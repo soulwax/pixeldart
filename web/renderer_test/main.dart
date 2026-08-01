@@ -6,6 +6,7 @@ import 'package:web/web.dart' as web;
 
 import 'package:pixeldart/rendering/assets/material_store.dart';
 import 'package:pixeldart/rendering/assets/mesh_store.dart';
+import 'package:pixeldart/rendering/assets/texture_store.dart';
 import 'package:pixeldart/rendering/core/frame_render_encoder.dart';
 import 'package:pixeldart/rendering/core/program_library.dart';
 import 'package:pixeldart/rendering/core/render_feature.dart';
@@ -459,11 +460,6 @@ const _latticeOpeningAlpha = 1;
 const _maskedCutoff = 0.5;
 const _unmaskedCutoff = 0.002;
 
-/// The one `TextureHandle` this bootstrap authors. Slot/generation are what
-/// `ResourceHandle`'s equality compares, so a plain const is enough to key
-/// the resolver in `_boot` without a texture store to allocate from.
-const _latticeAlbedo = TextureHandle(1, 1, 'lattice');
-
 /// RV-09 rung 2's demo grade LUT — an unwrapped-3D-LUT texture (`size`
 /// horizontal slices of `size`x`size`, one per blue level, exactly the
 /// layout `grade_lut.frag`'s `sampleLut` expects) encoding a classic
@@ -694,6 +690,56 @@ void _boot() {
   // makes it vanish when edge-on (RV-07); a doubleSided override here would
   // silently undo that earlier proof by making both "sides" render.
   final materialStore = MaterialStore();
+
+  // RP-2's TextureStore, replacing the ad-hoc `resolveAlbedo` closure this
+  // bootstrap hand-rolled before a real store existed. Declared before any
+  // material below, since every one of them now names its albedo
+  // explicitly rather than relying on a bootstrap-only "null means
+  // checkerboard" convention — the store's own fallback for `null` is
+  // white (§5.3's real missing-art contract), so making the checkerboard
+  // opt-in per material is what surfaces that correctly rather than
+  // papering over it the way the old closure did.
+  final textureStore = TextureStore(device);
+  // Texture + mip path: allocate mip storage, upload the base level, then
+  // finalizeMips — the exact sequence whose missing last step
+  // (generateMipmap) was found and fixed in the RV-07 packet.
+  const textureSize = 64;
+  final albedoHandle = textureStore.declare(
+    width: textureSize,
+    height: textureSize,
+    hasMips: true,
+    wrap: GpuTextureWrap.repeat,
+    pixels: _buildCheckerboardTexture(textureSize),
+    debugLabel: 'checkerboard',
+  );
+  textureStore.finalizeMips(albedoHandle);
+  // The masked panel's own albedo. Deliberately unmipped, unlike the
+  // checkerboard above: minification averages a cutout's alpha with its
+  // openings', so an alpha-tested surface's silhouette dissolves at higher
+  // mip levels. This panel is close and screen-large enough to sample
+  // level 0 throughout, and a real cutout asset wants either no mips or
+  // alpha-to-coverage, neither of which this rung is about.
+  final latticeHandle = textureStore.declare(
+    width: textureSize,
+    height: textureSize,
+    wrap: GpuTextureWrap.repeat,
+    pixels: _buildLatticeTexture(textureSize),
+    debugLabel: 'lattice',
+  );
+  // RV-09 rung 2's grade LUT: an unwrapped-3D-LUT texture, no mips
+  // (blending across mip levels would corrupt lookups — this is a lookup
+  // table, not a displayed image) and clamp-to-edge (the shader's own
+  // texel-center math already keeps every sample inside its own slice, but
+  // clamping is still the correct wrap policy for a lookup texture
+  // regardless).
+  const gradeLutSize = 16;
+  final gradeLutHandle = textureStore.declare(
+    width: gradeLutSize * gradeLutSize,
+    height: gradeLutSize,
+    pixels: _buildTealOrangeLut(gradeLutSize),
+    debugLabel: 'grade-lut',
+  );
+
   // affineSampling opts these two into the PS1 affine-UV path; every other
   // material below deliberately stays at the default (false) so a
   // PS1-profiled frame renders warped and perspective-correct surfaces side
@@ -701,12 +747,17 @@ void _boot() {
   // shape as the ground, at a comparable angle, whose texture must stay
   // straight while the ground's swims.
   final cubeMaterial = materialStore.register(
-    const MaterialDefinition(key: 'test-cube', affineSampling: true),
+    MaterialDefinition(
+      key: 'test-cube',
+      albedoTexture: albedoHandle,
+      affineSampling: true,
+    ),
     debugLabel: 'test-cube-material',
   );
   final cullQuadMaterial = materialStore.register(
-    const MaterialDefinition(
+    MaterialDefinition(
       key: 'cull-test-quad',
+      albedoTexture: albedoHandle,
       tintR: 1.0,
       tintG: 0.55,
       tintB: 0.35,
@@ -714,7 +765,11 @@ void _boot() {
     debugLabel: 'cull-quad-material',
   );
   final groundMaterial = materialStore.register(
-    const MaterialDefinition(key: 'ground-plane', affineSampling: true),
+    MaterialDefinition(
+      key: 'ground-plane',
+      albedoTexture: albedoHandle,
+      affineSampling: true,
+    ),
     debugLabel: 'ground-material',
   );
   // RV-08 rung 6: the one material in this bootstrap with real
@@ -724,8 +779,9 @@ void _boot() {
   // strong direct light, the spinning cube) staying bloom-free is itself
   // part of the proof (§8.7: "non-emissive white surface does not [bloom]").
   final glowingCubeMaterial = materialStore.register(
-    const MaterialDefinition(
+    MaterialDefinition(
       key: 'glowing-cube',
+      albedoTexture: albedoHandle,
       tintR: 1.0,
       tintG: 0.85,
       tintB: 0.55,
@@ -734,8 +790,9 @@ void _boot() {
     debugLabel: 'glowing-cube-material',
   );
   final moteMaterial = materialStore.register(
-    const MaterialDefinition(
+    MaterialDefinition(
       key: 'transient-mote',
+      albedoTexture: albedoHandle,
       tintR: 0.9,
       tintG: 0.85,
       tintB: 0.7,
@@ -744,8 +801,9 @@ void _boot() {
     debugLabel: 'transient-mote-material',
   );
   final shaftMaterial = materialStore.register(
-    const MaterialDefinition(
+    MaterialDefinition(
       key: 'transient-shaft',
+      albedoTexture: albedoHandle,
       tintR: 1.0,
       tintG: 0.9,
       tintB: 0.6,
@@ -754,7 +812,7 @@ void _boot() {
     ),
     debugLabel: 'transient-shaft-material',
   );
-  // §6.2's alpha-masked route. Both materials name _latticeAlbedo and both
+  // §6.2's alpha-masked route. Both materials name latticeHandle and both
   // are AlphaMode.masked — they differ only in alphaCutoff, so the M key's
   // A/B changes one float and nothing else. Keeping the "off" state masked
   // rather than switching it to AlphaMode.opaque is deliberate: an opaque
@@ -763,9 +821,9 @@ void _boot() {
   // has an alpha channel — the control would show holes of its own, from
   // an entirely different mechanism, and prove nothing.
   final maskedPanelMaterial = materialStore.register(
-    const MaterialDefinition(
+    MaterialDefinition(
       key: 'masked-lattice',
-      albedoTexture: _latticeAlbedo,
+      albedoTexture: latticeHandle,
       alphaMode: AlphaMode.masked,
       alphaCutoff: _maskedCutoff,
       tintR: 1.0,
@@ -776,9 +834,9 @@ void _boot() {
     debugLabel: 'masked-panel-material',
   );
   final unmaskedPanelMaterial = materialStore.register(
-    const MaterialDefinition(
+    MaterialDefinition(
       key: 'unmasked-lattice',
-      albedoTexture: _latticeAlbedo,
+      albedoTexture: latticeHandle,
       alphaMode: AlphaMode.masked,
       alphaCutoff: _unmaskedCutoff,
       tintR: 1.0,
@@ -788,61 +846,6 @@ void _boot() {
     ),
     debugLabel: 'unmasked-panel-material',
   );
-
-  // Texture + mip path: allocate mip storage, upload the base level, then
-  // finalizeMips — the exact sequence whose missing last step
-  // (generateMipmap) was found and fixed in the RV-07 packet.
-  const textureSize = 64;
-  final albedoTexture = device.createTexture(
-    const GpuTextureDescriptor(
-      width: textureSize,
-      height: textureSize,
-      hasMips: true,
-      wrap: GpuTextureWrap.repeat,
-    ),
-  );
-  device.uploadTextureLayer(albedoTexture, 0, _buildCheckerboardTexture(textureSize));
-  device.finalizeMips(albedoTexture);
-
-  // The masked panel's own albedo — the second texture this bootstrap has
-  // ever had, and the reason MaterialDefinition.albedoTexture finally means
-  // something: until masking, one texture bound once per pass covered every
-  // material, so the field could stay unread. Deliberately unmipped, unlike
-  // the checkerboard above: minification averages a cutout's alpha with its
-  // openings', so an alpha-tested surface's silhouette dissolves at higher
-  // mip levels. This panel is close and screen-large enough to sample level
-  // 0 throughout, and a real cutout asset wants either no mips or
-  // alpha-to-coverage, neither of which this rung is about.
-  final latticeTexture = device.createTexture(
-    const GpuTextureDescriptor(
-      width: textureSize,
-      height: textureSize,
-      wrap: GpuTextureWrap.repeat,
-    ),
-  );
-  device.uploadTextureLayer(latticeTexture, 0, _buildLatticeTexture(textureSize));
-
-  // No TextureStore exists (the counterpart to MeshStore/MaterialStore is
-  // unbuilt), so the bootstrap plays that role for its own two textures:
-  // a material naming _latticeAlbedo gets the lattice, and null — every
-  // material written before this packet — keeps the checkerboard it always
-  // had, which is what makes this change invisible to the rest of the scene.
-  GpuObject resolveAlbedo(TextureHandle? handle) =>
-      handle == _latticeAlbedo ? latticeTexture : albedoTexture;
-
-  // RV-09 rung 2's grade LUT: an unwrapped-3D-LUT texture, no mips (blending
-  // across mip levels would corrupt lookups — this is a lookup table, not a
-  // displayed image) and clamp-to-edge (the shader's own texel-center math
-  // already keeps every sample inside its own slice, but clamping is still
-  // the correct wrap policy for a lookup texture regardless).
-  const gradeLutSize = 16;
-  final gradeLutTexture = device.createTexture(
-    const GpuTextureDescriptor(
-      width: gradeLutSize * gradeLutSize,
-      height: gradeLutSize,
-    ),
-  );
-  device.uploadTextureLayer(gradeLutTexture, 0, _buildTealOrangeLut(gradeLutSize));
 
   // §8.4's shadow map target: depth-only, no color attachment at all, so a
   // world pass can later sample its depth texture directly.
@@ -1032,7 +1035,7 @@ void _boot() {
       );
     },
     resolveMaterial: materialStore.resolve,
-    resolveAlbedo: resolveAlbedo,
+    resolveAlbedo: textureStore.resolveAlbedo,
     resolveShadowMap: () => shadowMapTarget,
     resolveCasterLight: () => currentLight,
     resolveSceneDepth: () => sceneDepthTarget,
@@ -1046,7 +1049,7 @@ void _boot() {
     resolveBloomBlurV: () => bloomBlurVTarget,
     resolveDofBlurH: () => dofBlurHTarget,
     resolveDofBlurV: () => dofBlurVTarget,
-    resolveGradeLut: () => gradeLutTexture,
+    resolveGradeLut: () => textureStore.resolve(gradeLutHandle),
     resolveVhsHistory: () => vhsHistoryTarget,
     resolveTime: () => currentAnimTime,
   );
@@ -1161,7 +1164,7 @@ void _boot() {
     // frame shows a lattice — the visualization would disagree with the
     // thing it exists to visualize.
     resolveMaterial: materialStore.resolve,
-    resolveAlbedo: resolveAlbedo,
+    resolveAlbedo: textureStore.resolveAlbedo,
     resolveSceneDepth: () => sceneDepthTarget,
     near: 0.1,
     far: 100,
