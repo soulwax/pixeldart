@@ -1325,12 +1325,25 @@ void _boot() {
     // "masked materials stay in depth-writing opaque order" — the first
     // item in this bootstrap ever submitted under that mode, so it is also
     // what proves that route is real and not an enum value nothing picks.
+    //
+    // It also yaws slowly, which is not decoration. The panel is a single
+    // face with a doubleSided material, and `doubleSided` is only
+    // observable when something actually looks at the back of it — held
+    // still at this tilt the light's dot product with the panel normal
+    // stays positive across the entire orbit, so every pass sees a front
+    // face forever and honouring the flag or ignoring it produce identical
+    // frames. Turning it puts its back to the camera and to the light in
+    // turn, which is what makes "the shadow no longer blinks out" a claim
+    // this scene can be wrong about. Slow enough (0.3 rad/s) that an A/B
+    // pair captured a third of a second apart barely moves it.
     final maskedPanel = _TestCubeItem(
       maskedPanelHandle,
       maskActive ? maskedPanelMaterial : unmaskedPanelMaterial,
       Transform(
         translation: const Vec3(-1.05, 1.15, -0.9),
-        rotation: Quat.axisAngle(const Vec3(1, 0, 0), -0.85),
+        rotation:
+            Quat.axisAngle(const Vec3(0, 1, 0), t * 0.3) *
+            Quat.axisAngle(const Vec3(1, 0, 0), -0.85),
       ),
       castsShadow: true,
       drawMode: DrawMode.masked,
