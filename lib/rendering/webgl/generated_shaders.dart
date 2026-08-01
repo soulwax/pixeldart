@@ -206,6 +206,7 @@ uniform vec2 uSceneColorSize;
 uniform float uEmissiveStrength;
 uniform float uAffineWarpStrength;
 uniform float uAlphaCutoff;
+uniform float uOpaqueCoverage;
 uniform vec3 uFogColor;
 uniform float uFogStart;
 uniform float uFogEnd;
@@ -315,13 +316,16 @@ void main(){
   // property of oColor's reflected/lit light, not of emission.
   float fog=fogFactor(vViewDepth,vWorldPos.y);
   vec3 foggedLit=mix(lit,uFogColor,fog);
-  // A masked surface is binary: whatever survived the discard above is
-  // fully opaque, so its own texel alpha must not leak into the target and
-  // make a kept fragment semi-transparent — present.frag copies alpha
-  // straight through to a canvas with an alpha channel, so a 0.6 texel
-  // would show the page through solid geometry. Blended and opaque draws
-  // keep the pre-existing expression exactly.
-  float outAlpha=uAlphaCutoff>0.?1.:vColor.a*tex.a;
+  // Bug 18: vColor.a*tex.a is the correct alpha for a blended draw and the
+  // wrong one for everything else. present.frag copies this channel
+  // straight through to a canvas created with the default alpha:true, so an
+  // opaque or masked surface that emitted a texel's own alpha would show
+  // the *page* through solid geometry. Coverage, not transparency, is what
+  // an opaque or masked fragment writes: whatever survived the discard
+  // above is fully covering, and an opaque draw always was. uOpaqueCoverage
+  // is exactly 0 or 1, so the mix is exact in both directions and the
+  // blended path keeps its pre-existing expression bit-for-bit.
+  float outAlpha=mix(vColor.a*tex.a,1.,uOpaqueCoverage);
   oColor=vec4(foggedLit,outAlpha);
   // §8.7: bloom reads this declared attachment directly, never inferring
   // glow from oColor's final luma — a bright-but-non-emissive lit surface

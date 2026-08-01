@@ -65,6 +65,7 @@ final class ShadowedWorldProgramSource {
       'uVertexSnapGrid',
       'uAffineWarpStrength',
       'uAlphaCutoff',
+      'uOpaqueCoverage',
       'uFogColor',
       'uFogStart',
       'uFogEnd',
@@ -419,6 +420,17 @@ final class _ShadowedWorldPass implements RenderPass {
       UniformValue.float1(
         material.alphaMode == AlphaMode.masked ? material.alphaCutoff : 0,
       ),
+    );
+    // Bug 18's general fix. Only a blended draw writes real transparency
+    // into the target; opaque and masked draws write coverage, which is
+    // always 1. Keyed on DrawMode rather than on alphaMode, because this is
+    // a question about how the item composites, not about what its surface
+    // looks like — an opaque item sampling an alpha-carrying texture is the
+    // exact case that was broken, and its material says nothing about
+    // blending. See shadowed_world.frag for what the wrong value did.
+    encoder.setUniform(
+      'uOpaqueCoverage',
+      UniformValue.float1(drawMode == DrawMode.blended ? 0 : 1),
     );
     // Affine UV needs both halves to agree: the frame's PS1 weight says how
     // strongly the profile is applied at all, and the material's own

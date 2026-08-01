@@ -176,11 +176,18 @@ final class _DepthPrepassPass implements RenderPass {
   }
 
   /// The alpha-cutout half of "must match shadowedWorld exactly", alongside
-  /// the vertex snap above. Both uniforms are computed from the material by
-  /// the identical expressions `_ShadowedWorldPass._setMaterialState` uses,
-  /// so a masked surface discards the same fragments in both passes and an
-  /// affine-sampled one recovers the same uv — a divergence in either would
-  /// leave SSAO occluding against a silhouette nothing ever shaded.
+  /// the vertex snap above. All three values are computed from the material
+  /// by the identical expressions `_ShadowedWorldPass._setMaterialState`
+  /// uses, so a masked surface discards the same fragments in both passes,
+  /// an affine-sampled one recovers the same uv, and a double-sided one
+  /// keeps the same faces — a divergence in any of them would leave SSAO
+  /// occluding against a silhouette nothing ever shaded.
+  ///
+  /// [MaterialDefinition.doubleSided] was the last of the three to be
+  /// wired, and its absence was the same defect the shadow caster had: this
+  /// pass culled back faces unconditionally while the world pass did not,
+  /// so a double-sided surface seen from behind wrote no depth and the AO
+  /// texels behind it were computed against whatever lay further away.
   void _setMaterialState(
     DrawCommandEncoder encoder,
     MaterialHandle handle,
@@ -197,6 +204,10 @@ final class _DepthPrepassPass implements RenderPass {
     encoder.setUniform(
       'uAffineWarpStrength',
       UniformValue.float1(material.affineSampling ? affineWarpStrength : 0),
+    );
+    final baseState = descriptor.toDrawState();
+    encoder.applyDrawState(
+      material.doubleSided ? baseState.withCullEnable(false) : baseState,
     );
   }
 

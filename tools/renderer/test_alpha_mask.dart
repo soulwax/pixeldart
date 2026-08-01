@@ -38,6 +38,8 @@ void main() {
   _prepassAffineWeightMatchesTheWorldPass();
   _albedoIsResolvedPerMaterialNotOncePerPass();
   _blendedMaterialsNeverCutOut();
+  _everyPassAgreesOnWhichFacesExist();
+  _onlyBlendedDrawsWriteRealTransparency();
   print('Renderer alpha-mask fixtures passed.');
 }
 
@@ -71,6 +73,13 @@ const _maskedAffineMaterial = MaterialDefinition(
   affineSampling: true,
 );
 const _plainMaterial = MaterialDefinition(key: 'plain');
+const _doubleSidedMaterial = MaterialDefinition(
+  key: 'masked-double-sided',
+  albedoTexture: _maskTexture,
+  alphaMode: AlphaMode.masked,
+  alphaCutoff: 0.25,
+  doubleSided: true,
+);
 const _blendedMaterial = MaterialDefinition(
   key: 'blended-glass',
   albedoTexture: _maskTexture,
@@ -82,11 +91,13 @@ const _maskedHandle = MaterialHandle(0, 1);
 const _maskedAffineHandle = MaterialHandle(1, 1);
 const _plainHandle = MaterialHandle(2, 1);
 const _blendedHandle = MaterialHandle(3, 1);
+const _doubleSidedHandle = MaterialHandle(4, 1);
 
 MaterialDefinition _resolveMaterial(MaterialHandle handle) => switch (handle) {
   _maskedHandle => _maskedMaterial,
   _maskedAffineHandle => _maskedAffineMaterial,
   _blendedHandle => _blendedMaterial,
+  _doubleSidedHandle => _doubleSidedMaterial,
   _ => _plainMaterial,
 };
 
@@ -156,6 +167,17 @@ final class _Run {
     for (final line in device.drawLog)
       if (line.startsWith('bindTexture(0, ')) line,
   ];
+
+  /// Whether each `applyDrawState` call enabled culling, in call order. The
+  /// pass-wide state applied once before the draw loop is dropped, so what
+  /// remains is one entry per draw — the per-material decision.
+  List<bool> perDrawCullEnable() {
+    final all = [
+      for (final line in device.drawLog)
+        if (line.startsWith('applyDrawState(')) line.contains('cullEnable=true'),
+    ];
+    return all.isEmpty ? all : all.sublist(1);
+  }
 }
 
 _Run _runWorldPass(
@@ -451,6 +473,60 @@ void _albedoIsResolvedPerMaterialNotOncePerPass() {
       "material's texture",
     );
   }
+}
+
+/// `doubleSided` is the third thing the three passes have to agree about,
+/// alongside the cutoff and the affine weight. Disagreement here is not a
+/// subtle shading difference: the world pass shades a surface from both
+/// sides while the prepass writes no depth for it and the caster casts no
+/// shadow, for exactly the half of the view or the light's travel that sees
+/// its back face. Both were real omissions — each of those two passes
+/// applied its own cull state once and never varied it.
+void _everyPassAgreesOnWhichFacesExist() {
+  final scene = [
+    _item(_doubleSidedHandle, drawMode: DrawMode.masked),
+    _item(_plainHandle),
+    _item(_maskedHandle, drawMode: DrawMode.masked),
+  ];
+  const expected = [false, true, true];
+  for (final (name, culls) in [
+    ('shadowedWorld', _runWorldPass(scene, const [], 1).perDrawCullEnable()),
+    ('depthPrepass', _runPrepass(scene, 1).perDrawCullEnable()),
+    ('shadowCaster', _runShadowCaster(scene).perDrawCullEnable()),
+  ]) {
+    _expect(
+      culls.length == expected.length,
+      '$name must decide cull state once per draw, got ${culls.length} '
+      'decisions for ${expected.length} draws',
+    );
+    for (var i = 0; i < expected.length; i++) {
+      _expect(
+        culls[i] == expected[i],
+        '$name draw $i: expected cullEnable=${expected[i]}, got ${culls[i]} '
+        '(a doubleSided material must disable culling in every pass that '
+        'rasterizes it, not only in the one that shades it)',
+      );
+    }
+  }
+}
+
+/// Bug 18. Only a blended draw writes real transparency; opaque and masked
+/// draws write coverage, which is 1. The value reaches the canvas through
+/// `present.frag`, so getting it wrong makes solid geometry see-through —
+/// and it is invisible until some material samples a texture that actually
+/// has transparent texels, which is why this went unnoticed until masking
+/// introduced the first such texture.
+void _onlyBlendedDrawsWriteRealTransparency() {
+  _expectDoubles(
+    _runWorldPass(
+      [_item(_plainHandle), _item(_maskedHandle, drawMode: DrawMode.masked)],
+      [_item(_blendedHandle, drawMode: DrawMode.blended)],
+      1,
+    ).float1s('uOpaqueCoverage'),
+    [1, 1, 0],
+    'opaque and masked draws must write full coverage; only blended draws '
+    'may write a texel alpha through to the target',
+  );
 }
 
 /// `AlphaMode.blended` carries an `alphaCutoff` like every other material —

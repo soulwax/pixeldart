@@ -202,6 +202,14 @@ final class _ShadowCasterPass implements RenderPass {
   /// so a lattice casts a lattice rather than the solid shadow of its
   /// bounding quad. No affine weight is threaded here — see
   /// shadow_caster.vert for why light space has no equivalent warp.
+  ///
+  /// [MaterialDefinition.doubleSided] is honoured for the same reason the
+  /// world pass honours it, and the omission was a real defect: this pass
+  /// applied its own `cullEnable: true` state once and never varied it, so
+  /// a single-faced double-sided surface cast nothing at all for whichever
+  /// half of a light's travel it happened to face away from. Its shadow
+  /// blinked out and back as the caster orbited. A surface the world pass
+  /// agrees to shade from both sides must occlude from both sides too.
   void _setMaterialState(DrawCommandEncoder encoder, MaterialHandle handle) {
     final material = resolveMaterial(handle);
     encoder.bindTexture(0, resolveAlbedo(material.albedoTexture));
@@ -210,6 +218,10 @@ final class _ShadowCasterPass implements RenderPass {
       UniformValue.float1(
         material.alphaMode == AlphaMode.masked ? material.alphaCutoff : 0,
       ),
+    );
+    final baseState = descriptor.toDrawState();
+    encoder.applyDrawState(
+      material.doubleSided ? baseState.withCullEnable(false) : baseState,
     );
   }
 
