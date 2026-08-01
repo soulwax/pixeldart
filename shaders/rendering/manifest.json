@@ -1,0 +1,25 @@
+{
+  "shaders": {
+    "world/safe_world.vert": "safeWorldVertSrc",
+    "world/safe_world.frag": "safeWorldFragSrc",
+    "world/textured_world.vert": "texturedWorldVertSrc",
+    "world/textured_world.frag": "texturedWorldFragSrc",
+    "shadow/shadow_caster.vert": "shadowCasterVertSrc",
+    "shadow/shadow_caster.frag": "shadowCasterFragSrc",
+    "world/shadowed_world.vert": "shadowedWorldVertSrc",
+    "world/shadowed_world.frag": "shadowedWorldFragSrc",
+    "post/present.vert": "presentVertSrc",
+    "post/present.frag": "presentFragSrc",
+    "depth/depth_prepass.vert": "depthPrepassVertSrc",
+    "depth/depth_prepass.frag": "depthPrepassFragSrc",
+    "post/depth_debug.frag": "depthDebugFragSrc",
+    "ssao/ssao_occlusion.frag": "ssaoOcclusionFragSrc",
+    "ssao/ssao_blur.frag": "ssaoBlurFragSrc",
+    "bloom/bloom_blur.frag": "bloomBlurFragSrc",
+    "bloom/bloom_composite.frag": "bloomCompositeFragSrc",
+    "dof/dof_composite.frag": "dofCompositeFragSrc",
+    "grade/grade_lut.frag": "gradeLutFragSrc",
+    "ps1/ps1_quantize.frag": "ps1QuantizeFragSrc",
+    "vhs/vhs.frag": "vhsFragSrc"
+  }
+}

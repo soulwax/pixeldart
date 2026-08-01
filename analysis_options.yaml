@@ -1,0 +1,17 @@
+include: package:lints/recommended.yaml
+
+linter:
+  rules:
+    - avoid_dynamic_calls
+    - avoid_catching_errors
+    - cancel_subscriptions
+    - close_sinks
+
+analyzer:
+  exclude:
+    - build/**
+    - .dart_tool/**
+  errors:
+    missing_required_param: error
+    missing_return: error
+    todo: ignore

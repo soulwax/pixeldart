@@ -1,0 +1,14 @@
+{
+  "fileClasses": [
+    { "pattern": "lib/rendering/api/*.dart", "maxLines": 200, "label": "public API file" },
+    { "pattern": "lib/rendering/math/*.dart", "maxLines": 250, "label": "math/data file" },
+    { "pattern": "lib/rendering/assets/*.dart", "maxLines": 250, "label": "math/data file" },
+    { "pattern": "lib/rendering/core/*.dart", "maxLines": 350, "label": "core queue/graph file" },
+    { "pattern": "lib/rendering/webgl/*.dart", "maxLines": 450, "label": "WebGL device/resource file", "exempt": ["lib/rendering/webgl/generated_shaders.dart"] },
+    { "pattern": "lib/rendering/passes/*.dart", "maxLines": 500, "label": "individual render pass" },
+    { "pattern": "tools/renderer/*.dart", "maxLines": 500, "label": "renderer tool" },
+    { "pattern": "shaders/rendering/**/*.vert", "maxLines": 180, "label": "individual shader" },
+    { "pattern": "shaders/rendering/**/*.frag", "maxLines": 180, "label": "individual shader" }
+  ],
+  "subsystems": []
+}
