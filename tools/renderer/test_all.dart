@@ -21,6 +21,7 @@ const List<String> _scripts = [
   'tools/renderer/test_affine_uv.dart',
   'tools/renderer/test_alpha_mask.dart',
   'tools/renderer/test_zero_cost.dart',
+  'tools/renderer/test_post_chain_parameters.dart',
 ];
 
 void main() {

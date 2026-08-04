@@ -56,6 +56,7 @@ final class VhsFeature implements RenderFeature {
   final GpuDevice device;
   final GpuObject Function() resolveHistory;
   final double Function() resolveTime;
+  final ResourceRef inputResource;
 
   VhsFeature({
     required this.programLibrary,
@@ -64,6 +65,7 @@ final class VhsFeature implements RenderFeature {
     required this.device,
     required this.resolveHistory,
     required this.resolveTime,
+    this.inputResource = Ps1Resources.ps1Output,
   });
 
   @override
@@ -77,7 +79,7 @@ final class VhsFeature implements RenderFeature {
         id: 'vhs',
         stage: GraphStage.afterResolve,
         uses: [
-          const ResourceUse(Ps1Resources.ps1Output, ResourceAccess.read),
+          ResourceUse(inputResource, ResourceAccess.read),
           const ResourceUse(
             VhsResources.vhsOutput,
             ResourceAccess.historyRead,
@@ -103,7 +105,7 @@ final class VhsFeature implements RenderFeature {
           id: 'vhs',
           stage: GraphStage.afterResolve,
           uses: [
-            const ResourceUse(Ps1Resources.ps1Output, ResourceAccess.read),
+            ResourceUse(inputResource, ResourceAccess.read),
             const ResourceUse(
               VhsResources.vhsOutput,
               ResourceAccess.historyRead,
@@ -118,6 +120,7 @@ final class VhsFeature implements RenderFeature {
         emptyVao: emptyVao,
         resolveHistory: resolveHistory,
         resolveTime: resolveTime,
+        inputResource: inputResource,
       ),
     ];
   }
@@ -133,6 +136,7 @@ final class _VhsPass implements RenderPass {
   final GpuObject emptyVao;
   final GpuObject Function() resolveHistory;
   final double Function() resolveTime;
+  final ResourceRef inputResource;
 
   const _VhsPass({
     required this.descriptor,
@@ -140,12 +144,12 @@ final class _VhsPass implements RenderPass {
     required this.emptyVao,
     required this.resolveHistory,
     required this.resolveTime,
+    required this.inputResource,
   });
 
   @override
   void execute(RenderPassContext context) {
-    final sceneView =
-        context.viewOf(Ps1Resources.ps1Output.name) as BoundResourceView;
+    final sceneView = context.viewOf(inputResource.name) as BoundResourceView;
     final outputView =
         context.viewOf(VhsResources.vhsOutput.name) as BoundResourceView;
     final encoder = context.commandEncoder as DrawCommandEncoder;

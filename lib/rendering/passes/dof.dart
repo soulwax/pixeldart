@@ -52,16 +52,23 @@ final class DofBlurFeature implements RenderFeature {
   final ResourceRef destResource;
   final GpuObject Function() resolveSource;
 
+  /// [sourceResource] defaults to `BloomResources.sceneColorPostBloom` (a
+  /// `static final`, not `const`, since it is derived via `.nextVersion()`
+  /// — hence the nullable parameter rather than a default value) but must
+  /// be overridden to `SafeGraphResources.sceneColor` whenever bloom is
+  /// excluded from the pipeline, since DOF then blurs the world pass's
+  /// resolved output directly rather than bloom's composited-in-place one.
   DofBlurFeature.horizontal({
     required this.programLibrary,
     required this.vertexSource,
     required this.fragmentSource,
     required this.device,
     required this.resolveSource,
+    ResourceRef? sourceResource,
   }) : programId = 'dofBlurH',
        passId = 'dofBlurH',
        _axis = _DofBlurAxis.horizontal,
-       sourceResource = BloomResources.sceneColorPostBloom,
+       sourceResource = sourceResource ?? BloomResources.sceneColorPostBloom,
        destResource = DofResources.dofBlurH;
 
   DofBlurFeature.vertical({
@@ -222,6 +229,7 @@ final class DofCompositeFeature implements RenderFeature {
   final CameraView Function() resolveCamera;
   final double focusDistance;
   final double focusRange;
+  final ResourceRef? sourceResource;
 
   DofCompositeFeature({
     required this.programLibrary,
@@ -234,7 +242,16 @@ final class DofCompositeFeature implements RenderFeature {
     required this.resolveCamera,
     this.focusDistance = 5.0,
     this.focusRange = 2.8,
+    this.sourceResource,
   });
+
+  /// `BloomResources.sceneColorPostBloom` is `static final`, not `const` (it
+  /// is derived via `.nextVersion()`), so it cannot be a default parameter
+  /// value directly — [sourceResource] defaults to `null` and this resolves
+  /// the real default at the one place both `declare()` and
+  /// `createPasses()` need it.
+  ResourceRef get _resolvedSource =>
+      sourceResource ?? BloomResources.sceneColorPostBloom;
 
   @override
   String get id => 'dofComposite';
@@ -246,7 +263,7 @@ final class DofCompositeFeature implements RenderFeature {
         id: 'dofComposite',
         stage: GraphStage.afterResolve,
         uses: [
-          ResourceUse(BloomResources.sceneColorPostBloom, ResourceAccess.read),
+          ResourceUse(_resolvedSource, ResourceAccess.read),
           const ResourceUse(DofResources.dofBlurV, ResourceAccess.read),
           const ResourceUse(DofResources.dofOutput, ResourceAccess.write),
         ],
@@ -269,10 +286,7 @@ final class DofCompositeFeature implements RenderFeature {
           id: 'dofComposite',
           stage: GraphStage.afterResolve,
           uses: [
-            ResourceUse(
-              BloomResources.sceneColorPostBloom,
-              ResourceAccess.read,
-            ),
+            ResourceUse(_resolvedSource, ResourceAccess.read),
             const ResourceUse(DofResources.dofBlurV, ResourceAccess.read),
             const ResourceUse(DofResources.dofOutput, ResourceAccess.write),
           ],

@@ -45,6 +45,23 @@ final class RenderCapabilities {
   );
 }
 
+/// The effect-group vocabulary RP-3's pipeline assembler installs or
+/// excludes. Deliberately coarser than `RenderFeature.id`: `bloom` covers
+/// three passes (blur H/V + composite), `ssao` covers two, `dof` covers
+/// three — a profile toggles the group a player/config cares about, not
+/// the internal pass count implementing it.
+final class PipelineFeatures {
+  const PipelineFeatures._();
+
+  static const String shadows = 'shadows';
+  static const String ssao = 'ssao';
+  static const String bloom = 'bloom';
+  static const String dof = 'dof';
+  static const String grade = 'grade';
+  static const String ps1 = 'ps1';
+  static const String vhs = 'vhs';
+}
+
 enum QualityProfileKind {
   safe,
   standard,
@@ -66,4 +83,40 @@ final class QualityProfile {
     QualityProfileKind.safe,
     {},
   );
+
+  /// Shadows only — the cheapest profile `buildMainPipeline` can build
+  /// (distinct from `safe`, which is `buildSafeGraph`'s own separate,
+  /// shadow-free assembly). `shadows` is installed by every
+  /// `buildMainPipeline` profile regardless of what a caller's own set
+  /// contains: `ShadowedWorldFeature` hard-requires the caster to have run
+  /// (`resolveLightView` throws otherwise), so the two are one unit in
+  /// this assembler, not two independently excludable groups.
+  static const QualityProfile minimal = QualityProfile(
+    QualityProfileKind.standard,
+    {PipelineFeatures.shadows},
+  );
+
+  /// Every effect group except PS1's own quantize/dither and VHS — the
+  /// "clean" look §21/§8.9 describes as the non-PS1-profiled default.
+  static const QualityProfile clean = QualityProfile(QualityProfileKind.high, {
+    PipelineFeatures.shadows,
+    PipelineFeatures.ssao,
+    PipelineFeatures.bloom,
+    PipelineFeatures.dof,
+    PipelineFeatures.grade,
+  });
+
+  /// Every effect group installed — today's full pipeline, what
+  /// `buildShadowGraph` has always built and `test_shadow_graph.dart`
+  /// pins the exact 15-pass order of.
+  static const QualityProfile ps1Full =
+      QualityProfile(QualityProfileKind.shipping, {
+        PipelineFeatures.shadows,
+        PipelineFeatures.ssao,
+        PipelineFeatures.bloom,
+        PipelineFeatures.dof,
+        PipelineFeatures.grade,
+        PipelineFeatures.ps1,
+        PipelineFeatures.vhs,
+      });
 }

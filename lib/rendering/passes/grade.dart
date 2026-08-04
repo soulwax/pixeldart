@@ -50,6 +50,7 @@ final class GradeFeature implements RenderFeature {
   final GpuDevice device;
   final GpuObject Function() resolveLut;
   final double lutSize;
+  final ResourceRef inputResource;
 
   GradeFeature({
     required this.programLibrary,
@@ -58,6 +59,7 @@ final class GradeFeature implements RenderFeature {
     required this.device,
     required this.resolveLut,
     this.lutSize = 16,
+    this.inputResource = DofResources.dofOutput,
   });
 
   @override
@@ -70,7 +72,7 @@ final class GradeFeature implements RenderFeature {
         id: 'grade',
         stage: GraphStage.afterResolve,
         uses: [
-          const ResourceUse(DofResources.dofOutput, ResourceAccess.read),
+          ResourceUse(inputResource, ResourceAccess.read),
           const ResourceUse(GradeResources.gradeOutput, ResourceAccess.write),
         ],
       ),
@@ -92,7 +94,7 @@ final class GradeFeature implements RenderFeature {
           id: 'grade',
           stage: GraphStage.afterResolve,
           uses: [
-            const ResourceUse(DofResources.dofOutput, ResourceAccess.read),
+            ResourceUse(inputResource, ResourceAccess.read),
             const ResourceUse(
               GradeResources.gradeOutput,
               ResourceAccess.write,
@@ -106,6 +108,7 @@ final class GradeFeature implements RenderFeature {
         emptyVao: emptyVao,
         resolveLut: resolveLut,
         lutSize: lutSize,
+        inputResource: inputResource,
       ),
     ];
   }
@@ -121,6 +124,7 @@ final class _GradePass implements RenderPass {
   final GpuObject emptyVao;
   final GpuObject Function() resolveLut;
   final double lutSize;
+  final ResourceRef inputResource;
 
   const _GradePass({
     required this.descriptor,
@@ -128,12 +132,12 @@ final class _GradePass implements RenderPass {
     required this.emptyVao,
     required this.resolveLut,
     required this.lutSize,
+    required this.inputResource,
   });
 
   @override
   void execute(RenderPassContext context) {
-    final sceneView =
-        context.viewOf(DofResources.dofOutput.name) as BoundResourceView;
+    final sceneView = context.viewOf(inputResource.name) as BoundResourceView;
     final outputView =
         context.viewOf(GradeResources.gradeOutput.name) as BoundResourceView;
     final encoder = context.commandEncoder as DrawCommandEncoder;
