@@ -86,6 +86,7 @@ final class ShadowedWorldFeature implements RenderFeature {
   final ShadowLightView Function() resolveLightView;
   final SpotLight? Function() resolveCasterLight;
   final GpuObject Function() resolveSsaoBlurred;
+  final bool useSsao;
   final int sceneColorWidth;
   final int sceneColorHeight;
 
@@ -100,6 +101,7 @@ final class ShadowedWorldFeature implements RenderFeature {
     required this.resolveLightView,
     required this.resolveCasterLight,
     required this.resolveSsaoBlurred,
+    this.useSsao = true,
     required this.sceneColorWidth,
     required this.sceneColorHeight,
   });
@@ -115,7 +117,8 @@ final class ShadowedWorldFeature implements RenderFeature {
         stage: GraphStage.beforeWorld,
         uses: [
           const ResourceUse(ShadowResources.shadowMap, ResourceAccess.read),
-          const ResourceUse(SsaoResources.ssaoBlurred, ResourceAccess.read),
+          if (useSsao)
+            const ResourceUse(SsaoResources.ssaoBlurred, ResourceAccess.read),
           const ResourceUse(
             SafeGraphResources.sceneColor,
             ResourceAccess.write,
@@ -140,7 +143,8 @@ final class ShadowedWorldFeature implements RenderFeature {
           stage: GraphStage.beforeWorld,
           uses: [
             const ResourceUse(ShadowResources.shadowMap, ResourceAccess.read),
-            const ResourceUse(SsaoResources.ssaoBlurred, ResourceAccess.read),
+            if (useSsao)
+              const ResourceUse(SsaoResources.ssaoBlurred, ResourceAccess.read),
             const ResourceUse(
               SafeGraphResources.sceneColor,
               ResourceAccess.write,
@@ -207,11 +211,6 @@ final class _ShadowedWorldPass implements RenderPass {
     encoder.applyDrawState(descriptor.toDrawState());
     encoder.clear(ClearMask.colorAndDepth);
     encoder.useProgram(program.handle);
-    // Unit 0's *sampler* binding is pass-wide, but which texture sits in
-    // that unit is now per-draw (_setMaterialState) — masking has to sample
-    // the material's own albedo alpha, so one texture bound once for the
-    // whole pass stopped being sufficient the moment two materials could
-    // want different ones.
     encoder.setUniform('uAlbedo', const UniformValue.sampler(0));
     encoder.bindTexture(1, resolveShadowMap());
     encoder.setUniform('uShadowMap', const UniformValue.sampler(1));
@@ -288,13 +287,21 @@ final class _ShadowedWorldPass implements RenderPass {
     encoder.setUniform(
       'uLightPosition',
       UniformValue.float3(
-        Float32List.fromList([lightPosition.x, lightPosition.y, lightPosition.z]),
+        Float32List.fromList([
+          lightPosition.x,
+          lightPosition.y,
+          lightPosition.z,
+        ]),
       ),
     );
     encoder.setUniform(
       'uLightDirection',
       UniformValue.float3(
-        Float32List.fromList([lightDirection.x, lightDirection.y, lightDirection.z]),
+        Float32List.fromList([
+          lightDirection.x,
+          lightDirection.y,
+          lightDirection.z,
+        ]),
       ),
     );
     encoder.setUniform(
@@ -477,7 +484,10 @@ final class _ShadowedWorldPass implements RenderPass {
 
   void _setModelUniforms(DrawCommandEncoder encoder, Transform transform) {
     final model = transform.toMat4();
-    encoder.setUniform('uModel', UniformValue.mat4(Float32List.fromList(model.m)));
+    encoder.setUniform(
+      'uModel',
+      UniformValue.mat4(Float32List.fromList(model.m)),
+    );
     encoder.setUniform(
       'uNormalMatrix',
       UniformValue.mat4(Float32List.fromList(model.normalMatrix().m)),
