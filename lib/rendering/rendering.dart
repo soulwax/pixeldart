@@ -1,4 +1,5 @@
 export 'api/capabilities.dart';
+export 'api/configuration_coordinator.dart';
 export 'api/configuration_transition.dart';
 export 'api/effects.dart';
 export 'api/frame.dart';
