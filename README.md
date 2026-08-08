@@ -175,6 +175,26 @@ and a debug panel that logs every subsystem decision. Live toggles:
 The demo currently exercises the feature graph directly so that every pass can
 be inspected. It is intentionally more verbose than the reusable facade.
 
+### Using the game integration
+
+The parent game keeps its legacy renderer as the no-query default. During the
+transition, `?renderer=next` explicitly selects Pixeldart, while
+`?renderer=auto` selects Pixeldart when WebGL2 is available and safely falls
+back to legacy otherwise. The canvas exposes the selected backend, executable
+profile, fallback reason, build provenance, and frame budget through
+`data-renderer-*` attributes for smoke tests and diagnostics.
+
+For example, from the parent repository:
+
+```sh
+python3 -m http.server 8090 --directory dist/web
+# open http://127.0.0.1:8090/?renderer=auto
+```
+
+Keep the query-free URL as the rollback path until the external GPU,
+context-loss, accessibility, acoustic, and visual acceptance gates in
+`tmp/RENDERER_EXTERNAL_ACCEPTANCE.md` are closed.
+
 If the page is blank, check the browser console first: the demo must be served
 over HTTP (opening `index.html` with `file://` prevents module and shader
 assets from loading), and the browser must expose WebGL2. Run the shader
