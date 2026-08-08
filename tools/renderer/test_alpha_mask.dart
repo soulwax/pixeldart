@@ -16,6 +16,8 @@ import 'package:pixeldart/rendering/webgl/generated_shaders.dart';
 
 import 'fake_gpu_device.dart';
 
+part 'test_alpha_mask_tail.dart';
+
 /// Pins §6.2's "alpha-masked geometry participates in shadow, prepass, and
 /// opaque depth-writing routes."
 ///
@@ -132,7 +134,10 @@ final class _FakeItemView implements RetainedItemView {
 
 int _nextSlot = 0;
 
-RetainedItemView _item(MaterialHandle material, {DrawMode drawMode = DrawMode.opaque}) {
+RetainedItemView _item(
+  MaterialHandle material, {
+  DrawMode drawMode = DrawMode.opaque,
+}) {
   final slot = _nextSlot++;
   return _FakeItemView(
     InstanceId(slot, 1),
@@ -174,7 +179,8 @@ final class _Run {
   List<bool> perDrawCullEnable() {
     final all = [
       for (final line in device.drawLog)
-        if (line.startsWith('applyDrawState(')) line.contains('cullEnable=true'),
+        if (line.startsWith('applyDrawState('))
+          line.contains('cullEnable=true'),
     ];
     return all.isEmpty ? all : all.sublist(1);
   }
@@ -205,14 +211,12 @@ _Run _runWorldPass(
     resolveMaterial: _resolveMaterial,
     resolveAlbedo: (handle) =>
         handle == _maskTexture ? maskTexture : fallbackTexture,
-    resolveShadowMap: () => device.createTexture(
-      const GpuTextureDescriptor(width: 4, height: 4),
-    ),
+    resolveShadowMap: () =>
+        device.createTexture(const GpuTextureDescriptor(width: 4, height: 4)),
     resolveLightView: () => ShadowLightView(Mat4.identity()),
     resolveCasterLight: () => null,
-    resolveSsaoBlurred: () => device.createTexture(
-      const GpuTextureDescriptor(width: 4, height: 4),
-    ),
+    resolveSsaoBlurred: () =>
+        device.createTexture(const GpuTextureDescriptor(width: 4, height: 4)),
     sceneColorWidth: 384,
     sceneColorHeight: 216,
   );
@@ -247,10 +251,7 @@ _Run _runWorldPass(
   return _Run(device);
 }
 
-_Run _runPrepass(
-  List<RetainedItemView> opaque,
-  double affineWarpStrength,
-) {
+_Run _runPrepass(List<RetainedItemView> opaque, double affineWarpStrength) {
   final device = FakeGpuDevice();
   final library = ProgramLibrary(device);
   final fallbackTexture = device.createTexture(
@@ -402,15 +403,17 @@ void _everyPassAgreesOnTheCutoffOfEveryDraw() {
 void _onlyMaskedMaterialsCutOut() {
   final scene = [_item(_plainHandle), _item(_plainHandle)];
   for (final (name, sequence) in [
-    ('shadowedWorld', _runWorldPass(scene, const [], 1).float1s('uAlphaCutoff')),
+    (
+      'shadowedWorld',
+      _runWorldPass(scene, const [], 1).float1s('uAlphaCutoff'),
+    ),
     ('depthPrepass', _runPrepass(scene, 1).float1s('uAlphaCutoff')),
     ('shadowCaster', _runShadowCaster(scene).float1s('uAlphaCutoff')),
   ]) {
-    _expectDoubles(
-      sequence,
-      [0, 0],
-      '$name must leave opaque materials with no cutout at all',
-    );
+    _expectDoubles(sequence, [
+      0,
+      0,
+    ], '$name must leave opaque materials with no cutout at all');
   }
 }
 
@@ -424,13 +427,13 @@ void _prepassAffineWeightMatchesTheWorldPass() {
     _item(_plainHandle),
     _item(_maskedAffineHandle, drawMode: DrawMode.masked),
   ];
-  final world = _runWorldPass(scene, const [], 1).float1s('uAffineWarpStrength');
+  final world = _runWorldPass(
+    scene,
+    const [],
+    1,
+  ).float1s('uAffineWarpStrength');
   final prepass = _runPrepass(scene, 1).float1s('uAffineWarpStrength');
-  _expectDoubles(
-    world,
-    [0, 0, 1],
-    'only the affineSampling material may warp',
-  );
+  _expectDoubles(world, [0, 0, 1], 'only the affineSampling material may warp');
   _expectDoubles(
     prepass,
     world,
@@ -473,75 +476,4 @@ void _albedoIsResolvedPerMaterialNotOncePerPass() {
       "material's texture",
     );
   }
-}
-
-/// `doubleSided` is the third thing the three passes have to agree about,
-/// alongside the cutoff and the affine weight. Disagreement here is not a
-/// subtle shading difference: the world pass shades a surface from both
-/// sides while the prepass writes no depth for it and the caster casts no
-/// shadow, for exactly the half of the view or the light's travel that sees
-/// its back face. Both were real omissions — each of those two passes
-/// applied its own cull state once and never varied it.
-void _everyPassAgreesOnWhichFacesExist() {
-  final scene = [
-    _item(_doubleSidedHandle, drawMode: DrawMode.masked),
-    _item(_plainHandle),
-    _item(_maskedHandle, drawMode: DrawMode.masked),
-  ];
-  const expected = [false, true, true];
-  for (final (name, culls) in [
-    ('shadowedWorld', _runWorldPass(scene, const [], 1).perDrawCullEnable()),
-    ('depthPrepass', _runPrepass(scene, 1).perDrawCullEnable()),
-    ('shadowCaster', _runShadowCaster(scene).perDrawCullEnable()),
-  ]) {
-    _expect(
-      culls.length == expected.length,
-      '$name must decide cull state once per draw, got ${culls.length} '
-      'decisions for ${expected.length} draws',
-    );
-    for (var i = 0; i < expected.length; i++) {
-      _expect(
-        culls[i] == expected[i],
-        '$name draw $i: expected cullEnable=${expected[i]}, got ${culls[i]} '
-        '(a doubleSided material must disable culling in every pass that '
-        'rasterizes it, not only in the one that shades it)',
-      );
-    }
-  }
-}
-
-/// Bug 18. Only a blended draw writes real transparency; opaque and masked
-/// draws write coverage, which is 1. The value reaches the canvas through
-/// `present.frag`, so getting it wrong makes solid geometry see-through —
-/// and it is invisible until some material samples a texture that actually
-/// has transparent texels, which is why this went unnoticed until masking
-/// introduced the first such texture.
-void _onlyBlendedDrawsWriteRealTransparency() {
-  _expectDoubles(
-    _runWorldPass(
-      [_item(_plainHandle), _item(_maskedHandle, drawMode: DrawMode.masked)],
-      [_item(_blendedHandle, drawMode: DrawMode.blended)],
-      1,
-    ).float1s('uOpaqueCoverage'),
-    [1, 1, 0],
-    'opaque and masked draws must write full coverage; only blended draws '
-    'may write a texel alpha through to the target',
-  );
-}
-
-/// `AlphaMode.blended` carries an `alphaCutoff` like every other material —
-/// the field has a default and nothing stops an author setting it — and it
-/// must be ignored. A blended surface that also discarded would lose its
-/// soft edges to a hard cut, which is the failure a naive
-/// `alphaCutoff > 0` test would produce.
-void _blendedMaterialsNeverCutOut() {
-  _expectDoubles(
-    _runWorldPass(
-      const [],
-      [_item(_blendedHandle, drawMode: DrawMode.blended)],
-      1,
-    ).float1s('uAlphaCutoff'),
-    [0],
-    'a blended material must not cut out, whatever its alphaCutoff says',
-  );
 }
