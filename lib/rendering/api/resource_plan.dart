@@ -61,6 +61,9 @@ final class PreparedResourceAssembly {
     required this.plan,
   });
 
+  factory PreparedResourceAssembly.initial(OwnedResourcePlan plan) =>
+      PreparedResourceAssembly._(baseGeneration: 0, plan: plan);
+
   ResourceAssemblyState get state => _state;
 }
 
