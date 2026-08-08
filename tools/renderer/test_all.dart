@@ -28,6 +28,7 @@ const List<String> _scripts = [
   'tools/renderer/test_resource_assembler.dart',
   'tools/renderer/test_configuration_coordinator.dart',
   'tools/renderer/test_gpu_resource_plan_adapter.dart',
+  'tools/renderer/test_program_set.dart',
 ];
 
 void main() {
