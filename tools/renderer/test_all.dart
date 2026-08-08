@@ -24,6 +24,7 @@ const List<String> _scripts = [
   'tools/renderer/test_post_chain_parameters.dart',
   'tools/renderer/test_profile_resources.dart',
   'tools/renderer/test_profile_serialization.dart',
+  'tools/renderer/test_configuration_transition.dart',
 ];
 
 void main() {

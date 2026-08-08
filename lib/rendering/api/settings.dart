@@ -81,6 +81,7 @@ final class RendererConfiguration {
   );
 
   void validate() {
+    profile.validate();
     if (internalWidth <= 0 || internalHeight <= 0) {
       throw ArgumentError(
         'RendererConfiguration internal resolution must be > 0: '
