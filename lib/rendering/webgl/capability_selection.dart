@@ -7,12 +7,12 @@ import '../api/capabilities.dart';
 final class CapabilityProfileSelector {
   const CapabilityProfileSelector();
 
-  static const String featureShadows = 'shadows';
-  static const String featureSsao = 'ssao';
-  static const String featureBloom = 'bloom';
-  static const String featureDof = 'dof';
-  static const String featureMsaa = 'msaa';
-  static const String featureMaterialArray = 'material-array';
+  static const String featureShadows = PipelineFeatures.shadows;
+  static const String featureSsao = PipelineFeatures.ssao;
+  static const String featureBloom = PipelineFeatures.bloom;
+  static const String featureDof = PipelineFeatures.dof;
+  static const String featureMsaa = PipelineFeatures.msaa;
+  static const String featureMaterialArray = PipelineFeatures.materialArray;
 
   QualityProfile select(
     RenderCapabilities caps, {

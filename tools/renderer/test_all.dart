@@ -23,6 +23,7 @@ const List<String> _scripts = [
   'tools/renderer/test_zero_cost.dart',
   'tools/renderer/test_post_chain_parameters.dart',
   'tools/renderer/test_profile_resources.dart',
+  'tools/renderer/test_profile_serialization.dart',
 ];
 
 void main() {

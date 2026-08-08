@@ -60,6 +60,20 @@ final class PipelineFeatures {
   static const String grade = 'grade';
   static const String ps1 = 'ps1';
   static const String vhs = 'vhs';
+  static const String msaa = 'msaa';
+  static const String materialArray = 'material-array';
+
+  static const Set<String> all = {
+    shadows,
+    ssao,
+    bloom,
+    dof,
+    grade,
+    ps1,
+    vhs,
+    msaa,
+    materialArray,
+  };
 }
 
 enum QualityProfileKind {
@@ -78,6 +92,58 @@ final class QualityProfile {
   const QualityProfile(this.kind, this.installedFeatures);
 
   bool installs(String featureId) => installedFeatures.contains(featureId);
+
+  void validate() {
+    final unknown = installedFeatures.difference(PipelineFeatures.all);
+    if (unknown.isNotEmpty) {
+      throw ArgumentError.value(
+        unknown,
+        'installedFeatures',
+        'contains unknown pipeline features',
+      );
+    }
+    if (kind == QualityProfileKind.safe && installedFeatures.isNotEmpty) {
+      throw ArgumentError.value(
+        installedFeatures,
+        'installedFeatures',
+        'safe profiles cannot install optional features',
+      );
+    }
+  }
+
+  Map<String, Object> toMap() {
+    validate();
+    final features = installedFeatures.toList()..sort();
+    return <String, Object>{'kind': kind.name, 'features': features};
+  }
+
+  static QualityProfile fromMap(Map<String, Object?> value) {
+    final kindName = value['kind'];
+    final featureValues = value['features'];
+    if (kindName is! String || featureValues is! List) {
+      throw const FormatException('profile requires kind and features');
+    }
+    final kind = QualityProfileKind.values.firstWhere(
+      (candidate) => candidate.name == kindName,
+      orElse: () => throw FormatException('unknown profile kind: $kindName'),
+    );
+    if (featureValues.any((feature) => feature is! String)) {
+      throw const FormatException('profile features must be strings');
+    }
+    final profile = QualityProfile(kind, featureValues.cast<String>().toSet());
+    final unknown = profile.installedFeatures.difference(PipelineFeatures.all);
+    if (unknown.isNotEmpty) {
+      throw FormatException('unknown pipeline features: $unknown');
+    }
+    if (kind == QualityProfileKind.safe &&
+        profile.installedFeatures.isNotEmpty) {
+      throw const FormatException(
+        'safe profiles cannot install optional features',
+      );
+    }
+    profile.validate();
+    return profile;
+  }
 
   static const QualityProfile safe = QualityProfile(
     QualityProfileKind.safe,
