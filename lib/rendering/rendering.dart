@@ -7,6 +7,7 @@ export 'api/lights.dart';
 export 'api/materials.dart';
 export 'api/mesh.dart';
 export 'api/renderer.dart';
+export 'api/resource_plan.dart';
 export 'api/scene.dart';
 export 'api/settings.dart';
 export 'api/stats.dart';

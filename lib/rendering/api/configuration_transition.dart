@@ -1,3 +1,4 @@
+import 'resource_plan.dart';
 import 'settings.dart';
 
 enum ConfigurationTransactionState { open, committed, aborted }
@@ -5,6 +6,8 @@ enum ConfigurationTransactionState { open, committed, aborted }
 final class ConfigurationDelta {
   final Set<String> addedFeatures;
   final Set<String> removedFeatures;
+  final Set<String> addedResources;
+  final Set<String> removedResources;
   final bool renderTargetsChanged;
   final bool resourceTablesChanged;
   final bool diagnosticLevelChanged;
@@ -12,6 +15,8 @@ final class ConfigurationDelta {
   const ConfigurationDelta({
     required this.addedFeatures,
     required this.removedFeatures,
+    required this.addedResources,
+    required this.removedResources,
     required this.renderTargetsChanged,
     required this.resourceTablesChanged,
     required this.diagnosticLevelChanged,
@@ -20,6 +25,8 @@ final class ConfigurationDelta {
   bool get requiresGpuRebuild =>
       addedFeatures.isNotEmpty ||
       removedFeatures.isNotEmpty ||
+      addedResources.isNotEmpty ||
+      removedResources.isNotEmpty ||
       renderTargetsChanged ||
       resourceTablesChanged;
 
@@ -29,12 +36,14 @@ final class ConfigurationDelta {
 final class ConfigurationTransaction {
   final int baseGeneration;
   final RendererConfiguration target;
+  final OwnedResourcePlan targetResources;
   final ConfigurationDelta delta;
   ConfigurationTransactionState _state = ConfigurationTransactionState.open;
 
   ConfigurationTransaction._({
     required this.baseGeneration,
     required this.target,
+    required this.targetResources,
     required this.delta,
   });
 
@@ -43,6 +52,7 @@ final class ConfigurationTransaction {
 
 final class ConfigurationStateMachine {
   RendererConfiguration? _current;
+  OwnedResourcePlan? _currentResources;
   ConfigurationTransaction? _open;
   int _generation = 0;
   bool _disposed = false;
@@ -57,6 +67,14 @@ final class ConfigurationStateMachine {
 
   int get generation => _generation;
 
+  OwnedResourcePlan get currentResources {
+    final value = _currentResources;
+    if (value == null) {
+      throw StateError('resource state is not initialized');
+    }
+    return value;
+  }
+
   void initialize(RendererConfiguration configuration) {
     _ensureActive();
     if (_current != null) {
@@ -64,6 +82,7 @@ final class ConfigurationStateMachine {
     }
     configuration.validate();
     _current = configuration;
+    _currentResources = OwnedResourcePlan.forConfiguration(configuration);
     _generation = 1;
   }
 
@@ -74,10 +93,17 @@ final class ConfigurationStateMachine {
       throw StateError('a configuration transition is already open');
     }
     target.validate();
+    final targetResources = OwnedResourcePlan.forConfiguration(target);
     final transaction = ConfigurationTransaction._(
       baseGeneration: _generation,
       target: target,
-      delta: _delta(currentConfiguration, target),
+      targetResources: targetResources,
+      delta: _delta(
+        currentConfiguration,
+        target,
+        currentResources,
+        targetResources,
+      ),
     );
     _open = transaction;
     return transaction;
@@ -90,6 +116,7 @@ final class ConfigurationStateMachine {
       throw StateError('configuration transition is stale');
     }
     _current = transaction.target;
+    _currentResources = transaction.targetResources;
     _generation++;
     transaction._state = ConfigurationTransactionState.committed;
     _open = null;
@@ -109,6 +136,7 @@ final class ConfigurationStateMachine {
     }
     _disposed = true;
     _current = null;
+    _currentResources = null;
   }
 
   void _ensureActive() {
@@ -126,12 +154,20 @@ final class ConfigurationStateMachine {
 ConfigurationDelta _delta(
   RendererConfiguration before,
   RendererConfiguration after,
+  OwnedResourcePlan beforeResources,
+  OwnedResourcePlan afterResources,
 ) {
   final added = after.profile.installedFeatures.difference(
     before.profile.installedFeatures,
   );
   final removed = before.profile.installedFeatures.difference(
     after.profile.installedFeatures,
+  );
+  final addedResources = afterResources.resources.difference(
+    beforeResources.resources,
+  );
+  final removedResources = beforeResources.resources.difference(
+    afterResources.resources,
   );
   final renderTargetsChanged =
       before.profile.kind != after.profile.kind ||
@@ -148,6 +184,8 @@ ConfigurationDelta _delta(
   return ConfigurationDelta(
     addedFeatures: Set.unmodifiable(added),
     removedFeatures: Set.unmodifiable(removed),
+    addedResources: Set.unmodifiable(addedResources),
+    removedResources: Set.unmodifiable(removedResources),
     renderTargetsChanged: renderTargetsChanged,
     resourceTablesChanged: resourceTablesChanged,
     diagnosticLevelChanged: before.diagnosticLevel != after.diagnosticLevel,

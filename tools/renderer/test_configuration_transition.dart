@@ -1,4 +1,5 @@
 import 'package:pixeldart/rendering/rendering.dart';
+import 'package:pixeldart/rendering/passes/shadow_graph.dart';
 
 void require(bool condition, String message) {
   if (!condition) throw StateError(message);
@@ -7,7 +8,7 @@ void require(bool condition, String message) {
 void expectStateError(void Function() action, String message) {
   try {
     action();
-  // ignore: avoid_catching_errors
+    // ignore: avoid_catching_errors
   } catch (error) {
     if (error is StateError) return;
     rethrow;
@@ -47,6 +48,24 @@ void main() {
     'full transition misses added VHS',
   );
   require(
+    full.delta.addedResources.contains('vhsOutput') &&
+        full.delta.addedResources.contains('shadowMap'),
+    'full transition misses owned resources',
+  );
+  require(full.targetResources.hasHistory, 'full transition misses history');
+  final exactFull = PipelineResourcePlan.forProfile(QualityProfile.ps1Full);
+  final exactFullNames = exactFull.resources
+      .map(
+        (item) =>
+            item.version == 0 ? item.name : '${item.name}#${item.version}',
+      )
+      .toSet();
+  require(
+    full.targetResources.resources.length == exactFullNames.length &&
+        full.targetResources.resources.containsAll(exactFullNames),
+    'transition plan differs from graph plan: ${full.targetResources.resources} vs $exactFullNames',
+  );
+  require(
     full.delta.requiresGpuRebuild,
     'feature change must rebuild GPU state',
   );
@@ -69,6 +88,11 @@ void main() {
   require(
     machine.current.profile == QualityProfile.clean,
     'commit lost target profile',
+  );
+  require(
+    !machine.currentResources.hasHistory &&
+        !machine.currentResources.resources.contains('vhsOutput'),
+    'commit retained excluded VHS resources',
   );
 
   machine.dispose();
