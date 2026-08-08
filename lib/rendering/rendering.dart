@@ -1,4 +1,5 @@
 export 'api/capabilities.dart';
+export 'api/capability_serialization.dart';
 export 'api/configuration_coordinator.dart';
 export 'api/configuration_transition.dart';
 export 'api/effects.dart';
@@ -12,6 +13,11 @@ export 'api/resource_plan.dart';
 export 'api/scene.dart';
 export 'api/settings.dart';
 export 'api/stats.dart';
+export 'core/scene_renderer_impl.dart';
+export 'core/program_set_planner.dart';
+export 'core/program_source.dart';
+export 'core/feature_installation_planner.dart';
+export 'webgl/capability_selection.dart';
 export 'math/bounds.dart';
 export 'math/frustum.dart';
 export 'math/mat3.dart';

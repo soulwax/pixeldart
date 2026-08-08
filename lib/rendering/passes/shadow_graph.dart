@@ -7,6 +7,7 @@ import '../core/program_library.dart';
 import '../core/render_feature.dart';
 import '../webgl/device_api.dart';
 import '../webgl/generated_shaders.dart';
+import '../math/vec.dart';
 import 'bloom.dart';
 import 'depth_prepass.dart';
 import 'depth_resources.dart';
@@ -100,6 +101,17 @@ FeatureGraph buildShadowGraph(
     resolveCamera: resolveCamera,
   );
   ShadowLightView? lastLightView;
+  final fallbackLightView = ShadowLightView.fromSpotLight(
+    const SpotLight(
+      id: -1,
+      position: Vec3(0, 1, 0),
+      direction: Vec3(0, -1, 0),
+      color: LinearColor.white,
+      range: 1,
+      innerConeRadians: 0.3,
+      outerConeRadians: 0.5,
+    ),
+  );
   final shadow = ShadowFeature(
     programLibrary: programLibrary,
     vertexSource: shadowCasterVertSrc,
@@ -118,13 +130,7 @@ FeatureGraph buildShadowGraph(
     resolveMaterial: resolveMaterial,
     resolveAlbedo: resolveAlbedo,
     resolveShadowMap: resolveShadowMap,
-    resolveLightView: () =>
-        lastLightView ??
-        (throw StateError(
-          'buildShadowGraph: shadowedWorld pass ran before shadowCaster '
-          'computed a light view this frame — the shadow pass must execute '
-          'first, matching its beforeShadow/beforeWorld stage ordering',
-        )),
+    resolveLightView: () => lastLightView ?? fallbackLightView,
     resolveCasterLight: resolveCasterLight,
     resolveSsaoBlurred: resolveSsaoBlurred,
     useSsao: hasSsao,

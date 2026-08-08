@@ -6,23 +6,26 @@ have a detailed design already; they are unbuilt, not undesigned.
 
 ## Public API surface
 
-- [ ] **Implement `SceneRenderer`.** The interface exists (`initialize` /
+The facade and safe/minimal/clean profile transitions below are implemented;
+the remaining unchecked items are the next capability and acceptance gaps.
+
+- [x] **Implement `SceneRenderer`.** The interface exists (`initialize` /
       `configure` / `resize` / `beginFrame` / `endFrame` / `abortFrame` /
-      `dispose`) but has no concrete implementation — the demo drives the
-      feature graph and passes directly. This is the single biggest gap.
+      `dispose`) and the concrete facade now owns the reusable lifecycle; the
+      feature graph and passes directly. The standalone graph remains useful
+      for feature-level fixtures.
       **(spec'd)**
-- [ ] **`configure()` as an atomic between-frame graph rebuild** — prepare a
+- [x] **`configure()` as an atomic between-frame graph rebuild** — prepare a
       full replacement feature set, swap between frames, reset temporal
       history; never compile or allocate from `beginFrame`. **(spec'd)**
-- [ ] **`dispose()` with exact accounting** — releasing every owned CPU and GPU
+- [x] **`dispose()` with exact accounting** — releasing every owned CPU and GPU
       resource, provable by diagnostics returning to the pre-renderer
       baseline.
 - [ ] **Enforce the `RenderEncoder` lifecycle at runtime** — a stale encoder
       (after `endFrame`/`abortFrame`) should reject submissions instead of
       relying on caller discipline.
-- [ ] **`TextureStore`.** No texture store exists; the demo manages its one
-      checkerboard texture by hand. `MaterialDefinition.albedoTexture` /
-      `emissiveTexture` currently have nothing to resolve against.
+- [x] **`TextureStore`.** The store now owns declared textures, fallback
+      fallback resolution, pixel uploads, and context-restore rehydration.
 - [ ] **Per-instance transform streaming.** Instanced draws are wired, but all
       members of a batch share one transform — a flagged placeholder, not a
       silent default. Stream per-instance attributes from a persistent buffer.
@@ -34,10 +37,11 @@ have a detailed design already; they are unbuilt, not undesigned.
 - [ ] **Express MSAA resolve as a graph stage.** It works, but as bootstrap
       plumbing between two pass contexts; features cannot declare or validate
       a resolve.
-- [ ] **Profile exclusion ("owns zero targets").** No quality-profile-driven
+- [x] **Profile exclusion ("owns zero targets").** No quality-profile-driven
       feature installation exists — every feature's GPU targets are always
       allocated. A profile-excluded feature should compile no program,
-      allocate nothing, and add no pass. **(spec'd)**
+      allocate nothing, and add no pass; safe/minimal/clean now enforce that
+      ownership boundary. **(spec'd)**
 - [ ] **Extend zero-cost-off to grade, PS1 quantize, and VHS.** Each still runs
       its full-screen shader at zero weight (deliberately deferred — their
       per-pixel cost is small next to SSAO/blur — but the contract should be

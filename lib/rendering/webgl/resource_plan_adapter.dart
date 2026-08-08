@@ -96,6 +96,24 @@ final class GpuResourcePlanAdapter {
     _open = null;
   }
 
+  /// Recreates current target objects after a browser context restore. The
+  /// logical ownership plan and resource names remain unchanged; only the
+  /// device-owned objects are replaced.
+  void rehydrateAfterContextRestore(RendererConfiguration configuration) {
+    _ensureActive();
+    final current = _current;
+    if (current == null) {
+      throw StateError('GPU resource adapter is not initialized');
+    }
+    _current = PreparedGpuResourcePlan(
+      logical: current.logical,
+      objects: _createObjects(
+        OwnedResourcePlan.forConfiguration(configuration),
+        configuration,
+      ),
+    );
+  }
+
   void dispose() {
     if (_disposed) return;
     if (_open != null) throw StateError('cannot dispose an open GPU candidate');

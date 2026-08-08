@@ -54,6 +54,7 @@ final class PresentFeature implements RenderFeature {
   final GpuDevice device;
   final String programId;
   final ResourceRef sceneColorResource;
+  GpuObject? _emptyVao;
 
   PresentFeature({
     required this.programLibrary,
@@ -92,6 +93,7 @@ final class PresentFeature implements RenderFeature {
     // bound for portability across drivers, so one empty VAO is created
     // once here and reused for the pass's whole lifetime, not per frame.
     final emptyVao = device.createVertexArray();
+    _emptyVao = emptyVao;
     return [
       _PresentPass(
         descriptor: PassDescriptor(
@@ -110,7 +112,13 @@ final class PresentFeature implements RenderFeature {
   }
 
   @override
-  void dispose() {}
+  void dispose() {
+    final vao = _emptyVao;
+    if (vao != null) {
+      device.deleteVertexArray(vao);
+      _emptyVao = null;
+    }
+  }
 }
 
 final class _PresentPass implements RenderPass {
@@ -129,8 +137,7 @@ final class _PresentPass implements RenderPass {
 
   @override
   void execute(RenderPassContext context) {
-    final source =
-        context.viewOf(sceneColorResource.name) as BoundResourceView;
+    final source = context.viewOf(sceneColorResource.name) as BoundResourceView;
     final encoder = context.commandEncoder as DrawCommandEncoder;
 
     encoder.bindTarget(null);

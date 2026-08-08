@@ -1,6 +1,5 @@
-/// Queried device capabilities (§7.1). RV-02's WebGL backend populates
-/// this; RV-01 only defines the shape so pure code can reason about
-/// capability-bounded selection without a GPU context.
+import 'capability_serialization.dart';
+
 final class RenderCapabilities {
   final String? webglVersion;
   final String? rendererString;
@@ -32,10 +31,7 @@ final class RenderCapabilities {
     this.contextLossExtension = false,
   });
 
-  /// A capability floor sufficient for `world opaque -> world transparent
-  /// -> present` (§6.1) with no optional features. Used to synthesize a
-  /// deterministic capability object in pure tests and the safe fallback
-  /// path, without depending on a real WebGL context.
+  /// Capability floor for the mandatory safe graph and pure fallback tests.
   static const RenderCapabilities safeMinimum = RenderCapabilities(
     maxTextureSize: 2048,
     maxTextureArrayLayers: 1,
@@ -43,12 +39,27 @@ final class RenderCapabilities {
     maxVertexAttributes: 16,
     maxColorAttachments: 1,
   );
+
+  void validate() {
+    if ([
+      maxTextureSize,
+      maxTextureArrayLayers,
+      maxSamples,
+      maxVertexAttributes,
+      maxColorAttachments,
+    ].any((value) => value <= 0)) {
+      throw const FormatException('render capabilities contain invalid limits');
+    }
+  }
+
+  Map<String, Object?> toMap() => capabilityToMap(this);
+
+  factory RenderCapabilities.fromMap(Map<String, Object?> value) =>
+      capabilityFromMap(value);
 }
 
-/// The effect-group vocabulary RP-3's pipeline assembler installs or
-/// excludes. Deliberately coarser than `RenderFeature.id`: `bloom` covers
+/// Effect groups installed by the pipeline assembler.
 /// three passes (blur H/V + composite), `ssao` covers two, `dof` covers
-/// three — a profile toggles the group a player/config cares about, not
 /// the internal pass count implementing it.
 final class PipelineFeatures {
   const PipelineFeatures._();

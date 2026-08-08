@@ -18,6 +18,7 @@ final class CapabilityProfileSelector {
     RenderCapabilities caps, {
     QualityProfileKind? forceKind,
   }) {
+    caps.validate();
     if (forceKind == QualityProfileKind.safe) {
       return QualityProfile.safe;
     }
@@ -50,5 +51,18 @@ final class CapabilityProfileSelector {
               ? QualityProfileKind.safe
               : QualityProfileKind.standard);
     return QualityProfile(kind, features);
+  }
+
+  /// Maps queried capabilities to the concrete profiles currently executable
+  /// by [SceneRendererImpl]. The raw [select] result preserves every
+  /// capability bit for diagnostics; this method deliberately returns only
+  /// graph profiles that have complete resource/pass wiring today.
+  QualityProfile selectRuntimeProfile(RenderCapabilities caps) {
+    final negotiated = select(caps);
+    return switch (negotiated.kind) {
+      QualityProfileKind.high => QualityProfile.clean,
+      QualityProfileKind.standard => QualityProfile.minimal,
+      _ => QualityProfile.safe,
+    };
   }
 }

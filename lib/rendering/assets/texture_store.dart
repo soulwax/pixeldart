@@ -163,6 +163,10 @@ final class TextureStore {
     return resolve(handle);
   }
 
+  /// Built-in white texture used by passes when a material has no albedo or
+  /// its declared texture has not received pixels yet.
+  GpuObject get fallbackAlbedo => _fallbackAlbedo;
+
   void release(TextureHandle handle) {
     final texture = _texturesBySlot.remove(handle.slot);
     if (texture != null) {
@@ -198,4 +202,16 @@ final class TextureStore {
   }
 
   int get liveCount => _registry.liveCount;
+  int get createCount => _registry.createCount;
+  int get deleteCount => _registry.deleteCount;
+
+  /// Estimated retained pixel payload for frame-budget diagnostics. It
+  /// excludes driver allocation overhead and the built-in 1x1 fallback.
+  int get liveGpuBytes => _registry.liveDescriptors().fold<int>(0, (
+    total,
+    entry,
+  ) {
+    final descriptor = entry.$2.descriptor;
+    return total + descriptor.width * descriptor.height * descriptor.layers * 4;
+  });
 }

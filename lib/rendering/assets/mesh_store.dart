@@ -113,7 +113,11 @@ final class MeshStore {
       if (!boundLocations.add(location)) {
         continue;
       }
-      final componentCount = _componentCountAtLocation(mesh.layout, location, attr);
+      final componentCount = _componentCountAtLocation(
+        mesh.layout,
+        location,
+        attr,
+      );
       _device.vertexAttribPointer(
         location: location,
         componentCount: componentCount,
@@ -180,4 +184,19 @@ final class MeshStore {
   }
 
   int get liveCount => _registry.liveCount;
+
+  /// Bytes retained for the current logical mesh set. This is the uploaded
+  /// vertex/index payload estimate used by frame-budget diagnostics; driver
+  /// allocator overhead is intentionally outside this API.
+  int get liveGpuBytes => _registry.liveDescriptors().fold<int>(
+    0,
+    (total, entry) =>
+        total +
+        entry.$2.vertices.lengthInBytes +
+        (entry.$2.indices?.lengthInBytes ?? 0),
+  );
+
+  /// Internal scene-world validation seam. The renderer owns both stores and
+  /// worlds; callers still receive only the public handle/resource API.
+  ResourceRegistry<MeshHandle, MeshData> get registry => _registry;
 }

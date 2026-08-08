@@ -29,13 +29,21 @@ const List<String> _scripts = [
   'tools/renderer/test_configuration_coordinator.dart',
   'tools/renderer/test_gpu_resource_plan_adapter.dart',
   'tools/renderer/test_program_set.dart',
+  'tools/renderer/test_program_set_planner.dart',
+  'tools/renderer/test_feature_installation_planner.dart',
+  'tools/renderer/test_capability_validation.dart',
+  'tools/renderer/test_capability_serialization.dart',
+  'tools/renderer/test_scene_renderer.dart',
 ];
 
 void main() {
   var failures = 0;
   for (final script in _scripts) {
     stdout.writeln('--- $script ---');
-    final result = Process.runSync('dart', ['run', script]);
+    final result = Process.runSync(
+      Platform.resolvedExecutable,
+      ['--suppress-analytics', 'run', script],
+    );
     stdout.write(result.stdout);
     if (result.exitCode != 0) {
       failures += 1;

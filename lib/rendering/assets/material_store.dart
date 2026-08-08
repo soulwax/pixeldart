@@ -22,7 +22,14 @@ final class MaterialStore {
   MaterialDefinition resolve(MaterialHandle handle) =>
       _registry.descriptorOf(handle);
 
+  /// Resolves a material for a concrete render feature without exposing the
+  /// registry itself across the assets/passes boundary.
+  MaterialDefinition resolveForPass(MaterialHandle handle) =>
+      _registry.descriptorOf(handle);
+
   void release(MaterialHandle handle) => _registry.release(handle);
 
   int get liveCount => _registry.liveCount;
+  int get createCount => _registry.createCount;
+  int get deleteCount => _registry.deleteCount;
 }

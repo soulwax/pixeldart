@@ -1,5 +1,4 @@
 import 'package:pixeldart/rendering/rendering.dart';
-import 'package:pixeldart/rendering/webgl/capability_selection.dart';
 import 'package:pixeldart/rendering/webgl/device.dart';
 import 'package:pixeldart/rendering/webgl/device_api.dart';
 import 'package:pixeldart/rendering/webgl/resource_diagnostics.dart';

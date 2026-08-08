@@ -163,6 +163,14 @@ final class ProgramLibrary {
     _live.clear();
   }
 
+  /// Drops logical program references after the device has already discarded
+  /// every GPU object during context loss. Unlike [disposeAll], this must not
+  /// call delete on stale handles from the previous device epoch.
+  void resetAfterContextRestore() {
+    _openSet = null;
+    _live.clear();
+  }
+
   void _checkOpenSet(PreparedProgramSet prepared) {
     if (!identical(_openSet, prepared) ||
         prepared.state != ProgramSetCandidateState.prepared) {
