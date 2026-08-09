@@ -56,6 +56,7 @@ final class TextureStore {
   late GpuObject _fallbackNormal;
   late GpuObject _fallbackOrm;
   late GpuObject _fallbackEmissive;
+  late GpuObject _fallbackLightmap;
 
   TextureStore(this._device)
     : _registry = ResourceRegistry<TextureHandle, _TextureRecord>(
@@ -65,6 +66,7 @@ final class TextureStore {
     _fallbackNormal = _createFallback(FallbackPixels.flatNormal);
     _fallbackOrm = _createFallback(FallbackPixels.identityOrm);
     _fallbackEmissive = _createFallback(FallbackPixels.blackEmissive);
+    _fallbackLightmap = _createFallback(FallbackPixels.neutralLightmap);
   }
 
   GpuObject _createFallbackAlbedo() {
@@ -94,9 +96,23 @@ final class TextureStore {
     GpuTextureWrap wrap = GpuTextureWrap.clampToEdge,
     GpuTextureFilter minFilter = GpuTextureFilter.linear,
     GpuTextureFilter magFilter = GpuTextureFilter.linear,
+    double anisotropy = 1,
     Uint8List? pixels,
     String? debugLabel,
   }) {
+    if (width <= 0 || height <= 0 || layers <= 0) {
+      throw ArgumentError('TextureStore.declare dimensions/layers must be > 0');
+    }
+    if (!anisotropy.isFinite || anisotropy < 1 || anisotropy > 16) {
+      throw ArgumentError(
+        'TextureStore.declare anisotropy must be in [1, 16]: $anisotropy',
+      );
+    }
+    if (minFilter == GpuTextureFilter.linearMipmapLinear && !hasMips) {
+      throw ArgumentError(
+        'TextureStore.declare linearMipmapLinear requires hasMips: true',
+      );
+    }
     final descriptor = GpuTextureDescriptor(
       width: width,
       height: height,
@@ -105,6 +121,7 @@ final class TextureStore {
       wrap: wrap,
       minFilter: minFilter,
       magFilter: magFilter,
+      anisotropy: anisotropy,
     );
     final handle = _registry.declare(
       _TextureRecord(
@@ -192,12 +209,18 @@ final class TextureStore {
     return _resolve(handle, _fallbackEmissive);
   }
 
+  GpuObject resolveLightmap(TextureHandle? handle) {
+    if (handle == null) return _fallbackLightmap;
+    return _resolve(handle, _fallbackLightmap);
+  }
+
   /// Built-in white texture used by passes when a material has no albedo or
   /// its declared texture has not received pixels yet.
   GpuObject get fallbackAlbedo => _fallbackAlbedo;
   GpuObject get fallbackNormal => _fallbackNormal;
   GpuObject get fallbackOrm => _fallbackOrm;
   GpuObject get fallbackEmissive => _fallbackEmissive;
+  GpuObject get fallbackLightmap => _fallbackLightmap;
 
   void release(TextureHandle handle) {
     final texture = _texturesBySlot.remove(handle.slot);
@@ -218,6 +241,7 @@ final class TextureStore {
     _fallbackNormal = _createFallback(FallbackPixels.flatNormal);
     _fallbackOrm = _createFallback(FallbackPixels.identityOrm);
     _fallbackEmissive = _createFallback(FallbackPixels.blackEmissive);
+    _fallbackLightmap = _createFallback(FallbackPixels.neutralLightmap);
     for (final (handle, record) in _registry.liveDescriptors()) {
       if (record.layerPixels.every((pixels) => pixels == null)) {
         continue;

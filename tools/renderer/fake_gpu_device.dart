@@ -454,7 +454,7 @@ final class FakeGpuDevice implements GpuDevice {
   }
 
   @override
-  void uploadIndices(GpuObject buffer, Uint16List data) {
+  void uploadIndices(GpuObject buffer, List<int> data) {
     _requireReady();
     _requireLive(buffer);
     drawLog.add(
@@ -463,7 +463,11 @@ final class FakeGpuDevice implements GpuDevice {
   }
 
   @override
-  void drawElements({required int count, required int offsetBytes}) {
+  void drawElements({
+    required int count,
+    required int offsetBytes,
+    bool index32 = false,
+  }) {
     _requireReady();
     _requireDrawState();
     if (_boundElementBuffer == null) {
@@ -471,7 +475,7 @@ final class FakeGpuDevice implements GpuDevice {
         'FakeGpuDevice: drawElements with no bound element array buffer',
       );
     }
-    drawLog.add('drawElements($count, $offsetBytes)');
+    drawLog.add('drawElements($count, $offsetBytes, index32=$index32)');
   }
 
   @override
@@ -479,6 +483,7 @@ final class FakeGpuDevice implements GpuDevice {
     required int count,
     required int offsetBytes,
     required int instanceCount,
+    bool index32 = false,
   }) {
     _requireReady();
     _requireDrawState();
@@ -487,7 +492,10 @@ final class FakeGpuDevice implements GpuDevice {
         'FakeGpuDevice: drawElementsInstanced with no bound element array buffer',
       );
     }
-    drawLog.add('drawElementsInstanced($count, $offsetBytes, $instanceCount)');
+    drawLog.add(
+      'drawElementsInstanced($count, $offsetBytes, $instanceCount, '
+      'index32=$index32)',
+    );
   }
 
   void _requireLive(GpuObject obj) {

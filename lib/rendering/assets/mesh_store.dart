@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import '../api/handles.dart';
 import '../api/mesh.dart';
 import '../webgl/device_api.dart';
@@ -53,6 +55,7 @@ final class UploadedMesh {
   final GpuObject vao;
   final int indexCount;
   final int vertexCount;
+  final bool usesUint32Indices;
 
   const UploadedMesh({
     required this.vertexBuffer,
@@ -60,6 +63,7 @@ final class UploadedMesh {
     required this.vao,
     required this.indexCount,
     required this.vertexCount,
+    required this.usesUint32Indices,
   });
 
   bool get isIndexed => indexBuffer != null;
@@ -134,7 +138,7 @@ final class MeshStore {
     if (indices != null) {
       indexBuffer = _device.createBuffer(
         GpuBufferDescriptor(
-          byteLength: indices.lengthInBytes,
+          byteLength: _indexByteLength(indices),
           usage: GpuBufferUsage.staticDraw,
           kind: GpuBufferKind.indices,
         ),
@@ -149,6 +153,7 @@ final class MeshStore {
       vao: vao,
       indexCount: indices?.length ?? 0,
       vertexCount: mesh.vertexCount,
+      usesUint32Indices: indices is Uint32List,
     );
   }
 
@@ -195,8 +200,19 @@ final class MeshStore {
     (total, entry) =>
         total +
         entry.$2.vertices.lengthInBytes +
-        (entry.$2.indices?.lengthInBytes ?? 0),
+        _indexByteLengthOrZero(entry.$2.indices),
   );
+
+  static int _indexByteLength(List<int> indices) => switch (indices) {
+    Uint16List values => values.lengthInBytes,
+    Uint32List values => values.lengthInBytes,
+    _ => throw ArgumentError(
+      'MeshStore indices must be Uint16List or Uint32List',
+    ),
+  };
+
+  static int _indexByteLengthOrZero(List<int>? indices) =>
+      indices == null ? 0 : _indexByteLength(indices);
 
   /// Internal scene-world validation seam. The renderer owns both stores and
   /// worlds; callers still receive only the public handle/resource API.

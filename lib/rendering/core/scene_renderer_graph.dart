@@ -72,6 +72,7 @@ extension on SceneRendererImpl {
         vao: mesh.vao,
         isIndexed: mesh.isIndexed,
         drawCount: mesh.isIndexed ? mesh.indexCount : mesh.vertexCount,
+        usesUint32Indices: mesh.usesUint32Indices,
       );
     }
 
@@ -97,6 +98,7 @@ extension on SceneRendererImpl {
             resolveNormal: _resources!.textures.resolveNormal,
             resolveOrm: _resources!.textures.resolveOrm,
             resolveEmissive: _resources!.textures.resolveEmissive,
+            resolveLightmap: _resources!.textures.resolveLightmap,
             resolveShadowMap: () => resolveResource('shadowMap'),
             resolveCasterLight: () {
               final lights = _activeFrame?.environment.spotLights;

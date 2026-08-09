@@ -29,6 +29,11 @@ final class MaterialDefinition {
   final double roughness;
   final double metallic;
   final double occlusionStrength;
+
+  /// Optional neutral-indirect/lightmap texture sampled with UV1. Intensity
+  /// is zero by default so a missing map cannot brighten compatibility meshes.
+  final TextureHandle? lightmapTexture;
+  final double lightmapIntensity;
   final double uvScaleU, uvScaleV;
   final double uvOffsetU, uvOffsetV;
   final AlphaMode alphaMode;
@@ -60,6 +65,8 @@ final class MaterialDefinition {
     this.roughness = 1,
     this.metallic = 0,
     this.occlusionStrength = 1,
+    this.lightmapTexture,
+    this.lightmapIntensity = 0,
     this.uvScaleU = 1,
     this.uvScaleV = 1,
     this.uvOffsetU = 0,
@@ -89,6 +96,12 @@ final class MaterialDefinition {
     _validateUnit('roughness', roughness);
     _validateUnit('metallic', metallic);
     _validateUnit('occlusionStrength', occlusionStrength);
+    if (!lightmapIntensity.isFinite || lightmapIntensity < 0) {
+      throw ArgumentError(
+        'MaterialDefinition.lightmapIntensity must be >= 0: '
+        '$lightmapIntensity',
+      );
+    }
     for (final (name, value) in [
       ('uvScaleU', uvScaleU),
       ('uvScaleV', uvScaleV),

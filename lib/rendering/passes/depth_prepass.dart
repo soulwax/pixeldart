@@ -216,7 +216,11 @@ final class _DepthPrepassPass implements RenderPass {
       final mesh = resolveMesh(batch.descriptor.mesh);
       encoder.bindVertexArray(mesh.vao);
       if (mesh.isIndexed) {
-        encoder.drawElements(count: mesh.drawCount, offsetBytes: 0);
+        encoder.drawElements(
+          count: mesh.drawCount,
+          offsetBytes: 0,
+          index32: mesh.usesUint32Indices,
+        );
       } else {
         encoder.drawArrays(first: 0, count: mesh.drawCount);
       }
@@ -235,6 +239,7 @@ final class _DepthPrepassPass implements RenderPass {
           count: mesh.drawCount,
           offsetBytes: 0,
           instanceCount: batch.instanceCount,
+          index32: mesh.usesUint32Indices,
         );
       } else {
         encoder.drawArraysInstanced(

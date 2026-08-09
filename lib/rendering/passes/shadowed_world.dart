@@ -54,6 +54,7 @@ final class ShadowedWorldProgramSource {
       'uNormalMap': 3,
       'uOrmMap': 4,
       'uEmissiveMap': 5,
+      'uLightmap': 6,
     },
     requiredUniforms: const [
       'uViewProjection',
@@ -122,6 +123,7 @@ final class ShadowedWorldProgramSource {
       'uRoughness',
       'uMetallic',
       'uOcclusionStrength',
+      'uLightmapIntensity',
       'uVertexSnapGrid',
       'uAffineWarpStrength',
       'uAlphaCutoff',
@@ -146,6 +148,7 @@ final class ShadowedWorldFeature implements RenderFeature {
   final MaterialTextureResolver? resolveNormal;
   final MaterialTextureResolver? resolveOrm;
   final MaterialTextureResolver? resolveEmissive;
+  final MaterialTextureResolver? resolveLightmap;
   final GpuObject Function() resolveShadowMap;
   final ShadowLightView Function() resolveLightView;
   final SpotLight? Function() resolveCasterLight;
@@ -170,6 +173,7 @@ final class ShadowedWorldFeature implements RenderFeature {
     this.resolveNormal,
     this.resolveOrm,
     this.resolveEmissive,
+    this.resolveLightmap,
     required this.resolveShadowMap,
     required this.resolveLightView,
     required this.resolveCasterLight,
@@ -229,6 +233,7 @@ final class ShadowedWorldFeature implements RenderFeature {
         resolveNormal: resolveNormal,
         resolveOrm: resolveOrm,
         resolveEmissive: resolveEmissive,
+        resolveLightmap: resolveLightmap,
         resolveShadowMap: resolveShadowMap,
         resolveLightView: resolveLightView,
         resolveCasterLight: resolveCasterLight,
@@ -256,6 +261,7 @@ final class _ShadowedWorldPass implements RenderPass {
   final MaterialTextureResolver? resolveNormal;
   final MaterialTextureResolver? resolveOrm;
   final MaterialTextureResolver? resolveEmissive;
+  final MaterialTextureResolver? resolveLightmap;
   final GpuObject Function() resolveShadowMap;
   final ShadowLightView Function() resolveLightView;
   final SpotLight? Function() resolveCasterLight;
@@ -275,6 +281,7 @@ final class _ShadowedWorldPass implements RenderPass {
     required this.resolveNormal,
     required this.resolveOrm,
     required this.resolveEmissive,
+    required this.resolveLightmap,
     required this.resolveShadowMap,
     required this.resolveLightView,
     required this.resolveCasterLight,
@@ -310,6 +317,7 @@ final class _ShadowedWorldPass implements RenderPass {
     encoder.setUniform('uNormalMap', const UniformValue.sampler(3));
     encoder.setUniform('uOrmMap', const UniformValue.sampler(4));
     encoder.setUniform('uEmissiveMap', const UniformValue.sampler(5));
+    encoder.setUniform('uLightmap', const UniformValue.sampler(6));
     encoder.bindTexture(1, resolveShadowMap());
     encoder.setUniform('uShadowMap', const UniformValue.sampler(1));
     encoder.setUniform(
@@ -568,7 +576,11 @@ final class _ShadowedWorldPass implements RenderPass {
       final mesh = resolveMesh(batch.descriptor.mesh);
       encoder.bindVertexArray(mesh.vao);
       if (mesh.isIndexed) {
-        encoder.drawElements(count: mesh.drawCount, offsetBytes: 0);
+        encoder.drawElements(
+          count: mesh.drawCount,
+          offsetBytes: 0,
+          index32: mesh.usesUint32Indices,
+        );
       } else {
         encoder.drawArrays(first: 0, count: mesh.drawCount);
       }
@@ -590,6 +602,7 @@ final class _ShadowedWorldPass implements RenderPass {
           count: mesh.drawCount,
           offsetBytes: 0,
           instanceCount: batch.instanceCount,
+          index32: mesh.usesUint32Indices,
         );
       } else {
         encoder.drawArraysInstanced(
@@ -633,6 +646,10 @@ final class _ShadowedWorldPass implements RenderPass {
     encoder.bindTexture(
       5,
       (resolveEmissive ?? resolveAlbedo)(material.emissiveTexture),
+    );
+    encoder.bindTexture(
+      6,
+      (resolveLightmap ?? resolveAlbedo)(material.lightmapTexture),
     );
     // §6.2/§8.6's alpha-masked route. Zero means "no cutout at all" and is
     // the shader's own branch condition, so opaque and blended materials
@@ -704,6 +721,10 @@ final class _ShadowedWorldPass implements RenderPass {
     encoder.setUniform(
       'uOcclusionStrength',
       UniformValue.float1(material.occlusionStrength),
+    );
+    encoder.setUniform(
+      'uLightmapIntensity',
+      UniformValue.float1(material.lightmapIntensity),
     );
     encoder.setUniform(
       'uReceivesShadow',

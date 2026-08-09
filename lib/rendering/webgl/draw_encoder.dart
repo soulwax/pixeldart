@@ -22,11 +22,16 @@ abstract interface class DrawCommandEncoder {
     required int count,
     required int instanceCount,
   });
-  void drawElements({required int count, required int offsetBytes});
+  void drawElements({
+    required int count,
+    required int offsetBytes,
+    bool index32 = false,
+  });
   void drawElementsInstanced({
     required int count,
     required int offsetBytes,
     required int instanceCount,
+    bool index32 = false,
   });
 }
 
@@ -93,17 +98,26 @@ final class DeviceDrawCommandEncoder implements DrawCommandEncoder {
   );
 
   @override
-  void drawElements({required int count, required int offsetBytes}) =>
-      device.drawElements(count: count, offsetBytes: offsetBytes);
+  void drawElements({
+    required int count,
+    required int offsetBytes,
+    bool index32 = false,
+  }) => device.drawElements(
+    count: count,
+    offsetBytes: offsetBytes,
+    index32: index32,
+  );
 
   @override
   void drawElementsInstanced({
     required int count,
     required int offsetBytes,
     required int instanceCount,
+    bool index32 = false,
   }) => device.drawElementsInstanced(
     count: count,
     offsetBytes: offsetBytes,
     instanceCount: instanceCount,
+    index32: index32,
   );
 }

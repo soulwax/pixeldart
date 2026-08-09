@@ -4,6 +4,7 @@ in vec4 vColor;
 in vec3 vNormal;
 in highp vec2 vUv;
 in highp float vUvW;
+in highp vec2 vUv1;
 in vec4 vLightSpacePos;
 in vec3 vWorldPos;
 in vec4 vTangent;
@@ -12,6 +13,7 @@ uniform sampler2D uAlbedo;
 uniform sampler2D uNormalMap;
 uniform sampler2D uOrmMap;
 uniform sampler2D uEmissiveMap;
+uniform sampler2D uLightmap;
 uniform sampler2D uShadowMap;
 uniform vec3 uLightPosition;
 uniform vec3 uLightDirection;
@@ -76,6 +78,7 @@ uniform float uNormalStrength;
 uniform float uRoughness;
 uniform float uMetallic;
 uniform float uOcclusionStrength;
+uniform float uLightmapIntensity;
 uniform float uAffineWarpStrength;
 uniform float uAlphaCutoff;
 uniform float uOpaqueCoverage;
@@ -261,6 +264,9 @@ void main(){
   vec3 lit=baseColor*clamp(ambient+direct*(1.0-metal*(0.35+0.25*rough)),0.,1.);
   vec3 emissive=texture(uEmissiveMap,uv).rgb*uMaterialTint*uEmissiveStrength;
   lit+=emissive;
+  if(uLightmapIntensity>0.0){
+    lit+=baseColor*texture(uLightmap,vUv1).rgb*uLightmapIntensity;
+  }
   // Fog blends the surface's own lit color toward uFogColor only — never
   // oGlow below, which stays a declared emissive quantity independent of
   // how much atmosphere sits between the surface and the camera, matching

@@ -39,6 +39,10 @@ final class GpuTextureDescriptor {
   final GpuTextureFilter magFilter;
   final GpuTextureWrap wrap;
 
+  /// Requested anisotropy. Backends clamp this to their extension limit;
+  /// `1` is the portable/no-anisotropy policy.
+  final double anisotropy;
+
   const GpuTextureDescriptor({
     required this.width,
     required this.height,
@@ -47,6 +51,7 @@ final class GpuTextureDescriptor {
     this.minFilter = GpuTextureFilter.linear,
     this.magFilter = GpuTextureFilter.linear,
     this.wrap = GpuTextureWrap.clampToEdge,
+    this.anisotropy = 1,
   });
 }
 
@@ -210,10 +215,10 @@ abstract interface class GpuDevice {
   void enableVertexAttribArray(int location);
 
   /// Binds a buffer (created via [createBuffer]) as the currently bound
-  /// VAO's element (index) array, for `drawElements`. Uint16 indices only,
-  /// matching QMSH's deduplication output (§5.4).
+  /// VAO's element (index) array, for `drawElements`. Uint16 is compact;
+  /// Uint32 supports large authored meshes.
   void bindElementArrayBuffer(GpuObject buffer);
-  void uploadIndices(GpuObject buffer, Uint16List data);
+  void uploadIndices(GpuObject buffer, List<int> data);
 
   void drawArrays({required int first, required int count});
   void drawArraysInstanced({
@@ -221,11 +226,16 @@ abstract interface class GpuDevice {
     required int count,
     required int instanceCount,
   });
-  void drawElements({required int count, required int offsetBytes});
+  void drawElements({
+    required int count,
+    required int offsetBytes,
+    bool index32 = false,
+  });
   void drawElementsInstanced({
     required int count,
     required int offsetBytes,
     required int instanceCount,
+    bool index32 = false,
   });
 }
 

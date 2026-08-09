@@ -120,8 +120,8 @@ Gallery index: [all features](.github/screenshots/00-all-features-on.jpg) ·
 
 | Area | Features |
 | --- | --- |
-| World | Indexed meshes, per-pass draw state, depth test, backface culling, per-draw material tint, double-sided override, texture sampling with mipmaps, alpha-masked cutout (`discard` in world, depth-prepass, *and* shadow-caster paths) |
-| Materials | Material-v2 UV scale/offset, albedo/normal/ORM/emissive slots, derivative TBN normal mapping, linear ORM channels, emissive MRT glow, alpha modes, and neutral fallback maps |
+| World | Indexed meshes with Uint16/Uint32 element buffers, per-pass draw state, depth test, backface culling, per-draw material tint, double-sided override, texture sampling with mipmaps, alpha-masked cutout (`discard` in world, depth-prepass, *and* shadow-caster paths) |
+| Materials | Material-v2 UV scale/offset, albedo/normal/ORM/emissive/lightmap slots, derivative or authored TBN normal mapping, linear ORM channels, emissive MRT glow, alpha modes, neutral fallback maps, and validated sampler policy |
 | Lighting | Directional + ambient, four point slots, a selected shadow caster plus three direct spot slots with distance/cone falloff, shadow mapping with 2×2 PCF and slope-scaled bias |
 | Depth | Single-sample depth prepass shared by SSAO/DOF, linearized depth debug view |
 | AO | Half-resolution 8-sample SSAO reconstructing position from depth and normals from derivatives, depth-aware bilateral blur, modulates ambient only |
@@ -272,7 +272,9 @@ until they do, `TextureStore` binds stable neutral pixels (white albedo,
 flat normal, identity ORM, black emissive), so missing art cannot make a mesh
 disappear. ORM is sampled in linear space as **R = occlusion, G = roughness,
 B = metalness**. UV scale/offset and alpha mode are applied consistently by
-the world, depth-prepass, and shadow-caster routes.
+the world, depth-prepass, and shadow-caster routes. Optional UV1 lightmaps use
+a neutral white fallback and explicit per-material intensity; sampler
+declarations reject impossible mip/aniso combinations before GPU allocation.
 
 ```dart
 final material = renderer.resources.registerMaterial(

@@ -8,10 +8,43 @@ import 'fake_gpu_device.dart';
 void main() {
   _uploadCreatesRealBuffersAndVao();
   _indexedMeshResolvesWithCorrectDrawCount();
+  _uint32IndicesRetainIndexType();
   _nonIndexedMeshResolvesWithVertexCount();
   _releaseDeletesGpuObjectsAndInvalidatesHandle();
   _rehydrateAfterContextRestoreRebuildsFromCpuDescriptor();
   print('Renderer mesh store fixtures passed.');
+}
+
+void _uint32IndicesRetainIndexType() {
+  final device = FakeGpuDevice();
+  final store = MeshStore(device);
+  final mesh = MeshData(
+    layout: VertexLayoutDescriptor.compatibility14,
+    vertices: Float32List(
+      VertexLayoutDescriptor.compatibility14.strideFloats * 3,
+    ),
+    indices: Uint32List.fromList([0, 1, 2]),
+    localBounds: const Aabb(Vec3(-1, -1, -1), Vec3(1, 1, 1)),
+  );
+  final handle = store.upload(mesh);
+  final uploaded = store.resolve(handle);
+  if (!uploaded.usesUint32Indices) {
+    throw StateError('Uint32 index payload lost its index type during upload');
+  }
+  var rejected = false;
+  try {
+    MeshData(
+      layout: VertexLayoutDescriptor.compatibility14,
+      vertices: mesh.vertices,
+      indices: <int>[0, 1, 2],
+      localBounds: mesh.localBounds,
+    ).validate();
+  } catch (_) {
+    rejected = true;
+  }
+  if (!rejected) {
+    throw StateError('untyped growable index lists must be rejected');
+  }
 }
 
 MeshData _triangleMesh({bool indexed = false}) {
@@ -67,7 +100,8 @@ void _uploadCreatesRealBuffersAndVao() {
   // sampled UV that silently read the constant `mat` field instead.
   final location4Call = device.drawLog.firstWhere(
     (e) => e.startsWith('vertexAttribPointer(4,'),
-    orElse: () => throw StateError('expected a vertexAttribPointer call for location 4'),
+    orElse: () =>
+        throw StateError('expected a vertexAttribPointer call for location 4'),
   );
   if (location4Call != 'vertexAttribPointer(4, 3, 56, 44)') {
     throw StateError(

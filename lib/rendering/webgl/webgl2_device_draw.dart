@@ -398,11 +398,25 @@ extension WebGl2DeviceDraw on WebGl2Device {
     );
   }
 
-  void uploadIndicesImpl(GpuObject buffer, Uint16List data) {
+  void uploadIndicesImpl(GpuObject buffer, List<int> data) {
     _requireReady();
     final handle = (buffer as _WebGpuObject).handle as WebGLBuffer;
     gl.bindBuffer(_G.ELEMENT_ARRAY_BUFFER, handle);
-    gl.bufferData(_G.ELEMENT_ARRAY_BUFFER, data.toJS, _G.STATIC_DRAW);
+    switch (data) {
+      case Uint16List values:
+        gl.bufferData(_G.ELEMENT_ARRAY_BUFFER, values.toJS, _G.STATIC_DRAW);
+      default:
+        // The current package:web interop exposes Uint16List/Float32List
+        // directly but not the 32-bit list. A byte payload preserves the
+        // exact little-endian element values while still passing an
+        // ArrayBuffer view accepted by WebGL's bufferData overload.
+        final bytes = Uint8List(data.length * 4);
+        final byteData = ByteData.view(bytes.buffer);
+        for (var i = 0; i < data.length; i++) {
+          byteData.setUint32(i * 4, data[i], Endian.little);
+        }
+        gl.bufferData(_G.ELEMENT_ARRAY_BUFFER, bytes.toJS, _G.STATIC_DRAW);
+    }
   }
 
   void drawArraysImpl({required int first, required int count}) {
@@ -419,21 +433,31 @@ extension WebGl2DeviceDraw on WebGl2Device {
     gl.drawArraysInstanced(_G.TRIANGLES, first, count, instanceCount);
   }
 
-  void drawElementsImpl({required int count, required int offsetBytes}) {
+  void drawElementsImpl({
+    required int count,
+    required int offsetBytes,
+    required bool index32,
+  }) {
     _requireReady();
-    gl.drawElements(_G.TRIANGLES, count, _G.UNSIGNED_SHORT, offsetBytes);
+    gl.drawElements(
+      _G.TRIANGLES,
+      count,
+      index32 ? _G.UNSIGNED_INT : _G.UNSIGNED_SHORT,
+      offsetBytes,
+    );
   }
 
   void drawElementsInstancedImpl({
     required int count,
     required int offsetBytes,
     required int instanceCount,
+    required bool index32,
   }) {
     _requireReady();
     gl.drawElementsInstanced(
       _G.TRIANGLES,
       count,
-      _G.UNSIGNED_SHORT,
+      index32 ? _G.UNSIGNED_INT : _G.UNSIGNED_SHORT,
       offsetBytes,
       instanceCount,
     );

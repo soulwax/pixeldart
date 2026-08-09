@@ -1,6 +1,7 @@
 import 'package:pixeldart/rendering/api/materials.dart';
 import 'package:pixeldart/rendering/assets/texture_store.dart';
 import 'package:pixeldart/rendering/passes/shadowed_world.dart';
+import 'package:pixeldart/rendering/webgl/device_api.dart';
 import 'package:pixeldart/rendering/webgl/generated_shaders.dart';
 
 import 'fake_gpu_device.dart';
@@ -51,14 +52,20 @@ void _neutralTextureFallbacksAreDistinct() {
   final normal = store.resolveNormal(null);
   final orm = store.resolveOrm(null);
   final emissive = store.resolveEmissive(null);
+  final lightmap = store.resolveLightmap(null);
   require(!identical(albedo, normal), 'normal fallback aliases albedo');
   require(!identical(normal, orm), 'ORM fallback aliases normal');
   require(!identical(orm, emissive), 'emissive fallback aliases ORM');
+  require(!identical(emissive, lightmap), 'lightmap fallback aliases emissive');
   require(identical(normal, store.fallbackNormal), 'normal fallback unstable');
   require(identical(orm, store.fallbackOrm), 'ORM fallback unstable');
   require(
     identical(emissive, store.fallbackEmissive),
     'emissive fallback unstable',
+  );
+  require(
+    identical(lightmap, store.fallbackLightmap),
+    'lightmap fallback unstable',
   );
   final pending = store.declare(width: 1, height: 1);
   require(
@@ -73,6 +80,27 @@ void _neutralTextureFallbacksAreDistinct() {
     identical(store.resolveEmissive(pending), emissive),
     'unloaded emissive map must use the emissive fallback',
   );
+  require(
+    identical(store.resolveLightmap(pending), lightmap),
+    'unloaded lightmap must use the lightmap fallback',
+  );
+  for (final invalid in [
+    () => store.declare(width: 1, height: 1, anisotropy: 0.5),
+    () => store.declare(width: 1, height: 1, anisotropy: 16.1),
+    () => store.declare(
+      width: 1,
+      height: 1,
+      minFilter: GpuTextureFilter.linearMipmapLinear,
+    ),
+  ]) {
+    var rejected = false;
+    try {
+      invalid();
+    } catch (_) {
+      rejected = true;
+    }
+    require(rejected, 'invalid sampler policy was accepted');
+  }
 }
 
 void _shadowedWorldContractBindsEveryMaterialV2Slot() {
@@ -86,12 +114,14 @@ void _shadowedWorldContractBindsEveryMaterialV2Slot() {
     source.samplerUnits['uEmissiveMap'] == 5,
     'emissive sampler unit drift',
   );
+  require(source.samplerUnits['uLightmap'] == 6, 'lightmap sampler unit drift');
   for (final uniform in [
     'uUvScaleOffset',
     'uNormalStrength',
     'uRoughness',
     'uMetallic',
     'uOcclusionStrength',
+    'uLightmapIntensity',
   ]) {
     require(
       source.requiredUniforms.contains(uniform),
@@ -102,7 +132,14 @@ void _shadowedWorldContractBindsEveryMaterialV2Slot() {
       'material-v2 uniform missing from shader: $uniform',
     );
   }
-  for (final term in ['dFdx', 'dFdy', 'uEmissiveMap', 'texture(uOrmMap']) {
+  for (final term in [
+    'dFdx',
+    'dFdy',
+    'uEmissiveMap',
+    'uLightmap',
+    'texture(uOrmMap',
+    'vUv1',
+  ]) {
     require(
       source.fragmentSource.contains(term),
       'material-v2 shader behavior missing: $term',

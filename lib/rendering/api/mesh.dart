@@ -122,7 +122,10 @@ final class VertexLayoutDescriptor {
 final class MeshData {
   final VertexLayoutDescriptor layout;
   final Float32List vertices;
-  final Uint16List? indices;
+
+  /// Optional element indices. Uint16 is compact; Uint32 supports large
+  /// authored meshes whose vertex count exceeds 65,535.
+  final List<int>? indices;
   final Aabb localBounds;
 
   MeshData({
@@ -145,7 +148,7 @@ final class MeshData {
     _validateFiniteSurfaceV2Tangents();
     if (indices != null) {
       final count = vertexCount;
-      for (final index in indices!) {
+      for (final index in _indexValues(indices!)) {
         if (index >= count) {
           throw ArgumentError(
             'MeshData index $index out of range for $count vertices',
@@ -211,4 +214,12 @@ final class MeshData {
       }
     }
   }
+
+  static Iterable<int> _indexValues(List<int> data) => switch (data) {
+    Uint16List values => values,
+    Uint32List values => values,
+    _ => throw ArgumentError(
+      'MeshData.indices must be Uint16List or Uint32List, got ${data.runtimeType}',
+    ),
+  };
 }

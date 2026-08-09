@@ -17,6 +17,7 @@ out vec4 vColor;
 out vec3 vNormal;
 out highp vec2 vUv;
 out highp float vUvW;
+out highp vec2 vUv1;
 out vec4 vLightSpacePos;
 out vec3 vWorldPos;
 out vec4 vTangent;
@@ -61,4 +62,5 @@ void main(){
   float affineW=mix(1.0,clip.w,uAffineWarpStrength);
   vUv=aUvMat.xy*affineW;
   vUvW=affineW;
+  vUv1=aUv1;
 }

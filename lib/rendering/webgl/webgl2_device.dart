@@ -257,12 +257,10 @@ final class WebGl2Device implements GpuDevice {
   void bindTarget(GpuObject? target) => bindTargetImpl(target);
 
   @override
-  void setColorAttachmentCount(int count) =>
-      setColorAttachmentCountImpl(count);
+  void setColorAttachmentCount(int count) => setColorAttachmentCountImpl(count);
 
   @override
-  void applyDrawState(DrawStateDescriptor state) =>
-      applyDrawStateImpl(state);
+  void applyDrawState(DrawStateDescriptor state) => applyDrawStateImpl(state);
 
   @override
   void clear(
@@ -331,21 +329,30 @@ final class WebGl2Device implements GpuDevice {
       bindElementArrayBufferImpl(buffer);
 
   @override
-  void uploadIndices(GpuObject buffer, Uint16List data) =>
+  void uploadIndices(GpuObject buffer, List<int> data) =>
       uploadIndicesImpl(buffer, data);
 
   @override
-  void drawElements({required int count, required int offsetBytes}) =>
-      drawElementsImpl(count: count, offsetBytes: offsetBytes);
+  void drawElements({
+    required int count,
+    required int offsetBytes,
+    bool index32 = false,
+  }) => drawElementsImpl(
+    count: count,
+    offsetBytes: offsetBytes,
+    index32: index32,
+  );
 
   @override
   void drawElementsInstanced({
     required int count,
     required int offsetBytes,
     required int instanceCount,
+    bool index32 = false,
   }) => drawElementsInstancedImpl(
     count: count,
     offsetBytes: offsetBytes,
     instanceCount: instanceCount,
+    index32: index32,
   );
 }
