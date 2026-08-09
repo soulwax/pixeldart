@@ -26,14 +26,37 @@ final class _TransientItemView implements RetainedItemView {
 /// compute tighter bounds). [clear] must be called once per frame, before
 /// any `submit()` calls that frame — `RenderEncoder`'s own contract
 /// ("borrowed for one frame; invalid after `endFrame()`/`abortFrame()`")
-/// is enforced by this discipline rather than by a runtime frame-token
-/// check, which this bootstrap-scale implementation does not add.
+/// is enforced by the same small runtime state machine as [FrameQueue].
+enum FrameRenderEncoderState { idle, active, ended, aborted }
+
 final class FrameRenderEncoder implements RenderEncoder {
   final List<RetainedItemView> _items = [];
+  FrameRenderEncoderState _state = FrameRenderEncoderState.idle;
   int _nextSlot = 0;
+
+  FrameRenderEncoderState get state => _state;
+
+  void beginFrame() {
+    if (_state == FrameRenderEncoderState.active) {
+      throw StateError(
+        'FrameRenderEncoder.beginFrame called twice without end/abort',
+      );
+    }
+    _items.clear();
+    _nextSlot = 0;
+    _state = FrameRenderEncoderState.active;
+  }
+
+  /// Backwards-compatible spelling for the original bootstrap caller.
+  void clear() => beginFrame();
 
   @override
   void submit(RetainedItemDescriptor transientItem) {
+    if (_state != FrameRenderEncoderState.active) {
+      throw StateError(
+        'FrameRenderEncoder.submit called outside an active frame',
+      );
+    }
     transientItem.validate();
     final center = transientItem.transform.translation;
     const halfExtent = Vec3(0.5, 0.5, 0.5);
@@ -48,8 +71,24 @@ final class FrameRenderEncoder implements RenderEncoder {
 
   List<RetainedItemView> get items => List.unmodifiable(_items);
 
-  void clear() {
+  List<RetainedItemView> endFrame() {
+    if (_state != FrameRenderEncoderState.active) {
+      throw StateError(
+        'FrameRenderEncoder.endFrame called without an active frame',
+      );
+    }
+    _state = FrameRenderEncoderState.ended;
+    return items;
+  }
+
+  void abortFrame() {
+    if (_state != FrameRenderEncoderState.active) {
+      throw StateError(
+        'FrameRenderEncoder.abortFrame called without an active frame',
+      );
+    }
     _items.clear();
     _nextSlot = 0;
+    _state = FrameRenderEncoderState.aborted;
   }
 }

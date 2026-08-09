@@ -9,6 +9,7 @@ const List<String> _scripts = [
   'tools/renderer/test_program_library.dart',
   'tools/renderer/test_render_core.dart',
   'tools/renderer/test_frame_queue.dart',
+  'tools/renderer/test_frame_render_encoder.dart',
   'tools/renderer/test_qmesh.dart',
   'tools/renderer/test_feature_graph.dart',
   'tools/renderer/test_safe_graph.dart',
@@ -40,10 +41,11 @@ void main() {
   var failures = 0;
   for (final script in _scripts) {
     stdout.writeln('--- $script ---');
-    final result = Process.runSync(
-      Platform.resolvedExecutable,
-      ['--suppress-analytics', 'run', script],
-    );
+    final result = Process.runSync(Platform.resolvedExecutable, [
+      '--suppress-analytics',
+      'run',
+      script,
+    ]);
     stdout.write(result.stdout);
     if (result.exitCode != 0) {
       failures += 1;
