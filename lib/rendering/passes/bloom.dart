@@ -51,6 +51,8 @@ final class BloomBlurFeature implements RenderFeature {
   final ResourceRef sourceResource;
   final ResourceRef destResource;
   final GpuObject Function() resolveSource;
+  final int texelWidth;
+  final int texelHeight;
 
   BloomBlurFeature.horizontal({
     required this.programLibrary,
@@ -58,12 +60,18 @@ final class BloomBlurFeature implements RenderFeature {
     required this.fragmentSource,
     required this.device,
     required this.resolveSource,
+    int? texelWidth,
+    int? texelHeight,
+    ResourceRef? sourceResource,
+    ResourceRef? destResource,
   }) : programId = 'bloomBlurH',
        passId = 'bloomBlurH',
        _axis = _BloomBlurAxis.horizontal,
        sampleGlowAttachment = true,
-       sourceResource = SafeGraphResources.sceneColor,
-       destResource = BloomResources.bloomBlurH;
+       sourceResource = sourceResource ?? SafeGraphResources.sceneColor,
+       destResource = destResource ?? BloomResources.bloomBlurH,
+       texelWidth = texelWidth ?? BloomResources.bloomBlurH.width,
+       texelHeight = texelHeight ?? BloomResources.bloomBlurH.height;
 
   BloomBlurFeature.vertical({
     required this.programLibrary,
@@ -71,12 +79,18 @@ final class BloomBlurFeature implements RenderFeature {
     required this.fragmentSource,
     required this.device,
     required this.resolveSource,
+    int? texelWidth,
+    int? texelHeight,
+    ResourceRef? sourceResource,
+    ResourceRef? destResource,
   }) : programId = 'bloomBlurV',
        passId = 'bloomBlurV',
        _axis = _BloomBlurAxis.vertical,
        sampleGlowAttachment = false,
-       sourceResource = BloomResources.bloomBlurH,
-       destResource = BloomResources.bloomBlurV;
+       sourceResource = sourceResource ?? BloomResources.bloomBlurH,
+       destResource = destResource ?? BloomResources.bloomBlurV,
+       texelWidth = texelWidth ?? BloomResources.bloomBlurV.width,
+       texelHeight = texelHeight ?? BloomResources.bloomBlurV.height;
 
   @override
   String get id => passId;
@@ -106,8 +120,8 @@ final class BloomBlurFeature implements RenderFeature {
     );
     final emptyVao = device.createVertexArray();
     final texelStep = _axis == _BloomBlurAxis.horizontal
-        ? Float32List.fromList([1.0 / destResource.width, 0.0])
-        : Float32List.fromList([0.0, 1.0 / destResource.height]);
+        ? Float32List.fromList([1.0 / texelWidth, 0.0])
+        : Float32List.fromList([0.0, 1.0 / texelHeight]);
     return [
       _BloomBlurPass(
         descriptor: PassDescriptor(
@@ -213,6 +227,9 @@ final class BloomCompositeFeature implements RenderFeature {
   final String fragmentSource;
   final GpuDevice device;
   final GpuObject Function() resolveBloom;
+  final ResourceRef bloomResource;
+  final ResourceRef sceneColorResource;
+  final ResourceRef? sceneColorPostBloomResource;
 
   BloomCompositeFeature({
     required this.programLibrary,
@@ -220,7 +237,13 @@ final class BloomCompositeFeature implements RenderFeature {
     required this.fragmentSource,
     required this.device,
     required this.resolveBloom,
+    this.bloomResource = BloomResources.bloomBlurV,
+    this.sceneColorResource = SafeGraphResources.sceneColor,
+    this.sceneColorPostBloomResource,
   });
+
+  ResourceRef get _resolvedOutput =>
+      sceneColorPostBloomResource ?? BloomResources.sceneColorPostBloom;
 
   @override
   String get id => 'bloomComposite';
@@ -232,9 +255,9 @@ final class BloomCompositeFeature implements RenderFeature {
         id: 'bloomComposite',
         stage: GraphStage.afterResolve,
         uses: [
-          const ResourceUse(BloomResources.bloomBlurV, ResourceAccess.read),
-          const ResourceUse(SafeGraphResources.sceneColor, ResourceAccess.read),
-          ResourceUse(BloomResources.sceneColorPostBloom, ResourceAccess.write),
+          ResourceUse(bloomResource, ResourceAccess.read),
+          ResourceUse(sceneColorResource, ResourceAccess.read),
+          ResourceUse(_resolvedOutput, ResourceAccess.write),
         ],
       ),
     );
@@ -255,9 +278,9 @@ final class BloomCompositeFeature implements RenderFeature {
           id: 'bloomComposite',
           stage: GraphStage.afterResolve,
           uses: [
-            const ResourceUse(BloomResources.bloomBlurV, ResourceAccess.read),
-            const ResourceUse(SafeGraphResources.sceneColor, ResourceAccess.read),
-            ResourceUse(BloomResources.sceneColorPostBloom, ResourceAccess.write),
+            ResourceUse(bloomResource, ResourceAccess.read),
+            ResourceUse(sceneColorResource, ResourceAccess.read),
+            ResourceUse(_resolvedOutput, ResourceAccess.write),
           ],
           depthTest: false,
           depthWrite: false,
@@ -267,6 +290,8 @@ final class BloomCompositeFeature implements RenderFeature {
         program: program,
         emptyVao: emptyVao,
         resolveBloom: resolveBloom,
+        sceneColorResource: sceneColorResource,
+        outputResource: _resolvedOutput,
       ),
     ];
   }
@@ -281,12 +306,16 @@ final class _BloomCompositePass implements RenderPass {
   final CompiledProgram program;
   final GpuObject emptyVao;
   final GpuObject Function() resolveBloom;
+  final ResourceRef sceneColorResource;
+  final ResourceRef outputResource;
 
   const _BloomCompositePass({
     required this.descriptor,
     required this.program,
     required this.emptyVao,
     required this.resolveBloom,
+    required this.sceneColorResource,
+    required this.outputResource,
   });
 
   @override
@@ -302,8 +331,7 @@ final class _BloomCompositePass implements RenderPass {
         (context.frameScene.post as PostProcessState).bloomStrength;
     if (strength <= 0) return;
 
-    final view =
-        context.viewOf(SafeGraphResources.sceneColor.name) as BoundResourceView;
+    final view = context.viewOfResource(outputResource) as BoundResourceView;
     final encoder = context.commandEncoder as DrawCommandEncoder;
 
     encoder.bindTarget(view.gpuObject);

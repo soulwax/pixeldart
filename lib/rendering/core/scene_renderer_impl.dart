@@ -3,6 +3,7 @@ import '../api/capabilities.dart';
 import '../api/configuration_coordinator.dart';
 import '../api/frame.dart';
 import '../api/handles.dart';
+import '../api/lights.dart';
 import '../api/materials.dart';
 import '../api/mesh.dart';
 import '../api/renderer.dart';

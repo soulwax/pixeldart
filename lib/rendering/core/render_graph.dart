@@ -39,6 +39,7 @@ final class RenderGraphBuilder {
 
     _checkCapabilities(enabledPasses, availableCapabilities, failures);
     _checkMultisampleSampling(enabledPasses, failures);
+    _checkResolves(enabledPasses, failures);
     _checkHistoryReads(enabledPasses, hasValidPreviousFrame, failures);
 
     final writers = _collectWriters(enabledPasses, failures);
@@ -74,6 +75,7 @@ final class RenderGraphBuilder {
     List<GraphValidationFailure> failures,
   ) {
     for (final pass in passes) {
+      if (pass.isResolve) continue;
       for (final use in pass.reads) {
         if (use.resource.isMultisampled) {
           failures.add(
@@ -85,6 +87,48 @@ final class RenderGraphBuilder {
             ),
           );
         }
+      }
+    }
+  }
+
+  void _checkResolves(
+    List<PassDeclaration> passes,
+    List<GraphValidationFailure> failures,
+  ) {
+    for (final pass in passes.where((pass) => pass.isResolve)) {
+      final reads = pass.reads.toList();
+      final writes = pass.writes.toList();
+      if (reads.length != 1 || writes.length != 1) {
+        failures.add(
+          GraphValidationFailure(
+            GraphValidationFailureKind.invalidResolve,
+            pass.id,
+            'a resolve must read exactly one source and write exactly one destination',
+          ),
+        );
+        continue;
+      }
+      final source = reads.single.resource;
+      final destination = writes.single.resource;
+      if (!source.isMultisampled || destination.isMultisampled) {
+        failures.add(
+          GraphValidationFailure(
+            GraphValidationFailureKind.invalidResolve,
+            pass.id,
+            'resolve requires a multisampled source and single-sample destination',
+          ),
+        );
+      }
+      if (source.format != destination.format ||
+          source.width != destination.width ||
+          source.height != destination.height) {
+        failures.add(
+          GraphValidationFailure(
+            GraphValidationFailureKind.invalidResolve,
+            pass.id,
+            'resolve source and destination must match format and extent',
+          ),
+        );
       }
     }
   }

@@ -75,7 +75,12 @@ final class TexturedWorldFeature implements RenderFeature {
       PassDeclaration(
         id: 'texturedWorld',
         stage: GraphStage.beforeWorld,
-        uses: [const ResourceUse(SafeGraphResources.sceneColor, ResourceAccess.write)],
+        uses: [
+          const ResourceUse(
+            SafeGraphResources.sceneColor,
+            ResourceAccess.write,
+          ),
+        ],
       ),
     );
   }
@@ -83,14 +88,22 @@ final class TexturedWorldFeature implements RenderFeature {
   @override
   Iterable<RenderPass> createPasses(RenderPassResources resources) {
     final program = programLibrary.publish(
-      TexturedWorldProgramSource.build(vertexSource: vertexSource, fragmentSource: fragmentSource),
+      TexturedWorldProgramSource.build(
+        vertexSource: vertexSource,
+        fragmentSource: fragmentSource,
+      ),
     );
     return [
       _TexturedWorldPass(
         descriptor: PassDescriptor(
           id: 'texturedWorld',
           stage: GraphStage.beforeWorld,
-          uses: [const ResourceUse(SafeGraphResources.sceneColor, ResourceAccess.write)],
+          uses: [
+            const ResourceUse(
+              SafeGraphResources.sceneColor,
+              ResourceAccess.write,
+            ),
+          ],
         ),
         program: program,
         resolveMesh: resolveMesh,
@@ -119,14 +132,21 @@ final class _TexturedWorldPass implements RenderPass {
 
   @override
   void execute(RenderPassContext context) {
-    final view = context.viewOf(SafeGraphResources.sceneColor.name) as BoundResourceView;
+    final view =
+        context.viewOf(SafeGraphResources.sceneColor.name) as BoundResourceView;
     final encoder = context.commandEncoder as DrawCommandEncoder;
     final camera = context.frameScene.camera as CameraView;
     final environment = context.frameScene.environment as FrameEnvironment;
 
     encoder.bindTarget(view.gpuObject);
     encoder.applyDrawState(descriptor.toDrawState());
-    encoder.clear(ClearMask.colorAndDepth);
+    encoder.clear(
+      ClearMask.colorAndDepth,
+      r: environment.clearColor.r,
+      g: environment.clearColor.g,
+      b: environment.clearColor.b,
+      a: 1,
+    );
     encoder.useProgram(program.handle);
     encoder.bindTexture(0, resolveAlbedoTexture());
     encoder.setUniform('uAlbedo', const UniformValue.sampler(0));
@@ -139,14 +159,21 @@ final class _TexturedWorldPass implements RenderPass {
     final lightDir = light?.direction ?? const Vec3(0, 1, 0);
     encoder.setUniform(
       'uLightDir',
-      UniformValue.float3(Float32List.fromList([lightDir.x, lightDir.y, lightDir.z])),
+      UniformValue.float3(
+        Float32List.fromList([lightDir.x, lightDir.y, lightDir.z]),
+      ),
     );
     final ambient = environment.ambientColor;
     encoder.setUniform(
       'uAmbientColor',
-      UniformValue.float3(Float32List.fromList([ambient.r, ambient.g, ambient.b])),
+      UniformValue.float3(
+        Float32List.fromList([ambient.r, ambient.g, ambient.b]),
+      ),
     );
-    encoder.setUniform('uAmbientIntensity', UniformValue.float1(environment.ambientIntensity));
+    encoder.setUniform(
+      'uAmbientIntensity',
+      UniformValue.float1(environment.ambientIntensity),
+    );
 
     for (final batch in context.frameScene.opaqueBatches) {
       _drawBatch(encoder, batch);
@@ -178,7 +205,11 @@ final class _TexturedWorldPass implements RenderPass {
           instanceCount: batch.instanceCount,
         );
       } else {
-        encoder.drawArraysInstanced(first: 0, count: mesh.drawCount, instanceCount: batch.instanceCount);
+        encoder.drawArraysInstanced(
+          first: 0,
+          count: mesh.drawCount,
+          instanceCount: batch.instanceCount,
+        );
       }
     } else {
       throw ArgumentError(
@@ -190,7 +221,13 @@ final class _TexturedWorldPass implements RenderPass {
 
   void _setModelUniforms(DrawCommandEncoder encoder, Transform transform) {
     final model = transform.toMat4();
-    encoder.setUniform('uModel', UniformValue.mat4(Float32List.fromList(model.m)));
-    encoder.setUniform('uNormalMatrix', UniformValue.mat4(Float32List.fromList(model.normalMatrix().m)));
+    encoder.setUniform(
+      'uModel',
+      UniformValue.mat4(Float32List.fromList(model.m)),
+    );
+    encoder.setUniform(
+      'uNormalMatrix',
+      UniformValue.mat4(Float32List.fromList(model.normalMatrix().m)),
+    );
   }
 }

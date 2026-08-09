@@ -200,6 +200,8 @@ _Run _runWorldPass(
   List<RetainedItemView> blended,
   double affineWarpStrength, [
   FrameEnvironment lighting = const FrameEnvironment(),
+  List<SpotLight> directSpotLights = const [],
+  int shadowMapSize = 512,
 ]) {
   final device = FakeGpuDevice();
   final library = ProgramLibrary(device);
@@ -225,6 +227,9 @@ _Run _runWorldPass(
         device.createTexture(const GpuTextureDescriptor(width: 4, height: 4)),
     resolveLightView: () => ShadowLightView(Mat4.identity()),
     resolveCasterLight: () => null,
+    resolveDirectSpotLights: () => directSpotLights,
+    shadowMapWidth: shadowMapSize,
+    shadowMapHeight: shadowMapSize,
     resolveSsaoBlurred: () =>
         device.createTexture(const GpuTextureDescriptor(width: 4, height: 4)),
     sceneColorWidth: 384,

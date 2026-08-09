@@ -41,5 +41,12 @@ final class BoundPassContext implements RenderPassContext {
   }
 
   @override
+  ResourceView viewOfResource(ResourceRef resource) {
+    final exact = views['${resource.name}#${resource.version}'];
+    if (exact != null) return exact;
+    return viewOf(resource.name);
+  }
+
+  @override
   DrawCommandEncoder get commandEncoder => encoder;
 }

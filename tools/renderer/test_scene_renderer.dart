@@ -58,8 +58,10 @@ Future<void> main() async {
       far: 100,
       aspect: 16 / 9,
     ),
-    environment: const FrameEnvironment(),
-    post: PostProcessState.off,
+    environment: const FrameEnvironment(
+      clearColor: LinearColor(0.03, 0.02, 0.01),
+    ),
+    post: const PostProcessState(exposure: 1.25, vignette: 0.4, grain: 0.2),
     frameIndex: 1,
     historyEpoch: 0,
     noiseSeed: 7,
@@ -92,6 +94,19 @@ Future<void> main() async {
   require(
     device.drawLog.any((entry) => entry.startsWith('drawArrays')),
     'safe graph did not execute present',
+  );
+  require(
+    device.lastFloat1('uExposure') == 1.25 &&
+        device.lastFloat1('uVignette') == 0.4 &&
+        device.lastFloat1('uGrain') == 0.2 &&
+        device.lastFloat1('uOutputEncoding') == 1 &&
+        device.lastFloat1('uToneMap') == 1,
+    'present did not consume live exposure/vignette/grain controls',
+  );
+  final clear = device.clearLog.first;
+  require(
+    clear.r == 0.03 && clear.g == 0.02 && clear.b == 0.01 && clear.a == 1,
+    'world pass did not consume the authored clear color',
   );
 
   final targetsBeforeTransition = device.targetCreateCalls;
@@ -173,6 +188,29 @@ Future<void> main() async {
       pixelHeight: 900,
       devicePixelRatio: 2,
     ),
+  );
+
+  await renderer.configure(
+    const RendererConfiguration(
+      profile: QualityProfile.safe,
+      internalWidth: 321,
+      internalHeight: 181,
+      sampleCount: 4,
+      outputEncoding: ColorEncoding.linear,
+    ),
+  );
+  final resolvesBeforeMsaaFrame = device.resolveTargetCalls;
+  final msaaFrame = renderer.beginFrame(world, frame);
+  msaaFrame.submit(RetainedItemDescriptor(mesh: mesh, material: material));
+  renderer.endFrame();
+  require(
+    device.resolveTargetCalls == resolvesBeforeMsaaFrame + 1,
+    'sample-count reconfigure did not execute the graph-owned MSAA resolve',
+  );
+  require(
+    device.lastFloat1('uOutputEncoding') == 0 &&
+        device.lastFloat1('uToneMap') == 1,
+    'linear output policy was not threaded through the rebuilt present pass',
   );
 
   device.simulateContextLoss();

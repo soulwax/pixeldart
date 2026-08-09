@@ -63,6 +63,11 @@ typedef MaterialResolver = MaterialDefinition Function(MaterialHandle material);
 /// this is a resolver over the handle rather than a store lookup.
 typedef AlbedoResolver = GpuObject Function(TextureHandle? albedoTexture);
 
+/// Resolves any optional material-v2 texture slot. Keeping this separate
+/// from [AlbedoResolver] lets stores return distinct neutral fallbacks for
+/// normal, ORM, and emissive maps without changing the compatibility API.
+typedef MaterialTextureResolver = GpuObject Function(TextureHandle? texture);
+
 /// The safe-graph world program: vertex-lit, vertex-color, matches
 /// `shaders/rendering/world/safe_world.vert|frag` exactly (attribute
 /// locations, uniform names).
@@ -102,12 +107,14 @@ final class WorldFeature implements RenderFeature {
   final String vertexSource;
   final String fragmentSource;
   final MeshResolver resolveMesh;
+  final ResourceRef sceneColorResource;
 
   WorldFeature({
     required this.programLibrary,
     required this.vertexSource,
     required this.fragmentSource,
     required this.resolveMesh,
+    this.sceneColorResource = SafeGraphResources.sceneColor,
   });
 
   @override
@@ -119,12 +126,7 @@ final class WorldFeature implements RenderFeature {
       PassDeclaration(
         id: 'worldOpaqueTransparent',
         stage: GraphStage.beforeWorld,
-        uses: [
-          const ResourceUse(
-            SafeGraphResources.sceneColor,
-            ResourceAccess.write,
-          ),
-        ],
+        uses: [ResourceUse(sceneColorResource, ResourceAccess.write)],
       ),
     );
   }
@@ -142,15 +144,11 @@ final class WorldFeature implements RenderFeature {
         descriptor: PassDescriptor(
           id: 'worldOpaqueTransparent',
           stage: GraphStage.beforeWorld,
-          uses: [
-            const ResourceUse(
-              SafeGraphResources.sceneColor,
-              ResourceAccess.write,
-            ),
-          ],
+          uses: [ResourceUse(sceneColorResource, ResourceAccess.write)],
         ),
         program: program,
         resolveMesh: resolveMesh,
+        sceneColorResourceName: sceneColorResource.name,
       ),
     ];
   }
@@ -164,24 +162,31 @@ final class _WorldPass implements RenderPass {
   final PassDescriptor descriptor;
   final CompiledProgram program;
   final MeshResolver resolveMesh;
+  final String sceneColorResourceName;
 
   const _WorldPass({
     required this.descriptor,
     required this.program,
     required this.resolveMesh,
+    required this.sceneColorResourceName,
   });
 
   @override
   void execute(RenderPassContext context) {
-    final view =
-        context.viewOf(SafeGraphResources.sceneColor.name) as BoundResourceView;
+    final view = context.viewOf(sceneColorResourceName) as BoundResourceView;
     final encoder = context.commandEncoder as DrawCommandEncoder;
     final camera = context.frameScene.camera as CameraView;
     final environment = context.frameScene.environment as FrameEnvironment;
 
     encoder.bindTarget(view.gpuObject);
     encoder.applyDrawState(descriptor.toDrawState());
-    encoder.clear(ClearMask.colorAndDepth);
+    encoder.clear(
+      ClearMask.colorAndDepth,
+      r: environment.clearColor.r,
+      g: environment.clearColor.g,
+      b: environment.clearColor.b,
+      a: 1,
+    );
     encoder.useProgram(program.handle);
 
     encoder.setUniform(

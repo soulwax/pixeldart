@@ -98,14 +98,31 @@ void _heroLightingUniformsAndReceiversArePerFrameAndPerDraw() {
       ),
     ],
   );
+  const directSpots = [
+    SpotLight(
+      id: 20,
+      position: Vec3(0, 2, 1),
+      direction: Vec3(0, -1, 0),
+      color: LinearColor(1, 0.25, 0.1),
+      intensity: 0.9,
+      range: 5,
+    ),
+    SpotLight(
+      id: 21,
+      position: Vec3(2, 2, 0),
+      direction: Vec3(-1, -1, 0),
+      color: LinearColor(0.1, 0.25, 1),
+      intensity: 0.35,
+      range: 4,
+    ),
+  ];
   final run = _runWorldPass(
-    [
-      _item(_plainHandle),
-      _item(_plainHandle, receivesShadow: false),
-    ],
+    [_item(_plainHandle), _item(_plainHandle, receivesShadow: false)],
     const [],
     1,
     environment,
+    directSpots,
+    768,
   );
   _expectDoubles(
     run.float1s('uDirectionalIntensity'),
@@ -136,6 +153,27 @@ void _heroLightingUniformsAndReceiversArePerFrameAndPerDraw() {
     run.float1s('uSpotEnabled'),
     [0],
     'a frame without a selected shadow spot must disable spot contribution',
+  );
+  _expectDoubles(
+    run.float1s('uDirectSpotIntensity0'),
+    [0.9],
+    'the first direct spot must upload its authored intensity',
+  );
+  _expectDoubles(
+    run.float1s('uDirectSpotIntensity1'),
+    [0.35],
+    'the second direct spot must upload its authored intensity',
+  );
+  _expectDoubles(
+    run.float1s('uDirectSpotIntensity2'),
+    [0],
+    'unused direct spot slots must be explicitly disabled',
+  );
+  final shadowTexel = run.device.float2Sequence('uShadowMapTexelSize').single;
+  _expect(
+    (shadowTexel[0] - 1 / 768).abs() < 1e-9 &&
+        (shadowTexel[1] - 1 / 768).abs() < 1e-9,
+    'shadow texel size must follow configured shadow-map dimensions',
   );
   _expectDoubles(
     run.float1s('uReceivesShadow'),

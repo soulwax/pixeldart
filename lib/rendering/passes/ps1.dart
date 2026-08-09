@@ -48,6 +48,7 @@ final class Ps1QuantizeFeature implements RenderFeature {
   final String fragmentSource;
   final GpuDevice device;
   final ResourceRef inputResource;
+  final ResourceRef outputResource;
 
   Ps1QuantizeFeature({
     required this.programLibrary,
@@ -55,6 +56,7 @@ final class Ps1QuantizeFeature implements RenderFeature {
     required this.fragmentSource,
     required this.device,
     this.inputResource = GradeResources.gradeOutput,
+    this.outputResource = Ps1Resources.ps1Output,
   });
 
   @override
@@ -68,7 +70,7 @@ final class Ps1QuantizeFeature implements RenderFeature {
         stage: GraphStage.afterResolve,
         uses: [
           ResourceUse(inputResource, ResourceAccess.read),
-          const ResourceUse(Ps1Resources.ps1Output, ResourceAccess.write),
+          ResourceUse(outputResource, ResourceAccess.write),
         ],
       ),
     );
@@ -90,7 +92,7 @@ final class Ps1QuantizeFeature implements RenderFeature {
           stage: GraphStage.afterResolve,
           uses: [
             ResourceUse(inputResource, ResourceAccess.read),
-            const ResourceUse(Ps1Resources.ps1Output, ResourceAccess.write),
+            ResourceUse(outputResource, ResourceAccess.write),
           ],
           depthTest: false,
           depthWrite: false,
@@ -99,6 +101,7 @@ final class Ps1QuantizeFeature implements RenderFeature {
         program: program,
         emptyVao: emptyVao,
         inputResource: inputResource,
+        outputResource: outputResource,
       ),
     ];
   }
@@ -113,19 +116,20 @@ final class _Ps1QuantizePass implements RenderPass {
   final CompiledProgram program;
   final GpuObject emptyVao;
   final ResourceRef inputResource;
+  final ResourceRef outputResource;
 
   const _Ps1QuantizePass({
     required this.descriptor,
     required this.program,
     required this.emptyVao,
     required this.inputResource,
+    required this.outputResource,
   });
 
   @override
   void execute(RenderPassContext context) {
     final sceneView = context.viewOf(inputResource.name) as BoundResourceView;
-    final outputView =
-        context.viewOf(Ps1Resources.ps1Output.name) as BoundResourceView;
+    final outputView = context.viewOf(outputResource.name) as BoundResourceView;
     final encoder = context.commandEncoder as DrawCommandEncoder;
     final post = context.frameScene.post as PostProcessState;
 

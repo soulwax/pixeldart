@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import '../math/vec.dart';
 
 final class LinearColor {
@@ -119,4 +121,42 @@ final class SpotLight {
       );
     }
   }
+}
+
+/// Returns the capability-bounded direct practical lights for one frame.
+///
+/// Selection is independent of submission order: lights are ranked by a
+/// camera-relative influence estimate and ties resolve by stable authored ID.
+/// A selected shadow caster is excluded because the shadowed world already
+/// evaluates its direct contribution through the shadow map.
+List<SpotLight> selectSpotLights({
+  required Iterable<SpotLight> lights,
+  required Vec3 referencePosition,
+  SpotLight? shadowCaster,
+  int limit = 3,
+}) {
+  if (limit < 0) {
+    throw ArgumentError.value(limit, 'limit', 'must be >= 0');
+  }
+  final ranked = <({SpotLight light, double influence})>[];
+  for (final light in lights) {
+    if (light.id == shadowCaster?.id) continue;
+    final distanceSquared = (light.position - referencePosition).lengthSquared;
+    final chroma = math.max(
+      light.color.r,
+      math.max(light.color.g, light.color.b),
+    );
+    final influence =
+        light.intensity *
+        light.range *
+        light.range *
+        math.max(chroma, 1e-6) /
+        (1 + distanceSquared);
+    ranked.add((light: light, influence: influence));
+  }
+  ranked.sort((a, b) {
+    final byInfluence = b.influence.compareTo(a.influence);
+    return byInfluence == 0 ? a.light.id.compareTo(b.light.id) : byInfluence;
+  });
+  return [for (final entry in ranked.take(limit)) entry.light];
 }

@@ -57,11 +57,7 @@ final class ShadowCasterProgramSource {
     fragmentSource: fragmentSource,
     attributeLocations: const {'aPosition': 0, 'aUvMat': 4},
     samplerUnits: const {'uAlbedo': 0},
-    requiredUniforms: const [
-      'uLightViewProjection',
-      'uModel',
-      'uAlphaCutoff',
-    ],
+    requiredUniforms: const ['uLightViewProjection', 'uModel', 'uAlphaCutoff'],
   );
 }
 
@@ -81,6 +77,7 @@ final class ShadowFeature implements RenderFeature {
   final AlbedoResolver resolveAlbedo;
   final SpotLight? Function() resolveCasterLight;
   final void Function(ShadowLightView view) onLightViewComputed;
+  final ResourceRef shadowMapResource;
 
   ShadowFeature({
     required this.programLibrary,
@@ -91,6 +88,7 @@ final class ShadowFeature implements RenderFeature {
     required this.resolveAlbedo,
     required this.resolveCasterLight,
     required this.onLightViewComputed,
+    this.shadowMapResource = ShadowResources.shadowMap,
   });
 
   @override
@@ -102,9 +100,7 @@ final class ShadowFeature implements RenderFeature {
       PassDeclaration(
         id: 'shadowCaster',
         stage: GraphStage.beforeShadow,
-        uses: [
-          const ResourceUse(ShadowResources.shadowMap, ResourceAccess.write),
-        ],
+        uses: [ResourceUse(shadowMapResource, ResourceAccess.write)],
       ),
     );
   }
@@ -122,12 +118,7 @@ final class ShadowFeature implements RenderFeature {
         descriptor: PassDescriptor(
           id: 'shadowCaster',
           stage: GraphStage.beforeShadow,
-          uses: [
-            const ResourceUse(
-              ShadowResources.shadowMap,
-              ResourceAccess.write,
-            ),
-          ],
+          uses: [ResourceUse(shadowMapResource, ResourceAccess.write)],
           depthTest: true,
           depthWrite: true,
           cullEnable: true,
@@ -279,7 +270,10 @@ final class _ShadowCasterPass implements RenderPass {
     ShadowLightView lightView,
   ) {
     final model = transform.toMat4();
-    encoder.setUniform('uModel', UniformValue.mat4(Float32List.fromList(model.m)));
+    encoder.setUniform(
+      'uModel',
+      UniformValue.mat4(Float32List.fromList(model.m)),
+    );
     encoder.setUniform(
       'uLightViewProjection',
       UniformValue.mat4(Float32List.fromList(lightView.viewProjection.m)),

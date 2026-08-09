@@ -8,6 +8,9 @@ in vec4 vLightSpacePos;
 in vec3 vWorldPos;
 in float vViewDepth;
 uniform sampler2D uAlbedo;
+uniform sampler2D uNormalMap;
+uniform sampler2D uOrmMap;
+uniform sampler2D uEmissiveMap;
 uniform sampler2D uShadowMap;
 uniform vec3 uLightPosition;
 uniform vec3 uLightDirection;
@@ -36,13 +39,42 @@ uniform vec3 uPointPosition3;
 uniform vec3 uPointColor3;
 uniform float uPointIntensity3;
 uniform float uPointRadius3;
+uniform vec3 uDirectSpotPosition0;
+uniform vec3 uDirectSpotDirection0;
+uniform vec3 uDirectSpotColor0;
+uniform float uDirectSpotIntensity0;
+uniform float uDirectSpotRange0;
+uniform float uDirectSpotInnerCos0;
+uniform float uDirectSpotOuterCos0;
+uniform float uDirectSpotEnabled0;
+uniform vec3 uDirectSpotPosition1;
+uniform vec3 uDirectSpotDirection1;
+uniform vec3 uDirectSpotColor1;
+uniform float uDirectSpotIntensity1;
+uniform float uDirectSpotRange1;
+uniform float uDirectSpotInnerCos1;
+uniform float uDirectSpotOuterCos1;
+uniform float uDirectSpotEnabled1;
+uniform vec3 uDirectSpotPosition2;
+uniform vec3 uDirectSpotDirection2;
+uniform vec3 uDirectSpotColor2;
+uniform float uDirectSpotIntensity2;
+uniform float uDirectSpotRange2;
+uniform float uDirectSpotInnerCos2;
+uniform float uDirectSpotOuterCos2;
+uniform float uDirectSpotEnabled2;
 uniform vec3 uAmbientColor;
 uniform float uAmbientIntensity;
 uniform vec2 uShadowMapTexelSize;
 uniform vec3 uMaterialTint;
+uniform vec4 uUvScaleOffset;
 uniform sampler2D uSsao;
 uniform vec2 uSceneColorSize;
 uniform float uEmissiveStrength;
+uniform float uNormalStrength;
+uniform float uRoughness;
+uniform float uMetallic;
+uniform float uOcclusionStrength;
 uniform float uAffineWarpStrength;
 uniform float uAlphaCutoff;
 uniform float uOpaqueCoverage;
@@ -84,6 +116,19 @@ vec3 pointContribution(vec3 normal,vec3 worldPos,vec3 lightPosition,
   float ndotl=max(dot(normal,normalize(toLight)),0.);
   return lightColor*lightIntensity*ndotl*
     pointAttenuation(worldPos,lightPosition,lightRadius);
+}
+
+vec3 directSpotContribution(vec3 normal,vec3 worldPos,vec3 lightPosition,
+  vec3 lightDirection,vec3 lightColor,float lightIntensity,float lightRange,
+  float innerCos,float outerCos,float enabled){
+  vec3 toLight=lightPosition-worldPos;
+  float ndotl=max(dot(normal,normalize(toLight)),0.);
+  vec3 toFrag=worldPos-lightPosition;
+  float cosAngle=dot(normalize(toFrag),normalize(lightDirection));
+  float coneFalloff=smoothstep(outerCos,innerCos,cosAngle);
+  float distanceFalloff=clamp(1.-length(toFrag)/max(lightRange,.001),0.,1.);
+  return lightColor*lightIntensity*ndotl*coneFalloff*
+    distanceFalloff*distanceFalloff*enabled;
 }
 
 float sampleShadow(vec3 projCoord,float bias){
@@ -137,6 +182,7 @@ void main(){
   // exactly 1.0. The branch is uniform across the whole draw, so it costs
   // no divergence.
   vec2 uv=uAffineWarpStrength>0.?vUv/vUvW:vUv;
+  uv=uv*uUvScaleOffset.xy+uUvScaleOffset.zw;
   vec4 tex=texture(uAlbedo,uv);
   // §6.2's alpha-masked route. Deliberately the first thing after the
   // fetch it depends on, and ahead of all the lighting below: a discarded
@@ -151,6 +197,22 @@ void main(){
   // through.
   if(uAlphaCutoff>0.&&tex.a<uAlphaCutoff)discard;
   vec3 n=normalize(vNormal);
+  // Surface-v2's tangent attribute is not present in the compatibility
+  // layout yet. Derivatives produce an equivalent local frame for ordinary
+  // UV-mapped triangles and keep the material-v2 normal slot live today;
+  // authored tangents can replace this frame without changing bindings.
+  if(uNormalStrength>0.0){
+    vec3 dp1=dFdx(vWorldPos),dp2=dFdy(vWorldPos);
+    vec2 duv1=dFdx(uv),duv2=dFdy(uv);
+    vec3 t=normalize(dp1*duv2.y-dp2*duv1.y);
+    vec3 b=normalize(-dp1*duv2.x+dp2*duv1.x);
+    vec3 map=texture(uNormalMap,uv).xyz*2.0-1.0;
+    map.xy*=uNormalStrength;
+    n=normalize(mat3(t,b,n)*normalize(map));
+  }
+  vec3 orm=texture(uOrmMap,uv).rgb;
+  float ao=texture(uSsao,gl_FragCoord.xy/uSceneColorSize).r;
+  ao*=mix(1.0,orm.r,clamp(uOcclusionStrength,0.0,1.0));
   vec3 direct=vec3(0.);
   float directionalNdotL=max(dot(n,normalize(uDirectionalDirection)),0.);
   direct+=uDirectionalColor*uDirectionalIntensity*directionalNdotL;
@@ -162,6 +224,18 @@ void main(){
     uPointIntensity2,uPointRadius2);
   direct+=pointContribution(n,vWorldPos,uPointPosition3,uPointColor3,
     uPointIntensity3,uPointRadius3);
+  direct+=directSpotContribution(n,vWorldPos,uDirectSpotPosition0,
+    uDirectSpotDirection0,uDirectSpotColor0,uDirectSpotIntensity0,
+    uDirectSpotRange0,uDirectSpotInnerCos0,uDirectSpotOuterCos0,
+    uDirectSpotEnabled0);
+  direct+=directSpotContribution(n,vWorldPos,uDirectSpotPosition1,
+    uDirectSpotDirection1,uDirectSpotColor1,uDirectSpotIntensity1,
+    uDirectSpotRange1,uDirectSpotInnerCos1,uDirectSpotOuterCos1,
+    uDirectSpotEnabled1);
+  direct+=directSpotContribution(n,vWorldPos,uDirectSpotPosition2,
+    uDirectSpotDirection2,uDirectSpotColor2,uDirectSpotIntensity2,
+    uDirectSpotRange2,uDirectSpotInnerCos2,uDirectSpotOuterCos2,
+    uDirectSpotEnabled2);
   vec3 toSpot=normalize(uLightPosition-vWorldPos);
   float spotNdotL=max(dot(n,toSpot),0.);
   float shadow=uReceivesShadow>0.5?shadowFactor(spotNdotL):1.;
@@ -171,10 +245,17 @@ void main(){
   // (N.L * shadow * attenuation) term, only the ambient fill, or it would
   // double up with real shadowing and read as an incorrect global darkening
   // rather than contact occlusion specifically.
-  vec2 screenUv=gl_FragCoord.xy/uSceneColorSize;
-  float ao=texture(uSsao,screenUv).r;
   vec3 ambient=uAmbientColor*uAmbientIntensity*ao;
-  vec3 lit=vColor.rgb*tex.rgb*uMaterialTint*clamp(ambient+direct,0.,1.);
+  vec3 baseColor=vColor.rgb*tex.rgb*uMaterialTint;
+  // Metallic surfaces contribute less diffuse energy; roughness keeps a
+  // small, stable broadening factor until the surface-v2 camera/specular
+  // block lands. Both channels therefore affect the live output rather than
+  // being metadata-only fields.
+  float metal=clamp(uMetallic*orm.b,0.0,1.0);
+  float rough=clamp(uRoughness*orm.g,0.0,1.0);
+  vec3 lit=baseColor*clamp(ambient+direct*(1.0-metal*(0.35+0.25*rough)),0.,1.);
+  vec3 emissive=texture(uEmissiveMap,uv).rgb*uMaterialTint*uEmissiveStrength;
+  lit+=emissive;
   // Fog blends the surface's own lit color toward uFogColor only — never
   // oGlow below, which stays a declared emissive quantity independent of
   // how much atmosphere sits between the surface and the camera, matching
@@ -198,5 +279,5 @@ void main(){
   // (e.g. the checkerboard floor under strong light) must never bloom, only
   // a material with real emissiveStrength does, independent of how the
   // surface happens to be lit this frame.
-  oGlow=vec4(uMaterialTint*uEmissiveStrength,1.);
+  oGlow=vec4(emissive,1.);
 }

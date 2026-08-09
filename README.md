@@ -1,7 +1,8 @@
 # pixeldart
 
-> Current checkout note — 2026-08-08: the concrete `SceneRendererImpl`
-> bootstrap, safe graph, retained-world lifecycle, capability serialization,
+> Current checkout note — 2026-08-09: the concrete `SceneRendererImpl`
+> bootstrap, safe graph, retained-world lifecycle, material-v2 bindings,
+> capability serialization,
 > and context-restore path are present. The command and status guidance below
 > describes this checkout, including its deliberately explicit remaining gaps.
 
@@ -18,6 +19,23 @@ shadow map ─▶ depth prepass ─▶ SSAO (half-res) ─▶ world (MRT: color 
 The full pipeline is fifteen passes, pinned in order by a test.
 
 ![Everything on: shadows, SSAO, bloom, DOF, grade, PS1 quantize, VHS, fog, affine UV, alpha-masked lattice](.github/screenshots/00-all-features-on.jpg)
+
+### Capability evidence at a glance
+
+These are real standalone-demo captures, selected as a quick visual tour of
+the renderer's most failure-prone seams: lighting and contact occlusion,
+post-processing, cutout geometry, and back-face/depth agreement.
+
+| Lighting + post | Geometry + material contracts |
+| :---: | :---: |
+| ![Full pipeline with shadows, SSAO, bloom, DOF, grade, PS1, VHS and fog](.github/screenshots/00-all-features-on.jpg) | ![Alpha-masked lattice casting a matching cutout shadow](.github/screenshots/14-lattice-shadow-alpha-mask-on.jpg) |
+| **Full stack** — the graph composes all optional stages | **Alpha mask** — world, depth prepass, and shadow caster agree |
+| ![Post chain disabled, showing raw lit geometry](.github/screenshots/12-post-chain-off-geometry-only.jpg) | ![Double-sided panel shaded from the back face](.github/screenshots/16-double-sided-panel-back-face-shaded.jpg) |
+| **Raw geometry** — a useful baseline for A/B captures | **Double-sided material** — culling is a per-material override |
+
+The gallery below keeps the same camera and scene while changing one switch at
+a time, so the images are evidence of a live feature boundary rather than
+decorative mockups.
 
 ## Showcase
 
@@ -103,10 +121,12 @@ Gallery index: [all features](.github/screenshots/00-all-features-on.jpg) ·
 | Area | Features |
 | --- | --- |
 | World | Indexed meshes, per-pass draw state, depth test, backface culling, per-draw material tint, double-sided override, texture sampling with mipmaps, alpha-masked cutout (`discard` in world, depth-prepass, *and* shadow-caster paths) |
-| Lighting | Directional + ambient, one spot light with distance/cone falloff, shadow mapping with 2×2 PCF and slope-scaled bias on a depth-only target |
+| Materials | Material-v2 UV scale/offset, albedo/normal/ORM/emissive slots, derivative TBN normal mapping, linear ORM channels, emissive MRT glow, alpha modes, and neutral fallback maps |
+| Lighting | Directional + ambient, four point slots, a selected shadow caster plus three direct spot slots with distance/cone falloff, shadow mapping with 2×2 PCF and slope-scaled bias |
 | Depth | Single-sample depth prepass shared by SSAO/DOF, linearized depth debug view |
 | AO | Half-resolution 8-sample SSAO reconstructing position from depth and normals from derivatives, depth-aware bilateral blur, modulates ambient only |
-| Emissive | Real MRT (`COLOR_ATTACHMENT1`), driven purely by material emissive strength — never inferred from final luma — surviving explicit MSAA resolve |
+| Emissive | Real MRT (`COLOR_ATTACHMENT1`), driven by material emissive texture × strength — never inferred from final luma — surviving explicit MSAA resolve |
+| Output | Explicit MSAA resolve, scene-linear exposure/Reinhard tone map, selectable linear/sRGB output encoding, and configuration-scoped resource extents |
 | Post | Bloom (separable gaussian, additive composite), DOF (circle-of-confusion vs. focus distance/range), 3D-LUT color grade, fog (distance + optional height/density, never applied to emissive) |
 | PS1 | Vertex snapping in NDC before the perspective divide, affine UV warp (solved without `noperspective`, gated per material × per frame), color quantization to N bits with Bayer 4×4 ordered dithering |
 | VHS | Final recording stage with six independent weights — chroma bleed, tracking jitter, YIQ tape noise, head-switch tear, dropout streaks, frame ghosting via the graph's history/ping-pong mechanism |
@@ -139,7 +159,7 @@ dart run tools/renderer/check_sizes.dart
 dart run tools/renderer/shaders.dart --check
 ```
 
-`test_all.dart` currently runs 34 renderer fixtures. They run on the Dart VM
+`test_all.dart` currently runs 38 renderer fixtures. They run on the Dart VM
 against `FakeGpuDevice`; this is fast, deterministic contract evidence and is
 not a substitute for a real browser/driver run.
 
@@ -245,6 +265,39 @@ renderer.dispose();
 device.disposeListeners();
 ```
 
+### Material-v2 authoring
+
+Materials are renderer-neutral data. Optional maps can arrive asynchronously;
+until they do, `TextureStore` binds stable neutral pixels (white albedo,
+flat normal, identity ORM, black emissive), so missing art cannot make a mesh
+disappear. ORM is sampled in linear space as **R = occlusion, G = roughness,
+B = metalness**. UV scale/offset and alpha mode are applied consistently by
+the world, depth-prepass, and shadow-caster routes.
+
+```dart
+final material = renderer.resources.registerMaterial(
+  const MaterialDefinition(
+    key: 'gothic-oak',
+    tintR: 0.72,
+    tintG: 0.48,
+    tintB: 0.30,
+    normalStrength: 0.85,
+    roughness: 0.68,
+    metallic: 0.0,
+    occlusionStrength: 1.0,
+    uvScaleU: 2.0,
+    uvScaleV: 2.0,
+    emissiveStrength: 0.0,
+    alphaMode: AlphaMode.opaque,
+  ),
+);
+```
+
+The compatibility vertex layout derives a tangent frame from world-position
+and UV derivatives for normal maps. Authored tangents/lightmaps belong to the
+next `surface-v2` asset contract; this fallback is deliberately deterministic
+and keeps the current material API useful for high-detail house geometry.
+
 The application supplies the actual `MeshData` and `FrameInput`; Pixeldart does
 not own a clock, input system, camera controller, game state, save data, or
 scene semantics. `FrameInput` must contain a validated finite camera,
@@ -334,7 +387,7 @@ A few design decisions worth knowing before reading the code:
 
 ```sh
 dart analyze                                 # zero issues, including infos
-dart run tools/renderer/test_all.dart        # 34 pure test scripts
+dart run tools/renderer/test_all.dart        # 38 pure test scripts
 dart run tools/renderer/check_boundary.dart  # import/layering rules
 dart run tools/renderer/check_sizes.dart     # per-file authored-line budgets
 dart run tools/renderer/shaders.dart --check # generated shaders in sync
@@ -362,8 +415,8 @@ The current checkout has both the standalone feature-graph demo and a concrete
 `SceneRendererImpl` bootstrap facade. The facade owns the safe world → present
 graph, retained resources, frame legality, disposal, and fake-device context
 recovery. The remaining gaps are deliberately itemized in [TODO.md](TODO.md),
-including full profile-driven graph replacement, live target resizing, richer
-multi-light/shadow selection, browser-lab automation, and hardware acceptance.
+including full profile-driven graph replacement, live target resizing, authored
+surface-v2 tangents/lightmaps, browser-lab automation, and hardware acceptance.
 
 ## Provenance
 

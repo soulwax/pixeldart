@@ -1,5 +1,6 @@
 import '../api/frame.dart';
 import '../api/lights.dart';
+import '../api/settings.dart';
 import '../api/capabilities.dart';
 import '../core/feature_graph.dart';
 import '../core/graph_resource.dart';
@@ -10,7 +11,6 @@ import '../webgl/generated_shaders.dart';
 import '../math/vec.dart';
 import 'bloom.dart';
 import 'depth_prepass.dart';
-import 'depth_resources.dart';
 import 'dof.dart';
 import 'grade.dart';
 import 'present.dart';
@@ -19,17 +19,12 @@ import 'shadow.dart';
 import 'shadowed_world.dart';
 import 'ssao.dart';
 import 'vhs.dart';
-import 'vhs_resources.dart';
 import 'world.dart';
-import 'safe_graph_resources.dart';
-import 'shadow_resources.dart';
-import 'ssao_resources.dart';
-import 'bloom_resources.dart';
-import 'dof_resources.dart';
-import 'grade_resources.dart';
-import 'ps1_resources.dart';
+import 'pipeline_resource_layout.dart';
+import 'msaa_resolve.dart';
 
-export 'world.dart' show AlbedoResolver, MaterialResolver;
+export 'world.dart'
+    show AlbedoResolver, MaterialResolver, MaterialTextureResolver;
 
 /// The main graph: `depthPrepass -> ssaoOcclusion -> ssaoBlur -> shadowCaster
 /// -> shadowedWorld -> present`, folding §8.4's shadow map (rung 3) and
@@ -44,14 +39,21 @@ FeatureGraph buildShadowGraph(
   required MeshResolver resolveMesh,
   required MaterialResolver resolveMaterial,
   required AlbedoResolver resolveAlbedo,
+  MaterialTextureResolver? resolveNormal,
+  MaterialTextureResolver? resolveOrm,
+  MaterialTextureResolver? resolveEmissive,
   required GpuObject Function() resolveShadowMap,
   required SpotLight? Function() resolveCasterLight,
+  List<SpotLight> Function()? resolveDirectSpotLights,
   required GpuObject Function() resolveSceneDepth,
   required CameraView Function() resolveCamera,
   required GpuObject Function() resolveSsaoRaw,
   required GpuObject Function() resolveSsaoBlurred,
   required int sceneColorWidth,
   required int sceneColorHeight,
+  int shadowMapSize = 512,
+  int sampleCount = 1,
+  ColorEncoding outputEncoding = ColorEncoding.srgb,
   required GpuObject Function() resolveResolvedSceneColor,
   required GpuObject Function() resolveBloomBlurH,
   required GpuObject Function() resolveBloomBlurV,
@@ -75,6 +77,19 @@ FeatureGraph buildShadowGraph(
   final hasGrade = profile.installs(PipelineFeatures.grade);
   final hasPs1 = profile.installs(PipelineFeatures.ps1);
   final hasVhs = profile.installs(PipelineFeatures.vhs);
+  final layout = PipelineResourceLayout(
+    internalWidth: sceneColorWidth,
+    internalHeight: sceneColorHeight,
+    shadowMapSize: shadowMapSize,
+    sampleCount: sampleCount,
+  );
+  final msaaResolve = sampleCount > 1
+      ? MsaaResolveFeature(
+          device: device,
+          sourceResource: layout.sceneColor,
+          destinationResource: layout.sceneColorResolved,
+        )
+      : null;
   final depthPrepass = DepthPrepassFeature(
     programLibrary: programLibrary,
     vertexSource: depthPrepassVertSrc,
@@ -82,6 +97,7 @@ FeatureGraph buildShadowGraph(
     resolveMesh: resolveMesh,
     resolveMaterial: resolveMaterial,
     resolveAlbedo: resolveAlbedo,
+    sceneDepthResource: layout.sceneDepth,
   );
   final ssaoOcclusion = SsaoOcclusionFeature(
     programLibrary: programLibrary,
@@ -90,6 +106,7 @@ FeatureGraph buildShadowGraph(
     device: device,
     resolveSceneDepth: resolveSceneDepth,
     resolveCamera: resolveCamera,
+    ssaoRawResource: layout.ssaoRaw,
   );
   final ssaoBlur = SsaoBlurFeature(
     programLibrary: programLibrary,
@@ -99,6 +116,10 @@ FeatureGraph buildShadowGraph(
     resolveSsaoRaw: resolveSsaoRaw,
     resolveSceneDepth: resolveSceneDepth,
     resolveCamera: resolveCamera,
+    ssaoWidth: layout.halfWidth,
+    ssaoHeight: layout.halfHeight,
+    ssaoRawResource: layout.ssaoRaw,
+    ssaoBlurredResource: layout.ssaoBlurred,
   );
   ShadowLightView? lastLightView;
   final fallbackLightView = ShadowLightView.fromSpotLight(
@@ -121,6 +142,7 @@ FeatureGraph buildShadowGraph(
     resolveAlbedo: resolveAlbedo,
     resolveCasterLight: resolveCasterLight,
     onLightViewComputed: (view) => lastLightView = view,
+    shadowMapResource: layout.shadowMap,
   );
   final shadowedWorld = ShadowedWorldFeature(
     programLibrary: programLibrary,
@@ -129,13 +151,22 @@ FeatureGraph buildShadowGraph(
     resolveMesh: resolveMesh,
     resolveMaterial: resolveMaterial,
     resolveAlbedo: resolveAlbedo,
+    resolveNormal: resolveNormal,
+    resolveOrm: resolveOrm,
+    resolveEmissive: resolveEmissive,
     resolveShadowMap: resolveShadowMap,
     resolveLightView: () => lastLightView ?? fallbackLightView,
     resolveCasterLight: resolveCasterLight,
+    resolveDirectSpotLights: resolveDirectSpotLights,
     resolveSsaoBlurred: resolveSsaoBlurred,
     useSsao: hasSsao,
     sceneColorWidth: sceneColorWidth,
     sceneColorHeight: sceneColorHeight,
+    shadowMapWidth: shadowMapSize,
+    shadowMapHeight: shadowMapSize,
+    shadowMapResource: layout.shadowMap,
+    ssaoResource: layout.ssaoBlurred,
+    sceneColorResource: layout.sceneColor,
   );
   // §8.7's bloom pipeline — runs after the MSAA resolve (bootstrap-level,
   // same reasoning as the resolve/present split every prior packet has
@@ -143,7 +174,9 @@ FeatureGraph buildShadowGraph(
   // the multisampled one, since bindGlowTexture refuses a multisampled
   // target exactly like bindTexture already does for color.
   final postFeatures = <RenderFeature>[];
-  var postResource = SafeGraphResources.sceneColor;
+  var postResource = sampleCount > 1
+      ? layout.sceneColorResolved
+      : layout.sceneColor;
   if (hasBloom) {
     postFeatures.addAll([
       BloomBlurFeature.horizontal(
@@ -152,6 +185,10 @@ FeatureGraph buildShadowGraph(
         fragmentSource: bloomBlurFragSrc,
         device: device,
         resolveSource: resolveResolvedSceneColor,
+        texelWidth: layout.halfWidth,
+        texelHeight: layout.halfHeight,
+        sourceResource: postResource,
+        destResource: layout.bloomBlurH,
       ),
       BloomBlurFeature.vertical(
         programLibrary: programLibrary,
@@ -159,6 +196,10 @@ FeatureGraph buildShadowGraph(
         fragmentSource: bloomBlurFragSrc,
         device: device,
         resolveSource: resolveBloomBlurH,
+        texelWidth: layout.halfWidth,
+        texelHeight: layout.halfHeight,
+        sourceResource: layout.bloomBlurH,
+        destResource: layout.bloomBlurV,
       ),
       BloomCompositeFeature(
         programLibrary: programLibrary,
@@ -166,9 +207,12 @@ FeatureGraph buildShadowGraph(
         fragmentSource: bloomCompositeFragSrc,
         device: device,
         resolveBloom: resolveBloomBlurV,
+        bloomResource: layout.bloomBlurV,
+        sceneColorResource: postResource,
+        sceneColorPostBloomResource: layout.sceneColorPostBloom,
       ),
     ]);
-    postResource = BloomResources.sceneColorPostBloom;
+    postResource = layout.sceneColorPostBloom;
   }
   // RV-09's DOF pipeline — runs after bloom's composite, blurring bloom's
   // own physical output (the same `sceneColorTarget` bloom composited onto
@@ -187,6 +231,9 @@ FeatureGraph buildShadowGraph(
         device: device,
         resolveSource: resolveResolvedSceneColor,
         sourceResource: postResource,
+        texelWidth: layout.halfWidth,
+        texelHeight: layout.halfHeight,
+        destResource: layout.dofBlurH,
       ),
       DofBlurFeature.vertical(
         programLibrary: programLibrary,
@@ -194,6 +241,10 @@ FeatureGraph buildShadowGraph(
         fragmentSource: bloomBlurFragSrc,
         device: device,
         resolveSource: resolveDofBlurH,
+        texelWidth: layout.halfWidth,
+        texelHeight: layout.halfHeight,
+        sourceResource: layout.dofBlurH,
+        destResource: layout.dofBlurV,
       ),
       DofCompositeFeature(
         programLibrary: programLibrary,
@@ -205,9 +256,12 @@ FeatureGraph buildShadowGraph(
         resolveSceneDepth: resolveSceneDepth,
         resolveCamera: resolveCamera,
         sourceResource: postResource,
+        sceneDepthResource: layout.sceneDepth,
+        dofBlurredResource: layout.dofBlurV,
+        dofOutputResource: layout.dofOutput,
       ),
     ]);
-    postResource = DofResources.dofOutput;
+    postResource = layout.dofOutput;
   }
   // RV-09 rung 2's LUT grade — §6.2 places this immediately after DOF and
   // before PS1 quantize+dither/VHS (neither exists yet). Reads DOF's own
@@ -221,9 +275,10 @@ FeatureGraph buildShadowGraph(
         device: device,
         resolveLut: resolveGradeLut,
         inputResource: postResource,
+        outputResource: layout.gradeOutput,
       ),
     );
-    postResource = GradeResources.gradeOutput;
+    postResource = layout.gradeOutput;
   }
   // RV-09 rung 3's PS1 quantize+dither — §6.2 places this immediately after
   // LUT grade and before VHS (not built yet).
@@ -235,9 +290,10 @@ FeatureGraph buildShadowGraph(
         fragmentSource: ps1QuantizeFragSrc,
         device: device,
         inputResource: postResource,
+        outputResource: layout.ps1Output,
       ),
     );
-    postResource = Ps1Resources.ps1Output;
+    postResource = layout.ps1Output;
   }
   // RV-09 rung 4's VHS recording-stage treatment — §6.2's final pre-present
   // stage. Reads ps1Quantize's own output and writes/history-reads its own
@@ -253,9 +309,10 @@ FeatureGraph buildShadowGraph(
         resolveHistory: resolveVhsHistory,
         resolveTime: resolveTime,
         inputResource: postResource,
+        outputResource: layout.vhsOutput,
       ),
     );
-    postResource = VhsResources.vhsOutput;
+    postResource = layout.vhsOutput;
   }
   final present = PresentFeature(
     programLibrary: programLibrary,
@@ -263,6 +320,7 @@ FeatureGraph buildShadowGraph(
     fragmentSource: presentFragSrc,
     device: device,
     sceneColorResource: postResource,
+    outputEncoding: outputEncoding,
   );
   return FeatureGraph([
     depthPrepass,
@@ -270,6 +328,7 @@ FeatureGraph buildShadowGraph(
     if (hasSsao) ssaoBlur,
     shadow,
     shadowedWorld,
+    if (msaaResolve != null) msaaResolve,
     ...postFeatures,
     present,
   ]);
@@ -287,42 +346,48 @@ final class PipelineResourcePlan {
     required this.hasHistory,
   });
 
-  factory PipelineResourcePlan.forProfile(QualityProfile profile) {
+  factory PipelineResourcePlan.forProfile(
+    QualityProfile profile, {
+    int internalWidth = 384,
+    int internalHeight = 216,
+    int shadowMapSize = 512,
+    int sampleCount = 1,
+  }) {
+    final layout = PipelineResourceLayout(
+      internalWidth: internalWidth,
+      internalHeight: internalHeight,
+      shadowMapSize: shadowMapSize,
+      sampleCount: sampleCount,
+    );
     final resources = <ResourceRef>{
-      SafeGraphResources.sceneColor,
-      SafeGraphResources.presentTarget,
+      layout.sceneColor,
+      layout.presentTarget,
+      if (sampleCount > 1) layout.sceneColorResolved,
     };
     if (profile.installs(PipelineFeatures.shadows)) {
-      resources.addAll([
-        ShadowResources.shadowMap,
-        DepthPrepassResources.sceneDepth,
-      ]);
+      resources.addAll([layout.shadowMap, layout.sceneDepth]);
     }
     if (profile.installs(PipelineFeatures.ssao)) {
-      resources.addAll([SsaoResources.ssaoRaw, SsaoResources.ssaoBlurred]);
+      resources.addAll([layout.ssaoRaw, layout.ssaoBlurred]);
     }
     if (profile.installs(PipelineFeatures.bloom)) {
       resources.addAll([
-        BloomResources.bloomBlurH,
-        BloomResources.bloomBlurV,
-        BloomResources.sceneColorPostBloom,
+        layout.bloomBlurH,
+        layout.bloomBlurV,
+        layout.sceneColorPostBloom,
       ]);
     }
     if (profile.installs(PipelineFeatures.dof)) {
-      resources.addAll([
-        DofResources.dofBlurH,
-        DofResources.dofBlurV,
-        DofResources.dofOutput,
-      ]);
+      resources.addAll([layout.dofBlurH, layout.dofBlurV, layout.dofOutput]);
     }
     if (profile.installs(PipelineFeatures.grade)) {
-      resources.add(GradeResources.gradeOutput);
+      resources.add(layout.gradeOutput);
     }
     if (profile.installs(PipelineFeatures.ps1)) {
-      resources.add(Ps1Resources.ps1Output);
+      resources.add(layout.ps1Output);
     }
     if (profile.installs(PipelineFeatures.vhs)) {
-      resources.add(VhsResources.vhsOutput);
+      resources.add(layout.vhsOutput);
     }
     return PipelineResourcePlan(
       resources: Set.unmodifiable(resources),

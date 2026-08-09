@@ -9,6 +9,7 @@ final class PassDeclaration {
   final List<ResourceUse> uses;
   final Set<String> requiredCapabilities;
   final bool Function() enabledPredicate;
+  final bool isResolve;
 
   const PassDeclaration({
     required this.id,
@@ -16,6 +17,7 @@ final class PassDeclaration {
     required this.uses,
     this.requiredCapabilities = const {},
     this.enabledPredicate = _alwaysEnabled,
+    this.isResolve = false,
   });
 
   static bool _alwaysEnabled() => true;

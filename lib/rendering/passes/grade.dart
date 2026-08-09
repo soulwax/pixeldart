@@ -51,6 +51,7 @@ final class GradeFeature implements RenderFeature {
   final GpuObject Function() resolveLut;
   final double lutSize;
   final ResourceRef inputResource;
+  final ResourceRef outputResource;
 
   GradeFeature({
     required this.programLibrary,
@@ -60,6 +61,7 @@ final class GradeFeature implements RenderFeature {
     required this.resolveLut,
     this.lutSize = 16,
     this.inputResource = DofResources.dofOutput,
+    this.outputResource = GradeResources.gradeOutput,
   });
 
   @override
@@ -73,7 +75,7 @@ final class GradeFeature implements RenderFeature {
         stage: GraphStage.afterResolve,
         uses: [
           ResourceUse(inputResource, ResourceAccess.read),
-          const ResourceUse(GradeResources.gradeOutput, ResourceAccess.write),
+          ResourceUse(outputResource, ResourceAccess.write),
         ],
       ),
     );
@@ -95,10 +97,7 @@ final class GradeFeature implements RenderFeature {
           stage: GraphStage.afterResolve,
           uses: [
             ResourceUse(inputResource, ResourceAccess.read),
-            const ResourceUse(
-              GradeResources.gradeOutput,
-              ResourceAccess.write,
-            ),
+            ResourceUse(outputResource, ResourceAccess.write),
           ],
           depthTest: false,
           depthWrite: false,
@@ -109,6 +108,7 @@ final class GradeFeature implements RenderFeature {
         resolveLut: resolveLut,
         lutSize: lutSize,
         inputResource: inputResource,
+        outputResource: outputResource,
       ),
     ];
   }
@@ -125,6 +125,7 @@ final class _GradePass implements RenderPass {
   final GpuObject Function() resolveLut;
   final double lutSize;
   final ResourceRef inputResource;
+  final ResourceRef outputResource;
 
   const _GradePass({
     required this.descriptor,
@@ -133,13 +134,13 @@ final class _GradePass implements RenderPass {
     required this.resolveLut,
     required this.lutSize,
     required this.inputResource,
+    required this.outputResource,
   });
 
   @override
   void execute(RenderPassContext context) {
     final sceneView = context.viewOf(inputResource.name) as BoundResourceView;
-    final outputView =
-        context.viewOf(GradeResources.gradeOutput.name) as BoundResourceView;
+    final outputView = context.viewOf(outputResource.name) as BoundResourceView;
     final encoder = context.commandEncoder as DrawCommandEncoder;
     final post = context.frameScene.post as PostProcessState;
 

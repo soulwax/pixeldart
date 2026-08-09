@@ -62,6 +62,7 @@ final class SsaoOcclusionFeature implements RenderFeature {
   final GpuObject Function() resolveSceneDepth;
   final CameraView Function() resolveCamera;
   final double radius;
+  final ResourceRef ssaoRawResource;
 
   SsaoOcclusionFeature({
     required this.programLibrary,
@@ -71,6 +72,7 @@ final class SsaoOcclusionFeature implements RenderFeature {
     required this.resolveSceneDepth,
     required this.resolveCamera,
     this.radius = 0.4,
+    this.ssaoRawResource = SsaoResources.ssaoRaw,
   });
 
   @override
@@ -82,9 +84,7 @@ final class SsaoOcclusionFeature implements RenderFeature {
       PassDeclaration(
         id: 'ssaoOcclusion',
         stage: GraphStage.afterDepth,
-        uses: [
-          const ResourceUse(SsaoResources.ssaoRaw, ResourceAccess.write),
-        ],
+        uses: [ResourceUse(ssaoRawResource, ResourceAccess.write)],
       ),
     );
   }
@@ -103,9 +103,7 @@ final class SsaoOcclusionFeature implements RenderFeature {
         descriptor: PassDescriptor(
           id: 'ssaoOcclusion',
           stage: GraphStage.afterDepth,
-          uses: [
-            const ResourceUse(SsaoResources.ssaoRaw, ResourceAccess.write),
-          ],
+          uses: [ResourceUse(ssaoRawResource, ResourceAccess.write)],
           depthTest: false,
           depthWrite: false,
           cullEnable: false,
@@ -165,8 +163,14 @@ final class _SsaoOcclusionPass implements RenderPass {
     // scale (f) — the same two values Mat4.perspective wrote, read back
     // here rather than re-derived from FOV so this can never disagree with
     // the camera's actual projection matrix (§5.2's "never guesses a FOV").
-    encoder.setUniform('uProjScaleX', UniformValue.float1(camera.projection.m[0]));
-    encoder.setUniform('uProjScaleY', UniformValue.float1(camera.projection.m[5]));
+    encoder.setUniform(
+      'uProjScaleX',
+      UniformValue.float1(camera.projection.m[0]),
+    );
+    encoder.setUniform(
+      'uProjScaleY',
+      UniformValue.float1(camera.projection.m[5]),
+    );
     encoder.setUniform('uRadius', UniformValue.float1(radius));
     encoder.setUniform('uStrength', UniformValue.float1(strength));
     encoder.bindVertexArray(emptyVao);
@@ -209,6 +213,10 @@ final class SsaoBlurFeature implements RenderFeature {
   final GpuObject Function() resolveSsaoRaw;
   final GpuObject Function() resolveSceneDepth;
   final CameraView Function() resolveCamera;
+  final int ssaoWidth;
+  final int ssaoHeight;
+  final ResourceRef ssaoRawResource;
+  final ResourceRef ssaoBlurredResource;
 
   SsaoBlurFeature({
     required this.programLibrary,
@@ -218,6 +226,10 @@ final class SsaoBlurFeature implements RenderFeature {
     required this.resolveSsaoRaw,
     required this.resolveSceneDepth,
     required this.resolveCamera,
+    this.ssaoWidth = 192,
+    this.ssaoHeight = 108,
+    this.ssaoRawResource = SsaoResources.ssaoRaw,
+    this.ssaoBlurredResource = SsaoResources.ssaoBlurred,
   });
 
   @override
@@ -230,8 +242,8 @@ final class SsaoBlurFeature implements RenderFeature {
         id: 'ssaoBlur',
         stage: GraphStage.afterDepth,
         uses: [
-          const ResourceUse(SsaoResources.ssaoRaw, ResourceAccess.read),
-          const ResourceUse(SsaoResources.ssaoBlurred, ResourceAccess.write),
+          ResourceUse(ssaoRawResource, ResourceAccess.read),
+          ResourceUse(ssaoBlurredResource, ResourceAccess.write),
         ],
       ),
     );
@@ -252,11 +264,8 @@ final class SsaoBlurFeature implements RenderFeature {
           id: 'ssaoBlur',
           stage: GraphStage.afterDepth,
           uses: [
-            const ResourceUse(SsaoResources.ssaoRaw, ResourceAccess.read),
-            const ResourceUse(
-              SsaoResources.ssaoBlurred,
-              ResourceAccess.write,
-            ),
+            ResourceUse(ssaoRawResource, ResourceAccess.read),
+            ResourceUse(ssaoBlurredResource, ResourceAccess.write),
           ],
           depthTest: false,
           depthWrite: false,
@@ -267,6 +276,8 @@ final class SsaoBlurFeature implements RenderFeature {
         resolveSsaoRaw: resolveSsaoRaw,
         resolveSceneDepth: resolveSceneDepth,
         resolveCamera: resolveCamera,
+        ssaoWidth: ssaoWidth,
+        ssaoHeight: ssaoHeight,
       ),
     ];
   }
@@ -283,6 +294,8 @@ final class _SsaoBlurPass implements RenderPass {
   final GpuObject Function() resolveSsaoRaw;
   final GpuObject Function() resolveSceneDepth;
   final CameraView Function() resolveCamera;
+  final int ssaoWidth;
+  final int ssaoHeight;
 
   const _SsaoBlurPass({
     required this.descriptor,
@@ -291,6 +304,8 @@ final class _SsaoBlurPass implements RenderPass {
     required this.resolveSsaoRaw,
     required this.resolveSceneDepth,
     required this.resolveCamera,
+    required this.ssaoWidth,
+    required this.ssaoHeight,
   });
 
   @override
@@ -316,10 +331,7 @@ final class _SsaoBlurPass implements RenderPass {
     encoder.setUniform(
       'uTexelSize',
       UniformValue.float2(
-        Float32List.fromList([
-          1.0 / SsaoResources.ssaoRaw.width,
-          1.0 / SsaoResources.ssaoRaw.height,
-        ]),
+        Float32List.fromList([1.0 / ssaoWidth, 1.0 / ssaoHeight]),
       ),
     );
     encoder.setUniform('uNear', UniformValue.float1(camera.near));

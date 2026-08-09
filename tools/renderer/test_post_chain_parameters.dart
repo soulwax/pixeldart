@@ -104,6 +104,9 @@ final class _RecordingPassContext implements RenderPassContext {
   }
 
   @override
+  ResourceView viewOfResource(ResourceRef resource) => viewOf(resource.name);
+
+  @override
   DrawCommandEncoder get commandEncoder => encoder;
 }
 
@@ -182,16 +185,11 @@ Iterable<String> _readResourceNames(RenderFeature feature, String passId) {
 bool _passReads(RenderPass pass, String resourceName) {
   return pass.descriptor.uses.any(
     (use) =>
-        use.access != ResourceAccess.write &&
-        use.resource.name == resourceName,
+        use.access != ResourceAccess.write && use.resource.name == resourceName,
   );
 }
 
-void _expectReads(
-  Iterable<String> reads,
-  String expected,
-  String what,
-) {
+void _expectReads(Iterable<String> reads, String expected, String what) {
   if (!reads.contains(expected)) {
     throw StateError('$what must read $expected, got $reads');
   }
@@ -288,8 +286,9 @@ void _dofSourceResourceIsConfigurable() {
     resolveSceneDepth: () => sceneDepthTarget,
     resolveCamera: () => _fakeCamera,
   );
-  final defaultCompositePass =
-      defaultComposite.createPasses(_AlwaysAvailableResources()).single;
+  final defaultCompositePass = defaultComposite
+      .createPasses(_AlwaysAvailableResources())
+      .single;
   if (!_passReads(
     defaultCompositePass,
     BloomResources.sceneColorPostBloom.name,
@@ -308,8 +307,9 @@ void _dofSourceResourceIsConfigurable() {
     resolveCamera: () => _fakeCamera,
     sourceResource: _customChainInput,
   );
-  final customCompositePass =
-      customComposite.createPasses(_AlwaysAvailableResources()).single;
+  final customCompositePass = customComposite
+      .createPasses(_AlwaysAvailableResources())
+      .single;
   if (!_passReads(customCompositePass, _customChainInput.name)) {
     throw StateError('custom dofComposite must read customChainInput');
   }
@@ -329,8 +329,9 @@ void _gradeInputResourceIsConfigurable() {
     device: device,
     resolveLut: () => lutTexture,
   );
-  final defaultPass =
-      defaultFeature.createPasses(_AlwaysAvailableResources()).single;
+  final defaultPass = defaultFeature
+      .createPasses(_AlwaysAvailableResources())
+      .single;
   if (!_passReads(defaultPass, DofResources.dofOutput.name)) {
     throw StateError('default grade must read dofOutput');
   }
@@ -343,8 +344,9 @@ void _gradeInputResourceIsConfigurable() {
     resolveLut: () => lutTexture,
     inputResource: _customChainInput,
   );
-  final customPass =
-      customFeature.createPasses(_AlwaysAvailableResources()).single;
+  final customPass = customFeature
+      .createPasses(_AlwaysAvailableResources())
+      .single;
   if (!_passReads(customPass, _customChainInput.name)) {
     throw StateError('custom grade must read customChainInput');
   }
@@ -367,8 +369,9 @@ void _ps1InputResourceIsConfigurable() {
     fragmentSource: ps1QuantizeFragSrc,
     device: device,
   );
-  final defaultPass =
-      defaultFeature.createPasses(_AlwaysAvailableResources()).single;
+  final defaultPass = defaultFeature
+      .createPasses(_AlwaysAvailableResources())
+      .single;
   if (!_passReads(defaultPass, GradeResources.gradeOutput.name)) {
     throw StateError('default ps1Quantize must read gradeOutput');
   }
@@ -380,8 +383,9 @@ void _ps1InputResourceIsConfigurable() {
     device: device,
     inputResource: _customChainInput,
   );
-  final customPass =
-      customFeature.createPasses(_AlwaysAvailableResources()).single;
+  final customPass = customFeature
+      .createPasses(_AlwaysAvailableResources())
+      .single;
   if (!_passReads(customPass, _customChainInput.name)) {
     throw StateError('custom ps1Quantize must read customChainInput');
   }
@@ -409,8 +413,9 @@ void _vhsInputResourceIsConfigurable() {
     resolveHistory: () => ghostTarget,
     resolveTime: () => 0.0,
   );
-  final defaultPass =
-      defaultFeature.createPasses(_AlwaysAvailableResources()).single;
+  final defaultPass = defaultFeature
+      .createPasses(_AlwaysAvailableResources())
+      .single;
   if (!_passReads(defaultPass, Ps1Resources.ps1Output.name)) {
     throw StateError('default vhs must read ps1Output');
   }
@@ -424,8 +429,9 @@ void _vhsInputResourceIsConfigurable() {
     resolveTime: () => 0.0,
     inputResource: _customChainInput,
   );
-  final customPass =
-      customFeature.createPasses(_AlwaysAvailableResources()).single;
+  final customPass = customFeature
+      .createPasses(_AlwaysAvailableResources())
+      .single;
   if (!_passReads(customPass, _customChainInput.name)) {
     throw StateError('custom vhs must read customChainInput');
   }

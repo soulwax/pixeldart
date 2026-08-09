@@ -333,6 +333,9 @@ final class _ScopedContext implements RenderPassContext {
   }
 
   @override
+  ResourceView viewOfResource(ResourceRef resource) => viewOf(resource.name);
+
+  @override
   Object get commandEncoder => Object();
 
   @override

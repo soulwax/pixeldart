@@ -57,6 +57,7 @@ final class VhsFeature implements RenderFeature {
   final GpuObject Function() resolveHistory;
   final double Function() resolveTime;
   final ResourceRef inputResource;
+  final ResourceRef outputResource;
 
   VhsFeature({
     required this.programLibrary,
@@ -66,6 +67,7 @@ final class VhsFeature implements RenderFeature {
     required this.resolveHistory,
     required this.resolveTime,
     this.inputResource = Ps1Resources.ps1Output,
+    this.outputResource = VhsResources.vhsOutput,
   });
 
   @override
@@ -73,18 +75,15 @@ final class VhsFeature implements RenderFeature {
 
   @override
   void declare(RenderGraphBuilder graph, RenderFeatureContext context) {
-    graph.declareHistoryResource(VhsResources.vhsOutput.name);
+    graph.declareHistoryResource(outputResource.name);
     graph.addPass(
       PassDeclaration(
         id: 'vhs',
         stage: GraphStage.afterResolve,
         uses: [
           ResourceUse(inputResource, ResourceAccess.read),
-          const ResourceUse(
-            VhsResources.vhsOutput,
-            ResourceAccess.historyRead,
-          ),
-          const ResourceUse(VhsResources.vhsOutput, ResourceAccess.write),
+          ResourceUse(outputResource, ResourceAccess.historyRead),
+          ResourceUse(outputResource, ResourceAccess.write),
         ],
       ),
     );
@@ -106,11 +105,8 @@ final class VhsFeature implements RenderFeature {
           stage: GraphStage.afterResolve,
           uses: [
             ResourceUse(inputResource, ResourceAccess.read),
-            const ResourceUse(
-              VhsResources.vhsOutput,
-              ResourceAccess.historyRead,
-            ),
-            const ResourceUse(VhsResources.vhsOutput, ResourceAccess.write),
+            ResourceUse(outputResource, ResourceAccess.historyRead),
+            ResourceUse(outputResource, ResourceAccess.write),
           ],
           depthTest: false,
           depthWrite: false,
@@ -121,6 +117,7 @@ final class VhsFeature implements RenderFeature {
         resolveHistory: resolveHistory,
         resolveTime: resolveTime,
         inputResource: inputResource,
+        outputResource: outputResource,
       ),
     ];
   }
@@ -137,6 +134,7 @@ final class _VhsPass implements RenderPass {
   final GpuObject Function() resolveHistory;
   final double Function() resolveTime;
   final ResourceRef inputResource;
+  final ResourceRef outputResource;
 
   const _VhsPass({
     required this.descriptor,
@@ -145,13 +143,13 @@ final class _VhsPass implements RenderPass {
     required this.resolveHistory,
     required this.resolveTime,
     required this.inputResource,
+    required this.outputResource,
   });
 
   @override
   void execute(RenderPassContext context) {
     final sceneView = context.viewOf(inputResource.name) as BoundResourceView;
-    final outputView =
-        context.viewOf(VhsResources.vhsOutput.name) as BoundResourceView;
+    final outputView = context.viewOf(outputResource.name) as BoundResourceView;
     final encoder = context.commandEncoder as DrawCommandEncoder;
     final post = context.frameScene.post as PostProcessState;
 

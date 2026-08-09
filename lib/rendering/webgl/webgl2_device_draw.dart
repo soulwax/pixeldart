@@ -83,28 +83,44 @@ extension WebGl2DeviceDraw on WebGl2Device {
         );
       }
       gl.blitFramebuffer(
-        0, 0, src.width, src.height,
-        0, 0, dst.width, dst.height,
+        0,
+        0,
+        src.width,
+        src.height,
+        0,
+        0,
+        dst.width,
+        dst.height,
         _G.COLOR_BUFFER_BIT,
         _G.LINEAR,
       );
     }
     if (srcHasGlow && dstHasGlow) {
       gl.readBuffer(_G.COLOR_ATTACHMENT1);
-      gl.drawBuffers(
-        <JSNumber>[_G.NONE.toJS, _G.COLOR_ATTACHMENT1.toJS].toJS,
-      );
+      gl.drawBuffers(<JSNumber>[_G.NONE.toJS, _G.COLOR_ATTACHMENT1.toJS].toJS);
       gl.blitFramebuffer(
-        0, 0, src.width, src.height,
-        0, 0, dst.width, dst.height,
+        0,
+        0,
+        src.width,
+        src.height,
+        0,
+        0,
+        dst.width,
+        dst.height,
         _G.COLOR_BUFFER_BIT,
         _G.LINEAR,
       );
     }
     if (src.depthRb != null || src.depthTex != null) {
       gl.blitFramebuffer(
-        0, 0, src.width, src.height,
-        0, 0, dst.width, dst.height,
+        0,
+        0,
+        src.width,
+        src.height,
+        0,
+        0,
+        dst.width,
+        dst.height,
         _G.DEPTH_BUFFER_BIT,
         _G.NEAREST,
       );
@@ -286,6 +302,9 @@ extension WebGl2DeviceDraw on WebGl2Device {
       case UniformType.float3:
         final v = value.value as Float32List;
         gl.uniform3f(location, v[0], v[1], v[2]);
+      case UniformType.float4:
+        final v = value.value as Float32List;
+        gl.uniform4f(location, v[0], v[1], v[2], v[3]);
       case UniformType.mat4:
         gl.uniformMatrix4fv(location, false, (value.value as Float32List).toJS);
       case UniformType.sampler:

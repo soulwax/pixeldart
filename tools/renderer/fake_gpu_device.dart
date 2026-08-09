@@ -31,9 +31,14 @@ final class FakeGpuDevice implements GpuDevice {
   int programCompileCalls = 0;
   int programDeleteCalls = 0;
 
+  GpuTargetDescriptor targetDescriptor(GpuObject target) =>
+      _targetDescriptors[(target as _FakeGpuObject).id]!;
+
   final Set<int> _liveObjects = {};
   final List<String> drawLog = [];
   final List<({String name, UniformValue value})> uniformLog = [];
+  final List<({ClearMask mask, double r, double g, double b, double a})>
+  clearLog = [];
 
   @override
   GpuDeviceStatus get status => _status;
@@ -329,6 +334,7 @@ final class FakeGpuDevice implements GpuDevice {
     double a = 1,
   }) {
     _requireReady();
+    clearLog.add((mask: mask, r: r, g: g, b: b, a: a));
     drawLog.add('clear(${mask.name})');
   }
 
@@ -363,6 +369,12 @@ final class FakeGpuDevice implements GpuDevice {
     for (final entry in uniformLog)
       if (entry.name == name && entry.value.type == UniformType.float1)
         entry.value.value as double,
+  ];
+
+  List<List<double>> float2Sequence(String name) => [
+    for (final entry in uniformLog)
+      if (entry.name == name && entry.value.type == UniformType.float2)
+        (entry.value.value as Float32List).toList(),
   ];
 
   @override

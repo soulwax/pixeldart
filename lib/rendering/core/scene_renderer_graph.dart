@@ -94,10 +94,25 @@ extension on SceneRendererImpl {
             resolveMesh: resolveMesh,
             resolveMaterial: _resources!.materials.resolveForPass,
             resolveAlbedo: _resources!.textures.resolveAlbedo,
+            resolveNormal: _resources!.textures.resolveNormal,
+            resolveOrm: _resources!.textures.resolveOrm,
+            resolveEmissive: _resources!.textures.resolveEmissive,
             resolveShadowMap: () => resolveResource('shadowMap'),
             resolveCasterLight: () {
               final lights = _activeFrame?.environment.spotLights;
               return lights == null || lights.isEmpty ? null : lights.first;
+            },
+            resolveDirectSpotLights: () {
+              final frame = _activeFrame;
+              if (frame == null) return const [];
+              final spots = frame.environment.spotLights;
+              final caster = spots.isEmpty ? null : spots.first;
+              return selectSpotLights(
+                lights: spots,
+                referencePosition: frame.camera.eye,
+                shadowCaster: caster,
+                limit: 3,
+              );
             },
             resolveSceneDepth: () => resolveResource('sceneDepth'),
             resolveCamera: () => _activeFrame!.camera,
@@ -107,7 +122,12 @@ extension on SceneRendererImpl {
                 resolveResource('ssaoBlurred', fallback: 'sceneColor'),
             sceneColorWidth: configuration.internalWidth,
             sceneColorHeight: configuration.internalHeight,
-            resolveResolvedSceneColor: () => resolveResource('sceneColor'),
+            shadowMapSize: configuration.shadowMapSize,
+            sampleCount: configuration.sampleCount,
+            outputEncoding: configuration.outputEncoding,
+            resolveResolvedSceneColor: () => resolveResource(
+              configuration.sampleCount > 1 ? 'sceneColor#1' : 'sceneColor',
+            ),
             resolveBloomBlurH: () =>
                 resolveResource('bloomBlurH', fallback: 'sceneColor'),
             resolveBloomBlurV: () =>
@@ -122,7 +142,15 @@ extension on SceneRendererImpl {
             resolveTime: () => _activeFrame!.timeSeconds,
             profile: configuration.profile,
           )
-        : buildSafeGraph(programs, device: device, resolveMesh: resolveMesh);
+        : buildSafeGraph(
+            programs,
+            device: device,
+            resolveMesh: resolveMesh,
+            internalWidth: configuration.internalWidth,
+            internalHeight: configuration.internalHeight,
+            sampleCount: configuration.sampleCount,
+            outputEncoding: configuration.outputEncoding,
+          );
     final result = featureGraph.build(
       featureContext: RenderFeatureContext(
         capabilities: _capabilities!,
@@ -192,11 +220,17 @@ extension on SceneRendererImpl {
     for (final pass in graph.passes) {
       final views = <String, BoundResourceView>{};
       for (final use in pass.descriptor.uses) {
-        final name = use.resource.name;
-        views[name] = BoundResourceView(
+        final resource = use.resource;
+        final view = BoundResourceView(
           use.resource,
-          resources.current.objectFor(name),
+          resources.current.objectFor(
+            resource.version == 0
+                ? resource.name
+                : '${resource.name}#${resource.version}',
+          ),
         );
+        views['${resource.name}#${resource.version}'] = view;
+        views.putIfAbsent(resource.name, () => view);
       }
       pass.execute(
         BoundPassContext(views: views, encoder: encoder, frameScene: scene),

@@ -1,6 +1,7 @@
 import 'package:pixeldart/rendering/core/program_library.dart';
 import 'package:pixeldart/rendering/core/render_feature.dart';
 import 'package:pixeldart/rendering/passes/shadow_graph.dart';
+import 'package:pixeldart/rendering/passes/pipeline_resource_layout.dart';
 import 'package:pixeldart/rendering/passes/world.dart';
 import 'package:pixeldart/rendering/rendering.dart';
 import 'package:pixeldart/rendering/webgl/device_api.dart';
@@ -20,7 +21,112 @@ import 'fake_gpu_device.dart';
 /// time.
 void main() {
   _graphValidatesWithAllFifteenPasses();
+  _configuredGraphCarriesEveryResourceExtent();
   print('Renderer shadow-graph fixtures passed.');
+}
+
+void _configuredGraphCarriesEveryResourceExtent() {
+  final device = FakeGpuDevice();
+  final library = ProgramLibrary(device);
+  final placeholderTarget = device.createTarget(
+    const GpuTargetDescriptor(width: 1, height: 1),
+  );
+  final placeholderTexture = device.createTexture(
+    const GpuTextureDescriptor(width: 1, height: 1),
+  );
+  final graph = buildShadowGraph(
+    library,
+    device: device,
+    resolveMesh: (mesh) => ResolvedMesh(
+      vao: device.createVertexArray(),
+      isIndexed: false,
+      drawCount: 3,
+    ),
+    resolveMaterial: (handle) => const MaterialDefinition(key: 'fake'),
+    resolveAlbedo: (handle) => placeholderTexture,
+    resolveShadowMap: () => placeholderTarget,
+    resolveCasterLight: () => null,
+    resolveSceneDepth: () => placeholderTarget,
+    resolveCamera: () => _fakeCamera,
+    resolveSsaoRaw: () => placeholderTarget,
+    resolveSsaoBlurred: () => placeholderTarget,
+    sceneColorWidth: 641,
+    sceneColorHeight: 361,
+    shadowMapSize: 768,
+    sampleCount: 4,
+    resolveResolvedSceneColor: () => placeholderTarget,
+    resolveBloomBlurH: () => placeholderTarget,
+    resolveBloomBlurV: () => placeholderTarget,
+    resolveDofBlurH: () => placeholderTarget,
+    resolveDofBlurV: () => placeholderTarget,
+    resolveGradeLut: () => placeholderTexture,
+    resolveVhsHistory: () => placeholderTarget,
+    resolveTime: () => 0,
+  );
+  final result = graph.build(
+    featureContext: const RenderFeatureContext(
+      capabilities: RenderCapabilities.safeMinimum,
+      profile: QualityProfile.safe,
+    ),
+    availableCapabilities: const {},
+    hasValidPreviousFrame: true,
+    resources: _AlwaysAvailableResources(),
+  );
+  if (!result.isValid) {
+    throw StateError(
+      'configured shadow graph must validate cleanly: ${result.graph.failures}',
+    );
+  }
+  final layout = PipelineResourceLayout(
+    internalWidth: 641,
+    internalHeight: 361,
+    shadowMapSize: 768,
+    sampleCount: 4,
+  );
+  final resources = [
+    layout.sceneColor,
+    layout.sceneColorResolved,
+    layout.sceneDepth,
+    layout.shadowMap,
+    layout.ssaoRaw,
+    layout.ssaoBlurred,
+    layout.bloomBlurH,
+    layout.bloomBlurV,
+    layout.sceneColorPostBloom,
+    layout.dofBlurH,
+    layout.dofBlurV,
+    layout.dofOutput,
+    layout.gradeOutput,
+    layout.ps1Output,
+    layout.vhsOutput,
+  ];
+  final declared = [
+    for (final pass in result.graph.orderedPasses) ...[
+      for (final use in pass.uses) use.resource,
+    ],
+  ];
+  for (final expected in resources) {
+    final actual = declared.firstWhere(
+      (resource) =>
+          resource.name == expected.name &&
+          resource.version == expected.version,
+    );
+    if (actual.width != expected.width ||
+        actual.height != expected.height ||
+        actual.format != expected.format ||
+        actual.samples != expected.samples) {
+      throw StateError(
+        'resource ${expected.name}#${expected.version} lost configured '
+        'extent: expected $expected, got $actual',
+      );
+    }
+  }
+  if (layout.halfWidth != 321 || layout.halfHeight != 181) {
+    throw StateError(
+      'odd half-resolution rounding must be 321x181, got '
+      '${layout.halfWidth}x${layout.halfHeight}',
+    );
+  }
 }
 
 final _fakeCamera = CameraView(

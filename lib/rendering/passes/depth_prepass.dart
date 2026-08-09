@@ -67,6 +67,7 @@ final class DepthPrepassFeature implements RenderFeature {
   final MaterialResolver resolveMaterial;
   final AlbedoResolver resolveAlbedo;
   final String programId;
+  final ResourceRef sceneDepthResource;
 
   DepthPrepassFeature({
     required this.programLibrary,
@@ -76,6 +77,7 @@ final class DepthPrepassFeature implements RenderFeature {
     required this.resolveMaterial,
     required this.resolveAlbedo,
     this.programId = 'depthPrepass',
+    this.sceneDepthResource = DepthPrepassResources.sceneDepth,
   });
 
   @override
@@ -87,12 +89,7 @@ final class DepthPrepassFeature implements RenderFeature {
       PassDeclaration(
         id: 'depthPrepass',
         stage: GraphStage.beforeDepth,
-        uses: [
-          const ResourceUse(
-            DepthPrepassResources.sceneDepth,
-            ResourceAccess.write,
-          ),
-        ],
+        uses: [ResourceUse(sceneDepthResource, ResourceAccess.write)],
       ),
     );
   }
@@ -111,12 +108,7 @@ final class DepthPrepassFeature implements RenderFeature {
         descriptor: PassDescriptor(
           id: 'depthPrepass',
           stage: GraphStage.beforeDepth,
-          uses: [
-            const ResourceUse(
-              DepthPrepassResources.sceneDepth,
-              ResourceAccess.write,
-            ),
-          ],
+          uses: [ResourceUse(sceneDepthResource, ResourceAccess.write)],
           depthTest: true,
           depthWrite: true,
           cullEnable: true,
@@ -152,7 +144,8 @@ final class _DepthPrepassPass implements RenderPass {
   @override
   void execute(RenderPassContext context) {
     final view =
-        context.viewOf(DepthPrepassResources.sceneDepth.name) as BoundResourceView;
+        context.viewOf(DepthPrepassResources.sceneDepth.name)
+            as BoundResourceView;
     final encoder = context.commandEncoder as DrawCommandEncoder;
     final camera = context.frameScene.camera as CameraView;
     final post = context.frameScene.post as PostProcessState;
@@ -219,11 +212,7 @@ final class _DepthPrepassPass implements RenderPass {
   ) {
     if (batch is RetainedItemView) {
       _setUniforms(encoder, batch.descriptor.transform, camera);
-      _setMaterialState(
-        encoder,
-        batch.descriptor.material,
-        affineWarpStrength,
-      );
+      _setMaterialState(encoder, batch.descriptor.material, affineWarpStrength);
       final mesh = resolveMesh(batch.descriptor.mesh);
       encoder.bindVertexArray(mesh.vao);
       if (mesh.isIndexed) {
@@ -262,12 +251,19 @@ final class _DepthPrepassPass implements RenderPass {
     }
   }
 
-  void _setUniforms(DrawCommandEncoder encoder, Transform transform, CameraView camera) {
+  void _setUniforms(
+    DrawCommandEncoder encoder,
+    Transform transform,
+    CameraView camera,
+  ) {
     encoder.setUniform(
       'uViewProjection',
       UniformValue.mat4(Float32List.fromList(camera.viewProjection.m)),
     );
     final model = transform.toMat4();
-    encoder.setUniform('uModel', UniformValue.mat4(Float32List.fromList(model.m)));
+    encoder.setUniform(
+      'uModel',
+      UniformValue.mat4(Float32List.fromList(model.m)),
+    );
   }
 }

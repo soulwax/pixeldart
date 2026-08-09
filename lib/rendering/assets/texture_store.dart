@@ -53,19 +53,29 @@ final class TextureStore {
   final ResourceRegistry<TextureHandle, _TextureRecord> _registry;
   final Map<int, GpuObject> _texturesBySlot = {};
   late GpuObject _fallbackAlbedo;
+  late GpuObject _fallbackNormal;
+  late GpuObject _fallbackOrm;
+  late GpuObject _fallbackEmissive;
 
   TextureStore(this._device)
     : _registry = ResourceRegistry<TextureHandle, _TextureRecord>(
         (slot, generation, label) => TextureHandle(slot, generation, label),
       ) {
     _fallbackAlbedo = _createFallbackAlbedo();
+    _fallbackNormal = _createFallback(FallbackPixels.flatNormal);
+    _fallbackOrm = _createFallback(FallbackPixels.identityOrm);
+    _fallbackEmissive = _createFallback(FallbackPixels.blackEmissive);
   }
 
   GpuObject _createFallbackAlbedo() {
+    return _createFallback(FallbackPixels.whiteAlbedo);
+  }
+
+  GpuObject _createFallback(Uint8List pixels) {
     final texture = _device.createTexture(
       const GpuTextureDescriptor(width: 1, height: 1),
     );
-    _device.uploadTextureLayer(texture, 0, FallbackPixels.whiteAlbedo);
+    _device.uploadTextureLayer(texture, 0, pixels);
     return texture;
   }
 
@@ -148,8 +158,12 @@ final class TextureStore {
   /// returns its real texture, or the fallback if nothing has been uploaded
   /// to it yet.
   GpuObject resolve(TextureHandle handle) {
+    return _resolve(handle, _fallbackAlbedo);
+  }
+
+  GpuObject _resolve(TextureHandle handle, GpuObject fallback) {
     _registry.descriptorOf(handle);
-    return _texturesBySlot[handle.slot] ?? _fallbackAlbedo;
+    return _texturesBySlot[handle.slot] ?? fallback;
   }
 
   /// The `AlbedoResolver` shape (`world.dart`): `null` — a material that
@@ -163,9 +177,27 @@ final class TextureStore {
     return resolve(handle);
   }
 
+  GpuObject resolveNormal(TextureHandle? handle) {
+    if (handle == null) return _fallbackNormal;
+    return _resolve(handle, _fallbackNormal);
+  }
+
+  GpuObject resolveOrm(TextureHandle? handle) {
+    if (handle == null) return _fallbackOrm;
+    return _resolve(handle, _fallbackOrm);
+  }
+
+  GpuObject resolveEmissive(TextureHandle? handle) {
+    if (handle == null) return _fallbackEmissive;
+    return _resolve(handle, _fallbackEmissive);
+  }
+
   /// Built-in white texture used by passes when a material has no albedo or
   /// its declared texture has not received pixels yet.
   GpuObject get fallbackAlbedo => _fallbackAlbedo;
+  GpuObject get fallbackNormal => _fallbackNormal;
+  GpuObject get fallbackOrm => _fallbackOrm;
+  GpuObject get fallbackEmissive => _fallbackEmissive;
 
   void release(TextureHandle handle) {
     final texture = _texturesBySlot.remove(handle.slot);
@@ -183,6 +215,9 @@ final class TextureStore {
   /// than a gap.
   void rehydrateAfterContextRestore() {
     _fallbackAlbedo = _createFallbackAlbedo();
+    _fallbackNormal = _createFallback(FallbackPixels.flatNormal);
+    _fallbackOrm = _createFallback(FallbackPixels.identityOrm);
+    _fallbackEmissive = _createFallback(FallbackPixels.blackEmissive);
     for (final (handle, record) in _registry.liveDescriptors()) {
       if (record.layerPixels.every((pixels) => pixels == null)) {
         continue;

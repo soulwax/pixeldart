@@ -45,7 +45,14 @@ final class ShadowedWorldProgramSource {
       'aAlpha': 3,
       'aUvMat': 4,
     },
-    samplerUnits: const {'uAlbedo': 0, 'uShadowMap': 1, 'uSsao': 2},
+    samplerUnits: const {
+      'uAlbedo': 0,
+      'uShadowMap': 1,
+      'uSsao': 2,
+      'uNormalMap': 3,
+      'uOrmMap': 4,
+      'uEmissiveMap': 5,
+    },
     requiredUniforms: const [
       'uViewProjection',
       'uView',
@@ -79,11 +86,40 @@ final class ShadowedWorldProgramSource {
       'uPointColor3',
       'uPointIntensity3',
       'uPointRadius3',
+      'uDirectSpotPosition0',
+      'uDirectSpotDirection0',
+      'uDirectSpotColor0',
+      'uDirectSpotIntensity0',
+      'uDirectSpotRange0',
+      'uDirectSpotInnerCos0',
+      'uDirectSpotOuterCos0',
+      'uDirectSpotEnabled0',
+      'uDirectSpotPosition1',
+      'uDirectSpotDirection1',
+      'uDirectSpotColor1',
+      'uDirectSpotIntensity1',
+      'uDirectSpotRange1',
+      'uDirectSpotInnerCos1',
+      'uDirectSpotOuterCos1',
+      'uDirectSpotEnabled1',
+      'uDirectSpotPosition2',
+      'uDirectSpotDirection2',
+      'uDirectSpotColor2',
+      'uDirectSpotIntensity2',
+      'uDirectSpotRange2',
+      'uDirectSpotInnerCos2',
+      'uDirectSpotOuterCos2',
+      'uDirectSpotEnabled2',
       'uAmbientColor',
       'uAmbientIntensity',
       'uShadowMapTexelSize',
       'uSceneColorSize',
       'uEmissiveStrength',
+      'uUvScaleOffset',
+      'uNormalStrength',
+      'uRoughness',
+      'uMetallic',
+      'uOcclusionStrength',
       'uVertexSnapGrid',
       'uAffineWarpStrength',
       'uAlphaCutoff',
@@ -105,13 +141,22 @@ final class ShadowedWorldFeature implements RenderFeature {
   final MeshResolver resolveMesh;
   final MaterialResolver resolveMaterial;
   final AlbedoResolver resolveAlbedo;
+  final MaterialTextureResolver? resolveNormal;
+  final MaterialTextureResolver? resolveOrm;
+  final MaterialTextureResolver? resolveEmissive;
   final GpuObject Function() resolveShadowMap;
   final ShadowLightView Function() resolveLightView;
   final SpotLight? Function() resolveCasterLight;
+  final List<SpotLight> Function()? resolveDirectSpotLights;
   final GpuObject Function() resolveSsaoBlurred;
   final bool useSsao;
   final int sceneColorWidth;
   final int sceneColorHeight;
+  final int shadowMapWidth;
+  final int shadowMapHeight;
+  final ResourceRef shadowMapResource;
+  final ResourceRef ssaoResource;
+  final ResourceRef sceneColorResource;
 
   ShadowedWorldFeature({
     required this.programLibrary,
@@ -120,13 +165,22 @@ final class ShadowedWorldFeature implements RenderFeature {
     required this.resolveMesh,
     required this.resolveMaterial,
     required this.resolveAlbedo,
+    this.resolveNormal,
+    this.resolveOrm,
+    this.resolveEmissive,
     required this.resolveShadowMap,
     required this.resolveLightView,
     required this.resolveCasterLight,
+    this.resolveDirectSpotLights,
     required this.resolveSsaoBlurred,
     this.useSsao = true,
     required this.sceneColorWidth,
     required this.sceneColorHeight,
+    this.shadowMapWidth = 512,
+    this.shadowMapHeight = 512,
+    this.shadowMapResource = ShadowResources.shadowMap,
+    this.ssaoResource = SsaoResources.ssaoBlurred,
+    this.sceneColorResource = SafeGraphResources.sceneColor,
   });
 
   @override
@@ -139,13 +193,9 @@ final class ShadowedWorldFeature implements RenderFeature {
         id: 'shadowedWorld',
         stage: GraphStage.beforeWorld,
         uses: [
-          const ResourceUse(ShadowResources.shadowMap, ResourceAccess.read),
-          if (useSsao)
-            const ResourceUse(SsaoResources.ssaoBlurred, ResourceAccess.read),
-          const ResourceUse(
-            SafeGraphResources.sceneColor,
-            ResourceAccess.write,
-          ),
+          ResourceUse(shadowMapResource, ResourceAccess.read),
+          if (useSsao) ResourceUse(ssaoResource, ResourceAccess.read),
+          ResourceUse(sceneColorResource, ResourceAccess.write),
         ],
       ),
     );
@@ -165,25 +215,27 @@ final class ShadowedWorldFeature implements RenderFeature {
           id: 'shadowedWorld',
           stage: GraphStage.beforeWorld,
           uses: [
-            const ResourceUse(ShadowResources.shadowMap, ResourceAccess.read),
-            if (useSsao)
-              const ResourceUse(SsaoResources.ssaoBlurred, ResourceAccess.read),
-            const ResourceUse(
-              SafeGraphResources.sceneColor,
-              ResourceAccess.write,
-            ),
+            ResourceUse(shadowMapResource, ResourceAccess.read),
+            if (useSsao) ResourceUse(ssaoResource, ResourceAccess.read),
+            ResourceUse(sceneColorResource, ResourceAccess.write),
           ],
         ),
         program: program,
         resolveMesh: resolveMesh,
         resolveMaterial: resolveMaterial,
         resolveAlbedo: resolveAlbedo,
+        resolveNormal: resolveNormal,
+        resolveOrm: resolveOrm,
+        resolveEmissive: resolveEmissive,
         resolveShadowMap: resolveShadowMap,
         resolveLightView: resolveLightView,
         resolveCasterLight: resolveCasterLight,
+        resolveDirectSpotLights: resolveDirectSpotLights,
         resolveSsaoBlurred: resolveSsaoBlurred,
         sceneColorWidth: sceneColorWidth,
         sceneColorHeight: sceneColorHeight,
+        shadowMapWidth: shadowMapWidth,
+        shadowMapHeight: shadowMapHeight,
       ),
     ];
   }
@@ -199,12 +251,18 @@ final class _ShadowedWorldPass implements RenderPass {
   final MeshResolver resolveMesh;
   final MaterialResolver resolveMaterial;
   final AlbedoResolver resolveAlbedo;
+  final MaterialTextureResolver? resolveNormal;
+  final MaterialTextureResolver? resolveOrm;
+  final MaterialTextureResolver? resolveEmissive;
   final GpuObject Function() resolveShadowMap;
   final ShadowLightView Function() resolveLightView;
   final SpotLight? Function() resolveCasterLight;
+  final List<SpotLight> Function()? resolveDirectSpotLights;
   final GpuObject Function() resolveSsaoBlurred;
   final int sceneColorWidth;
   final int sceneColorHeight;
+  final int shadowMapWidth;
+  final int shadowMapHeight;
 
   const _ShadowedWorldPass({
     required this.descriptor,
@@ -212,12 +270,18 @@ final class _ShadowedWorldPass implements RenderPass {
     required this.resolveMesh,
     required this.resolveMaterial,
     required this.resolveAlbedo,
+    required this.resolveNormal,
+    required this.resolveOrm,
+    required this.resolveEmissive,
     required this.resolveShadowMap,
     required this.resolveLightView,
     required this.resolveCasterLight,
+    required this.resolveDirectSpotLights,
     required this.resolveSsaoBlurred,
     required this.sceneColorWidth,
     required this.sceneColorHeight,
+    required this.shadowMapWidth,
+    required this.shadowMapHeight,
   });
 
   @override
@@ -232,22 +296,31 @@ final class _ShadowedWorldPass implements RenderPass {
 
     encoder.bindTarget(view.gpuObject);
     encoder.applyDrawState(descriptor.toDrawState());
-    encoder.clear(ClearMask.colorAndDepth);
+    encoder.clear(
+      ClearMask.colorAndDepth,
+      r: environment.clearColor.r,
+      g: environment.clearColor.g,
+      b: environment.clearColor.b,
+      a: 1,
+    );
     encoder.useProgram(program.handle);
     encoder.setUniform('uAlbedo', const UniformValue.sampler(0));
+    encoder.setUniform('uNormalMap', const UniformValue.sampler(3));
+    encoder.setUniform('uOrmMap', const UniformValue.sampler(4));
+    encoder.setUniform('uEmissiveMap', const UniformValue.sampler(5));
     encoder.bindTexture(1, resolveShadowMap());
     encoder.setUniform('uShadowMap', const UniformValue.sampler(1));
     encoder.setUniform(
       'uShadowMapTexelSize',
       UniformValue.float2(
-        Float32List.fromList([
-          1.0 / ShadowResources.shadowMap.width,
-          1.0 / ShadowResources.shadowMap.height,
-        ]),
+        Float32List.fromList([1.0 / shadowMapWidth, 1.0 / shadowMapHeight]),
       ),
     );
     encoder.bindTexture(2, resolveSsaoBlurred());
     encoder.setUniform('uSsao', const UniformValue.sampler(2));
+    // Material-v2 slots use neutral store fallbacks when no resolver is
+    // supplied, preserving the old injected single-albedo test seam.
+    // Actual map selection is per draw in _setMaterialState below.
     encoder.setUniform(
       'uVertexSnapGrid',
       UniformValue.float1(post.vertexSnapGrid),
@@ -305,6 +378,11 @@ final class _ShadowedWorldPass implements RenderPass {
     // scene disagree about where the light actually is, which reads as two
     // lights fighting each other rather than one light casting a shadow.
     final casterLight = resolveCasterLight();
+    final directSpots = [
+      for (final light
+          in (resolveDirectSpotLights?.call() ?? const <SpotLight>[]))
+        if (light.id != casterLight?.id) light,
+    ];
     final lightPosition = casterLight?.position ?? const Vec3(0, 1, 0);
     final lightDirection = casterLight?.direction ?? const Vec3(0, -1, 0);
     encoder.setUniform(
@@ -390,6 +468,48 @@ final class _ShadowedWorldPass implements RenderPass {
       encoder.setUniform(
         'uPointRadius$i',
         UniformValue.float1(light?.radius ?? 1),
+      );
+    }
+    for (var i = 0; i < 3; i++) {
+      final light = i < directSpots.length ? directSpots[i] : null;
+      final position = light?.position ?? Vec3.zero;
+      final direction = light?.direction ?? const Vec3(0, -1, 0);
+      final color = light?.color ?? LinearColor.black;
+      encoder.setUniform(
+        'uDirectSpotPosition$i',
+        UniformValue.float3(
+          Float32List.fromList([position.x, position.y, position.z]),
+        ),
+      );
+      encoder.setUniform(
+        'uDirectSpotDirection$i',
+        UniformValue.float3(
+          Float32List.fromList([direction.x, direction.y, direction.z]),
+        ),
+      );
+      encoder.setUniform(
+        'uDirectSpotColor$i',
+        UniformValue.float3(Float32List.fromList([color.r, color.g, color.b])),
+      );
+      encoder.setUniform(
+        'uDirectSpotIntensity$i',
+        UniformValue.float1(light?.intensity ?? 0),
+      );
+      encoder.setUniform(
+        'uDirectSpotRange$i',
+        UniformValue.float1(light?.range ?? 1),
+      );
+      encoder.setUniform(
+        'uDirectSpotInnerCos$i',
+        UniformValue.float1(math.cos(light?.innerConeRadians ?? 0.3)),
+      );
+      encoder.setUniform(
+        'uDirectSpotOuterCos$i',
+        UniformValue.float1(math.cos(light?.outerConeRadians ?? 0.5)),
+      );
+      encoder.setUniform(
+        'uDirectSpotEnabled$i',
+        UniformValue.float1(light == null ? 0 : 1),
       );
     }
     encoder.setUniform(
@@ -503,6 +623,15 @@ final class _ShadowedWorldPass implements RenderPass {
   ) {
     final material = resolveMaterial(handle);
     encoder.bindTexture(0, resolveAlbedo(material.albedoTexture));
+    encoder.bindTexture(
+      3,
+      (resolveNormal ?? resolveAlbedo)(material.normalTexture),
+    );
+    encoder.bindTexture(4, (resolveOrm ?? resolveAlbedo)(material.ormTexture));
+    encoder.bindTexture(
+      5,
+      (resolveEmissive ?? resolveAlbedo)(material.emissiveTexture),
+    );
     // §6.2/§8.6's alpha-masked route. Zero means "no cutout at all" and is
     // the shader's own branch condition, so opaque and blended materials
     // take a path with no alpha compare in it rather than one that compares
@@ -552,6 +681,27 @@ final class _ShadowedWorldPass implements RenderPass {
     encoder.setUniform(
       'uEmissiveStrength',
       UniformValue.float1(material.emissiveStrength),
+    );
+    encoder.setUniform(
+      'uUvScaleOffset',
+      UniformValue.float4(
+        Float32List.fromList([
+          material.uvScaleU,
+          material.uvScaleV,
+          material.uvOffsetU,
+          material.uvOffsetV,
+        ]),
+      ),
+    );
+    encoder.setUniform(
+      'uNormalStrength',
+      UniformValue.float1(material.normalStrength),
+    );
+    encoder.setUniform('uRoughness', UniformValue.float1(material.roughness));
+    encoder.setUniform('uMetallic', UniformValue.float1(material.metallic));
+    encoder.setUniform(
+      'uOcclusionStrength',
+      UniformValue.float1(material.occlusionStrength),
     );
     encoder.setUniform(
       'uReceivesShadow',

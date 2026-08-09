@@ -90,6 +90,11 @@ abstract interface class ResourceView {
 /// graph (re)build, not every frame.
 abstract interface class RenderPassContext {
   ResourceView viewOf(String resourceName);
+
+  /// Resolves a versioned graph edge when two versions share one logical
+  /// resource name (for example an MSAA source and its single-sample resolve).
+  ResourceView viewOfResource(ResourceRef resource);
+
   Object get commandEncoder;
   FrameSceneData get frameScene;
 }

@@ -14,9 +14,25 @@ final class MaterialDefinition {
   final double tintR, tintG, tintB;
   final TextureHandle? emissiveTexture;
   final double emissiveStrength;
+
+  /// Tangent-space normal map. The current compatibility vertex layout does
+  /// not carry authored tangents, so the shader derives a stable TBN from
+  /// world-position/UV derivatives; surface-v2 can replace that with a
+  /// supplied tangent without changing this material contract.
+  final TextureHandle? normalTexture;
+  final double normalStrength;
+
+  /// Linear ORM map: R=occlusion, G=roughness, B=metalness. Scalar values
+  /// remain useful as deterministic fallbacks when the optional map is
+  /// absent or still loading.
+  final TextureHandle? ormTexture;
+  final double roughness;
+  final double metallic;
+  final double occlusionStrength;
   final double uvScaleU, uvScaleV;
   final double uvOffsetU, uvOffsetV;
   final AlphaMode alphaMode;
+
   /// Sampled albedo alpha below this value is discarded when [alphaMode] is
   /// [AlphaMode.masked]; ignored entirely for the other two modes. Must stay
   /// strictly positive: the three geometry passes encode "this draw has no
@@ -38,6 +54,12 @@ final class MaterialDefinition {
     this.tintB = 1,
     this.emissiveTexture,
     this.emissiveStrength = 0,
+    this.normalTexture,
+    this.normalStrength = 1,
+    this.ormTexture,
+    this.roughness = 1,
+    this.metallic = 0,
+    this.occlusionStrength = 1,
     this.uvScaleU = 1,
     this.uvScaleV = 1,
     this.uvOffsetU = 0,
@@ -59,6 +81,27 @@ final class MaterialDefinition {
         'MaterialDefinition.emissiveStrength must be >= 0: $emissiveStrength',
       );
     }
+    if (!normalStrength.isFinite || normalStrength < 0) {
+      throw ArgumentError(
+        'MaterialDefinition.normalStrength must be >= 0: $normalStrength',
+      );
+    }
+    _validateUnit('roughness', roughness);
+    _validateUnit('metallic', metallic);
+    _validateUnit('occlusionStrength', occlusionStrength);
+    for (final (name, value) in [
+      ('uvScaleU', uvScaleU),
+      ('uvScaleV', uvScaleV),
+      ('uvOffsetU', uvOffsetU),
+      ('uvOffsetV', uvOffsetV),
+      ('tintR', tintR),
+      ('tintG', tintG),
+      ('tintB', tintB),
+    ]) {
+      if (!value.isFinite) {
+        throw ArgumentError('MaterialDefinition.$name must be finite: $value');
+      }
+    }
     if (uvScaleU == 0 || uvScaleV == 0) {
       throw ArgumentError('MaterialDefinition uv scale must not be zero');
     }
@@ -66,6 +109,12 @@ final class MaterialDefinition {
       throw ArgumentError(
         'MaterialDefinition.alphaCutoff must be in (0, 1]: $alphaCutoff',
       );
+    }
+  }
+
+  static void _validateUnit(String name, double value) {
+    if (!value.isFinite || value < 0 || value > 1) {
+      throw ArgumentError('MaterialDefinition.$name must be in [0, 1]: $value');
     }
   }
 }

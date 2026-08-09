@@ -11,6 +11,7 @@ import '../core/render_graph.dart';
 import '../webgl/device_api.dart';
 import '../webgl/draw_encoder.dart';
 import 'bloom_resources.dart';
+import 'depth_resources.dart';
 import 'dof_resources.dart';
 import 'pass_context_impl.dart';
 
@@ -51,6 +52,8 @@ final class DofBlurFeature implements RenderFeature {
   final ResourceRef sourceResource;
   final ResourceRef destResource;
   final GpuObject Function() resolveSource;
+  final int texelWidth;
+  final int texelHeight;
 
   /// [sourceResource] defaults to `BloomResources.sceneColorPostBloom` (a
   /// `static final`, not `const`, since it is derived via `.nextVersion()`
@@ -64,12 +67,17 @@ final class DofBlurFeature implements RenderFeature {
     required this.fragmentSource,
     required this.device,
     required this.resolveSource,
+    int? texelWidth,
+    int? texelHeight,
     ResourceRef? sourceResource,
+    ResourceRef? destResource,
   }) : programId = 'dofBlurH',
        passId = 'dofBlurH',
        _axis = _DofBlurAxis.horizontal,
        sourceResource = sourceResource ?? BloomResources.sceneColorPostBloom,
-       destResource = DofResources.dofBlurH;
+       destResource = destResource ?? DofResources.dofBlurH,
+       texelWidth = texelWidth ?? DofResources.dofBlurH.width,
+       texelHeight = texelHeight ?? DofResources.dofBlurH.height;
 
   DofBlurFeature.vertical({
     required this.programLibrary,
@@ -77,11 +85,17 @@ final class DofBlurFeature implements RenderFeature {
     required this.fragmentSource,
     required this.device,
     required this.resolveSource,
+    int? texelWidth,
+    int? texelHeight,
+    ResourceRef? sourceResource,
+    ResourceRef? destResource,
   }) : programId = 'dofBlurV',
        passId = 'dofBlurV',
        _axis = _DofBlurAxis.vertical,
-       sourceResource = DofResources.dofBlurH,
-       destResource = DofResources.dofBlurV;
+       sourceResource = sourceResource ?? DofResources.dofBlurH,
+       destResource = destResource ?? DofResources.dofBlurV,
+       texelWidth = texelWidth ?? DofResources.dofBlurV.width,
+       texelHeight = texelHeight ?? DofResources.dofBlurV.height;
 
   @override
   String get id => passId;
@@ -111,8 +125,8 @@ final class DofBlurFeature implements RenderFeature {
     );
     final emptyVao = device.createVertexArray();
     final texelStep = _axis == _DofBlurAxis.horizontal
-        ? Float32List.fromList([1.0 / destResource.width, 0.0])
-        : Float32List.fromList([0.0, 1.0 / destResource.height]);
+        ? Float32List.fromList([1.0 / texelWidth, 0.0])
+        : Float32List.fromList([0.0, 1.0 / texelHeight]);
     return [
       _DofBlurPass(
         descriptor: PassDescriptor(
@@ -230,6 +244,9 @@ final class DofCompositeFeature implements RenderFeature {
   final double focusDistance;
   final double focusRange;
   final ResourceRef? sourceResource;
+  final ResourceRef sceneDepthResource;
+  final ResourceRef dofBlurredResource;
+  final ResourceRef dofOutputResource;
 
   DofCompositeFeature({
     required this.programLibrary,
@@ -243,6 +260,9 @@ final class DofCompositeFeature implements RenderFeature {
     this.focusDistance = 5.0,
     this.focusRange = 2.8,
     this.sourceResource,
+    this.sceneDepthResource = DepthPrepassResources.sceneDepth,
+    this.dofBlurredResource = DofResources.dofBlurV,
+    this.dofOutputResource = DofResources.dofOutput,
   });
 
   /// `BloomResources.sceneColorPostBloom` is `static final`, not `const` (it
@@ -264,8 +284,9 @@ final class DofCompositeFeature implements RenderFeature {
         stage: GraphStage.afterResolve,
         uses: [
           ResourceUse(_resolvedSource, ResourceAccess.read),
-          const ResourceUse(DofResources.dofBlurV, ResourceAccess.read),
-          const ResourceUse(DofResources.dofOutput, ResourceAccess.write),
+          ResourceUse(sceneDepthResource, ResourceAccess.read),
+          ResourceUse(dofBlurredResource, ResourceAccess.read),
+          ResourceUse(dofOutputResource, ResourceAccess.write),
         ],
       ),
     );
@@ -287,8 +308,9 @@ final class DofCompositeFeature implements RenderFeature {
           stage: GraphStage.afterResolve,
           uses: [
             ResourceUse(_resolvedSource, ResourceAccess.read),
-            const ResourceUse(DofResources.dofBlurV, ResourceAccess.read),
-            const ResourceUse(DofResources.dofOutput, ResourceAccess.write),
+            ResourceUse(sceneDepthResource, ResourceAccess.read),
+            ResourceUse(dofBlurredResource, ResourceAccess.read),
+            ResourceUse(dofOutputResource, ResourceAccess.write),
           ],
           depthTest: false,
           depthWrite: false,

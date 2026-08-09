@@ -21,10 +21,46 @@ import 'fake_gpu_device.dart';
 /// not have.
 void main() {
   _graphValidatesWithBothPasses();
+  _configuredSceneColorExtentIsShared();
+  _configuredMsaaGraphOwnsResolvePass();
   _worldPassClearsAndDrawsBeforePresent();
   _presentPassBindsCanvasAndSamplesSceneColor();
   _instancedBatchIssuesOneInstancedDrawCall();
   print('Renderer safe-graph fixtures passed.');
+}
+
+void _configuredMsaaGraphOwnsResolvePass() {
+  final device = FakeGpuDevice();
+  final graph = buildSafeGraph(
+    ProgramLibrary(device),
+    device: device,
+    resolveMesh: (mesh) => ResolvedMesh(
+      vao: device.createVertexArray(),
+      isIndexed: false,
+      drawCount: 3,
+    ),
+    internalWidth: 641,
+    internalHeight: 361,
+    sampleCount: 4,
+  );
+  final result = graph.build(
+    featureContext: const RenderFeatureContext(
+      capabilities: RenderCapabilities.safeMinimum,
+      profile: QualityProfile.safe,
+    ),
+    availableCapabilities: const {},
+    hasValidPreviousFrame: false,
+    resources: _AlwaysAvailableResources(),
+  );
+  if (!result.isValid) {
+    throw StateError('MSAA safe graph must validate: ${result.graph.failures}');
+  }
+  final ids = result.passes.map((pass) => pass.descriptor.id).toList();
+  const expected = ['worldOpaqueTransparent', 'msaaResolve', 'present'];
+  if (ids.length != expected.length ||
+      ids.asMap().entries.any((entry) => entry.value != expected[entry.key])) {
+    throw StateError('expected MSAA safe graph $expected, got $ids');
+  }
 }
 
 final _fakeCamera = CameraView(
@@ -76,6 +112,58 @@ FeatureGraphResult _buildAndValidate(FakeGpuDevice device) {
     hasValidPreviousFrame: false,
     resources: _AlwaysAvailableResources(),
   );
+}
+
+void _configuredSceneColorExtentIsShared() {
+  final device = FakeGpuDevice();
+  final library = ProgramLibrary(device);
+  final graph = buildSafeGraph(
+    library,
+    device: device,
+    resolveMesh: (mesh) => ResolvedMesh(
+      vao: device.createVertexArray(),
+      isIndexed: false,
+      drawCount: 3,
+    ),
+    internalWidth: 641,
+    internalHeight: 361,
+    sampleCount: 1,
+  );
+  final result = graph.build(
+    featureContext: const RenderFeatureContext(
+      capabilities: RenderCapabilities.safeMinimum,
+      profile: QualityProfile.safe,
+    ),
+    availableCapabilities: const {},
+    hasValidPreviousFrame: false,
+    resources: _AlwaysAvailableResources(),
+  );
+  if (!result.isValid) {
+    throw StateError(
+      'configured safe graph must validate cleanly: ${result.graph.failures}',
+    );
+  }
+  final world = result.graph.orderedPasses.firstWhere(
+    (pass) => pass.id == 'worldOpaqueTransparent',
+  );
+  final present = result.graph.orderedPasses.firstWhere(
+    (pass) => pass.id == 'present',
+  );
+  final worldTarget = world.uses.single.resource;
+  final presentInput = present.uses.single.resource;
+  if (worldTarget.width != 641 ||
+      worldTarget.height != 361 ||
+      worldTarget.samples != 1 ||
+      presentInput.width != 641 ||
+      presentInput.height != 361 ||
+      presentInput.samples != 1 ||
+      worldTarget.name != presentInput.name ||
+      worldTarget.version != presentInput.version) {
+    throw StateError(
+      'world/present must share configured sceneColor 641x361 x1; '
+      'got $worldTarget and $presentInput',
+    );
+  }
 }
 
 final class _AlwaysAvailableResources implements RenderPassResources {

@@ -31,6 +31,14 @@ final class GpuResourcePlanAdapter {
 
   GpuResourcePlanAdapter(this.device);
 
+  /// Returns the target descriptor that would be allocated for [resource].
+  /// This is pure so resize/reconfigure fixtures can verify extents without
+  /// creating GPU objects.
+  GpuTargetDescriptor descriptorFor(
+    String resource,
+    RendererConfiguration configuration,
+  ) => _descriptor(resource, configuration);
+
   PreparedGpuResourcePlan get current {
     final value = _current;
     if (value == null) {
@@ -131,16 +139,34 @@ final class GpuResourcePlanAdapter {
     final objects = <String, GpuObject>{};
     final created = <GpuObject>[];
     try {
-      for (final resource in plan.resources) {
-        if (resource == 'sceneColor#1') {
-          objects[resource] = objects['sceneColor']!;
-          continue;
-        }
+      final baseResources = plan.resources.where(
+        (resource) => !resource.startsWith('sceneColor#'),
+      );
+      for (final resource in baseResources) {
         final target = device.createTarget(
           _descriptor(resource, configuration),
         );
         created.add(target);
         objects[resource] = target;
+      }
+      final sceneVersions =
+          plan.resources
+              .where((resource) => resource.startsWith('sceneColor#'))
+              .toList()
+            ..sort();
+      for (final resource in sceneVersions) {
+        final version = int.parse(resource.substring('sceneColor#'.length));
+        if (configuration.sampleCount == 1) {
+          objects[resource] = objects['sceneColor']!;
+        } else if (version >= 2) {
+          objects[resource] = objects['sceneColor#1']!;
+        } else {
+          final target = device.createTarget(
+            _descriptor(resource, configuration),
+          );
+          created.add(target);
+          objects[resource] = target;
+        }
       }
       return Map.unmodifiable(objects);
     } catch (_) {
@@ -177,16 +203,22 @@ final class GpuResourcePlanAdapter {
         resource.startsWith('ssao') ||
         resource.startsWith('bloomBlur') ||
         resource.startsWith('dofBlur');
+    final targetWidth = half ? _halfExtent(width) : width;
+    final targetHeight = half ? _halfExtent(height) : height;
+    final sceneColorResource =
+        resource == 'sceneColor' || resource.startsWith('sceneColor#');
     return GpuTargetDescriptor(
-      width: half ? width ~/ 2 : width,
-      height: half ? height ~/ 2 : height,
+      width: targetWidth,
+      height: targetHeight,
       samples: resource == 'sceneColor' ? configuration.sampleCount : 1,
-      attachments: resource == 'sceneColor'
+      attachments: sceneColorResource
           ? GpuTargetAttachment.colorAndGlow
           : GpuTargetAttachment.color,
-      hasDepth: resource == 'sceneColor',
+      hasDepth: sceneColorResource,
     );
   }
+
+  static int _halfExtent(int value) => (value + 1) ~/ 2;
 
   void _deleteObjects(Map<String, GpuObject> objects) {
     final unique = <GpuObject>{...objects.values};

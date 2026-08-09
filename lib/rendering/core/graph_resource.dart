@@ -54,6 +54,20 @@ final class ResourceRef {
       samples == other.samples;
 
   @override
+  bool operator ==(Object other) =>
+      other is ResourceRef &&
+      name == other.name &&
+      format == other.format &&
+      width == other.width &&
+      height == other.height &&
+      samples == other.samples &&
+      version == other.version;
+
+  @override
+  int get hashCode =>
+      Object.hash(name, format, width, height, samples, version);
+
+  @override
   String toString() =>
       'ResourceRef($name#$version, $format, ${width}x$height'
       '${samples > 1 ? ' x$samples' : ''})';

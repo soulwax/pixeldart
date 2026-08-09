@@ -151,13 +151,13 @@ void _rehydrateReuploadsLoadedTexturesAndSkipsUnloadedOnes() {
   final beforeCreates = device.textureCreateCalls;
   store.rehydrateAfterContextRestore();
 
-  // Exactly two new textures: the loaded handle's real one, plus the
-  // fallback itself (also a real GPU object invalidated by the same
-  // context loss) — the unloaded handle has no pixel data to replay and
-  // must not cost a create call of its own.
-  if (device.textureCreateCalls != beforeCreates + 2) {
+  // Exactly five new textures: the loaded handle's real one, plus the four
+  // neutral material fallbacks (albedo, normal, ORM, emissive) invalidated
+  // by the same context loss. The unloaded handle has no pixel data to
+  // replay and must not cost a create call of its own.
+  if (device.textureCreateCalls != beforeCreates + 5) {
     throw StateError(
-      'rehydrate must create exactly 2 textures (the loaded handle + the '
+      'rehydrate must create exactly 5 textures (the loaded handle + four '
       'fallback), got ${device.textureCreateCalls - beforeCreates}',
     );
   }

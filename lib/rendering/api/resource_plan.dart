@@ -33,8 +33,13 @@ final class OwnedResourcePlan {
       resources.addAll({'ssaoRaw', 'ssaoBlurred'});
     }
     if (profile.installs(PipelineFeatures.bloom)) {
-      resources.addAll({'bloomBlurH', 'bloomBlurV', 'sceneColor#1'});
+      resources.addAll({
+        'bloomBlurH',
+        'bloomBlurV',
+        'sceneColor#${configuration.sampleCount > 1 ? 2 : 1}',
+      });
     }
+    if (configuration.sampleCount > 1) resources.add('sceneColor#1');
     if (profile.installs(PipelineFeatures.dof)) {
       resources.addAll({'dofBlurH', 'dofBlurV', 'dofOutput'});
     }

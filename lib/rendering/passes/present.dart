@@ -1,3 +1,7 @@
+import 'dart:math' as math;
+
+import '../api/effects.dart';
+import '../api/settings.dart';
 import '../core/graph_pass.dart';
 import '../core/graph_resource.dart';
 import '../core/program_library.dart';
@@ -8,6 +12,44 @@ import '../webgl/device_api.dart';
 import '../webgl/draw_encoder.dart';
 import 'pass_context_impl.dart';
 import 'safe_graph_resources.dart';
+
+/// CPU reference for the final shader's deterministic color contract. It is
+/// used by pure color-ramp fixtures; the live image path remains GLSL so the
+/// conversion runs per pixel on the GPU.
+final class PresentOutputPolicy {
+  const PresentOutputPolicy._();
+
+  static double encodingUniform(ColorEncoding encoding) =>
+      encoding == ColorEncoding.srgb ? 1 : 0;
+
+  static const double toneMapUniform = 1;
+
+  static List<double> encodeLinearColor(
+    Iterable<double> color, {
+    double exposure = 1,
+    ColorEncoding encoding = ColorEncoding.srgb,
+  }) => [
+    for (final channel in color)
+      _encodeChannel(channel, exposure: exposure, encoding: encoding),
+  ];
+
+  static double _encodeChannel(
+    double channel, {
+    required double exposure,
+    required ColorEncoding encoding,
+  }) {
+    final sceneLinear =
+        (channel < 0 ? 0 : channel) * (exposure < 0 ? 0 : exposure);
+    final toneMapped = sceneLinear / (1 + sceneLinear);
+    if (encoding == ColorEncoding.linear) return toneMapped;
+    if (toneMapped <= 0.0031308) return toneMapped * 12.92;
+    return 1.055 * _pow(toneMapped, 1 / 2.4) - 0.055;
+  }
+
+  static double _pow(double value, double exponent) {
+    return math.pow(value, exponent).toDouble();
+  }
+}
 
 final class PresentProgramSource {
   static ProgramSource build({
@@ -20,7 +62,13 @@ final class PresentProgramSource {
     fragmentSource: fragmentSource,
     attributeLocations: const {},
     samplerUnits: const {'uTex': 0},
-    requiredUniforms: const [],
+    requiredUniforms: const [
+      'uExposure',
+      'uVignette',
+      'uGrain',
+      'uOutputEncoding',
+      'uToneMap',
+    ],
   );
 }
 
@@ -54,6 +102,7 @@ final class PresentFeature implements RenderFeature {
   final GpuDevice device;
   final String programId;
   final ResourceRef sceneColorResource;
+  final ColorEncoding outputEncoding;
   GpuObject? _emptyVao;
 
   PresentFeature({
@@ -63,6 +112,7 @@ final class PresentFeature implements RenderFeature {
     required this.device,
     this.programId = 'present',
     this.sceneColorResource = SafeGraphResources.sceneColor,
+    this.outputEncoding = ColorEncoding.srgb,
   });
 
   @override
@@ -107,6 +157,7 @@ final class PresentFeature implements RenderFeature {
         program: program,
         emptyVao: emptyVao,
         sceneColorResource: sceneColorResource,
+        outputEncoding: outputEncoding,
       ),
     ];
   }
@@ -127,17 +178,20 @@ final class _PresentPass implements RenderPass {
   final CompiledProgram program;
   final GpuObject emptyVao;
   final ResourceRef sceneColorResource;
+  final ColorEncoding outputEncoding;
 
   const _PresentPass({
     required this.descriptor,
     required this.program,
     required this.emptyVao,
     required this.sceneColorResource,
+    required this.outputEncoding,
   });
 
   @override
   void execute(RenderPassContext context) {
-    final source = context.viewOf(sceneColorResource.name) as BoundResourceView;
+    final source =
+        context.viewOfResource(sceneColorResource) as BoundResourceView;
     final encoder = context.commandEncoder as DrawCommandEncoder;
 
     encoder.bindTarget(null);
@@ -145,6 +199,18 @@ final class _PresentPass implements RenderPass {
     encoder.useProgram(program.handle);
     encoder.bindVertexArray(emptyVao);
     encoder.bindTexture(0, source.gpuObject);
+    final post = context.frameScene.post as PostProcessState;
+    encoder.setUniform('uExposure', UniformValue.float1(post.exposure));
+    encoder.setUniform('uVignette', UniformValue.float1(post.vignette));
+    encoder.setUniform('uGrain', UniformValue.float1(post.grain));
+    encoder.setUniform(
+      'uOutputEncoding',
+      UniformValue.float1(PresentOutputPolicy.encodingUniform(outputEncoding)),
+    );
+    encoder.setUniform(
+      'uToneMap',
+      const UniformValue.float1(PresentOutputPolicy.toneMapUniform),
+    );
     encoder.drawArrays(first: 0, count: 3);
   }
 }
