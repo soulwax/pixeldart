@@ -54,9 +54,31 @@ final class ShadowedWorldProgramSource {
       'uLightViewProjection',
       'uLightPosition',
       'uLightDirection',
+      'uLightColor',
+      'uLightIntensity',
       'uLightRange',
       'uLightInnerCos',
       'uLightOuterCos',
+      'uSpotEnabled',
+      'uDirectionalDirection',
+      'uDirectionalColor',
+      'uDirectionalIntensity',
+      'uPointPosition0',
+      'uPointColor0',
+      'uPointIntensity0',
+      'uPointRadius0',
+      'uPointPosition1',
+      'uPointColor1',
+      'uPointIntensity1',
+      'uPointRadius1',
+      'uPointPosition2',
+      'uPointColor2',
+      'uPointIntensity2',
+      'uPointRadius2',
+      'uPointPosition3',
+      'uPointColor3',
+      'uPointIntensity3',
+      'uPointRadius3',
       'uAmbientColor',
       'uAmbientIntensity',
       'uShadowMapTexelSize',
@@ -71,6 +93,7 @@ final class ShadowedWorldProgramSource {
       'uFogEnd',
       'uFogHeightFalloff',
       'uFogDensity',
+      'uReceivesShadow',
     ],
   );
 }
@@ -304,6 +327,71 @@ final class _ShadowedWorldPass implements RenderPass {
         ]),
       ),
     );
+    final hasSpot = casterLight != null;
+    final spotColor = casterLight?.color ?? LinearColor.black;
+    encoder.setUniform(
+      'uLightColor',
+      UniformValue.float3(
+        Float32List.fromList([spotColor.r, spotColor.g, spotColor.b]),
+      ),
+    );
+    encoder.setUniform(
+      'uLightIntensity',
+      UniformValue.float1(casterLight?.intensity ?? 0),
+    );
+    encoder.setUniform('uSpotEnabled', UniformValue.float1(hasSpot ? 1 : 0));
+    final directional = environment.directionalLight;
+    final directionalDirection = directional?.direction ?? const Vec3(0, 1, 0);
+    final directionalColor = directional?.color ?? LinearColor.black;
+    encoder.setUniform(
+      'uDirectionalDirection',
+      UniformValue.float3(
+        Float32List.fromList([
+          directionalDirection.x,
+          directionalDirection.y,
+          directionalDirection.z,
+        ]),
+      ),
+    );
+    encoder.setUniform(
+      'uDirectionalColor',
+      UniformValue.float3(
+        Float32List.fromList([
+          directionalColor.r,
+          directionalColor.g,
+          directionalColor.b,
+        ]),
+      ),
+    );
+    encoder.setUniform(
+      'uDirectionalIntensity',
+      UniformValue.float1(directional?.intensity ?? 0),
+    );
+    for (var i = 0; i < 4; i++) {
+      final light = i < environment.pointLights.length
+          ? environment.pointLights[i]
+          : null;
+      final position = light?.position ?? const Vec3(0, 0, 0);
+      final color = light?.color ?? LinearColor.black;
+      encoder.setUniform(
+        'uPointPosition$i',
+        UniformValue.float3(
+          Float32List.fromList([position.x, position.y, position.z]),
+        ),
+      );
+      encoder.setUniform(
+        'uPointColor$i',
+        UniformValue.float3(Float32List.fromList([color.r, color.g, color.b])),
+      );
+      encoder.setUniform(
+        'uPointIntensity$i',
+        UniformValue.float1(light?.intensity ?? 0),
+      );
+      encoder.setUniform(
+        'uPointRadius$i',
+        UniformValue.float1(light?.radius ?? 1),
+      );
+    }
     encoder.setUniform(
       'uLightRange',
       UniformValue.float1(casterLight?.range ?? 1),
@@ -353,6 +441,7 @@ final class _ShadowedWorldPass implements RenderPass {
         batch.descriptor.drawMode,
         batch.descriptor.blendMode,
         affineWarpStrength,
+        batch.descriptor.receivesShadow,
       );
       final mesh = resolveMesh(batch.descriptor.mesh);
       encoder.bindVertexArray(mesh.vao);
@@ -370,6 +459,7 @@ final class _ShadowedWorldPass implements RenderPass {
         representative.descriptor.drawMode,
         representative.descriptor.blendMode,
         affineWarpStrength,
+        representative.descriptor.receivesShadow,
       );
       final mesh = resolveMesh(representative.descriptor.mesh);
       encoder.bindVertexArray(mesh.vao);
@@ -409,6 +499,7 @@ final class _ShadowedWorldPass implements RenderPass {
     DrawMode drawMode,
     BlendMode blendMode,
     double affineWarpStrength,
+    bool itemReceivesShadow,
   ) {
     final material = resolveMaterial(handle);
     encoder.bindTexture(0, resolveAlbedo(material.albedoTexture));
@@ -461,6 +552,12 @@ final class _ShadowedWorldPass implements RenderPass {
     encoder.setUniform(
       'uEmissiveStrength',
       UniformValue.float1(material.emissiveStrength),
+    );
+    encoder.setUniform(
+      'uReceivesShadow',
+      UniformValue.float1(
+        material.receivesShadow && itemReceivesShadow ? 1 : 0,
+      ),
     );
     // RV-09 rung 6: opaque/masked items keep this pass's own declared
     // (depth-writing, non-blended) state; DrawMode.blended items override

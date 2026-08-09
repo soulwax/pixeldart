@@ -68,3 +68,78 @@ void _blendedMaterialsNeverCutOut() {
     'a blended material must not cut out, whatever its alphaCutoff says',
   );
 }
+
+/// The hero route submits one daylight direction plus a bounded set of
+/// practical point lights. Keep this contract visible in a CPU fixture: the
+/// world pass must upload the frame lighting once, zero unused slots, and
+/// resolve shadow reception per retained item rather than treating the pass
+/// as globally shadowed.
+void _heroLightingUniformsAndReceiversArePerFrameAndPerDraw() {
+  const environment = FrameEnvironment(
+    directionalLight: DirectionalLight(
+      direction: Vec3(0.25, 0.9, -0.2),
+      color: LinearColor(0.7, 0.8, 1),
+      intensity: 0.7,
+    ),
+    pointLights: [
+      PointLight(
+        id: 4,
+        position: Vec3(1, 2, 3),
+        color: LinearColor(1, 0.35, 0.12),
+        intensity: 0.4,
+        radius: 6,
+      ),
+      PointLight(
+        id: 5,
+        position: Vec3(-1, 1, 2),
+        color: LinearColor(0.2, 0.3, 1),
+        intensity: 0.2,
+        radius: 4,
+      ),
+    ],
+  );
+  final run = _runWorldPass(
+    [
+      _item(_plainHandle),
+      _item(_plainHandle, receivesShadow: false),
+    ],
+    const [],
+    1,
+    environment,
+  );
+  _expectDoubles(
+    run.float1s('uDirectionalIntensity'),
+    [0.7],
+    'directional daylight must be uploaded once per frame',
+  );
+  _expectDoubles(
+    run.float1s('uPointIntensity0'),
+    [0.4],
+    'the first practical light must occupy point slot 0',
+  );
+  _expectDoubles(
+    run.float1s('uPointIntensity1'),
+    [0.2],
+    'the second practical light must occupy point slot 1',
+  );
+  _expectDoubles(
+    run.float1s('uPointIntensity2'),
+    [0],
+    'unused point slots must be explicitly disabled',
+  );
+  _expectDoubles(
+    run.float1s('uPointIntensity3'),
+    [0],
+    'all unused point slots must be explicitly disabled',
+  );
+  _expectDoubles(
+    run.float1s('uSpotEnabled'),
+    [0],
+    'a frame without a selected shadow spot must disable spot contribution',
+  );
+  _expectDoubles(
+    run.float1s('uReceivesShadow'),
+    [1, 0],
+    'shadow reception must follow each retained item descriptor',
+  );
+}

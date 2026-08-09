@@ -194,9 +194,31 @@ uniform sampler2D uAlbedo;
 uniform sampler2D uShadowMap;
 uniform vec3 uLightPosition;
 uniform vec3 uLightDirection;
+uniform vec3 uLightColor;
+uniform float uLightIntensity;
 uniform float uLightRange;
 uniform float uLightInnerCos;
 uniform float uLightOuterCos;
+uniform float uSpotEnabled;
+uniform vec3 uDirectionalDirection;
+uniform vec3 uDirectionalColor;
+uniform float uDirectionalIntensity;
+uniform vec3 uPointPosition0;
+uniform vec3 uPointColor0;
+uniform float uPointIntensity0;
+uniform float uPointRadius0;
+uniform vec3 uPointPosition1;
+uniform vec3 uPointColor1;
+uniform float uPointIntensity1;
+uniform float uPointRadius1;
+uniform vec3 uPointPosition2;
+uniform vec3 uPointColor2;
+uniform float uPointIntensity2;
+uniform float uPointRadius2;
+uniform vec3 uPointPosition3;
+uniform vec3 uPointColor3;
+uniform float uPointIntensity3;
+uniform float uPointRadius3;
 uniform vec3 uAmbientColor;
 uniform float uAmbientIntensity;
 uniform vec2 uShadowMapTexelSize;
@@ -212,6 +234,7 @@ uniform float uFogStart;
 uniform float uFogEnd;
 uniform float uFogHeightFalloff;
 uniform float uFogDensity;
+uniform float uReceivesShadow;
 layout(location=0)out vec4 oColor;
 layout(location=1)out vec4 oGlow;
 
@@ -230,6 +253,20 @@ float lightAttenuation(vec3 worldPos){
   float cosAngle=dot(normalize(toFrag),normalize(uLightDirection));
   float coneFalloff=smoothstep(uLightOuterCos,uLightInnerCos,cosAngle);
   return distFalloff*coneFalloff;
+}
+
+float pointAttenuation(vec3 worldPos,vec3 lightPosition,float lightRadius){
+  float dist=length(lightPosition-worldPos);
+  float falloff=clamp(1.-dist/max(lightRadius,.001),0.,1.);
+  return falloff*falloff;
+}
+
+vec3 pointContribution(vec3 normal,vec3 worldPos,vec3 lightPosition,
+  vec3 lightColor,float lightIntensity,float lightRadius){
+  vec3 toLight=lightPosition-worldPos;
+  float ndotl=max(dot(normal,normalize(toLight)),0.);
+  return lightColor*lightIntensity*ndotl*
+    pointAttenuation(worldPos,lightPosition,lightRadius);
 }
 
 float sampleShadow(vec3 projCoord,float bias){
@@ -297,10 +334,22 @@ void main(){
   // through.
   if(uAlphaCutoff>0.&&tex.a<uAlphaCutoff)discard;
   vec3 n=normalize(vNormal);
-  vec3 toLight=normalize(uLightPosition-vWorldPos);
-  float ndotl=max(dot(n,toLight),0.);
-  float shadow=shadowFactor(ndotl);
+  vec3 direct=vec3(0.);
+  float directionalNdotL=max(dot(n,normalize(uDirectionalDirection)),0.);
+  direct+=uDirectionalColor*uDirectionalIntensity*directionalNdotL;
+  direct+=pointContribution(n,vWorldPos,uPointPosition0,uPointColor0,
+    uPointIntensity0,uPointRadius0);
+  direct+=pointContribution(n,vWorldPos,uPointPosition1,uPointColor1,
+    uPointIntensity1,uPointRadius1);
+  direct+=pointContribution(n,vWorldPos,uPointPosition2,uPointColor2,
+    uPointIntensity2,uPointRadius2);
+  direct+=pointContribution(n,vWorldPos,uPointPosition3,uPointColor3,
+    uPointIntensity3,uPointRadius3);
+  vec3 toSpot=normalize(uLightPosition-vWorldPos);
+  float spotNdotL=max(dot(n,toSpot),0.);
+  float shadow=uReceivesShadow>0.5?shadowFactor(spotNdotL):1.;
   float attenuation=lightAttenuation(vWorldPos);
+  direct+=uLightColor*uLightIntensity*spotNdotL*shadow*attenuation*uSpotEnabled;
   // §8.5: "modulates ambient only" — SSAO must never darken the direct
   // (N.L * shadow * attenuation) term, only the ambient fill, or it would
   // double up with real shadowing and read as an incorrect global darkening
@@ -308,7 +357,7 @@ void main(){
   vec2 screenUv=gl_FragCoord.xy/uSceneColorSize;
   float ao=texture(uSsao,screenUv).r;
   vec3 ambient=uAmbientColor*uAmbientIntensity*ao;
-  vec3 lit=vColor.rgb*tex.rgb*uMaterialTint*clamp(ambient+vec3(ndotl*shadow*attenuation),0.,1.);
+  vec3 lit=vColor.rgb*tex.rgb*uMaterialTint*clamp(ambient+direct,0.,1.);
   // Fog blends the surface's own lit color toward uFogColor only — never
   // oGlow below, which stays a declared emissive quantity independent of
   // how much atmosphere sits between the surface and the camera, matching

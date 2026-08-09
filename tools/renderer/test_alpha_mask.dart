@@ -42,6 +42,7 @@ void main() {
   _blendedMaterialsNeverCutOut();
   _everyPassAgreesOnWhichFacesExist();
   _onlyBlendedDrawsWriteRealTransparency();
+  _heroLightingUniformsAndReceiversArePerFrameAndPerDraw();
   print('Renderer alpha-mask fixtures passed.');
 }
 
@@ -107,7 +108,13 @@ final class _FakeFrameScene implements FrameSceneData {
   final List<Object> opaque;
   final List<Object> blended;
   final PostProcessState postState;
-  const _FakeFrameScene(this.opaque, this.blended, this.postState);
+  final FrameEnvironment lighting;
+  const _FakeFrameScene(
+    this.opaque,
+    this.blended,
+    this.postState, {
+    this.lighting = const FrameEnvironment(),
+  });
 
   @override
   Iterable<Object> get opaqueBatches => opaque;
@@ -116,7 +123,7 @@ final class _FakeFrameScene implements FrameSceneData {
   @override
   Object get camera => _fakeCamera;
   @override
-  Object get environment => const FrameEnvironment();
+  Object get environment => lighting;
   @override
   Object get post => postState;
 }
@@ -137,6 +144,7 @@ int _nextSlot = 0;
 RetainedItemView _item(
   MaterialHandle material, {
   DrawMode drawMode = DrawMode.opaque,
+  bool receivesShadow = true,
 }) {
   final slot = _nextSlot++;
   return _FakeItemView(
@@ -145,6 +153,7 @@ RetainedItemView _item(
       mesh: MeshHandle(0, 1),
       material: material,
       drawMode: drawMode,
+      receivesShadow: receivesShadow,
       instanceFamilyKey: 1,
     ),
     const Aabb(Vec3(-0.5, -0.5, -0.5), Vec3(0.5, 0.5, 0.5)),
@@ -189,8 +198,9 @@ final class _Run {
 _Run _runWorldPass(
   List<RetainedItemView> opaque,
   List<RetainedItemView> blended,
-  double affineWarpStrength,
-) {
+  double affineWarpStrength, [
+  FrameEnvironment lighting = const FrameEnvironment(),
+]) {
   final device = FakeGpuDevice();
   final library = ProgramLibrary(device);
   final fallbackTexture = device.createTexture(
@@ -245,6 +255,7 @@ _Run _runWorldPass(
         opaque,
         blended,
         PostProcessState(affineWarpStrength: affineWarpStrength),
+        lighting: lighting,
       ),
     ),
   );
