@@ -19,6 +19,53 @@ enum GpuTextureFilter { nearest, linear, linearMipmapLinear }
 
 enum GpuTextureWrap { clampToEdge, repeat }
 
+/// The result of negotiating a texture's requested anisotropy with a
+/// backend.  Texture descriptors intentionally carry the request, while the
+/// device reports this effective value after extension/capability negotiation
+/// so callers can distinguish "requested 8x" from "actually running at 1x".
+final class AnisotropyDecision {
+  final double requested;
+  final double effective;
+  final double maxSupported;
+  final bool extensionAvailable;
+
+  const AnisotropyDecision({
+    required this.requested,
+    required this.effective,
+    required this.maxSupported,
+    required this.extensionAvailable,
+  });
+
+  bool get usedFallback => effective < requested;
+
+  /// Clamps a valid request to the extension's reported limit.  Missing,
+  /// malformed, or sub-1 limits intentionally collapse to portable 1x.
+  static AnisotropyDecision resolve({
+    required double requested,
+    required bool extensionAvailable,
+    double maxSupported = 1,
+  }) {
+    if (!requested.isFinite || requested < 1 || requested > 16) {
+      throw ArgumentError.value(
+        requested,
+        'requested',
+        'anisotropy must be finite and in [1, 16]',
+      );
+    }
+    final usableMax =
+        extensionAvailable && maxSupported.isFinite && maxSupported >= 1
+        ? (maxSupported > 16 ? 16.0 : maxSupported)
+        : 1.0;
+    final effective = requested < usableMax ? requested : usableMax;
+    return AnisotropyDecision(
+      requested: requested,
+      effective: effective,
+      maxSupported: usableMax,
+      extensionAvailable: extensionAvailable,
+    );
+  }
+}
+
 final class GpuBufferDescriptor {
   final int byteLength;
   final GpuBufferUsage usage;
@@ -86,6 +133,15 @@ abstract interface class GpuObject {}
 
 enum GpuDeviceStatus { ready, lost }
 
+enum GpuTimerStatus { unsupported, pending, ready, disjoint }
+
+final class GpuTimerPoll {
+  final GpuTimerStatus status;
+  final int? elapsedNanoseconds;
+
+  const GpuTimerPoll(this.status, [this.elapsedNanoseconds]);
+}
+
 enum ShaderCompileStage { vertex, fragment, link, validation }
 
 final class ShaderCompileException implements Exception {
@@ -106,6 +162,13 @@ final class ShaderCompileException implements Exception {
 abstract interface class GpuDevice {
   GpuDeviceStatus get status;
   RenderCapabilities queryCapabilities();
+
+  /// Begins a delayed elapsed-time query for the current command stream.
+  /// Unsupported adapters return `null`; they must never fabricate a timing.
+  GpuObject? beginGpuTimer();
+  void endGpuTimer(GpuObject query);
+  GpuTimerPoll pollGpuTimer(GpuObject query);
+  void deleteGpuTimer(GpuObject query);
 
   GpuObject createBuffer(GpuBufferDescriptor descriptor);
   void uploadBuffer(
@@ -239,7 +302,7 @@ abstract interface class GpuDevice {
   });
 }
 
-enum UniformType { float1, float2, float3, float4, mat4, sampler }
+enum UniformType { float1, float2, float3, float4, mat4, mat4Array, sampler }
 
 final class UniformValue {
   final UniformType type;
@@ -255,6 +318,9 @@ final class UniformValue {
     : type = UniformType.float4,
       value = v;
   const UniformValue.mat4(Float32List v) : type = UniformType.mat4, value = v;
+  const UniformValue.mat4Array(Float32List v)
+    : type = UniformType.mat4Array,
+      value = v;
   const UniformValue.sampler(int textureUnit)
     : type = UniformType.sampler,
       value = textureUnit;

@@ -9,6 +9,10 @@ import '../api/scene.dart';
 /// both paths run through the same grouping function, just with different
 /// keys.
 final class InstanceBatch {
+  /// Two mat4 arrays consume eight uniform vectors per instance; 16 keeps
+  /// the stream within WebGL2's minimum vertex-uniform budget alongside the
+  /// world matrices and lighting uniforms.
+  static const int maxInstanceCount = 16;
   final RetainedItemView representative;
   final List<RetainedItemView> members;
 
@@ -31,6 +35,10 @@ List<InstanceBatch> batchOpaque(List<RetainedItemView> sortedOpaqueItems) {
         '${item.descriptor.mesh.slot}:${item.descriptor.material.slot}:$familyKey';
     final existingIndex = groupIndexByKey[key];
     if (existingIndex == null) {
+      groupIndexByKey[key] = batches.length;
+      batches.add(InstanceBatch(item, [item]));
+    } else if (batches[existingIndex].members.length >=
+        InstanceBatch.maxInstanceCount) {
       groupIndexByKey[key] = batches.length;
       batches.add(InstanceBatch(item, [item]));
     } else {

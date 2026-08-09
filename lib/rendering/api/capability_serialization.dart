@@ -10,6 +10,7 @@ Map<String, Object?> capabilityToMap(RenderCapabilities value) => {
   'maxVertexAttributes': value.maxVertexAttributes,
   'maxColorAttachments': value.maxColorAttachments,
   'anisotropicFiltering': value.anisotropicFiltering,
+  'maxAnisotropy': value.maxAnisotropy,
   'disjointTimerQuery': value.disjointTimerQuery,
   'floatRenderTarget': value.floatRenderTarget,
   'halfFloatRenderTarget': value.halfFloatRenderTarget,
@@ -24,6 +25,15 @@ RenderCapabilities capabilityFromMap(Map<String, Object?> value) {
   }
 
   bool optionalBool(String key) => value[key] is bool && value[key] as bool;
+  double optionalDouble(String key, double fallback) {
+    final result = value[key];
+    if (result == null) return fallback;
+    if (result is! num) {
+      throw FormatException('capability $key is malformed');
+    }
+    return result.toDouble();
+  }
+
   final capabilities = RenderCapabilities(
     webglVersion: value['webglVersion'] as String?,
     rendererString: value['rendererString'] as String?,
@@ -34,6 +44,7 @@ RenderCapabilities capabilityFromMap(Map<String, Object?> value) {
     maxVertexAttributes: requiredInt('maxVertexAttributes'),
     maxColorAttachments: requiredInt('maxColorAttachments'),
     anisotropicFiltering: optionalBool('anisotropicFiltering'),
+    maxAnisotropy: optionalDouble('maxAnisotropy', 1),
     disjointTimerQuery: optionalBool('disjointTimerQuery'),
     floatRenderTarget: optionalBool('floatRenderTarget'),
     halfFloatRenderTarget: optionalBool('halfFloatRenderTarget'),

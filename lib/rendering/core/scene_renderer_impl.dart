@@ -10,8 +10,11 @@ import '../api/renderer.dart';
 import '../api/scene.dart';
 import '../api/settings.dart';
 import '../api/stats.dart';
+import '../math/bounds.dart';
 import '../assets/material_store.dart';
 import '../assets/mesh_store.dart';
+import '../assets/model_binding.dart';
+import '../assets/model_definition.dart';
 import '../assets/texture_store.dart';
 import '../webgl/device_api.dart';
 import '../webgl/draw_encoder.dart';
@@ -22,6 +25,7 @@ import '../passes/shadow_graph.dart';
 import '../passes/world.dart';
 import 'batching.dart';
 import 'feature_graph.dart';
+import 'frame_telemetry.dart';
 import 'frame_queue.dart';
 import 'program_library.dart';
 import 'render_feature.dart';
@@ -29,126 +33,11 @@ import 'render_world_impl.dart';
 import 'sort_key.dart';
 import 'visibility.dart';
 part 'scene_renderer_graph.dart';
+part 'scene_renderer_timing.dart';
+part 'resource_library_impl.dart';
 
-final class ResourceLibraryImpl implements ResourceLibrary {
-  final MeshStore _meshes;
-  final MaterialStore _materials = MaterialStore();
-  final TextureStore _textures;
-  final Set<MeshHandle> _meshHandles = {};
-  final Set<MaterialHandle> _materialHandles = {};
-  final Set<TextureHandle> _textureHandles = {};
-  bool _disposed = false;
-  ResourceLibraryImpl(GpuDevice device)
-    : _meshes = MeshStore(device),
-      _textures = TextureStore(device);
-  MeshStore get meshes => _meshes;
-  MaterialStore get materials => _materials;
-  TextureStore get textures => _textures;
-
-  int get estimatedGpuBytes => _meshes.liveGpuBytes + _textures.liveGpuBytes;
-
-  int get resourceCreateCount =>
-      _meshes.registry.createCount +
-      _materials.createCount +
-      _textures.createCount;
-
-  int get resourceDeleteCount =>
-      _meshes.registry.deleteCount +
-      _materials.deleteCount +
-      _textures.deleteCount;
+final class SceneRendererImpl with _GpuTimingSupport implements SceneRenderer {
   @override
-  MeshHandle registerMesh(MeshData data, {String? debugLabel}) {
-    _ensureActive();
-    final handle = _meshes.upload(data, debugLabel: debugLabel);
-    _meshHandles.add(handle);
-    return handle;
-  }
-
-  @override
-  void releaseMesh(MeshHandle handle) {
-    _ensureActive();
-    _meshes.release(handle);
-    _meshHandles.remove(handle);
-  }
-
-  @override
-  MaterialHandle registerMaterial(MaterialDefinition definition) {
-    _ensureActive();
-    final handle = _materials.register(definition);
-    _materialHandles.add(handle);
-    return handle;
-  }
-
-  @override
-  void releaseMaterial(MaterialHandle handle) {
-    _ensureActive();
-    _materials.release(handle);
-    _materialHandles.remove(handle);
-  }
-
-  @override
-  TextureHandle registerTexture({
-    required int width,
-    required int height,
-    int layers = 1,
-    Uint8List? pixels,
-    String? debugLabel,
-  }) {
-    _ensureActive();
-    final handle = _textures.declare(
-      width: width,
-      height: height,
-      layers: layers,
-      pixels: pixels,
-      debugLabel: debugLabel,
-    );
-    _textureHandles.add(handle);
-    return handle;
-  }
-
-  @override
-  void updateTexturePixels(TextureHandle handle, Uint8List pixels) {
-    _ensureActive();
-    _textures.updatePixels(handle, pixels);
-  }
-
-  @override
-  void releaseTexture(TextureHandle handle) {
-    _ensureActive();
-    _textures.release(handle);
-    _textureHandles.remove(handle);
-  }
-
-  void rehydrateAfterContextRestore() {
-    _ensureActive();
-    _meshes.rehydrateAfterContextRestore();
-    _textures.rehydrateAfterContextRestore();
-  }
-
-  @override
-  void dispose() {
-    if (_disposed) return;
-    for (final handle in _textureHandles.toList()) {
-      _textures.release(handle);
-    }
-    for (final handle in _materialHandles.toList()) {
-      _materials.release(handle);
-    }
-    for (final handle in _meshHandles.toList()) {
-      _meshes.release(handle);
-    }
-    _textureHandles.clear();
-    _materialHandles.clear();
-    _meshHandles.clear();
-    _disposed = true;
-  }
-
-  void _ensureActive() {
-    if (_disposed) throw StateError('resource library is disposed');
-  }
-}
-
-final class SceneRendererImpl implements SceneRenderer {
   final GpuDevice device;
   final ConfigurationCoordinator _configurations = ConfigurationCoordinator();
   final FrameQueue _frames = FrameQueue();
@@ -165,6 +54,7 @@ final class SceneRendererImpl implements SceneRenderer {
   FrameInput? _activeFrame;
   RenderWorldImpl? _activeWorld;
   SceneRendererImpl(this.device);
+
   @override
   RendererState get state => _state;
   @override
@@ -237,7 +127,17 @@ final class SceneRendererImpl implements SceneRenderer {
     frame.validate();
     _activeFrame = frame;
     _activeWorld = world;
-    return _frames.beginFrame();
+    final encoder = _frames.beginFrame();
+    try {
+      _beginGpuTiming(frame.frameIndex);
+      return encoder;
+    } catch (_) {
+      _frames.abortFrame();
+      _abortGpuTiming();
+      _activeFrame = null;
+      _activeWorld = null;
+      rethrow;
+    }
   }
 
   @override
@@ -250,28 +150,36 @@ final class SceneRendererImpl implements SceneRenderer {
     }
     final transient = _frames.endFrame();
     try {
-      _executeGraph(world, frame);
-      final items = [
-        ...world.items.map((item) => item.descriptor),
-        ...transient,
-      ];
-      var triangles = 0;
-      for (final item in items) {
-        final mesh = _resources!.meshes.resolve(item.mesh);
-        triangles +=
-            (mesh.indexCount > 0 ? mesh.indexCount : mesh.vertexCount) ~/ 3;
-      }
+      final execution = _executeGraph(world, frame, transient);
+      final passStats = execution.telemetry.snapshot();
+      final sceneStats = passStats.entries
+          .where((entry) => entry.key.toLowerCase().contains('world'))
+          .map((entry) => entry.value)
+          .fold(
+            const FramePassStats(),
+            (total, pass) => FramePassStats(
+              drawCalls: total.drawCalls + pass.drawCalls,
+              trianglesSubmitted:
+                  total.trianglesSubmitted + pass.trianglesSubmitted,
+              instancesSubmitted:
+                  total.instancesSubmitted + pass.instancesSubmitted,
+            ),
+          );
       return FrameStats(
         frameIndex: frame.frameIndex,
-        drawCalls: items.length,
-        trianglesSubmitted: triangles,
-        instancesSubmitted: items.length,
+        drawCalls: sceneStats.drawCalls,
+        trianglesSubmitted: sceneStats.trianglesSubmitted,
+        trianglesCulled: execution.trianglesCulled,
+        instancesSubmitted: sceneStats.instancesSubmitted,
+        instancesCulled: execution.cull.stats.culled,
         liveGpuBytes: _resources!.estimatedGpuBytes,
         peakGpuBytes: _resources!.estimatedGpuBytes,
         resourceCreateCount: _resources!.resourceCreateCount,
         resourceDeleteCount: _resources!.resourceDeleteCount,
+        passStats: passStats,
       );
     } finally {
+      _finishGpuTiming(frame.frameIndex);
       _activeFrame = null;
       _activeWorld = null;
     }
@@ -282,15 +190,20 @@ final class SceneRendererImpl implements SceneRenderer {
     if (_activeFrame == null) {
       throw StateError('renderer.abortFrame called without an active frame');
     }
-    _frames.abortFrame();
-    _activeFrame = null;
-    _activeWorld = null;
+    try {
+      _frames.abortFrame();
+    } finally {
+      _abortGpuTiming();
+      _activeFrame = null;
+      _activeWorld = null;
+    }
   }
 
   @override
   void dispose() {
     if (_state == RendererState.disposed) return;
     if (_activeFrame != null) abortFrame();
+    _disposeGpuTimings();
     for (final world in _worlds) {
       world.dispose();
     }
@@ -325,6 +238,7 @@ final class SceneRendererImpl implements SceneRenderer {
       throw StateError('renderer is not ready: ${_state.name}');
     }
     if (device.status == GpuDeviceStatus.lost) {
+      _discardGpuTimings();
       _state = RendererState.contextLost;
       throw StateError('renderer context lost');
     }

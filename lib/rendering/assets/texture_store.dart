@@ -230,6 +230,22 @@ final class TextureStore {
     _registry.release(handle);
   }
 
+  /// Releases device-owned textures that are not represented by public
+  /// handles. The fallback set is created with the store and therefore must
+  /// be torn down with it; otherwise every renderer disposal leaks five
+  /// 1x1 textures even when the application registered no textures.
+  void dispose() {
+    for (final texture in _texturesBySlot.values) {
+      _device.deleteTexture(texture);
+    }
+    _texturesBySlot.clear();
+    _device.deleteTexture(_fallbackAlbedo);
+    _device.deleteTexture(_fallbackNormal);
+    _device.deleteTexture(_fallbackOrm);
+    _device.deleteTexture(_fallbackEmissive);
+    _device.deleteTexture(_fallbackLightmap);
+  }
+
   /// Rebuilds every live, already-loaded texture from its retained pixel
   /// data after a context restore (mirrors `MeshStore`'s own rehydration).
   /// A handle that was declared but never loaded stays unloaded — there is

@@ -71,15 +71,13 @@ void _fiftyInstancesOneDraw() {
   final sorted = sortOpaque(keyed);
   final batches = batchOpaque(sorted);
 
-  if (batches.length != 1) {
+  if (batches.length != 4) {
     throw StateError(
-      'expected 50 same-family items to collapse to 1 batch, got ${batches.length}',
+      'expected 50 same-family items to split into 4 bounded batches, got ${batches.length}',
     );
   }
-  if (batches.single.instanceCount != 50) {
-    throw StateError(
-      'expected the single batch to carry all 50 instances, got ${batches.single.instanceCount}',
-    );
+  if (batches.map((batch) => batch.instanceCount).join(',') != '16,16,16,2') {
+    throw StateError('instance batch split did not preserve all transforms');
   }
 }
 

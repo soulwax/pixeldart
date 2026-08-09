@@ -21,7 +21,11 @@ extension WebGl2DeviceResources on WebGl2Device {
         ? _G.ELEMENT_ARRAY_BUFFER
         : _G.ARRAY_BUFFER;
     gl.bindBuffer(target, buffer);
-    gl.bufferData(target, descriptor.byteLength.toJS, _glUsage(descriptor.usage));
+    gl.bufferData(
+      target,
+      descriptor.byteLength.toJS,
+      _glUsage(descriptor.usage),
+    );
     return _WebGpuObject(buffer);
   }
 
@@ -100,6 +104,18 @@ extension WebGl2DeviceResources on WebGl2Device {
     );
     gl.texParameteri(target, _G.TEXTURE_WRAP_S, _glWrap(descriptor.wrap));
     gl.texParameteri(target, _G.TEXTURE_WRAP_T, _glWrap(descriptor.wrap));
+    final extensionAvailable = _hasExtension('EXT_texture_filter_anisotropic');
+    final maxAnisotropy = extensionAvailable
+        ? _paramDouble(_maxTextureMaxAnisotropyExt)
+        : 1.0;
+    final anisotropy = AnisotropyDecision.resolve(
+      requested: descriptor.anisotropy,
+      extensionAvailable: extensionAvailable,
+      maxSupported: maxAnisotropy,
+    );
+    if (anisotropy.effective > 1) {
+      gl.texParameterf(target, _textureMaxAnisotropyExt, anisotropy.effective);
+    }
     return _WebGpuObject(
       _WebGlTexture(
         handle: texture,
@@ -107,6 +123,7 @@ extension WebGl2DeviceResources on WebGl2Device {
         height: descriptor.height,
         layers: descriptor.layers,
         hasMips: descriptor.hasMips,
+        anisotropy: anisotropy,
       ),
     );
   }

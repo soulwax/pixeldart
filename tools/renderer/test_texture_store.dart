@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:pixeldart/rendering/api/handles.dart';
 import 'package:pixeldart/rendering/assets/texture_store.dart';
+import 'package:pixeldart/rendering/webgl/device_api.dart';
 
 import 'fake_gpu_device.dart';
 
@@ -12,8 +13,72 @@ void main() {
   _mipsFinalizedOnlyWhenDeclaredMipped();
   _releaseDeletesTextureAndInvalidatesHandle();
   _rehydrateReuploadsLoadedTexturesAndSkipsUnloadedOnes();
+  _anisotropyNegotiationIsDeterministic();
   _handleRejectionVocabulary();
   print('Renderer texture store fixtures passed.');
+}
+
+void _anisotropyNegotiationIsDeterministic() {
+  final portable = AnisotropyDecision.resolve(
+    requested: 8,
+    extensionAvailable: false,
+    maxSupported: 16,
+  );
+  if (portable.effective != 1 ||
+      !portable.usedFallback ||
+      portable.extensionAvailable) {
+    throw StateError(
+      'missing anisotropy extension must deterministically fall back to 1x',
+    );
+  }
+
+  final clamped = AnisotropyDecision.resolve(
+    requested: 8,
+    extensionAvailable: true,
+    maxSupported: 4,
+  );
+  if (clamped.effective != 4 ||
+      !clamped.usedFallback ||
+      clamped.maxSupported != 4) {
+    throw StateError('anisotropy must clamp to the extension-reported limit');
+  }
+
+  final accepted = AnisotropyDecision.resolve(
+    requested: 8,
+    extensionAvailable: true,
+    maxSupported: 32,
+  );
+  if (accepted.effective != 8 ||
+      accepted.usedFallback ||
+      accepted.maxSupported != 16) {
+    throw StateError('anisotropy policy must cap impossible limits at 16x');
+  }
+
+  final malformedLimit = AnisotropyDecision.resolve(
+    requested: 2,
+    extensionAvailable: true,
+    maxSupported: double.nan,
+  );
+  if (malformedLimit.effective != 1 || !malformedLimit.usedFallback) {
+    throw StateError('malformed extension limits must use the 1x fallback');
+  }
+
+  for (final invalid in <double>[0, double.nan, 16.1]) {
+    var threw = false;
+    try {
+      AnisotropyDecision.resolve(
+        requested: invalid,
+        extensionAvailable: true,
+        maxSupported: 16,
+      );
+    } catch (error) {
+      if (error is! ArgumentError) rethrow;
+      threw = true;
+    }
+    if (!threw) {
+      throw StateError('invalid anisotropy request $invalid must be rejected');
+    }
+  }
 }
 
 Uint8List _onePixel() => Uint8List.fromList([10, 20, 30, 255]);

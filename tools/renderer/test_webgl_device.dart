@@ -16,7 +16,35 @@ void main() {
   _stateCacheDiffMinimal();
   _capabilitySelection();
   _optionalTargetFailureDoesNotDestroySafeTarget();
+  _timerQueryFallbackIsExplicit();
   print('Renderer WebGL device fixtures passed.');
+}
+
+void _timerQueryFallbackIsExplicit() {
+  final supported = FakeGpuDevice();
+  final query = supported.beginGpuTimer();
+  if (query == null) throw StateError('fake timer query was not allocated');
+  supported.endGpuTimer(query);
+  if (supported.pollGpuTimer(query).status != GpuTimerStatus.pending ||
+      supported.pollGpuTimer(query).status != GpuTimerStatus.ready) {
+    throw StateError('fake timer query did not preserve delayed readiness');
+  }
+  supported.deleteGpuTimer(query);
+
+  final disjoint = FakeGpuDevice(disjointTimer: true);
+  final disjointQuery = disjoint.beginGpuTimer()!;
+  disjoint.endGpuTimer(disjointQuery);
+  disjoint.pollGpuTimer(disjointQuery);
+  if (disjoint.pollGpuTimer(disjointQuery).status != GpuTimerStatus.disjoint) {
+    throw StateError('disjoint timer query was reported as a valid sample');
+  }
+  disjoint.deleteGpuTimer(disjointQuery);
+
+  final unsupported = FakeGpuDevice(timerQueries: false);
+  if (unsupported.queryCapabilities().disjointTimerQuery ||
+      unsupported.beginGpuTimer() != null) {
+    throw StateError('unsupported timer query was reported as available');
+  }
 }
 
 void _staleHandlesRejected() {

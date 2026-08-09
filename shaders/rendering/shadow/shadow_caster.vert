@@ -3,6 +3,8 @@ layout(location=0) in vec3 aPosition;
 layout(location=4) in vec3 aUvMat;
 uniform mat4 uLightViewProjection;
 uniform mat4 uModel;
+uniform mat4 uInstanceModels[16];
+uniform float uUseInstances;
 out highp vec2 vUv;
 // No affine premultiply here, unlike depth_prepass.vert. Affine sampling is
 // an artifact of *this camera's* screen-space rasterization; the shadow map
@@ -13,6 +15,8 @@ out highp vec2 vUv;
 // profile asked for. That divergence is deliberate: the two rasterizations
 // have no shared screen space to agree in.
 void main(){
+  mat4 model=uModel;
+  if(uUseInstances>0.5){model=uInstanceModels[gl_InstanceID];}
   vUv=aUvMat.xy;
-  gl_Position=uLightViewProjection*uModel*vec4(aPosition,1.0);
+  gl_Position=uLightViewProjection*model*vec4(aPosition,1.0);
 }

@@ -1,4 +1,5 @@
 import 'device_api.dart';
+import '../core/frame_telemetry.dart';
 import 'state_cache.dart';
 
 /// The concrete type behind `RenderPassContext.commandEncoder` (§5.6). One
@@ -42,7 +43,8 @@ abstract interface class DrawCommandEncoder {
 /// a real backend would translate them 1:1 into WebGL2 calls.
 final class DeviceDrawCommandEncoder implements DrawCommandEncoder {
   final GpuDevice device;
-  const DeviceDrawCommandEncoder(this.device);
+  final FrameDrawTelemetry? telemetry;
+  const DeviceDrawCommandEncoder(this.device, {this.telemetry});
 
   @override
   void bindTarget(GpuObject? target) => device.bindTarget(target);
@@ -83,30 +85,38 @@ final class DeviceDrawCommandEncoder implements DrawCommandEncoder {
       device.bindGlowTexture(unit, target);
 
   @override
-  void drawArrays({required int first, required int count}) =>
-      device.drawArrays(first: first, count: count);
+  void drawArrays({required int first, required int count}) {
+    device.drawArrays(first: first, count: count);
+    telemetry?.recordArrays(count);
+  }
 
   @override
   void drawArraysInstanced({
     required int first,
     required int count,
     required int instanceCount,
-  }) => device.drawArraysInstanced(
-    first: first,
-    count: count,
-    instanceCount: instanceCount,
-  );
+  }) {
+    device.drawArraysInstanced(
+      first: first,
+      count: count,
+      instanceCount: instanceCount,
+    );
+    telemetry?.recordArrays(count, instanceCount: instanceCount);
+  }
 
   @override
   void drawElements({
     required int count,
     required int offsetBytes,
     bool index32 = false,
-  }) => device.drawElements(
-    count: count,
-    offsetBytes: offsetBytes,
-    index32: index32,
-  );
+  }) {
+    device.drawElements(
+      count: count,
+      offsetBytes: offsetBytes,
+      index32: index32,
+    );
+    telemetry?.recordElements(count);
+  }
 
   @override
   void drawElementsInstanced({
@@ -114,10 +124,13 @@ final class DeviceDrawCommandEncoder implements DrawCommandEncoder {
     required int offsetBytes,
     required int instanceCount,
     bool index32 = false,
-  }) => device.drawElementsInstanced(
-    count: count,
-    offsetBytes: offsetBytes,
-    instanceCount: instanceCount,
-    index32: index32,
-  );
+  }) {
+    device.drawElementsInstanced(
+      count: count,
+      offsetBytes: offsetBytes,
+      instanceCount: instanceCount,
+      index32: index32,
+    );
+    telemetry?.recordElements(count, instanceCount: instanceCount);
+  }
 }

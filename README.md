@@ -159,7 +159,9 @@ dart run tools/renderer/check_sizes.dart
 dart run tools/renderer/shaders.dart --check
 ```
 
-`test_all.dart` currently runs 39 renderer fixtures. They run on the Dart VM
+`test_all.dart` discovers and runs all 44 renderer fixtures. It resolves the
+package root from its own script path, so the aggregate is safe to invoke from
+the repository root or this package directory. The fixtures run on the Dart VM
 against `FakeGpuDevice`; this is fast, deterministic contract evidence and is
 not a substitute for a real browser/driver run.
 
@@ -197,18 +199,30 @@ be inspected. It is intentionally more verbose than the reusable facade.
 
 ### Using the game integration
 
-The parent game keeps its legacy renderer as the no-query default. During the
-transition, `?renderer=next` explicitly selects Pixeldart, while
-`?renderer=auto` selects Pixeldart when WebGL2 is available and safely falls
-back to legacy otherwise. The canvas exposes the selected backend, executable
-profile, fallback reason, build provenance, and frame budget through
-`data-renderer-*` attributes for smoke tests and diagnostics.
+The parent game uses Pixeldart as its no-query default. During the transition,
+`?renderer=pixeldart` is the canonical explicit spelling and `?renderer=next` is
+retained as a diagnosed compatibility alias. `?renderer=auto` selects Pixeldart
+when WebGL2 is available and safely falls back to legacy otherwise. The canvas
+exposes the selected backend, executable profile, fallback reason, build
+provenance, and frame budget through `data-renderer-*` attributes for smoke tests
+and diagnostics.
+
+The parent game keeps the stable renderer diagnostics fields at the top level
+and publishes selection facts under a nested `selection` object. Its keys are
+`kind`, `explicit`, `automatic`, `fallback`, `rejected`, and `aliasUsed`, with
+optional `fallbackReason`, `rejectionReason`, and `aliasReason` strings. A
+canonical request reports `kind: "pixeldart"`; a `next` request reports the
+same canonical kind plus `aliasUsed: true` and migration guidance. Unsupported
+queries remain an observable legacy fallback with `rejected: true`, rather than
+being treated as accepted renderer choices. Bootstrap runtime downgrades must
+preserve this nested object while changing only the effective backend/fallback
+fields.
 
 For example, from the parent repository:
 
 ```sh
 python3 -m http.server 8090 --directory dist/web
-# open http://127.0.0.1:8090/?renderer=auto
+# open http://127.0.0.1:8090/?renderer=pixeldart
 ```
 
 Keep the query-free URL as the rollback path until the external GPU,
@@ -276,6 +290,16 @@ the world, depth-prepass, and shadow-caster routes. Optional UV1 lightmaps use
 a neutral white fallback and explicit per-material intensity; sampler
 declarations reject impossible mip/aniso combinations before GPU allocation.
 
+Anisotropy is a request, not a promise. On WebGL2, `WebGl2Device` negotiates
+`EXT_texture_filter_anisotropic`, clamps to the extension's reported limit
+(with the renderer's 16× authoring cap), applies
+`TEXTURE_MAX_ANISOTROPY_EXT`, and retains an `AnisotropyDecision` for
+diagnostics. If the extension is absent or reports an unusable limit, the
+effective value is deterministically 1×; `usedFallback` makes that downgrade
+observable instead of silently overstating quality.
+`RenderCapabilities.maxAnisotropy` reports the backend limit used during this
+negotiation, while the authoring cap remains 16×.
+
 ```dart
 final material = renderer.resources.registerMaterial(
   const MaterialDefinition(
@@ -303,6 +327,11 @@ non-finite, zero-length, non-orthogonal, or non-±1-handed tangent bases before
 they reach a VAO. Compatibility14 meshes retain the deterministic derivative
 fallback, keeping old house geometry valid while new assets opt into authored
 tangents.
+
+For data-driven models, register the shared mesh/material handles first and
+call `ResourceLibrary.bindModel(model)`. The resulting binding view resolves
+every part, LOD range, and material variant against the retained stores; it
+does not duplicate ownership, and a released handle fails before submission.
 
 The application supplies the actual `MeshData` and `FrameInput`; Pixeldart does
 not own a clock, input system, camera controller, game state, save data, or
@@ -336,10 +365,41 @@ logical resource handles after restoration. Applications should stop submitting
 while the device is lost and resume only after the restored event. The fake
 device fixtures exercise the deterministic ordering; real browser loss/restore
 still requires a hardware/browser run.
+Pending GPU timer queries are discarded during loss, abort, and disposal;
+polling a sample invalidated by loss returns `GpuTimingStatus.disjoint` rather
+than a stale or zero-duration result.
 
 ### Diagnostics and release provenance
 
 The renderer exposes capabilities, health, state, and per-frame `FrameStats`.
+`FrameStats.drawCalls`, `trianglesSubmitted`, and `instancesSubmitted` are the
+successful scene-world submissions recorded at the encoder boundary; culled
+geometry is reported separately. `FrameStats.passStats` retains the same
+truthful draw/triangle/instance counts for every graph pass, including shadow,
+post, and present work, so a performance trace can distinguish scene cost
+from a full-screen composite:
+
+```dart
+final worldPass = stats.pass('worldOpaqueTransparent');
+final presentPass = stats.pass('present');
+print('world=${worldPass.drawCalls} draws, '
+    'present=${presentPass.drawCalls} draws, '
+    'culled=${stats.trianglesCulled} triangles');
+```
+
+Transient frame items participate in the same retained-world cull and are
+included only when they pass the camera/visibility test. Backend timer-query
+results are polled separately because availability is delayed:
+
+```dart
+final timing = renderer.pollGpuTiming();
+if (timing.status == GpuTimingStatus.ready) {
+  print('GPU: ${timing.elapsedNanoseconds} ns for frame ${timing.frameIndex}');
+}
+```
+
+`pending`, `disjoint`, and `unsupported` are explicit outcomes; none may be
+represented as zero-cost GPU work.
 The host application should publish its own backend/profile/fallback identity
 alongside the renderer capability map. For reproducible builds, inject the
 game SHA, Pixeldart SHA, Dart SDK version, lockfile digest, and build ID at
@@ -393,7 +453,7 @@ A few design decisions worth knowing before reading the code:
 
 ```sh
 dart analyze                                 # zero issues, including infos
-dart run tools/renderer/test_all.dart        # 39 pure test scripts
+dart run tools/renderer/test_all.dart        # 44 pure test scripts
 dart run tools/renderer/check_boundary.dart  # import/layering rules
 dart run tools/renderer/check_sizes.dart     # per-file authored-line budgets
 dart run tools/renderer/shaders.dart --check # generated shaders in sync

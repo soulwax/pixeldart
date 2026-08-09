@@ -1,56 +1,49 @@
 import 'dart:io';
 
-const List<String> _scripts = [
-  'tools/renderer/test_math.dart',
-  'tools/renderer/test_api.dart',
-  'tools/renderer/test_light_selection.dart',
-  'tools/renderer/test_lighting_shader_contract.dart',
-  'tools/renderer/test_webgl_device.dart',
-  'tools/renderer/test_render_graph.dart',
-  'tools/renderer/test_render_graph_positive.dart',
-  'tools/renderer/test_program_library.dart',
-  'tools/renderer/test_render_core.dart',
-  'tools/renderer/test_frame_queue.dart',
-  'tools/renderer/test_frame_render_encoder.dart',
-  'tools/renderer/test_qmesh.dart',
-  'tools/renderer/test_feature_graph.dart',
-  'tools/renderer/test_safe_graph.dart',
-  'tools/renderer/test_mesh_store.dart',
-  'tools/renderer/test_texture_mips.dart',
-  'tools/renderer/test_material_store.dart',
-  'tools/renderer/test_texture_store.dart',
-  'tools/renderer/test_material_conformance.dart',
-  'tools/renderer/test_surface_v2.dart',
-  'tools/renderer/test_msaa_resolve.dart',
-  'tools/renderer/test_shadow_graph.dart',
-  'tools/renderer/test_affine_uv.dart',
-  'tools/renderer/test_alpha_mask.dart',
-  'tools/renderer/test_zero_cost.dart',
-  'tools/renderer/test_post_chain_parameters.dart',
-  'tools/renderer/test_output_encoding.dart',
-  'tools/renderer/test_profile_resources.dart',
-  'tools/renderer/test_profile_serialization.dart',
-  'tools/renderer/test_configuration_transition.dart',
-  'tools/renderer/test_resource_assembler.dart',
-  'tools/renderer/test_configuration_coordinator.dart',
-  'tools/renderer/test_gpu_resource_plan_adapter.dart',
-  'tools/renderer/test_program_set.dart',
-  'tools/renderer/test_program_set_planner.dart',
-  'tools/renderer/test_feature_installation_planner.dart',
-  'tools/renderer/test_capability_validation.dart',
-  'tools/renderer/test_capability_serialization.dart',
-  'tools/renderer/test_scene_renderer.dart',
-];
+List<String> discoverScripts(Directory packageRoot) {
+  final rendererDir = Directory(
+    '${packageRoot.path}${Platform.pathSeparator}tools${Platform.pathSeparator}renderer',
+  );
+  final names =
+      rendererDir
+          .listSync()
+          .whereType<File>()
+          .map((file) => file.uri.pathSegments.last)
+          .where(
+            (name) =>
+                name.startsWith('test_') &&
+                name.endsWith('.dart') &&
+                name != 'test_all.dart',
+          )
+          .toList()
+        ..sort();
+  return List.unmodifiable([for (final name in names) 'tools/renderer/$name']);
+}
+
+Directory packageRootFromScript() {
+  final script = File.fromUri(Platform.script).absolute;
+  // test_all.dart lives at <package>/tools/renderer/test_all.dart.
+  return script.parent.parent.parent;
+}
 
 void main() {
+  final packageRoot = packageRootFromScript();
+  final scripts = discoverScripts(packageRoot);
+  if (scripts.isEmpty) {
+    stderr.writeln(
+      'No renderer test scripts discovered in ${packageRoot.path}',
+    );
+    exit(2);
+  }
+
   var failures = 0;
-  for (final script in _scripts) {
+  for (final script in scripts) {
     stdout.writeln('--- $script ---');
     final result = Process.runSync(Platform.resolvedExecutable, [
       '--suppress-analytics',
       'run',
       script,
-    ]);
+    ], workingDirectory: packageRoot.path);
     stdout.write(result.stdout);
     if (result.exitCode != 0) {
       failures += 1;
@@ -60,11 +53,11 @@ void main() {
   }
 
   if (failures == 0) {
-    stdout.writeln('All ${_scripts.length} renderer test scripts passed.');
+    stdout.writeln('All ${scripts.length} renderer test scripts passed.');
     return;
   }
   stderr.writeln(
-    '$failures of ${_scripts.length} renderer test scripts failed.',
+    '$failures of ${scripts.length} renderer test scripts failed.',
   );
   exit(1);
 }

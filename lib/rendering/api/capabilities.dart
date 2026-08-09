@@ -4,17 +4,15 @@ final class RenderCapabilities {
   final String? webglVersion;
   final String? rendererString;
   final String? vendorString;
-  final int maxTextureSize;
-  final int maxTextureArrayLayers;
-  final int maxSamples;
+  final int maxTextureSize, maxTextureArrayLayers, maxSamples;
   final int maxVertexAttributes;
   final int maxColorAttachments;
   final bool anisotropicFiltering;
-  final bool disjointTimerQuery;
-  final bool floatRenderTarget;
-  final bool halfFloatRenderTarget;
-  final bool contextLossExtension;
-
+  final double maxAnisotropy;
+  final bool disjointTimerQuery,
+      floatRenderTarget,
+      halfFloatRenderTarget,
+      contextLossExtension;
   const RenderCapabilities({
     this.webglVersion,
     this.rendererString,
@@ -25,6 +23,7 @@ final class RenderCapabilities {
     required this.maxVertexAttributes,
     required this.maxColorAttachments,
     this.anisotropicFiltering = false,
+    this.maxAnisotropy = 1,
     this.disjointTimerQuery = false,
     this.floatRenderTarget = false,
     this.halfFloatRenderTarget = false,
@@ -39,7 +38,6 @@ final class RenderCapabilities {
     maxVertexAttributes: 16,
     maxColorAttachments: 1,
   );
-
   void validate() {
     if ([
       maxTextureSize,
@@ -50,8 +48,10 @@ final class RenderCapabilities {
     ].any((value) => value <= 0)) {
       throw const FormatException('render capabilities contain invalid limits');
     }
+    if (!maxAnisotropy.isFinite || maxAnisotropy < 1) {
+      throw const FormatException('invalid anisotropy limit');
+    }
   }
-
   Map<String, Object?> toMap() => capabilityToMap(this);
 
   factory RenderCapabilities.fromMap(Map<String, Object?> value) =>

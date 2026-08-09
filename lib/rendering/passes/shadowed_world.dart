@@ -10,6 +10,7 @@ import '../api/scene.dart';
 import '../core/batching.dart';
 import '../core/graph_pass.dart';
 import '../core/graph_resource.dart';
+import '../core/instance_transforms.dart';
 import '../core/program_library.dart';
 import '../core/program_source.dart';
 import '../core/render_feature.dart';
@@ -564,6 +565,7 @@ final class _ShadowedWorldPass implements RenderPass {
     double affineWarpStrength,
   ) {
     if (batch is RetainedItemView) {
+      disableInstanceTransformUniforms(encoder);
       _setModelUniforms(encoder, batch.descriptor.transform);
       _setMaterialState(
         encoder,
@@ -587,6 +589,7 @@ final class _ShadowedWorldPass implements RenderPass {
     } else if (batch is InstanceBatch) {
       final representative = batch.representative;
       _setModelUniforms(encoder, representative.descriptor.transform);
+      setInstanceTransformUniforms(encoder, batch);
       _setMaterialState(
         encoder,
         representative.descriptor.material,

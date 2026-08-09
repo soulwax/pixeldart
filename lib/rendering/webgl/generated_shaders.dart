@@ -13,12 +13,18 @@ layout(location=4) in vec3 aUvMat;
 uniform mat4 uViewProjection;
 uniform mat4 uModel;
 uniform mat4 uNormalMatrix;
+uniform mat4 uInstanceModels[16];
+uniform mat4 uInstanceNormalMatrices[16];
+uniform float uUseInstances;
 out vec4 vColor;
 out vec3 vNormal;
 void main(){
+  mat4 model=uModel;
+  mat4 normalMatrix=uNormalMatrix;
+  if(uUseInstances>0.5){model=uInstanceModels[gl_InstanceID];normalMatrix=uInstanceNormalMatrices[gl_InstanceID];}
   vColor=vec4(aColor.rgb,aAlpha);
-  vNormal=mat3(uNormalMatrix)*aNormal;
-  gl_Position=uViewProjection*uModel*vec4(aPosition,1.0);
+  vNormal=mat3(normalMatrix)*aNormal;
+  gl_Position=uViewProjection*model*vec4(aPosition,1.0);
 }
 ''';
 
@@ -49,14 +55,20 @@ layout(location=4) in vec3 aUvMat;
 uniform mat4 uViewProjection;
 uniform mat4 uModel;
 uniform mat4 uNormalMatrix;
+uniform mat4 uInstanceModels[16];
+uniform mat4 uInstanceNormalMatrices[16];
+uniform float uUseInstances;
 out vec4 vColor;
 out vec3 vNormal;
 out vec2 vUv;
 void main(){
+  mat4 model=uModel;
+  mat4 normalMatrix=uNormalMatrix;
+  if(uUseInstances>0.5){model=uInstanceModels[gl_InstanceID];normalMatrix=uInstanceNormalMatrices[gl_InstanceID];}
   vColor=vec4(aColor.rgb,aAlpha);
-  vNormal=mat3(uNormalMatrix)*aNormal;
+  vNormal=mat3(normalMatrix)*aNormal;
   vUv=aUvMat.xy;
-  gl_Position=uViewProjection*uModel*vec4(aPosition,1.0);
+  gl_Position=uViewProjection*model*vec4(aPosition,1.0);
 }
 ''';
 
@@ -86,6 +98,8 @@ layout(location=0) in vec3 aPosition;
 layout(location=4) in vec3 aUvMat;
 uniform mat4 uLightViewProjection;
 uniform mat4 uModel;
+uniform mat4 uInstanceModels[16];
+uniform float uUseInstances;
 out highp vec2 vUv;
 // No affine premultiply here, unlike depth_prepass.vert. Affine sampling is
 // an artifact of *this camera's* screen-space rasterization; the shadow map
@@ -96,8 +110,10 @@ out highp vec2 vUv;
 // profile asked for. That divergence is deliberate: the two rasterizations
 // have no shared screen space to agree in.
 void main(){
+  mat4 model=uModel;
+  if(uUseInstances>0.5){model=uInstanceModels[gl_InstanceID];}
   vUv=aUvMat.xy;
-  gl_Position=uLightViewProjection*uModel*vec4(aPosition,1.0);
+  gl_Position=uLightViewProjection*model*vec4(aPosition,1.0);
 }
 ''';
 
@@ -130,6 +146,9 @@ uniform mat4 uViewProjection;
 uniform mat4 uView;
 uniform mat4 uModel;
 uniform mat4 uNormalMatrix;
+uniform mat4 uInstanceModels[16];
+uniform mat4 uInstanceNormalMatrices[16];
+uniform float uUseInstances;
 uniform mat4 uLightViewProjection;
 uniform float uVertexSnapGrid;
 uniform float uAffineWarpStrength;
@@ -143,11 +162,14 @@ out vec3 vWorldPos;
 out vec4 vTangent;
 out float vViewDepth;
 void main(){
+  mat4 model=uModel;
+  mat4 normalMatrix=uNormalMatrix;
+  if(uUseInstances>0.5){model=uInstanceModels[gl_InstanceID];normalMatrix=uInstanceNormalMatrices[gl_InstanceID];}
   vColor=vec4(aColor.rgb,aAlpha);
-  vNormal=mat3(uNormalMatrix)*aNormal;
-  vec4 worldPos=uModel*vec4(aPosition,1.0);
+  vNormal=mat3(normalMatrix)*aNormal;
+  vec4 worldPos=model*vec4(aPosition,1.0);
   vWorldPos=worldPos.xyz;
-  vTangent=vec4(mat3(uNormalMatrix)*aTangent.xyz,aTangent.w);
+  vTangent=vec4(mat3(normalMatrix)*aTangent.xyz,aTangent.w);
   vLightSpacePos=uLightViewProjection*worldPos;
   // RV-09 rung 5's fog: the same "linear view depth" convention SSAO/DOF
   // already reconstruct from a depth texture, computed directly here
@@ -544,6 +566,8 @@ layout(location=0) in vec3 aPosition;
 layout(location=4) in vec3 aUvMat;
 uniform mat4 uViewProjection;
 uniform mat4 uModel;
+uniform mat4 uInstanceModels[16];
+uniform float uUseInstances;
 uniform float uVertexSnapGrid;
 uniform float uAffineWarpStrength;
 out highp vec2 vUv;
@@ -560,7 +584,9 @@ out highp float vUvW;
 // given texel lands, so the w-premultiply below is the same expression
 // shadowed_world.vert uses and is driven from the same per-material weight.
 void main(){
-  vec4 clip=uViewProjection*uModel*vec4(aPosition,1.0);
+  mat4 model=uModel;
+  if(uUseInstances>0.5){model=uInstanceModels[gl_InstanceID];}
+  vec4 clip=uViewProjection*model*vec4(aPosition,1.0);
   if(uVertexSnapGrid>0.0){
     vec2 ndc=clip.xy/clip.w;
     ndc=floor(ndc/uVertexSnapGrid+0.5)*uVertexSnapGrid;

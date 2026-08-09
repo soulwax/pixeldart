@@ -7,6 +7,7 @@ import '../api/scene.dart';
 import '../core/batching.dart';
 import '../core/graph_pass.dart';
 import '../core/graph_resource.dart';
+import '../core/instance_transforms.dart';
 import '../core/program_library.dart';
 import '../core/program_source.dart';
 import '../core/render_feature.dart';
@@ -223,6 +224,7 @@ final class _ShadowCasterPass implements RenderPass {
   ) {
     if (batch is RetainedItemView) {
       if (!batch.descriptor.castsShadow) return;
+      disableInstanceTransformUniforms(encoder);
       _setLightUniforms(encoder, batch.descriptor.transform, lightView);
       _setMaterialState(encoder, batch.descriptor.material);
       final mesh = resolveMesh(batch.descriptor.mesh);
@@ -243,6 +245,11 @@ final class _ShadowCasterPass implements RenderPass {
         encoder,
         representative.descriptor.transform,
         lightView,
+      );
+      setInstanceTransformUniforms(
+        encoder,
+        batch,
+        includeNormalMatrices: false,
       );
       _setMaterialState(encoder, representative.descriptor.material);
       final mesh = resolveMesh(representative.descriptor.mesh);

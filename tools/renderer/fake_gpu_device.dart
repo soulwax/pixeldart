@@ -4,6 +4,8 @@ import 'package:pixeldart/rendering/rendering.dart';
 import 'package:pixeldart/rendering/webgl/device_api.dart';
 import 'package:pixeldart/rendering/webgl/state_cache.dart';
 
+part 'fake_gpu_device_timing.dart';
+
 final class _FakeGpuObject implements GpuObject {
   final int id;
   const _FakeGpuObject(this.id);
@@ -14,7 +16,12 @@ final class _FakeGpuObject implements GpuObject {
 /// requirement that a fake device cover context loss/restore without a
 /// browser. Every create/delete call is counted so tests can assert
 /// resource-count behavior across warm-up and loss/restore cycles.
-final class FakeGpuDevice implements GpuDevice {
+final class FakeGpuDevice with _FakeGpuTimerSupport implements GpuDevice {
+  @override
+  final bool timerQueries;
+  @override
+  final bool disjointTimer;
+  FakeGpuDevice({this.timerQueries = true, this.disjointTimer = false});
   GpuDeviceStatus _status = GpuDeviceStatus.ready;
   int _nextId = 1;
 
@@ -46,8 +53,13 @@ final class FakeGpuDevice implements GpuDevice {
   bool isLive(GpuObject obj) =>
       _liveObjects.contains((obj as _FakeGpuObject).id);
 
+  /// Exposes only aggregate ownership counts for steady-state fixtures; test
+  /// code must not depend on the private object identities.
+  int get liveObjectCount => _liveObjects.length;
+  int get liveTimerCount => _timerIds.length;
+
   @override
-  RenderCapabilities queryCapabilities() => const RenderCapabilities(
+  RenderCapabilities queryCapabilities() => RenderCapabilities(
     webglVersion: 'fake-2.0',
     rendererString: 'FakeGpuDevice',
     maxTextureSize: 4096,
@@ -57,6 +69,7 @@ final class FakeGpuDevice implements GpuDevice {
     maxColorAttachments: 4,
     floatRenderTarget: true,
     contextLossExtension: true,
+    disjointTimerQuery: timerQueries,
   );
 
   GpuObject _create() {

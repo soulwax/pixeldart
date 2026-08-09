@@ -1,5 +1,24 @@
 part of 'scene_renderer_impl.dart';
 
+final class _FrameExecution {
+  final FrameDrawTelemetry telemetry;
+  final CullResult cull;
+  final int trianglesCulled;
+
+  const _FrameExecution(this.telemetry, this.cull, this.trianglesCulled);
+}
+
+final class _TransientItemView implements RetainedItemView {
+  @override
+  final InstanceId id;
+  @override
+  final RetainedItemDescriptor descriptor;
+  @override
+  final Aabb worldBounds;
+
+  const _TransientItemView(this.id, this.descriptor, this.worldBounds);
+}
+
 extension on SceneRendererImpl {
   Future<void> _configure(RendererConfiguration configuration) async {
     _ensureReady();
@@ -170,17 +189,50 @@ extension on SceneRendererImpl {
     return _SafeGraphAssembly(featureGraph, result);
   }
 
-  void _executeGraph(RenderWorldImpl world, FrameInput frame) {
+  _FrameExecution _executeGraph(
+    RenderWorldImpl world,
+    FrameInput frame,
+    List<RetainedItemDescriptor> transient,
+  ) {
     final graph = _graph;
     final resources = _gpuResources;
     if (graph == null || resources == null) {
       throw StateError('renderer graph is not initialized');
     }
-    final visible = cullItems(
-      items: world.items,
+    final allItems = <RetainedItemView>[...world.items];
+    for (var i = 0; i < transient.length; i += 1) {
+      final descriptor = transient[i];
+      final bounds = _resources!.meshes.registry
+          .descriptorOf(descriptor.mesh)
+          .localBounds
+          .transformed(descriptor.transform.toMat4());
+      allItems.add(
+        _TransientItemView(
+          InstanceId(1 << 30 | i, 0, 'transient'),
+          descriptor,
+          bounds,
+        ),
+      );
+    }
+    final cull = cullItems(
+      items: allItems,
       frustum: frame.camera.buildFrustum(),
       visibilityMask: frame.visibilityMask,
-    ).visible;
+    );
+    var candidateTriangles = 0;
+    for (final item in allItems) {
+      candidateTriangles += _triangleCount(item.descriptor.mesh);
+    }
+    var visibleTriangles = 0;
+    for (final item in cull.visible) {
+      visibleTriangles += _triangleCount(item.descriptor.mesh);
+    }
+    final visible = cull.visible;
+    final telemetry = FrameDrawTelemetry()..beginPass('cull');
+    telemetry.recordCull(
+      triangles: candidateTriangles - visibleTriangles,
+      instances: cull.stats.culled,
+    );
     final opaque = <SortableItem<OpaqueSortKey>>[];
     final blended = <SortableItem<BlendedSortKey>>[];
     for (final item in visible) {
@@ -218,8 +270,9 @@ extension on SceneRendererImpl {
       environment: frame.environment,
       post: frame.post,
     );
-    final encoder = DeviceDrawCommandEncoder(device);
+    final encoder = DeviceDrawCommandEncoder(device, telemetry: telemetry);
     for (final pass in graph.passes) {
+      telemetry.beginPass(pass.descriptor.id);
       final views = <String, BoundResourceView>{};
       for (final use in pass.descriptor.uses) {
         final resource = use.resource;
@@ -238,6 +291,16 @@ extension on SceneRendererImpl {
         BoundPassContext(views: views, encoder: encoder, frameScene: scene),
       );
     }
+    return _FrameExecution(
+      telemetry,
+      cull,
+      candidateTriangles - visibleTriangles,
+    );
+  }
+
+  int _triangleCount(MeshHandle handle) {
+    final mesh = _resources!.meshes.resolve(handle);
+    return (mesh.indexCount > 0 ? mesh.indexCount : mesh.vertexCount) ~/ 3;
   }
 }
 

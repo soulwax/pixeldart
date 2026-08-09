@@ -36,6 +36,42 @@ final class RendererHealth {
   static const RendererHealth healthy = RendererHealth();
 }
 
+/// Draw work issued by one graph pass during a frame. Counts are collected at
+/// the encoder's successful draw boundary, so post-processing and scene work
+/// remain distinguishable without relying on submission estimates.
+final class FramePassStats {
+  final int drawCalls;
+  final int trianglesSubmitted;
+  final int trianglesCulled;
+  final int instancesSubmitted;
+  final int instancesCulled;
+
+  const FramePassStats({
+    this.drawCalls = 0,
+    this.trianglesSubmitted = 0,
+    this.trianglesCulled = 0,
+    this.instancesSubmitted = 0,
+    this.instancesCulled = 0,
+  });
+}
+
+enum GpuTimingStatus { unsupported, pending, ready, disjoint }
+
+/// A delayed GPU elapsed-time sample. [pending] is expected immediately
+/// after submission; [disjoint] means the adapter invalidated the sample and
+/// callers must not treat it as a zero-cost frame.
+final class GpuTimingResult {
+  final int frameIndex;
+  final GpuTimingStatus status;
+  final int? elapsedNanoseconds;
+
+  const GpuTimingResult({
+    required this.frameIndex,
+    required this.status,
+    this.elapsedNanoseconds,
+  });
+}
+
 /// Immediate CPU/counter statistics returned by `endFrame()` (§5.1).
 /// Asynchronous GPU query results are not part of this type; they surface
 /// later in diagnostics keyed to [frameIndex].
@@ -50,6 +86,7 @@ final class FrameStats {
   final int peakGpuBytes;
   final int resourceCreateCount;
   final int resourceDeleteCount;
+  final Map<String, FramePassStats> passStats;
 
   const FrameStats({
     required this.frameIndex,
@@ -62,7 +99,10 @@ final class FrameStats {
     this.peakGpuBytes = 0,
     this.resourceCreateCount = 0,
     this.resourceDeleteCount = 0,
+    this.passStats = const {},
   });
+
+  FramePassStats pass(String id) => passStats[id] ?? const FramePassStats();
 
   @override
   String toString() =>

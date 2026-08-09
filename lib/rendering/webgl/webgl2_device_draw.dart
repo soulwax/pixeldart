@@ -307,6 +307,8 @@ extension WebGl2DeviceDraw on WebGl2Device {
         gl.uniform4f(location, v[0], v[1], v[2], v[3]);
       case UniformType.mat4:
         gl.uniformMatrix4fv(location, false, (value.value as Float32List).toJS);
+      case UniformType.mat4Array:
+        gl.uniformMatrix4fv(location, false, (value.value as Float32List).toJS);
       case UniformType.sampler:
         gl.uniform1i(location, value.value as int);
     }

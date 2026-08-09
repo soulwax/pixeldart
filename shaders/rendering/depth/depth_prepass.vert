@@ -3,6 +3,8 @@ layout(location=0) in vec3 aPosition;
 layout(location=4) in vec3 aUvMat;
 uniform mat4 uViewProjection;
 uniform mat4 uModel;
+uniform mat4 uInstanceModels[16];
+uniform float uUseInstances;
 uniform float uVertexSnapGrid;
 uniform float uAffineWarpStrength;
 out highp vec2 vUv;
@@ -19,7 +21,9 @@ out highp float vUvW;
 // given texel lands, so the w-premultiply below is the same expression
 // shadowed_world.vert uses and is driven from the same per-material weight.
 void main(){
-  vec4 clip=uViewProjection*uModel*vec4(aPosition,1.0);
+  mat4 model=uModel;
+  if(uUseInstances>0.5){model=uInstanceModels[gl_InstanceID];}
+  vec4 clip=uViewProjection*model*vec4(aPosition,1.0);
   if(uVertexSnapGrid>0.0){
     vec2 ndc=clip.xy/clip.w;
     ndc=floor(ndc/uVertexSnapGrid+0.5)*uVertexSnapGrid;

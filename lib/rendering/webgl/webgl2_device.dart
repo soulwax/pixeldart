@@ -11,8 +11,17 @@ import 'state_cache.dart';
 part 'webgl2_device_draw.dart';
 part 'webgl2_device_resources.dart';
 part 'webgl2_device_targets.dart';
+part 'webgl2_device_timing.dart';
 
 typedef _G = WebGL2RenderingContext;
+
+// EXT_texture_filter_anisotropic constants are extension-owned values. The
+// package:web 0.5 bindings expose them as external static getters, but those
+// getters are not present on every browser's global object. Keep the numeric
+// WebGL constants local so capability probing remains safe when the extension
+// is absent or only partially exposed.
+const _textureMaxAnisotropyExt = 34046;
+const _maxTextureMaxAnisotropyExt = 34047;
 
 /// Wraps either a raw JS interop handle (buffer/texture/VAO/program) or a
 /// composite Dart-side record (the multi-attachment framebuffer bundle
@@ -29,12 +38,14 @@ final class _WebGlTexture {
   final web.WebGLTexture handle;
   final int width, height, layers;
   final bool hasMips;
+  final AnisotropyDecision anisotropy;
   const _WebGlTexture({
     required this.handle,
     required this.width,
     required this.height,
     required this.layers,
     required this.hasMips,
+    required this.anisotropy,
   });
 }
 
@@ -62,6 +73,12 @@ final class _WebGlFramebuffer {
   });
 }
 
+final class _WebGlTimerQuery {
+  final WebGLQuery query;
+  bool ended = false;
+  _WebGlTimerQuery(this.query);
+}
+
 /// Real WebGL2 implementation of `GpuDevice` (§4.1, §7.1-7.2, §7.4), split
 /// across three files by responsibility (this coordinator, `_resources` for
 /// create/upload/delete, `_draw` for the per-frame command surface) to stay
@@ -73,13 +90,17 @@ final class _WebGlFramebuffer {
 /// already proven in the legacy `lib/engine/gl.dart`; nothing here is
 /// speculative GL usage, but it is unexecuted GL usage until a browser
 /// session confirms it.
-final class WebGl2Device implements GpuDevice {
+final class WebGl2Device with _WebGlTimerSupport implements GpuDevice {
+  @override
   final WebGL2RenderingContext gl;
   GpuDeviceStatus _status = GpuDeviceStatus.ready;
   EventListener? _lostListener;
   EventListener? _restoredListener;
   WebGLProgram? _boundProgram;
   final WebGlStateCache _stateCache = WebGlStateCache();
+  final Set<String> _supportedExtensions;
+  @override
+  bool _timerExtensionAvailable = false;
 
   WebGLProgram? get boundProgram => _boundProgram;
   void setBoundProgram(WebGLProgram? program) => _boundProgram = program;
@@ -89,7 +110,7 @@ final class WebGl2Device implements GpuDevice {
   /// stops the browser's default *permanent* context loss and allows
   /// `webglcontextrestored` to fire at all — omitting it means a lost
   /// context never comes back regardless of anything else this class does.
-  WebGl2Device(this.gl) {
+  WebGl2Device(this.gl) : _supportedExtensions = _readSupportedExtensions(gl) {
     final canvasTarget = gl.canvas as EventTarget;
     _lostListener =
         ((Event event) {
@@ -105,6 +126,14 @@ final class WebGl2Device implements GpuDevice {
     canvasTarget.addEventListener('webglcontextlost', _lostListener);
     canvasTarget.addEventListener('webglcontextrestored', _restoredListener);
   }
+
+  static Set<String> _readSupportedExtensions(WebGL2RenderingContext gl) {
+    final extensions = gl.getSupportedExtensions();
+    if (extensions == null) return <String>{};
+    return {for (final extension in extensions.toDart) extension.toDart};
+  }
+
+  bool _hasExtension(String name) => _supportedExtensions.contains(name);
 
   /// Detaches the listeners installed in the constructor. Callers must
   /// invoke this before dropping their last reference to a `WebGl2Device`,
@@ -135,13 +164,15 @@ final class WebGl2Device implements GpuDevice {
     final maxAttribs = _paramInt(_G.MAX_VERTEX_ATTRIBS);
     final maxColorAttachments = _paramInt(_G.MAX_COLOR_ATTACHMENTS);
 
-    final aniso = gl.getExtension('EXT_texture_filter_anisotropic') != null;
-    final timerQuery =
-        gl.getExtension('EXT_disjoint_timer_query_webgl2') != null;
-    final floatBlend = gl.getExtension('EXT_color_buffer_float') != null;
-    final halfFloatBlend =
-        gl.getExtension('EXT_color_buffer_half_float') != null;
-    final contextLoss = gl.getExtension('WEBGL_lose_context') != null;
+    final aniso = _hasExtension('EXT_texture_filter_anisotropic');
+    final maxAnisotropy = aniso
+        ? _validAnisotropyLimit(_paramDouble(_maxTextureMaxAnisotropyExt))
+        : 1.0;
+    _timerExtensionAvailable = _hasExtension('EXT_disjoint_timer_query_webgl2');
+    final timerQuery = _timerExtensionAvailable;
+    final floatBlend = _hasExtension('EXT_color_buffer_float');
+    final halfFloatBlend = _hasExtension('EXT_color_buffer_half_float');
+    final contextLoss = _hasExtension('WEBGL_lose_context');
 
     final renderer = gl.getParameter(_G.RENDERER).dartify();
     final vendor = gl.getParameter(_G.VENDOR).dartify();
@@ -156,6 +187,7 @@ final class WebGl2Device implements GpuDevice {
       maxVertexAttributes: maxAttribs,
       maxColorAttachments: maxColorAttachments,
       anisotropicFiltering: aniso,
+      maxAnisotropy: maxAnisotropy,
       disjointTimerQuery: timerQuery,
       floatRenderTarget: floatBlend,
       halfFloatRenderTarget: halfFloatBlend,
@@ -168,6 +200,26 @@ final class WebGl2Device implements GpuDevice {
     return v is num ? v.toInt() : 0;
   }
 
+  double _paramDouble(int pname) {
+    final v = gl.getParameter(pname).dartify();
+    return v is num ? v.toDouble() : double.nan;
+  }
+
+  double _validAnisotropyLimit(double value) =>
+      value.isFinite && value >= 1 ? value : 1.0;
+
+  /// Reports the sampler negotiation retained on a texture created by this
+  /// device.  Keeping this on the backend object makes diagnostics honest:
+  /// the descriptor is only a request, whereas this is what WebGL accepted.
+  AnisotropyDecision anisotropyDecisionOf(GpuObject texture) {
+    final value = (texture as _WebGpuObject).handle;
+    if (value is! _WebGlTexture) {
+      throw ArgumentError.value(texture, 'texture', 'is not a WebGL texture');
+    }
+    return value.anisotropy;
+  }
+
+  @override
   void _requireReady() {
     if (_status != GpuDeviceStatus.ready) {
       throw StateError(

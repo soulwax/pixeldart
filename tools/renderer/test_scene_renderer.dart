@@ -44,8 +44,32 @@ Future<void> main() async {
   final material = library.registerMaterial(
     const MaterialDefinition(key: 'unit'),
   );
+  final binding = library.bindModel(
+    ModelDefinition(
+      key: 'unit-model',
+      parts: [
+        ModelPart(
+          key: 'body',
+          mesh: mesh,
+          material: material,
+          localBounds: const Aabb(Vec3(-1, -1, -1), Vec3(1, 1, 1)),
+        ),
+      ],
+      combinedBounds: const Aabb(Vec3(-1, -1, -1), Vec3(1, 1, 1)),
+    ),
+  );
+  require(
+    binding.part('body') != null,
+    'resource library did not expose the retained model binding',
+  );
   final world = renderer.createWorld();
-  world.addItem(RetainedItemDescriptor(mesh: mesh, material: material));
+  world.addItem(
+    RetainedItemDescriptor(
+      mesh: mesh,
+      material: material,
+      instanceFamilyKey: 7,
+    ),
+  );
 
   final frame = FrameInput(
     camera: CameraView(
@@ -68,7 +92,14 @@ Future<void> main() async {
     timeSeconds: 0,
   );
   final encoder = renderer.beginFrame(world, frame);
-  encoder.submit(RetainedItemDescriptor(mesh: mesh, material: material));
+  encoder.submit(
+    RetainedItemDescriptor(
+      mesh: mesh,
+      material: material,
+      transform: Transform.at(const Vec3(2, 0, 0)),
+      instanceFamilyKey: 7,
+    ),
+  );
   var configureRejected = false;
   try {
     await renderer.configure(RendererConfiguration.safe);
@@ -78,10 +109,42 @@ Future<void> main() async {
   require(configureRejected, 'configuration must not overlap an active frame');
   final stats = renderer.endFrame();
   require(
-    stats.drawCalls == 2,
-    'persistent and transient draws were not counted',
+    stats.drawCalls == 1,
+    'instanced persistent and transient world draws were not batched',
   );
   require(stats.trianglesSubmitted == 2, 'triangle count is not deterministic');
+  final pendingTiming = renderer.pollGpuTiming();
+  require(
+    pendingTiming.frameIndex == 1 &&
+        pendingTiming.status == GpuTimingStatus.pending,
+    'GPU timing did not remain delayed after submission',
+  );
+  final readyTiming = renderer.pollGpuTiming();
+  require(
+    readyTiming.status == GpuTimingStatus.ready &&
+        readyTiming.elapsedNanoseconds == 1250000,
+    'GPU timing result was not surfaced after availability',
+  );
+  require(
+    stats.trianglesCulled == 0 &&
+        stats.instancesSubmitted == 2 &&
+        stats.instancesCulled == 0,
+    'visible scene counters are not truthful',
+  );
+  require(
+    stats.pass('worldOpaqueTransparent').drawCalls == 1 &&
+        stats.pass('worldOpaqueTransparent').trianglesSubmitted == 2 &&
+        stats.pass('present').drawCalls == 1,
+    'per-pass encoder telemetry is incomplete',
+  );
+  final instanceUniform = device.uniformLog.lastWhere(
+    (entry) => entry.name == 'uInstanceModels',
+  );
+  final instanceModels = instanceUniform.value.value as Float32List;
+  require(
+    instanceModels.length == 32 && instanceModels[28] == 2,
+    'world pass did not submit the distinct instance transform stream',
+  );
   require(stats.liveGpuBytes == 168, 'mesh upload bytes were not reported');
   require(
     stats.resourceCreateCount == 2 && stats.resourceDeleteCount == 0,
@@ -107,6 +170,13 @@ Future<void> main() async {
   require(
     clear.r == 0.03 && clear.g == 0.02 && clear.b == 0.01 && clear.a == 1,
     'world pass did not consume the authored clear color',
+  );
+  final offscreen = world.addItem(
+    RetainedItemDescriptor(
+      mesh: mesh,
+      material: material,
+      transform: Transform.at(const Vec3(100, 0, 0)),
+    ),
   );
 
   final targetsBeforeTransition = device.targetCreateCalls;
@@ -147,8 +217,12 @@ Future<void> main() async {
   profileFrame.submit(RetainedItemDescriptor(mesh: mesh, material: material));
   final profileStats = renderer.endFrame();
   require(
-    profileStats.drawCalls == 2,
-    'capability-selected minimal graph changed draw accounting',
+    profileStats.drawCalls == 2 && profileStats.instancesSubmitted == 2,
+    'capability-selected minimal graph changed retained/transient draw accounting',
+  );
+  require(
+    profileStats.instancesCulled == 1 && profileStats.trianglesCulled == 1,
+    'frustum cull totals did not reach frame diagnostics',
   );
   require(
     device.drawLog.any((entry) => entry == 'clear(depthOnly)'),
@@ -161,6 +235,7 @@ Future<void> main() async {
       internalHeight: 180,
     ),
   );
+  world.removeItem(offscreen);
   final targetsBeforeInvalid = device.targetCreateCalls;
   var invalidRejected = false;
   try {

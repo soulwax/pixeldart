@@ -9,21 +9,17 @@ import '../api/mesh.dart';
 /// bit-identical — this is deliberately stricter than an epsilon
 /// comparison, so it never silently merges two vertices an author meant to
 /// keep distinct (e.g. a hard edge with a duplicated position but a
-/// different normal).
+/// different normal). The resulting index width is selected from the final
+/// unique-vertex count: compact Uint16 for ordinary meshes, Uint32 when an
+/// authored mesh genuinely crosses the 65,536-vertex boundary.
 MeshData deduplicateMesh(MeshData source) {
   if (source.indices != null) {
     return source;
   }
-  if (source.vertexCount > 65536) {
-    throw ArgumentError(
-      'deduplicateMesh: ${source.vertexCount} vertices exceeds Uint16 index range',
-    );
-  }
-
   final stride = source.layout.strideFloats;
   final keyToIndex = <String, int>{};
   final uniqueVertices = <double>[];
-  final indices = Uint16List(source.vertexCount);
+  final indices = List<int>.filled(source.vertexCount, 0);
 
   for (var v = 0; v < source.vertexCount; v++) {
     final start = v * stride;
@@ -44,10 +40,14 @@ MeshData deduplicateMesh(MeshData source) {
     }
   }
 
+  final uniqueCount = uniqueVertices.length ~/ stride;
+  final typedIndices = uniqueCount > 65536
+      ? Uint32List.fromList(indices)
+      : Uint16List.fromList(indices);
   return MeshData(
     layout: source.layout,
     vertices: Float32List.fromList(uniqueVertices),
-    indices: indices,
+    indices: typedIndices,
     localBounds: source.localBounds,
   );
 }

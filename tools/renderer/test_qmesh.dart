@@ -1,15 +1,112 @@
 import 'dart:typed_data';
 
 import 'package:pixeldart/rendering/assets/mesh_dedup.dart';
+import 'package:pixeldart/rendering/assets/mesh_store.dart';
 import 'package:pixeldart/rendering/assets/model_cache.dart';
 import 'package:pixeldart/rendering/assets/qmesh.dart';
+import 'package:pixeldart/rendering/webgl/draw_encoder.dart';
+
+import 'fake_gpu_device.dart';
 
 void main() {
   _validFixtureDecodesExactly();
   _corruptCasesRejected();
   _dedupIsStableAndDeterministic();
   _cacheSkipsRedecode();
+  _largeMeshRetainsUint32AcrossCacheDrawRestoreAndRelease();
   print('Renderer QMSH fixtures passed.');
+}
+
+Uint8List _buildLargeQmesh() {
+  const stride = 14;
+  const vertexCount = 65538;
+  final bytes = Uint8List(36 + vertexCount * stride * 4);
+  final view = ByteData.sublistView(bytes);
+  bytes.setAll(0, const [0x51, 0x4D, 0x53, 0x48]);
+  view.setUint16(4, 1, Endian.little);
+  view.setUint16(6, stride, Endian.little);
+  view.setUint32(8, vertexCount, Endian.little);
+  for (var i = 0; i < 6; i++) {
+    view.setFloat32(
+      12 + i * 4,
+      i < 3 ? 0 : vertexCount.toDouble(),
+      Endian.little,
+    );
+  }
+  for (var vertex = 0; vertex < vertexCount; vertex++) {
+    final base = 36 + vertex * stride * 4;
+    view.setFloat32(base, vertex.toDouble(), Endian.little);
+    view.setFloat32(base + 4, 0, Endian.little);
+    view.setFloat32(base + 8, 0, Endian.little);
+    view.setFloat32(base + 12, 0, Endian.little);
+    view.setFloat32(base + 16, 1, Endian.little);
+    view.setFloat32(base + 20, 0, Endian.little);
+    for (var field = 6; field < stride; field++) {
+      view.setFloat32(base + field * 4, field == 8 ? 1 : 0, Endian.little);
+    }
+  }
+  return bytes;
+}
+
+void _largeMeshRetainsUint32AcrossCacheDrawRestoreAndRelease() {
+  final cache = ModelCache();
+  final bytes = _buildLargeQmesh();
+  final first = cache.decodeAndCache(bytes);
+  final second = cache.decodeAndCache(bytes);
+  final mesh = first.deduplicated;
+  if (!identical(first, second) || cache.cachedCount != 1) {
+    throw StateError('large QMSH bytes must deduplicate to one cache record');
+  }
+  if (mesh.vertexCount != 65538 || mesh.indices is! Uint32List) {
+    throw StateError(
+      'a 65,538-vertex QMSH must retain a Uint32 index buffer, got '
+      '${mesh.vertexCount} vertices and ${mesh.indices.runtimeType}',
+    );
+  }
+
+  final device = FakeGpuDevice();
+  final store = MeshStore(device);
+  final handle = store.upload(mesh, debugLabel: 'large-qmesh');
+  final uploaded = store.resolve(handle);
+  if (!uploaded.usesUint32Indices || uploaded.indexCount != 65538) {
+    throw StateError('MeshStore lost the large mesh index width or count');
+  }
+
+  final program = device.compileProgram(
+    vertexSource: 'void main() {}',
+    fragmentSource: 'void main() {}',
+    requiredAttributes: const [],
+    requiredUniforms: const [],
+  );
+  device.useProgram(program);
+  device.bindVertexArray(uploaded.vao);
+  device.bindElementArrayBuffer(uploaded.indexBuffer!);
+  DeviceDrawCommandEncoder(device).drawElements(
+    count: uploaded.indexCount,
+    offsetBytes: 0,
+    index32: uploaded.usesUint32Indices,
+  );
+  if (!device.drawLog.last.contains('index32=true')) {
+    throw StateError('large mesh draw must select the Uint32 element type');
+  }
+
+  final vaoCreates = device.vaoCreateCalls;
+  device.simulateContextLoss();
+  device.simulateContextRestore();
+  store.rehydrateAfterContextRestore();
+  if (device.vaoCreateCalls != vaoCreates + 1 || store.liveCount != 1) {
+    throw StateError('large mesh restore must rebuild one GPU upload in place');
+  }
+  if (!store.resolve(handle).usesUint32Indices) {
+    throw StateError('large mesh restore must retain the Uint32 index type');
+  }
+
+  store.release(handle);
+  if (store.liveCount != 0) {
+    throw StateError(
+      'large mesh release must return the logical live count to zero',
+    );
+  }
 }
 
 Uint8List _buildQmesh({
@@ -183,6 +280,13 @@ void _cacheSkipsRedecode() {
       'cache must hold exactly one entry for one distinct content hash',
     );
   }
+  if (cache.referencesFor(first) != 2) {
+    throw StateError('duplicate cache loads must retain two logical owners');
+  }
+  cache.acquire(first);
+  if (cache.referencesFor(first) != 3) {
+    throw StateError('explicit acquire must add one cache owner');
+  }
 
   final differentBytes = _buildQmesh(boundsOverride: [0, 0, 0, 2, 2, 0]);
   final third = cache.decodeAndCache(differentBytes);
@@ -193,5 +297,52 @@ void _cacheSkipsRedecode() {
     throw StateError(
       'a second distinct content hash must add a second cache entry',
     );
+  }
+
+  cache.release(first);
+  if (cache.referencesFor(first) != 2 || cache.cachedCount != 2) {
+    throw StateError(
+      'releasing one duplicate owner must retain the cache entry',
+    );
+  }
+  cache.release(first);
+  if (cache.referencesFor(first) != 1 || cache.cachedCount != 2) {
+    throw StateError('releasing two owners must retain the final cache owner');
+  }
+  cache.release(first);
+  if (cache.cachedCount != 1) {
+    throw StateError('final duplicate release must evict exactly one entry');
+  }
+  cache.release(third);
+  if (cache.cachedCount != 0) {
+    throw StateError('releasing every cache owner must return count to zero');
+  }
+
+  var staleReleaseRejected = false;
+  try {
+    cache.release(first);
+  } catch (error) {
+    if (error is! StateError) rethrow;
+    staleReleaseRejected = true;
+  }
+  if (!staleReleaseRejected) {
+    throw StateError('releasing an evicted cache entry must be rejected');
+  }
+
+  final versionTwo = ModelCache(decodeVersion: 2);
+  final versioned = versionTwo.decodeAndCache(bytes);
+  if (versioned.cacheKey == first.cacheKey || versioned.decodeVersion != 2) {
+    throw StateError('decode version must participate in the cache identity');
+  }
+  versionTwo.clear();
+  var clearReleaseRejected = false;
+  try {
+    versionTwo.release(versioned);
+  } catch (error) {
+    if (error is! StateError) rethrow;
+    clearReleaseRejected = true;
+  }
+  if (!clearReleaseRejected) {
+    throw StateError('clearing a cache must invalidate its owned entries');
   }
 }

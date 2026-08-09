@@ -10,6 +10,9 @@ uniform mat4 uViewProjection;
 uniform mat4 uView;
 uniform mat4 uModel;
 uniform mat4 uNormalMatrix;
+uniform mat4 uInstanceModels[16];
+uniform mat4 uInstanceNormalMatrices[16];
+uniform float uUseInstances;
 uniform mat4 uLightViewProjection;
 uniform float uVertexSnapGrid;
 uniform float uAffineWarpStrength;
@@ -23,11 +26,14 @@ out vec3 vWorldPos;
 out vec4 vTangent;
 out float vViewDepth;
 void main(){
+  mat4 model=uModel;
+  mat4 normalMatrix=uNormalMatrix;
+  if(uUseInstances>0.5){model=uInstanceModels[gl_InstanceID];normalMatrix=uInstanceNormalMatrices[gl_InstanceID];}
   vColor=vec4(aColor.rgb,aAlpha);
-  vNormal=mat3(uNormalMatrix)*aNormal;
-  vec4 worldPos=uModel*vec4(aPosition,1.0);
+  vNormal=mat3(normalMatrix)*aNormal;
+  vec4 worldPos=model*vec4(aPosition,1.0);
   vWorldPos=worldPos.xyz;
-  vTangent=vec4(mat3(uNormalMatrix)*aTangent.xyz,aTangent.w);
+  vTangent=vec4(mat3(normalMatrix)*aTangent.xyz,aTangent.w);
   vLightSpacePos=uLightViewProjection*worldPos;
   // RV-09 rung 5's fog: the same "linear view depth" convention SSAO/DOF
   // already reconstruct from a depth texture, computed directly here

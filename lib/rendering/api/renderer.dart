@@ -8,6 +8,8 @@ import 'mesh.dart';
 import 'scene.dart';
 import 'settings.dart';
 import 'stats.dart';
+import '../assets/model_binding.dart';
+import '../assets/model_definition.dart';
 
 /// Declares, loads, and releases shared GPU-backed resources. Owned by one
 /// [SceneRenderer]; every [MeshHandle]/[TextureHandle]/[MaterialHandle] it
@@ -18,6 +20,10 @@ abstract interface class ResourceLibrary {
 
   MaterialHandle registerMaterial(MaterialDefinition definition);
   void releaseMaterial(MaterialHandle handle);
+
+  /// Resolves an authored model against this library's retained mesh/material
+  /// stores without taking ownership away from those stores.
+  ModelBinding bindModel(ModelDefinition definition);
 
   /// [pixels] is `null` for a declared-but-not-yet-loaded texture; a
   /// renderer substitutes a built-in fallback (§5.3) until it is set via
@@ -64,6 +70,10 @@ abstract interface class SceneRenderer {
   /// Closes or discards every submitted list even after an optional pass
   /// failure, and returns immediate CPU/counter statistics.
   FrameStats endFrame();
+
+  /// Polls the oldest delayed GPU timer sample. Unsupported/disjoint samples
+  /// are explicit statuses, never a zero-duration success.
+  GpuTimingResult pollGpuTiming();
 
   /// Releases every borrowed encoder/list without rendering.
   void abortFrame();

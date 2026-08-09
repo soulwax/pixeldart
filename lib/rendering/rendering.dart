@@ -13,6 +13,8 @@ export 'api/resource_plan.dart';
 export 'api/scene.dart';
 export 'api/settings.dart';
 export 'api/stats.dart';
+export 'assets/model_binding.dart';
+export 'assets/model_definition.dart';
 export 'core/scene_renderer_impl.dart';
 export 'core/program_set_planner.dart';
 export 'core/program_source.dart';
