@@ -21,9 +21,9 @@ the remaining unchecked items are the next capability and acceptance gaps.
 - [x] **`dispose()` with exact accounting** — releasing every owned CPU and GPU
       resource, provable by diagnostics returning to the pre-renderer
       baseline.
-- [ ] **Enforce the `RenderEncoder` lifecycle at runtime** — a stale encoder
-      (after `endFrame`/`abortFrame`) should reject submissions instead of
-      relying on caller discipline.
+- [x] **Enforce the `RenderEncoder` lifecycle at runtime** — both transient
+      encoder implementations now reject stale submissions after `endFrame` /
+      `abortFrame`, with focused active/end/abort coverage.
 - [x] **`TextureStore`.** The store now owns declared textures, fallback
       fallback resolution, pixel uploads, and context-restore rehydration.
 - [ ] **Per-instance transform streaming.** Instanced draws are wired, but all

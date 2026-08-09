@@ -139,7 +139,7 @@ dart run tools/renderer/check_sizes.dart
 dart run tools/renderer/shaders.dart --check
 ```
 
-`test_all.dart` currently runs 33 renderer fixtures. They run on the Dart VM
+`test_all.dart` currently runs 34 renderer fixtures. They run on the Dart VM
 against `FakeGpuDevice`; this is fast, deterministic contract evidence and is
 not a substitute for a real browser/driver run.
 
@@ -334,7 +334,7 @@ A few design decisions worth knowing before reading the code:
 
 ```sh
 dart analyze                                 # zero issues, including infos
-dart run tools/renderer/test_all.dart        # 33 pure test scripts
+dart run tools/renderer/test_all.dart        # 34 pure test scripts
 dart run tools/renderer/check_boundary.dart  # import/layering rules
 dart run tools/renderer/check_sizes.dart     # per-file authored-line budgets
 dart run tools/renderer/shaders.dart --check # generated shaders in sync
