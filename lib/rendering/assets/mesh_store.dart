@@ -18,6 +18,8 @@ int _shaderLocationFor(VertexAttributeKind kind) => switch (kind) {
   VertexAttributeKind.color => 2,
   VertexAttributeKind.alpha => 3,
   VertexAttributeKind.uv0 => 4,
+  VertexAttributeKind.tangent4 => 5,
+  VertexAttributeKind.uv1 => 6,
   VertexAttributeKind.legacyMaterialEffect => 4,
   VertexAttributeKind.emissive => throw UnsupportedError(
     'MeshStore: no shader location reserved for VertexAttributeKind.emissive yet '

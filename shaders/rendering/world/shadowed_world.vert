@@ -4,6 +4,8 @@ layout(location=1) in vec3 aNormal;
 layout(location=2) in vec4 aColor;
 layout(location=3) in float aAlpha;
 layout(location=4) in vec3 aUvMat;
+layout(location=5) in vec4 aTangent;
+layout(location=6) in vec2 aUv1;
 uniform mat4 uViewProjection;
 uniform mat4 uView;
 uniform mat4 uModel;
@@ -17,12 +19,14 @@ out highp vec2 vUv;
 out highp float vUvW;
 out vec4 vLightSpacePos;
 out vec3 vWorldPos;
+out vec4 vTangent;
 out float vViewDepth;
 void main(){
   vColor=vec4(aColor.rgb,aAlpha);
   vNormal=mat3(uNormalMatrix)*aNormal;
   vec4 worldPos=uModel*vec4(aPosition,1.0);
   vWorldPos=worldPos.xyz;
+  vTangent=vec4(mat3(uNormalMatrix)*aTangent.xyz,aTangent.w);
   vLightSpacePos=uLightViewProjection*worldPos;
   // RV-09 rung 5's fog: the same "linear view depth" convention SSAO/DOF
   // already reconstruct from a depth texture, computed directly here

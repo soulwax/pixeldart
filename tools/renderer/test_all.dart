@@ -20,6 +20,7 @@ const List<String> _scripts = [
   'tools/renderer/test_material_store.dart',
   'tools/renderer/test_texture_store.dart',
   'tools/renderer/test_material_conformance.dart',
+  'tools/renderer/test_surface_v2.dart',
   'tools/renderer/test_msaa_resolve.dart',
   'tools/renderer/test_shadow_graph.dart',
   'tools/renderer/test_affine_uv.dart',

@@ -6,6 +6,7 @@ in highp vec2 vUv;
 in highp float vUvW;
 in vec4 vLightSpacePos;
 in vec3 vWorldPos;
+in vec4 vTangent;
 in float vViewDepth;
 uniform sampler2D uAlbedo;
 uniform sampler2D uNormalMap;
@@ -197,15 +198,19 @@ void main(){
   // through.
   if(uAlphaCutoff>0.&&tex.a<uAlphaCutoff)discard;
   vec3 n=normalize(vNormal);
-  // Surface-v2's tangent attribute is not present in the compatibility
-  // layout yet. Derivatives produce an equivalent local frame for ordinary
-  // UV-mapped triangles and keep the material-v2 normal slot live today;
-  // authored tangents can replace this frame without changing bindings.
+  // Surface-v2 supplies a tangent4 with OpenGL's +/-1 handedness in W.
+  // Compatibility14 meshes leave the attribute at its default zero and use
+  // the derivative frame below, so old content and authored tangents share
+  // one shader contract.
   if(uNormalStrength>0.0){
     vec3 dp1=dFdx(vWorldPos),dp2=dFdy(vWorldPos);
     vec2 duv1=dFdx(uv),duv2=dFdy(uv);
-    vec3 t=normalize(dp1*duv2.y-dp2*duv1.y);
-    vec3 b=normalize(-dp1*duv2.x+dp2*duv1.x);
+    vec3 derivativeT=normalize(dp1*duv2.y-dp2*duv1.y);
+    vec3 derivativeB=normalize(-dp1*duv2.x+dp2*duv1.x);
+    vec3 authoredT=normalize(vTangent.xyz-n*dot(n,vTangent.xyz));
+    bool hasAuthoredT=dot(vTangent.xyz,vTangent.xyz)>0.25;
+    vec3 t=hasAuthoredT?authoredT:derivativeT;
+    vec3 b=hasAuthoredT?normalize(cross(n,t)*vTangent.w):derivativeB;
     vec3 map=texture(uNormalMap,uv).xyz*2.0-1.0;
     map.xy*=uNormalStrength;
     n=normalize(mat3(t,b,n)*normalize(map));

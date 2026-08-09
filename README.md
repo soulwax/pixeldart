@@ -159,7 +159,7 @@ dart run tools/renderer/check_sizes.dart
 dart run tools/renderer/shaders.dart --check
 ```
 
-`test_all.dart` currently runs 38 renderer fixtures. They run on the Dart VM
+`test_all.dart` currently runs 39 renderer fixtures. They run on the Dart VM
 against `FakeGpuDevice`; this is fast, deterministic contract evidence and is
 not a substitute for a real browser/driver run.
 
@@ -294,9 +294,13 @@ final material = renderer.resources.registerMaterial(
 ```
 
 The compatibility vertex layout derives a tangent frame from world-position
-and UV derivatives for normal maps. Authored tangents/lightmaps belong to the
-next `surface-v2` asset contract; this fallback is deliberately deterministic
-and keeps the current material API useful for high-detail house geometry.
+and UV derivatives for normal maps. Authored lightmaps belong to the remaining
+indirect-light contract; the surface-v2 layout is now available with
+tangent4 (handedness in W) and an optional UV1 channel. Mesh upload rejects
+non-finite, zero-length, non-orthogonal, or non-±1-handed tangent bases before
+they reach a VAO. Compatibility14 meshes retain the deterministic derivative
+fallback, keeping old house geometry valid while new assets opt into authored
+tangents.
 
 The application supplies the actual `MeshData` and `FrameInput`; Pixeldart does
 not own a clock, input system, camera controller, game state, save data, or
@@ -387,7 +391,7 @@ A few design decisions worth knowing before reading the code:
 
 ```sh
 dart analyze                                 # zero issues, including infos
-dart run tools/renderer/test_all.dart        # 38 pure test scripts
+dart run tools/renderer/test_all.dart        # 39 pure test scripts
 dart run tools/renderer/check_boundary.dart  # import/layering rules
 dart run tools/renderer/check_sizes.dart     # per-file authored-line budgets
 dart run tools/renderer/shaders.dart --check # generated shaders in sync

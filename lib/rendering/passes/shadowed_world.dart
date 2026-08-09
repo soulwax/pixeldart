@@ -44,6 +44,8 @@ final class ShadowedWorldProgramSource {
       'aColor': 2,
       'aAlpha': 3,
       'aUvMat': 4,
+      'aTangent': 5,
+      'aUv1': 6,
     },
     samplerUnits: const {
       'uAlbedo': 0,
