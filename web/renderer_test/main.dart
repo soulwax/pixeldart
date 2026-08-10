@@ -9,6 +9,7 @@ import 'package:pixeldart/rendering/assets/mesh_store.dart';
 import 'package:pixeldart/rendering/assets/texture_store.dart';
 import 'package:pixeldart/rendering/core/batching.dart';
 import 'package:pixeldart/rendering/core/frame_render_encoder.dart';
+import 'package:pixeldart/rendering/core/frame_telemetry.dart';
 import 'package:pixeldart/rendering/core/program_library.dart';
 import 'package:pixeldart/rendering/core/render_feature.dart';
 import 'package:pixeldart/rendering/passes/bloom_resources.dart';
@@ -463,6 +464,26 @@ Uint8List _buildCheckerboardTexture(int size) {
   return pixels;
 }
 
+/// High-contrast payload for the standalone R-09 residency fixture. The
+/// handle is declared without pixels first (so the material samples the
+/// store's white fallback), then this payload arrives on that same handle.
+/// The deliberately different magenta/teal pattern makes the transition
+/// visible in a capture as well as in the DOM/resource evidence.
+Uint8List _buildResidencyTexture(int size) {
+  final pixels = Uint8List(size * size * 4);
+  for (var y = 0; y < size; y++) {
+    for (var x = 0; x < size; x++) {
+      final stripe = ((x ~/ 8) + (y ~/ 8)).isEven;
+      final i = (y * size + x) * 4;
+      pixels[i] = stripe ? 238 : 24;
+      pixels[i + 1] = stripe ? 42 : 210;
+      pixels[i + 2] = stripe ? 170 : 220;
+      pixels[i + 3] = 255;
+    }
+  }
+  return pixels;
+}
+
 /// The alpha-masked demo surface: a lattice of bars with square openings
 /// punched through it, carrying three distinct alpha levels rather than a
 /// binary in/out mask — 255 inside a bar, 128 along a one-texel ramp at
@@ -679,6 +700,15 @@ void _boot() {
   final r09InstanceFixture = web.window.location.search.contains(
     'r09-instances',
   );
+  final r09ResidencyFixture = web.window.location.search.contains(
+    'r09-residency',
+  );
+  final r09ShadowFixture = web.window.location.search.contains(
+    'r09-shadow-proof',
+  );
+  final r09ShadowDisabled = web.window.location.search.contains(
+    'r09-shadow-off',
+  );
   // The canvas fills #viewport via CSS (width/height: 100%); its backing
   // pixel buffer must be sized to match explicitly, or WebGL2 defaults to
   // the element's default 300x150 attribute size regardless of how large
@@ -694,6 +724,13 @@ void _boot() {
   if (ctx == null) {
     canvas.setAttribute('data-gpu-timing-status', 'unsupported');
     canvas.setAttribute('data-gpu-timing-polls', '0');
+    if (r09ShadowFixture) {
+      canvas
+        ..setAttribute('data-r09-shadow-capability', 'unsupported')
+        ..setAttribute('data-r09-shadow-status', 'unsupported')
+        ..setAttribute('data-r09-shadow-pixel-proof', 'unsupported')
+        ..setAttribute('data-r09-shadow-reason', 'webgl2-context-unavailable');
+    }
     _setStatus('WebGL2 unavailable in this browser/context.');
     return;
   }
@@ -807,6 +844,24 @@ void _boot() {
     pixels: _buildTealOrangeLut(gradeLutSize),
     debugLabel: 'grade-lut',
   );
+  // R-09 package-boundary fixture: reserve a real logical texture handle
+  // without pixels. The first frame therefore draws through the store's
+  // fallback; a later frame uploads the payload into this same handle and
+  // draws it without rebuilding the material or scene item.
+  final residencyHandle = textureStore.declare(
+    width: textureSize,
+    height: textureSize,
+    wrap: GpuTextureWrap.repeat,
+    debugLabel: 'r09-residency-payload',
+  );
+  final residencyManager = TextureResidencyManager(textureStore);
+  final residencyRequest = TextureResidencyRequest(
+    key: 'r09-residency-payload',
+    handle: residencyHandle,
+    priority: 10,
+  );
+  TextureResidencyReport? residencyReport;
+  var residencyUploaded = false;
 
   // affineSampling opts these two into the PS1 affine-UV path; every other
   // material below deliberately stays at the default (false) so a
@@ -856,6 +911,17 @@ void _boot() {
       emissiveStrength: 2.5,
     ),
     debugLabel: 'glowing-cube-material',
+  );
+  final residencyMaterial = materialStore.register(
+    MaterialDefinition(
+      key: 'r09-residency-payload',
+      albedoTexture: residencyHandle,
+      tintR: 1.0,
+      tintG: 1.0,
+      tintB: 1.0,
+      emissiveStrength: 0.15,
+    ),
+    debugLabel: 'r09-residency-material',
   );
   final moteMaterial = materialStore.register(
     MaterialDefinition(
@@ -1324,8 +1390,51 @@ void _boot() {
   var frame = 0;
   void tick(num highResTime) {
     frame += 1;
-    final t = highResTime / 1000;
+    // Freeze the dedicated residency fixture so its pending/resident
+    // screenshots differ only because the uploaded payload arrived, not
+    // because the demo's animated light/cubes moved between captures.
+    final t = r09ResidencyFixture || r09ShadowFixture
+        ? 0.0
+        : highResTime / 1000;
     currentAnimTime = t;
+    if (r09ResidencyFixture) {
+      // Leave a visible pending window for browser capture, then fulfill the
+      // request in place. The manager is probed again after upload to prove
+      // the status transition without allocating a second logical handle.
+      if (frame == 1) {
+        residencyReport = residencyManager.prewarm([residencyRequest]);
+      } else if (frame == 45 && !residencyUploaded) {
+        textureStore.updatePixels(
+          residencyHandle,
+          _buildResidencyTexture(textureSize),
+        );
+        residencyUploaded = true;
+        residencyReport = residencyManager.prewarm([residencyRequest]);
+      }
+      final report = residencyReport;
+      if (report != null) {
+        final result = report.results.single;
+        canvas
+          ..setAttribute(
+            'data-r09-texture-residency-status',
+            result.status.name,
+          )
+          ..setAttribute(
+            'data-r09-texture-residency-handle',
+            '${residencyHandle.slot}.${residencyHandle.generation}',
+          )
+          ..setAttribute('data-r09-texture-residency-frame', '$frame')
+          ..setAttribute(
+            'data-r09-texture-residency-draw',
+            result.isUsable ? 'resident-material' : 'fallback-material',
+          )
+          ..setAttribute(
+            'data-r09-texture-residency-resources',
+            'live=${textureStore.liveCount};created=${textureStore.createCount};'
+                'deleted=${textureStore.deleteCount};bytes=${textureStore.liveGpuBytes}',
+          );
+      }
+    }
     // Swaps which physical ghost target is "this frame's VHS write" vs.
     // "last frame's VHS history read" every frame — the ping-pong itself.
     if (frame.isEven) {
@@ -1342,6 +1451,7 @@ void _boot() {
     // Hovers above the ground plane so its shadow falls clearly onto a
     // real receiving surface — the §8.4 gate this whole graph exists to
     // prove ("bannister shadow across a wall/floor").
+    final shadowCastsEnabled = !r09ShadowFixture || !r09ShadowDisabled;
     final spinningCube = _TestCubeItem(
       cubeHandle,
       cubeMaterial,
@@ -1349,7 +1459,7 @@ void _boot() {
         translation: const Vec3(0, 0.9, 0),
         rotation: Quat.axisAngle(const Vec3(0.4, 1, 0.2), t),
       ),
-      castsShadow: true,
+      castsShadow: shadowCastsEnabled,
       instanceSlot: 1,
       instanceFamilyKey: _instanceProbeFamilyKey,
     );
@@ -1363,7 +1473,7 @@ void _boot() {
         translation: const Vec3(0.85, 0.9, 0),
         rotation: Quat.axisAngle(const Vec3(0.4, 1, 0.2), -0.35),
       ),
-      castsShadow: true,
+      castsShadow: shadowCastsEnabled,
       instanceSlot: 2,
       instanceFamilyKey: _instanceProbeFamilyKey,
     );
@@ -1374,7 +1484,7 @@ void _boot() {
         translation: const Vec3(-0.85, 0.9, 0),
         rotation: Quat.axisAngle(const Vec3(0.4, 1, 0.2), 0.35),
       ),
-      castsShadow: true,
+      castsShadow: shadowCastsEnabled,
       instanceSlot: 3,
       instanceFamilyKey: _instanceProbeFamilyKey,
     );
@@ -1388,7 +1498,7 @@ void _boot() {
         translation: const Vec3(-1.8, 0.9, 0),
         rotation: Quat.axisAngle(const Vec3(0, 1, 0), t * 1.5),
       ),
-      castsShadow: true,
+      castsShadow: shadowCastsEnabled,
     );
     // Bobs vertically in place at a fixed XZ position, rotating on none of
     // the axes the other two test items do — a motion this visually
@@ -1398,9 +1508,9 @@ void _boot() {
     // its caster is individually doing) or from the caster's own transform.
     final bobbingCube = _TestCubeItem(
       cubeHandle,
-      glowingCubeMaterial,
+      r09ResidencyFixture ? residencyMaterial : glowingCubeMaterial,
       Transform(translation: Vec3(1.8, 1.0 + math.sin(t * 1.3) * 0.5, -0.4)),
-      castsShadow: true,
+      castsShadow: shadowCastsEnabled,
     );
     final ground = _TestCubeItem(
       groundHandle,
@@ -1441,7 +1551,7 @@ void _boot() {
             Quat.axisAngle(const Vec3(0, 1, 0), t * 0.3) *
             Quat.axisAngle(const Vec3(1, 0, 0), -0.85),
       ),
-      castsShadow: true,
+      castsShadow: shadowCastsEnabled,
       drawMode: DrawMode.masked,
     );
 
@@ -1534,7 +1644,7 @@ void _boot() {
             ],
       camera,
       environment,
-      r09InstanceFixture
+      r09InstanceFixture || r09ResidencyFixture || r09ShadowFixture
           ? PostProcessState.off
           : PostProcessState(
               ssaoStrength: ssaoActive ? 1.2 : 0.0,
@@ -1552,9 +1662,10 @@ void _boot() {
               vhsDropoutWeight: vhsActive ? 0.05 : 0.0,
               vhsGhostWeight: vhsActive ? 0.04 : 0.0,
             ),
-      r09InstanceFixture ? const <Object>[] : blendedItems,
+      r09InstanceFixture || r09ShadowFixture ? const <Object>[] : blendedItems,
     );
-    final encoder = DeviceDrawCommandEncoder(device);
+    final frameTelemetry = FrameDrawTelemetry();
+    final encoder = DeviceDrawCommandEncoder(device, telemetry: frameTelemetry);
 
     // Bloom/DOF's own targets, plus resolved sceneColor — only ever read in
     // the non-debug branch below (the debug branch executes its own,
@@ -1634,6 +1745,7 @@ void _boot() {
       // a target this debug graph never writes, so each graph must now run
       // its own present pass end-to-end.
       for (final pass in depthDebugResult.passes) {
+        frameTelemetry.beginPass(pass.descriptor.id);
         pass.execute(depthDebugContext);
       }
     } else {
@@ -1672,6 +1784,7 @@ void _boot() {
       );
       for (final pass in result.passes) {
         if (_postResolvePassIds.contains(pass.descriptor.id)) continue;
+        frameTelemetry.beginPass(pass.descriptor.id);
         pass.execute(msaaContext);
       }
 
@@ -1686,11 +1799,13 @@ void _boot() {
       for (final pass in result.passes) {
         if (pass.descriptor.id == 'present') continue;
         if (!_postResolvePassIds.contains(pass.descriptor.id)) continue;
+        frameTelemetry.beginPass(pass.descriptor.id);
         pass.execute(resolvedContext);
       }
 
       for (final pass in result.passes) {
         if (pass.descriptor.id != 'present') continue;
+        frameTelemetry.beginPass(pass.descriptor.id);
         pass.execute(resolvedContext);
       }
     }
@@ -1701,6 +1816,14 @@ void _boot() {
         instanceProbeCube,
         instanceProbeCubeTwo,
       ]);
+      if (r09ShadowFixture) {
+        _publishR09ShadowProof(
+          device.gl,
+          canvas,
+          frameTelemetry,
+          disabled: r09ShadowDisabled,
+        );
+      }
     }
 
     if (frame == 1 || frame % 60 == 0) {
@@ -1851,6 +1974,75 @@ void _publishR09InstancePixelProof(
     'data-instance-pixel-proof',
     hits.every((value) => value > 0) ? 'three-distinct' : 'pixel-miss',
   );
+}
+
+/// Publishes the standalone renderer's shadow-pass seam for the browser
+/// A/B fixture. The direct bootstrap owns the graph execution, so it also
+/// owns the pass telemetry that the normal [SceneRendererImpl] wrapper would
+/// otherwise expose. A zero draw count is intentionally reported as
+/// `zero-pass` rather than being treated as a failed assertion: that is the
+/// truthful outcome on a profile/adapter where the shadow feature is absent
+/// or where the fixture is explicitly running its shadow-off half.
+void _publishR09ShadowProof(
+  web.WebGL2RenderingContext gl,
+  web.HTMLCanvasElement canvas,
+  FrameDrawTelemetry telemetry, {
+  required bool disabled,
+}) {
+  final shadow = telemetry.snapshot()['shadowCaster'];
+  final draws = shadow?.drawCalls ?? 0;
+  final triangles = shadow?.trianglesSubmitted ?? 0;
+  final hasShadowPass = draws > 0 && triangles > 0;
+  final width = gl.drawingBufferWidth;
+  final height = gl.drawingBufferHeight;
+  final pixels = Uint8List(width * height * 4);
+  gl.readPixels(
+    0,
+    0,
+    width,
+    height,
+    web.WebGL2RenderingContext.RGBA,
+    web.WebGL2RenderingContext.UNSIGNED_BYTE,
+    pixels.toJS,
+  );
+  // The default framebuffer is transient on some headless adapters: a
+  // later browser read can observe a cleared buffer even though this frame's
+  // in-loop read was valid (the instance proof above follows the same rule).
+  // Publish a compact, deterministic luma grid while the presented pixels
+  // are still live so the Node fixture can compare shadow-on and shadow-off
+  // without relying on a screenshot decoder.
+  const sampleColumns = 64;
+  const sampleRows = 36;
+  final samples = <int>[];
+  for (var row = 0; row < sampleRows; row++) {
+    final y = ((row + 0.5) * height / sampleRows).floor();
+    for (var column = 0; column < sampleColumns; column++) {
+      final x = ((column + 0.5) * width / sampleColumns).floor();
+      final index = (y * width + x) * 4;
+      samples.add(
+        ((pixels[index] + pixels[index + 1] + pixels[index + 2]) / 3).round(),
+      );
+    }
+  }
+  canvas
+    ..setAttribute('data-r09-shadow-capability', 'available')
+    ..setAttribute('data-r09-shadow-mode', disabled ? 'off' : 'on')
+    ..setAttribute(
+      'data-r09-shadow-status',
+      hasShadowPass ? 'shadow-pass' : 'zero-pass',
+    )
+    ..setAttribute('data-r09-shadow-caster-draws', '$draws')
+    ..setAttribute('data-r09-shadow-triangles', '$triangles')
+    ..setAttribute('data-r09-shadow-pixel-size', '${sampleColumns}x$sampleRows')
+    ..setAttribute('data-r09-shadow-pixel-samples', samples.join(','))
+    ..setAttribute(
+      'data-r09-shadow-pixel-proof',
+      hasShadowPass ? 'shadow-pass' : 'zero-pass',
+    )
+    ..setAttribute(
+      'data-r09-shadow-reason',
+      hasShadowPass ? 'caster-pass-recorded' : 'no-shadow-caster-draws',
+    );
 }
 
 final class _AlwaysAvailable implements RenderPassResources {

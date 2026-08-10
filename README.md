@@ -230,6 +230,39 @@ PIXELDART_INSTANCE_BASE_URL=http://127.0.0.1:8090/web/renderer_test/?r09-instanc
 This fixture uses only the standalone cube mesh/material; it does not load
 house inventory, exterior cells, or PVS data.
 
+### R-09 package texture-residency draw proof
+
+The standalone demo also exposes `?r09-residency=1`. It declares a real
+`TextureHandle` with no pixels, draws a retained material through the store's
+white fallback, then uploads a high-contrast payload into that same
+slot+generation handle. The fixture freezes the camera/light and disables the
+post chain so the two captures differ only at the material transition. The
+canvas publishes `data-r09-texture-residency-status`, `-handle`, `-draw`, and
+`-resources`; the browser harness additionally intercepts WebGL texture and
+draw calls. It requires `pending`/`fallback-material` first, then
+`resident`/`resident-material`, one new `createTexture`, no `deleteTexture`, a
+stable logical handle, additional draws, and non-identical PNGs.
+
+From the parent repository, the reproducible browser check is:
+
+```sh
+dart compile js external/pixeldart/web/renderer_test/main.dart \
+  -o tmp/r09-web/main.dart.js -O2
+python3 -m http.server 8092 --directory .
+PIXELDART_RESIDENCY_BASE_URL='http://127.0.0.1:8092/tmp/r09-web/?r09-residency=1' \
+  node tools/browser/pixeldart_residency_smoke.cjs
+```
+
+The standardized pending/resident evidence is checked in beside the other
+renderer captures: [pending PNG](.github/screenshots/browser-pixeldart-texture-residency-pending.png) ·
+[pending metadata](.github/screenshots/browser-pixeldart-texture-residency-pending.json) ·
+[resident PNG](.github/screenshots/browser-pixeldart-texture-residency-resident.png) ·
+[resident metadata](.github/screenshots/browser-pixeldart-texture-residency-resident.json).
+Their `.digest.json` sidecars carry the same screenshot contract and SHA-256
+coverage as game captures. This proves package-level declared-loading and
+resident material draws only; asset streaming budgets, actual eviction, and
+shadow-capable hardware pixels remain explicitly outside the claim.
+
 ### Deterministic per-instance LOD
 
 `ModelPart.lods` remains the authored, half-open distance contract. The exported
