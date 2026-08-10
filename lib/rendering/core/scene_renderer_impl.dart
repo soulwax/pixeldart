@@ -16,6 +16,7 @@ import '../assets/mesh_store.dart';
 import '../assets/model_binding.dart';
 import '../assets/model_definition.dart';
 import '../assets/texture_store.dart';
+import '../assets/texture_residency.dart';
 import '../webgl/device_api.dart';
 import '../webgl/draw_encoder.dart';
 import '../webgl/resource_plan_adapter.dart';

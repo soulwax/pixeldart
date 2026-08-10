@@ -7,6 +7,7 @@ import 'package:web/web.dart' as web;
 import 'package:pixeldart/rendering/assets/material_store.dart';
 import 'package:pixeldart/rendering/assets/mesh_store.dart';
 import 'package:pixeldart/rendering/assets/texture_store.dart';
+import 'package:pixeldart/rendering/core/batching.dart';
 import 'package:pixeldart/rendering/core/frame_render_encoder.dart';
 import 'package:pixeldart/rendering/core/program_library.dart';
 import 'package:pixeldart/rendering/core/render_feature.dart';
@@ -184,12 +185,30 @@ CameraView _buildCamera(double aspect) {
 MeshData _buildTestCube() {
   const s = 0.6;
   final faces = <(Vec3 normal, List<Vec3> corners)>[
-    (const Vec3(0, 0, 1), [Vec3(-s, -s, s), Vec3(s, -s, s), Vec3(s, s, s), Vec3(-s, s, s)]),
-    (const Vec3(0, 0, -1), [Vec3(s, -s, -s), Vec3(-s, -s, -s), Vec3(-s, s, -s), Vec3(s, s, -s)]),
-    (const Vec3(1, 0, 0), [Vec3(s, -s, s), Vec3(s, -s, -s), Vec3(s, s, -s), Vec3(s, s, s)]),
-    (const Vec3(-1, 0, 0), [Vec3(-s, -s, -s), Vec3(-s, -s, s), Vec3(-s, s, s), Vec3(-s, s, -s)]),
-    (const Vec3(0, 1, 0), [Vec3(-s, s, s), Vec3(s, s, s), Vec3(s, s, -s), Vec3(-s, s, -s)]),
-    (const Vec3(0, -1, 0), [Vec3(-s, -s, -s), Vec3(s, -s, -s), Vec3(s, -s, s), Vec3(-s, -s, s)]),
+    (
+      const Vec3(0, 0, 1),
+      [Vec3(-s, -s, s), Vec3(s, -s, s), Vec3(s, s, s), Vec3(-s, s, s)],
+    ),
+    (
+      const Vec3(0, 0, -1),
+      [Vec3(s, -s, -s), Vec3(-s, -s, -s), Vec3(-s, s, -s), Vec3(s, s, -s)],
+    ),
+    (
+      const Vec3(1, 0, 0),
+      [Vec3(s, -s, s), Vec3(s, -s, -s), Vec3(s, s, -s), Vec3(s, s, s)],
+    ),
+    (
+      const Vec3(-1, 0, 0),
+      [Vec3(-s, -s, -s), Vec3(-s, -s, s), Vec3(-s, s, s), Vec3(-s, s, -s)],
+    ),
+    (
+      const Vec3(0, 1, 0),
+      [Vec3(-s, s, s), Vec3(s, s, s), Vec3(s, s, -s), Vec3(-s, s, -s)],
+    ),
+    (
+      const Vec3(0, -1, 0),
+      [Vec3(-s, -s, -s), Vec3(s, -s, -s), Vec3(s, -s, s), Vec3(-s, -s, s)],
+    ),
   ];
   const faceUvs = [(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)];
 
@@ -199,11 +218,20 @@ MeshData _buildTestCube() {
       final corner = corners[i];
       final (u, v) = faceUvs[i];
       floats.addAll([
-        corner.x, corner.y, corner.z,
-        normal.x, normal.y, normal.z,
-        1.0, 1.0, 1.0, 0.0,
+        corner.x,
+        corner.y,
+        corner.z,
+        normal.x,
+        normal.y,
+        normal.z,
         1.0,
-        u, v, 0,
+        1.0,
+        1.0,
+        0.0,
+        1.0,
+        u,
+        v,
+        0,
       ]);
     }
   }
@@ -249,11 +277,20 @@ MeshData _buildCullTestQuad() {
     final corner = corners[i];
     final (u, v) = faceUvs[i];
     floats.addAll([
-      corner.x, corner.y, corner.z,
-      normal.x, normal.y, normal.z,
-      1.0, 1.0, 1.0, 0.0,
+      corner.x,
+      corner.y,
+      corner.z,
+      normal.x,
+      normal.y,
+      normal.z,
       1.0,
-      u, v, 0,
+      1.0,
+      1.0,
+      0.0,
+      1.0,
+      u,
+      v,
+      0,
     ]);
   }
 
@@ -297,11 +334,20 @@ MeshData _buildBillboardQuad({
     final corner = corners[i];
     final (u, v) = faceUvs[i];
     floats.addAll([
-      corner.x, corner.y, corner.z,
-      normal.x, normal.y, normal.z,
-      1.0, 1.0, 1.0, 0.0,
+      corner.x,
+      corner.y,
+      corner.z,
+      normal.x,
+      normal.y,
+      normal.z,
+      1.0,
+      1.0,
+      1.0,
+      0.0,
       alpha,
-      u, v, 0,
+      u,
+      v,
+      0,
     ]);
   }
 
@@ -352,11 +398,20 @@ MeshData _buildGroundPlane() {
       final alongX = col / steps;
       final alongZ = row / steps;
       floats.addAll([
-        -s + 2 * s * alongX, 0.0, s - 2 * s * alongZ,
-        normal.x, normal.y, normal.z,
-        1.0, 1.0, 1.0, 0.0,
+        -s + 2 * s * alongX,
+        0.0,
+        s - 2 * s * alongZ,
+        normal.x,
+        normal.y,
+        normal.z,
         1.0,
-        uvSpan * alongX, uvSpan * alongZ, 0,
+        1.0,
+        1.0,
+        0.0,
+        1.0,
+        uvSpan * alongX,
+        uvSpan * alongZ,
+        0,
       ]);
     }
   }
@@ -371,8 +426,12 @@ MeshData _buildGroundPlane() {
       final origin = row * (steps + 1) + col;
       final nextRow = origin + steps + 1;
       indices.addAll([
-        origin, origin + 1, nextRow + 1,
-        origin, nextRow + 1, nextRow,
+        origin,
+        origin + 1,
+        nextRow + 1,
+        origin,
+        nextRow + 1,
+        nextRow,
       ]);
     }
   }
@@ -601,8 +660,11 @@ const _postResolvePassIds = {
   'present',
 };
 
+const _instanceProbeFamilyKey = 901;
+
 void main() {
-  _debugLog = web.document.getElementById('debug-log') as web.HTMLTextAreaElement;
+  _debugLog =
+      web.document.getElementById('debug-log') as web.HTMLTextAreaElement;
   try {
     _boot();
   } catch (error, stack) {
@@ -614,6 +676,9 @@ void main() {
 void _boot() {
   final canvas =
       web.document.getElementById('test-canvas') as web.HTMLCanvasElement;
+  final r09InstanceFixture = web.window.location.search.contains(
+    'r09-instances',
+  );
   // The canvas fills #viewport via CSS (width/height: 100%); its backing
   // pixel buffer must be sized to match explicitly, or WebGL2 defaults to
   // the element's default 300x150 attribute size regardless of how large
@@ -627,6 +692,8 @@ void _boot() {
 
   final ctx = canvas.getContext('webgl2') as web.WebGL2RenderingContext?;
   if (ctx == null) {
+    canvas.setAttribute('data-gpu-timing-status', 'unsupported');
+    canvas.setAttribute('data-gpu-timing-polls', '0');
     _setStatus('WebGL2 unavailable in this browser/context.');
     return;
   }
@@ -636,6 +703,7 @@ void _boot() {
 
   _setStatus('device constructed, querying capabilities…');
   final caps = device.queryCapabilities();
+  _startGpuTimingProbe(device, caps);
   _setStatus(
     'capabilities: ${caps.rendererString ?? "?"} / ${caps.vendorString ?? "?"}\n'
     'max texture: ${caps.maxTextureSize}, max samples: ${caps.maxSamples}\n'
@@ -1282,6 +1350,33 @@ void _boot() {
         rotation: Quat.axisAngle(const Vec3(0.4, 1, 0.2), t),
       ),
       castsShadow: true,
+      instanceSlot: 1,
+      instanceFamilyKey: _instanceProbeFamilyKey,
+    );
+    // Shares the cube mesh/material/family with [spinningCube], but keeps a
+    // distinct translation. The resulting InstanceBatch is the browser
+    // proof that one instanced draw carries three different model matrices.
+    final instanceProbeCube = _TestCubeItem(
+      cubeHandle,
+      cubeMaterial,
+      Transform(
+        translation: const Vec3(0.85, 0.9, 0),
+        rotation: Quat.axisAngle(const Vec3(0.4, 1, 0.2), -0.35),
+      ),
+      castsShadow: true,
+      instanceSlot: 2,
+      instanceFamilyKey: _instanceProbeFamilyKey,
+    );
+    final instanceProbeCubeTwo = _TestCubeItem(
+      cubeHandle,
+      cubeMaterial,
+      Transform(
+        translation: const Vec3(-0.85, 0.9, 0),
+        rotation: Quat.axisAngle(const Vec3(0.4, 1, 0.2), 0.35),
+      ),
+      castsShadow: true,
+      instanceSlot: 3,
+      instanceFamilyKey: _instanceProbeFamilyKey,
     );
     // Spins purely around Y so its single face sweeps edge-on to the camera
     // twice per revolution — the moment CULL_FACE must make it vanish
@@ -1304,9 +1399,7 @@ void _boot() {
     final bobbingCube = _TestCubeItem(
       cubeHandle,
       glowingCubeMaterial,
-      Transform(
-        translation: Vec3(1.8, 1.0 + math.sin(t * 1.3) * 0.5, -0.4),
-      ),
+      Transform(translation: Vec3(1.8, 1.0 + math.sin(t * 1.3) * 0.5, -0.4)),
       castsShadow: true,
     );
     final ground = _TestCubeItem(
@@ -1397,32 +1490,69 @@ void _boot() {
     // from these items to fight over.
     final blendedItems = transientEncoder.items.toList()
       ..sort((a, b) {
-        final da = (a.descriptor.transform.translation - camera.eye).lengthSquared;
-        final db = (b.descriptor.transform.translation - camera.eye).lengthSquared;
+        final da =
+            (a.descriptor.transform.translation - camera.eye).lengthSquared;
+        final db =
+            (b.descriptor.transform.translation - camera.eye).lengthSquared;
         return db.compareTo(da);
       });
+    // Close the frame-local encoder before the graph executes. The next
+    // animation frame may call `clear()` again; leaving it active would make
+    // the second frame fail with the encoder's double-begin guard.
+    transientEncoder.endFrame();
 
+    final instanceBatch = InstanceBatch(spinningCube, [
+      spinningCube,
+      instanceProbeCube,
+      instanceProbeCubeTwo,
+    ]);
+    canvas
+      ..setAttribute('data-instance-family-key', '$_instanceProbeFamilyKey')
+      ..setAttribute('data-instance-count', '${instanceBatch.instanceCount}')
+      ..setAttribute(
+        'data-instance-transforms',
+        '${spinningCube.transform.translation.x},'
+            '${spinningCube.transform.translation.y},'
+            '${spinningCube.transform.translation.z};'
+            '${instanceProbeCube.transform.translation.x},'
+            '${instanceProbeCube.transform.translation.y},'
+            '${instanceProbeCube.transform.translation.z};'
+            '${instanceProbeCubeTwo.transform.translation.x},'
+            '${instanceProbeCubeTwo.transform.translation.y},'
+            '${instanceProbeCubeTwo.transform.translation.z}',
+      )
+      ..setAttribute('data-instance-draw-mode', 'instanced');
     final frameScene = _StaticFrameScene(
-      [ground, spinningCube, cullTestQuad, bobbingCube, maskedPanel],
+      r09InstanceFixture
+          ? <Object>[instanceBatch]
+          : <Object>[
+              ground,
+              instanceBatch,
+              cullTestQuad,
+              bobbingCube,
+              maskedPanel,
+            ],
       camera,
       environment,
-      PostProcessState(
-        ssaoStrength: ssaoActive ? 1.2 : 0.0,
-        bloomStrength: bloomActive ? 1.0 : 0.0,
-        depthOfFieldStrength: dofActive ? 1.0 : 0.0,
-        colorGradeStrength: gradeActive ? 1.0 : 0.0,
-        vertexSnapGrid: ps1Active ? 0.01 : 0.0,
-        ditherStrength: ps1Active ? 0.5 : 0.0,
-        quantizationBits: ps1Active ? 4 : 8,
-        affineWarpStrength: affineActive ? 1.0 : 0.0,
-        vhsChromaWeight: vhsActive ? 0.05 : 0.0,
-        vhsTrackingWeight: vhsActive ? 0.04 : 0.0,
-        vhsNoiseWeight: vhsActive ? 0.03 : 0.0,
-        vhsHeadSwitchWeight: vhsActive ? 0.06 : 0.0,
-        vhsDropoutWeight: vhsActive ? 0.05 : 0.0,
-        vhsGhostWeight: vhsActive ? 0.04 : 0.0,
-      ),
-      blendedItems,
+      r09InstanceFixture
+          ? PostProcessState.off
+          : PostProcessState(
+              ssaoStrength: ssaoActive ? 1.2 : 0.0,
+              bloomStrength: bloomActive ? 1.0 : 0.0,
+              depthOfFieldStrength: dofActive ? 1.0 : 0.0,
+              colorGradeStrength: gradeActive ? 1.0 : 0.0,
+              vertexSnapGrid: ps1Active ? 0.01 : 0.0,
+              ditherStrength: ps1Active ? 0.5 : 0.0,
+              quantizationBits: ps1Active ? 4 : 8,
+              affineWarpStrength: affineActive ? 1.0 : 0.0,
+              vhsChromaWeight: vhsActive ? 0.05 : 0.0,
+              vhsTrackingWeight: vhsActive ? 0.04 : 0.0,
+              vhsNoiseWeight: vhsActive ? 0.03 : 0.0,
+              vhsHeadSwitchWeight: vhsActive ? 0.06 : 0.0,
+              vhsDropoutWeight: vhsActive ? 0.05 : 0.0,
+              vhsGhostWeight: vhsActive ? 0.04 : 0.0,
+            ),
+      r09InstanceFixture ? const <Object>[] : blendedItems,
     );
     final encoder = DeviceDrawCommandEncoder(device);
 
@@ -1565,6 +1695,14 @@ void _boot() {
       }
     }
 
+    if (frame == 1) {
+      _publishR09InstancePixelProof(device.gl, canvas, camera, [
+        spinningCube,
+        instanceProbeCube,
+        instanceProbeCubeTwo,
+      ]);
+    }
+
     if (frame == 1 || frame % 60 == 0) {
       _setStatus(
         'running — frame $frame\n'
@@ -1577,6 +1715,142 @@ void _boot() {
   }
 
   web.window.requestAnimationFrame(tick.toJS);
+}
+
+/// Runs one real WebGL timer-query probe and publishes its lifecycle on the
+/// canvas for browser automation. This is deliberately separate from the
+/// renderer's frame loop: a ready value is reported only when the adapter
+/// returns one, while unsupported/disjoint/pending states never receive a
+/// fabricated elapsed time.
+void _startGpuTimingProbe(WebGl2Device device, RenderCapabilities caps) {
+  final canvas = device.gl.canvas as web.HTMLCanvasElement;
+  void publish(GpuTimerPoll result, {int? polls}) {
+    canvas.setAttribute('data-gpu-timing-status', result.status.name);
+    if (polls != null) {
+      canvas.setAttribute('data-gpu-timing-polls', '$polls');
+    }
+    final elapsed = result.elapsedNanoseconds;
+    if (elapsed == null) {
+      canvas.removeAttribute('data-gpu-timing-elapsed-ns');
+    } else {
+      canvas.setAttribute('data-gpu-timing-elapsed-ns', '$elapsed');
+    }
+  }
+
+  if (!caps.disjointTimerQuery) {
+    const unsupported = GpuTimerPoll(GpuTimerStatus.unsupported);
+    publish(unsupported, polls: 0);
+    _setStatus(
+      'GPU timing: unsupported — EXT_disjoint_timer_query_webgl2 is absent; '
+      'no duration reported',
+    );
+    return;
+  }
+
+  final query = device.beginGpuTimer();
+  if (query == null) {
+    const unsupported = GpuTimerPoll(GpuTimerStatus.unsupported);
+    publish(unsupported, polls: 0);
+    _setStatus('GPU timing: unsupported — query allocation returned null');
+    return;
+  }
+
+  // A clear is enough real GPU work to exercise the query without depending
+  // on the demo graph's later resource setup or changing its frame stats.
+  device.gl.clearColor(0, 0, 0, 0);
+  device.gl.clear(web.WebGL2RenderingContext.COLOR_BUFFER_BIT);
+  device.gl.flush();
+  device.endGpuTimer(query);
+
+  var polls = 0;
+  void poll(num _) {
+    polls += 1;
+    final result = device.pollGpuTimer(query);
+    publish(result, polls: polls);
+    switch (result.status) {
+      case GpuTimerStatus.pending:
+        if (polls < 120) {
+          web.window.requestAnimationFrame(poll.toJS);
+          return;
+        }
+        // Keep the truthful pending state but clean up the query rather than
+        // turning a slow adapter into a made-up duration.
+        device.deleteGpuTimer(query);
+        _setStatus('GPU timing: pending after $polls polls — duration omitted');
+      case GpuTimerStatus.ready:
+        device.deleteGpuTimer(query);
+        _setStatus(
+          'GPU timing: ready — ${result.elapsedNanoseconds} ns '
+          '(polls: $polls)',
+        );
+      case GpuTimerStatus.disjoint:
+        device.deleteGpuTimer(query);
+        _setStatus(
+          'GPU timing: disjoint — adapter invalidated the sample; '
+          'duration omitted',
+        );
+      case GpuTimerStatus.unsupported:
+        device.deleteGpuTimer(query);
+        _setStatus('GPU timing: unsupported — duration omitted');
+    }
+  }
+
+  // The first poll is expected to be pending on a real adapter, but the
+  // implementation remains correct if a driver makes the result ready
+  // immediately.
+  web.window.requestAnimationFrame(poll.toJS);
+}
+
+/// Reads one small neighborhood around each authored instance center after
+/// the present pass. This is intentionally independent of the house: the
+/// standalone renderer demo's shared cube mesh/material is enough to prove
+/// that three distinct transforms reached a real WebGL draw. A non-black hit
+/// at every projected center is stronger than the DOM metadata alone, while
+/// the metadata keeps the browser report explainable when a headless adapter
+/// has no visible WebGL output.
+void _publishR09InstancePixelProof(
+  web.WebGL2RenderingContext gl,
+  web.HTMLCanvasElement canvas,
+  CameraView camera,
+  List<_TestCubeItem> items,
+) {
+  final width = gl.drawingBufferWidth;
+  final height = gl.drawingBufferHeight;
+  final hits = <int>[];
+  for (final item in items) {
+    final ndc = camera.viewProjection.transformPoint(
+      item.transform.translation,
+    );
+    final centerX = ((ndc.x * 0.5 + 0.5) * (width - 1)).round();
+    final centerY = ((ndc.y * 0.5 + 0.5) * (height - 1)).round();
+    var hit = 0;
+    for (var dy = -2; dy <= 2; dy += 1) {
+      for (var dx = -2; dx <= 2; dx += 1) {
+        final x = centerX + dx;
+        final y = centerY + dy;
+        if (x < 0 || x >= width || y < 0 || y >= height) continue;
+        final pixel = Uint8List(4);
+        gl.readPixels(
+          x,
+          y,
+          1,
+          1,
+          web.WebGL2RenderingContext.RGBA,
+          web.WebGL2RenderingContext.UNSIGNED_BYTE,
+          pixel.toJS,
+        );
+        if (pixel[0] > 12 || pixel[1] > 12 || pixel[2] > 12) {
+          hit += 1;
+        }
+      }
+    }
+    hits.add(hit);
+  }
+  canvas.setAttribute('data-instance-pixel-hits', hits.join(','));
+  canvas.setAttribute(
+    'data-instance-pixel-proof',
+    hits.every((value) => value > 0) ? 'three-distinct' : 'pixel-miss',
+  );
 }
 
 final class _AlwaysAvailable implements RenderPassResources {
@@ -1594,15 +1868,19 @@ final class _TestCubeItem implements RetainedItemView {
   final Transform transform;
   final bool castsShadow;
   final DrawMode drawMode;
+  final int instanceSlot;
+  final int? instanceFamilyKey;
   const _TestCubeItem(
     this.mesh,
     this.material,
     this.transform, {
     this.castsShadow = true,
     this.drawMode = DrawMode.opaque,
+    this.instanceSlot = 0,
+    this.instanceFamilyKey,
   });
   @override
-  InstanceId get id => const InstanceId(0, 1);
+  InstanceId get id => InstanceId(instanceSlot, 1);
   @override
   RetainedItemDescriptor get descriptor => RetainedItemDescriptor(
     mesh: mesh,
@@ -1610,6 +1888,7 @@ final class _TestCubeItem implements RetainedItemView {
     transform: transform,
     castsShadow: castsShadow,
     drawMode: drawMode,
+    instanceFamilyKey: instanceFamilyKey,
   );
   @override
   Aabb get worldBounds => const Aabb(Vec3(-1, -1, -1), Vec3(1, 1, 1));

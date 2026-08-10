@@ -226,14 +226,9 @@ final class _WorldPass implements RenderPass {
 
   void _drawBatch(DrawCommandEncoder encoder, Object batch) {
     if (batch is InstanceBatch) {
-      // Per-instance transforms need a real instance attribute stream
-      // (RV-04's "persistent instance buffers" line item, not yet built);
-      // a single shared uModel would be wrong for a batch whose members
-      // have different transforms by definition. Using the representative
-      // item's transform is a known, deliberate placeholder — every
-      // instance in the batch currently renders at the same place — not a
-      // silent approximation, and it must not be mistaken for correct
-      // instanced rendering.
+      // Keep the representative model uniform populated for the shader's
+      // explicit non-instanced fallback; the per-member matrices uploaded by
+      // setInstanceTransformUniforms are selected with gl_InstanceID below.
       final representative = batch.representative;
       _setModelUniforms(encoder, representative.descriptor.transform);
       setInstanceTransformUniforms(encoder, batch);

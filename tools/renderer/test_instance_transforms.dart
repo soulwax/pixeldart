@@ -10,16 +10,23 @@ import 'package:pixeldart/rendering/webgl/state_cache.dart';
 void main() {
   final first = _view(1, const Vec3(2, 0, -3));
   final second = _view(2, const Vec3(-4, 1, -7));
+  final third = _view(3, const Vec3(6, -2, -11));
   final encoder = _RecordingEncoder();
-  setInstanceTransformUniforms(encoder, InstanceBatch(first, [first, second]));
+  setInstanceTransformUniforms(
+    encoder,
+    InstanceBatch(first, [first, second, third]),
+  );
   final models = encoder.uniforms['uInstanceModels']!.value as Float32List;
-  if (models.length != 32 ||
+  if (models.length != 48 ||
       models[12] != 2 ||
       models[13] != 0 ||
       models[14] != -3 ||
       models[28] != -4 ||
       models[29] != 1 ||
-      models[30] != -7) {
+      models[30] != -7 ||
+      models[44] != 6 ||
+      models[45] != -2 ||
+      models[46] != -11) {
     throw StateError('instance transform stream lost distinct translations');
   }
   if (encoder.uniforms['uInstanceNormalMatrices']!.type !=
@@ -29,6 +36,24 @@ void main() {
   disableInstanceTransformUniforms(encoder);
   if (encoder.uniforms['uUseInstances']!.value != 0) {
     throw StateError('instance stream disable marker was not emitted');
+  }
+  var oversizedRejected = false;
+  try {
+    setInstanceTransformUniforms(
+      encoder,
+      InstanceBatch(
+        first,
+        List<RetainedItemView>.filled(
+          InstanceBatch.maxInstanceCount + 1,
+          first,
+        ),
+      ),
+    );
+  } catch (_) {
+    oversizedRejected = true;
+  }
+  if (!oversizedRejected) {
+    throw StateError('instance stream accepted an unsafe uniform-array size');
   }
   print('Instance transform stream fixture passed.');
 }

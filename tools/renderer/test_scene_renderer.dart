@@ -100,6 +100,14 @@ Future<void> main() async {
       instanceFamilyKey: 7,
     ),
   );
+  encoder.submit(
+    RetainedItemDescriptor(
+      mesh: mesh,
+      material: material,
+      transform: Transform.at(const Vec3(0.25, 0.5, 0)),
+      instanceFamilyKey: 7,
+    ),
+  );
   var configureRejected = false;
   try {
     await renderer.configure(RendererConfiguration.safe);
@@ -112,7 +120,7 @@ Future<void> main() async {
     stats.drawCalls == 1,
     'instanced persistent and transient world draws were not batched',
   );
-  require(stats.trianglesSubmitted == 2, 'triangle count is not deterministic');
+  require(stats.trianglesSubmitted == 3, 'triangle count is not deterministic');
   final pendingTiming = renderer.pollGpuTiming();
   require(
     pendingTiming.frameIndex == 1 &&
@@ -127,13 +135,13 @@ Future<void> main() async {
   );
   require(
     stats.trianglesCulled == 0 &&
-        stats.instancesSubmitted == 2 &&
+        stats.instancesSubmitted == 3 &&
         stats.instancesCulled == 0,
     'visible scene counters are not truthful',
   );
   require(
     stats.pass('worldOpaqueTransparent').drawCalls == 1 &&
-        stats.pass('worldOpaqueTransparent').trianglesSubmitted == 2 &&
+        stats.pass('worldOpaqueTransparent').trianglesSubmitted == 3 &&
         stats.pass('present').drawCalls == 1,
     'per-pass encoder telemetry is incomplete',
   );
@@ -142,7 +150,9 @@ Future<void> main() async {
   );
   final instanceModels = instanceUniform.value.value as Float32List;
   require(
-    instanceModels.length == 32 && instanceModels[28] == 2,
+    instanceModels.length == 48 &&
+        instanceModels[28] == 2 &&
+        instanceModels[44] == 0.25,
     'world pass did not submit the distinct instance transform stream',
   );
   require(stats.liveGpuBytes == 168, 'mesh upload bytes were not reported');
@@ -153,6 +163,10 @@ Future<void> main() async {
   require(
     device.drawLog.any((entry) => entry.startsWith('draw')),
     'safe graph did not execute a world draw',
+  );
+  require(
+    device.drawLog.any((entry) => entry == 'drawArraysInstanced(0, 3, 3)'),
+    'safe graph did not issue the three-instance draw call',
   );
   require(
     device.drawLog.any((entry) => entry.startsWith('drawArrays')),

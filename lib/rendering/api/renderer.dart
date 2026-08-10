@@ -10,6 +10,7 @@ import 'settings.dart';
 import 'stats.dart';
 import '../assets/model_binding.dart';
 import '../assets/model_definition.dart';
+import '../assets/texture_residency.dart';
 
 /// Declares, loads, and releases shared GPU-backed resources. Owned by one
 /// [SceneRenderer]; every [MeshHandle]/[TextureHandle]/[MaterialHandle] it
@@ -37,6 +38,10 @@ abstract interface class ResourceLibrary {
   });
   void updateTexturePixels(TextureHandle handle, Uint8List pixels);
   void releaseTexture(TextureHandle handle);
+
+  /// Probes deterministic working-set requests without taking ownership of
+  /// the referenced texture handles or creating duplicate GPU textures.
+  TextureResidencyManager get textureResidency;
 
   void dispose();
 }

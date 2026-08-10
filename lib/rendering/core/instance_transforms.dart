@@ -12,15 +12,24 @@ void setInstanceTransformUniforms(
   InstanceBatch batch, {
   bool includeNormalMatrices = true,
 }) {
+  if (batch.instanceCount > InstanceBatch.maxInstanceCount) {
+    throw ArgumentError.value(
+      batch.instanceCount,
+      'batch.instanceCount',
+      'exceeds the WebGL2-safe instance uniform bound of '
+          '${InstanceBatch.maxInstanceCount}',
+    );
+  }
   final models = Float32List(batch.instanceCount * 16);
   final normals = includeNormalMatrices
       ? Float32List(batch.instanceCount * 16)
       : null;
   for (var i = 0; i < batch.members.length; i += 1) {
     final transform = batch.members[i].descriptor.transform;
-    _copyMatrix(models, i, transform.toMat4().m);
+    final model = transform.toMat4();
+    _copyMatrix(models, i, model.m);
     if (normals != null) {
-      _copyMatrix(normals, i, transform.toMat4().normalMatrix().m);
+      _copyMatrix(normals, i, model.normalMatrix().m);
     }
   }
   encoder.setUniform('uInstanceModels', UniformValue.mat4Array(models));

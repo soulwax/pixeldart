@@ -4,6 +4,8 @@ final class ResourceLibraryImpl implements ResourceLibrary {
   final MeshStore _meshes;
   final MaterialStore _materials = MaterialStore();
   final TextureStore _textures;
+  late final TextureResidencyManager _textureResidency =
+      TextureResidencyManager(_textures);
   final Set<MeshHandle> _meshHandles = {};
   final Set<MaterialHandle> _materialHandles = {};
   final Set<TextureHandle> _textureHandles = {};
@@ -14,6 +16,8 @@ final class ResourceLibraryImpl implements ResourceLibrary {
   MeshStore get meshes => _meshes;
   MaterialStore get materials => _materials;
   TextureStore get textures => _textures;
+  @override
+  TextureResidencyManager get textureResidency => _textureResidency;
   int get estimatedGpuBytes => _meshes.liveGpuBytes + _textures.liveGpuBytes;
   int get resourceCreateCount =>
       _meshes.registry.createCount +
