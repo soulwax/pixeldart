@@ -66,6 +66,8 @@ final class PresentProgramSource {
       'uExposure',
       'uVignette',
       'uGrain',
+      'uRainIntensity',
+      'uRainWindowVisibility',
       'uOutputEncoding',
       'uToneMap',
     ],
@@ -203,6 +205,14 @@ final class _PresentPass implements RenderPass {
     encoder.setUniform('uExposure', UniformValue.float1(post.exposure));
     encoder.setUniform('uVignette', UniformValue.float1(post.vignette));
     encoder.setUniform('uGrain', UniformValue.float1(post.grain));
+    encoder.setUniform(
+      'uRainIntensity',
+      UniformValue.float1(post.rainIntensity),
+    );
+    encoder.setUniform(
+      'uRainWindowVisibility',
+      UniformValue.float1(post.rainWindowVisibility),
+    );
     encoder.setUniform(
       'uOutputEncoding',
       UniformValue.float1(PresentOutputPolicy.encodingUniform(outputEncoding)),

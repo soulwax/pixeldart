@@ -299,6 +299,7 @@ uniform float uFogEnd;
 uniform float uFogHeightFalloff;
 uniform float uFogDensity;
 uniform float uReceivesShadow;
+uniform float uRainWetness;
 layout(location=0)out vec4 oColor;
 layout(location=1)out vec4 oGlow;
 
@@ -472,7 +473,15 @@ void main(){
   // being metadata-only fields.
   float metal=clamp(uMetallic*orm.b,0.0,1.0);
   float rough=clamp(uRoughness*orm.g,0.0,1.0);
+  // Rain response stays in the world pass so it follows geometry depth rather
+  // than painting streaks over the whole screen. Near surfaces receive a
+  // restrained cool darkening and a broad wet highlight; distant surfaces
+  // fade back to their authored material before the fog composite.
+  float wetDepth=1.0-smoothstep(2.0,18.0,max(vViewDepth,0.0));
+  float wetness=clamp(uRainWetness,0.0,1.0)*wetDepth;
+  baseColor=mix(baseColor,baseColor*vec3(0.84,0.90,0.98),wetness*0.22);
   vec3 lit=baseColor*clamp(ambient+direct*(1.0-metal*(0.35+0.25*rough)),0.,1.);
+  lit+=direct*(wetness*(0.035+0.075*(1.0-rough)));
   vec3 emissive=texture(uEmissiveMap,uv).rgb*uMaterialTint*uEmissiveStrength;
   lit+=emissive;
   if(uLightmapIntensity>0.0){
@@ -523,6 +532,8 @@ uniform sampler2D uTex;
 uniform float uExposure;
 uniform float uVignette;
 uniform float uGrain;
+uniform float uRainIntensity;
+uniform float uRainWindowVisibility;
 uniform float uOutputEncoding;
 uniform float uToneMap;
 out vec4 oColor;
@@ -542,6 +553,16 @@ vec3 linearToSrgb(vec3 color){
   return mix(low,high,cutoff);
 }
 
+float rainStreak(vec2 uv){
+  // Stable diagonal streaks: no time or allocation dependency, and no work
+  // when uRainIntensity is zero. The small hash offset avoids a tiled comb.
+  vec2 cell=vec2(floor(uv.x*96.0),floor(uv.y*18.0));
+  float phase=fract(uv.x*96.0+uv.y*18.0+hash(cell));
+  float width=smoothstep(.08,.0,abs(phase-.5));
+  float sparse=step(.72,hash(cell+vec2(19.0,7.0)));
+  return width*sparse;
+}
+
 void main(){
   vec4 source=texture(uTex,vUv);
   // Exposure operates in scene-linear space; tone mapping prevents HDR
@@ -552,6 +573,9 @@ void main(){
   float vignette=smoothstep(.35,.78,edge);
   color*=1.-clamp(uVignette,0.,1.)*vignette;
   if(uOutputEncoding>.5) color=linearToSrgb(max(color,vec3(0.)));
+  float rain=clamp(uRainIntensity,0.,1.)*
+    clamp(uRainWindowVisibility,0.,1.);
+  color=mix(color,vec3(.56,.67,.76),rain*rainStreak(vUv)*.16);
   // A stable screen-space grain keeps captures reproducible for a fixed
   // viewport while still giving the dark gothic presentation a fine film
   // texture. It is deliberately tiny and never changes alpha.

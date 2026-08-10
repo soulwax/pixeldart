@@ -88,6 +88,7 @@ uniform float uFogEnd;
 uniform float uFogHeightFalloff;
 uniform float uFogDensity;
 uniform float uReceivesShadow;
+uniform float uRainWetness;
 layout(location=0)out vec4 oColor;
 layout(location=1)out vec4 oGlow;
 
@@ -261,7 +262,15 @@ void main(){
   // being metadata-only fields.
   float metal=clamp(uMetallic*orm.b,0.0,1.0);
   float rough=clamp(uRoughness*orm.g,0.0,1.0);
+  // Rain response stays in the world pass so it follows geometry depth rather
+  // than painting streaks over the whole screen. Near surfaces receive a
+  // restrained cool darkening and a broad wet highlight; distant surfaces
+  // fade back to their authored material before the fog composite.
+  float wetDepth=1.0-smoothstep(2.0,18.0,max(vViewDepth,0.0));
+  float wetness=clamp(uRainWetness,0.0,1.0)*wetDepth;
+  baseColor=mix(baseColor,baseColor*vec3(0.84,0.90,0.98),wetness*0.22);
   vec3 lit=baseColor*clamp(ambient+direct*(1.0-metal*(0.35+0.25*rough)),0.,1.);
+  lit+=direct*(wetness*(0.035+0.075*(1.0-rough)));
   vec3 emissive=texture(uEmissiveMap,uv).rgb*uMaterialTint*uEmissiveStrength;
   lit+=emissive;
   if(uLightmapIntensity>0.0){

@@ -12,6 +12,7 @@ import '../core/program_library.dart';
 import '../core/program_source.dart';
 import '../core/render_feature.dart';
 import '../core/render_graph.dart';
+import '../core/shadow_caster_lod.dart';
 import '../math/mat4.dart';
 import '../math/transform.dart';
 import '../math/vec.dart';
@@ -77,6 +78,8 @@ final class ShadowFeature implements RenderFeature {
   final MaterialResolver resolveMaterial;
   final AlbedoResolver resolveAlbedo;
   final SpotLight? Function() resolveCasterLight;
+  final ShadowCasterLodResolver? resolveCasterLod;
+  final ShadowCasterMeshResolver? resolveCasterMesh;
   final void Function(ShadowLightView view) onLightViewComputed;
   final ResourceRef shadowMapResource;
 
@@ -88,6 +91,8 @@ final class ShadowFeature implements RenderFeature {
     required this.resolveMaterial,
     required this.resolveAlbedo,
     required this.resolveCasterLight,
+    this.resolveCasterLod,
+    this.resolveCasterMesh,
     required this.onLightViewComputed,
     this.shadowMapResource = ShadowResources.shadowMap,
   });
@@ -129,6 +134,8 @@ final class ShadowFeature implements RenderFeature {
         resolveMaterial: resolveMaterial,
         resolveAlbedo: resolveAlbedo,
         resolveCasterLight: resolveCasterLight,
+        resolveCasterLod: resolveCasterLod,
+        resolveCasterMesh: resolveCasterMesh,
         onLightViewComputed: onLightViewComputed,
       ),
     ];
@@ -146,6 +153,8 @@ final class _ShadowCasterPass implements RenderPass {
   final MaterialResolver resolveMaterial;
   final AlbedoResolver resolveAlbedo;
   final SpotLight? Function() resolveCasterLight;
+  final ShadowCasterLodResolver? resolveCasterLod;
+  final ShadowCasterMeshResolver? resolveCasterMesh;
   final void Function(ShadowLightView view) onLightViewComputed;
 
   const _ShadowCasterPass({
@@ -155,6 +164,8 @@ final class _ShadowCasterPass implements RenderPass {
     required this.resolveMaterial,
     required this.resolveAlbedo,
     required this.resolveCasterLight,
+    required this.resolveCasterLod,
+    required this.resolveCasterMesh,
     required this.onLightViewComputed,
   });
 
@@ -185,7 +196,7 @@ final class _ShadowCasterPass implements RenderPass {
     encoder.setUniform('uAlbedo', const UniformValue.sampler(0));
 
     for (final batch in context.frameScene.opaqueBatches) {
-      _drawCaster(encoder, batch, lightView);
+      _drawCaster(encoder, batch, light, lightView);
     }
   }
 
@@ -220,14 +231,19 @@ final class _ShadowCasterPass implements RenderPass {
   void _drawCaster(
     DrawCommandEncoder encoder,
     Object batch,
+    SpotLight light,
     ShadowLightView lightView,
   ) {
     if (batch is RetainedItemView) {
       if (!batch.descriptor.castsShadow) return;
+      final lod = _lodFor(batch, light);
+      if (lod == ShadowCasterLod.culled) return;
       disableInstanceTransformUniforms(encoder);
       _setLightUniforms(encoder, batch.descriptor.transform, lightView);
       _setMaterialState(encoder, batch.descriptor.material);
-      final mesh = resolveMesh(batch.descriptor.mesh);
+      final meshHandle =
+          resolveCasterMesh?.call(batch, light, lod) ?? batch.descriptor.mesh;
+      final mesh = resolveMesh(meshHandle);
       encoder.bindVertexArray(mesh.vao);
       if (mesh.isIndexed) {
         encoder.drawElements(
@@ -241,6 +257,8 @@ final class _ShadowCasterPass implements RenderPass {
     } else if (batch is InstanceBatch) {
       final representative = batch.representative;
       if (!representative.descriptor.castsShadow) return;
+      final lod = _uniformBatchLod(batch, light);
+      if (lod == ShadowCasterLod.culled) return;
       _setLightUniforms(
         encoder,
         representative.descriptor.transform,
@@ -252,7 +270,10 @@ final class _ShadowCasterPass implements RenderPass {
         includeNormalMatrices: false,
       );
       _setMaterialState(encoder, representative.descriptor.material);
-      final mesh = resolveMesh(representative.descriptor.mesh);
+      final meshHandle =
+          resolveCasterMesh?.call(representative, light, lod) ??
+          representative.descriptor.mesh;
+      final mesh = resolveMesh(meshHandle);
       encoder.bindVertexArray(mesh.vao);
       if (mesh.isIndexed) {
         encoder.drawElementsInstanced(
@@ -274,6 +295,32 @@ final class _ShadowCasterPass implements RenderPass {
         'RetainedItemView, got ${batch.runtimeType}',
       );
     }
+  }
+
+  ShadowCasterLod _lodFor(RetainedItemView item, SpotLight light) =>
+      resolveCasterLod?.call(item, light) ?? ShadowCasterLod.full;
+
+  /// An instanced batch cannot change geometry or instance count per member
+  /// without splitting the retained batch. Skip it only when every member
+  /// that is authored as a caster is culled; otherwise draw the conservative
+  /// full batch and let the host wire a future reduced-mesh path.
+  ShadowCasterLod _uniformBatchLod(InstanceBatch batch, SpotLight light) {
+    final resolver = resolveCasterLod;
+    if (resolver == null) return ShadowCasterLod.full;
+    ShadowCasterLod? selected;
+    for (final member in batch.members) {
+      if (!member.descriptor.castsShadow) continue;
+      final lod = resolver(member, light);
+      if (lod == ShadowCasterLod.culled) continue;
+      if (selected == null) {
+        selected = lod;
+      } else if (selected != lod) {
+        // A mixed-tier batch cannot safely swap one mesh for every member;
+        // retain the authored mesh as the conservative fallback.
+        return ShadowCasterLod.full;
+      }
+    }
+    return selected ?? ShadowCasterLod.culled;
   }
 
   void _setLightUniforms(

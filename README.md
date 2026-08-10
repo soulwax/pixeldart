@@ -144,7 +144,7 @@ Gallery index: [all features](.github/screenshots/00-all-features-on.jpg) ·
 | AO | Half-resolution 8-sample SSAO reconstructing position from depth and normals from derivatives, depth-aware bilateral blur, modulates ambient only |
 | Emissive | Real MRT (`COLOR_ATTACHMENT1`), driven by material emissive texture × strength — never inferred from final luma — surviving explicit MSAA resolve |
 | Output | Explicit MSAA resolve, scene-linear exposure/Reinhard tone map, selectable linear/sRGB output encoding, and configuration-scoped resource extents |
-| Post | Bloom (separable gaussian, additive composite), DOF (circle-of-confusion vs. focus distance/range), 3D-LUT color grade, fog (distance + optional height/density, never applied to emissive) |
+| Post | Bloom (separable gaussian, additive composite), DOF (circle-of-confusion vs. focus distance/range), 3D-LUT color grade, fog (distance + optional height/density, never applied to emissive), deterministic screen-space rain streaks with aperture weighting, and depth-weighted near-surface wetness driven by `PostProcessState.rainIntensity` |
 | PS1 | Vertex snapping in NDC before the perspective divide, affine UV warp (solved without `noperspective`, gated per material × per frame), color quantization to N bits with Bayer 4×4 ordered dithering |
 | VHS | Final recording stage with six independent weights — chroma bleed, tracking jitter, YIQ tape noise, head-switch tear, dropout streaks, frame ghosting via the graph's history/ping-pong mechanism |
 | Transients | Frame-local particle submission (alpha motes, additive light shafts) through a persistent grow-only encoder, sorted back-to-front |
@@ -176,7 +176,7 @@ dart run tools/renderer/check_sizes.dart
 dart run tools/renderer/shaders.dart --check
 ```
 
-`test_all.dart` discovers and runs all 48 renderer fixtures. It resolves the
+`test_all.dart` discovers and runs all 51 renderer fixtures. It resolves the
 package root from its own script path, so the aggregate is safe to invoke from
 the repository root or this package directory. The fixtures run on the Dart VM
 against `FakeGpuDevice`; this is fast, deterministic contract evidence and is
@@ -250,9 +250,12 @@ room cells; the Pixeldart runtime updates retained-item visibility masks and
 reuses one material per slot, so a room change does not re-register meshes or
 instance resources. The runtime publishes
 `data-renderer-exterior-cells` and `data-renderer-exterior-items` for later
-browser draw telemetry. This is presentation partitioning only: house portals,
-collision, and shadow-caster selection remain authoritative outside Pixeldart;
-asset loading and eviction policy remain host-owned around the residency probe.
+browser draw telemetry. This is presentation partitioning only: house portals
+and collision remain authoritative outside Pixeldart. The house still owns its
+authored cell tier; Pixeldart additionally exposes a generic light-distance
+shadow-caster policy for hosts that need a renderer-level detail decision.
+Neither policy swaps meshes by itself. Asset loading and eviction remain
+host-owned around the residency probe.
 
 `TextureResidencyManager` is the explicit retained-texture prewarm seam. It
 uses the store's existing fallback-resolve contract, sorts requests by
@@ -261,7 +264,28 @@ priority/key, deduplicates shared handles, and reports
 performing I/O. `ResourceLibrary.textureResidency` exposes the same manager to
 host integrations. The focused fixture probes the same working set 100 times,
 then releases one handle to prove eviction diagnostics without ownership
-churn; browser/package residency evidence remains separate.
+churn. The authored-house package probe now publishes
+`data-renderer-exterior-texture-bindings` and rejects any submitted exterior
+item whose texture is not resident or whose slot+generation handle disagrees
+with the retained residency report. Its hall→kitchen evidence keeps the
+11/17→6/17 PVS working set and `grime=1.1,wall-plaster=0.1` handles stable;
+the deterministic parser/validator lives in
+`tools/browser/exterior_pvs_residency.cjs`.
+
+### Generic shadow-caster LOD policy
+
+`ShadowCasterLodPolicy` selects `full`, `reduced`, or `culled` from distance to
+the selected `SpotLight`, with explicit hysteresis at both boundaries.
+`InstanceShadowCasterLodSelector` keeps that presentation state independently
+per retained `InstanceId`; it never registers, releases, or replaces a GPU
+resource. Hosts map the tiers to authored caster meshes or skip work, so the
+policy does not claim alternate-mesh rendering or browser shadow pixels. The
+focused `test_shadow_caster_lod.dart` fixture checks boundary behavior,
+light-space distance, invalid inputs, and a 100-frame two-instance ownership
+soak. `ShadowFeature` accepts the optional resolver and skips a direct item
+only at `culled`; an instanced batch is skipped only when all of its casting
+members are culled, preserving conservative batch ownership. The focused
+`test_shadow_caster_pass_lod.dart` fixture exercises that seam for 100 frames.
 
 The demo also publishes the real timer-query lifecycle on
 `#test-canvas[data-gpu-timing-status]`. With the server running on port 8091,
@@ -554,7 +578,7 @@ A few design decisions worth knowing before reading the code:
 
 ```sh
 dart analyze                                 # zero issues, including infos
-dart run tools/renderer/test_all.dart        # 48 pure test scripts
+dart run tools/renderer/test_all.dart        # 51 pure test scripts
 dart run tools/renderer/check_boundary.dart  # import/layering rules
 dart run tools/renderer/check_sizes.dart     # per-file authored-line budgets
 dart run tools/renderer/shaders.dart --check # generated shaders in sync

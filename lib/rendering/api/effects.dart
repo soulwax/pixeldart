@@ -9,6 +9,16 @@ final class PostProcessState {
   final double depthOfFieldStrength;
   final double vignette;
   final double grain;
+
+  /// Deterministic screen-space precipitation amount in [0, 1].
+  /// Zero is a true no-op; callers map weather facts into this presentation
+  /// value without teaching the renderer about game states.
+  final double rainIntensity;
+
+  /// Aperture visibility for screen-space precipitation in [0, 1]. A closed
+  /// room can retain a faint exterior glint without receiving a full-screen
+  /// interior rain layer. This is presentation data, not a portal rule.
+  final double rainWindowVisibility;
   final double ditherStrength;
   final double colorGradeStrength;
   final double affineWarpStrength;
@@ -31,6 +41,8 @@ final class PostProcessState {
     this.depthOfFieldStrength = 0,
     this.vignette = 0,
     this.grain = 0,
+    this.rainIntensity = 0,
+    this.rainWindowVisibility = 1,
     this.ditherStrength = 0,
     this.colorGradeStrength = 0,
     this.affineWarpStrength = 0,
@@ -58,6 +70,17 @@ final class PostProcessState {
         'PostProcessState.quantizationBits must be in [1, 8]: $quantizationBits',
       );
     }
+    if (rainIntensity > 1) {
+      throw ArgumentError(
+        'PostProcessState.rainIntensity must be in [0, 1]: $rainIntensity',
+      );
+    }
+    if (rainWindowVisibility > 1) {
+      throw ArgumentError(
+        'PostProcessState.rainWindowVisibility must be in [0, 1]: '
+        '$rainWindowVisibility',
+      );
+    }
   }
 
   Map<String, double> get _weights => {
@@ -67,6 +90,8 @@ final class PostProcessState {
     'depthOfFieldStrength': depthOfFieldStrength,
     'vignette': vignette,
     'grain': grain,
+    'rainIntensity': rainIntensity,
+    'rainWindowVisibility': rainWindowVisibility,
     'ditherStrength': ditherStrength,
     'colorGradeStrength': colorGradeStrength,
     'affineWarpStrength': affineWarpStrength,

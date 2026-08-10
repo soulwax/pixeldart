@@ -5,6 +5,7 @@ import '../api/capabilities.dart';
 import '../core/feature_graph.dart';
 import '../core/graph_resource.dart';
 import '../core/program_library.dart';
+import '../core/shadow_caster_lod.dart';
 import '../core/render_feature.dart';
 import '../webgl/device_api.dart';
 import '../webgl/generated_shaders.dart';
@@ -45,6 +46,8 @@ FeatureGraph buildShadowGraph(
   MaterialTextureResolver? resolveLightmap,
   required GpuObject Function() resolveShadowMap,
   required SpotLight? Function() resolveCasterLight,
+  ShadowCasterLodResolver? resolveCasterLod,
+  ShadowCasterMeshResolver? resolveCasterMesh,
   List<SpotLight> Function()? resolveDirectSpotLights,
   required GpuObject Function() resolveSceneDepth,
   required CameraView Function() resolveCamera,
@@ -142,6 +145,8 @@ FeatureGraph buildShadowGraph(
     resolveMaterial: resolveMaterial,
     resolveAlbedo: resolveAlbedo,
     resolveCasterLight: resolveCasterLight,
+    resolveCasterLod: resolveCasterLod,
+    resolveCasterMesh: resolveCasterMesh,
     onLightViewComputed: (view) => lastLightView = view,
     shadowMapResource: layout.shadowMap,
   );

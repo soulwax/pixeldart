@@ -135,6 +135,7 @@ final class ShadowedWorldProgramSource {
       'uFogHeightFalloff',
       'uFogDensity',
       'uReceivesShadow',
+      'uRainWetness',
     ],
   );
 }
@@ -549,6 +550,10 @@ final class _ShadowedWorldPass implements RenderPass {
     encoder.setUniform(
       'uAmbientIntensity',
       UniformValue.float1(environment.ambientIntensity),
+    );
+    encoder.setUniform(
+      'uRainWetness',
+      UniformValue.float1(post.rainIntensity),
     );
 
     for (final batch in context.frameScene.opaqueBatches) {
