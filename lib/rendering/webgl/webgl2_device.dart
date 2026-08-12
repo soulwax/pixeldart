@@ -113,16 +113,15 @@ final class WebGl2Device with _WebGlTimerSupport implements GpuDevice {
   WebGl2Device(this.gl) : _supportedExtensions = _readSupportedExtensions(gl) {
     final canvasTarget = gl.canvas as EventTarget;
     _lostListener =
-        ((Event event) {
-              event.preventDefault();
-              _status = GpuDeviceStatus.lost;
-            }).toJS
-            as EventListener;
+        ((JSAny? e) {
+          final event = e as web.Event;
+          event.preventDefault();
+          _status = GpuDeviceStatus.lost;
+        }).toJS as EventListener;
     _restoredListener =
-        ((Event event) {
-              _status = GpuDeviceStatus.ready;
-            }).toJS
-            as EventListener;
+        ((JSAny? e) {
+          _status = GpuDeviceStatus.ready;
+        }).toJS as EventListener;
     canvasTarget.addEventListener('webglcontextlost', _lostListener);
     canvasTarget.addEventListener('webglcontextrestored', _restoredListener);
   }
