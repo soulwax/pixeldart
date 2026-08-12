@@ -114,8 +114,8 @@ final class Mat4 {
     required Vec3 up,
   }) {
     final f = forward.normalized;
-    final r = f.cross(up).normalized;
-    final u = r.cross(f);
+    final r = up.cross(f).normalized;
+    final u = f.cross(r);
     return Mat4._(
       Float32List(16)
         ..[0] = r.x
