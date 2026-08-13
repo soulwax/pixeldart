@@ -12,6 +12,7 @@ import '../api/settings.dart';
 import '../api/stats.dart';
 import '../math/bounds.dart';
 import '../assets/material_store.dart';
+import '../assets/material_residency.dart';
 import '../assets/mesh_store.dart';
 import '../assets/model_binding.dart';
 import '../assets/model_definition.dart';
@@ -63,6 +64,9 @@ final class SceneRendererImpl with _GpuTimingSupport implements SceneRenderer {
       _capabilities ?? (throw StateError('renderer is not initialized'));
   @override
   RendererHealth get health => _health;
+  @override
+  RendererConfiguration get configuration =>
+      _configuration ?? (throw StateError('renderer is not initialized'));
   @override
   ResourceLibrary get resources =>
       _resources ?? (throw StateError('renderer is not initialized'));

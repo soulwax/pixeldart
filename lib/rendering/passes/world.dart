@@ -61,9 +61,9 @@ typedef MaterialResolver = MaterialDefinition Function(MaterialHandle material);
 /// and takes the caller's fallback — the state every material in the
 /// renderer-test bootstrap was in before alpha masking needed a second
 /// texture, so a resolver that ignores its argument reproduces the previous
-/// single-texture behaviour exactly. No `TextureStore` exists yet (the
-/// counterpart to `MeshStore`/`MaterialStore` is unbuilt), which is why
-/// this is a resolver over the handle rather than a store lookup.
+/// single-texture behaviour exactly. The resolver remains an injected pass
+/// boundary even though the concrete renderer now backs it with `TextureStore`,
+/// keeping the pass independent from resource ownership and easy to fixture.
 typedef AlbedoResolver = GpuObject Function(TextureHandle? albedoTexture);
 
 /// Resolves any optional material-v2 texture slot. Keeping this separate

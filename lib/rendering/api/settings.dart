@@ -71,6 +71,20 @@ final class RendererConfiguration {
     this.diagnosticLevel = DiagnosticLevel.errorsOnly,
   });
 
+  Map<String, Object> toMap() => {
+    'profile': profile.toMap(),
+    'internalWidth': internalWidth,
+    'internalHeight': internalHeight,
+    'sampleCount': sampleCount,
+    'outputEncoding': outputEncoding.name,
+    'shadowMapCount': shadowMapCount,
+    'shadowMapSize': shadowMapSize,
+    'materialTableCapacity': materialTableCapacity,
+    'lightTableCapacity': lightTableCapacity,
+    'textureArrayLayerCapacity': textureArrayLayerCapacity,
+    'diagnosticLevel': diagnosticLevel.name,
+  };
+
   /// The mandatory safe graph configuration (§6.1): `world opaque -> world
   /// transparent -> present`, no optional targets, no temporal history.
   static const RendererConfiguration safe = RendererConfiguration(

@@ -10,6 +10,7 @@ import 'settings.dart';
 import 'stats.dart';
 import '../assets/model_binding.dart';
 import '../assets/model_definition.dart';
+import '../assets/material_residency.dart';
 import '../assets/texture_residency.dart';
 
 /// Declares, loads, and releases shared GPU-backed resources. Owned by one
@@ -43,6 +44,9 @@ abstract interface class ResourceLibrary {
   /// the referenced texture handles or creating duplicate GPU textures.
   TextureResidencyManager get textureResidency;
 
+  /// Aggregates the existing texture planner into material-level readiness.
+  MaterialResidencyManager get materialResidency;
+
   void dispose();
 }
 
@@ -53,6 +57,9 @@ abstract interface class SceneRenderer {
   RendererState get state;
   RenderCapabilities get capabilities;
   RendererHealth get health;
+  /// The last configuration committed by the renderer, including effective
+  /// allocations rather than only the user's requested profile.
+  RendererConfiguration get configuration;
   ResourceLibrary get resources;
 
   Future<void> initialize(
