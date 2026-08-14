@@ -73,6 +73,11 @@ final class ResourceLibraryImpl implements ResourceLibrary {
     required int width,
     required int height,
     int layers = 1,
+    bool hasMips = false,
+    GpuTextureFilter minFilter = GpuTextureFilter.linear,
+    GpuTextureFilter magFilter = GpuTextureFilter.linear,
+    GpuTextureWrap wrap = GpuTextureWrap.clampToEdge,
+    double anisotropy = 1,
     Uint8List? pixels,
     String? debugLabel,
   }) {
@@ -81,6 +86,11 @@ final class ResourceLibraryImpl implements ResourceLibrary {
       width: width,
       height: height,
       layers: layers,
+      hasMips: hasMips,
+      minFilter: minFilter,
+      magFilter: magFilter,
+      wrap: wrap,
+      anisotropy: anisotropy,
       pixels: pixels,
       debugLabel: debugLabel,
     );
@@ -92,6 +102,12 @@ final class ResourceLibraryImpl implements ResourceLibrary {
   void updateTexturePixels(TextureHandle handle, Uint8List pixels) {
     _ensureActive();
     _textures.updatePixels(handle, pixels);
+  }
+
+  @override
+  void finalizeTextureMips(TextureHandle handle) {
+    _ensureActive();
+    _textures.finalizeMips(handle);
   }
 
   @override

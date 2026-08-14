@@ -12,6 +12,7 @@ import '../assets/model_binding.dart';
 import '../assets/model_definition.dart';
 import '../assets/material_residency.dart';
 import '../assets/texture_residency.dart';
+import '../webgl/device_api.dart';
 
 /// Declares, loads, and releases shared GPU-backed resources. Owned by one
 /// [SceneRenderer]; every [MeshHandle]/[TextureHandle]/[MaterialHandle] it
@@ -34,10 +35,16 @@ abstract interface class ResourceLibrary {
     required int width,
     required int height,
     int layers = 1,
+    bool hasMips = false,
+    GpuTextureFilter minFilter = GpuTextureFilter.linear,
+    GpuTextureFilter magFilter = GpuTextureFilter.linear,
+    GpuTextureWrap wrap = GpuTextureWrap.clampToEdge,
+    double anisotropy = 1,
     Uint8List? pixels,
     String? debugLabel,
   });
   void updateTexturePixels(TextureHandle handle, Uint8List pixels);
+  void finalizeTextureMips(TextureHandle handle);
   void releaseTexture(TextureHandle handle);
 
   /// Probes deterministic working-set requests without taking ownership of
@@ -57,6 +64,7 @@ abstract interface class SceneRenderer {
   RendererState get state;
   RenderCapabilities get capabilities;
   RendererHealth get health;
+
   /// The last configuration committed by the renderer, including effective
   /// allocations rather than only the user's requested profile.
   RendererConfiguration get configuration;
