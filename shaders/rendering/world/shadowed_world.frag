@@ -99,20 +99,26 @@ layout(location=1)out vec4 oGlow;
   // API already but nothing read them before this, so the light previously
   // had a hard-edged, non-attenuating cone that read as flat/harsh instead of
 // a graduated pool of light).
+float rangeAttenuation(float dist,float range){
+  float normalized=clamp(dist/max(range,.001),0.,1.);
+  // Smooth quartic cutoff avoids a visible ring at the authored range while
+  // retaining an inverse-square response inside the light's influence.
+  float cutoff=1.-normalized*normalized*normalized*normalized;
+  float inverseSquare=1./(1.+(dist*dist)/max(range*range,.001));
+  return cutoff*cutoff*inverseSquare;
+}
+
 float lightAttenuation(vec3 worldPos){
   vec3 toFrag=worldPos-uLightPosition;
   float dist=length(toFrag);
-  float distFalloff=clamp(1.-dist/uLightRange,0.,1.);
-  distFalloff*=distFalloff;
   float cosAngle=dot(normalize(toFrag),normalize(uLightDirection));
   float coneFalloff=smoothstep(uLightOuterCos,uLightInnerCos,cosAngle);
-  return distFalloff*coneFalloff;
+  return rangeAttenuation(dist,uLightRange)*coneFalloff;
 }
 
 float pointAttenuation(vec3 worldPos,vec3 lightPosition,float lightRadius){
   float dist=length(lightPosition-worldPos);
-  float falloff=clamp(1.-dist/max(lightRadius,.001),0.,1.);
-  return falloff*falloff;
+  return rangeAttenuation(dist,lightRadius);
 }
 
 vec3 pointContribution(vec3 normal,vec3 worldPos,vec3 lightPosition,
@@ -131,9 +137,9 @@ vec3 directSpotContribution(vec3 normal,vec3 worldPos,vec3 lightPosition,
   vec3 toFrag=worldPos-lightPosition;
   float cosAngle=dot(normalize(toFrag),normalize(lightDirection));
   float coneFalloff=smoothstep(outerCos,innerCos,cosAngle);
-  float distanceFalloff=clamp(1.-length(toFrag)/max(lightRange,.001),0.,1.);
+  float distanceFalloff=rangeAttenuation(length(toFrag),lightRange);
   return lightColor*lightIntensity*ndotl*coneFalloff*
-    distanceFalloff*distanceFalloff*enabled;
+    distanceFalloff*enabled;
 }
 
 float sampleShadow(vec3 projCoord,float bias){
@@ -172,15 +178,19 @@ float shadowFactor(float ndotl){
   // Receiver-plane style slope bias keeps grazing surfaces from acne while
   // avoiding the detached-shadow look of a large constant offset.
   float bias=max(.003*(1.-ndotl),.0008);
+  // Fixed low-discrepancy offsets avoid the directional shimmer of a regular
+  // square lattice while remaining deterministic and free of per-frame noise.
+  vec2 t=uShadowMapTexelSize;
   float sum=0.;
-  // Nine-tap rotated-grid PCF removes the old four-corner shimmer while
-  // retaining a bounded kernel and stable cost for every shadow caster.
-  for(int y=-1;y<=1;y++){
-    for(int x=-1;x<=1;x++){
-      vec2 offset=vec2(float(x),float(y))*uShadowMapTexelSize;
-      sum+=sampleShadow(projCoord+vec3(offset,0.),bias);
-    }
-  }
+  sum+=sampleShadow(projCoord+vec3(vec2(-.942,-.399)*t,0.),bias);
+  sum+=sampleShadow(projCoord+vec3(vec2(.945,-.768)*t,0.),bias);
+  sum+=sampleShadow(projCoord+vec3(vec2(-.094,.886)*t,0.),bias);
+  sum+=sampleShadow(projCoord+vec3(vec2(.344,.294)*t,0.),bias);
+  sum+=sampleShadow(projCoord+vec3(vec2(-.716,.642)*t,0.),bias);
+  sum+=sampleShadow(projCoord+vec3(vec2(.688,-.089)*t,0.),bias);
+  sum+=sampleShadow(projCoord+vec3(vec2(-.287,-.885)*t,0.),bias);
+  sum+=sampleShadow(projCoord+vec3(vec2(.052,.008)*t,0.),bias);
+  sum+=sampleShadow(projCoord+vec3(vec2(.831,.486)*t,0.),bias);
   return sum/9.;
 }
 
