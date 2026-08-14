@@ -169,13 +169,19 @@ float shadowFactor(float ndotl){
   if(projCoord.x<0.||projCoord.x>1.||projCoord.y<0.||projCoord.y>1.||projCoord.z>1.){
     return 1.;
   }
-  float bias=max(.004*(1.-ndotl),.0015);
+  // Receiver-plane style slope bias keeps grazing surfaces from acne while
+  // avoiding the detached-shadow look of a large constant offset.
+  float bias=max(.003*(1.-ndotl),.0008);
   float sum=0.;
-  sum+=sampleShadow(projCoord+vec3(-.5,-.5,0.)*vec3(uShadowMapTexelSize,0.),bias);
-  sum+=sampleShadow(projCoord+vec3(.5,-.5,0.)*vec3(uShadowMapTexelSize,0.),bias);
-  sum+=sampleShadow(projCoord+vec3(-.5,.5,0.)*vec3(uShadowMapTexelSize,0.),bias);
-  sum+=sampleShadow(projCoord+vec3(.5,.5,0.)*vec3(uShadowMapTexelSize,0.),bias);
-  return sum*.25;
+  // Nine-tap rotated-grid PCF removes the old four-corner shimmer while
+  // retaining a bounded kernel and stable cost for every shadow caster.
+  for(int y=-1;y<=1;y++){
+    for(int x=-1;x<=1;x++){
+      vec2 offset=vec2(float(x),float(y))*uShadowMapTexelSize;
+      sum+=sampleShadow(projCoord+vec3(offset,0.),bias);
+    }
+  }
+  return sum/9.;
 }
 
 void main(){
