@@ -279,6 +279,16 @@ void main(){
     n=normalize(mat3(t,b,n)*normalize(map));
   }
   vec3 orm=texture(uOrmMap,uv).rgb;
+  float normalVariance=0.0;
+  if(uNormalStrength>0.0){
+    // Toksvig-style widening suppresses sub-pixel normal sparkle when a high
+    // resolution map is minified. It preserves authored relief at distance
+    // while converting unresolved detail into a stable roughness increase.
+    vec3 normalSample=texture(uNormalMap,uv).xyz*2.0-1.0;
+    vec3 normalDx=dFdx(normalSample);
+    vec3 normalDy=dFdy(normalSample);
+    normalVariance=dot(normalDx,normalDx)+dot(normalDy,normalDy);
+  }
   float ao=texture(uSsao,gl_FragCoord.xy/uSceneColorSize).r;
   ao*=mix(1.0,orm.r,clamp(uOcclusionStrength,0.0,1.0));
   vec3 direct=vec3(0.);
@@ -323,7 +333,7 @@ void main(){
   float rough=clamp(uRoughness*orm.g,0.0,1.0);
   // Avoid singular highlights while retaining a visibly sharp porcelain
   // response at the authored low end of the roughness range.
-  float specRough=max(0.045,rough);
+  float specRough=max(0.045,sqrt(rough*rough+normalVariance*0.18));
   vec3 viewDir=normalize(uCameraPosition-vWorldPos);
   vec3 specular=vec3(0.0);
   specular+=specularContribution(n,viewDir,normalize(uDirectionalDirection),
@@ -346,7 +356,7 @@ void main(){
     specRough,metal);
   specular+=specularContribution(n,viewDir,
     normalize(uLightPosition-vWorldPos),uLightColor,uLightIntensity,
-    lightAttenuation(vWorldPos)*uSpotEnabled,baseColor,specRough,metal);
+    lightAttenuation(vWorldPos)*uSpotEnabled*shadow,baseColor,specRough,metal);
   // Rain response stays in the world pass so it follows geometry depth rather
   // than painting streaks over the whole screen. Near surfaces receive a
   // restrained cool darkening and a broad wet highlight; distant surfaces
