@@ -6,7 +6,48 @@ void main() {
   _releaseInvalidatesTheHandle();
   _updateDoesNotEmitNewIdentity();
   _invalidDefinitionRejectedAtRegister();
+  _materialMapColorSpacesAreExplicit();
   print('Renderer material store fixtures passed.');
+}
+
+void _materialMapColorSpacesAreExplicit() {
+  const porcelain = MaterialDefinition(
+    key: 'porcelain-mermaid',
+    albedoColorSpace: MaterialMapColorSpace.srgb,
+    normalColorSpace: MaterialMapColorSpace.linear,
+    ormColorSpace: MaterialMapColorSpace.linear,
+    roughness: 0.28,
+    metallic: 0,
+    clearcoatStrength: 0.72,
+    clearcoatRoughness: 0.18,
+  );
+  final store = MaterialStore();
+  final handle = store.register(porcelain);
+  final resolved = store.resolve(handle);
+  if (resolved.albedoColorSpace != MaterialMapColorSpace.srgb ||
+      resolved.normalColorSpace != MaterialMapColorSpace.linear ||
+      resolved.ormColorSpace != MaterialMapColorSpace.linear) {
+    throw StateError('material map color-space metadata was not retained');
+  }
+  if (resolved.clearcoatStrength != 0.72 ||
+      resolved.clearcoatRoughness != 0.18) {
+    throw StateError('porcelain clearcoat metadata was not retained');
+  }
+
+  var rejected = false;
+  try {
+    store.register(
+      const MaterialDefinition(
+        key: 'wrong-normal-space',
+        normalColorSpace: MaterialMapColorSpace.srgb,
+      ),
+    );
+  } catch (_) {
+    rejected = true;
+  }
+  if (!rejected) {
+    throw StateError('non-linear normal maps must be rejected at registration');
+  }
 }
 
 void _registerResolvesBackToTheSameDefinition() {
@@ -48,7 +89,9 @@ void _releaseInvalidatesTheHandle() {
     throw StateError('resolving a released MaterialHandle must throw');
   }
   if (store.liveCount != 0) {
-    throw StateError('expected liveCount 0 after release, got ${store.liveCount}');
+    throw StateError(
+      'expected liveCount 0 after release, got ${store.liveCount}',
+    );
   }
 }
 
@@ -60,7 +103,8 @@ void _updateDoesNotEmitNewIdentity() {
   if (handle == secondHandle) {
     throw StateError('two distinct registrations must not collide on identity');
   }
-  if (store.resolve(handle).key != 'a' || store.resolve(secondHandle).key != 'b') {
+  if (store.resolve(handle).key != 'a' ||
+      store.resolve(secondHandle).key != 'b') {
     throw StateError('resolve must not cross-contaminate between handles');
   }
 }

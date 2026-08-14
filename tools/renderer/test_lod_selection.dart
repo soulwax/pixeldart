@@ -186,6 +186,12 @@ void _oneHundredTransitionsDoNotChangeOwnership() {
     'expected 100 deterministic transitions, got $transitions',
   );
   require(
+    selector.selectionChanges == 102,
+    'expected initial selections plus 100 transitions, got '
+    '${selector.selectionChanges}',
+  );
+  require(selector.cullEvents == 0, 'LOD soak unexpectedly culled an instance');
+  require(
     selector.trackedInstanceCount == 2 && selector.trackedSelectionCount == 2,
     'LOD state did not remain owned by exactly two instances',
   );

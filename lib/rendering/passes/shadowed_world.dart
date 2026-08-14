@@ -124,7 +124,10 @@ final class ShadowedWorldProgramSource {
       'uRoughness',
       'uMetallic',
       'uOcclusionStrength',
+      'uClearcoatStrength',
+      'uClearcoatRoughness',
       'uLightmapIntensity',
+      'uCameraPosition',
       'uVertexSnapGrid',
       'uAffineWarpStrength',
       'uAlphaCutoff',
@@ -322,6 +325,12 @@ final class _ShadowedWorldPass implements RenderPass {
     encoder.setUniform('uLightmap', const UniformValue.sampler(6));
     encoder.bindTexture(1, resolveShadowMap());
     encoder.setUniform('uShadowMap', const UniformValue.sampler(1));
+    encoder.setUniform(
+      'uCameraPosition',
+      UniformValue.float3(
+        Float32List.fromList([camera.eye.x, camera.eye.y, camera.eye.z]),
+      ),
+    );
     encoder.setUniform(
       'uShadowMapTexelSize',
       UniformValue.float2(
@@ -551,10 +560,7 @@ final class _ShadowedWorldPass implements RenderPass {
       'uAmbientIntensity',
       UniformValue.float1(environment.ambientIntensity),
     );
-    encoder.setUniform(
-      'uRainWetness',
-      UniformValue.float1(post.rainIntensity),
-    );
+    encoder.setUniform('uRainWetness', UniformValue.float1(post.rainIntensity));
 
     for (final batch in context.frameScene.opaqueBatches) {
       _drawBatch(encoder, batch, post.affineWarpStrength);
@@ -726,6 +732,14 @@ final class _ShadowedWorldPass implements RenderPass {
     );
     encoder.setUniform('uRoughness', UniformValue.float1(material.roughness));
     encoder.setUniform('uMetallic', UniformValue.float1(material.metallic));
+    encoder.setUniform(
+      'uClearcoatStrength',
+      UniformValue.float1(material.clearcoatStrength),
+    );
+    encoder.setUniform(
+      'uClearcoatRoughness',
+      UniformValue.float1(material.clearcoatRoughness),
+    );
     encoder.setUniform(
       'uOcclusionStrength',
       UniformValue.float1(material.occlusionStrength),

@@ -2,6 +2,10 @@ import 'handles.dart';
 
 enum AlphaMode { opaque, masked, blended }
 
+/// Colour-space contract for authored material maps. Albedo is sampled as
+/// display-referred colour; shading data must remain linear.
+enum MaterialMapColorSpace { srgb, linear }
+
 /// Authored material definition, keyed by a stable string rather than a
 /// hash (§8.2). The legacy `lib/engine/materials.dart` assigns runtime
 /// identity from a djb2-style hash of field values with no collision
@@ -11,6 +15,7 @@ enum AlphaMode { opaque, masked, blended }
 final class MaterialDefinition {
   final String key;
   final TextureHandle? albedoTexture;
+  final MaterialMapColorSpace albedoColorSpace;
   final double tintR, tintG, tintB;
   final TextureHandle? emissiveTexture;
   final double emissiveStrength;
@@ -20,15 +25,19 @@ final class MaterialDefinition {
   /// world-position/UV derivatives; surface-v2 can replace that with a
   /// supplied tangent without changing this material contract.
   final TextureHandle? normalTexture;
+  final MaterialMapColorSpace normalColorSpace;
   final double normalStrength;
 
   /// Linear ORM map: R=occlusion, G=roughness, B=metalness. Scalar values
   /// remain useful as deterministic fallbacks when the optional map is
   /// absent or still loading.
   final TextureHandle? ormTexture;
+  final MaterialMapColorSpace ormColorSpace;
   final double roughness;
   final double metallic;
   final double occlusionStrength;
+  final double clearcoatStrength;
+  final double clearcoatRoughness;
 
   /// Optional neutral-indirect/lightmap texture sampled with UV1. Intensity
   /// is zero by default so a missing map cannot brighten compatibility meshes.
@@ -54,17 +63,22 @@ final class MaterialDefinition {
   const MaterialDefinition({
     required this.key,
     this.albedoTexture,
+    this.albedoColorSpace = MaterialMapColorSpace.srgb,
     this.tintR = 1,
     this.tintG = 1,
     this.tintB = 1,
     this.emissiveTexture,
     this.emissiveStrength = 0,
     this.normalTexture,
+    this.normalColorSpace = MaterialMapColorSpace.linear,
     this.normalStrength = 1,
     this.ormTexture,
+    this.ormColorSpace = MaterialMapColorSpace.linear,
     this.roughness = 1,
     this.metallic = 0,
     this.occlusionStrength = 1,
+    this.clearcoatStrength = 0,
+    this.clearcoatRoughness = 0.2,
     this.lightmapTexture,
     this.lightmapIntensity = 0,
     this.uvScaleU = 1,
@@ -83,6 +97,21 @@ final class MaterialDefinition {
     if (key.isEmpty) {
       throw ArgumentError('MaterialDefinition.key must not be empty');
     }
+    if (albedoColorSpace != MaterialMapColorSpace.srgb) {
+      throw ArgumentError(
+        'MaterialDefinition.albedoColorSpace must be srgb: $key',
+      );
+    }
+    if (normalColorSpace != MaterialMapColorSpace.linear) {
+      throw ArgumentError(
+        'MaterialDefinition.normalColorSpace must be linear: $key',
+      );
+    }
+    if (ormColorSpace != MaterialMapColorSpace.linear) {
+      throw ArgumentError(
+        'MaterialDefinition.ormColorSpace must be linear: $key',
+      );
+    }
     if (!emissiveStrength.isFinite || emissiveStrength < 0) {
       throw ArgumentError(
         'MaterialDefinition.emissiveStrength must be >= 0: $emissiveStrength',
@@ -96,6 +125,8 @@ final class MaterialDefinition {
     _validateUnit('roughness', roughness);
     _validateUnit('metallic', metallic);
     _validateUnit('occlusionStrength', occlusionStrength);
+    _validateUnit('clearcoatStrength', clearcoatStrength);
+    _validateUnit('clearcoatRoughness', clearcoatRoughness);
     if (!lightmapIntensity.isFinite || lightmapIntensity < 0) {
       throw ArgumentError(
         'MaterialDefinition.lightmapIntensity must be >= 0: '

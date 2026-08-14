@@ -4,12 +4,14 @@ import 'package:pixeldart/rendering/assets/mesh_dedup.dart';
 import 'package:pixeldart/rendering/assets/mesh_store.dart';
 import 'package:pixeldart/rendering/assets/model_cache.dart';
 import 'package:pixeldart/rendering/assets/qmesh.dart';
+import 'package:pixeldart/rendering/api/mesh.dart';
 import 'package:pixeldart/rendering/webgl/draw_encoder.dart';
 
 import 'fake_gpu_device.dart';
 
 void main() {
   _validFixtureDecodesExactly();
+  _surfaceV2FixtureDecodesTangents();
   _corruptCasesRejected();
   _dedupIsStableAndDeterministic();
   _cacheSkipsRedecode();
@@ -46,6 +48,33 @@ Uint8List _buildLargeQmesh() {
     }
   }
   return bytes;
+}
+
+void _surfaceV2FixtureDecodesTangents() {
+  List<double> vertexAt(double x, double y) => [
+    x, y, 0.0, // position
+    0.0, 0.0, 1.0, // normal
+    1.0, 0.0, 0.0, 1.0, // tangent + handedness
+    1.0, 1.0, 1.0, 0.0, // colour/glow
+    1.0, // alpha
+    x, y, // uv0
+    0.0, // material effect
+  ];
+  final mesh = decodeQmesh(
+    _buildQmesh(
+      version: 2,
+      stride: 18,
+      verticesOverride: [
+        ...vertexAt(0.0, 0.0),
+        ...vertexAt(1.0, 0.0),
+        ...vertexAt(0.0, 1.0),
+      ],
+    ),
+  );
+  if (mesh.layout != VertexLayoutDescriptor.surfaceV2 ||
+      mesh.vertexCount != 3) {
+    throw StateError('QMSH v2 must decode the tangent-bearing surface layout');
+  }
 }
 
 void _largeMeshRetainsUint32AcrossCacheDrawRestoreAndRelease() {
@@ -187,7 +216,7 @@ void _expectRejected(Uint8List bytes, QmeshRejection reason) {
 void _corruptCasesRejected() {
   _expectRejected(Uint8List(10), QmeshRejection.tooShortForHeader);
   _expectRejected(_buildQmesh(badMagic: true), QmeshRejection.badMagic);
-  _expectRejected(_buildQmesh(version: 2), QmeshRejection.unsupportedVersion);
+  _expectRejected(_buildQmesh(version: 3), QmeshRejection.unsupportedVersion);
   _expectRejected(_buildQmesh(stride: 8), QmeshRejection.unsupportedStride);
   _expectRejected(
     _buildQmesh(truncateBy: 4),

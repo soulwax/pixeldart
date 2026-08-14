@@ -27,10 +27,12 @@ final class QmeshDecodeException implements Exception {
 
 const int _headerBytes = 36;
 const List<int> _magic = [0x51, 0x4D, 0x53, 0x48]; // "QMSH"
-const int _supportedVersion = 1;
-const int _supportedStride = 14;
+const int _compatibilityVersion = 1;
+const int _surfaceVersion = 2;
+const int _compatibilityStride = 14;
+const Set<int> _surfaceStrides = {18, 20};
 
-/// Strict QMSH v1 decoder (RENDERER-ELEVATION-PLAN.md §5.4, RV-06 Phase A).
+/// Strict QMSH v1/v2 decoder (RENDERER-ELEVATION-PLAN.md §5.4, RV-06 Phase A).
 /// Validates magic, version, stride, exact byte length, finite bounds, and
 /// `vertexCount % 3 == 0` before interpreting a single vertex — a malformed
 /// file is rejected wholesale, never partially decoded. Performs no
@@ -54,18 +56,21 @@ MeshData decodeQmesh(Uint8List bytes) {
 
   final view = ByteData.sublistView(bytes);
   final version = view.getUint16(4, Endian.little);
-  if (version != _supportedVersion) {
+  if (version != _compatibilityVersion && version != _surfaceVersion) {
     throw QmeshDecodeException(
       QmeshRejection.unsupportedVersion,
-      'got version $version, expected $_supportedVersion',
+      'got version $version, expected $_compatibilityVersion or $_surfaceVersion',
     );
   }
 
   final stride = view.getUint16(6, Endian.little);
-  if (stride != _supportedStride) {
+  final validStride = version == _compatibilityVersion
+      ? stride == _compatibilityStride
+      : _surfaceStrides.contains(stride);
+  if (!validStride) {
     throw QmeshDecodeException(
       QmeshRejection.unsupportedStride,
-      'got stride $stride, expected $_supportedStride',
+      'got stride $stride for QMSH v$version',
     );
   }
 
@@ -108,12 +113,30 @@ MeshData decodeQmesh(Uint8List bytes) {
     vertices[i] = value;
   }
 
-  return MeshData(
-    layout: VertexLayoutDescriptor.compatibility14,
+  final mesh = MeshData(
+    layout: switch (stride) {
+      14 => VertexLayoutDescriptor.compatibility14,
+      18 => VertexLayoutDescriptor.surfaceV2,
+      20 => VertexLayoutDescriptor.surfaceV2WithUv1,
+      _ => throw QmeshDecodeException(
+        QmeshRejection.unsupportedStride,
+        'no vertex layout for stride $stride',
+      ),
+    },
     vertices: vertices,
     localBounds: Aabb(
       Vec3(bounds[0], bounds[1], bounds[2]),
       Vec3(bounds[3], bounds[4], bounds[5]),
     ),
   );
+  // Reject malformed tangent bases before a package can reach GPU upload.
+  try {
+    mesh.validate();
+  } catch (error) {
+    throw QmeshDecodeException(
+      QmeshRejection.nonFiniteVertex,
+      'mesh validation failed: $error',
+    );
+  }
+  return mesh;
 }

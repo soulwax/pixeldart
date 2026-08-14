@@ -101,6 +101,8 @@ final class LodSelector {
 final class InstanceLodSelector {
   final LodSelector selector;
   final Map<InstanceId, Map<ModelPart, LodSelection>> _selected = {};
+  int _selectionChanges = 0;
+  int _cullEvents = 0;
 
   InstanceLodSelector({this.selector = const LodSelector()});
 
@@ -112,9 +114,13 @@ final class InstanceLodSelector {
     final previous = byPart?[part];
     final next = selector.select(part, distance, previous: previous);
     if (next == null) {
+      if (previous != null) _cullEvents++;
       byPart?.remove(part);
       if (byPart != null && byPart.isEmpty) _selected.remove(instance);
       return null;
+    }
+    if (previous == null || previous.lod.key != next.lod.key) {
+      _selectionChanges++;
     }
     (_selected[instance] ??= <ModelPart, LodSelection>{})[part] = next;
     return next;
@@ -135,4 +141,9 @@ final class InstanceLodSelector {
 
   int get trackedSelectionCount =>
       _selected.values.fold<int>(0, (total, byPart) => total + byPart.length);
+
+  /// Presentation telemetry for renderer diagnostics. These counters are
+  /// cumulative for the selector lifetime and do not own GPU resources.
+  int get selectionChanges => _selectionChanges;
+  int get cullEvents => _cullEvents;
 }

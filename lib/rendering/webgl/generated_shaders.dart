@@ -226,6 +226,7 @@ uniform sampler2D uOrmMap;
 uniform sampler2D uEmissiveMap;
 uniform sampler2D uLightmap;
 uniform sampler2D uShadowMap;
+uniform vec3 uCameraPosition;
 uniform vec3 uLightPosition;
 uniform vec3 uLightDirection;
 uniform vec3 uLightColor;
@@ -289,6 +290,8 @@ uniform float uNormalStrength;
 uniform float uRoughness;
 uniform float uMetallic;
 uniform float uOcclusionStrength;
+uniform float uClearcoatStrength;
+uniform float uClearcoatRoughness;
 uniform float uLightmapIntensity;
 uniform float uAffineWarpStrength;
 uniform float uAlphaCutoff;
@@ -351,6 +354,46 @@ vec3 directSpotContribution(vec3 normal,vec3 worldPos,vec3 lightPosition,
   float distanceFalloff=rangeAttenuation(length(toFrag),lightRange);
   return lightColor*lightIntensity*ndotl*coneFalloff*
     distanceFalloff*enabled;
+}
+
+// Compact Cook-Torrance response for the clean/high path. The bounded
+// per-light evaluation makes roughness and metallic maps visibly useful
+// without introducing a deferred light buffer.
+float distributionGgx(float ndoth,float roughness){
+  float a=roughness*roughness;
+  float a2=a*a;
+  float denom=ndoth*ndoth*(a2-1.0)+1.0;
+  return a2/(3.14159265*denom*denom);
+}
+
+float geometrySchlick(float ndotv,float roughness){
+  float k=(roughness+1.0)*(roughness+1.0)/8.0;
+  return ndotv/(ndotv*(1.0-k)+k);
+}
+
+float geometrySmith(float ndotv,float ndotl,float roughness){
+  return geometrySchlick(ndotv,roughness)*geometrySchlick(ndotl,roughness);
+}
+
+vec3 fresnelSchlick(float cosTheta,vec3 f0){
+  return f0+(1.0-f0)*pow(1.0-clamp(cosTheta,0.0,1.0),5.0);
+}
+
+vec3 specularContribution(vec3 normal,vec3 viewDir,vec3 lightDir,
+  vec3 lightColor,float lightIntensity,float attenuation,vec3 baseColor,
+  float roughness,float metallic){
+  vec3 halfDir=normalize(viewDir+lightDir);
+  float ndotv=max(dot(normal,viewDir),0.0);
+  float ndotl=max(dot(normal,lightDir),0.0);
+  float ndoth=max(dot(normal,halfDir),0.0);
+  float hdotv=max(dot(halfDir,viewDir),0.0);
+  vec3 f0=mix(vec3(0.04),baseColor,metallic);
+  vec3 fresnel=fresnelSchlick(hdotv,f0);
+  float distribution=distributionGgx(ndoth,roughness);
+  float geometry=geometrySmith(ndotv,ndotl,roughness);
+  vec3 numerator=distribution*geometry*fresnel;
+  float denominator=max(4.0*ndotv*ndotl,0.001);
+  return numerator/denominator*lightColor*lightIntensity*attenuation*ndotl;
 }
 
 float sampleShadow(vec3 projCoord,float bias){
@@ -489,6 +532,32 @@ void main(){
   // being metadata-only fields.
   float metal=clamp(uMetallic*orm.b,0.0,1.0);
   float rough=clamp(uRoughness*orm.g,0.0,1.0);
+  // Avoid singular highlights while retaining a visibly sharp porcelain
+  // response at the authored low end of the roughness range.
+  float specRough=max(0.045,rough);
+  vec3 viewDir=normalize(uCameraPosition-vWorldPos);
+  vec3 specular=vec3(0.0);
+  specular+=specularContribution(n,viewDir,normalize(uDirectionalDirection),
+    uDirectionalColor,uDirectionalIntensity,1.0,baseColor,specRough,metal);
+  specular+=specularContribution(n,viewDir,
+    normalize(uPointPosition0-vWorldPos),uPointColor0,uPointIntensity0,
+    pointAttenuation(vWorldPos,uPointPosition0,uPointRadius0),baseColor,
+    specRough,metal);
+  specular+=specularContribution(n,viewDir,
+    normalize(uPointPosition1-vWorldPos),uPointColor1,uPointIntensity1,
+    pointAttenuation(vWorldPos,uPointPosition1,uPointRadius1),baseColor,
+    specRough,metal);
+  specular+=specularContribution(n,viewDir,
+    normalize(uPointPosition2-vWorldPos),uPointColor2,uPointIntensity2,
+    pointAttenuation(vWorldPos,uPointPosition2,uPointRadius2),baseColor,
+    specRough,metal);
+  specular+=specularContribution(n,viewDir,
+    normalize(uPointPosition3-vWorldPos),uPointColor3,uPointIntensity3,
+    pointAttenuation(vWorldPos,uPointPosition3,uPointRadius3),baseColor,
+    specRough,metal);
+  specular+=specularContribution(n,viewDir,
+    normalize(uLightPosition-vWorldPos),uLightColor,uLightIntensity,
+    lightAttenuation(vWorldPos)*uSpotEnabled,baseColor,specRough,metal);
   // Rain response stays in the world pass so it follows geometry depth rather
   // than painting streaks over the whole screen. Near surfaces receive a
   // restrained cool darkening and a broad wet highlight; distant surfaces
@@ -496,7 +565,27 @@ void main(){
   float wetDepth=1.0-smoothstep(2.0,18.0,max(vViewDepth,0.0));
   float wetness=clamp(uRainWetness,0.0,1.0)*wetDepth;
   baseColor=mix(baseColor,baseColor*vec3(0.84,0.90,0.98),wetness*0.22);
-  vec3 lit=baseColor*clamp(ambient+direct*(1.0-metal*(0.35+0.25*rough)),0.,1.);
+  // Keep reflected energy available to the specular lobe. The previous
+  // diffuse-first clamp clipped bright ceramic response before tone mapping,
+  // producing the broad plastic patches visible in low-roughness samples.
+  // This split is bounded by the material metalness and lets the final
+  // composite perform the intentional HDR compression once.
+  vec3 diffuseEnergy=baseColor*(1.0-metal)*
+    (ambient+direct*(1.0-0.25*rough));
+  vec3 lit=diffuseEnergy+specular;
+  // A restrained dielectric clearcoat is intentionally separate from the
+  // base roughness/metalness response. It gives porcelain a broad, stable
+  // grazing highlight without turning the surface into a mirror.
+  vec3 coatLight=normalize(uDirectionalDirection);
+  vec3 coatHalf=normalize(viewDir+coatLight);
+  float coatNdotV=max(dot(n,viewDir),0.);
+  float coatNdotH=max(dot(n,coatHalf),0.);
+  float coatNdotL=max(dot(n,coatLight),0.);
+  float coatPower=mix(128.0,8.0,clamp(uClearcoatRoughness,0.0,1.0));
+  float coatFresnel=0.04+0.96*pow(1.0-coatNdotV,5.0);
+  float coat=clamp(uClearcoatStrength,0.0,1.0)*coatFresnel*
+    pow(coatNdotH,coatPower)*coatNdotL*uDirectionalIntensity;
+  lit+=uDirectionalColor*coat;
   lit+=direct*(wetness*(0.035+0.075*(1.0-rough)));
   vec3 emissive=texture(uEmissiveMap,uv).rgb*uMaterialTint*uEmissiveStrength;
   lit+=emissive;
