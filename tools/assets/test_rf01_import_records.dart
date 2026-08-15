@@ -48,5 +48,13 @@ void main() {
     encoded is Map && encoded['schema'] == 'pixeldart-fbx-preflight-v1',
     'preflight schema is stable',
   );
+  final packageDiagnostics = validateGeneratedPackageManifest({
+    'assetId': 'test-room',
+    'packageHash': 'bad',
+  });
+  check(
+    packageDiagnostics.any((diagnostic) => diagnostic.code == 'PACKAGE_HASH'),
+    'package validation emits stable hash code',
+  );
   print('RF-01 import records passed.');
 }
