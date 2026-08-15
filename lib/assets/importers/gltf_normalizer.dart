@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 /// Source-neutral primitive descriptor emitted by glTF normalization.
 final class GltfPrimitiveDescriptor {
   final int positionAccessor;
@@ -80,16 +82,86 @@ final class GltfMaterialDescriptor {
       roughnessFactor: roughness,
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    'name': name,
+    'baseColorFactor': baseColorFactor,
+    'metallicFactor': metallicFactor,
+    'roughnessFactor': roughnessFactor,
+  };
+}
+
+final class GltfNodeDescriptor {
+  final String name;
+  final int? meshIndex;
+  final List<double> translation;
+  final List<double> rotation;
+  final List<double> scale;
+
+  const GltfNodeDescriptor({
+    required this.name,
+    this.meshIndex,
+    this.translation = const [0, 0, 0],
+    this.rotation = const [0, 0, 0, 1],
+    this.scale = const [1, 1, 1],
+  });
+
+  factory GltfNodeDescriptor.fromJson(Map<String, dynamic> json) {
+    List<double> vector(String key, int length, List<double> fallback) {
+      final raw = json[key] as List?;
+      if (raw == null) return fallback;
+      if (raw.length != length) {
+        throw FormatException('$key must have $length components');
+      }
+      return raw
+          .map((value) => (value as num).toDouble())
+          .toList(growable: false);
+    }
+
+    final node = GltfNodeDescriptor(
+      name: json['name'] as String? ?? 'node',
+      meshIndex: json['mesh'] as int?,
+      translation: vector('translation', 3, const [0, 0, 0]),
+      rotation: vector('rotation', 4, const [0, 0, 0, 1]),
+      scale: vector('scale', 3, const [1, 1, 1]),
+    );
+    if ([
+      ...node.translation,
+      ...node.rotation,
+      ...node.scale,
+    ].any((value) => !value.isFinite)) {
+      throw const FormatException('node transform contains non-finite values');
+    }
+    return node;
+  }
+
+  Map<String, dynamic> toJson() => {
+    'name': name,
+    'meshIndex': meshIndex,
+    'translation': translation,
+    'rotation': rotation,
+    'scale': scale,
+  };
 }
 
 final class GltfNormalizedScene {
   final List<GltfPrimitiveDescriptor> primitives;
   final List<GltfMaterialDescriptor> materials;
+  final List<GltfNodeDescriptor> nodes;
 
   const GltfNormalizedScene({
     required this.primitives,
     required this.materials,
+    this.nodes = const [],
   });
+
+  Map<String, dynamic> toJson() => {
+    'materials': materials.map((material) => material.toJson()).toList(),
+    'primitives': primitives.map((primitive) => primitive.toJson()).toList(),
+    'nodes': nodes.map((node) => node.toJson()).toList(),
+  };
+
+  String canonicalJson() => jsonEncode(toJson());
 }
 
 GltfNormalizedScene normalizeGltfScene(Map<String, dynamic> document) {
@@ -113,5 +185,19 @@ GltfNormalizedScene normalizeGltfScene(Map<String, dynamic> document) {
   if (primitives.isEmpty) {
     throw const FormatException('glTF document has no primitives');
   }
-  return GltfNormalizedScene(primitives: primitives, materials: materials);
+  final nodes = <GltfNodeDescriptor>[];
+  final meshes = document['meshes'] as List? ?? const [];
+  for (final raw in (document['nodes'] as List? ?? const [])) {
+    final node = GltfNodeDescriptor.fromJson(raw as Map<String, dynamic>);
+    if (node.meshIndex != null &&
+        (node.meshIndex! < 0 || node.meshIndex! >= meshes.length)) {
+      throw const FormatException('node mesh index is out of range');
+    }
+    nodes.add(node);
+  }
+  return GltfNormalizedScene(
+    primitives: primitives,
+    materials: materials,
+    nodes: nodes,
+  );
 }

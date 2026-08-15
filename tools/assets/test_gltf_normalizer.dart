@@ -36,6 +36,32 @@ void main() {
     scene.materials.single.roughnessFactor == 0.35,
     'material factors retained',
   );
+  final transformed = normalizeGltfScene({
+    'meshes': [
+      {
+        'primitives': [
+          {
+            'attributes': {'POSITION': 0},
+          },
+        ],
+      },
+    ],
+    'nodes': [
+      {
+        'name': 'Wall',
+        'mesh': 0,
+        'translation': [1, 2, 3],
+      },
+    ],
+  });
+  check(
+    transformed.nodes.single.translation[1] == 2,
+    'node transform retained',
+  );
+  check(
+    transformed.canonicalJson() == transformed.canonicalJson(),
+    'normalized output is deterministic',
+  );
 
   var rejected = false;
   try {
@@ -55,5 +81,25 @@ void main() {
     rejected = true;
   }
   check(rejected, 'non-triangle primitive rejects');
+  rejected = false;
+  try {
+    normalizeGltfScene({
+      'meshes': [
+        {
+          'primitives': [
+            {
+              'attributes': {'POSITION': 0},
+            },
+          ],
+        },
+      ],
+      'nodes': [
+        {'mesh': 2},
+      ],
+    });
+  } on FormatException {
+    rejected = true;
+  }
+  check(rejected, 'node mesh index rejects');
   print('RF-03 glTF normalizer tests passed.');
 }
