@@ -66,8 +66,18 @@ final class ModelPackageManifest {
     if (parts.isEmpty) errors.add('parts must be non-empty');
     if (lods.toSet().length != lods.length) errors.add('lods must be unique');
     if (!lods.contains('LOD0')) errors.add('LOD0 is required');
-    if (parts.any((part) => part.materialSlot >= materials.length)) {
-      errors.add('part material slot is outside materials');
+    for (final part in parts) {
+      if (part.materialSlot < 0 || part.materialSlot >= materials.length) {
+        errors.add('part material slot is outside materials');
+      }
+      if (part.lodFiles.isEmpty) {
+        errors.add('part ${part.id} must declare payload files');
+      }
+      for (final path in part.lodFiles.values) {
+        if (!_isSafeRelativePath(path)) {
+          errors.add('part ${part.id} contains unsafe payload path');
+        }
+      }
     }
     return errors;
   }
@@ -128,6 +138,16 @@ String _required(Map<String, dynamic> json, String key) {
     throw FormatException('$key is required');
   }
   return value;
+}
+
+bool _isSafeRelativePath(String path) {
+  if (path.isEmpty || path.startsWith('/') || path.contains('\\')) {
+    return false;
+  }
+  final segments = path.split('/');
+  return segments.every(
+    (segment) => segment.isNotEmpty && segment != '.' && segment != '..',
+  );
 }
 
 List<String> _strings(Object? value) => value is List

@@ -16,6 +16,8 @@ export 'importers/gltf_container.dart';
 export 'importers/gltf_normalizer.dart';
 export 'importers/gltf_validator.dart';
 export 'packages/model_package.dart';
+export 'packages/model_package_emitter.dart';
 export 'packages/model_package_loader.dart';
+export 'packages/model_package_cache_handoff.dart';
 export 'packages/model_package_manifest.dart';
 export 'packages/model_package_validator.dart';

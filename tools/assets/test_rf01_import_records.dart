@@ -75,10 +75,17 @@ void main() {
     package.computedPackageHash().length == 64,
     'model package hash is deterministic',
   );
-  final validated = validateModelPackageManifest(package);
+  final invalidPackage = ModelPackageManifest(
+    assetId: package.assetId,
+    packageHash: 'bad',
+    sourceFormat: package.sourceFormat,
+    materials: package.materials,
+    parts: package.parts,
+  );
+  final validated = validateModelPackageManifest(invalidPackage);
   check(
-    validated.any((diagnostic) => diagnostic.code == 'MODEL_PACKAGE_HASH'),
-    'package validator rejects stale hash',
+    validated.any((diagnostic) => diagnostic.code == 'MODEL_PACKAGE_INVALID'),
+    'package validator rejects malformed hash',
   );
   final cpu = ValidatedModelPackage(
     manifest: package,
@@ -89,6 +96,29 @@ void main() {
   check(
     cpu.payload('wall.qmesh').length == 3,
     'validated package retains bytes',
+  );
+  final emitted = ModelPackageEmitter.emit(
+    assetId: 'room',
+    sourceFormat: 'gltf',
+    scene: normalizeGltfScene({
+      'meshes': [
+        {
+          'primitives': [
+            {
+              'attributes': {'POSITION': 0},
+            },
+          ],
+        },
+      ],
+    }),
+    payloads: {
+      'primitive-000.qmesh': Uint8List.fromList([9, 8, 7]),
+    },
+  );
+  check(emitted.manifest.packageHash.length == 64, 'emitter hashes package');
+  check(
+    emitted.payloads['primitive-000.qmesh']!.first == 9,
+    'emitter retains payload bytes',
   );
   print('RF-01 import records passed.');
 }

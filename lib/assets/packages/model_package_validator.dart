@@ -23,12 +23,9 @@ List<AssetImportDiagnostic> validateModelPackageManifest(
   for (final message in manifest.validate()) {
     error('MODEL_PACKAGE_INVALID', message);
   }
-  if (manifest.packageHash != manifest.computedPackageHash()) {
-    error(
-      'MODEL_PACKAGE_HASH',
-      'packageHash does not match canonical package content',
-    );
-  }
+  // The package hash covers payload bytes as well as this manifest. Metadata
+  // validation happens before payloads are loaded; ModelPackageLoader performs
+  // the full hash check once those bytes are available.
   final ids = <String>{};
   for (final part in manifest.parts) {
     if (!ids.add(part.id)) {
