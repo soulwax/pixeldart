@@ -15,6 +15,7 @@ export 'api/settings.dart';
 export 'api/stats.dart';
 export 'assets/model_binding.dart';
 export 'assets/model_definition.dart';
+export 'assets/model_scene_binding.dart';
 export 'assets/material_residency.dart';
 export 'assets/texture_residency.dart';
 export 'core/scene_renderer_impl.dart';

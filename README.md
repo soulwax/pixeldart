@@ -37,6 +37,59 @@ The gallery below keeps the same camera and scene while changing one switch at
 a time, so the images are evidence of a live feature boundary rather than
 decorative mockups.
 
+## What makes the finished renderer special
+
+Pixeldart is being finished as a renderer that is beautiful because it is
+well-behaved, not because it hides complexity behind a spectacular screenshot.
+Its defining promise is that a host application can submit a scene, lose the
+GPU context, run on a weaker adapter, load a large model, and still understand
+exactly what the renderer did and why.
+
+The finished renderer brings several qualities together:
+
+- **A retained scene that respects time.** Static geometry, materials, textures,
+  instances, and world items stay registered. A frame submits changing facts—
+  transforms, visibility, lights, environment and effects—rather than rebuilding
+  the world or re-uploading every prop.
+- **Correctness before decoration.** The render graph validates resource order,
+  attachment formats, history, resolves, capabilities and pass dependencies
+  before the first draw. Depth, world, shadow and alpha-mask paths share the
+  same material meaning, so a cutout does not become solid in its shadow or
+  disappear from the depth prepass.
+- **Graceful degradation with no fake promises.** Safe and reduced profiles are
+  real renderer configurations, not labels attached to a high-quality frame.
+  Unsupported HDR, anisotropy, shadows, timers or optional effects produce an
+  explicit effective configuration and reason. The safe world-to-present path
+  remains available when an optional feature fails.
+- **Resources that can be trusted.** Typed generation-checked handles reject
+  stale use, double release and draw-after-release. CPU descriptors survive
+  context loss, GPU objects are rebuilt in a known order, and repeated attach,
+  resize, LOD and restore cycles must return live-resource counts to zero.
+- **A coherent image.** Linear colour handling, authored tangent bases, normal
+  maps, ORM channels, emissive energy, alpha modes, contact grounding, bounded
+  direct lights and shadow selection are parts of one contract. PS1/VHS treatment
+  is layered after that clean image; it is an authored presentation choice, not
+  a filter used to conceal broken geometry or lighting.
+- **Assets that arrive with evidence.** glTF/GLB and normalized model packages
+  carry hashes, bounds, material slots, LODs, sockets, provenance and licence
+  records. The renderer can reject malformed or incomplete content before GPU
+  allocation instead of silently turning a missing surface into an unexplained
+  white box.
+- **Determinism that helps both people and machines.** The host owns time,
+  frame index, history invalidation and random seed. The same resolved inputs
+  produce the same CPU decisions, diagnostics and fake-device trace, while real
+  WebGL captures prove the pixels and driver behaviour that a fake device cannot.
+- **A renderer that does not become the game.** Pixeldart does not own input,
+  physics, rooms, story, saves, audio or UI. Any Dart/WebGL2 host can provide
+  immutable frame facts and retained-scene commands without importing game code.
+
+That combination is the point: Pixeldart aims to make high-fidelity rendering
+feel dependable to the application around it. A finished feature is not merely a
+shader that works once; it has a declared contract, a safe fallback, lifecycle
+ownership, diagnostics, fake-device coverage, and a real-browser proof path.
+The result is a renderer that can be used for a distinctive game today and still
+be a credible open framework for a different application tomorrow.
+
 ## Showcase
 
 Every effect in the stack, isolated by turning it off against the same scene. Left/right pairs are live captures from the demo (`web/renderer_test/`).
