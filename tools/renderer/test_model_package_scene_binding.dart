@@ -78,11 +78,18 @@ Future<void> main() async {
     resources: resources,
     world: world,
     materialForSlot: (_) => material,
+    transform: Transform.at(const Vec3(4, 0, 0)),
+    visibilityMask: 4,
   );
   binding.attach();
   require(
     binding.itemCount == 1 && world.items.length == 1,
     'attach creates one retained item',
+  );
+  require(
+    world.items.single.descriptor.visibilityMask == 4 &&
+        world.items.single.descriptor.transform.translation.x == 4,
+    'placement transform and visibility reach the retained descriptor',
   );
   binding.switchLod('LOD1');
   require(

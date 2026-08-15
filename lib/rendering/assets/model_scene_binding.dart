@@ -7,6 +7,8 @@ import 'model_cache.dart';
 import '../api/handles.dart';
 import '../api/renderer.dart';
 import '../api/scene.dart';
+import '../math/transform.dart';
+import 'model_package_diagnostics.dart';
 
 /// Binds one validated CPU package to retained world items. Material slots are
 /// resolved by the host; unresolved slots are errors, never fallbacks.
@@ -16,6 +18,8 @@ final class ModelPackageSceneBinding {
   final ResourceLibrary resources;
   final RenderWorld world;
   final MaterialHandle Function(int slot) materialForSlot;
+  final Transform transform;
+  final int visibilityMask;
   String _activeLod;
   ModelPackageCacheHandoff? _handoff;
   final List<MeshHandle> _meshes = [];
@@ -28,11 +32,22 @@ final class ModelPackageSceneBinding {
     required this.resources,
     required this.world,
     required this.materialForSlot,
+    this.transform = Transform.identity,
+    this.visibilityMask = -1,
     String initialLod = 'LOD0',
   }) : _activeLod = initialLod;
 
   String get activeLod => _activeLod;
   int get itemCount => _items.length;
+
+  ModelPackageDiagnostics diagnostics() => ModelPackageDiagnostics(
+    assetId: package.manifest.assetId,
+    activeLod: _activeLod,
+    attached: _handoff != null,
+    itemCount: _items.length,
+    meshCount: _meshes.length,
+    cacheReferenceCount: _handoff?.meshes.length ?? 0,
+  );
 
   void attach() {
     _ensureUsable();
@@ -99,7 +114,14 @@ final class ModelPackageSceneBinding {
         );
         meshes.add(mesh);
         items.add(
-          world.addItem(RetainedItemDescriptor(mesh: mesh, material: material)),
+          world.addItem(
+            RetainedItemDescriptor(
+              mesh: mesh,
+              material: material,
+              transform: transform,
+              visibilityMask: visibilityMask,
+            ),
+          ),
         );
       }
       return (handoff: handoff, meshes: meshes, items: items);
