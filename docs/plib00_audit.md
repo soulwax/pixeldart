@@ -11,25 +11,21 @@ audit is intentionally inventory-only; it does not move files or change APIs.
 - Runtime dependencies: `web`
 - Pixeldart libraries: `145`
 - Host files importing Pixeldart: `6`
-- Host deep imports: `6`
+- Host deep imports: `0`
 - Pixeldart imports of `package:quarantine`: `0`
 - Package filesystem/network calls: `0`
 
 ## Current Host Deep Imports
 
-The game currently reaches Pixeldart internals through:
+The game no longer reaches individual Pixeldart implementation paths. All
+remaining runtime references use the stable, advanced, or browser adapter
+facades. The browser composition root no longer owns an FBX diagnostic
+controller; it publishes only a format-neutral model-package diagnostic record.
+Legacy offline FBX wrapper tests use `ModelCache` only through the explicit
+testing facade; the advanced/runtime facade does not expose that cache.
 
-```text
-rendering/api/handles.dart
-rendering/api/renderer.dart
-rendering/api/scene.dart
-rendering/assets/model_cache.dart
-rendering/webgl/device_api.dart
-rendering/webgl/webgl2_device.dart
-```
-
-These are recorded compatibility facts for PLIB-01/04, not permission to
-rename or remove them in this packet.
+This is recorded as a test-only compatibility fact, not permission to make the
+cache a permanent runtime API.
 
 ## Governance Gaps
 

@@ -36,6 +36,7 @@ void main() {
           'pixeldart.dart',
           'pixeldart_advanced.dart',
           'pixeldart_testing.dart',
+          'rendering/webgl/webgl2_renderer_factory.dart',
         }.contains(path),
       ),
     );

@@ -14,4 +14,7 @@ export 'rendering/api/resource_plan.dart';
 export 'rendering/api/scene.dart';
 export 'rendering/api/stats.dart';
 export 'rendering/core/lod_selection.dart';
+// Offline asset and lifecycle fixtures may use the concrete cache through the
+// testing facade; production hosts should bind validated model packages.
+export 'rendering/assets/model_cache.dart';
 export 'rendering/webgl/device_api.dart';
