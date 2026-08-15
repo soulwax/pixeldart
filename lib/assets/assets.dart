@@ -7,6 +7,8 @@ library;
 
 export 'importers/asset_import_diagnostic.dart';
 export 'importers/asset_tool_command.dart';
+export 'importers/converter_invocation.dart';
+export 'importers/converter_command.dart';
 export 'importers/asset_import_limits.dart';
 export 'importers/fbx_import_config.dart';
 export 'importers/fbx_import_provenance.dart';

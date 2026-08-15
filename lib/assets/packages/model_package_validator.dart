@@ -1,4 +1,45 @@
 import '../importers/asset_import_diagnostic.dart';
+import 'model_package_manifest.dart';
+
+/// Validates the source-neutral RF-04 manifest before any runtime resource
+/// allocation. It is deliberately separate from the legacy generated-package
+/// validator below.
+List<AssetImportDiagnostic> validateModelPackageManifest(
+  ModelPackageManifest manifest,
+) {
+  final diagnostics = <AssetImportDiagnostic>[];
+  void error(String code, String message) {
+    diagnostics.add(
+      AssetImportDiagnostic(
+        code: code,
+        severity: DiagnosticSeverity.error,
+        stage: 'model-package',
+        message: message,
+        remediation: 'rebuild the deterministic model package',
+      ),
+    );
+  }
+
+  for (final message in manifest.validate()) {
+    error('MODEL_PACKAGE_INVALID', message);
+  }
+  if (manifest.packageHash != manifest.computedPackageHash()) {
+    error(
+      'MODEL_PACKAGE_HASH',
+      'packageHash does not match canonical package content',
+    );
+  }
+  final ids = <String>{};
+  for (final part in manifest.parts) {
+    if (!ids.add(part.id)) {
+      error('MODEL_PACKAGE_DUPLICATE_PART', 'duplicate part id: ${part.id}');
+    }
+    if (!part.lodFiles.containsKey('LOD0')) {
+      error('MODEL_PACKAGE_PART_LOD', 'part ${part.id} has no LOD0 payload');
+    }
+  }
+  return diagnostics;
+}
 
 /// Validates the current generated-package manifest before it is copied into
 /// runtime assets. The manifest is still the legacy source packet shape; RF-04

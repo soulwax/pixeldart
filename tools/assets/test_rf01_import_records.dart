@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:pixeldart/assets/assets.dart';
 
@@ -55,6 +56,39 @@ void main() {
   check(
     packageDiagnostics.any((diagnostic) => diagnostic.code == 'PACKAGE_HASH'),
     'package validation emits stable hash code',
+  );
+  final package = ModelPackageManifest(
+    assetId: 'room',
+    packageHash: '0' * 64,
+    sourceFormat: 'fbx',
+    materials: ['default'],
+    parts: [
+      ModelPackagePart(
+        id: 'wall',
+        materialSlot: 0,
+        lodFiles: {'LOD0': 'wall.qmesh'},
+      ),
+    ],
+  );
+  check(package.validate().isEmpty, 'model package manifest validates');
+  check(
+    package.computedPackageHash().length == 64,
+    'model package hash is deterministic',
+  );
+  final validated = validateModelPackageManifest(package);
+  check(
+    validated.any((diagnostic) => diagnostic.code == 'MODEL_PACKAGE_HASH'),
+    'package validator rejects stale hash',
+  );
+  final cpu = ValidatedModelPackage(
+    manifest: package,
+    payloads: {
+      'wall.qmesh': Uint8List.fromList([1, 2, 3]),
+    },
+  );
+  check(
+    cpu.payload('wall.qmesh').length == 3,
+    'validated package retains bytes',
   );
   print('RF-01 import records passed.');
 }
