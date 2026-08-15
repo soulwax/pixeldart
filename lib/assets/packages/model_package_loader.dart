@@ -9,12 +9,18 @@ import 'model_package_validator.dart';
 final class ModelPackageLimits {
   final int maxPayloadBytes;
   final int maxTotalBytes;
+  final int maxParts;
+  final int maxPayloadCount;
 
   const ModelPackageLimits({
     this.maxPayloadBytes = 64 * 1024 * 1024,
     this.maxTotalBytes = 256 * 1024 * 1024,
+    this.maxParts = 4096,
+    this.maxPayloadCount = 16384,
   }) : assert(maxPayloadBytes > 0),
-       assert(maxTotalBytes >= maxPayloadBytes);
+       assert(maxTotalBytes >= maxPayloadBytes),
+       assert(maxParts > 0),
+       assert(maxPayloadCount > 0);
 }
 
 /// Source of immutable package metadata and payload bytes.
@@ -38,6 +44,15 @@ final class ModelPackageLoader {
       throw FormatException(
         manifestErrors.map((error) => error.message).join('; '),
       );
+    }
+    if (source.manifest.parts.length > limits.maxParts) {
+      throw const FormatException('model package exceeds part limit');
+    }
+    final declaredPaths = <String>{
+      for (final part in source.manifest.parts) ...part.lodFiles.values,
+    };
+    if (declaredPaths.length > limits.maxPayloadCount) {
+      throw const FormatException('model package exceeds payload count limit');
     }
     final payloads = <String, Uint8List>{};
     for (final part in source.manifest.parts) {

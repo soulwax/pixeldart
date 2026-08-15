@@ -13,6 +13,8 @@ final class ModelPackageManifest {
   final List<String> materials;
   final List<String> textures;
   final List<String> lods;
+  final List<double> combinedBounds;
+  final Map<String, List<double>> sockets;
   final Map<String, String> provenance;
 
   const ModelPackageManifest({
@@ -24,6 +26,8 @@ final class ModelPackageManifest {
     this.materials = const [],
     this.textures = const [],
     this.lods = const ['LOD-S', 'LOD0', 'LOD1', 'LOD2'],
+    this.combinedBounds = const [],
+    this.sockets = const {},
     this.provenance = const {},
   });
 
@@ -46,6 +50,8 @@ final class ModelPackageManifest {
       materials: _strings(json['materials']),
       textures: _strings(json['textures']),
       lods: _strings(json['lods']),
+      combinedBounds: _numbers(json['combinedBounds']),
+      sockets: _socketMap(json['sockets']),
       provenance:
           (json['provenance'] as Map?)?.map(
             (key, value) => MapEntry(key.toString(), value.toString()),
@@ -66,6 +72,20 @@ final class ModelPackageManifest {
     if (parts.isEmpty) errors.add('parts must be non-empty');
     if (lods.toSet().length != lods.length) errors.add('lods must be unique');
     if (!lods.contains('LOD0')) errors.add('LOD0 is required');
+    if (combinedBounds.isNotEmpty &&
+        (combinedBounds.length != 6 ||
+            combinedBounds.any((value) => !value.isFinite))) {
+      errors.add('combinedBounds must contain six finite values');
+    }
+    for (final entry in sockets.entries) {
+      if (entry.key.isEmpty ||
+          entry.value.length != 16 ||
+          entry.value.any((value) => !value.isFinite)) {
+        errors.add(
+          'socket ${entry.key} must contain sixteen finite transform values',
+        );
+      }
+    }
     for (final part in parts) {
       if (part.materialSlot < 0 || part.materialSlot >= materials.length) {
         errors.add('part material slot is outside materials');
@@ -91,6 +111,8 @@ final class ModelPackageManifest {
     'materials': materials,
     'textures': textures,
     'lods': lods,
+    'combinedBounds': combinedBounds,
+    'sockets': sockets,
     'provenance': provenance,
   };
 
@@ -150,6 +172,32 @@ bool _isSafeRelativePath(String path) {
   );
 }
 
-List<String> _strings(Object? value) => value is List
-    ? value.map((item) => item.toString()).toList(growable: false)
-    : const [];
+List<String> _strings(Object? value) {
+  if (value == null) return const [];
+  if (value is! List || value.any((item) => item is! String)) {
+    throw const FormatException('manifest string array is malformed');
+  }
+  return [for (final item in value) item as String];
+}
+
+List<double> _numbers(Object? value) {
+  if (value == null) return const [];
+  if (value is! List || value.any((item) => item is! num)) {
+    throw const FormatException('manifest numeric array is malformed');
+  }
+  return [for (final item in value) (item as num).toDouble()];
+}
+
+Map<String, List<double>> _socketMap(Object? value) {
+  if (value == null) return const {};
+  if (value is! Map) {
+    throw const FormatException('manifest socket map is malformed');
+  }
+  if (value.keys.any((key) => key is! String)) {
+    throw const FormatException('manifest socket names are malformed');
+  }
+  return {
+    for (final entry in value.entries)
+      if (entry.key is String) entry.key as String: _numbers(entry.value),
+  };
+}

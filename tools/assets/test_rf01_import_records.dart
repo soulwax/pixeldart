@@ -71,6 +71,41 @@ void main() {
     ],
   );
   check(package.validate().isEmpty, 'model package manifest validates');
+  final spatial = ModelPackageManifest(
+    assetId: package.assetId,
+    packageHash: package.packageHash,
+    sourceFormat: package.sourceFormat,
+    materials: package.materials,
+    parts: package.parts,
+    combinedBounds: const [0, 0, 0, 1, 1, 1],
+    sockets: {'door': List<double>.filled(16, 0)},
+  );
+  final roundTrip = ModelPackageManifest.fromJson(spatial.toJson());
+  check(
+    roundTrip.combinedBounds.length == 6 &&
+        roundTrip.sockets.containsKey('door'),
+    'spatial manifest fields round-trip',
+  );
+  var malformedSpatialRejected = false;
+  try {
+    ModelPackageManifest.fromJson({
+      ...spatial.toJson(),
+      'combinedBounds': [0, 'nan', 0, 1, 1, 1],
+    });
+  } on FormatException {
+    malformedSpatialRejected = true;
+  }
+  check(malformedSpatialRejected, 'malformed spatial arrays are rejected');
+  var malformedSocketsRejected = false;
+  try {
+    ModelPackageManifest.fromJson({
+      ...spatial.toJson(),
+      'sockets': ['door'],
+    });
+  } on FormatException {
+    malformedSocketsRejected = true;
+  }
+  check(malformedSocketsRejected, 'malformed socket maps are rejected');
   check(
     package.computedPackageHash().length == 64,
     'model package hash is deterministic',

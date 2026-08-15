@@ -21,6 +21,7 @@ export 'assets/model_placement_adapter.dart';
 export 'assets/browser_promotion.dart';
 export 'assets/browser_lifecycle_promotion.dart';
 export 'assets/browser_performance_promotion.dart';
+export 'assets/promotion_bundle.dart';
 export 'api/settings_migration.dart';
 export 'assets/material_residency.dart';
 export 'assets/texture_residency.dart';

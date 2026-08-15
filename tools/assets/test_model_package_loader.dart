@@ -94,5 +94,33 @@ Future<void> main() async {
     rejectedLimit = true;
   }
   check(rejectedLimit, 'loader enforces payload limits');
+
+  var rejectedCount = false;
+  try {
+    final tooMany = ModelPackageManifest(
+      assetId: emitted.manifest.assetId,
+      packageHash: emitted.manifest.packageHash,
+      sourceFormat: emitted.manifest.sourceFormat,
+      materials: emitted.manifest.materials,
+      parts: [
+        ...emitted.manifest.parts,
+        const ModelPackagePart(
+          id: 'primitive-001',
+          materialSlot: 0,
+          lodFiles: {'LOD0': 'second.qmesh'},
+        ),
+      ],
+    );
+    await const ModelPackageLoader().load(
+      ModelPackageSource(
+        manifest: tooMany,
+        load: (path) async => emitted.payloads[path]!,
+      ),
+      limits: const ModelPackageLimits(maxParts: 1, maxPayloadCount: 1),
+    );
+  } on FormatException {
+    rejectedCount = true;
+  }
+  check(rejectedCount, 'loader enforces structural count limits');
   print('RF-05 model package loader tests passed.');
 }
