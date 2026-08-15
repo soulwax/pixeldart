@@ -709,6 +709,7 @@ void _boot() {
   final r09ShadowDisabled = web.window.location.search.contains(
     'r09-shadow-off',
   );
+  final modelShowcase = web.window.location.search.contains('showcase=model');
   // The canvas fills #viewport via CSS (width/height: 100%); its backing
   // pixel buffer must be sized to match explicitly, or WebGL2 defaults to
   // the element's default 300x150 attribute size regardless of how large
@@ -980,6 +981,52 @@ void _boot() {
     ),
     debugLabel: 'unmasked-panel-material',
   );
+
+  // Isolated model showcase: the scene below is intentionally independent of
+  // the renderer regression fixtures. It binds one retained multi-part
+  // ModelDefinition (solid, emissive, and alpha-masked parts) through the
+  // production ModelDefinition.bind path, then places those same handles in
+  // a clean pedestal composition for visual review.
+  final showcaseDefinition = ModelDefinition(
+    key: 'renderer-model-showcase',
+    parts: [
+      ModelPart(
+        key: 'solid',
+        mesh: cubeHandle,
+        material: cubeMaterial,
+        localBounds: const Aabb(Vec3(-0.6, -0.6, -0.6), Vec3(0.6, 0.6, 0.6)),
+      ),
+      ModelPart(
+        key: 'emissive',
+        mesh: cubeHandle,
+        material: glowingCubeMaterial,
+        localBounds: const Aabb(Vec3(-0.6, -0.6, -0.6), Vec3(0.6, 0.6, 0.6)),
+      ),
+      ModelPart(
+        key: 'masked',
+        mesh: maskedPanelHandle,
+        material: maskedPanelMaterial,
+        localBounds: const Aabb(Vec3(-0.9, -0.9, 0), Vec3(0.9, 0.9, 0)),
+      ),
+    ],
+    combinedBounds: const Aabb(Vec3(-2.2, 0, -0.8), Vec3(2.2, 2.0, 0.8)),
+  );
+  final showcaseBinding = showcaseDefinition.bind(
+    meshes: meshStore,
+    materials: materialStore,
+  );
+  if (modelShowcase) {
+    canvas
+      ..setAttribute('data-showcase', 'model')
+      ..setAttribute('data-showcase-model-key', showcaseBinding.definition.key)
+      ..setAttribute('data-showcase-model-parts', '${showcaseBinding.parts.length}')
+      ..setAttribute('data-showcase-model-binding', 'retained');
+    _setStatus(
+      'isolated model showcase: ${showcaseBinding.definition.key} — '
+      '${showcaseBinding.parts.length} retained parts (solid, emissive, masked); '
+      'press D/F/G/P/V/H/S/B/A/M to inspect renderer lenses',
+    );
+  }
 
   // §8.4's shadow map target: depth-only, no color attachment at all, so a
   // world pass can later sample its depth texture directly.
@@ -1554,6 +1601,31 @@ void _boot() {
       castsShadow: shadowCastsEnabled,
       drawMode: DrawMode.masked,
     );
+    final showcaseItems = <Object>[
+      ground,
+      _TestCubeItem(
+        showcaseBinding.part('solid')!.definition.mesh,
+        showcaseBinding.part('solid')!.definition.material,
+        const Transform(translation: Vec3(-1.35, 0.9, 0)),
+        castsShadow: shadowCastsEnabled,
+      ),
+      _TestCubeItem(
+        showcaseBinding.part('emissive')!.definition.mesh,
+        showcaseBinding.part('emissive')!.definition.material,
+        const Transform(translation: Vec3(1.35, 0.9, 0)),
+        castsShadow: shadowCastsEnabled,
+      ),
+      _TestCubeItem(
+        showcaseBinding.part('masked')!.definition.mesh,
+        showcaseBinding.part('masked')!.definition.material,
+        Transform(
+          translation: const Vec3(0, 1.15, -0.65),
+          rotation: Quat.axisAngle(const Vec3(1, 0, 0), -0.85),
+        ),
+        castsShadow: shadowCastsEnabled,
+        drawMode: DrawMode.masked,
+      ),
+    ];
 
     // RV-09 rung 6: transient blended submission via the generic
     // RenderEncoder — six drifting, translucent (BlendMode.alpha) motes and
@@ -1633,7 +1705,9 @@ void _boot() {
       )
       ..setAttribute('data-instance-draw-mode', 'instanced');
     final frameScene = _StaticFrameScene(
-      r09InstanceFixture
+      modelShowcase
+          ? showcaseItems
+          : r09InstanceFixture
           ? <Object>[instanceBatch]
           : <Object>[
               ground,
