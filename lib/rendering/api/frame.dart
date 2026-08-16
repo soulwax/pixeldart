@@ -53,7 +53,7 @@ final class CameraView {
   }
 }
 
-/// Neutral scene environment values only — no room, no house, no story
+/// Neutral scene environment values only — no application-domain semantics
 /// state (§5.2).
 final class FrameEnvironment {
   final LinearColor clearColor;

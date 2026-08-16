@@ -1,7 +1,7 @@
 import '../math/transform.dart';
 
-/// Immutable host-owned placement facts. It carries no room, story, input or
-/// save semantics and is safe to rebuild from a frame snapshot.
+/// Immutable host-owned placement facts. It carries no domain, input, or
+/// persistence semantics and is safe to rebuild from a frame snapshot.
 final class ModelPlacementDescriptor {
   final String placementId;
   final String packageAssetId;

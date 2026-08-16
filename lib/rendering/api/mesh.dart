@@ -117,7 +117,7 @@ final class VertexLayoutDescriptor {
 }
 
 /// Renderer-neutral mesh data (§5.4). Contains no room, examine tag,
-/// collision rule, or story meaning — that separation is what lets
+/// collision rule, or domain meaning — that separation is what lets
 /// `lib/rendering/**` stay free of game imports.
 final class MeshData {
   final VertexLayoutDescriptor layout;

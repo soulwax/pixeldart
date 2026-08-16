@@ -85,7 +85,9 @@ void main() {
     }
   }
   for (final noun in ['quarantine', 'house', 'story', 'visitor', 'save']) {
-    if (packageWide.toLowerCase().contains(noun)) {
+    // Match vocabulary as a standalone noun. For example, renderer history
+    // must not be misclassified because it contains the letters in "story".
+    if (RegExp(r'\b' + noun + r'\b', caseSensitive: false).hasMatch(packageWide)) {
       finding('package.game-vocabulary', 'documentation', 'Game-specific noun appears in package source', path: noun);
     }
   }

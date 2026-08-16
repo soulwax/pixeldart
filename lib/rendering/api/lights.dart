@@ -81,7 +81,7 @@ final class PointLight {
 }
 
 /// Generic spot light. Also used as the sole shadow-casting approximation
-/// for a mantle point light per §7.1: v1 shadow rendering supports
+/// for a bounded point light per §7.1: v1 shadow rendering supports
 /// directional/spot projections only, never an unimplemented cube shadow.
 final class SpotLight {
   final int id;

@@ -27,8 +27,12 @@ testing facade; the advanced/runtime facade does not expose that cache.
 This is recorded as a test-only compatibility fact, not permission to make the
 cache a permanent runtime API.
 
-## Governance Gaps
+The audit's vocabulary review uses standalone-word matching, so renderer terms
+such as `history` are not misclassified as the game noun `story`.
 
-The package currently has no `CHANGELOG.md`, `CONTRIBUTING.md`,
-`CODE_OF_CONDUCT.md`, or `SECURITY.md`. This is tracked for PLIB-09 and is not
-addressed by the boundary audit.
+## Governance
+
+The package now contains GPL-aware `CHANGELOG.md`, `CONTRIBUTING.md`,
+`CODE_OF_CONDUCT.md`, and `SECURITY.md` documents. Licence/provenance,
+dependency, package-content, and release-readiness audits remain tracked by
+PLIB-09.

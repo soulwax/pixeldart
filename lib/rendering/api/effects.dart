@@ -1,5 +1,5 @@
 /// Post-processing feature weights, not game states (§5.2). The caller's
-/// `GameFrameAdapter` maps `GameTime`, mantle data, panel state,
+/// A host frame adapter maps simulation time, interaction data, panel state,
 /// `RuptureState`, URL profile, and accessibility preferences into these
 /// values; no switch on a game-side step type belongs in `lib/rendering/**`.
 final class PostProcessState {

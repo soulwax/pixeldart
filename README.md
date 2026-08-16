@@ -328,6 +328,12 @@ buffers. `tools/renderer/test_lod_selection.dart` exercises boundary behavior,
 independent instance state, invalid inputs, and 100 deterministic transition
 samples while asserting stable retained-resource/GPU ownership.
 
+## Non-normative host integration case study
+
+The following section records one application's integration evidence. It is
+not part of Pixeldart's reusable API contract; independent hosts should use
+their own scene, visibility, collision, and asset vocabulary.
+
 ### Exterior PVS cell submission (host integration)
 
 The house adapter partitions the indexed exterior shell once into deterministic
