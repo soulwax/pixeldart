@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'gltf_validator.dart';
+
 /// Source-neutral primitive descriptor emitted by glTF normalization.
 final class GltfPrimitiveDescriptor {
   final int positionAccessor;
@@ -200,4 +202,15 @@ GltfNormalizedScene normalizeGltfScene(Map<String, dynamic> document) {
     materials: materials,
     nodes: nodes,
   );
+}
+
+/// Production entry point: reject malformed source structure before emitting
+/// a normalized scene record. The legacy normalizer remains available for
+/// already-trusted in-memory fixtures and migration callers.
+GltfNormalizedScene normalizeValidatedGltfScene(
+  Map<String, dynamic> document, {
+  int? binaryLength,
+}) {
+  validateGltfDocument(document, binaryLength: binaryLength);
+  return normalizeGltfScene(document);
 }

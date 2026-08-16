@@ -5,6 +5,22 @@ void check(bool value, String message) {
 }
 
 void main() {
+  final validated = normalizeValidatedGltfScene(
+    {
+      'asset': {'version': '2.0'},
+      'buffers': [{'byteLength': 8}],
+      'bufferViews': [{'buffer': 0, 'byteLength': 8}],
+      'accessors': [
+        {'bufferView': 0, 'componentType': 5123, 'count': 4, 'type': 'SCALAR'},
+      ],
+      'meshes': [
+        {'primitives': [{'attributes': {'POSITION': 0}}]},
+      ],
+    },
+    binaryLength: 8,
+  );
+  check(validated.primitives.length == 1, 'validated scene normalizes');
+
   final scene = normalizeGltfScene({
     'materials': [
       {

@@ -7,6 +7,41 @@ void check(bool value, String message) {
 }
 
 void main() {
+  validateGltfDocument({
+    'asset': {'version': '2.0'},
+    'buffers': [{'byteLength': 8}],
+    'bufferViews': [{'buffer': 0, 'byteLength': 8}],
+    'accessors': [
+      {'bufferView': 0, 'componentType': 5123, 'count': 4, 'type': 'SCALAR'},
+    ],
+    'meshes': [
+      {'primitives': [{'attributes': {'POSITION': 0}}]},
+    ],
+  }, binaryLength: 8);
+  check(true, 'valid document accepted');
+
+  var rejected = false;
+  try {
+    validateGltfDocument({
+      'asset': {'version': '2.0'},
+      'buffers': [{'byteLength': 4}],
+      'bufferViews': [{'buffer': 0, 'byteOffset': 3, 'byteLength': 2}],
+    });
+  } on FormatException {
+    rejected = true;
+  }
+  check(rejected, 'bufferView overflow rejects');
+  rejected = false;
+  try {
+    validateGltfDocument({
+      'asset': {'version': '2.0'},
+      'extensionsRequired': ['VENDOR_unknown'],
+    });
+  } on FormatException {
+    rejected = true;
+  }
+  check(rejected, 'unsupported required extension rejects');
+
   final binary = Uint8List.fromList([1, 0, 2, 0, 3, 0, 4, 0]);
   final decoder = GltfAccessorDecoder(
     binary: binary,
@@ -24,7 +59,7 @@ void main() {
     'Uint16 accessor decodes',
   );
 
-  var rejected = false;
+  rejected = false;
   try {
     GltfAccessorDecoder(
       binary: Uint8List(2),

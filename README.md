@@ -16,6 +16,27 @@ shadow map ─▶ depth prepass ─▶ SSAO (half-res) ─▶ world (MRT: color 
   ─▶ PS1 quantize + dither ─▶ VHS ─▶ NEAREST present
 ```
 
+## Use Pixeldart as a library
+
+Pixeldart is independently usable. A host does not need *The Quarantine*, its
+rooms, story, save format, DOM, audio, or input system. Import
+`package:pixeldart/pixeldart.dart` for the stable renderer-facing facade and
+submit retained scene resources plus immutable frame facts. Import
+`package:pixeldart/pixeldart_advanced.dart` only when the host deliberately
+owns backend policy such as capability negotiation, residency, or pass
+planning.
+
+The stable facade contains contracts, handles, math, model packages, and
+diagnostics. It does not expose game types or require browser globals. WebGL
+construction and generated shader details stay behind the implementation
+boundary, so another Dart/WebGL host can use the same package and receive the
+same explicit capability, lifecycle, and degradation diagnostics.
+
+The game is one downstream host and its integration evidence is separate from
+the renderer's own package tests. Pixeldart must never infer story or room
+meaning from asset names, and the game must never parse renderer package
+internals in browser gameplay code.
+
 The full pipeline is fifteen passes, pinned in order by a test.
 
 ![Everything on: shadows, SSAO, bloom, DOF, grade, PS1 quantize, VHS, fog, affine UV, alpha-masked lattice](.github/screenshots/00-all-features-on.jpg)
