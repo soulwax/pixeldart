@@ -560,7 +560,10 @@ final class _ShadowedWorldPass implements RenderPass {
       'uAmbientIntensity',
       UniformValue.float1(environment.ambientIntensity),
     );
-    encoder.setUniform('uRainWetness', UniformValue.float1(post.rainIntensity));
+    encoder.setUniform(
+      'uRainWetness',
+      UniformValue.float1(post.surfaceWetness),
+    );
 
     for (final batch in context.frameScene.opaqueBatches) {
       _drawBatch(encoder, batch, post.affineWarpStrength);

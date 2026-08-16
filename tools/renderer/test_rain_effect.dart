@@ -5,8 +5,11 @@ import 'package:pixeldart/rendering/webgl/generated_shaders.dart';
 void main() {
   const dry = PostProcessState();
   dry.validate();
-  const wet = PostProcessState(rainIntensity: 0.73);
+  const wet = PostProcessState(rainIntensity: 0.73, surfaceWetness: 0.61);
   wet.validate();
+  if (wet.surfaceWetness != 0.61) {
+    throw StateError('surface wetness did not retain its value');
+  }
   const closed = PostProcessState(
     rainIntensity: 0.73,
     rainWindowVisibility: 0.12,
@@ -28,6 +31,14 @@ void main() {
     rejected = true;
   }
   if (!rejected) throw StateError('negative rain intensity was accepted');
+  rejected = false;
+  try {
+    const PostProcessState(surfaceWetness: 1.01).validate();
+  } catch (error) {
+    if (error is! ArgumentError) rethrow;
+    rejected = true;
+  }
+  if (!rejected) throw StateError('surface wetness above one was accepted');
   rejected = false;
   try {
     const PostProcessState(rainIntensity: 1.01).validate();

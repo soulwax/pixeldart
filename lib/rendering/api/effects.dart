@@ -15,6 +15,10 @@ final class PostProcessState {
   /// value without teaching the renderer about game states.
   final double rainIntensity;
 
+  /// Material wetness response in [0, 1], independent of screen-space
+  /// precipitation.
+  final double surfaceWetness;
+
   /// Aperture visibility for screen-space precipitation in [0, 1]. A closed
   /// room can retain a faint exterior glint without receiving a full-screen
   /// interior rain layer. This is presentation data, not a portal rule.
@@ -42,6 +46,7 @@ final class PostProcessState {
     this.vignette = 0,
     this.grain = 0,
     this.rainIntensity = 0,
+    this.surfaceWetness = 0,
     this.rainWindowVisibility = 1,
     this.ditherStrength = 0,
     this.colorGradeStrength = 0,
@@ -75,6 +80,12 @@ final class PostProcessState {
         'PostProcessState.rainIntensity must be in [0, 1]: $rainIntensity',
       );
     }
+    if (surfaceWetness > 1) {
+      throw ArgumentError(
+        'PostProcessState.surfaceWetness must be in [0, 1]: '
+        '$surfaceWetness',
+      );
+    }
     if (rainWindowVisibility > 1) {
       throw ArgumentError(
         'PostProcessState.rainWindowVisibility must be in [0, 1]: '
@@ -91,6 +102,7 @@ final class PostProcessState {
     'vignette': vignette,
     'grain': grain,
     'rainIntensity': rainIntensity,
+    'surfaceWetness': surfaceWetness,
     'rainWindowVisibility': rainWindowVisibility,
     'ditherStrength': ditherStrength,
     'colorGradeStrength': colorGradeStrength,
