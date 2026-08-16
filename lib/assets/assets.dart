@@ -15,6 +15,7 @@ export 'importers/fbx_import_provenance.dart';
 export 'importers/gltf_container.dart';
 export 'importers/gltf_normalizer.dart';
 export 'importers/gltf_validator.dart';
+export 'importers/obj_importer.dart';
 export 'packages/model_package.dart';
 export 'packages/model_package_emitter.dart';
 export 'packages/model_package_loader.dart';
