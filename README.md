@@ -268,31 +268,6 @@ and a debug panel that logs every subsystem decision. Live toggles:
 The demo currently exercises the feature graph directly so that every pass can
 be inspected. It is intentionally more verbose than the reusable facade.
 
-For a minimal unrelated host, use [`web/minimal/`](web/minimal/) and the
-[first-frame guide](docs/plib07_minimal_host.md). It exercises only the public
-facade/factory path and publishes lifecycle telemetry on the canvas.
-The [three-slice productization index](docs/three_slices.md) groups the facade,
-neutral-host, and release-boundary checks under one command.
-The compatibility and archive checks are listed in the
-[release-slice index](docs/three_release_slices.md); they do not publish or
-modify package metadata.
-Versioning policy and the pre-1.0 compatibility boundary are documented in
-[docs/plib10_versioning.md](docs/plib10_versioning.md).
-
-### Visual showcase and evidence
-
-The standalone demo includes an isolated model showcase at
-`?showcase=model`. It renders a retained three-part model with opaque,
-emissive, and alpha-masked materials on a deliberately clean pedestal, making
-material separation and binding ownership visible without application/game
-content. The same demo exposes the instancing and texture-residency probes
-described in the [visual evidence index](docs/visual_evidence.md).
-
-Capture these probes at a fixed viewport and keep the screenshot beside its
-DOM metadata. A screenshot is accepted as visual evidence only when the
-corresponding real-WebGL probe reports the expected draw/resource telemetry;
-the fake-device suite remains contract evidence, not pixel evidence.
-
 For the renderer-only R-09 correctness probe, append
 `?r09-instances=1` to the demo URL. The canvas then renders only three shared
 opaque cube items, publishes their distinct transforms, reads back a small
@@ -353,12 +328,6 @@ register, release, or duplicate meshes, materials, textures, or instance
 buffers. `tools/renderer/test_lod_selection.dart` exercises boundary behavior,
 independent instance state, invalid inputs, and 100 deterministic transition
 samples while asserting stable retained-resource/GPU ownership.
-
-## Non-normative host integration case study
-
-The following section records one application's integration evidence. It is
-not part of Pixeldart's reusable API contract; independent hosts should use
-their own scene, visibility, collision, and asset vocabulary.
 
 ### Exterior PVS cell submission (host integration)
 
