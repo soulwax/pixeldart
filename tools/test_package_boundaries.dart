@@ -16,6 +16,7 @@ void main() {
     'tools/test_plib09_package_content.dart',
     'tools/test_plib07_minimal_host.dart',
     'tools/test_plib11_archive_manifest.dart',
+    'tools/renderer/test_rf11_runtime_reference_audit.dart',
   ];
   var failures = 0;
   for (final script in scripts) {

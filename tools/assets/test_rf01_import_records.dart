@@ -57,6 +57,76 @@ void main() {
     packageDiagnostics.any((diagnostic) => diagnostic.code == 'PACKAGE_HASH'),
     'package validation emits stable hash code',
   );
+  final incompleteRuntimeDiagnostics = validateGeneratedPackageManifest({
+    'assetId': 'test-room',
+    'packageHash': '0' * 64,
+    'converterId': 'assimp-cli',
+    'converterVersion': '6.0.0',
+    'settingsHash': '0' * 64,
+    'licenseId': 'test-license',
+    'packageFiles': ['wall.qmesh'],
+    'sourceFiles': [],
+    'sourceHashes': [],
+    'units': 'metres',
+    'upAxis': 'Y-up',
+    'pivot': 'floor-center',
+    'materialSlots': [0],
+    'runtimeProfile': 'runtime',
+    'mediaStatus': 'incomplete',
+    'sourceFormat': 'fbx',
+    'parts': [
+      {'id': 'wall', 'materialSlot': 0},
+    ],
+    'materials': [],
+    'textures': [],
+    'lods': ['LOD-S', 'LOD0', 'LOD1', 'LOD2'],
+    'combinedBounds': {
+      'min': [0, 0, 0],
+      'max': [1, 1, 1],
+    },
+  });
+  check(
+    incompleteRuntimeDiagnostics.any(
+      (diagnostic) => diagnostic.code == 'PACKAGE_RUNTIME_MEDIA',
+    ),
+    'runtime package rejects incomplete texture media',
+  );
+  final externalTextureDiagnostics = validateGeneratedPackageManifest({
+    'assetId': 'test-room',
+    'packageHash': '0' * 64,
+    'converterId': 'assimp-cli',
+    'converterVersion': '6.0.0',
+    'settingsHash': '0' * 64,
+    'licenseId': 'test-license',
+    'packageFiles': ['wall.qmesh'],
+    'sourceFiles': [],
+    'sourceHashes': [],
+    'units': 'metres',
+    'upAxis': 'Y-up',
+    'pivot': 'floor-center',
+    'materialSlots': [0],
+    'runtimeProfile': 'runtime',
+    'mediaStatus': 'complete',
+    'sourceFormat': 'fbx',
+    'parts': [
+      {'id': 'wall', 'materialSlot': 0},
+    ],
+    'materials': [],
+    'textures': [
+      {'id': 'wall', 'status': 'external-reference'},
+    ],
+    'lods': ['LOD-S', 'LOD0', 'LOD1', 'LOD2'],
+    'combinedBounds': {
+      'min': [0, 0, 0],
+      'max': [1, 1, 1],
+    },
+  });
+  check(
+    externalTextureDiagnostics.any(
+      (diagnostic) => diagnostic.code == 'PACKAGE_RUNTIME_TEXTURE',
+    ),
+    'runtime package rejects external texture records',
+  );
   final package = ModelPackageManifest(
     assetId: 'room',
     packageHash: '0' * 64,

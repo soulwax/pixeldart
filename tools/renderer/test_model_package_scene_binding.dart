@@ -119,6 +119,87 @@ Future<void> main() async {
     failed && world.items.isEmpty && cache.cachedCount == 0,
     'failed attach rolls back all ownership',
   );
+  for (var cycle = 0; cycle < 100; cycle++) {
+    final soak = ModelPackageSceneBinding(
+      package: package,
+      cache: cache,
+      resources: resources,
+      world: world,
+      materialForSlot: (_) => material,
+      visibilityMask: 4,
+    );
+    soak.attach();
+    soak.switchLod('LOD1');
+    soak.switchLod('LOD0');
+    soak.dispose();
+    require(
+      world.items.isEmpty && cache.cachedCount == 0,
+      'cycle $cycle leaked model binding ownership',
+    );
+  }
+  final recovery = ModelPackageSceneBinding(
+    package: package,
+    cache: cache,
+    resources: resources,
+    world: world,
+    materialForSlot: (_) => material,
+  );
+  recovery.attach();
+  device.simulateContextLoss();
+  var lossRejected = false;
+  try {
+    renderer.beginFrame(
+      world,
+      FrameInput(
+        camera: CameraView(
+          view: Mat4.identity(),
+          projection: Mat4.identity(),
+          viewProjection: Mat4.identity(),
+          eye: Vec3.zero,
+          forward: const Vec3(0, 0, 1),
+          near: 0.1,
+          far: 100,
+          aspect: 16 / 9,
+        ),
+        environment: const FrameEnvironment(),
+        post: PostProcessState.off,
+        frameIndex: 1,
+        historyEpoch: 1,
+        noiseSeed: 1,
+        timeSeconds: 0,
+      ),
+    );
+  } catch (_) {
+    lossRejected = true;
+  }
+  require(lossRejected, 'context loss must reject model frame submission');
+  device.simulateContextRestore();
+  final restored = renderer.beginFrame(
+    world,
+    FrameInput(
+      camera: CameraView(
+        view: Mat4.identity(),
+        projection: Mat4.identity(),
+        viewProjection: Mat4.identity(),
+        eye: Vec3.zero,
+        forward: const Vec3(0, 0, 1),
+        near: 0.1,
+        far: 100,
+        aspect: 16 / 9,
+      ),
+      environment: const FrameEnvironment(),
+      post: PostProcessState.off,
+      frameIndex: 2,
+      historyEpoch: 2,
+      noiseSeed: 2,
+      timeSeconds: 0,
+    ),
+  );
+  restored.submit(world.items.single.descriptor);
+  renderer.endFrame();
+  require(recovery.itemCount == 1, 'context restore lost retained model item');
+  recovery.dispose();
+  require(world.items.isEmpty && cache.cachedCount == 0, 'context recovery leaked model ownership');
   renderer.dispose();
   print('RF-06 model package scene binding tests passed.');
 }

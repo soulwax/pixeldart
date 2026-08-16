@@ -137,6 +137,19 @@ List<AssetImportDiagnostic> validateGeneratedPackageManifest(
       'runtime packages cannot contain incomplete texture media',
     );
   }
+  if (manifest['runtimeProfile'] == 'runtime' &&
+      mediaStatus == 'complete' &&
+      manifest['textures'] is List) {
+    for (final texture in (manifest['textures'] as List)) {
+      if (texture is! Map || texture['status'] != 'embedded') {
+        error(
+          'PACKAGE_RUNTIME_TEXTURE',
+          'runtime packages require every texture to be embedded',
+        );
+        break;
+      }
+    }
+  }
   final lods = manifest['lods'];
   if (lods is! List || lods.length < 3) {
     error('PACKAGE_LODS', 'lods must contain LOD-S, LOD0, LOD1, and LOD2');
