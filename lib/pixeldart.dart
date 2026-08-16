@@ -16,6 +16,7 @@ export 'rendering/api/renderer.dart';
 export 'rendering/api/scene.dart';
 export 'rendering/api/settings.dart';
 export 'rendering/api/stats.dart';
+export 'rendering/particles/atmospheric_particles.dart';
 export 'rendering/assets/model_definition.dart';
 export 'rendering/assets/model_binding.dart';
 export 'rendering/assets/model_scene_binding.dart';
