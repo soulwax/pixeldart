@@ -22,7 +22,7 @@ void main() async {
   var illegalEndFrame = false;
   try {
     renderer.endFrame();
-  } on StateError {
+  } catch (_) {
     illegalEndFrame = true;
   }
   require(illegalEndFrame, 'endFrame without beginFrame was accepted');

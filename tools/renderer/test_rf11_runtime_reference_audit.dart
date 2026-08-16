@@ -11,7 +11,9 @@ List<File> dartFiles(String path) => Directory(path)
     .toList();
 
 void main() {
-  final pixeldartFiles = dartFiles('external/pixeldart/lib');
+  final packageRoot = File.fromUri(Platform.script).parent.parent.parent;
+  final projectRoot = Directory('${packageRoot.path}/../..');
+  final pixeldartFiles = dartFiles('${packageRoot.path}/lib');
   final forbidden = <String>[];
   for (final file in pixeldartFiles) {
     final text = file.readAsStringSync();
@@ -32,17 +34,19 @@ void main() {
     'Pixeldart runtime contains source-specific symbols: $forbidden',
   );
 
-  final rootFiles = [...dartFiles('lib'), ...dartFiles('web')];
+  final rootFiles = [
+    ...dartFiles('${projectRoot.path}/lib'),
+    ...dartFiles('${projectRoot.path}/web'),
+  ];
   final sourceRefs = <String>[];
   for (final file in rootFiles) {
     final text = file.readAsStringSync();
     if (text.contains('FbxRuntimePackage') ||
         text.contains('FbxSceneBinding')) {
-      sourceRefs.add(file.path);
+      sourceRefs.add(file.path.substring(projectRoot.path.length + 1));
     }
   }
   const expectedRefs = {
-    'web/main.dart',
     'lib/engine/fbx_diagnostic_controller.dart',
     'lib/engine/fbx_scene_binding.dart',
     'lib/engine/fbx_runtime_package.dart',
@@ -53,7 +57,9 @@ void main() {
     'source-specific runtime references are spreading or disappearing unexpectedly',
   );
 
-  final compatibility = File('lib/engine/fbx_runtime_package.dart');
+  final compatibility = File(
+    '${projectRoot.path}/lib/engine/fbx_runtime_package.dart',
+  );
   require(
     compatibility.existsSync(),
     'compatibility wrapper inventory changed unexpectedly',

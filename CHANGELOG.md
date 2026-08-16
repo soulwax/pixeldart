@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.1.0 (unreleased)
 
 - Added stable, advanced, and testing package facades.
 - Added host-neutral renderer factories and lifecycle recovery contracts.
