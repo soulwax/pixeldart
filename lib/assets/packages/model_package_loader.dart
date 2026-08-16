@@ -4,6 +4,7 @@ import 'model_package.dart';
 import 'model_package_emitter.dart';
 import 'model_package_manifest.dart';
 import 'model_package_validator.dart';
+import '../../rendering/assets/qmesh.dart';
 
 /// Resource bounds applied before package bytes enter a decoder or cache.
 final class ModelPackageLimits {
@@ -11,12 +12,14 @@ final class ModelPackageLimits {
   final int maxTotalBytes;
   final int maxParts;
   final int maxPayloadCount;
+  final bool requireQmeshPayloads;
 
   const ModelPackageLimits({
     this.maxPayloadBytes = 64 * 1024 * 1024,
     this.maxTotalBytes = 256 * 1024 * 1024,
     this.maxParts = 4096,
     this.maxPayloadCount = 16384,
+    this.requireQmeshPayloads = false,
   }) : assert(maxPayloadBytes > 0),
        assert(maxTotalBytes >= maxPayloadBytes),
        assert(maxParts > 0),
@@ -72,6 +75,15 @@ final class ModelPackageLoader {
           throw const FormatException('model package exceeds total byte limit');
         }
         payloads[path] = Uint8List.fromList(bytes);
+        if (limits.requireQmeshPayloads) {
+          try {
+            decodeQmesh(payloads[path]!);
+          } on QmeshDecodeException catch (error) {
+            throw FormatException(
+              'model package payload is not valid QMSH: $path (${error.reason.name})',
+            );
+          }
+        }
       }
     }
     final expected = ModelPackageEmitter.computePackageHash(

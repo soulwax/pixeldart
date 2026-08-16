@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import '../importers/asset_import_diagnostic.dart';
 import 'model_package_manifest.dart';
 
@@ -33,6 +35,50 @@ List<AssetImportDiagnostic> validateModelPackageManifest(
     }
     if (!part.lodFiles.containsKey('LOD0')) {
       error('MODEL_PACKAGE_PART_LOD', 'part ${part.id} has no LOD0 payload');
+    }
+  }
+  return diagnostics;
+}
+
+/// Validates the bytes supplied alongside a source-neutral manifest. The
+/// manifest is authoritative: extra files are rejected instead of silently
+/// ignored, and every declared LOD payload must be present before decoding.
+List<AssetImportDiagnostic> validateModelPackagePayloads(
+  ModelPackageManifest manifest,
+  Map<String, Uint8List> payloads,
+) {
+  final diagnostics = <AssetImportDiagnostic>[];
+  void error(String code, String message) {
+    diagnostics.add(
+      AssetImportDiagnostic(
+        code: code,
+        severity: DiagnosticSeverity.error,
+        stage: 'model-package-payloads',
+        message: message,
+        remediation: 'rebuild the package with only declared runtime payloads',
+      ),
+    );
+  }
+
+  final declared = <String>{
+    for (final part in manifest.parts) ...part.lodFiles.values,
+  };
+  for (final path in declared) {
+    if (!payloads.containsKey(path)) {
+      error('MODEL_PACKAGE_PAYLOAD_MISSING', 'declared payload is missing: $path');
+    }
+  }
+  for (final path in payloads.keys) {
+    if (!declared.contains(path)) {
+      error('MODEL_PACKAGE_PAYLOAD_UNDECLARED', 'payload is not declared: $path');
+    }
+    final lower = path.toLowerCase();
+    if (lower.endsWith('.fbx') ||
+        lower.endsWith('.obj') ||
+        lower.endsWith('.mtl') ||
+        lower.endsWith('.gltf') ||
+        lower.endsWith('.glb')) {
+      error('MODEL_PACKAGE_SOURCE_LEAK', 'source/intermediate payload: $path');
     }
   }
   return diagnostics;

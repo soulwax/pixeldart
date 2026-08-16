@@ -12,10 +12,10 @@ void main() async {
   final renderer = const WebGl2RendererFactory().create(canvas);
   if (renderer == null) {
     canvas
-      ..setAttribute('data-renderer-state', 'no-webgl2')
-      ..setAttribute('data-renderer-backend', 'legacy')
-      ..setAttribute('data-renderer-fallback', 'true')
-      ..setAttribute('data-renderer-fallback-reason', 'webgl2 unavailable');
+      ..setAttribute('data-renderer-state', 'renderer-unavailable')
+      ..setAttribute('data-renderer-backend', 'pixeldart')
+      ..setAttribute('data-renderer-fallback', 'false')
+      ..setAttribute('data-renderer-failure-reason', 'webgl2 unavailable');
     return;
   }
   final requestedProfile = Uri.base.queryParameters['profile'] ?? 'safe';

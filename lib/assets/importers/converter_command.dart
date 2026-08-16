@@ -45,7 +45,7 @@ final class ConverterCommandSpec {
     required String animationPolicy,
   }) {
     if (converterId == 'assimp-cli') {
-      return ['export', sourcePath, outputPath];
+      return ['export', sourcePath, outputPath, '-f', 'glb2'];
     }
     return [
       '-b',

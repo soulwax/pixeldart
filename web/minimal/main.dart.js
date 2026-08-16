@@ -1,7435 +1,14919 @@
-(function dartProgram(){function copyProperties(a,b){var s=Object.keys(a)
-for(var r=0;r<s.length;r++){var q=s[r]
-b[q]=a[q]}}function mixinPropertiesHard(a,b){var s=Object.keys(a)
-for(var r=0;r<s.length;r++){var q=s[r]
-if(!b.hasOwnProperty(q)){b[q]=a[q]}}}function mixinPropertiesEasy(a,b){Object.assign(b,a)}var z=function(){var s=function(){}
-s.prototype={p:{}}
-var r=new s()
-if(!(Object.getPrototypeOf(r)&&Object.getPrototypeOf(r).p===s.prototype.p))return false
-try{if(typeof navigator!="undefined"&&typeof navigator.userAgent=="string"&&navigator.userAgent.indexOf("Chrome/")>=0)return true
-if(typeof version=="function"&&version.length==0){var q=version()
-if(/^\d+\.\d+\.\d+\.\d+$/.test(q))return true}}catch(p){}return false}()
-function inherit(a,b){a.prototype.constructor=a
-a.prototype["$i"+a.name]=a
-if(b!=null){if(z){Object.setPrototypeOf(a.prototype,b.prototype)
-return}var s=Object.create(b.prototype)
-copyProperties(a.prototype,s)
-a.prototype=s}}function inheritMany(a,b){for(var s=0;s<b.length;s++){inherit(b[s],a)}}function mixinEasy(a,b){mixinPropertiesEasy(b.prototype,a.prototype)
-a.prototype.constructor=a}function mixinHard(a,b){mixinPropertiesHard(b.prototype,a.prototype)
-a.prototype.constructor=a}function lazy(a,b,c,d){var s=a
-a[b]=s
-a[c]=function(){if(a[b]===s){a[b]=d()}a[c]=function(){return this[b]}
-return a[b]}}function lazyFinal(a,b,c,d){var s=a
-a[b]=s
-a[c]=function(){if(a[b]===s){var r=d()
-if(a[b]!==s){A.oy(b)}a[b]=r}var q=a[b]
-a[c]=function(){return q}
-return q}}function makeConstList(a,b){if(b!=null)A.d(a,b)
-a.$flags=7
-return a}function convertToFastObject(a){function t(){}t.prototype=a
-new t()
-return a}function convertAllToFastObject(a){for(var s=0;s<a.length;++s){convertToFastObject(a[s])}}var y=0
-function instanceTearOffGetter(a,b){var s=null
-return a?function(c){if(s===null)s=A.jv(b)
-return new s(c,this)}:function(){if(s===null)s=A.jv(b)
-return new s(this,null)}}function staticTearOffGetter(a){var s=null
-return function(){if(s===null)s=A.jv(a).prototype
-return s}}var x=0
-function tearOffParameters(a,b,c,d,e,f,g,h,i,j){if(typeof h=="number"){h+=x}return{co:a,iS:b,iI:c,rC:d,dV:e,cs:f,fs:g,fT:h,aI:i||0,nDA:j}}function installStaticTearOff(a,b,c,d,e,f,g,h){var s=tearOffParameters(a,true,false,c,d,e,f,g,h,false)
-var r=staticTearOffGetter(s)
-a[b]=r}function installInstanceTearOff(a,b,c,d,e,f,g,h,i,j){c=!!c
-var s=tearOffParameters(a,false,c,d,e,f,g,h,i,!!j)
-var r=instanceTearOffGetter(c,s)
-a[b]=r}function setOrUpdateInterceptorsByTag(a){var s=v.interceptorsByTag
-if(!s){v.interceptorsByTag=a
-return}copyProperties(a,s)}function setOrUpdateLeafTags(a){var s=v.leafTags
-if(!s){v.leafTags=a
-return}copyProperties(a,s)}function updateTypes(a){var s=v.types
-var r=s.length
-s.push.apply(s,a)
-return r}function updateHolder(a,b){copyProperties(b,a)
-return a}var hunkHelpers=function(){var s=function(a,b,c,d,e){return function(f,g,h,i){return installInstanceTearOff(f,g,a,b,c,d,[h],i,e,false)}},r=function(a,b,c,d){return function(e,f,g,h){return installStaticTearOff(e,f,a,b,c,[g],h,d)}}
-return{inherit:inherit,inheritMany:inheritMany,mixin:mixinEasy,mixinHard:mixinHard,installStaticTearOff:installStaticTearOff,installInstanceTearOff:installInstanceTearOff,_instance_0u:s(0,0,null,["$0"],0),_instance_1u:s(0,1,null,["$1"],0),_instance_2u:s(0,2,null,["$2"],0),_instance_0i:s(1,0,null,["$0"],0),_instance_1i:s(1,1,null,["$1"],0),_instance_2i:s(1,2,null,["$2"],0),_static_0:r(0,null,["$0"],0),_static_1:r(1,null,["$1"],0),_static_2:r(2,null,["$2"],0),makeConstList:makeConstList,lazy:lazy,lazyFinal:lazyFinal,updateHolder:updateHolder,convertToFastObject:convertToFastObject,updateTypes:updateTypes,setOrUpdateInterceptorsByTag:setOrUpdateInterceptorsByTag,setOrUpdateLeafTags:setOrUpdateLeafTags}}()
-function initializeDeferredHunk(a){x=v.types.length
-a(hunkHelpers,v,w,$)}var J={
-jB(a,b,c,d){return{i:a,p:b,e:c,x:d}},
-jx(a){var s,r,q,p,o,n=a[v.dispatchPropertyName]
-if(n==null)if($.jz==null){A.ok()
-n=a[v.dispatchPropertyName]}if(n!=null){s=n.p
-if(!1===s)return n.i
-if(!0===s)return a
-r=Object.getPrototypeOf(a)
-if(s===r)return n.i
-if(n.e===r)throw A.b(A.ke("Return interceptor for "+A.p(s(a,n))))}q=a.constructor
-if(q==null)p=null
-else{o=$.hY
-if(o==null)o=$.hY=v.getIsolateTag("_$dart_js")
-p=q[o]}if(p!=null)return p
-p=A.op(a)
-if(p!=null)return p
-if(typeof a=="function")return B.be
-s=Object.getPrototypeOf(a)
-if(s==null)return B.am
-if(s===Object.prototype)return B.am
-if(typeof q=="function"){o=$.hY
-if(o==null)o=$.hY=v.getIsolateTag("_$dart_js")
-Object.defineProperty(q,o,{value:B.Z,enumerable:false,writable:true,configurable:true})
-return B.Z}return B.Z},
-jU(a,b){if(a<0||a>4294967295)throw A.b(A.au(a,0,4294967295,"length",null))
-return J.jV(new Array(a),b)},
-jT(a,b){if(a<0)throw A.b(A.r("Length must be a non-negative integer: "+a,null))
-return A.d(new Array(a),b.h("t<0>"))},
-jV(a,b){var s=A.d(a,b.h("t<0>"))
-s.$flags=1
-return s},
-lU(a,b){var s=t.e8
-return J.lw(s.a(a),s.a(b))},
-bF(a){if(typeof a=="number"){if(Math.floor(a)==a)return J.cu.prototype
-return J.dZ.prototype}if(typeof a=="string")return J.ba.prototype
-if(a==null)return J.cv.prototype
-if(typeof a=="boolean")return J.dY.prototype
-if(Array.isArray(a))return J.t.prototype
-if(typeof a!="object"){if(typeof a=="function")return J.bb.prototype
-if(typeof a=="symbol")return J.cy.prototype
-if(typeof a=="bigint")return J.cw.prototype
-return a}if(a instanceof A.v)return a
-return J.jx(a)},
-cb(a){if(typeof a=="string")return J.ba.prototype
-if(a==null)return a
-if(Array.isArray(a))return J.t.prototype
-if(typeof a!="object"){if(typeof a=="function")return J.bb.prototype
-if(typeof a=="symbol")return J.cy.prototype
-if(typeof a=="bigint")return J.cw.prototype
-return a}if(a instanceof A.v)return a
-return J.jx(a)},
-fi(a){if(a==null)return a
-if(Array.isArray(a))return J.t.prototype
-if(typeof a!="object"){if(typeof a=="function")return J.bb.prototype
-if(typeof a=="symbol")return J.cy.prototype
-if(typeof a=="bigint")return J.cw.prototype
-return a}if(a instanceof A.v)return a
-return J.jx(a)},
-of(a){if(typeof a=="number")return J.bO.prototype
-if(typeof a=="string")return J.ba.prototype
-if(a==null)return a
-if(!(a instanceof A.v))return J.bu.prototype
-return a},
-og(a){if(typeof a=="string")return J.ba.prototype
-if(a==null)return a
-if(!(a instanceof A.v))return J.bu.prototype
-return a},
-aK(a,b){if(a==null)return b==null
-if(typeof a!="object")return b!=null&&a===b
-return J.bF(a).R(a,b)},
-iY(a,b){if(typeof b==="number")if(Array.isArray(a)||typeof a=="string"||A.on(a,a[v.dispatchPropertyName]))if(b>>>0===b&&b<a.length)return a[b]
-return J.cb(a).n(a,b)},
-dx(a,b,c){return J.fi(a).q(a,b,c)},
-jJ(a,b){return J.fi(a).j(a,b)},
-lw(a,b){return J.of(a).H(a,b)},
-iZ(a,b){return J.fi(a).K(a,b)},
-J(a){return J.bF(a).gB(a)},
-X(a){return J.fi(a).gv(a)},
-b6(a){return J.cb(a).gp(a)},
-dy(a){return J.bF(a).gC(a)},
-lx(a,b){return J.og(a).ar(a,b)},
-bH(a){return J.bF(a).i(a)},
-dW:function dW(){},
-dY:function dY(){},
-cv:function cv(){},
-cx:function cx(){},
-bc:function bc(){},
-ec:function ec(){},
-bu:function bu(){},
-bb:function bb(){},
-cw:function cw(){},
-cy:function cy(){},
-t:function t(a){this.$ti=a},
-dX:function dX(){},
-fS:function fS(a){this.$ti=a},
-ce:function ce(a,b,c){var _=this
-_.a=a
-_.b=b
-_.c=0
-_.d=null
-_.$ti=c},
-bO:function bO(){},
-cu:function cu(){},
-dZ:function dZ(){},
-ba:function ba(){}},A={j2:function j2(){},
-jW(a){return new A.cz("Field '"+a+"' has been assigned during initialization.")},
-lV(a){return new A.cz("Field '"+a+"' has not been initialized.")},
-iF(a){var s,r=a^48
-if(r<=9)return r
-s=a|32
-if(97<=s&&s<=102)return s-87
-return-1},
-U(a,b){a=a+b&536870911
-a=a+((a&524287)<<10)&536870911
-return a^a>>>6},
-ev(a){a=a+((a&67108863)<<3)&536870911
-a^=a>>>11
-return a+((a&16383)<<15)&536870911},
-dv(a,b,c){return a},
-jA(a){var s,r
-for(s=$.ak.length,r=0;r<s;++r)if(a===$.ak[r])return!0
-return!1},
-kc(a,b,c,d){A.eh(b,"start")
-if(c!=null){A.eh(c,"end")
-if(b>c)A.k(A.au(b,0,c,"start",null))}return new A.cW(a,b,c,d.h("cW<0>"))},
-k_(a,b,c,d){if(t.gw.b(a))return new A.cp(a,b,c.h("@<0>").D(d).h("cp<1,2>"))
-return new A.aU(a,b,c.h("@<0>").D(d).h("aU<1,2>"))},
-j0(){return new A.bY("No element")},
-lS(){return new A.bY("Too many elements")},
-c0:function c0(){},
-ch:function ch(a,b){this.a=a
-this.$ti=b},
-d_:function d_(){},
-ci:function ci(a,b){this.a=a
-this.$ti=b},
-cz:function cz(a){this.a=a},
-dH:function dH(a){this.a=a},
-hr:function hr(){},
-n:function n(){},
-V:function V(){},
-cW:function cW(a,b,c,d){var _=this
-_.a=a
-_.b=b
-_.c=c
-_.$ti=d},
-at:function at(a,b,c){var _=this
-_.a=a
-_.b=b
-_.c=0
-_.d=null
-_.$ti=c},
-aU:function aU(a,b,c){this.a=a
-this.b=b
-this.$ti=c},
-cp:function cp(a,b,c){this.a=a
-this.b=b
-this.$ti=c},
-cD:function cD(a,b,c){var _=this
-_.a=null
-_.b=a
-_.c=b
-_.$ti=c},
-aV:function aV(a,b,c){this.a=a
-this.b=b
-this.$ti=c},
-a5:function a5(a,b,c){this.a=a
-this.b=b
-this.$ti=c},
-G:function G(a,b,c){this.a=a
-this.b=b
-this.$ti=c},
-a8:function a8(){},
-bv:function bv(){},
-bZ:function bZ(){},
-cS:function cS(a,b){this.a=a
-this.$ti=b},
-dq:function dq(){},
-jQ(a,b,c){var s,r,q,p,o,n,m,l=A.q(a),k=A.j6(new A.bp(a,l.h("bp<1>")),!0,b),j=k.length,i=0
-for(;;){if(!(i<j)){s=!0
-break}r=k[i]
-if(typeof r!="string"||"__proto__"===r){s=!1
-break}++i}if(s){q={}
-for(p=0,i=0;i<k.length;k.length===j||(0,A.B)(k),++i,p=o){r=k[i]
-c.a(a.n(0,r))
-o=p+1
-q[r]=p}n=A.j6(new A.aT(a,l.h("aT<2>")),!0,c)
-m=new A.K(q,n,b.h("@<0>").D(c).h("K<1,2>"))
-m.$keys=k
-return m}return new A.cm(A.lY(a,b,c),b.h("@<0>").D(c).h("cm<1,2>"))},
-lF(){throw A.b(A.b1("Cannot modify unmodifiable Map"))},
-lG(){throw A.b(A.b1("Cannot modify constant Set"))},
-le(a){var s=v.mangledGlobalNames[a]
-if(s!=null)return s
-return"minified:"+a},
-on(a,b){var s
-if(b!=null){s=b.x
-if(s!=null)return s}return t.aU.b(a)},
-p(a){var s
-if(typeof a=="string")return a
-if(typeof a=="number"){if(a!==0)return""+a}else if(!0===a)return"true"
-else if(!1===a)return"false"
-else if(a==null)return"null"
-s=J.bH(a)
-return s},
-ee(a){var s,r=$.k3
-if(r==null)r=$.k3=Symbol("identityHashCode")
-s=a[r]
-if(s==null){s=Math.random()*0x3fffffff|0
-a[r]=s}return s},
-k4(a,b){var s,r=/^\s*[+-]?((0x[a-f0-9]+)|(\d+)|([a-z0-9]+))\s*$/i.exec(a)
-if(r==null)return null
-if(3>=r.length)return A.h(r,3)
-s=r[3]
-if(s!=null)return parseInt(a,10)
-if(r[2]!=null)return parseInt(a,16)
-return null},
-ef(a){var s,r,q,p
-if(a instanceof A.v)return A.aj(A.bj(a),null)
-s=J.bF(a)
-if(s===B.bd||s===B.bf||t.ak.b(a)){r=B.a1(a)
-if(r!=="Object"&&r!=="")return r
-q=a.constructor
-if(typeof q=="function"){p=q.name
-if(typeof p=="string"&&p!=="Object"&&p!=="")return p}}return A.aj(A.bj(a),null)},
-k5(a){var s,r,q
-if(a==null||typeof a=="number"||A.jq(a))return J.bH(a)
-if(typeof a=="string")return JSON.stringify(a)
-if(a instanceof A.b8)return a.i(0)
-if(a instanceof A.bh)return a.bR(!0)
-s=$.lv()
-for(r=0;r<1;++r){q=s[r].e9(a)
-if(q!=null)return q}return"Instance of '"+A.ef(a)+"'"},
-m2(){if(!!self.location)return self.location.href
-return null},
-mb(a,b,c){var s,r,q,p
-if(c<=500&&b===0&&c===a.length)return String.fromCharCode.apply(null,a)
-for(s=b,r="";s<c;s=q){q=s+500
-p=q<c?q:c
-r+=String.fromCharCode.apply(null,a.subarray(s,p))}return r},
-bs(a){var s
-if(0<=a){if(a<=65535)return String.fromCharCode(a)
-if(a<=1114111){s=a-65536
-return String.fromCharCode((B.i.aZ(s,10)|55296)>>>0,s&1023|56320)}}throw A.b(A.au(a,0,1114111,null,null))},
-bT(a){if(a.date===void 0)a.date=new Date(a.a)
-return a.date},
-ma(a){var s=A.bT(a).getUTCFullYear()+0
-return s},
-m8(a){var s=A.bT(a).getUTCMonth()+1
-return s},
-m4(a){var s=A.bT(a).getUTCDate()+0
-return s},
-m5(a){var s=A.bT(a).getUTCHours()+0
-return s},
-m7(a){var s=A.bT(a).getUTCMinutes()+0
-return s},
-m9(a){var s=A.bT(a).getUTCSeconds()+0
-return s},
-m6(a){var s=A.bT(a).getUTCMilliseconds()+0
-return s},
-m3(a){var s=a.$thrownJsError
-if(s==null)return null
-return A.cc(s)},
-k6(a,b){var s
-if(a.$thrownJsError==null){s=new Error()
-A.P(a,s)
-a.$thrownJsError=s
-s.stack=b.i(0)}},
-oi(a){throw A.b(A.ju(a))},
-h(a,b){if(a==null)J.b6(a)
-throw A.b(A.iD(a,b))},
-iD(a,b){var s,r="index"
-if(!A.kV(b))return new A.aB(!0,b,r,null)
-s=A.a(J.b6(a))
-if(b<0||b>=s)return A.fR(b,s,a,r)
-return new A.cO(null,null,!0,b,r,"Value not in range")},
-ju(a){return new A.aB(!0,a,null,null)},
-b(a){return A.P(a,new Error())},
-P(a,b){var s
-if(a==null)a=new A.aZ()
-b.dartException=a
-s=A.oz
-if("defineProperty" in Object){Object.defineProperty(b,"message",{get:s})
-b.name=""}else b.toString=s
-return b},
-oz(){return J.bH(this.dartException)},
-k(a,b){throw A.P(a,b==null?new Error():b)},
-b4(a,b,c){var s
-if(b==null)b=0
-if(c==null)c=0
-s=Error()
-A.k(A.nr(a,b,c),s)},
-nr(a,b,c){var s,r,q,p,o,n,m,l,k
-if(typeof b=="string")s=b
-else{r="[]=;add;removeWhere;retainWhere;removeRange;setRange;setInt8;setInt16;setInt32;setUint8;setUint16;setUint32;setFloat32;setFloat64".split(";")
-q=r.length
-p=b
-if(p>q){c=p/q|0
-p%=q}s=r[p]}o=typeof c=="string"?c:"modify;remove from;add to".split(";")[c]
-n=t.aH.b(a)?"list":"ByteData"
-m=a.$flags|0
-l="a "
-if((m&4)!==0)k="constant "
-else if((m&2)!==0){k="unmodifiable "
-l="an "}else k=(m&1)!==0?"fixed-length ":""
-return new A.cY("'"+s+"': Cannot "+o+" "+l+k+n)},
-B(a){throw A.b(A.am(a))},
-b_(a){var s,r,q,p,o,n
-a=A.ot(a.replace(String({}),"$receiver$"))
-s=a.match(/\\\$[a-zA-Z]+\\\$/g)
-if(s==null)s=A.d([],t.s)
-r=s.indexOf("\\$arguments\\$")
-q=s.indexOf("\\$argumentsExpr\\$")
-p=s.indexOf("\\$expr\\$")
-o=s.indexOf("\\$method\\$")
-n=s.indexOf("\\$receiver\\$")
-return new A.hv(a.replace(new RegExp("\\\\\\$arguments\\\\\\$","g"),"((?:x|[^x])*)").replace(new RegExp("\\\\\\$argumentsExpr\\\\\\$","g"),"((?:x|[^x])*)").replace(new RegExp("\\\\\\$expr\\\\\\$","g"),"((?:x|[^x])*)").replace(new RegExp("\\\\\\$method\\\\\\$","g"),"((?:x|[^x])*)").replace(new RegExp("\\\\\\$receiver\\\\\\$","g"),"((?:x|[^x])*)"),r,q,p,o,n)},
-hw(a){return function($expr$){var $argumentsExpr$="$arguments$"
-try{$expr$.$method$($argumentsExpr$)}catch(s){return s.message}}(a)},
-kd(a){return function($expr$){try{$expr$.$method$}catch(s){return s.message}}(a)},
-j3(a,b){var s=b==null,r=s?null:b.method
-return new A.e_(a,r,s?null:b.receiver)},
-b5(a){var s
-if(a==null)return new A.h3(a)
-if(a instanceof A.cq){s=a.a
-return A.bk(a,s==null?A.dr(s):s)}if(typeof a!=="object")return a
-if("dartException" in a)return A.bk(a,a.dartException)
-return A.o2(a)},
-bk(a,b){if(t.U.b(b))if(b.$thrownJsError==null)b.$thrownJsError=a
-return b},
-o2(a){var s,r,q,p,o,n,m,l,k,j,i,h,g
-if(!("message" in a))return a
-s=a.message
-if("number" in a&&typeof a.number=="number"){r=a.number
-q=r&65535
-if((B.i.aZ(r,16)&8191)===10)switch(q){case 438:return A.bk(a,A.j3(A.p(s)+" (Error "+q+")",null))
-case 445:case 5007:A.p(s)
-return A.bk(a,new A.cL())}}if(a instanceof TypeError){p=$.lh()
-o=$.li()
-n=$.lj()
-m=$.lk()
-l=$.ln()
-k=$.lo()
-j=$.lm()
-$.ll()
-i=$.lq()
-h=$.lp()
-g=p.Z(s)
-if(g!=null)return A.bk(a,A.j3(A.aH(s),g))
-else{g=o.Z(s)
-if(g!=null){g.method="call"
-return A.bk(a,A.j3(A.aH(s),g))}else if(n.Z(s)!=null||m.Z(s)!=null||l.Z(s)!=null||k.Z(s)!=null||j.Z(s)!=null||m.Z(s)!=null||i.Z(s)!=null||h.Z(s)!=null){A.aH(s)
-return A.bk(a,new A.cL())}}return A.bk(a,new A.eA(typeof s=="string"?s:""))}if(a instanceof RangeError){if(typeof s=="string"&&s.indexOf("call stack")!==-1)return new A.cV()
-s=function(b){try{return String(b)}catch(f){}return null}(a)
-return A.bk(a,new A.aB(!1,null,null,typeof s=="string"?s.replace(/^RangeError:\s*/,""):s))}if(typeof InternalError=="function"&&a instanceof InternalError)if(typeof s=="string"&&s==="too much recursion")return new A.cV()
-return a},
-cc(a){var s
-if(a instanceof A.cq)return a.b
-if(a==null)return new A.dc(a)
-s=a.$cachedTrace
-if(s!=null)return s
-s=new A.dc(a)
-if(typeof a==="object")a.$cachedTrace=s
-return s},
-iP(a){if(a==null)return J.J(a)
-if(typeof a=="object")return A.ee(a)
-return J.J(a)},
-od(a,b){var s,r,q,p=a.length
-for(s=0;s<p;s=q){r=s+1
-q=r+1
-b.q(0,a[s],a[r])}return b},
-oe(a,b){var s,r=a.length
-for(s=0;s<r;++s)b.j(0,a[s])
-return b},
-nE(a,b,c,d,e,f){t.Z.a(a)
-switch(A.a(b)){case 0:return a.$0()
-case 1:return a.$1(c)
-case 2:return a.$2(c,d)
-case 3:return a.$3(c,d,e)
-case 4:return a.$4(c,d,e,f)}throw A.b(new A.hK("Unsupported number of arguments for wrapped closure"))},
-c8(a,b){var s=a.$identity
-if(!!s)return s
-s=A.o9(a,b)
-a.$identity=s
-return s},
-o9(a,b){var s
-switch(b){case 0:s=a.$0
-break
-case 1:s=a.$1
-break
-case 2:s=a.$2
-break
-case 3:s=a.$3
-break
-case 4:s=a.$4
-break
-default:s=null}if(s!=null)return s.bind(a)
-return function(c,d,e){return function(f,g,h,i){return e(c,d,f,g,h,i)}}(a,b,A.nE)},
-lE(a2){var s,r,q,p,o,n,m,l,k,j,i=a2.co,h=a2.iS,g=a2.iI,f=a2.nDA,e=a2.aI,d=a2.fs,c=a2.cs,b=d[0],a=c[0],a0=i[b],a1=a2.fT
-a1.toString
-s=h?Object.create(new A.et().constructor.prototype):Object.create(new A.bI(null,null).constructor.prototype)
-s.$initialize=s.constructor
-r=h?function static_tear_off(){this.$initialize()}:function tear_off(a3,a4){this.$initialize(a3,a4)}
-s.constructor=r
-r.prototype=s
-s.$_name=b
-s.$_target=a0
-q=!h
-if(q)p=A.jP(b,a0,g,f)
-else{s.$static_name=b
-p=a0}s.$S=A.lA(a1,h,g)
-s[a]=p
-for(o=p,n=1;n<d.length;++n){m=d[n]
-if(typeof m=="string"){l=i[m]
-k=m
-m=l}else k=""
-j=c[n]
-if(j!=null){if(q)m=A.jP(k,m,g,f)
-s[j]=m}if(n===e)o=m}s.$C=o
-s.$R=a2.rC
-s.$D=a2.dV
-return r},
-lA(a,b,c){if(typeof a=="number")return a
-if(typeof a=="string"){if(b)throw A.b("Cannot compute signature for static tearoff.")
-return function(d,e){return function(){return e(this,d)}}(a,A.ly)}throw A.b("Error in functionType of tearoff")},
-lB(a,b,c,d){var s=A.jO
-switch(b?-1:a){case 0:return function(e,f){return function(){return f(this)[e]()}}(c,s)
-case 1:return function(e,f){return function(g){return f(this)[e](g)}}(c,s)
-case 2:return function(e,f){return function(g,h){return f(this)[e](g,h)}}(c,s)
-case 3:return function(e,f){return function(g,h,i){return f(this)[e](g,h,i)}}(c,s)
-case 4:return function(e,f){return function(g,h,i,j){return f(this)[e](g,h,i,j)}}(c,s)
-case 5:return function(e,f){return function(g,h,i,j,k){return f(this)[e](g,h,i,j,k)}}(c,s)
-default:return function(e,f){return function(){return e.apply(f(this),arguments)}}(d,s)}},
-jP(a,b,c,d){if(c)return A.lD(a,b,d)
-return A.lB(b.length,d,a,b)},
-lC(a,b,c,d){var s=A.jO,r=A.lz
-switch(b?-1:a){case 0:throw A.b(new A.em("Intercepted function with no arguments."))
-case 1:return function(e,f,g){return function(){return f(this)[e](g(this))}}(c,r,s)
-case 2:return function(e,f,g){return function(h){return f(this)[e](g(this),h)}}(c,r,s)
-case 3:return function(e,f,g){return function(h,i){return f(this)[e](g(this),h,i)}}(c,r,s)
-case 4:return function(e,f,g){return function(h,i,j){return f(this)[e](g(this),h,i,j)}}(c,r,s)
-case 5:return function(e,f,g){return function(h,i,j,k){return f(this)[e](g(this),h,i,j,k)}}(c,r,s)
-case 6:return function(e,f,g){return function(h,i,j,k,l){return f(this)[e](g(this),h,i,j,k,l)}}(c,r,s)
-default:return function(e,f,g){return function(){var q=[g(this)]
-Array.prototype.push.apply(q,arguments)
-return e.apply(f(this),q)}}(d,r,s)}},
-lD(a,b,c){var s,r
-if($.jM==null)$.jM=A.jL("interceptor")
-if($.jN==null)$.jN=A.jL("receiver")
-s=b.length
-r=A.lC(s,c,a,b)
-return r},
-jv(a){return A.lE(a)},
-ly(a,b){return A.dh(v.typeUniverse,A.bj(a.a),b)},
-jO(a){return a.a},
-lz(a){return a.b},
-jL(a){var s,r,q,p=new A.bI("receiver","interceptor"),o=Object.getOwnPropertyNames(p)
-o.$flags=1
-s=o
-for(o=s.length,r=0;r<o;++r){q=s[r]
-if(p[q]===a)return q}throw A.b(A.r("Field name "+a+" not found.",null))},
-l6(a){return v.getIsolateTag(a)},
-lc(){return v.G},
-op(a){var s,r,q,p,o,n=A.aH($.l8.$1(a)),m=$.iE[n]
-if(m!=null){Object.defineProperty(a,v.dispatchPropertyName,{value:m,enumerable:false,writable:true,configurable:true})
-return m.i}s=$.iJ[n]
-if(s!=null)return s
-r=v.interceptorsByTag[n]
-if(r==null){q=A.bD($.l3.$2(a,n))
-if(q!=null){m=$.iE[q]
-if(m!=null){Object.defineProperty(a,v.dispatchPropertyName,{value:m,enumerable:false,writable:true,configurable:true})
-return m.i}s=$.iJ[q]
-if(s!=null)return s
-r=v.interceptorsByTag[q]
-n=q}}if(r==null)return null
-s=r.prototype
-p=n[0]
-if(p==="!"){m=A.iO(s)
-$.iE[n]=m
-Object.defineProperty(a,v.dispatchPropertyName,{value:m,enumerable:false,writable:true,configurable:true})
-return m.i}if(p==="~"){$.iJ[n]=s
-return s}if(p==="-"){o=A.iO(s)
-Object.defineProperty(Object.getPrototypeOf(a),v.dispatchPropertyName,{value:o,enumerable:false,writable:true,configurable:true})
-return o.i}if(p==="+")return A.la(a,s)
-if(p==="*")throw A.b(A.ke(n))
-if(v.leafTags[n]===true){o=A.iO(s)
-Object.defineProperty(Object.getPrototypeOf(a),v.dispatchPropertyName,{value:o,enumerable:false,writable:true,configurable:true})
-return o.i}else return A.la(a,s)},
-la(a,b){var s=Object.getPrototypeOf(a)
-Object.defineProperty(s,v.dispatchPropertyName,{value:J.jB(b,s,null,null),enumerable:false,writable:true,configurable:true})
-return b},
-iO(a){return J.jB(a,!1,null,!!a.$iag)},
-or(a,b,c){var s=b.prototype
-if(v.leafTags[a]===true)return A.iO(s)
-else return J.jB(s,c,null,null)},
-ok(){if(!0===$.jz)return
-$.jz=!0
-A.ol()},
-ol(){var s,r,q,p,o,n,m,l
-$.iE=Object.create(null)
-$.iJ=Object.create(null)
-A.oj()
-s=v.interceptorsByTag
-r=Object.getOwnPropertyNames(s)
-if(typeof window!="undefined"){window
-q=function(){}
-for(p=0;p<r.length;++p){o=r[p]
-n=$.lb.$1(o)
-if(n!=null){m=A.or(o,s[o],n)
-if(m!=null){Object.defineProperty(n,v.dispatchPropertyName,{value:m,enumerable:false,writable:true,configurable:true})
-q.prototype=n}}}}for(p=0;p<r.length;++p){o=r[p]
-if(/^[A-Za-z_]/.test(o)){l=s[o]
-s["!"+o]=l
-s["~"+o]=l
-s["-"+o]=l
-s["+"+o]=l
-s["*"+o]=l}}},
-oj(){var s,r,q,p,o,n,m=B.aH()
-m=A.c7(B.aI,A.c7(B.aJ,A.c7(B.a2,A.c7(B.a2,A.c7(B.aK,A.c7(B.aL,A.c7(B.aM(B.a1),m)))))))
-if(typeof dartNativeDispatchHooksTransformer!="undefined"){s=dartNativeDispatchHooksTransformer
-if(typeof s=="function")s=[s]
-if(Array.isArray(s))for(r=0;r<s.length;++r){q=s[r]
-if(typeof q=="function")m=q(m)||m}}p=m.getTag
-o=m.getUnknownTag
-n=m.prototypeForTag
-$.l8=new A.iG(p)
-$.l3=new A.iH(o)
-$.lb=new A.iI(n)},
-c7(a,b){return a(b)||b},
-oa(a,b){var s=b.length,r=v.rttc[""+s+";"+a]
-if(r==null)return null
-if(s===0)return r
-if(s===r.length)return r.apply(null,b)
-return r(b)},
-ox(a,b,c){var s=a.indexOf(b,c)
-return s>=0},
-ot(a){if(/[[\]{}()*+?.\\^$|]/.test(a))return a.replace(/[[\]{}()*+?.\\^$|]/g,"\\$&")
-return a},
-d9:function d9(a,b){this.a=a
-this.b=b},
-da:function da(a,b){this.a=a
-this.b=b},
-cm:function cm(a,b){this.a=a
-this.$ti=b},
-cl:function cl(){},
-K:function K(a,b,c){this.a=a
-this.b=b
-this.$ti=c},
-by:function by(a,b){this.a=a
-this.$ti=b},
-bz:function bz(a,b,c){var _=this
-_.a=a
-_.b=b
-_.c=0
-_.d=null
-_.$ti=c},
-cn:function cn(){},
-aM:function aM(a,b,c){this.a=a
-this.b=b
-this.$ti=c},
-cT:function cT(){},
-hv:function hv(a,b,c,d,e,f){var _=this
-_.a=a
-_.b=b
-_.c=c
-_.d=d
-_.e=e
-_.f=f},
-cL:function cL(){},
-e_:function e_(a,b,c){this.a=a
-this.b=b
-this.c=c},
-eA:function eA(a){this.a=a},
-h3:function h3(a){this.a=a},
-cq:function cq(a,b){this.a=a
-this.b=b},
-dc:function dc(a){this.a=a
-this.b=null},
-b8:function b8(){},
-dF:function dF(){},
-dG:function dG(){},
-ew:function ew(){},
-et:function et(){},
-bI:function bI(a,b){this.a=a
-this.b=b},
-em:function em(a){this.a=a},
-aQ:function aQ(a){var _=this
-_.a=0
-_.f=_.e=_.d=_.c=_.b=null
-_.r=0
-_.$ti=a},
-fT:function fT(a,b){var _=this
-_.a=a
-_.b=b
-_.d=_.c=null},
-bp:function bp(a,b){this.a=a
-this.$ti=b},
-cB:function cB(a,b,c,d){var _=this
-_.a=a
-_.b=b
-_.c=c
-_.d=null
-_.$ti=d},
-aT:function aT(a,b){this.a=a
-this.$ti=b},
-aS:function aS(a,b,c,d){var _=this
-_.a=a
-_.b=b
-_.c=c
-_.d=null
-_.$ti=d},
-aR:function aR(a,b){this.a=a
-this.$ti=b},
-cA:function cA(a,b,c,d){var _=this
-_.a=a
-_.b=b
-_.c=c
-_.d=null
-_.$ti=d},
-iG:function iG(a){this.a=a},
-iH:function iH(a){this.a=a},
-iI:function iI(a){this.a=a},
-bh:function bh(){},
-bC:function bC(){},
-x(a){return a},
-m1(a){return new Uint8Array(a)},
-e9(a){return new Uint8Array(A.x(a))},
-b3(a,b,c){if(a>>>0!==a||a>=c)throw A.b(A.iD(b,a))},
-bS:function bS(){},
-cI:function cI(){},
-e2:function e2(){},
-Y:function Y(){},
-cG:function cG(){},
-cH:function cH(){},
-cF:function cF(){},
-e3:function e3(){},
-e4:function e4(){},
-e5:function e5(){},
-e6:function e6(){},
-e7:function e7(){},
-e8:function e8(){},
-cJ:function cJ(){},
-cK:function cK(){},
-d5:function d5(){},
-d6:function d6(){},
-d7:function d7(){},
-d8:function d8(){},
-jb(a,b){var s=b.c
-return s==null?b.c=A.df(a,"bn",[b.x]):s},
-k8(a){var s=a.w
-if(s===6||s===7)return A.k8(a.x)
-return s===11||s===12},
-mg(a){return a.as},
-ca(a){return A.i5(v.typeUniverse,a,!1)},
-bE(a1,a2,a3,a4){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0=a2.w
-switch(a0){case 5:case 1:case 2:case 3:case 4:return a2
-case 6:s=a2.x
-r=A.bE(a1,s,a3,a4)
-if(r===s)return a2
-return A.kC(a1,r,!0)
-case 7:s=a2.x
-r=A.bE(a1,s,a3,a4)
-if(r===s)return a2
-return A.kB(a1,r,!0)
-case 8:q=a2.y
-p=A.c6(a1,q,a3,a4)
-if(p===q)return a2
-return A.df(a1,a2.x,p)
-case 9:o=a2.x
-n=A.bE(a1,o,a3,a4)
-m=a2.y
-l=A.c6(a1,m,a3,a4)
-if(n===o&&l===m)return a2
-return A.jj(a1,n,l)
-case 10:k=a2.x
-j=a2.y
-i=A.c6(a1,j,a3,a4)
-if(i===j)return a2
-return A.kD(a1,k,i)
-case 11:h=a2.x
-g=A.bE(a1,h,a3,a4)
-f=a2.y
-e=A.o_(a1,f,a3,a4)
-if(g===h&&e===f)return a2
-return A.kA(a1,g,e)
-case 12:d=a2.y
-a4+=d.length
-c=A.c6(a1,d,a3,a4)
-o=a2.x
-n=A.bE(a1,o,a3,a4)
-if(c===d&&n===o)return a2
-return A.jk(a1,n,c,!0)
-case 13:b=a2.x
-if(b<a4)return a2
-a=a3[b-a4]
-if(a==null)return a2
-return a
-default:throw A.b(A.dA("Attempted to substitute unexpected RTI kind "+a0))}},
-c6(a,b,c,d){var s,r,q,p,o=b.length,n=A.i9(o)
-for(s=!1,r=0;r<o;++r){q=b[r]
-p=A.bE(a,q,c,d)
-if(p!==q)s=!0
-n[r]=p}return s?n:b},
-o0(a,b,c,d){var s,r,q,p,o,n,m=b.length,l=A.i9(m)
-for(s=!1,r=0;r<m;r+=3){q=b[r]
-p=b[r+1]
-o=b[r+2]
-n=A.bE(a,o,c,d)
-if(n!==o)s=!0
-l.splice(r,3,q,p,n)}return s?l:b},
-o_(a,b,c,d){var s,r=b.a,q=A.c6(a,r,c,d),p=b.b,o=A.c6(a,p,c,d),n=b.c,m=A.o0(a,n,c,d)
-if(q===r&&o===p&&m===n)return b
-s=new A.eW()
-s.a=q
-s.b=o
-s.c=m
-return s},
-d(a,b){a[v.arrayRti]=b
-return a},
-jw(a){var s=a.$S
-if(s!=null){if(typeof s=="number")return A.oh(s)
-return a.$S()}return null},
-om(a,b){var s
-if(A.k8(b))if(a instanceof A.b8){s=A.jw(a)
-if(s!=null)return s}return A.bj(a)},
-bj(a){if(a instanceof A.v)return A.q(a)
-if(Array.isArray(a))return A.O(a)
-return A.jp(J.bF(a))},
-O(a){var s=a[v.arrayRti],r=t.p
-if(s==null)return r
-if(s.constructor!==r.constructor)return r
-return s},
-q(a){var s=a.$ti
-return s!=null?s:A.jp(a)},
-jp(a){var s=a.constructor,r=s.$ccache
-if(r!=null)return r
-return A.nA(a,s)},
-nA(a,b){var s=a instanceof A.b8?Object.getPrototypeOf(Object.getPrototypeOf(a)).constructor:b,r=A.mW(v.typeUniverse,s.name)
-b.$ccache=r
-return r},
-oh(a){var s,r=v.types,q=r[a]
-if(typeof q=="string"){s=A.i5(v.typeUniverse,q,!1)
-r[a]=s
-return s}return q},
-jy(a){return A.aI(A.q(a))},
-jt(a){var s
-if(a instanceof A.bh)return a.bB()
-s=a instanceof A.b8?A.jw(a):null
-if(s!=null)return s
-if(t.dm.b(a))return J.dy(a).a
-if(Array.isArray(a))return A.O(a)
-return A.bj(a)},
-aI(a){var s=a.r
-return s==null?a.r=new A.i4(a):s},
-oc(a,b){var s,r,q=b,p=q.length
-if(p===0)return t.bQ
-if(0>=p)return A.h(q,0)
-s=A.dh(v.typeUniverse,A.jt(q[0]),"@<0>")
-for(r=1;r<p;++r){if(!(r<q.length))return A.h(q,r)
-s=A.kE(v.typeUniverse,s,A.jt(q[r]))}return A.dh(v.typeUniverse,s,a)},
-aq(a){return A.aI(A.i5(v.typeUniverse,a,!1))},
-nz(a){var s=this
-s.b=A.nY(s)
-return s.b(a)},
-nY(a){var s,r,q,p,o
-if(a===t.K)return A.nK
-if(A.bG(a))return A.nO
-s=a.w
-if(s===6)return A.nx
-if(s===1)return A.kX
-if(s===7)return A.nF
-r=A.nX(a)
-if(r!=null)return r
-if(s===8){q=a.x
-if(a.y.every(A.bG)){a.f="$i"+q
-if(q==="u")return A.nI
-if(a===t.m)return A.nH
-return A.nN}}else if(s===10){p=A.oa(a.x,a.y)
-o=p==null?A.kX:p
-return o==null?A.dr(o):o}return A.nv},
-nX(a){if(a.w===8){if(a===t.S)return A.kV
-if(a===t.i||a===t.o)return A.nJ
-if(a===t.N)return A.nM
-if(a===t.y)return A.jq}return null},
-ny(a){var s=this,r=A.nu
-if(A.bG(s))r=A.nk
-else if(s===t.K)r=A.dr
-else if(A.cd(s)){r=A.nw
-if(s===t.h6)r=A.nj
-else if(s===t.dk)r=A.bD
-else if(s===t.fQ)r=A.nh
-else if(s===t.cg)r=A.kO
-else if(s===t.cD)r=A.ni
-else if(s===t.an)r=A.a1}else if(s===t.S)r=A.a
-else if(s===t.N)r=A.aH
-else if(s===t.y)r=A.ng
-else if(s===t.o)r=A.jo
-else if(s===t.i)r=A.ib
-else if(s===t.m)r=A.a0
-s.a=r
-return s.a(a)},
-nv(a){var s=this
-if(a==null)return A.cd(s)
-return A.oo(v.typeUniverse,A.om(a,s),s)},
-nx(a){if(a==null)return!0
-return this.x.b(a)},
-nN(a){var s,r=this
-if(a==null)return A.cd(r)
-s=r.f
-if(a instanceof A.v)return!!a[s]
-return!!J.bF(a)[s]},
-nI(a){var s,r=this
-if(a==null)return A.cd(r)
-if(typeof a!="object")return!1
-if(Array.isArray(a))return!0
-s=r.f
-if(a instanceof A.v)return!!a[s]
-return!!J.bF(a)[s]},
-nH(a){var s=this
-if(a==null)return!1
-if(typeof a=="object"){if(a instanceof A.v)return!!a[s.f]
-return!0}if(typeof a=="function")return!0
-return!1},
-kW(a){if(typeof a=="object"){if(a instanceof A.v)return t.m.b(a)
-return!0}if(typeof a=="function")return!0
-return!1},
-nu(a){var s=this
-if(a==null){if(A.cd(s))return a}else if(s.b(a))return a
-throw A.P(A.kQ(a,s),new Error())},
-nw(a){var s=this
-if(a==null||s.b(a))return a
-throw A.P(A.kQ(a,s),new Error())},
-kQ(a,b){return new A.dd("TypeError: "+A.ks(a,A.aj(b,null)))},
-ks(a,b){return A.fw(a)+": type '"+A.aj(A.jt(a),null)+"' is not a subtype of type '"+b+"'"},
-ap(a,b){return new A.dd("TypeError: "+A.ks(a,b))},
-nF(a){var s=this
-return s.x.b(a)||A.jb(v.typeUniverse,s).b(a)},
-nK(a){return a!=null},
-dr(a){if(a!=null)return a
-throw A.P(A.ap(a,"Object"),new Error())},
-nO(a){return!0},
-nk(a){return a},
-kX(a){return!1},
-jq(a){return!0===a||!1===a},
-ng(a){if(!0===a)return!0
-if(!1===a)return!1
-throw A.P(A.ap(a,"bool"),new Error())},
-nh(a){if(!0===a)return!0
-if(!1===a)return!1
-if(a==null)return a
-throw A.P(A.ap(a,"bool?"),new Error())},
-ib(a){if(typeof a=="number")return a
-throw A.P(A.ap(a,"double"),new Error())},
-ni(a){if(typeof a=="number")return a
-if(a==null)return a
-throw A.P(A.ap(a,"double?"),new Error())},
-kV(a){return typeof a=="number"&&Math.floor(a)===a},
-a(a){if(typeof a=="number"&&Math.floor(a)===a)return a
-throw A.P(A.ap(a,"int"),new Error())},
-nj(a){if(typeof a=="number"&&Math.floor(a)===a)return a
-if(a==null)return a
-throw A.P(A.ap(a,"int?"),new Error())},
-nJ(a){return typeof a=="number"},
-jo(a){if(typeof a=="number")return a
-throw A.P(A.ap(a,"num"),new Error())},
-kO(a){if(typeof a=="number")return a
-if(a==null)return a
-throw A.P(A.ap(a,"num?"),new Error())},
-nM(a){return typeof a=="string"},
-aH(a){if(typeof a=="string")return a
-throw A.P(A.ap(a,"String"),new Error())},
-bD(a){if(typeof a=="string")return a
-if(a==null)return a
-throw A.P(A.ap(a,"String?"),new Error())},
-a0(a){if(A.kW(a))return a
-throw A.P(A.ap(a,"JSObject"),new Error())},
-a1(a){if(a==null)return a
-if(A.kW(a))return a
-throw A.P(A.ap(a,"JSObject?"),new Error())},
-l_(a,b){var s,r,q
-for(s="",r="",q=0;q<a.length;++q,r=", ")s+=r+A.aj(a[q],b)
-return s},
-nS(a,b){var s,r,q,p,o,n,m=a.x,l=a.y
-if(""===m)return"("+A.l_(l,b)+")"
-s=l.length
-r=m.split(",")
-q=r.length-s
-for(p="(",o="",n=0;n<s;++n,o=", "){p+=o
-if(q===0)p+="{"
-p+=A.aj(l[n],b)
-if(q>=0)p+=" "+r[q];++q}return p+"})"},
-kS(a3,a4,a5){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0,a1=", ",a2=null
-if(a5!=null){s=a5.length
-if(a4==null)a4=A.d([],t.s)
-else a2=a4.length
-r=a4.length
-for(q=s;q>0;--q)B.a.j(a4,"T"+(r+q))
-for(p=t.X,o="<",n="",q=0;q<s;++q,n=a1){m=a4.length
-l=m-1-q
-if(!(l>=0))return A.h(a4,l)
-o=o+n+a4[l]
-k=a5[q]
-j=k.w
-if(!(j===2||j===3||j===4||j===5||k===p))o+=" extends "+A.aj(k,a4)}o+=">"}else o=""
-p=a3.x
-i=a3.y
-h=i.a
-g=h.length
-f=i.b
-e=f.length
-d=i.c
-c=d.length
-b=A.aj(p,a4)
-for(a="",a0="",q=0;q<g;++q,a0=a1)a+=a0+A.aj(h[q],a4)
-if(e>0){a+=a0+"["
-for(a0="",q=0;q<e;++q,a0=a1)a+=a0+A.aj(f[q],a4)
-a+="]"}if(c>0){a+=a0+"{"
-for(a0="",q=0;q<c;q+=3,a0=a1){a+=a0
-if(d[q+1])a+="required "
-a+=A.aj(d[q+2],a4)+" "+d[q]}a+="}"}if(a2!=null){a4.toString
-a4.length=a2}return o+"("+a+") => "+b},
-aj(a,b){var s,r,q,p,o,n,m,l=a.w
-if(l===5)return"erased"
-if(l===2)return"dynamic"
-if(l===3)return"void"
-if(l===1)return"Never"
-if(l===4)return"any"
-if(l===6){s=a.x
-r=A.aj(s,b)
-q=s.w
-return(q===11||q===12?"("+r+")":r)+"?"}if(l===7)return"FutureOr<"+A.aj(a.x,b)+">"
-if(l===8){p=A.o1(a.x)
-o=a.y
-return o.length>0?p+("<"+A.l_(o,b)+">"):p}if(l===10)return A.nS(a,b)
-if(l===11)return A.kS(a,b,null)
-if(l===12)return A.kS(a.x,b,a.y)
-if(l===13){n=a.x
-m=b.length
-n=m-1-n
-if(!(n>=0&&n<m))return A.h(b,n)
-return b[n]}return"?"},
-o1(a){var s=v.mangledGlobalNames[a]
-if(s!=null)return s
-return"minified:"+a},
-mX(a,b){var s=a.tR[b]
-while(typeof s=="string")s=a.tR[s]
-return s},
-mW(a,b){var s,r,q,p,o,n=a.eT,m=n[b]
-if(m==null)return A.i5(a,b,!1)
-else if(typeof m=="number"){s=m
-r=A.dg(a,5,"#")
-q=A.i9(s)
-for(p=0;p<s;++p)q[p]=r
-o=A.df(a,b,q)
-n[b]=o
-return o}else return m},
-mV(a,b){return A.kM(a.tR,b)},
-mU(a,b){return A.kM(a.eT,b)},
-i5(a,b,c){var s,r=a.eC,q=r.get(b)
-if(q!=null)return q
-s=A.kx(A.kv(a,null,b,!1))
-r.set(b,s)
-return s},
-dh(a,b,c){var s,r,q=b.z
-if(q==null)q=b.z=new Map()
-s=q.get(c)
-if(s!=null)return s
-r=A.kx(A.kv(a,b,c,!0))
-q.set(c,r)
-return r},
-kE(a,b,c){var s,r,q,p=b.Q
-if(p==null)p=b.Q=new Map()
-s=c.as
-r=p.get(s)
-if(r!=null)return r
-q=A.jj(a,b,c.w===9?c.y:[c])
-p.set(s,q)
-return q},
-bi(a,b){b.a=A.ny
-b.b=A.nz
-return b},
-dg(a,b,c){var s,r,q=a.eC.get(c)
-if(q!=null)return q
-s=new A.av(null,null)
-s.w=b
-s.as=c
-r=A.bi(a,s)
-a.eC.set(c,r)
-return r},
-kC(a,b,c){var s,r=b.as+"?",q=a.eC.get(r)
-if(q!=null)return q
-s=A.mS(a,b,r,c)
-a.eC.set(r,s)
-return s},
-mS(a,b,c,d){var s,r,q
-if(d){s=b.w
-r=!0
-if(!A.bG(b))if(!(b===t.P||b===t.T))if(s!==6)r=s===7&&A.cd(b.x)
-if(r)return b
-else if(s===1)return t.P}q=new A.av(null,null)
-q.w=6
-q.x=b
-q.as=c
-return A.bi(a,q)},
-kB(a,b,c){var s,r=b.as+"/",q=a.eC.get(r)
-if(q!=null)return q
-s=A.mQ(a,b,r,c)
-a.eC.set(r,s)
-return s},
-mQ(a,b,c,d){var s,r
-if(d){s=b.w
-if(A.bG(b)||b===t.K)return b
-else if(s===1)return A.df(a,"bn",[b])
-else if(b===t.P||b===t.T)return t.eH}r=new A.av(null,null)
-r.w=7
-r.x=b
-r.as=c
-return A.bi(a,r)},
-mT(a,b){var s,r,q=""+b+"^",p=a.eC.get(q)
-if(p!=null)return p
-s=new A.av(null,null)
-s.w=13
-s.x=b
-s.as=q
-r=A.bi(a,s)
-a.eC.set(q,r)
-return r},
-de(a){var s,r,q,p=a.length
-for(s="",r="",q=0;q<p;++q,r=",")s+=r+a[q].as
-return s},
-mP(a){var s,r,q,p,o,n=a.length
-for(s="",r="",q=0;q<n;q+=3,r=","){p=a[q]
-o=a[q+1]?"!":":"
-s+=r+p+o+a[q+2].as}return s},
-df(a,b,c){var s,r,q,p=b
-if(c.length>0)p+="<"+A.de(c)+">"
-s=a.eC.get(p)
-if(s!=null)return s
-r=new A.av(null,null)
-r.w=8
-r.x=b
-r.y=c
-if(c.length>0)r.c=c[0]
-r.as=p
-q=A.bi(a,r)
-a.eC.set(p,q)
-return q},
-jj(a,b,c){var s,r,q,p,o,n
-if(b.w===9){s=b.x
-r=b.y.concat(c)}else{r=c
-s=b}q=s.as+(";<"+A.de(r)+">")
-p=a.eC.get(q)
-if(p!=null)return p
-o=new A.av(null,null)
-o.w=9
-o.x=s
-o.y=r
-o.as=q
-n=A.bi(a,o)
-a.eC.set(q,n)
-return n},
-kD(a,b,c){var s,r,q="+"+(b+"("+A.de(c)+")"),p=a.eC.get(q)
-if(p!=null)return p
-s=new A.av(null,null)
-s.w=10
-s.x=b
-s.y=c
-s.as=q
-r=A.bi(a,s)
-a.eC.set(q,r)
-return r},
-kA(a,b,c){var s,r,q,p,o,n=b.as,m=c.a,l=m.length,k=c.b,j=k.length,i=c.c,h=i.length,g="("+A.de(m)
-if(j>0){s=l>0?",":""
-g+=s+"["+A.de(k)+"]"}if(h>0){s=l>0?",":""
-g+=s+"{"+A.mP(i)+"}"}r=n+(g+")")
-q=a.eC.get(r)
-if(q!=null)return q
-p=new A.av(null,null)
-p.w=11
-p.x=b
-p.y=c
-p.as=r
-o=A.bi(a,p)
-a.eC.set(r,o)
-return o},
-jk(a,b,c,d){var s,r=b.as+("<"+A.de(c)+">"),q=a.eC.get(r)
-if(q!=null)return q
-s=A.mR(a,b,c,r,d)
-a.eC.set(r,s)
-return s},
-mR(a,b,c,d,e){var s,r,q,p,o,n,m,l
-if(e){s=c.length
-r=A.i9(s)
-for(q=0,p=0;p<s;++p){o=c[p]
-if(o.w===1){r[p]=o;++q}}if(q>0){n=A.bE(a,b,r,0)
-m=A.c6(a,c,r,0)
-return A.jk(a,n,m,c!==m)}}l=new A.av(null,null)
-l.w=12
-l.x=b
-l.y=c
-l.as=d
-return A.bi(a,l)},
-kv(a,b,c,d){return{u:a,e:b,r:c,s:[],p:0,n:d}},
-kx(a){var s,r,q,p,o,n,m,l=a.r,k=a.s
-for(s=l.length,r=0;r<s;){q=l.charCodeAt(r)
-if(q>=48&&q<=57)r=A.mJ(r+1,q,l,k)
-else if((((q|32)>>>0)-97&65535)<26||q===95||q===36||q===124)r=A.kw(a,r,l,k,!1)
-else if(q===46)r=A.kw(a,r,l,k,!0)
-else{++r
-switch(q){case 44:break
-case 58:k.push(!1)
-break
-case 33:k.push(!0)
-break
-case 59:k.push(A.bB(a.u,a.e,k.pop()))
-break
-case 94:k.push(A.mT(a.u,k.pop()))
-break
-case 35:k.push(A.dg(a.u,5,"#"))
-break
-case 64:k.push(A.dg(a.u,2,"@"))
-break
-case 126:k.push(A.dg(a.u,3,"~"))
-break
-case 60:k.push(a.p)
-a.p=k.length
-break
-case 62:A.mL(a,k)
-break
-case 38:A.mK(a,k)
-break
-case 63:p=a.u
-k.push(A.kC(p,A.bB(p,a.e,k.pop()),a.n))
-break
-case 47:p=a.u
-k.push(A.kB(p,A.bB(p,a.e,k.pop()),a.n))
-break
-case 40:k.push(-3)
-k.push(a.p)
-a.p=k.length
-break
-case 41:A.mI(a,k)
-break
-case 91:k.push(a.p)
-a.p=k.length
-break
-case 93:o=k.splice(a.p)
-A.ky(a.u,a.e,o)
-a.p=k.pop()
-k.push(o)
-k.push(-1)
-break
-case 123:k.push(a.p)
-a.p=k.length
-break
-case 125:o=k.splice(a.p)
-A.mN(a.u,a.e,o)
-a.p=k.pop()
-k.push(o)
-k.push(-2)
-break
-case 43:n=l.indexOf("(",r)
-k.push(l.substring(r,n))
-k.push(-4)
-k.push(a.p)
-a.p=k.length
-r=n+1
-break
-default:throw"Bad character "+q}}}m=k.pop()
-return A.bB(a.u,a.e,m)},
-mJ(a,b,c,d){var s,r,q=b-48
-for(s=c.length;a<s;++a){r=c.charCodeAt(a)
-if(!(r>=48&&r<=57))break
-q=q*10+(r-48)}d.push(q)
-return a},
-kw(a,b,c,d,e){var s,r,q,p,o,n,m=b+1
-for(s=c.length;m<s;++m){r=c.charCodeAt(m)
-if(r===46){if(e)break
-e=!0}else{if(!((((r|32)>>>0)-97&65535)<26||r===95||r===36||r===124))q=r>=48&&r<=57
-else q=!0
-if(!q)break}}p=c.substring(b,m)
-if(e){s=a.u
-o=a.e
-if(o.w===9)o=o.x
-n=A.mX(s,o.x)[p]
-if(n==null)A.k('No "'+p+'" in "'+A.mg(o)+'"')
-d.push(A.dh(s,o,n))}else d.push(p)
-return m},
-mL(a,b){var s,r=a.u,q=A.ku(a,b),p=b.pop()
-if(typeof p=="string")b.push(A.df(r,p,q))
-else{s=A.bB(r,a.e,p)
-switch(s.w){case 11:b.push(A.jk(r,s,q,a.n))
-break
-default:b.push(A.jj(r,s,q))
-break}}},
-mI(a,b){var s,r,q,p=a.u,o=b.pop(),n=null,m=null
-if(typeof o=="number")switch(o){case-1:n=b.pop()
-break
-case-2:m=b.pop()
-break
-default:b.push(o)
-break}else b.push(o)
-s=A.ku(a,b)
-o=b.pop()
-switch(o){case-3:o=b.pop()
-if(n==null)n=p.sEA
-if(m==null)m=p.sEA
-r=A.bB(p,a.e,o)
-q=new A.eW()
-q.a=s
-q.b=n
-q.c=m
-b.push(A.kA(p,r,q))
-return
-case-4:b.push(A.kD(p,b.pop(),s))
-return
-default:throw A.b(A.dA("Unexpected state under `()`: "+A.p(o)))}},
-mK(a,b){var s=b.pop()
-if(0===s){b.push(A.dg(a.u,1,"0&"))
-return}if(1===s){b.push(A.dg(a.u,4,"1&"))
-return}throw A.b(A.dA("Unexpected extended operation "+A.p(s)))},
-ku(a,b){var s=b.splice(a.p)
-A.ky(a.u,a.e,s)
-a.p=b.pop()
-return s},
-bB(a,b,c){if(typeof c=="string")return A.df(a,c,a.sEA)
-else if(typeof c=="number"){b.toString
-return A.mM(a,b,c)}else return c},
-ky(a,b,c){var s,r=c.length
-for(s=0;s<r;++s)c[s]=A.bB(a,b,c[s])},
-mN(a,b,c){var s,r=c.length
-for(s=2;s<r;s+=3)c[s]=A.bB(a,b,c[s])},
-mM(a,b,c){var s,r,q=b.w
-if(q===9){if(c===0)return b.x
-s=b.y
-r=s.length
-if(c<=r)return s[c-1]
-c-=r
-b=b.x
-q=b.w}else if(c===0)return b
-if(q!==8)throw A.b(A.dA("Indexed base must be an interface type"))
-s=b.y
-if(c<=s.length)return s[c-1]
-throw A.b(A.dA("Bad index "+c+" for "+b.i(0)))},
-oo(a,b,c){var s,r=b.d
-if(r==null)r=b.d=new Map()
-s=r.get(c)
-if(s==null){s=A.R(a,b,null,c,null)
-r.set(c,s)}return s},
-R(a,b,c,d,e){var s,r,q,p,o,n,m,l,k,j,i
-if(b===d)return!0
-if(A.bG(d))return!0
-s=b.w
-if(s===4)return!0
-if(A.bG(b))return!1
-if(b.w===1)return!0
-r=s===13
-if(r)if(A.R(a,c[b.x],c,d,e))return!0
-q=d.w
-p=t.P
-if(b===p||b===t.T){if(q===7)return A.R(a,b,c,d.x,e)
-return d===p||d===t.T||q===6}if(d===t.K){if(s===7)return A.R(a,b.x,c,d,e)
-return s!==6}if(s===7){if(!A.R(a,b.x,c,d,e))return!1
-return A.R(a,A.jb(a,b),c,d,e)}if(s===6)return A.R(a,p,c,d,e)&&A.R(a,b.x,c,d,e)
-if(q===7){if(A.R(a,b,c,d.x,e))return!0
-return A.R(a,b,c,A.jb(a,d),e)}if(q===6)return A.R(a,b,c,p,e)||A.R(a,b,c,d.x,e)
-if(r)return!1
-p=s!==11
-if((!p||s===12)&&d===t.Z)return!0
-o=s===10
-if(o&&d===t.gT)return!0
-if(q===12){if(b===t.q)return!0
-if(s!==12)return!1
-n=b.y
-m=d.y
-l=n.length
-if(l!==m.length)return!1
-c=c==null?n:n.concat(c)
-e=e==null?m:m.concat(e)
-for(k=0;k<l;++k){j=n[k]
-i=m[k]
-if(!A.R(a,j,c,i,e)||!A.R(a,i,e,j,c))return!1}return A.kU(a,b.x,c,d.x,e)}if(q===11){if(b===t.q)return!0
-if(p)return!1
-return A.kU(a,b,c,d,e)}if(s===8){if(q!==8)return!1
-return A.nG(a,b,c,d,e)}if(o&&q===10)return A.nL(a,b,c,d,e)
-return!1},
-kU(a3,a4,a5,a6,a7){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0,a1,a2
-if(!A.R(a3,a4.x,a5,a6.x,a7))return!1
-s=a4.y
-r=a6.y
-q=s.a
-p=r.a
-o=q.length
-n=p.length
-if(o>n)return!1
-m=n-o
-l=s.b
-k=r.b
-j=l.length
-i=k.length
-if(o+j<n+i)return!1
-for(h=0;h<o;++h){g=q[h]
-if(!A.R(a3,p[h],a7,g,a5))return!1}for(h=0;h<m;++h){g=l[h]
-if(!A.R(a3,p[o+h],a7,g,a5))return!1}for(h=0;h<i;++h){g=l[m+h]
-if(!A.R(a3,k[h],a7,g,a5))return!1}f=s.c
-e=r.c
-d=f.length
-c=e.length
-for(b=0,a=0;a<c;a+=3){a0=e[a]
-for(;;){if(b>=d)return!1
-a1=f[b]
-b+=3
-if(a0<a1)return!1
-a2=f[b-2]
-if(a1<a0){if(a2)return!1
-continue}g=e[a+1]
-if(a2&&!g)return!1
-g=f[b-1]
-if(!A.R(a3,e[a+2],a7,g,a5))return!1
-break}}while(b<d){if(f[b+1])return!1
-b+=3}return!0},
-nG(a,b,c,d,e){var s,r,q,p,o,n=b.x,m=d.x
-while(n!==m){s=a.tR[n]
-if(s==null)return!1
-if(typeof s=="string"){n=s
-continue}r=s[m]
-if(r==null)return!1
-q=r.length
-p=q>0?new Array(q):v.typeUniverse.sEA
-for(o=0;o<q;++o)p[o]=A.dh(a,b,r[o])
-return A.kN(a,p,null,c,d.y,e)}return A.kN(a,b.y,null,c,d.y,e)},
-kN(a,b,c,d,e,f){var s,r=b.length
-for(s=0;s<r;++s)if(!A.R(a,b[s],d,e[s],f))return!1
-return!0},
-nL(a,b,c,d,e){var s,r=b.y,q=d.y,p=r.length
-if(p!==q.length)return!1
-if(b.x!==d.x)return!1
-for(s=0;s<p;++s)if(!A.R(a,r[s],c,q[s],e))return!1
-return!0},
-cd(a){var s=a.w,r=!0
-if(!(a===t.P||a===t.T))if(!A.bG(a))if(s!==6)r=s===7&&A.cd(a.x)
-return r},
-bG(a){var s=a.w
-return s===2||s===3||s===4||s===5||a===t.X},
-kM(a,b){var s,r,q=Object.keys(b),p=q.length
-for(s=0;s<p;++s){r=q[s]
-a[r]=b[r]}},
-i9(a){return a>0?new Array(a):v.typeUniverse.sEA},
-av:function av(a,b){var _=this
-_.a=a
-_.b=b
-_.r=_.f=_.d=_.c=null
-_.w=0
-_.as=_.Q=_.z=_.y=_.x=null},
-eW:function eW(){this.c=this.b=this.a=null},
-i4:function i4(a){this.a=a},
-eU:function eU(){},
-dd:function dd(a){this.a=a},
-mD(){var s,r,q
-if(self.scheduleImmediate!=null)return A.o4()
-if(self.MutationObserver!=null&&self.document!=null){s={}
-r=self.document.createElement("div")
-q=self.document.createElement("span")
-s.a=null
-new self.MutationObserver(A.c8(new A.hG(s),1)).observe(r,{childList:true})
-return new A.hF(s,r,q)}else if(self.setImmediate!=null)return A.o5()
-return A.o6()},
-mE(a){self.scheduleImmediate(A.c8(new A.hH(t.M.a(a)),0))},
-mF(a){self.setImmediate(A.c8(new A.hI(t.M.a(a)),0))},
-mG(a){t.M.a(a)
-A.mO(0,a)},
-mO(a,b){var s=new A.i2()
-s.cA(a,b)
-return s},
-nQ(a){return new A.eJ(new A.N($.I,a.h("N<0>")),a.h("eJ<0>"))},
-nn(a,b){a.$2(0,null)
-b.b=!0
-return b.a},
-kP(a,b){A.no(a,b)},
-nm(a,b){b.b_(a)},
-nl(a,b){b.b0(A.b5(a),A.cc(a))},
-no(a,b){var s,r,q=new A.ic(b),p=new A.id(b)
-if(a instanceof A.N)a.bP(q,p,t.A)
-else{s=t.A
-if(a instanceof A.N)a.co(q,p,s)
-else{r=new A.N($.I,t.c)
-r.a=8
-r.c=a
-r.bP(q,p,s)}}},
-o3(a){var s=function(b,c){return function(d,e){while(true){try{b(d,e)
-break}catch(r){e=r
-d=c}}}}(a,1)
-return $.I.cn(new A.iz(s),t.H,t.S,t.A)},
-kz(a,b,c){return 0},
-j_(a){var s
-if(t.U.b(a)){s=a.gag()
-if(s!=null)return s}return B.v},
-nB(a,b){if($.I===B.n)return null
-return null},
-nC(a,b){if($.I!==B.n)A.nB(a,b)
-if(b==null)if(t.U.b(a)){b=a.gag()
-if(b==null){A.k6(a,B.v)
-b=B.v}}else b=B.v
-else if(t.U.b(a))A.k6(a,b)
-return new A.al(a,b)},
-jd(a,b,c){var s,r,q,p,o={},n=o.a=a
-for(s=t.c;r=n.a,(r&4)!==0;n=a){a=s.a(n.c)
-o.a=a}if(n===b){s=A.mh()
-b.aN(new A.al(new A.aB(!0,n,null,"Cannot complete a future with itself"),s))
-return}q=b.a&1
-s=n.a=r|q
-if((s&24)===0){p=t.F.a(b.c)
-b.a=b.a&1|4
-b.c=n
-n.bE(p)
-return}if(!c)if(b.c==null)n=(s&16)===0||q!==0
-else n=!1
-else n=!0
-if(n){p=b.aw()
-b.au(o.a)
-A.c1(b,p)
-return}b.a^=2
-A.fh(null,null,b.b,t.M.a(new A.hP(o,b)))},
-c1(a,b){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d={},c=d.a=a
-for(s=t.v,r=t.F;;){q={}
-p=c.a
-o=(p&16)===0
-n=!o
-if(b==null){if(n&&(p&1)===0){m=s.a(c.c)
-A.js(m.a,m.b)}return}q.a=b
-l=b.a
-for(c=b;l!=null;c=l,l=k){c.a=null
-A.c1(d.a,c)
-q.a=l
-k=l.a}p=d.a
-j=p.c
-q.b=n
-q.c=j
-if(o){i=c.c
-i=(i&1)!==0||(i&15)===8}else i=!0
-if(i){h=c.b.b
-if(n){p=p.b===h
-p=!(p||p)}else p=!1
-if(p){s.a(j)
-A.js(j.a,j.b)
-return}g=$.I
-if(g!==h)$.I=h
-else g=null
-c=c.c
-if((c&15)===8)new A.hT(q,d,n).$0()
-else if(o){if((c&1)!==0)new A.hS(q,j).$0()}else if((c&2)!==0)new A.hR(d,q).$0()
-if(g!=null)$.I=g
-c=q.c
-if(c instanceof A.N){p=q.a.$ti
-p=p.h("bn<2>").b(c)||!p.y[1].b(c)}else p=!1
-if(p){f=q.a.b
-if((c.a&24)!==0){e=r.a(f.c)
-f.c=null
-b=f.az(e)
-f.a=c.a&30|f.a&1
-f.c=c.c
-d.a=c
-continue}else A.jd(c,f,!0)
-return}}f=q.a.b
-e=r.a(f.c)
-f.c=null
-b=f.az(e)
-c=q.b
-p=q.c
-if(!c){f.$ti.c.a(p)
-f.a=8
-f.c=p}else{s.a(p)
-f.a=f.a&1|16
-f.c=p}d.a=f
-c=f}},
-nT(a,b){var s
-if(t.d.b(a))return b.cn(a,t.A,t.K,t.l)
-s=t.x
-if(s.b(a))return s.a(a)
-throw A.b(A.aL(a,"onError",u.c))},
-nR(){var s,r
-for(s=$.c5;s!=null;s=$.c5){$.du=null
-r=s.b
-$.c5=r
-if(r==null)$.dt=null
-s.a.$0()}},
-nZ(){$.jr=!0
-try{A.nR()}finally{$.du=null
-$.jr=!1
-if($.c5!=null)$.jI().$1(A.l4())}},
-l1(a){var s=new A.eK(a),r=$.dt
-if(r==null){$.c5=$.dt=s
-if(!$.jr)$.jI().$1(A.l4())}else $.dt=r.b=s},
-nW(a){var s,r,q,p=$.c5
-if(p==null){A.l1(a)
-$.du=$.dt
-return}s=new A.eK(a)
-r=$.du
-if(r==null){s.b=p
-$.c5=$.du=s}else{q=r.b
-s.b=q
-$.du=r.b=s
-if(q==null)$.dt=s}},
-oN(a,b){A.dv(a,"stream",t.K)
-return new A.fa(b.h("fa<0>"))},
-js(a,b){A.nW(new A.iy(a,b))},
-kZ(a,b,c,d,e){var s,r=$.I
-if(r===c)return d.$0()
-$.I=c
-s=r
-try{r=d.$0()
-return r}finally{$.I=s}},
-nV(a,b,c,d,e,f,g){var s,r=$.I
-if(r===c)return d.$1(e)
-$.I=c
-s=r
-try{r=d.$1(e)
-return r}finally{$.I=s}},
-nU(a,b,c,d,e,f,g,h,i){var s,r=$.I
-if(r===c)return d.$2(e,f)
-$.I=c
-s=r
-try{r=d.$2(e,f)
-return r}finally{$.I=s}},
-fh(a,b,c,d){t.M.a(d)
-if(B.n!==c){d=c.dn(d)
-d=d}A.l1(d)},
-hG:function hG(a){this.a=a},
-hF:function hF(a,b,c){this.a=a
-this.b=b
-this.c=c},
-hH:function hH(a){this.a=a},
-hI:function hI(a){this.a=a},
-i2:function i2(){},
-i3:function i3(a,b){this.a=a
-this.b=b},
-eJ:function eJ(a,b){this.a=a
-this.b=!1
-this.$ti=b},
-ic:function ic(a){this.a=a},
-id:function id(a){this.a=a},
-iz:function iz(a){this.a=a},
-aA:function aA(a,b){var _=this
-_.a=a
-_.e=_.d=_.c=_.b=null
-_.$ti=b},
-aG:function aG(a,b){this.a=a
-this.$ti=b},
-al:function al(a,b){this.a=a
-this.b=b},
-eO:function eO(){},
-cZ:function cZ(a,b){this.a=a
-this.$ti=b},
-bw:function bw(a,b,c,d,e){var _=this
-_.a=null
-_.b=a
-_.c=b
-_.d=c
-_.e=d
-_.$ti=e},
-N:function N(a,b){var _=this
-_.a=0
-_.b=a
-_.c=null
-_.$ti=b},
-hM:function hM(a,b){this.a=a
-this.b=b},
-hQ:function hQ(a,b){this.a=a
-this.b=b},
-hP:function hP(a,b){this.a=a
-this.b=b},
-hO:function hO(a,b){this.a=a
-this.b=b},
-hN:function hN(a,b){this.a=a
-this.b=b},
-hT:function hT(a,b,c){this.a=a
-this.b=b
-this.c=c},
-hU:function hU(a,b){this.a=a
-this.b=b},
-hV:function hV(a){this.a=a},
-hS:function hS(a,b){this.a=a
-this.b=b},
-hR:function hR(a,b){this.a=a
-this.b=b},
-eK:function eK(a){this.a=a
-this.b=null},
-fa:function fa(a){this.$ti=a},
-dp:function dp(){},
-f3:function f3(){},
-i_:function i_(a,b){this.a=a
-this.b=b},
-iy:function iy(a,b){this.a=a
-this.b=b},
-kt(a,b){var s=a[b]
-return s===a?null:s},
-jf(a,b,c){if(c==null)a[b]=a
-else a[b]=c},
-je(){var s=Object.create(null)
-A.jf(s,"<non-identifier-key>",s)
-delete s["<non-identifier-key>"]
-return s},
-lW(a,b){return new A.aQ(a.h("@<0>").D(b).h("aQ<1,2>"))},
-lX(a,b,c){return b.h("@<0>").D(c).h("jX<1,2>").a(A.od(a,new A.aQ(b.h("@<0>").D(c).h("aQ<1,2>"))))},
-as(a,b){return new A.aQ(a.h("@<0>").D(b).h("aQ<1,2>"))},
-j4(a){return new A.az(a.h("az<0>"))},
-aC(a){return new A.az(a.h("az<0>"))},
-e0(a,b){return b.h("jY<0>").a(A.oe(a,new A.az(b.h("az<0>"))))},
-jh(){var s=Object.create(null)
-s["<non-identifier-key>"]=s
-delete s["<non-identifier-key>"]
-return s},
-jg(a,b,c){var s=new A.bA(a,b,c.h("bA<0>"))
-s.c=a.e
-return s},
-lY(a,b,c){var s=A.lW(b,c)
-a.al(0,new A.fU(s,b,c))
-return s},
-lZ(a,b){var s,r,q=A.j4(b)
-for(s=a.length,r=0;r<a.length;a.length===s||(0,A.B)(a),++r)q.j(0,b.a(a[r]))
-return q},
-j5(a,b){var s=A.j4(b)
-s.W(0,a)
-return s},
-j7(a){var s,r
-if(A.jA(a))return"{...}"
-s=new A.ab("")
-try{r={}
-B.a.j($.ak,a)
-s.a+="{"
-r.a=!0
-a.al(0,new A.fW(r,s))
-s.a+="}"}finally{if(0>=$.ak.length)return A.h($.ak,-1)
-$.ak.pop()}r=s.a
-return r.charCodeAt(0)==0?r:r},
-mY(){throw A.b(A.b1("Cannot change an unmodifiable set"))},
-d0:function d0(){},
-hX:function hX(a){this.a=a},
-d2:function d2(a){var _=this
-_.a=0
-_.e=_.d=_.c=_.b=null
-_.$ti=a},
-bx:function bx(a,b){this.a=a
-this.$ti=b},
-d1:function d1(a,b,c){var _=this
-_.a=a
-_.b=b
-_.c=0
-_.d=null
-_.$ti=c},
-az:function az(a){var _=this
-_.a=0
-_.f=_.e=_.d=_.c=_.b=null
-_.r=0
-_.$ti=a},
-eY:function eY(a){this.a=a
-this.c=this.b=null},
-bA:function bA(a,b,c){var _=this
-_.a=a
-_.b=b
-_.d=_.c=null
-_.$ti=c},
-fU:function fU(a,b,c){this.a=a
-this.b=b
-this.c=c},
-w:function w(){},
-bq:function bq(){},
-fV:function fV(a){this.a=a},
-fW:function fW(a,b){this.a=a
-this.b=b},
-d3:function d3(a,b){this.a=a
-this.$ti=b},
-d4:function d4(a,b,c){var _=this
-_.a=a
-_.b=b
-_.c=null
-_.$ti=c},
-di:function di(){},
-bQ:function bQ(){},
-bf:function bf(a,b){this.a=a
-this.$ti=b},
-aY:function aY(){},
-db:function db(){},
-fc:function fc(){},
-cX:function cX(a,b){this.a=a
-this.$ti=b},
-c3:function c3(){},
-dj:function dj(){},
-ne(a,b,c){var s,r,q,p,o=c-b
-if(o<=4096)s=$.lu()
-else s=new Uint8Array(o)
-for(r=J.cb(a),q=0;q<o;++q){p=r.n(a,b+q)
-if((p&255)!==p)p=255
-s[q]=p}return s},
-nd(a,b,c,d){var s=a?$.lt():$.ls()
-if(s==null)return null
-if(0===c&&d===b.length)return A.kL(s,b)
-return A.kL(s,b.subarray(c,d))},
-kL(a,b){var s,r
-try{s=a.decode(b)
-return s}catch(r){}return null},
-jK(a,b,c,d,e,f){if(B.i.aJ(f,4)!==0)throw A.b(A.a9("Invalid base64 padding, padded length must be multiple of four, is "+f,a,c))
-if(d+e!==f)throw A.b(A.a9("Invalid base64 padding, '=' not at the end",a,b))
-if(e>2)throw A.b(A.a9("Invalid base64 padding, more than two '=' characters",a,b))},
-nf(a){switch(a){case 65:return"Missing extension byte"
-case 67:return"Unexpected extension byte"
-case 69:return"Invalid UTF-8 byte"
-case 71:return"Overlong encoding"
-case 73:return"Out of unicode range"
-case 75:return"Encoded surrogate"
-case 77:return"Unfinished UTF-8 octet sequence"
-default:return""}},
-i8:function i8(){},
-i7:function i7(){},
-dB:function dB(){},
-fk:function fk(){},
-bK:function bK(){},
-dJ:function dJ(){},
-dO:function dO(){},
-eE:function eE(){},
-hA:function hA(a){this.a=a},
-i6:function i6(a){this.a=a
-this.b=16
-this.c=0},
-l9(a){var s=A.k4(a,null)
-if(s!=null)return s
-throw A.b(A.a9(a,null,null))},
-lJ(a,b){a=A.P(a,new Error())
-if(a==null)a=A.dr(a)
-a.stack=b.i(0)
-throw a},
-cC(a,b,c,d){var s,r=J.jU(a,d)
-if(a!==0&&b!=null)for(s=0;s<a;++s)r[s]=b
-return r},
-j6(a,b,c){var s,r=A.d([],c.h("t<0>"))
-for(s=J.X(a);s.k();)B.a.j(r,c.a(s.gl()))
-if(b)return r
-r.$flags=1
-return r},
-an(a,b){var s,r
-if(Array.isArray(a))return A.d(a.slice(0),b.h("t<0>"))
-s=A.d([],b.h("t<0>"))
-for(r=J.X(a);r.k();)B.a.j(s,r.gl())
-return s},
-jZ(a,b){var s=A.j6(a,!1,b)
-s.$flags=3
-return s},
-kb(a,b,c){var s,r
-A.eh(b,"start")
-if(c!=null){s=c-b
-if(s<0)throw A.b(A.au(c,b,null,"end",null))
-if(s===0)return""}r=A.mj(a,b,c)
-return r},
-mj(a,b,c){var s=a.length
-if(b>=s)return""
-return A.mb(a,b,c==null||c>s?s:c)},
-ka(a,b,c){var s=J.X(b)
-if(!s.k())return a
-if(c.length===0){do a+=A.p(s.gl())
-while(s.k())}else{a+=A.p(s.gl())
-while(s.k())a=a+c+A.p(s.gl())}return a},
-mr(){var s,r,q=A.m2()
-if(q==null)throw A.b(A.b1("'Uri.base' is not supported"))
-s=$.kh
-if(s!=null&&q===$.kg)return s
-r=A.ms(q)
-$.kh=r
-$.kg=q
-return r},
-mh(){return A.cc(new Error())},
-lH(a){var s=Math.abs(a),r=a<0?"-":""
-if(s>=1000)return""+a
-if(s>=100)return r+"0"+s
-if(s>=10)return r+"00"+s
-return r+"000"+s},
-jR(a){if(a>=100)return""+a
-if(a>=10)return"0"+a
-return"00"+a},
-dK(a){if(a>=10)return""+a
-return"0"+a},
-fw(a){if(typeof a=="number"||A.jq(a)||a==null)return J.bH(a)
-if(typeof a=="string")return JSON.stringify(a)
-return A.k5(a)},
-lK(a,b){A.dv(a,"error",t.K)
-A.dv(b,"stackTrace",t.l)
-A.lJ(a,b)},
-dA(a){return new A.dz(a)},
-r(a,b){return new A.aB(!1,null,b,a)},
-aL(a,b,c){return new A.aB(!0,a,b,c)},
-au(a,b,c,d,e){return new A.cO(b,c,!0,a,d,"Invalid value")},
-ei(a,b,c){if(0>a||a>c)throw A.b(A.au(a,0,c,"start",null))
-if(b!=null){if(a>b||b>c)throw A.b(A.au(b,a,c,"end",null))
-return b}return c},
-eh(a,b){if(a<0)throw A.b(A.au(a,0,null,b,null))
-return a},
-fR(a,b,c,d){return new A.dV(b,!0,a,d,"Index out of range")},
-b1(a){return new A.cY(a)},
-ke(a){return new A.ez(a)},
-j(a){return new A.bY(a)},
-am(a){return new A.dI(a)},
-a9(a,b,c){return new A.aN(a,b,c)},
-lT(a,b,c){var s,r
-if(A.jA(a)){if(b==="("&&c===")")return"(...)"
-return b+"..."+c}s=A.d([],t.s)
-B.a.j($.ak,a)
-try{A.nP(a,s)}finally{if(0>=$.ak.length)return A.h($.ak,-1)
-$.ak.pop()}r=A.ka(b,t.hf.a(s),", ")+c
-return r.charCodeAt(0)==0?r:r},
-j1(a,b,c){var s,r
-if(A.jA(a))return b+"..."+c
-s=new A.ab(b)
-B.a.j($.ak,a)
-try{r=s
-r.a=A.ka(r.a,a,", ")}finally{if(0>=$.ak.length)return A.h($.ak,-1)
-$.ak.pop()}s.a+=c
-r=s.a
-return r.charCodeAt(0)==0?r:r},
-nP(a,b){var s,r,q,p,o,n,m,l=a.gv(a),k=0,j=0
-for(;;){if(!(k<80||j<3))break
-if(!l.k())return
-s=A.p(l.gl())
-B.a.j(b,s)
-k+=s.length+2;++j}if(!l.k()){if(j<=5)return
-if(0>=b.length)return A.h(b,-1)
-r=b.pop()
-if(0>=b.length)return A.h(b,-1)
-q=b.pop()}else{p=l.gl();++j
-if(!l.k()){if(j<=4){B.a.j(b,A.p(p))
-return}r=A.p(p)
-if(0>=b.length)return A.h(b,-1)
-q=b.pop()
-k+=r.length+2}else{o=l.gl();++j
-for(;l.k();p=o,o=n){n=l.gl();++j
-if(j>100){for(;;){if(!(k>75&&j>3))break
-if(0>=b.length)return A.h(b,-1)
-k-=b.pop().length+2;--j}B.a.j(b,"...")
-return}}q=A.p(p)
-r=A.p(o)
-k+=r.length+q.length+4}}if(j>b.length+2){k+=5
-m="..."}else m=null
-for(;;){if(!(k>80&&b.length>3))break
-if(0>=b.length)return A.h(b,-1)
-k-=b.pop().length+2
-if(m==null){k+=5
-m="..."}}if(m!=null)B.a.j(b,m)
-B.a.j(b,q)
-B.a.j(b,r)},
-cM(a,b,c,d,e,f){var s
-if(B.h===c){s=J.J(a)
-b=J.J(b)
-return A.ev(A.U(A.U($.dw(),s),b))}if(B.h===d){s=J.J(a)
-b=J.J(b)
-c=J.J(c)
-return A.ev(A.U(A.U(A.U($.dw(),s),b),c))}if(B.h===e){s=J.J(a)
-b=J.J(b)
-c=J.J(c)
-d=J.J(d)
-return A.ev(A.U(A.U(A.U(A.U($.dw(),s),b),c),d))}if(B.h===f){s=J.J(a)
-b=J.J(b)
-c=J.J(c)
-d=J.J(d)
-e=J.J(e)
-return A.ev(A.U(A.U(A.U(A.U(A.U($.dw(),s),b),c),d),e))}s=J.J(a)
-b=J.J(b)
-c=J.J(c)
-d=J.J(d)
-e=J.J(e)
-f=J.J(f)
-f=A.ev(A.U(A.U(A.U(A.U(A.U(A.U($.dw(),s),b),c),d),e),f))
-return f},
-ms(a5){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0,a1,a2,a3=null,a4=a5.length
-if(a4>=5){if(4>=a4)return A.h(a5,4)
-s=((a5.charCodeAt(4)^58)*3|a5.charCodeAt(0)^100|a5.charCodeAt(1)^97|a5.charCodeAt(2)^116|a5.charCodeAt(3)^97)>>>0
-if(s===0)return A.kf(a4<a4?B.b.u(a5,0,a4):a5,5,a3).gcp()
-else if(s===32)return A.kf(B.b.u(a5,5,a4),0,a3).gcp()}r=A.cC(8,0,!1,t.S)
-B.a.q(r,0,0)
-B.a.q(r,1,-1)
-B.a.q(r,2,-1)
-B.a.q(r,7,-1)
-B.a.q(r,3,0)
-B.a.q(r,4,0)
-B.a.q(r,5,a4)
-B.a.q(r,6,a4)
-if(A.l0(a5,0,a4,0,r)>=14)B.a.q(r,7,a4)
-q=r[1]
-if(q>=0)if(A.l0(a5,0,q,20,r)===20)r[7]=q
-p=r[2]+1
-o=r[3]
-n=r[4]
-m=r[5]
-l=r[6]
-if(l<m)m=l
-if(n<p)n=m
-else if(n<=q)n=q+1
-if(o<p)o=n
-k=r[7]<0
-j=a3
-if(k){k=!1
-if(!(p>q+3)){i=o>0
-if(!(i&&o+1===n)){if(!B.b.G(a5,"\\",n))if(p>0)h=B.b.G(a5,"\\",p-1)||B.b.G(a5,"\\",p-2)
-else h=!1
-else h=!0
-if(!h){if(!(m<a4&&m===n+2&&B.b.G(a5,"..",n)))h=m>n+2&&B.b.G(a5,"/..",m-3)
-else h=!0
-if(!h)if(q===4){if(B.b.G(a5,"file",0)){if(p<=0){if(!B.b.G(a5,"/",n)){g="file:///"
-s=3}else{g="file://"
-s=2}a5=g+B.b.u(a5,n,a4)
-m+=s
-l+=s
-a4=a5.length
-p=7
-o=7
-n=7}else if(n===m){++l
-f=m+1
-a5=B.b.ab(a5,n,m,"/");++a4
-m=f}j="file"}else if(B.b.G(a5,"http",0)){if(i&&o+3===n&&B.b.G(a5,"80",o+1)){l-=3
-e=n-3
-m-=3
-a5=B.b.ab(a5,o,n,"")
-a4-=3
-n=e}j="http"}}else if(q===5&&B.b.G(a5,"https",0)){if(i&&o+4===n&&B.b.G(a5,"443",o+1)){l-=4
-e=n-4
-m-=4
-a5=B.b.ab(a5,o,n,"")
-a4-=3
-n=e}j="https"}k=!h}}}}if(k)return new A.f7(a4<a5.length?B.b.u(a5,0,a4):a5,q,p,o,n,m,l,j)
-if(j==null)if(q>0)j=A.n7(a5,0,q)
-else{if(q===0)A.c4(a5,0,"Invalid empty scheme")
-j=""}d=a3
-if(p>0){c=q+3
-b=c<p?A.n8(a5,c,p-1):""
-a=A.n3(a5,p,o,!1)
-i=o+1
-if(i<n){a0=A.k4(B.b.u(a5,i,n),a3)
-d=A.n5(a0==null?A.k(A.a9("Invalid port",a5,i)):a0,j)}}else{a=a3
-b=""}a1=A.n4(a5,n,m,a3,j,a!=null)
-a2=m<l?A.n6(a5,m+1,l,a3):a3
-return A.mZ(j,b,a,d,a1,a2,l<a4?A.n2(a5,l+1,a4):a3)},
-kj(a){var s=t.N
-return B.a.ak(A.d(a.split("&"),t.s),A.as(s,s),new A.hz(B.a4),t.f)},
-eD(a,b,c){throw A.b(A.a9("Illegal IPv4 address, "+a,b,c))},
-mo(a,b,c,d,e){var s,r,q,p,o,n,m,l,k,j="invalid character"
-for(s=a.length,r=b,q=r,p=0,o=0;;){if(q>=c)n=0
-else{if(!(q>=0&&q<s))return A.h(a,q)
-n=a.charCodeAt(q)}m=n^48
-if(m<=9){if(o!==0||q===r){o=o*10+m
-if(o<=255){++q
-continue}A.eD("each part must be in the range 0..255",a,r)}A.eD("parts must not have leading zeros",a,r)}if(q===r){if(q===c)break
-A.eD(j,a,q)}l=p+1
-k=e+p
-d.$flags&2&&A.b4(d)
-if(!(k<16))return A.h(d,k)
-d[k]=o
-if(n===46){if(l<4){++q
-p=l
-r=q
-o=0
-continue}break}if(q===c){if(l===4)return
-break}A.eD(j,a,q)
-p=l}A.eD("IPv4 address should contain exactly 4 parts",a,q)},
-mp(a,b,c){var s
-if(b===c)throw A.b(A.a9("Empty IP address",a,b))
-if(!(b>=0&&b<a.length))return A.h(a,b)
-if(a.charCodeAt(b)===118){s=A.mq(a,b,c)
-if(s!=null)throw A.b(s)
-return!1}A.ki(a,b,c)
-return!0},
-mq(a,b,c){var s,r,q,p,o,n="Missing hex-digit in IPvFuture address",m=u.f;++b
-for(s=a.length,r=b;;r=q){if(r<c){q=r+1
-if(!(r>=0&&r<s))return A.h(a,r)
-p=a.charCodeAt(r)
-if((p^48)<=9)continue
-o=p|32
-if(o>=97&&o<=102)continue
-if(p===46){if(q-1===b)return new A.aN(n,a,q)
-r=q
-break}return new A.aN("Unexpected character",a,q-1)}if(r-1===b)return new A.aN(n,a,r)
-return new A.aN("Missing '.' in IPvFuture address",a,r)}if(r===c)return new A.aN("Missing address in IPvFuture address, host, cursor",null,null)
-for(;;){if(!(r>=0&&r<s))return A.h(a,r)
-p=a.charCodeAt(r)
-if(!(p<128))return A.h(m,p)
-if((m.charCodeAt(p)&16)!==0){++r
-if(r<c)continue
-return null}return new A.aN("Invalid IPvFuture address character",a,r)}},
-ki(a3,a4,a5){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0,a1="an address must contain at most 8 parts",a2=new A.hy(a3)
-if(a5-a4<2)a2.$2("address is too short",null)
-s=new Uint8Array(16)
-r=a3.length
-if(!(a4>=0&&a4<r))return A.h(a3,a4)
-q=-1
-p=0
-if(a3.charCodeAt(a4)===58){o=a4+1
-if(!(o<r))return A.h(a3,o)
-if(a3.charCodeAt(o)===58){n=a4+2
-m=n
-q=0
-p=1}else{a2.$2("invalid start colon",a4)
-n=a4
-m=n}}else{n=a4
-m=n}for(l=0,k=!0;;){if(n>=a5)j=0
-else{if(!(n<r))return A.h(a3,n)
-j=a3.charCodeAt(n)}A:{i=j^48
-h=!1
-if(i<=9)g=i
-else{f=j|32
-if(f>=97&&f<=102)g=f-87
-else break A
-k=h}if(n<m+4){l=l*16+g;++n
-continue}a2.$2("an IPv6 part can contain a maximum of 4 hex digits",m)}if(n>m){if(j===46){if(k){if(p<=6){A.mo(a3,m,a5,s,p*2)
-p+=2
-n=a5
-break}a2.$2(a1,m)}break}o=p*2
-e=B.i.aZ(l,8)
-if(!(o<16))return A.h(s,o)
-s[o]=e;++o
-if(!(o<16))return A.h(s,o)
-s[o]=l&255;++p
-if(j===58){if(p<8){++n
-m=n
-l=0
-k=!0
-continue}a2.$2(a1,n)}break}if(j===58){if(q<0){d=p+1;++n
-q=p
-p=d
-m=n
-continue}a2.$2("only one wildcard `::` is allowed",n)}if(q!==p-1)a2.$2("missing part",n)
-break}if(n<a5)a2.$2("invalid character",n)
-if(p<8){if(q<0)a2.$2("an address without a wildcard must contain exactly 8 parts",a5)
-c=q+1
-b=p-c
-if(b>0){a=c*2
-a0=16-b*2
-B.al.ct(s,a0,16,s,a)
-B.al.dD(s,a,a0,0)}}return s},
-mZ(a,b,c,d,e,f,g){return new A.dk(a,b,c,d,e,f,g)},
-kF(a){if(a==="http")return 80
-if(a==="https")return 443
-return 0},
-c4(a,b,c){throw A.b(A.a9(c,a,b))},
-n5(a,b){var s=A.kF(b)
-if(a===s)return null
-return a},
-n3(a,b,c,d){var s,r,q,p,o,n,m,l,k
-if(b===c)return""
-s=a.length
-if(!(b>=0&&b<s))return A.h(a,b)
-if(a.charCodeAt(b)===91){r=c-1
-if(!(r>=0&&r<s))return A.h(a,r)
-if(a.charCodeAt(r)!==93)A.c4(a,b,"Missing end `]` to match `[` in host")
-q=b+1
-if(!(q<s))return A.h(a,q)
-p=""
-if(a.charCodeAt(q)!==118){o=A.n0(a,q,r)
-if(o<r){n=o+1
-p=A.kK(a,B.b.G(a,"25",n)?o+3:n,r,"%25")}}else o=r
-m=A.mp(a,q,o)
-l=B.b.u(a,q,o)
-return"["+(m?l.toLowerCase():l)+p+"]"}for(k=b;k<c;++k){if(!(k<s))return A.h(a,k)
-if(a.charCodeAt(k)===58){o=B.b.aC(a,"%",b)
-o=o>=b&&o<c?o:c
-if(o<c){n=o+1
-p=A.kK(a,B.b.G(a,"25",n)?o+3:n,c,"%25")}else p=""
-A.ki(a,b,o)
-return"["+B.b.u(a,b,o)+p+"]"}}return A.na(a,b,c)},
-n0(a,b,c){var s=B.b.aC(a,"%",b)
-return s>=b&&s<c?s:c},
-kK(a,b,c,d){var s,r,q,p,o,n,m,l,k,j,i,h=d!==""?new A.ab(d):null
-for(s=a.length,r=b,q=r,p=!0;r<c;){if(!(r>=0&&r<s))return A.h(a,r)
-o=a.charCodeAt(r)
-if(o===37){n=A.jm(a,r,!0)
-m=n==null
-if(m&&p){r+=3
-continue}if(h==null)h=new A.ab("")
-l=h.a+=B.b.u(a,q,r)
-if(m)n=B.b.u(a,r,r+3)
-else if(n==="%")A.c4(a,r,"ZoneID should not contain % anymore")
-h.a=l+n
-r+=3
-q=r
-p=!0}else if(o<127&&(u.f.charCodeAt(o)&1)!==0){if(p&&65<=o&&90>=o){if(h==null)h=new A.ab("")
-if(q<r){h.a+=B.b.u(a,q,r)
-q=r}p=!1}++r}else{k=1
-if((o&64512)===55296&&r+1<c){m=r+1
-if(!(m<s))return A.h(a,m)
-j=a.charCodeAt(m)
-if((j&64512)===56320){o=65536+((o&1023)<<10)+(j&1023)
-k=2}}i=B.b.u(a,q,r)
-if(h==null){h=new A.ab("")
-m=h}else m=h
-m.a+=i
-l=A.jl(o)
-m.a+=l
-r+=k
-q=r}}if(h==null)return B.b.u(a,b,c)
-if(q<c){i=B.b.u(a,q,c)
-h.a+=i}s=h.a
-return s.charCodeAt(0)==0?s:s},
-na(a,b,c){var s,r,q,p,o,n,m,l,k,j,i,h,g=u.f
-for(s=a.length,r=b,q=r,p=null,o=!0;r<c;){if(!(r>=0&&r<s))return A.h(a,r)
-n=a.charCodeAt(r)
-if(n===37){m=A.jm(a,r,!0)
-l=m==null
-if(l&&o){r+=3
-continue}if(p==null)p=new A.ab("")
-k=B.b.u(a,q,r)
-if(!o)k=k.toLowerCase()
-j=p.a+=k
-i=3
-if(l)m=B.b.u(a,r,r+3)
-else if(m==="%"){m="%25"
-i=1}p.a=j+m
-r+=i
-q=r
-o=!0}else if(n<127&&(g.charCodeAt(n)&32)!==0){if(o&&65<=n&&90>=n){if(p==null)p=new A.ab("")
-if(q<r){p.a+=B.b.u(a,q,r)
-q=r}o=!1}++r}else if(n<=93&&(g.charCodeAt(n)&1024)!==0)A.c4(a,r,"Invalid character")
-else{i=1
-if((n&64512)===55296&&r+1<c){l=r+1
-if(!(l<s))return A.h(a,l)
-h=a.charCodeAt(l)
-if((h&64512)===56320){n=65536+((n&1023)<<10)+(h&1023)
-i=2}}k=B.b.u(a,q,r)
-if(!o)k=k.toLowerCase()
-if(p==null){p=new A.ab("")
-l=p}else l=p
-l.a+=k
-j=A.jl(n)
-l.a+=j
-r+=i
-q=r}}if(p==null)return B.b.u(a,b,c)
-if(q<c){k=B.b.u(a,q,c)
-if(!o)k=k.toLowerCase()
-p.a+=k}s=p.a
-return s.charCodeAt(0)==0?s:s},
-n7(a,b,c){var s,r,q,p
-if(b===c)return""
-s=a.length
-if(!(b<s))return A.h(a,b)
-if(!A.kH(a.charCodeAt(b)))A.c4(a,b,"Scheme not starting with alphabetic character")
-for(r=b,q=!1;r<c;++r){if(!(r<s))return A.h(a,r)
-p=a.charCodeAt(r)
-if(!(p<128&&(u.f.charCodeAt(p)&8)!==0))A.c4(a,r,"Illegal scheme character")
-if(65<=p&&p<=90)q=!0}a=B.b.u(a,b,c)
-return A.n_(q?a.toLowerCase():a)},
-n_(a){if(a==="http")return"http"
-if(a==="file")return"file"
-if(a==="https")return"https"
-if(a==="package")return"package"
-return a},
-n8(a,b,c){return A.dl(a,b,c,16,!1,!1)},
-n4(a,b,c,d,e,f){var s=e==="file",r=s||f,q=A.dl(a,b,c,128,!0,!0)
-if(q.length===0){if(s)return"/"}else if(r&&!B.b.E(q,"/"))q="/"+q
-return A.n9(q,e,f)},
-n9(a,b,c){var s=b.length===0
-if(s&&!c&&!B.b.E(a,"/")&&!B.b.E(a,"\\"))return A.nb(a,!s||c)
-return A.nc(a)},
-n6(a,b,c,d){return A.dl(a,b,c,256,!0,!1)},
-n2(a,b,c){return A.dl(a,b,c,256,!0,!1)},
-jm(a,b,c){var s,r,q,p,o,n,m=u.f,l=b+2,k=a.length
-if(l>=k)return"%"
-s=b+1
-if(!(s>=0&&s<k))return A.h(a,s)
-r=a.charCodeAt(s)
-if(!(l>=0))return A.h(a,l)
-q=a.charCodeAt(l)
-p=A.iF(r)
-o=A.iF(q)
-if(p<0||o<0)return"%"
-n=p*16+o
-if(n<127){if(!(n>=0))return A.h(m,n)
-l=(m.charCodeAt(n)&1)!==0}else l=!1
-if(l)return A.bs(c&&65<=n&&90>=n?(n|32)>>>0:n)
-if(r>=97||q>=97)return B.b.u(a,b,b+3).toUpperCase()
-return null},
-jl(a){var s,r,q,p,o,n,m,l,k="0123456789ABCDEF"
-if(a<=127){s=new Uint8Array(3)
-s[0]=37
-r=a>>>4
-if(!(r<16))return A.h(k,r)
-s[1]=k.charCodeAt(r)
-s[2]=k.charCodeAt(a&15)}else{if(a>2047)if(a>65535){q=240
-p=4}else{q=224
-p=3}else{q=192
-p=2}r=3*p
-s=new Uint8Array(r)
-for(o=0;--p,p>=0;q=128){n=B.i.d9(a,6*p)&63|q
-if(!(o<r))return A.h(s,o)
-s[o]=37
-m=o+1
-l=n>>>4
-if(!(l<16))return A.h(k,l)
-if(!(m<r))return A.h(s,m)
-s[m]=k.charCodeAt(l)
-l=o+2
-if(!(l<r))return A.h(s,l)
-s[l]=k.charCodeAt(n&15)
-o+=3}}return A.kb(s,0,null)},
-dl(a,b,c,d,e,f){var s=A.kJ(a,b,c,d,e,f)
-return s==null?B.b.u(a,b,c):s},
-kJ(a,b,c,d,e,f){var s,r,q,p,o,n,m,l,k,j,i=null,h=u.f
-for(s=!e,r=a.length,q=b,p=q,o=i;q<c;){if(!(q>=0&&q<r))return A.h(a,q)
-n=a.charCodeAt(q)
-if(n<127&&(h.charCodeAt(n)&d)!==0)++q
-else{m=1
-if(n===37){l=A.jm(a,q,!1)
-if(l==null){q+=3
-continue}if("%"===l)l="%25"
-else m=3}else if(n===92&&f)l="/"
-else if(s&&n<=93&&(h.charCodeAt(n)&1024)!==0){A.c4(a,q,"Invalid character")
-m=i
-l=m}else{if((n&64512)===55296){k=q+1
-if(k<c){if(!(k<r))return A.h(a,k)
-j=a.charCodeAt(k)
-if((j&64512)===56320){n=65536+((n&1023)<<10)+(j&1023)
-m=2}}}l=A.jl(n)}if(o==null){o=new A.ab("")
-k=o}else k=o
-k.a=(k.a+=B.b.u(a,p,q))+l
-if(typeof m!=="number")return A.oi(m)
-q+=m
-p=q}}if(o==null)return i
-if(p<c){s=B.b.u(a,p,c)
-o.a+=s}s=o.a
-return s.charCodeAt(0)==0?s:s},
-kI(a){if(B.b.E(a,"."))return!0
-return B.b.aB(a,"/.")!==-1},
-nc(a){var s,r,q,p,o,n,m
-if(!A.kI(a))return a
-s=A.d([],t.s)
-for(r=a.split("/"),q=r.length,p=!1,o=0;o<q;++o){n=r[o]
-if(n===".."){m=s.length
-if(m!==0){if(0>=m)return A.h(s,-1)
-s.pop()
-if(s.length===0)B.a.j(s,"")}p=!0}else{p="."===n
-if(!p)B.a.j(s,n)}}if(p)B.a.j(s,"")
-return B.a.aF(s,"/")},
-nb(a,b){var s,r,q,p,o,n
-if(!A.kI(a))return!b?A.kG(a):a
-s=A.d([],t.s)
-for(r=a.split("/"),q=r.length,p=!1,o=0;o<q;++o){n=r[o]
-if(".."===n){if(s.length!==0&&B.a.gcb(s)!==".."){if(0>=s.length)return A.h(s,-1)
-s.pop()}else B.a.j(s,"..")
-p=!0}else{p="."===n
-if(!p)B.a.j(s,n.length===0&&s.length===0?"./":n)}}if(s.length===0)return"./"
-if(p)B.a.j(s,"")
-if(!b){if(0>=s.length)return A.h(s,0)
-B.a.q(s,0,A.kG(s[0]))}return B.a.aF(s,"/")},
-kG(a){var s,r,q,p=u.f,o=a.length
-if(o>=2&&A.kH(a.charCodeAt(0)))for(s=1;s<o;++s){r=a.charCodeAt(s)
-if(r===58)return B.b.u(a,0,s)+"%3A"+B.b.ar(a,s+1)
-if(r<=127){if(!(r<128))return A.h(p,r)
-q=(p.charCodeAt(r)&8)===0}else q=!0
-if(q)break}return a},
-n1(a,b){var s,r,q,p,o
-for(s=a.length,r=0,q=0;q<2;++q){p=b+q
-if(!(p<s))return A.h(a,p)
-o=a.charCodeAt(p)
-if(48<=o&&o<=57)r=r*16+o-48
-else{o|=32
-if(97<=o&&o<=102)r=r*16+o-87
-else throw A.b(A.r("Invalid URL encoding",null))}}return r},
-jn(a,b,c,d,e){var s,r,q,p,o=a.length,n=b
-for(;;){if(!(n<c)){s=!0
-break}if(!(n<o))return A.h(a,n)
-r=a.charCodeAt(n)
-q=!0
-if(r<=127)if(r!==37)q=r===43
-if(q){s=!1
-break}++n}if(s)if(B.a4===d)return B.b.u(a,b,c)
-else p=new A.dH(B.b.u(a,b,c))
-else{p=A.d([],t.t)
-for(n=b;n<c;++n){if(!(n<o))return A.h(a,n)
-r=a.charCodeAt(n)
-if(r>127)throw A.b(A.r("Illegal percent encoding in URI",null))
-if(r===37){if(n+3>o)throw A.b(A.r("Truncated URI",null))
-B.a.j(p,A.n1(a,n+1))
-n+=2}else if(r===43)B.a.j(p,32)
-else B.a.j(p,r)}}t.L.a(p)
-return B.cJ.dv(p)},
-kH(a){var s=a|32
-return 97<=s&&s<=122},
-kf(a,b,c){var s,r,q,p,o,n,m,l,k="Invalid MIME type",j=A.d([b-1],t.t)
-for(s=a.length,r=b,q=-1,p=null;r<s;++r){p=a.charCodeAt(r)
-if(p===44||p===59)break
-if(p===47){if(q<0){q=r
-continue}throw A.b(A.a9(k,a,r))}}if(q<0&&r>b)throw A.b(A.a9(k,a,r))
-while(p!==44){B.a.j(j,r);++r
-for(o=-1;r<s;++r){if(!(r>=0))return A.h(a,r)
-p=a.charCodeAt(r)
-if(p===61){if(o<0)o=r}else if(p===59||p===44)break}if(o>=0)B.a.j(j,o)
-else{n=B.a.gcb(j)
-if(p!==44||r!==n+7||!B.b.G(a,"base64",n+1))throw A.b(A.a9("Expecting '='",a,r))
-break}}B.a.j(j,r)
-m=r+1
-if((j.length&1)===1)a=B.aF.dQ(a,m,s)
-else{l=A.kJ(a,m,s,256,!0,!1)
-if(l!=null)a=B.b.ab(a,m,s,l)}return new A.hx(a,j,c)},
-l0(a,b,c,d,e){var s,r,q,p,o,n='\xe1\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\xe1\xe1\xe1\x01\xe1\xe1\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\xe1\xe3\xe1\xe1\x01\xe1\x01\xe1\xcd\x01\xe1\x01\x01\x01\x01\x01\x01\x01\x01\x0e\x03\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01"\x01\xe1\x01\xe1\xac\xe1\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\xe1\xe1\xe1\x01\xe1\xe1\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\xe1\xea\xe1\xe1\x01\xe1\x01\xe1\xcd\x01\xe1\x01\x01\x01\x01\x01\x01\x01\x01\x01\n\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01"\x01\xe1\x01\xe1\xac\xeb\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\xeb\xeb\xeb\x8b\xeb\xeb\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\xeb\x83\xeb\xeb\x8b\xeb\x8b\xeb\xcd\x8b\xeb\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x92\x83\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\xeb\x8b\xeb\x8b\xeb\xac\xeb\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\xeb\xeb\xeb\v\xeb\xeb\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\xebD\xeb\xeb\v\xeb\v\xeb\xcd\v\xeb\v\v\v\v\v\v\v\v\x12D\v\v\v\v\v\v\v\v\v\v\xeb\v\xeb\v\xeb\xac\xe5\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\xe5\xe5\xe5\x05\xe5D\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe8\x8a\xe5\xe5\x05\xe5\x05\xe5\xcd\x05\xe5\x05\x05\x05\x05\x05\x05\x05\x05\x05\x8a\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05f\x05\xe5\x05\xe5\xac\xe5\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\xe5\xe5\xe5\x05\xe5D\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\x8a\xe5\xe5\x05\xe5\x05\xe5\xcd\x05\xe5\x05\x05\x05\x05\x05\x05\x05\x05\x05\x8a\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05f\x05\xe5\x05\xe5\xac\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7D\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\x8a\xe7\xe7\xe7\xe7\xe7\xe7\xcd\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\x8a\xe7\x07\x07\x07\x07\x07\x07\x07\x07\x07\xe7\xe7\xe7\xe7\xe7\xac\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7D\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\x8a\xe7\xe7\xe7\xe7\xe7\xe7\xcd\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\x8a\x07\x07\x07\x07\x07\x07\x07\x07\x07\x07\xe7\xe7\xe7\xe7\xe7\xac\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\x05\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\xeb\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\xeb\xeb\xeb\v\xeb\xeb\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\xeb\xea\xeb\xeb\v\xeb\v\xeb\xcd\v\xeb\v\v\v\v\v\v\v\v\x10\xea\v\v\v\v\v\v\v\v\v\v\xeb\v\xeb\v\xeb\xac\xeb\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\xeb\xeb\xeb\v\xeb\xeb\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\xeb\xea\xeb\xeb\v\xeb\v\xeb\xcd\v\xeb\v\v\v\v\v\v\v\v\x12\n\v\v\v\v\v\v\v\v\v\v\xeb\v\xeb\v\xeb\xac\xeb\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\xeb\xeb\xeb\v\xeb\xeb\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\xeb\xea\xeb\xeb\v\xeb\v\xeb\xcd\v\xeb\v\v\v\v\v\v\v\v\v\n\v\v\v\v\v\v\v\v\v\v\xeb\v\xeb\v\xeb\xac\xec\f\f\f\f\f\f\f\f\f\f\f\f\f\f\f\f\f\f\f\f\f\f\f\f\f\f\xec\xec\xec\f\xec\xec\f\f\f\f\f\f\f\f\f\f\f\f\f\f\f\f\f\f\f\f\f\f\f\f\f\f\xec\xec\xec\xec\f\xec\f\xec\xcd\f\xec\f\f\f\f\f\f\f\f\f\xec\f\f\f\f\f\f\f\f\f\f\xec\f\xec\f\xec\f\xed\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\xed\xed\xed\r\xed\xed\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\xed\xed\xed\xed\r\xed\r\xed\xed\r\xed\r\r\r\r\r\r\r\r\r\xed\r\r\r\r\r\r\r\r\r\r\xed\r\xed\r\xed\r\xe1\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\xe1\xe1\xe1\x01\xe1\xe1\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\xe1\xea\xe1\xe1\x01\xe1\x01\xe1\xcd\x01\xe1\x01\x01\x01\x01\x01\x01\x01\x01\x0f\xea\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01"\x01\xe1\x01\xe1\xac\xe1\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\xe1\xe1\xe1\x01\xe1\xe1\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\xe1\xe9\xe1\xe1\x01\xe1\x01\xe1\xcd\x01\xe1\x01\x01\x01\x01\x01\x01\x01\x01\x01\t\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01"\x01\xe1\x01\xe1\xac\xeb\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\xeb\xeb\xeb\v\xeb\xeb\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\xeb\xea\xeb\xeb\v\xeb\v\xeb\xcd\v\xeb\v\v\v\v\v\v\v\v\x11\xea\v\v\v\v\v\v\v\v\v\v\xeb\v\xeb\v\xeb\xac\xeb\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\xeb\xeb\xeb\v\xeb\xeb\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\xeb\xe9\xeb\xeb\v\xeb\v\xeb\xcd\v\xeb\v\v\v\v\v\v\v\v\v\t\v\v\v\v\v\v\v\v\v\v\xeb\v\xeb\v\xeb\xac\xeb\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\xeb\xeb\xeb\v\xeb\xeb\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\xeb\xea\xeb\xeb\v\xeb\v\xeb\xcd\v\xeb\v\v\v\v\v\v\v\v\x13\xea\v\v\v\v\v\v\v\v\v\v\xeb\v\xeb\v\xeb\xac\xeb\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\xeb\xeb\xeb\v\xeb\xeb\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\xeb\xea\xeb\xeb\v\xeb\v\xeb\xcd\v\xeb\v\v\v\v\v\v\v\v\v\xea\v\v\v\v\v\v\v\v\v\v\xeb\v\xeb\v\xeb\xac\xf5\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\x15\xf5\x15\x15\xf5\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\xf5\xf5\xf5\xf5\xf5\xf5'
-for(s=a.length,r=b;r<c;++r){if(!(r<s))return A.h(a,r)
-q=a.charCodeAt(r)^96
-if(q>95)q=31
-p=d*96+q
-if(!(p<2112))return A.h(n,p)
-o=n.charCodeAt(p)
-d=o&31
-B.a.q(e,o>>>5,r)}return d},
-bl:function bl(a,b,c){this.a=a
-this.b=b
-this.c=c},
-hJ:function hJ(){},
-D:function D(){},
-dz:function dz(a){this.a=a},
-aZ:function aZ(){},
-aB:function aB(a,b,c,d){var _=this
-_.a=a
-_.b=b
-_.c=c
-_.d=d},
-cO:function cO(a,b,c,d,e,f){var _=this
-_.e=a
-_.f=b
-_.a=c
-_.b=d
-_.c=e
-_.d=f},
-dV:function dV(a,b,c,d,e){var _=this
-_.f=a
-_.a=b
-_.b=c
-_.c=d
-_.d=e},
-cY:function cY(a){this.a=a},
-ez:function ez(a){this.a=a},
-bY:function bY(a){this.a=a},
-dI:function dI(a){this.a=a},
-ea:function ea(){},
-cV:function cV(){},
-hK:function hK(a){this.a=a},
-aN:function aN(a,b,c){this.a=a
-this.b=b
-this.c=c},
-i:function i(){},
-Q:function Q(a,b,c){this.a=a
-this.b=b
-this.$ti=c},
-S:function S(){},
-v:function v(){},
-fb:function fb(){},
-ab:function ab(a){this.a=a},
-hz:function hz(a){this.a=a},
-hy:function hy(a){this.a=a},
-dk:function dk(a,b,c,d,e,f,g){var _=this
-_.a=a
-_.b=b
-_.c=c
-_.d=d
-_.e=e
-_.f=f
-_.r=g
-_.z=_.y=_.w=$},
-hx:function hx(a,b,c){this.a=a
-this.b=b
-this.c=c},
-f7:function f7(a,b,c,d,e,f,g,h){var _=this
-_.a=a
-_.b=b
-_.c=c
-_.d=d
-_.e=e
-_.f=f
-_.r=g
-_.w=h
-_.x=null},
-eP:function eP(a,b,c,d,e,f,g){var _=this
-_.a=a
-_.b=b
-_.c=c
-_.d=d
-_.e=e
-_.f=f
-_.r=g
-_.z=_.y=_.w=$},
-h2:function h2(a){this.a=a},
-ds(a){var s
-if(typeof a=="function")throw A.b(A.r("Attempting to rewrap a JS function.",null))
-s=function(b,c){return function(d){return b(c,d,arguments.length)}}(A.np,a)
-s[$.jC()]=a
-return s},
-np(a,b,c){t.Z.a(a)
-if(A.a(c)>=1)return a.$1(b)
-return a.$0()},
-l7(a,b,c){return c.a(a[b])},
-kT(a,b){return a[b]},
-a6(a,b,c,d){return d.a(a[b].apply(a,c))},
-os(a,b){var s=new A.N($.I,b.h("N<0>")),r=new A.cZ(s,b.h("cZ<0>"))
-a.then(A.c8(new A.iQ(r,b),1),A.c8(new A.iR(r),1))
-return s},
-kY(a){return a==null||typeof a==="boolean"||typeof a==="number"||typeof a==="string"||a instanceof Int8Array||a instanceof Uint8Array||a instanceof Uint8ClampedArray||a instanceof Int16Array||a instanceof Uint16Array||a instanceof Int32Array||a instanceof Uint32Array||a instanceof Float32Array||a instanceof Float64Array||a instanceof ArrayBuffer||a instanceof DataView},
-c9(a){if(A.kY(a))return a
-return new A.iC(new A.d2(t.hg)).$1(a)},
-iQ:function iQ(a,b){this.a=a
-this.b=b},
-iR:function iR(a){this.a=a},
-iC:function iC(a){this.a=a},
-hc:function hc(a){this.z=a},
-bV:function bV(a,b){this.a=a
-this.b=b},
-bU:function bU(a,b){this.a=a
-this.b=b},
-fn:function fn(a,b){this.a=a
-this.b=b},
-fo:function fo(){this.a=null
-this.d=0},
-h9:function h9(){},
-cg:function cg(a,b,c,d,e,f,g,h){var _=this
-_.a=a
-_.b=b
-_.c=c
-_.d=d
-_.e=e
-_.f=f
-_.r=g
-_.w=h},
-fD:function fD(){},
-dR:function dR(a,b,c,d,e){var _=this
-_.a=a
-_.b=b
-_.c=c
-_.e=d
-_.w=e},
-bN(a,b){return new A.fQ(a,b)},
-aW:function aW(){},
-ah:function ah(a,b,c){this.a=a
-this.b=b
-this.c=c},
-ai:function ai(a,b,c){this.a=a
-this.b=b
-this.c=c},
-aD:function aD(a,b,c){this.a=a
-this.b=b
-this.c=c},
-eb:function eb(a,b,c){this.a=a
-this.b=b
-this.c=c},
-bo:function bo(a,b,c){this.a=a
-this.b=b
-this.c=c},
-ct:function ct(a,b){this.a=a
-this.b=b},
-fQ:function fQ(a,b){this.a=a
-this.b=b},
-ou(a,b,c,d){var s,r,q,p,o,n,m=A.d([],t.cw)
-for(s=0-c.a,r=1-c.b,q=0-c.c,q=1+(s*s+r*r+q*q),p=0;!1;++p){o=a[p]
-B.a.j(m,new A.da(Math.max(Math.max(1,Math.max(1,1)),0.000001)/q,o))}B.a.af(m,new A.iS())
-s=A.d([],t.w)
-for(r=A.kc(m,0,A.dv(b,"count",t.S),t.fk),q=r.$ti,r=new A.at(r,r.gp(0),q.h("at<V.E>")),q=q.h("V.E");r.k();){n=r.d
-s.push((n==null?q.a(n):n).b)}return s},
-bP:function bP(a,b,c){this.a=a
-this.b=b
-this.c=c},
-ae:function ae(){},
-iS:function iS(){},
-aw:function aw(a,b){this.a=a
-this.b=b},
-fs:function fs(){},
-h5(a){var s,r=t.N,q=A.e0(["sceneColor","present"],r),p=a.a.b
-if(p.t(0,"shadows"))q.W(0,A.e0(["shadowMap","sceneDepth"],r))
-if(p.t(0,"ssao"))q.W(0,A.e0(["ssaoRaw","ssaoBlurred"],r))
-if(p.t(0,"bloom"))q.W(0,A.e0(["bloomBlurH","bloomBlurV","sceneColor#"+(a.d>1?2:1)],r))
-if(a.d>1)q.j(0,"sceneColor#1")
-if(p.t(0,"dof"))q.W(0,A.e0(["dofBlurH","dofBlurV","dofOutput"],r))
-if(p.t(0,"grade"))q.j(0,"gradeOutput")
-if(p.t(0,"ps1"))q.j(0,"ps1Output")
-s=p.t(0,"vhs")
-if(s)q.j(0,"vhsOutput")
-return new A.h4(new A.cX(A.j5(q,r),t.am),s)},
-h4:function h4(a,b){this.a=a
-this.b=b},
-h6:function h6(){},
-ha:function ha(a){this.b=a},
-el:function el(){this.a=null
-this.c=0
-this.d=!1},
-eu:function eu(a,b,c,d){var _=this
-_.a=a
-_.b=b
-_.c=c
-_.d=d},
-fm:function fm(a,b){this.a=a
-this.b=b},
-fu:function fu(a,b){this.a=a
-this.b=b},
-ej:function ej(a,b,c,d,e){var _=this
-_.a=a
-_.b=b
-_.c=c
-_.d=d
-_.f=e},
-bW:function bW(a,b){this.a=a
-this.b=b},
-L:function L(a,b,c){this.a=a
-this.b=b
-this.d=c},
-fF:function fF(a,b,c,d,e){var _=this
-_.a=a
-_.b=b
-_.c=c
-_.d=d
-_.r=e},
-m_(){return new A.e1(new A.aE(new A.fY(),A.d([],t.ha),A.d([],t.t),t.ex))},
-e1:function e1(a){this.a=a},
-fY:function fY(){},
-l2(a){var s=4
-switch(a){case B.cM:s=0
-break
-case B.cN:s=1
-break
-case B.cO:s=2
-break
-case B.cQ:s=3
-break
-case B.cR:break
-case B.cS:s=5
-break
-case B.cT:s=6
-break
-case B.cU:break
-case B.cP:s=A.k(A.b1("MeshStore: no shader location reserved for VertexAttributeKind.emissive yet \u2014 safe_world.vert has no emissive input"))
-break
-default:s=null}return s},
-nq(a,b,c){var s,r,q,p,o
-for(s=a.gdk(),r=s.length,q=0,p=0;p<r;++p){o=s[p]
-if(A.l2(o.gdN())===b)q=B.i.ae(q,o.gel())}return q},
-m0(a){return new A.h_(a,new A.aE(new A.h0(),A.d([],t.c9),A.d([],t.t),t.cE),A.as(t.S,t.bw))},
-k1(a){var s
-A:{s=a.gce(a)
-break A}return s},
-eB:function eB(a,b,c,d,e,f){var _=this
-_.a=a
-_.b=b
-_.c=c
-_.d=d
-_.e=e
-_.f=f},
-h_:function h_(a,b,c){this.a=a
-this.b=b
-this.c=c},
-h0:function h0(){},
-h1:function h1(){},
-mk(a){var s=new A.ex(a,new A.aE(new A.hs(),A.d([],t.fq),A.d([],t.t),t.g2),A.as(t.S,t.j))
-s.d=s.V($.jH())
-s.e=s.V($.jE())
-s.f=s.V($.jF())
-s.r=s.V($.jD())
-s.w=s.V($.jG())
-return s},
-ex:function ex(a,b,c){var _=this
-_.a=a
-_.b=b
-_.c=c
-_.w=_.r=_.f=_.e=_.d=$},
-hs:function hs(){},
-hu:function hu(){},
-ht:function ht(){},
-o7(a){var s,r,q,p,o,n,m,l,k,j=A.d([],t.gk),i=A.as(t.N,t.S)
-for(s=a.length,r=t.G,q=0;q<a.length;a.length===s||(0,A.B)(a),++q){p=a[q]
-o=p.gm().geo()
-n=A.p(p.gm().gS().gU())+":"+A.p(p.gm().ga9().gU())+":"+A.p(o)
-m=i.n(0,n)
-if(m==null){i.q(0,n,j.length)
-B.a.j(j,new A.b9(p,A.d([p],r)))}else{l=j.length
-if(m>>>0!==m||m>=l)return A.h(j,m)
-k=j[m].b
-if(k.length>=16){i.q(0,n,l)
-B.a.j(j,new A.b9(p,A.d([p],r)))}else B.a.j(k,p)}}return j},
-b9:function b9(a,b){this.a=a
-this.b=b},
-dP:function dP(a){this.a=a},
-fz:function fz(){},
-fA:function fA(a){this.a=a},
-fx:function fx(a){this.a=a},
-fy:function fy(a){this.a=a},
-dQ:function dQ(a,b){this.a=a
-this.b=b},
-bL:function bL(a,b){this.a=a
-this.b=b},
-fE:function fE(a,b){this.a=a
-this.b=b
-this.c=0},
-mH(){return new A.c2()},
-fC:function fC(a){this.a=a
-this.b=null},
-c2:function c2(){var _=this
-_.e=_.d=_.c=_.b=_.a=0},
-j9(){return!0},
-F:function F(a,b,c,d){var _=this
-_.a=a
-_.b=b
-_.c=c
-_.f=d},
-h7:function h7(){},
-h8:function h8(){},
-ar:function ar(a,b){this.a=a
-this.b=b},
-a2:function a2(a,b,c){this.a=a
-this.b=b
-this.c=c},
-ek:function ek(a,b){this.a=a
-this.b=b},
-aP:function aP(a,b){this.a=a
-this.b=b},
-M:function M(a,b,c,d,e,f){var _=this
-_.a=a
-_.b=b
-_.c=c
-_.d=d
-_.e=e
-_.f=f},
-cR:function cR(a,b){this.a=a
-this.b=b},
-l:function l(a,b){this.a=a
-this.b=b},
-ck:function ck(a){this.b=a},
-hb:function hb(a,b){var _=this
-_.a=a
-_.b=b
-_.c=null
-_.e=_.d=0},
-a3:function a3(a,b,c,d,e,f){var _=this
-_.a=a
-_.b=b
-_.c=c
-_.d=d
-_.e=e
-_.f=f},
-hd:function hd(){},
-Z:function Z(a,b,c,d,e,f){var _=this
-_.a=a
-_.c=b
-_.d=c
-_.e=d
-_.f=e
-_.r=f},
-hf:function hf(a,b){this.a=a
-this.b=b},
-hk:function hk(){},
-hj:function hj(){},
-hi:function hi(){},
-hh:function hh(a){this.a=a},
-hg:function hg(a,b,c){this.a=a
-this.b=b
-this.c=c},
-he:function he(a,b){this.a=a
-this.b=b},
-mf(a){return new A.cP(a,new A.aE(new A.hl(),A.d([],t.aO),A.d([],t.t),t.b0))},
-cP:function cP(a,b){this.a=a
-this.b=b},
-hl:function hl(){},
-kR(a){var s,r=a.y
-r.toString
-s=a.as
-s.toString
-a.Q=A.ns(a,r,s,a.x.gl().a.b.a).b},
-ns(a,b,c,d){var s,r,q,p,o,n,m,l="sceneColor",k=new A.iv(a),j=new A.iw(d,a),i=c.a,h=a.a,g=c.b,f=c.c,e=c.d
-if(i.b.t(0,"shadows")){s=a.w
-r=s.b
-s=s.c
-q=A.o8(b,h,B.C,i,s.gdS(),new A.ie(j),new A.ig(j),new A.ih(a),new A.im(a),new A.io(a),new A.ip(j),new A.iq(j),s.gdU(),new A.ir(a),s.gdY(),r.gdW(),k,s.ge_(),s.ge1(),new A.is(j,c),new A.it(j),new A.iu(j),new A.ii(j),new A.ij(j),new A.ik(a),new A.il(j),e,f,g,512)}else{p=new A.M(l,B.k,g,f,e,0)
-o=new A.M(l,B.k,g,f,1,1)
-j=e>1
-i=j?o:p
-n=j?new A.cE(h,p,o):null
-k=A.d([new A.eI(b,"#version 300 es\nlayout(location=0) in vec3 aPosition;\nlayout(location=1) in vec3 aNormal;\nlayout(location=2) in vec4 aColor;\nlayout(location=3) in float aAlpha;\nlayout(location=4) in vec3 aUvMat;\nuniform mat4 uViewProjection;\nuniform mat4 uModel;\nuniform mat4 uNormalMatrix;\nuniform mat4 uInstanceModels[16];\nuniform mat4 uInstanceNormalMatrices[16];\nuniform float uUseInstances;\nout vec4 vColor;\nout vec3 vNormal;\nvoid main(){\n  mat4 model=uModel;\n  mat4 normalMatrix=uNormalMatrix;\n  if(uUseInstances>0.5){model=uInstanceModels[gl_InstanceID];normalMatrix=uInstanceNormalMatrices[gl_InstanceID];}\n  vColor=vec4(aColor.rgb,aAlpha);\n  vNormal=mat3(normalMatrix)*aNormal;\n  gl_Position=uViewProjection*model*vec4(aPosition,1.0);\n}\n","#version 300 es\nprecision highp float;\nin vec4 vColor;\nin vec3 vNormal;\nuniform vec3 uLightDir;\nuniform vec3 uAmbientColor;\nuniform float uAmbientIntensity;\nout vec4 oColor;\nvoid main(){\n  vec3 n=normalize(vNormal);\n  float ndotl=max(dot(n,normalize(uLightDir)),0.0);\n  vec3 lit=vColor.rgb*clamp(uAmbientColor*uAmbientIntensity+vec3(ndotl),0.0,1.0);\n  oColor=vec4(lit,vColor.a);\n}\n",k,p)],t.e)
-if(n!=null)k.push(n)
-k.push(new A.cN(b,u.l,u.o,h,i,B.C))
-q=new A.dP(k)}a.r.toString
-m=q.ds(B.P,new A.hd(),!1,new A.f0())
-k=m.a.b
-if(k.length!==0)throw A.b(A.j("safe renderer graph is invalid: "+A.p(k)))
-return new A.i0(q,m)},
-nt(b6,b7,b8,b9){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0,a1,a2,a3,a4,a5,a6,a7,a8,a9,b0,b1,b2,b3=null,b4=b6.Q,b5=b6.x
-if(b4==null||b5==null)throw A.b(A.j("renderer graph is not initialized"))
-s=A.an(b7.gca(),t.Y)
-for(r=0;r<b9.length;++r){q=b9[r]
-b6.w.a.b.a4(q.gS()).ges().eE(q.ga2().ap())}p=b8.a
-o=A.ob(A.lN(p.c),s,-1)
-for(n=s.length,m=0,l=0;l<s.length;s.length===n||(0,A.B)(s),++l){k=s[l].gm().gS()
-j=b6.w.a
-if(j.c.n(0,k.gU())==null)A.k(A.bN(B.F,k))
-j.b.a4(k)
-m=B.i.ae(m,b3)}for(s=o.a,n=s.length,i=0,l=0;l<s.length;s.length===n||(0,A.B)(s),++l){k=s[l].gm().gS()
-j=b6.w.a
-if(j.c.n(0,k.gU())==null)A.k(A.bN(B.F,k))
-j.b.a4(k)
-i=B.i.ae(i,b3)}n=t.N
-k=A.as(n,t.a8)
-h=new A.fC(k)
-h.dm("cull")
-j=m-i
-g=h.b
-if(g==null)A.k(A.j("cull recorded outside an active frame"))
-if(j<0)A.k(A.r("cull totals must be non-negative",b3))
-f=k.n(0,g)
-f.c+=j
-f.e+=o.b.b
-e=A.d([],t.c1)
-d=A.d([],t.aM)
-for(c=s.length,b=t.k,l=0;l<s.length;s.length===c||(0,A.B)(s),++l){a=s[l]
-a.gm().gc_()
-B.a.j(e,new A.T(new A.ad(B.c_,a.gm().ga9(),a.gm().gS(),a.gF().a),a,b))}a0=new A.eV(A.o7(A.ow(e)),A.ov(d),p,b8.b,b8.c)
-a1=new A.dM(b6.a,h)
-for(s=b4.b,p=s.length,c=t.do,l=0;l<s.length;s.length===p||(0,A.B)(s),++l){a2=s[l]
-b=a2.gm().a
-if(b.length===0)A.k(A.aL(b,"passId",b3))
-h.b=b
-k.b9(b,A.l5())
-a3=A.as(n,c)
-for(b=a2.gm().c,a4=b.length,a5=0;a5<b.length;b.length===a4||(0,A.B)(b),++a5){a6=b[a5].a
-a7=b5.c
-if(a7==null)A.k(A.j("GPU resource adapter is not initialized"))
-a8=a6.f
-a9=a6.a
-b0=a8===0?a9:a9+"#"+a8
-b1=a7.b.n(0,b0)
-if(b1==null)A.k(A.j("resource is not in candidate: "+b0))
-b2=new A.bJ(b1)
-a3.q(0,a9+"#"+a8,b2)
-a3.b9(a9,new A.ix(b2))}a2.L(new A.dE(a3,a1,a0))}return new A.hL(h,o,j)},
-hm:function hm(a,b,c,d,e,f){var _=this
-_.a=a
-_.b=b
-_.c=c
-_.f=d
-_.r=e
-_.w=f
-_.x=!1},
-hL:function hL(a,b,c){this.a=a
-this.b=b
-this.c=c},
-iv:function iv(a){this.a=a},
-iw:function iw(a,b){this.a=a
-this.b=b},
-iu:function iu(a){this.a=a},
-im:function im(a){this.a=a},
-io:function io(a){this.a=a},
-it:function it(a){this.a=a},
-ih:function ih(a){this.a=a},
-ij:function ij(a){this.a=a},
-ii:function ii(a){this.a=a},
-is:function is(a,b){this.a=a
-this.b=b},
-ie:function ie(a){this.a=a},
-ig:function ig(a){this.a=a},
-ip:function ip(a){this.a=a},
-iq:function iq(a){this.a=a},
-ir:function ir(a){this.a=a},
-il:function il(a){this.a=a},
-ik:function ik(a){this.a=a},
-ix:function ix(a){this.a=a},
-i0:function i0(a,b){this.a=a
-this.b=b},
-f0:function f0(){},
-eV:function eV(a,b,c,d,e){var _=this
-_.a=a
-_.b=b
-_.c=c
-_.d=d
-_.e=e},
-hn:function hn(a,b,c,d,e,f,g){var _=this
-_.a=a
-_.b=b
-_.c=c
-_.d=d
-_.e=e
-_.ax=_.at=_.as=_.Q=_.y=_.x=_.w=_.r=null
-_.a$=f
-_.b$=g},
-ho:function ho(){},
-hp:function hp(){},
-hq:function hq(){},
-f_:function f_(a){this.b=a},
-hW:function hW(){},
-f4:function f4(){},
-eo:function eo(a,b){this.a=a
-this.b=b},
-ow(a){var s,r,q=A.an(a,t.k)
-B.a.af(q,new A.iW())
-s=A.O(q)
-r=s.h("aV<1,aX>")
-s=A.an(new A.aV(q,s.h("aX(1)").a(new A.iX()),r),r.h("V.E"))
-s.$flags=1
-return s},
-ov(a){var s,r,q=A.an(a,t.a)
-B.a.af(q,new A.iU())
-s=A.O(q)
-r=s.h("aV<1,aX>")
-s=A.an(new A.aV(q,s.h("aX(1)").a(new A.iV()),r),r.h("V.E"))
-s.$flags=1
-return s},
-ad:function ad(a,b,c,d){var _=this
-_.a=a
-_.b=b
-_.c=c
-_.d=d},
-T:function T(a,b,c){this.a=a
-this.b=b
-this.$ti=c},
-iW:function iW(){},
-iX:function iX(){},
-iU:function iU(){},
-iV:function iV(){},
-ob(a,b,c){var s,r,q,p,o,n,m=A.d([],t.G)
-for(s=b.length,r=0,q=0,p=0;p<b.length;b.length===s||(0,A.B)(b),++p){o=b[p];++r
-o.gm().geK().eb(0,c)
-n=o.gea()
-if(!n.gT(n))throw A.b(A.r("cullItems: non-finite world bounds for instance "+o.gF().i(0),null))
-if(a.e6(o.gea())===B.a7){++q
-continue}B.a.j(m,o)}return new A.fq(m,new A.fr(q))},
-fr:function fr(a){this.b=a},
-fq:function fq(a,b){this.a=a
-this.b=b},
-lN(a){var s=a.a,r=new A.fH()
-return new A.fG(A.d([r.$4(s[3]+s[0],s[7]+s[4],s[11]+s[8],s[15]+s[12]),r.$4(s[3]-s[0],s[7]-s[4],s[11]-s[8],s[15]-s[12]),r.$4(s[3]+s[1],s[7]+s[5],s[11]+s[9],s[15]+s[13]),r.$4(s[3]-s[1],s[7]-s[5],s[11]-s[9],s[15]-s[13]),r.$4(s[3]+s[2],s[7]+s[6],s[11]+s[10],s[15]+s[14]),r.$4(s[3]-s[2],s[7]-s[6],s[11]-s[10],s[15]-s[14])],t.dV))},
-br:function br(a,b){this.a=a
-this.b=b},
-cr:function cr(a,b){this.a=a
-this.b=b},
-fG:function fG(a){this.a=a},
-fH:function fH(){},
-k0(a,b,c,d){var s=1/Math.tan(c/2),r=1/(d-b),q=new Float32Array(16)
-q[0]=s/a
-q[5]=s
-q[10]=(b+d)*r
-q[11]=-1
-q[14]=2*b*d*r
-return new A.bR(q)},
-bR:function bR(a){this.a=a},
-fX:function fX(){},
-ao:function ao(a,b,c){this.a=a
-this.b=b
-this.c=c},
-eL:function eL(a,b){this.a=a
-this.b=b},
-cf:function cf(a,b,c,d,e,f,g,h,i,j,k,l,m){var _=this
-_.a=a
-_.b=b
-_.c=c
-_.d=d
-_.e=e
-_.f=f
-_.r=g
-_.w=h
-_.x=i
-_.y=j
-_.z=k
-_.Q=l
-_.as=m},
-eM:function eM(a,b,c,d,e,f,g){var _=this
-_.a=a
-_.b=b
-_.c=c
-_.d=d
-_.e=e
-_.f=f
-_.r=g},
-dD:function dD(a,b,c,d,e,f,g,h){var _=this
-_.a=a
-_.b=b
-_.c=c
-_.d=d
-_.e=e
-_.f=f
-_.r=g
-_.w=h},
-eN:function eN(a,b,c,d,e){var _=this
-_.a=a
-_.b=b
-_.c=c
-_.d=d
-_.f=e},
-dL:function dL(a,b,c,d,e,f,g){var _=this
-_.a=a
-_.b=b
-_.c=c
-_.d=d
-_.e=e
-_.f=f
-_.w=g},
-eQ:function eQ(a,b,c,d,e){var _=this
-_.a=a
-_.b=b
-_.c=c
-_.d=d
-_.e=e},
-eR:function eR(a,b){this.a=a
-this.b=b},
-co:function co(a,b,c,d,e,f,g,h,i,j,k,l){var _=this
-_.a=a
-_.b=b
-_.c=c
-_.d=d
-_.e=e
-_.f=f
-_.r=g
-_.w=h
-_.x=i
-_.y=j
-_.z=k
-_.Q=l},
-eS:function eS(a,b,c,d,e,f){var _=this
-_.a=a
-_.b=b
-_.c=c
-_.d=d
-_.e=e
-_.f=f},
-dN:function dN(a,b,c,d,e,f,g,h,i,j,k,l){var _=this
-_.a=a
-_.b=b
-_.c=c
-_.d=d
-_.e=e
-_.f=f
-_.r=g
-_.w=h
-_.z=i
-_.Q=j
-_.as=k
-_.at=l},
-eT:function eT(a,b,c,d,e,f,g,h,i){var _=this
-_.a=a
-_.b=b
-_.c=c
-_.d=d
-_.e=e
-_.f=f
-_.r=g
-_.w=h
-_.x=i},
-dU:function dU(a,b,c,d,e,f,g){var _=this
-_.a=a
-_.b=b
-_.c=c
-_.d=d
-_.e=e
-_.r=f
-_.w=g},
-eX:function eX(a,b,c,d,e,f,g){var _=this
-_.a=a
-_.b=b
-_.c=c
-_.d=d
-_.e=e
-_.f=f
-_.r=g},
-cE:function cE(a,b,c){this.a=a
-this.b=b
-this.c=c},
-eZ:function eZ(a,b,c,d){var _=this
-_.a=a
-_.b=b
-_.c=c
-_.d=d},
-bJ:function bJ(a){this.b=a},
-dE:function dE(a,b,c){this.a=a
-this.b=b
-this.c=c},
-aa(a,b,c,d,e){var s=d==null?a.e:d,r=e==null?a.f:e
-return new A.M(a.a,a.b,b,c,s,r)},
-ja:function ja(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q){var _=this
-_.c=a
-_.d=b
-_.r=c
-_.w=d
-_.y=e
-_.z=f
-_.Q=g
-_.as=h
-_.at=i
-_.ax=j
-_.ay=k
-_.ch=l
-_.CW=m
-_.cx=n
-_.cy=o
-_.db=p
-_.dx=q},
-cN:function cN(a,b,c,d,e,f){var _=this
-_.a=a
-_.b=b
-_.c=c
-_.d=d
-_.f=e
-_.r=f},
-f1:function f1(a,b,c,d,e){var _=this
-_.a=a
-_.b=b
-_.c=c
-_.d=d
-_.e=e},
-eg:function eg(a,b,c,d,e,f){var _=this
-_.a=a
-_.b=b
-_.c=c
-_.d=d
-_.e=e
-_.f=f},
-f2:function f2(a,b,c,d,e){var _=this
-_.a=a
-_.b=b
-_.c=c
-_.d=d
-_.e=e},
-k9(a){var s=Math.abs(0)<0.99?B.cL:B.p,r=B.u.gci(),q=s.bX(r).gci(),p=r.bX(q)
-s=new Float32Array(16)
-s[0]=q.a
-s[1]=p.a
-s[2]=-r.a
-s[3]=0
-s[4]=q.b
-s[5]=p.b
-s[6]=-r.b
-s[7]=0
-s[8]=q.c
-s[9]=p.c
-s[10]=-r.c
-s[11]=0
-s[12]=-q.b1(B.p)
-s[13]=-p.b1(B.p)
-s[14]=r.b1(B.p)
-s[15]=1
-return new A.bt(A.k0(1,1,B.i.du(1,0.1,3),0.05).a_(0,new A.bR(s)))},
-bt:function bt(a){this.a=a},
-ep:function ep(a,b,c,d,e,f,g,h,i,j,k){var _=this
-_.a=a
-_.b=b
-_.c=c
-_.d=d
-_.e=e
-_.f=f
-_.r=g
-_.w=h
-_.x=i
-_.y=j
-_.z=k},
-f5:function f5(a,b,c,d,e,f,g,h,i){var _=this
-_.a=a
-_.b=b
-_.c=c
-_.d=d
-_.e=e
-_.f=f
-_.r=g
-_.w=h
-_.x=i},
-o8(b7,b8,b9,c0,c1,c2,c3,c4,c5,c6,c7,c8,c9,d0,d1,d2,d3,d4,d5,d6,d7,d8,d9,e0,e1,e2,e3,e4,e5,e6){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0,a1,a2,a3,a4,a5,a6,a7,a8=null,a9=u.l,b0="#version 300 es\nprecision highp float;\nin vec2 vUv;\nuniform sampler2D uSource;\nuniform vec2 uTexelStep;\nout vec4 oColor;\n\nconst float WEIGHTS[5]=float[5](0.227027,0.1945946,0.1216216,0.054054,0.016216);\n\nvoid main(){\n  vec3 sum=texture(uSource,vUv).rgb*WEIGHTS[0];\n  for(int i=1;i<5;i++){\n    vec2 offset=uTexelStep*float(i);\n    sum+=texture(uSource,vUv+offset).rgb*WEIGHTS[i];\n    sum+=texture(uSource,vUv-offset).rgb*WEIGHTS[i];\n  }\n  oColor=vec4(sum,1.0);\n}\n",b1="bloomBlurH",b2="bloomBlurV",b3="dofBlurH",b4="dofBlurV",b5={},b6=c0.b
-if(!b6.t(0,"shadows"))throw A.b(A.aL(c0,"profile","buildShadowGraph requires the shadows feature; use buildSafeGraph for a shadow-free profile"))
-s=b6.t(0,"ssao")
-r=b6.t(0,"bloom")
-q=b6.t(0,"dof")
-p=b6.t(0,"grade")
-o=b6.t(0,"ps1")
-n=b6.t(0,"vhs")
-b6=(e5+1)/2|0
-m=(e4+1)/2|0
-l=A.aa(B.O,e5,e4,e3,a8)
-k=A.aa(B.O.cf(),e5,e4,a8,a8)
-A.aa(B.ch,e5,e4,a8,a8)
-j=A.aa(B.ce,e5,e4,a8,a8)
-i=A.aa(B.c9,e6,e6,a8,a8)
-h=A.aa(B.ca,b6,m,a8,a8)
-g=A.aa(B.cb,b6,m,a8,a8)
-f=A.aa(B.cf,b6,m,a8,a8)
-e=A.aa(B.cg,b6,m,a8,a8)
-d=$.lf()
-c=e3>1
-b=A.aa(d,e5,e4,a8,c?2:1)
-d=A.aa(B.c6,b6,m,a8,a8)
-a=A.aa(B.c7,b6,m,a8,a8)
-a0=A.aa(B.c8,e5,e4,a8,a8)
-a1=A.aa(B.cc,e5,e4,a8,a8)
-a2=A.aa(B.ci,e5,e4,a8,a8)
-a3=A.aa(B.cd,e5,e4,a8,a8)
-a4=c?new A.cE(b8,l,k):a8
-b5.a=null
-a5=A.k9(B.aO)
-a6=t.e
-a7=A.d([],a6)
-k=c?k:l
-if(r){B.a.W(a7,A.d([new A.cf(b7,a9,b0,b8,b1,b1,B.aA,!0,k,f,d6,b6,m),new A.cf(b7,a9,b0,b8,b2,b2,B.cV,!1,f,e,c2,b6,m),new A.dD(b7,a9,"#version 300 es\nprecision highp float;\nin vec2 vUv;\nuniform sampler2D uBloom;\nuniform float uBloomStrength;\nout vec4 oColor;\n\nvoid main(){\n  oColor=vec4(texture(uBloom,vUv).rgb*uBloomStrength,1.0);\n}\n",b8,c3,e,k,b)],a6))
-k=b}if(q){B.a.W(a7,A.d([new A.co(b7,a9,b0,b8,b3,b3,B.aB,k,d,d6,b6,m),new A.co(b7,a9,b0,b8,b4,b4,B.cW,d,a,c7,b6,m),new A.dN(b7,a9,"#version 300 es\nprecision highp float;\nin vec2 vUv;\nuniform sampler2D uSharp;\nuniform sampler2D uBlurred;\nuniform sampler2D uSceneDepth;\nuniform float uNear;\nuniform float uFar;\nuniform float uFocusDistance;\nuniform float uFocusRange;\nuniform float uStrength;\nout vec4 oColor;\n\nfloat linearDepth(float raw){\n  float ndc=raw*2.0-1.0;\n  return (2.0*uNear*uFar)/(uFar+uNear-ndc*(uFar-uNear));\n}\n\n// Circle-of-confusion is a simple linear ramp from the focus distance\n// outward (front and back treated the same \u2014 no separate near/far falloff\n// curve), clamped to [0,1] and scaled by uStrength so\n// PostProcessState.depthOfFieldStrength == 0 is a true no-op (coc == 0\n// everywhere, oColor == the sharp source exactly).\nvoid main(){\n  float depth=linearDepth(texture(uSceneDepth,vUv).r);\n  float coc=clamp(abs(depth-uFocusDistance)/max(uFocusRange,0.0001),0.0,1.0)*uStrength;\n  vec3 sharp=texture(uSharp,vUv).rgb;\n  vec3 blurred=texture(uBlurred,vUv).rgb;\n  oColor=vec4(mix(sharp,blurred,coc),1.0);\n}\n",b8,d6,c8,d7,c4,k,j,a,a0)],a6))
-k=a0}if(p){B.a.j(a7,new A.dU(b7,a9,"#version 300 es\nprecision highp float;\nin vec2 vUv;\nuniform sampler2D uScene;\nuniform sampler2D uLut;\nuniform float uLutSize;\nuniform float uStrength;\nout vec4 oColor;\n\n// \xa75.3's \"identity LUT\" baseline resource and this shader's actual grade LUT\n// are both just textures in this same unwrapped-3D-LUT layout (width =\n// size*size, height = size, blue index selects a size*size horizontal\n// slice) \u2014 there is nothing identity-specific about the sampling path\n// itself, only about what a given LUT texture's texels happen to encode.\nvec3 sampleLut(vec3 color){\n  float size=uLutSize;\n  float maxIndex=size-1.0;\n  vec3 scaled=clamp(color,0.0,1.0)*maxIndex;\n  float bLow=floor(scaled.b);\n  float bHigh=min(bLow+1.0,maxIndex);\n  float bFrac=scaled.b-bLow;\n  vec2 texel=vec2(1.0/(size*size),1.0/size);\n  vec2 rg=vec2(scaled.r+0.5,scaled.g+0.5);\n  vec2 uvLow=vec2((bLow*size+rg.x)*texel.x,rg.y*texel.y);\n  vec2 uvHigh=vec2((bHigh*size+rg.x)*texel.x,rg.y*texel.y);\n  vec3 colorLow=texture(uLut,uvLow).rgb;\n  vec3 colorHigh=texture(uLut,uvHigh).rgb;\n  return mix(colorLow,colorHigh,bFrac);\n}\n\nvoid main(){\n  vec3 scene=texture(uScene,vUv).rgb;\n  vec3 graded=sampleLut(scene);\n  oColor=vec4(mix(scene,graded,uStrength),1.0);\n}\n",b8,d0,k,a1))
-k=a1}if(o){B.a.j(a7,new A.eg(b7,a9,"#version 300 es\nprecision highp float;\nin vec2 vUv;\nuniform sampler2D uScene;\nuniform float uQuantizationBits;\nuniform float uDitherStrength;\nout vec4 oColor;\n\nconst float BAYER4X4[16]=float[16](\n  0.0,8.0,2.0,10.0,\n  12.0,4.0,14.0,6.0,\n  3.0,11.0,1.0,9.0,\n  15.0,7.0,13.0,5.0\n);\n\nfloat bayerValue(vec2 fragCoord){\n  int x=int(mod(fragCoord.x,4.0));\n  int y=int(mod(fragCoord.y,4.0));\n  return BAYER4X4[y*4+x]/16.0;\n}\n\n// \xa76.2's \"quantization/dither is an explicit composite after LUT grade\":\n// an ordered (Bayer 4x4) dither offset, scaled to one quantization step, is\n// added before rounding to uQuantizationBits levels per channel \u2014 this is\n// what breaks a hard quantization boundary into a dithered gradient instead\n// of a flat color band. uQuantizationBits==8 (RGBA8's own native precision)\n// with uDitherStrength==0 round-trips the source exactly: no dither offset\n// is added, and floor(x*255+0.5)/255 returns an already-8-bit value\n// unchanged.\nvoid main(){\n  vec3 scene=texture(uScene,vUv).rgb;\n  float levels=pow(2.0,uQuantizationBits)-1.0;\n  float dither=(bayerValue(gl_FragCoord.xy)-0.5)*uDitherStrength/levels;\n  vec3 dithered=clamp(scene+dither,0.0,1.0);\n  vec3 quantized=floor(dithered*levels+0.5)/levels;\n  oColor=vec4(quantized,1.0);\n}\n",b8,k,a2))
-k=a2}if(n){B.a.j(a7,new A.eF(b7,a9,'#version 300 es\nprecision highp float;\nin vec2 vUv;\nuniform sampler2D uScene;\nuniform sampler2D uHistory;\nuniform float uTime;\nuniform float uChromaWeight;\nuniform float uTrackingWeight;\nuniform float uNoiseWeight;\nuniform float uHeadSwitchWeight;\nuniform float uDropoutWeight;\nuniform float uGhostWeight;\nout vec4 oColor;\n\nfloat hash(vec2 p){\n  return fract(sin(dot(p,vec2(12.9898,78.233)))*43758.5453);\n}\n\n// \xa78.10: "sample the jittered/tracking UV before YIQ/chroma work so later\n// sampling does not overwrite earlier effects" \u2014 tracking jitter is\n// computed and applied to the UV exactly once, up front; every later\n// effect either operates on the resulting single sample or samples a\n// further offset FROM that same jittered UV, never re-reading uScene at\n// the original vUv.\nvoid main(){\n  float scanline=vUv.y;\n\n  // Tracking: a per-scanline horizontal jitter, re-rolled roughly 8 times\n  // a second (not per-frame) so it reads as tape wobble rather than\n  // high-frequency noise. Comfort clamp: 0.02 UV (a few source texels at\n  // this bootstrap\'s 384-wide internal resolution) is the max displacement\n  // regardless of weight \u2014 a weight of 1.0 must read as "visibly glitchy,"\n  // never as "the image is unreadable."\n  float trackingNoise=hash(vec2(floor(scanline*216.0),floor(uTime*8.0)))-0.5;\n  float jitter=trackingNoise*0.02*uTrackingWeight;\n  vec2 uv=vec2(clamp(vUv.x+jitter,0.0,1.0),vUv.y);\n  vec3 raw=texture(uScene,uv).rgb;\n\n  // Chroma bleed: convert to YIQ, sample a second, further-offset UV for\n  // the chroma (I/Q) channels only \u2014 luma (what reads as "sharp" to the\n  // eye) stays exactly where tracking already put it; only color smears.\n  vec2 chromaUv=vec2(clamp(uv.x+0.01*uChromaWeight,0.0,1.0),uv.y);\n  vec3 rawChroma=texture(uScene,chromaUv).rgb;\n  float y=dot(raw,vec3(0.299,0.587,0.114));\n  float i=dot(rawChroma,vec3(0.596,-0.274,-0.322));\n  float q=dot(rawChroma,vec3(0.211,-0.523,0.312));\n  vec3 yiqColor=vec3(\n    y+0.956*i+0.621*q,\n    y-0.272*i-0.647*q,\n    y-1.106*i+1.703*q\n  );\n  vec3 color=mix(raw,yiqColor,uChromaWeight);\n\n  // Static/snow: modeled in YIQ (luma + chroma), the same conversion\n  // chroma bleed already uses above, not independent RGB \u2014 real analog\n  // colour noise comes from the chroma subcarrier, so its hues are\n  // correlated/limited rather than arbitrary per-channel static. Noise\n  // cells are quantized coarser along x than y, giving each speckle a\n  // short horizontal dash instead of an isolated dot \u2014 a "vague line\n  // shape," matching how scanline-based static actually streaks. A\n  // sparser, stronger sparkle layer and a rare single-sample micro-\n  // distortion (an actual tiny position offset, not just colour) are both\n  // gated by a high-threshold mask so only occasional pixels carry the\n  // effect \u2014 small magnitude on top of that sparsity, for a sprinkle, not\n  // a wash.\n  vec2 noiseCell=vec2(floor(gl_FragCoord.x/3.0),gl_FragCoord.y)+uTime*60.0;\n  float noiseY=(hash(noiseCell)-0.5)*0.05;\n  float noiseI=(hash(noiseCell+vec2(17.0,3.0))-0.5)*0.14;\n  float noiseQ=(hash(noiseCell+vec2(53.0,29.0))-0.5)*0.14;\n  vec3 noiseYiq=vec3(\n    noiseY+0.956*noiseI+0.621*noiseQ,\n    noiseY-0.272*noiseI-0.647*noiseQ,\n    noiseY-1.106*noiseI+1.703*noiseQ\n  );\n  color+=noiseYiq*uNoiseWeight;\n  float sparkleMask=step(0.995,hash(noiseCell+vec2(97.0,3.0)));\n  float sparkleI=(hash(noiseCell+5.0)-0.5)*2.0;\n  float sparkleQ=(hash(noiseCell+9.0)-0.5)*2.0;\n  vec3 sparkleYiq=0.5+0.5*vec3(\n    0.956*sparkleI+0.621*sparkleQ,\n    -0.272*sparkleI-0.647*sparkleQ,\n    -1.106*sparkleI+1.703*sparkleQ\n  );\n  color+=sparkleYiq*sparkleMask*0.3*uNoiseWeight;\n  float distortMask=step(0.997,hash(noiseCell+vec2(43.0,61.0)));\n  vec2 distortOffset=\n    vec2(hash(noiseCell+1.0)-0.5,hash(noiseCell+2.0)-0.5)*0.01;\n  vec3 distortColor=texture(uScene,clamp(uv+distortOffset,0.0,1.0)).rgb;\n  color=mix(color,distortColor,distortMask*0.5*uNoiseWeight);\n\n  // Head-switch band: a thin strip near the bottom of frame (where a real\n  // VCR\'s playback head crosses the tape edge) gets a stronger tear,\n  // fading smoothly over the band\'s height rather than a hard cutoff.\n  float headSwitchBand=smoothstep(0.06,0.0,abs(scanline-0.98));\n  float headSwitchJitter=(hash(vec2(uTime*30.0,scanline))-0.5)*0.06;\n  vec2 headSwitchUv=vec2(\n    clamp(uv.x+headSwitchJitter*uHeadSwitchWeight*headSwitchBand,0.0,1.0),\n    uv.y\n  );\n  vec3 headSwitchColor=texture(uScene,headSwitchUv).rgb;\n  color=mix(color,headSwitchColor,uHeadSwitchWeight*headSwitchBand);\n\n  // Dropout: sparse, per-scanline streaks mimicking analog tape dropout.\n  // Real dropout is neither a flat full-width bar nor a fixed brightness \u2014\n  // a per-x noise mask (smoothstepped, not a hard cutoff) makes each\n  // streak\'s width and edges vary along its length, and a per-streak\n  // random intensity keeps consecutive dropouts from looking identical. A\n  // slow ~6Hz reroll (not per-frame) and a high activation threshold keep\n  // this an occasional glitch rather than a strobe \u2014 subtle enough not to\n  // distract during continuous play, even at uDropoutWeight\'s full value.\n  float dropoutCell=floor(uTime*6.0);\n  float dropoutRoll=hash(vec2(floor(scanline*216.0),dropoutCell));\n  float dropoutActive=step(0.994,dropoutRoll);\n  float dropoutIntensity=hash(vec2(dropoutCell,17.0))*0.5+0.4;\n  float dropoutMask=hash(\n    vec2(floor(uv.x*48.0),floor(scanline*216.0)+dropoutCell*3.0)\n  );\n  float dropoutStripe=\n    dropoutActive*uDropoutWeight*smoothstep(0.3,0.9,dropoutMask);\n  color=mix(color,vec3(dropoutIntensity),dropoutStripe*0.8);\n\n  // Ghosting: blends in last frame\'s own VHS *output* (uHistory, never\n  // uScene), horizontally offset, for a trailing double-image echo \u2014\n  // reading the previous frame\'s already-composited result is what makes\n  // this a genuine feedback trail rather than a static double-exposure.\n  vec2 ghostUv=vec2(clamp(uv.x-0.015,0.0,1.0),uv.y);\n  vec3 ghostColor=texture(uHistory,ghostUv).rgb;\n  color=mix(color,ghostColor,uGhostWeight*0.5);\n\n  oColor=vec4(clamp(color,0.0,1.0),1.0);\n}\n',b8,e2,e1,k,a3))
-k=a3}j=A.d([new A.dL(b7,"#version 300 es\nlayout(location=0) in vec3 aPosition;\nlayout(location=4) in vec3 aUvMat;\nuniform mat4 uViewProjection;\nuniform mat4 uModel;\nuniform mat4 uInstanceModels[16];\nuniform float uUseInstances;\nuniform float uVertexSnapGrid;\nuniform float uAffineWarpStrength;\nout highp vec2 vUv;\nout highp float vUvW;\n// This prepass must land geometry on exactly the same pixels shadowedWorld\n// will, because its depth is what SSAO occludes against and what\n// shadowedWorld then samples back at its *own* gl_FragCoord. Snapping there\n// and not here would mean the AO texel a fragment reads was computed for a\n// slightly different surface than the one being shaded, and the error grows\n// with the grid. The snap math below is deliberately identical to\n// shadowed_world.vert's, including uVertexSnapGrid==0 skipping the branch.\n// The same reasoning now covers UVs: an alpha-masked surface's holes must\n// land on the same pixels in both passes, and affine sampling moves where a\n// given texel lands, so the w-premultiply below is the same expression\n// shadowed_world.vert uses and is driven from the same per-material weight.\nvoid main(){\n  mat4 model=uModel;\n  if(uUseInstances>0.5){model=uInstanceModels[gl_InstanceID];}\n  vec4 clip=uViewProjection*model*vec4(aPosition,1.0);\n  if(uVertexSnapGrid>0.0){\n    vec2 ndc=clip.xy/clip.w;\n    ndc=floor(ndc/uVertexSnapGrid+0.5)*uVertexSnapGrid;\n    clip.xy=ndc*clip.w;\n  }\n  gl_Position=clip;\n  float affineW=mix(1.0,clip.w,uAffineWarpStrength);\n  vUv=aUvMat.xy*affineW;\n  vUvW=affineW;\n}\n","#version 300 es\nprecision highp float;\nin highp vec2 vUv;\nin highp float vUvW;\nuniform sampler2D uAlbedo;\nuniform float uAlphaCutoff;\nuniform float uAffineWarpStrength;\n// \xa76.2: \"includes opaque + alpha-masked depth.\" A masked surface's holes\n// must not write depth, or SSAO occludes against geometry the world pass\n// discarded and DOF's CoC defocuses against a surface nothing shaded. The\n// compare is bit-identical to shadowed_world.frag's \u2014 same uv recovery,\n// same threshold, same direction \u2014 because any divergence reintroduces\n// exactly the class of bug the vertex-snap parity fix (bug 17) closed.\n// Everything is inside the uAlphaCutoff>0. branch, so an unmasked draw\n// costs no texture fetch at all here, only the interpolation the varyings\n// were already going to do.\nvoid main(){\n  if(uAlphaCutoff>0.){\n    vec2 uv=uAffineWarpStrength>0.?vUv/vUvW:vUv;\n    if(texture(uAlbedo,uv).a<uAlphaCutoff)discard;\n  }\n}\n",d3,d2,c1,j)],a6)
-if(s)j.push(new A.es(b7,a9,"#version 300 es\nprecision highp float;\nin vec2 vUv;\nuniform sampler2D uSceneDepth;\nuniform float uNear;\nuniform float uFar;\nuniform float uProjScaleX;\nuniform float uProjScaleY;\nuniform float uRadius;\nuniform float uStrength;\nout vec4 oColor;\n\nconst int KERNEL_SIZE=8;\nconst vec3 KERNEL[8]=vec3[8](\n  vec3( 0.35, 0.23, 0.45),\n  vec3(-0.28, 0.41, 0.32),\n  vec3( 0.18,-0.36, 0.55),\n  vec3(-0.42,-0.19, 0.28),\n  vec3( 0.51, 0.08, 0.18),\n  vec3(-0.11, 0.53, 0.16),\n  vec3( 0.07,-0.48, 0.38),\n  vec3(-0.33,-0.31, 0.48)\n);\n\nfloat linearDepth(float raw){\n  float ndc=raw*2.0-1.0;\n  return (2.0*uNear*uFar)/(uFar+uNear-ndc*(uFar-uNear));\n}\n\nvec3 viewPosAt(vec2 uv){\n  float viewZ=-linearDepth(texture(uSceneDepth,uv).r);\n  vec2 ndc=uv*2.0-1.0;\n  float viewX=ndc.x*(-viewZ)/uProjScaleX;\n  float viewY=ndc.y*(-viewZ)/uProjScaleY;\n  return vec3(viewX,viewY,viewZ);\n}\n\n// Pinned per-pixel kernel rotation \u2014 a deterministic hash of screen\n// position, not per-frame randomness, matching \xa78.5's \"rotates a small\n// kernel from pinned blue noise\" without the extra machinery of an actual\n// noise texture: the rotation angle is stable across frames for a given\n// pixel, which is what \"pinned\" requires (temporal stability), while still\n// varying spatially enough to break up banding between neighboring samples.\nfloat pinnedRotation(vec2 fragCoord){\n  return fract(sin(dot(fragCoord,vec2(12.9898,78.233)))*43758.5453)*6.2831853;\n}\n\nvoid main(){\n  vec3 originView=viewPosAt(vUv);\n  // Screen-space derivatives reconstruct a per-fragment normal from\n  // neighboring depth samples alone \u2014 no G-buffer normal attachment exists\n  // (deferred; see depth_prepass.dart's doc comment), which is sufficient\n  // for a chunky/stylized AO term rather than a precision-critical one.\n  vec3 normalView=normalize(cross(dFdx(originView),dFdy(originView)));\n\n  // Rotates each kernel sample's tangent-plane (x,y) offset in place, before\n  // it's transformed into view space by tbn below \u2014 this is what actually\n  // varies the kernel per pixel; rotating the already-reprojected screen UV\n  // afterward would rotate around the wrong origin and misalign every\n  // sample from the surface it's meant to test.\n  float angle=pinnedRotation(gl_FragCoord.xy);\n  float ca=cos(angle);\n  float sa=sin(angle);\n  mat2 rot=mat2(ca,sa,-sa,ca);\n\n  vec3 up=abs(normalView.z)<0.99?vec3(0.0,0.0,1.0):vec3(1.0,0.0,0.0);\n  vec3 tangent=normalize(cross(up,normalView));\n  vec3 bitangent=cross(normalView,tangent);\n  mat3 tbn=mat3(tangent,bitangent,normalView);\n\n  float occlusion=0.0;\n  for(int i=0;i<KERNEL_SIZE;i++){\n    vec3 kernelSample=KERNEL[i];\n    kernelSample.xy=rot*kernelSample.xy;\n    vec3 samplePos=originView+tbn*kernelSample*uRadius;\n    // Project the sample's view-space position back to screen UV using the\n    // same scale factors used to reconstruct it, inverted.\n    vec2 sampleUv=vec2(\n      samplePos.x*uProjScaleX/(-samplePos.z),\n      samplePos.y*uProjScaleY/(-samplePos.z)\n    );\n    // NDC [-1,1] -> UV [0,1] requires the constant 0.5, not vUv (the\n    // *current* fragment's own UV) \u2014 adding vUv here was a real bug: it\n    // conflated \"this sample's own absolute reprojected screen position\"\n    // with \"an offset relative to the current fragment,\" producing an\n    // error of (vUv-0.5) per axis that grows with distance from screen\n    // center. That's exactly what produced a huge, blobby, non-local dark\n    // region instead of contact occlusion \u2014 every sample tested a wildly\n    // wrong depth location except right at screen center, where the error\n    // happened to be near zero.\n    sampleUv=sampleUv*0.5+0.5;\n    if(sampleUv.x<0.0||sampleUv.x>1.0||sampleUv.y<0.0||sampleUv.y>1.0){\n      continue;\n    }\n    vec3 occluderView=viewPosAt(sampleUv);\n    float rangeCheck=smoothstep(0.0,1.0,uRadius/max(abs(originView.z-occluderView.z),0.0001));\n    occlusion+=(occluderView.z>=samplePos.z+0.02?1.0:0.0)*rangeCheck;\n  }\n  float ao=1.0-clamp((occlusion/float(KERNEL_SIZE))*uStrength,0.0,1.0);\n  oColor=vec4(vec3(ao),1.0);\n}\n",b8,d7,c4,h))
-if(s)j.push(new A.er(b7,a9,'#version 300 es\nprecision highp float;\nin vec2 vUv;\nuniform sampler2D uSsaoRaw;\nuniform sampler2D uSceneDepth;\nuniform vec2 uTexelSize;\nuniform float uNear;\nuniform float uFar;\nout vec4 oColor;\n\nfloat linearDepth(float raw){\n  float ndc=raw*2.0-1.0;\n  return (2.0*uNear*uFar)/(uFar+uNear-ndc*(uFar-uNear));\n}\n\n// \xa78.5: "uses a depth-aware bilateral blur rather than smearing across\n// silhouettes" \u2014 a plain box blur would bleed occlusion from a near object\n// onto a far background behind it (or vice versa) whenever they share\n// screen-space pixels near a silhouette edge; weighting each tap by how\n// close its depth is to the center tap\'s depth is what keeps the blur\n// confined to one surface at a time.\nvoid main(){\n  float centerDepth=linearDepth(texture(uSceneDepth,vUv).r);\n  float sum=0.0;\n  float weightSum=0.0;\n  for(int y=-2;y<=2;y++){\n    for(int x=-2;x<=2;x++){\n      vec2 offset=vec2(float(x),float(y))*uTexelSize;\n      vec2 sampleUv=vUv+offset;\n      float sampleDepth=linearDepth(texture(uSceneDepth,sampleUv).r);\n      float depthWeight=1.0/(1.0+abs(sampleDepth-centerDepth)*4.0);\n      sum+=texture(uSsaoRaw,sampleUv).r*depthWeight;\n      weightSum+=depthWeight;\n    }\n  }\n  float blurred=sum/max(weightSum,0.0001);\n  oColor=vec4(vec3(blurred),1.0);\n}\n',b8,e0,d7,c4,b6,m,h,g))
-j.push(new A.ep(b7,"#version 300 es\nlayout(location=0) in vec3 aPosition;\nlayout(location=4) in vec3 aUvMat;\nuniform mat4 uLightViewProjection;\nuniform mat4 uModel;\nuniform mat4 uInstanceModels[16];\nuniform float uUseInstances;\nout highp vec2 vUv;\n// No affine premultiply here, unlike depth_prepass.vert. Affine sampling is\n// an artifact of *this camera's* screen-space rasterization; the shadow map\n// rasterizes the same triangle from the light, where the equivalent warp\n// would be a different, unrelated distortion. A masked surface therefore\n// cuts its shadow from the perspective-correct UVs \u2014 the geometrically\n// right holes \u2014 while the camera passes cut theirs from whatever the PS1\n// profile asked for. That divergence is deliberate: the two rasterizations\n// have no shared screen space to agree in.\nvoid main(){\n  mat4 model=uModel;\n  if(uUseInstances>0.5){model=uInstanceModels[gl_InstanceID];}\n  vUv=aUvMat.xy;\n  gl_Position=uLightViewProjection*model*vec4(aPosition,1.0);\n}\n",'#version 300 es\nprecision highp float;\nin highp vec2 vUv;\nuniform sampler2D uAlbedo;\nuniform float uAlphaCutoff;\n// \xa76.2: "alpha-masked geometry participates in shadow, prepass, and opaque\n// depth-writing routes." Without this discard a lattice, a leaf or a grille\n// casts the solid shadow of its bounding quad \u2014 the single most obvious way\n// a masked material reads as fake. uAlphaCutoff==0 skips the fetch, so\n// every opaque caster costs exactly what it did before this existed.\nvoid main(){\n  if(uAlphaCutoff>0.&&texture(uAlbedo,vUv).a<uAlphaCutoff)discard;\n}\n',d3,d2,c1,c5,a8,a8,new A.iA(b5),i))
-j.push(new A.eq(b7,"#version 300 es\nlayout(location=0) in vec3 aPosition;\nlayout(location=1) in vec3 aNormal;\nlayout(location=2) in vec4 aColor;\nlayout(location=3) in float aAlpha;\nlayout(location=4) in vec3 aUvMat;\nlayout(location=5) in vec4 aTangent;\nlayout(location=6) in vec2 aUv1;\nuniform mat4 uViewProjection;\nuniform mat4 uView;\nuniform mat4 uModel;\nuniform mat4 uNormalMatrix;\nuniform mat4 uInstanceModels[16];\nuniform mat4 uInstanceNormalMatrices[16];\nuniform float uUseInstances;\nuniform mat4 uLightViewProjection;\nuniform float uVertexSnapGrid;\nuniform float uAffineWarpStrength;\nout vec4 vColor;\nout vec3 vNormal;\nout highp vec2 vUv;\nout highp float vUvW;\nout highp vec2 vUv1;\nout vec4 vLightSpacePos;\nout vec3 vWorldPos;\nout vec4 vTangent;\nout float vViewDepth;\nvoid main(){\n  mat4 model=uModel;\n  mat4 normalMatrix=uNormalMatrix;\n  if(uUseInstances>0.5){model=uInstanceModels[gl_InstanceID];normalMatrix=uInstanceNormalMatrices[gl_InstanceID];}\n  vColor=vec4(aColor.rgb,aAlpha);\n  vNormal=mat3(normalMatrix)*aNormal;\n  vec4 worldPos=model*vec4(aPosition,1.0);\n  vWorldPos=worldPos.xyz;\n  vTangent=vec4(mat3(normalMatrix)*aTangent.xyz,aTangent.w);\n  vLightSpacePos=uLightViewProjection*worldPos;\n  // RV-09 rung 5's fog: the same \"linear view depth\" convention SSAO/DOF\n  // already reconstruct from a depth texture, computed directly here\n  // instead \u2014 this pass rasterizes the actual geometry, so there is a true\n  // view-space Z per-vertex already, with no texture round-trip needed.\n  vViewDepth=-(uView*worldPos).z;\n  vec4 clip=uViewProjection*worldPos;\n  // RV-09 rung 3's PS1 profile: snaps clip-space xy to a fixed grid before\n  // the perspective divide, emulating the fixed-point vertex transform\n  // precision loss that gives PS1 geometry its characteristic wobble as it\n  // moves. uVertexSnapGrid==0 skips the branch entirely, so the default/\n  // safe path is bit-for-bit unchanged from before this rung.\n  if(uVertexSnapGrid>0.0){\n    vec2 ndc=clip.xy/clip.w;\n    ndc=floor(ndc/uVertexSnapGrid+0.5)*uVertexSnapGrid;\n    clip.xy=ndc*clip.w;\n  }\n  gl_Position=clip;\n  // Affine UV, the PS1 rung's deferred half. GLSL ES 300 has no\n  // `noperspective` qualifier, so the divide the rasterizer already performs\n  // is cancelled instead of disabled: hardware hands the fragment\n  // interp(v/w)/interp(1/w), so premultiplying a varying by w makes that\n  // expression collapse to interp(v) \u2014 screen-space linear, which *is*\n  // affine. Both varyings are scaled by the same factor so the fragment's\n  // vUv/vUvW recovers exactly that, and the intermediate blend between the\n  // two regimes stays continuous rather than popping at any strength.\n  // uAffineWarpStrength==0 gives affineW==1.0 exactly, leaving vUv equal to\n  // aUvMat.xy bit-for-bit; the fragment then skips the divide entirely on\n  // the same uniform, so the perspective-correct path is untouched rather\n  // than merely round-tripped. Snapping above only rewrites clip.xy, never\n  // clip.w, so the two PS1 halves are independent.\n  float affineW=mix(1.0,clip.w,uAffineWarpStrength);\n  vUv=aUvMat.xy*affineW;\n  vUvW=affineW;\n  vUv1=aUv1;\n}\n","#version 300 es\nprecision highp float;\nin vec4 vColor;\nin vec3 vNormal;\nin highp vec2 vUv;\nin highp float vUvW;\nin highp vec2 vUv1;\nin vec4 vLightSpacePos;\nin vec3 vWorldPos;\nin vec4 vTangent;\nin float vViewDepth;\nuniform sampler2D uAlbedo;\nuniform sampler2D uNormalMap;\nuniform sampler2D uOrmMap;\nuniform sampler2D uEmissiveMap;\nuniform sampler2D uLightmap;\nuniform sampler2D uShadowMap;\nuniform vec3 uCameraPosition;\nuniform vec3 uLightPosition;\nuniform vec3 uLightDirection;\nuniform vec3 uLightColor;\nuniform float uLightIntensity;\nuniform float uLightRange;\nuniform float uLightInnerCos;\nuniform float uLightOuterCos;\nuniform float uSpotEnabled;\nuniform vec3 uDirectionalDirection;\nuniform vec3 uDirectionalColor;\nuniform float uDirectionalIntensity;\nuniform vec3 uPointPosition0;\nuniform vec3 uPointColor0;\nuniform float uPointIntensity0;\nuniform float uPointRadius0;\nuniform vec3 uPointPosition1;\nuniform vec3 uPointColor1;\nuniform float uPointIntensity1;\nuniform float uPointRadius1;\nuniform vec3 uPointPosition2;\nuniform vec3 uPointColor2;\nuniform float uPointIntensity2;\nuniform float uPointRadius2;\nuniform vec3 uPointPosition3;\nuniform vec3 uPointColor3;\nuniform float uPointIntensity3;\nuniform float uPointRadius3;\nuniform vec3 uDirectSpotPosition0;\nuniform vec3 uDirectSpotDirection0;\nuniform vec3 uDirectSpotColor0;\nuniform float uDirectSpotIntensity0;\nuniform float uDirectSpotRange0;\nuniform float uDirectSpotInnerCos0;\nuniform float uDirectSpotOuterCos0;\nuniform float uDirectSpotEnabled0;\nuniform vec3 uDirectSpotPosition1;\nuniform vec3 uDirectSpotDirection1;\nuniform vec3 uDirectSpotColor1;\nuniform float uDirectSpotIntensity1;\nuniform float uDirectSpotRange1;\nuniform float uDirectSpotInnerCos1;\nuniform float uDirectSpotOuterCos1;\nuniform float uDirectSpotEnabled1;\nuniform vec3 uDirectSpotPosition2;\nuniform vec3 uDirectSpotDirection2;\nuniform vec3 uDirectSpotColor2;\nuniform float uDirectSpotIntensity2;\nuniform float uDirectSpotRange2;\nuniform float uDirectSpotInnerCos2;\nuniform float uDirectSpotOuterCos2;\nuniform float uDirectSpotEnabled2;\nuniform vec3 uAmbientColor;\nuniform float uAmbientIntensity;\nuniform vec2 uShadowMapTexelSize;\nuniform vec3 uMaterialTint;\nuniform vec4 uUvScaleOffset;\nuniform sampler2D uSsao;\nuniform vec2 uSceneColorSize;\nuniform float uEmissiveStrength;\nuniform float uNormalStrength;\nuniform float uRoughness;\nuniform float uMetallic;\nuniform float uOcclusionStrength;\nuniform float uClearcoatStrength;\nuniform float uClearcoatRoughness;\nuniform float uLightmapIntensity;\nuniform float uAffineWarpStrength;\nuniform float uAlphaCutoff;\nuniform float uOpaqueCoverage;\nuniform vec3 uFogColor;\nuniform float uFogStart;\nuniform float uFogEnd;\nuniform float uFogHeightFalloff;\nuniform float uFogDensity;\nuniform float uReceivesShadow;\nuniform float uRainWetness;\nlayout(location=0)out vec4 oColor;\nlayout(location=1)out vec4 oGlow;\n\n// Distance falloff (smooth to zero at uLightRange, matching SpotLight.range\n// rather than an unbounded inverse-square that never reaches zero) times\n// cone-edge falloff (smoothstep between the outer and inner cone angles,\n  // SpotLight.outerConeRadians/innerConeRadians \u2014 both fields existed on the\n  // API already but nothing read them before this, so the light previously\n  // had a hard-edged, non-attenuating cone that read as flat/harsh instead of\n// a graduated pool of light).\nfloat rangeAttenuation(float dist,float range){\n  float normalized=clamp(dist/max(range,.001),0.,1.);\n  // Smooth quartic cutoff avoids a visible ring at the authored range while\n  // retaining an inverse-square response inside the light's influence.\n  float cutoff=1.-normalized*normalized*normalized*normalized;\n  float inverseSquare=1./(1.+(dist*dist)/max(range*range,.001));\n  return cutoff*cutoff*inverseSquare;\n}\n\nfloat lightAttenuation(vec3 worldPos){\n  vec3 toFrag=worldPos-uLightPosition;\n  float dist=length(toFrag);\n  float cosAngle=dot(normalize(toFrag),normalize(uLightDirection));\n  float coneFalloff=smoothstep(uLightOuterCos,uLightInnerCos,cosAngle);\n  return rangeAttenuation(dist,uLightRange)*coneFalloff;\n}\n\nfloat pointAttenuation(vec3 worldPos,vec3 lightPosition,float lightRadius){\n  float dist=length(lightPosition-worldPos);\n  return rangeAttenuation(dist,lightRadius);\n}\n\nvec3 pointContribution(vec3 normal,vec3 worldPos,vec3 lightPosition,\n  vec3 lightColor,float lightIntensity,float lightRadius){\n  vec3 toLight=lightPosition-worldPos;\n  float ndotl=max(dot(normal,normalize(toLight)),0.);\n  return lightColor*lightIntensity*ndotl*\n    pointAttenuation(worldPos,lightPosition,lightRadius);\n}\n\nvec3 directSpotContribution(vec3 normal,vec3 worldPos,vec3 lightPosition,\n  vec3 lightDirection,vec3 lightColor,float lightIntensity,float lightRange,\n  float innerCos,float outerCos,float enabled){\n  vec3 toLight=lightPosition-worldPos;\n  float ndotl=max(dot(normal,normalize(toLight)),0.);\n  vec3 toFrag=worldPos-lightPosition;\n  float cosAngle=dot(normalize(toFrag),normalize(lightDirection));\n  float coneFalloff=smoothstep(outerCos,innerCos,cosAngle);\n  float distanceFalloff=rangeAttenuation(length(toFrag),lightRange);\n  return lightColor*lightIntensity*ndotl*coneFalloff*\n    distanceFalloff*enabled;\n}\n\n// Compact Cook-Torrance response for the clean/high path. The bounded\n// per-light evaluation makes roughness and metallic maps visibly useful\n// without introducing a deferred light buffer.\nfloat distributionGgx(float ndoth,float roughness){\n  float a=roughness*roughness;\n  float a2=a*a;\n  float denom=ndoth*ndoth*(a2-1.0)+1.0;\n  return a2/(3.14159265*denom*denom);\n}\n\nfloat geometrySchlick(float ndotv,float roughness){\n  float k=(roughness+1.0)*(roughness+1.0)/8.0;\n  return ndotv/(ndotv*(1.0-k)+k);\n}\n\nfloat geometrySmith(float ndotv,float ndotl,float roughness){\n  return geometrySchlick(ndotv,roughness)*geometrySchlick(ndotl,roughness);\n}\n\nvec3 fresnelSchlick(float cosTheta,vec3 f0){\n  return f0+(1.0-f0)*pow(1.0-clamp(cosTheta,0.0,1.0),5.0);\n}\n\nvec3 specularContribution(vec3 normal,vec3 viewDir,vec3 lightDir,\n  vec3 lightColor,float lightIntensity,float attenuation,vec3 baseColor,\n  float roughness,float metallic){\n  vec3 halfDir=normalize(viewDir+lightDir);\n  float ndotv=max(dot(normal,viewDir),0.0);\n  float ndotl=max(dot(normal,lightDir),0.0);\n  float ndoth=max(dot(normal,halfDir),0.0);\n  float hdotv=max(dot(halfDir,viewDir),0.0);\n  vec3 f0=mix(vec3(0.04),baseColor,metallic);\n  vec3 fresnel=fresnelSchlick(hdotv,f0);\n  float distribution=distributionGgx(ndoth,roughness);\n  float geometry=geometrySmith(ndotv,ndotl,roughness);\n  vec3 numerator=distribution*geometry*fresnel;\n  float denominator=max(4.0*ndotv*ndotl,0.001);\n  return numerator/denominator*lightColor*lightIntensity*attenuation*ndotl;\n}\n\nfloat sampleShadow(vec3 projCoord,float bias){\n  float shadowDepth=texture(uShadowMap,projCoord.xy).r;\n  return projCoord.z-bias>shadowDepth?0.:1.;\n}\n\n// \xa78.5's fog: \"distance plus restrained height/damp modulation\" \u2014 the base\n// term is a smoothstepped distance ramp (uFogStart..uFogEnd), not a plain\n// linear one: a linear ramp's density right at uFogStart is already\n// visibly nonzero, which reads as a hard onset band across a large\n// continuous surface like the ground plane. smoothstep's derivative is\n// zero at both ends, so density stays low just past uFogStart and eases\n// in gradually instead. Height falloff and density are each optional in\n// FrameEnvironment (nullable there, 0.0 here) and each written so 0.0 is\n// an exact no-op, rather than needing a separate enabled flag per term:\n//   - height: exp(-0*y) == 1, an identity multiply, when no falloff is set;\n//   - density: 1-exp(-0*depth) == 0, so max(distance, 0) leaves the plain\n//     distance term untouched when no density is set. Density can only\n//     ever push fog stronger than the base distance ramp, never weaker \u2014\n//     \"restrained\" in the sense that it augments, never overrides.\nfloat fogFactor(float viewDepth,float worldY){\n  float distFactor=smoothstep(uFogStart,uFogEnd,viewDepth);\n  float densityFactor=1.-exp(-uFogDensity*viewDepth);\n  float factor=max(distFactor,densityFactor);\n  float heightFactor=exp(-uFogHeightFalloff*max(worldY,0.));\n  return clamp(factor*heightFactor,0.,1.);\n}\n\nfloat shadowFactor(float ndotl){\n  vec3 projCoord=vLightSpacePos.xyz/vLightSpacePos.w;\n  projCoord=projCoord*.5+.5;\n  if(projCoord.x<0.||projCoord.x>1.||projCoord.y<0.||projCoord.y>1.||projCoord.z>1.){\n    return 1.;\n  }\n  // Receiver-plane style slope bias keeps grazing surfaces from acne while\n  // avoiding the detached-shadow look of a large constant offset.\n  float bias=max(.003*(1.-ndotl),.0008);\n  // Fixed low-discrepancy offsets avoid the directional shimmer of a regular\n  // square lattice while remaining deterministic and free of per-frame noise.\n  vec2 t=uShadowMapTexelSize;\n  float sum=0.;\n  sum+=sampleShadow(projCoord+vec3(vec2(-.942,-.399)*t,0.),bias);\n  sum+=sampleShadow(projCoord+vec3(vec2(.945,-.768)*t,0.),bias);\n  sum+=sampleShadow(projCoord+vec3(vec2(-.094,.886)*t,0.),bias);\n  sum+=sampleShadow(projCoord+vec3(vec2(.344,.294)*t,0.),bias);\n  sum+=sampleShadow(projCoord+vec3(vec2(-.716,.642)*t,0.),bias);\n  sum+=sampleShadow(projCoord+vec3(vec2(.688,-.089)*t,0.),bias);\n  sum+=sampleShadow(projCoord+vec3(vec2(-.287,-.885)*t,0.),bias);\n  sum+=sampleShadow(projCoord+vec3(vec2(.052,.008)*t,0.),bias);\n  sum+=sampleShadow(projCoord+vec3(vec2(.831,.486)*t,0.),bias);\n  return sum/9.;\n}\n\nvoid main(){\n  // The divide that undoes the rasterizer's own perspective correction (see\n  // shadowed_world.vert). Branched on the uniform rather than always\n  // dividing, so a zero-strength draw samples the untouched vUv and is\n  // bit-identical to the pre-affine path \u2014 the divisor is 1.0 there, but\n  // only after an interpolate/divide round-trip that need not return\n  // exactly 1.0. The branch is uniform across the whole draw, so it costs\n  // no divergence.\n  vec2 uv=uAffineWarpStrength>0.?vUv/vUvW:vUv;\n  uv=uv*uUvScaleOffset.xy+uUvScaleOffset.zw;\n  vec4 tex=texture(uAlbedo,uv);\n  // \xa76.2's alpha-masked route. Deliberately the first thing after the\n  // fetch it depends on, and ahead of all the lighting below: a discarded\n  // fragment must not pay for four shadow-map taps and two normalizes it\n  // will never use. uAlphaCutoff==0 is the pass's \"this material has no\n  // cutout\" sentinel (MaterialDefinition.validate forbids a real zero), so\n  // opaque and blended draws take a path containing no alpha compare at\n  // all rather than one comparing against an unreachable threshold. The\n  // same test, against the same uv, runs in depth_prepass.frag and\n  // shadow_caster.frag \u2014 three passes must agree on which fragments exist\n  // or SSAO, DOF and shadowing all occlude against holes this pass shaded\n  // through.\n  if(uAlphaCutoff>0.&&tex.a<uAlphaCutoff)discard;\n  vec3 n=normalize(vNormal);\n  // Surface-v2 supplies a tangent4 with OpenGL's +/-1 handedness in W.\n  // Compatibility14 meshes leave the attribute at its default zero and use\n  // the derivative frame below, so old content and authored tangents share\n  // one shader contract.\n  if(uNormalStrength>0.0){\n    vec3 dp1=dFdx(vWorldPos),dp2=dFdy(vWorldPos);\n    vec2 duv1=dFdx(uv),duv2=dFdy(uv);\n    vec3 derivativeT=normalize(dp1*duv2.y-dp2*duv1.y);\n    vec3 derivativeB=normalize(-dp1*duv2.x+dp2*duv1.x);\n    vec3 authoredT=normalize(vTangent.xyz-n*dot(n,vTangent.xyz));\n    bool hasAuthoredT=dot(vTangent.xyz,vTangent.xyz)>0.25;\n    vec3 t=hasAuthoredT?authoredT:derivativeT;\n    vec3 b=hasAuthoredT?normalize(cross(n,t)*vTangent.w):derivativeB;\n    vec3 map=texture(uNormalMap,uv).xyz*2.0-1.0;\n    map.xy*=uNormalStrength;\n    n=normalize(mat3(t,b,n)*normalize(map));\n  }\n  vec3 orm=texture(uOrmMap,uv).rgb;\n  float normalVariance=0.0;\n  if(uNormalStrength>0.0){\n    // Toksvig-style widening suppresses sub-pixel normal sparkle when a high\n    // resolution map is minified. It preserves authored relief at distance\n    // while converting unresolved detail into a stable roughness increase.\n    vec3 normalSample=texture(uNormalMap,uv).xyz*2.0-1.0;\n    vec3 normalDx=dFdx(normalSample);\n    vec3 normalDy=dFdy(normalSample);\n    normalVariance=dot(normalDx,normalDx)+dot(normalDy,normalDy);\n  }\n  float ao=texture(uSsao,gl_FragCoord.xy/uSceneColorSize).r;\n  ao*=mix(1.0,orm.r,clamp(uOcclusionStrength,0.0,1.0));\n  vec3 direct=vec3(0.);\n  float directionalNdotL=max(dot(n,normalize(uDirectionalDirection)),0.);\n  direct+=uDirectionalColor*uDirectionalIntensity*directionalNdotL;\n  direct+=pointContribution(n,vWorldPos,uPointPosition0,uPointColor0,\n    uPointIntensity0,uPointRadius0);\n  direct+=pointContribution(n,vWorldPos,uPointPosition1,uPointColor1,\n    uPointIntensity1,uPointRadius1);\n  direct+=pointContribution(n,vWorldPos,uPointPosition2,uPointColor2,\n    uPointIntensity2,uPointRadius2);\n  direct+=pointContribution(n,vWorldPos,uPointPosition3,uPointColor3,\n    uPointIntensity3,uPointRadius3);\n  direct+=directSpotContribution(n,vWorldPos,uDirectSpotPosition0,\n    uDirectSpotDirection0,uDirectSpotColor0,uDirectSpotIntensity0,\n    uDirectSpotRange0,uDirectSpotInnerCos0,uDirectSpotOuterCos0,\n    uDirectSpotEnabled0);\n  direct+=directSpotContribution(n,vWorldPos,uDirectSpotPosition1,\n    uDirectSpotDirection1,uDirectSpotColor1,uDirectSpotIntensity1,\n    uDirectSpotRange1,uDirectSpotInnerCos1,uDirectSpotOuterCos1,\n    uDirectSpotEnabled1);\n  direct+=directSpotContribution(n,vWorldPos,uDirectSpotPosition2,\n    uDirectSpotDirection2,uDirectSpotColor2,uDirectSpotIntensity2,\n    uDirectSpotRange2,uDirectSpotInnerCos2,uDirectSpotOuterCos2,\n    uDirectSpotEnabled2);\n  vec3 toSpot=normalize(uLightPosition-vWorldPos);\n  float spotNdotL=max(dot(n,toSpot),0.);\n  float shadow=uReceivesShadow>0.5?shadowFactor(spotNdotL):1.;\n  float attenuation=lightAttenuation(vWorldPos);\n  direct+=uLightColor*uLightIntensity*spotNdotL*shadow*attenuation*uSpotEnabled;\n  // \xa78.5: \"modulates ambient only\" \u2014 SSAO must never darken the direct\n  // (N.L * shadow * attenuation) term, only the ambient fill, or it would\n  // double up with real shadowing and read as an incorrect global darkening\n  // rather than contact occlusion specifically.\n  vec3 ambient=uAmbientColor*uAmbientIntensity*ao;\n  vec3 baseColor=vColor.rgb*tex.rgb*uMaterialTint;\n  // Metallic surfaces contribute less diffuse energy; roughness keeps a\n  // small, stable broadening factor until the surface-v2 camera/specular\n  // block lands. Both channels therefore affect the live output rather than\n  // being metadata-only fields.\n  float metal=clamp(uMetallic*orm.b,0.0,1.0);\n  float rough=clamp(uRoughness*orm.g,0.0,1.0);\n  // Avoid singular highlights while retaining a visibly sharp porcelain\n  // response at the authored low end of the roughness range.\n  float specRough=max(0.045,sqrt(rough*rough+normalVariance*0.18));\n  vec3 viewDir=normalize(uCameraPosition-vWorldPos);\n  vec3 specular=vec3(0.0);\n  specular+=specularContribution(n,viewDir,normalize(uDirectionalDirection),\n    uDirectionalColor,uDirectionalIntensity,1.0,baseColor,specRough,metal);\n  specular+=specularContribution(n,viewDir,\n    normalize(uPointPosition0-vWorldPos),uPointColor0,uPointIntensity0,\n    pointAttenuation(vWorldPos,uPointPosition0,uPointRadius0),baseColor,\n    specRough,metal);\n  specular+=specularContribution(n,viewDir,\n    normalize(uPointPosition1-vWorldPos),uPointColor1,uPointIntensity1,\n    pointAttenuation(vWorldPos,uPointPosition1,uPointRadius1),baseColor,\n    specRough,metal);\n  specular+=specularContribution(n,viewDir,\n    normalize(uPointPosition2-vWorldPos),uPointColor2,uPointIntensity2,\n    pointAttenuation(vWorldPos,uPointPosition2,uPointRadius2),baseColor,\n    specRough,metal);\n  specular+=specularContribution(n,viewDir,\n    normalize(uPointPosition3-vWorldPos),uPointColor3,uPointIntensity3,\n    pointAttenuation(vWorldPos,uPointPosition3,uPointRadius3),baseColor,\n    specRough,metal);\n  specular+=specularContribution(n,viewDir,\n    normalize(uLightPosition-vWorldPos),uLightColor,uLightIntensity,\n    lightAttenuation(vWorldPos)*uSpotEnabled*shadow,baseColor,specRough,metal);\n  // Rain response stays in the world pass so it follows geometry depth rather\n  // than painting streaks over the whole screen. Near surfaces receive a\n  // restrained cool darkening and a broad wet highlight; distant surfaces\n  // fade back to their authored material before the fog composite.\n  float wetDepth=1.0-smoothstep(2.0,18.0,max(vViewDepth,0.0));\n  float wetness=clamp(uRainWetness,0.0,1.0)*wetDepth;\n  baseColor=mix(baseColor,baseColor*vec3(0.84,0.90,0.98),wetness*0.22);\n  // Keep reflected energy available to the specular lobe. The previous\n  // diffuse-first clamp clipped bright ceramic response before tone mapping,\n  // producing the broad plastic patches visible in low-roughness samples.\n  // This split is bounded by the material metalness and lets the final\n  // composite perform the intentional HDR compression once.\n  vec3 diffuseEnergy=baseColor*(1.0-metal)*\n    (ambient+direct*(1.0-0.25*rough));\n  vec3 lit=diffuseEnergy+specular;\n  // A restrained dielectric clearcoat is intentionally separate from the\n  // base roughness/metalness response. It gives porcelain a broad, stable\n  // grazing highlight without turning the surface into a mirror.\n  vec3 coatLight=normalize(uDirectionalDirection);\n  vec3 coatHalf=normalize(viewDir+coatLight);\n  float coatNdotV=max(dot(n,viewDir),0.);\n  float coatNdotH=max(dot(n,coatHalf),0.);\n  float coatNdotL=max(dot(n,coatLight),0.);\n  float coatPower=mix(128.0,8.0,clamp(uClearcoatRoughness,0.0,1.0));\n  float coatFresnel=0.04+0.96*pow(1.0-coatNdotV,5.0);\n  float coat=clamp(uClearcoatStrength,0.0,1.0)*coatFresnel*\n    pow(coatNdotH,coatPower)*coatNdotL*uDirectionalIntensity;\n  lit+=uDirectionalColor*coat;\n  lit+=direct*(wetness*(0.035+0.075*(1.0-rough)));\n  vec3 emissive=texture(uEmissiveMap,uv).rgb*uMaterialTint*uEmissiveStrength;\n  lit+=emissive;\n  if(uLightmapIntensity>0.0){\n    lit+=baseColor*texture(uLightmap,vUv1).rgb*uLightmapIntensity;\n  }\n  // Fog blends the surface's own lit color toward uFogColor only \u2014 never\n  // oGlow below, which stays a declared emissive quantity independent of\n  // how much atmosphere sits between the surface and the camera, matching\n  // \xa78.7's \"does not infer glow from final luma\" scoping: fog is a\n  // property of oColor's reflected/lit light, not of emission.\n  float fog=fogFactor(vViewDepth,vWorldPos.y);\n  vec3 foggedLit=mix(lit,uFogColor,fog);\n  // Bug 18: vColor.a*tex.a is the correct alpha for a blended draw and the\n  // wrong one for everything else. present.frag copies this channel\n  // straight through to a canvas created with the default alpha:true, so an\n  // opaque or masked surface that emitted a texel's own alpha would show\n  // the *page* through solid geometry. Coverage, not transparency, is what\n  // an opaque or masked fragment writes: whatever survived the discard\n  // above is fully covering, and an opaque draw always was. uOpaqueCoverage\n  // is exactly 0 or 1, so the mix is exact in both directions and the\n  // blended path keeps its pre-existing expression bit-for-bit.\n  float outAlpha=mix(vColor.a*tex.a,1.,uOpaqueCoverage);\n  oColor=vec4(foggedLit,outAlpha);\n  // \xa78.7: bloom reads this declared attachment directly, never inferring\n  // glow from oColor's final luma \u2014 a bright-but-non-emissive lit surface\n  // (e.g. the checkerboard floor under strong light) must never bloom, only\n  // a material with real emissiveStrength does, independent of how the\n  // surface happens to be lit this frame.\n  oGlow=vec4(emissive,1.);\n}\n",d3,d2,c1,d4,d5,c9,d1,d8,new A.iB(b5,a5),c5,c6,d9,s,e5,e4,e6,e6,i,g,l))
-if(a4!=null)j.push(a4)
-B.a.W(j,a7)
-j.push(new A.cN(b7,a9,u.o,b8,k,b9))
-return new A.dP(j)},
-iA:function iA(a){this.a=a},
-iB:function iB(a,b){this.a=a
-this.b=b},
-eq:function eq(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,a0,a1,a2,a3){var _=this
-_.a=a
-_.b=b
-_.c=c
-_.d=d
-_.e=e
-_.f=f
-_.r=g
-_.w=h
-_.x=i
-_.y=j
-_.z=k
-_.Q=l
-_.as=m
-_.at=n
-_.ax=o
-_.ay=p
-_.ch=q
-_.CW=r
-_.cx=s
-_.cy=a0
-_.db=a1
-_.dx=a2
-_.dy=a3},
-f6:function f6(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r){var _=this
-_.a=a
-_.b=b
-_.c=c
-_.d=d
-_.e=e
-_.f=f
-_.r=g
-_.w=h
-_.x=i
-_.y=j
-_.z=k
-_.Q=l
-_.as=m
-_.at=n
-_.ax=o
-_.ay=p
-_.ch=q
-_.CW=r},
-es:function es(a,b,c,d,e,f,g){var _=this
-_.a=a
-_.b=b
-_.c=c
-_.d=d
-_.e=e
-_.f=f
-_.w=g},
-f9:function f9(a,b,c,d,e,f){var _=this
-_.a=a
-_.b=b
-_.c=c
-_.d=d
-_.e=e
-_.f=f},
-er:function er(a,b,c,d,e,f,g,h,i,j,k){var _=this
-_.a=a
-_.b=b
-_.c=c
-_.d=d
-_.e=e
-_.f=f
-_.r=g
-_.w=h
-_.x=i
-_.y=j
-_.z=k},
-f8:function f8(a,b,c,d,e,f,g,h){var _=this
-_.a=a
-_.b=b
-_.c=c
-_.d=d
-_.e=e
-_.f=f
-_.r=g
-_.w=h},
-eF:function eF(a,b,c,d,e,f,g,h){var _=this
-_.a=a
-_.b=b
-_.c=c
-_.d=d
-_.e=e
-_.f=f
-_.r=g
-_.w=h},
-fd:function fd(a,b,c,d,e,f,g){var _=this
-_.a=a
-_.b=b
-_.c=c
-_.d=d
-_.e=e
-_.f=f
-_.r=g},
-cQ:function cQ(a,b,c,d){var _=this
-_.a=a
-_.b=b
-_.c=c
-_.d=d},
-eI:function eI(a,b,c,d,e){var _=this
-_.a=a
-_.b=b
-_.c=c
-_.d=d
-_.e=e},
-fg:function fg(a,b,c,d){var _=this
-_.a=a
-_.b=b
-_.c=c
-_.d=d},
-en(a,b){return new A.cU(a,b)},
-fJ:function fJ(a,b){this.a=a
-this.b=b},
-dS:function dS(a,b){this.a=a
-this.b=b},
-fO:function fO(a,b){this.a=a
-this.b=b},
-fP:function fP(a,b){this.a=a
-this.b=b},
-fI:function fI(a,b,c){this.a=a
-this.b=b
-this.c=c},
-fN:function fN(){},
-bM:function bM(a,b){this.a=a
-this.b=b},
-cs:function cs(a,b,c,d,e){var _=this
-_.a=a
-_.b=b
-_.c=c
-_.d=d
-_.e=e},
-dT:function dT(a,b){this.a=a
-this.b=b},
-bX:function bX(a,b){this.a=a
-this.b=b},
-cU:function cU(a,b){this.a=a
-this.b=b},
-b0:function b0(a,b){this.a=a
-this.b=b},
-f:function f(a,b){this.a=a
-this.b=b},
-cj:function cj(a,b){this.a=a
-this.b=b},
-dM:function dM(a,b){this.a=a
-this.b=b},
-ed:function ed(a,b){this.a=a
-this.b=b},
-fK:function fK(a,b){var _=this
-_.a=a
-_.b=b
-_.c=null
-_.e=!1},
-fL:function fL(){},
-fM:function fM(){},
-aE:function aE(a,b,c,d){var _=this
-_.a=a
-_.b=b
-_.c=c
-_.e=0
-_.$ti=d},
-jS(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p){return new A.fv(l,k,m,b,d,a,c,i,j,!0,!1,!0,!0,!0,!0,!1)},
-fl:function fl(a,b){this.a=a
-this.b=b},
-dC:function dC(a,b){this.a=a
-this.b=b},
-fp:function fp(a,b){this.a=a
-this.b=b},
-ft:function ft(a,b){this.a=a
-this.b=b},
-fv:function fv(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p){var _=this
-_.a=a
-_.b=b
-_.c=c
-_.d=d
-_.e=e
-_.f=f
-_.r=g
-_.w=h
-_.x=i
-_.y=j
-_.z=k
-_.Q=l
-_.as=m
-_.at=n
-_.ax=o
-_.ay=p},
-a4:function a4(a,b){this.a=a
-this.b=b},
-hE:function hE(){this.a=null},
-mt(a){var s=new A.eG(a,B.e,new A.hE(),A.mC(a))
-s.cz(a)
-return s},
-mC(a){var s,r,q=t.du.a(a.getSupportedExtensions())
-if(q==null)return A.aC(t.N)
-s=A.aC(t.N)
-r=J.X(t.r.b(q)?q:new A.ci(q,A.O(q).h("ci<1,m>")))
-while(r.k())s.j(0,r.gl())
-return s},
-ax(a,b){var s,r
-if(a.b!==B.e)A.k(A.j(u.k))
-if(b==null){s=a.a
-s.bindFramebuffer(A.a(v.G.WebGL2RenderingContext.FRAMEBUFFER),null)
-s.viewport(0,0,A.a(s.drawingBufferWidth),A.a(s.drawingBufferHeight))
-return}r=t.V.a(b.a)
-s=a.a
-s.bindFramebuffer(A.a(v.G.WebGL2RenderingContext.FRAMEBUFFER),r.a)
-s.viewport(0,0,r.w,r.x)},
-mx(a,b){var s
-switch(b.a){case 0:s=A.a(v.G.WebGL2RenderingContext.LESS)
-break
-case 1:s=A.a(v.G.WebGL2RenderingContext.LEQUAL)
-break
-case 2:s=A.a(v.G.WebGL2RenderingContext.ALWAYS)
-break
-case 3:s=A.a(v.G.WebGL2RenderingContext.NEVER)
-break
-default:s=null}return s},
-mw(a,b){var s
-switch(b.a){case 0:s=A.a(v.G.WebGL2RenderingContext.FRONT)
-break
-case 1:s=A.a(v.G.WebGL2RenderingContext.BACK)
-break
-default:s=null}return s},
-kk(a,b){var s
-switch(b.a){case 0:s=A.a(v.G.WebGL2RenderingContext.ZERO)
-break
-case 1:s=A.a(v.G.WebGL2RenderingContext.ONE)
-break
-case 2:s=A.a(v.G.WebGL2RenderingContext.SRC_ALPHA)
-break
-case 3:s=A.a(v.G.WebGL2RenderingContext.ONE_MINUS_SRC_ALPHA)
-break
-case 4:s=A.a(v.G.WebGL2RenderingContext.DST_ALPHA)
-break
-case 5:s=A.a(v.G.WebGL2RenderingContext.ONE_MINUS_DST_ALPHA)
-break
-default:s=null}return s},
-mu(a,b){var s
-switch(b.a){case 0:s=A.a(v.G.WebGL2RenderingContext.FUNC_ADD)
-break
-case 1:s=A.a(v.G.WebGL2RenderingContext.FUNC_SUBTRACT)
-break
-case 2:s=A.a(v.G.WebGL2RenderingContext.FUNC_REVERSE_SUBTRACT)
-break
-default:s=null}return s},
-af(a,b){var s,r,q,p
-if(a.b!==B.e)A.k(A.j(u.k))
-s=a.f
-r=s.dB(b)
-if(r.a===0)return
-if(r.t(0,B.Q)){q=v.G
-p=a.a
-if(b.a)p.enable(A.a(q.WebGL2RenderingContext.DEPTH_TEST))
-else p.disable(A.a(q.WebGL2RenderingContext.DEPTH_TEST))}if(r.t(0,B.R))a.a.depthFunc(A.mx(a,b.b))
-if(r.t(0,B.S))a.a.depthMask(b.c)
-if(r.t(0,B.W)){q=v.G
-p=a.a
-if(b.w)p.enable(A.a(q.WebGL2RenderingContext.CULL_FACE))
-else p.disable(A.a(q.WebGL2RenderingContext.CULL_FACE))}if(r.t(0,B.X))a.a.cullFace(A.mw(a,b.x))
-if(r.t(0,B.av)){q=v.G.WebGL2RenderingContext
-q=A.a(q.CCW)
-a.a.frontFace(q)}if(r.t(0,B.T)){q=v.G
-p=a.a
-if(b.d)p.enable(A.a(q.WebGL2RenderingContext.BLEND))
-else p.disable(A.a(q.WebGL2RenderingContext.BLEND))}if(r.t(0,B.U))a.a.blendFunc(A.kk(a,b.e),A.kk(a,b.f))
-if(r.t(0,B.V))a.a.blendEquation(A.mu(a,b.r))
-if(r.t(0,B.at))a.a.colorMask(!0,!0,!0,!0)
-if(r.t(0,B.au)){q=v.G.WebGL2RenderingContext
-a.a.disable(A.a(q.SCISSOR_TEST))}s.a=b},
-mv(a,b){var s
-switch(b.a){case 0:s=A.a(v.G.WebGL2RenderingContext.COLOR_BUFFER_BIT)
-break
-case 1:s=v.G
-s=(A.a(s.WebGL2RenderingContext.COLOR_BUFFER_BIT)|A.a(s.WebGL2RenderingContext.DEPTH_BUFFER_BIT))>>>0
-break
-case 2:s=A.a(v.G.WebGL2RenderingContext.DEPTH_BUFFER_BIT)
-break
-default:s=null}return s},
-c_(a,b,c,d,e,f){var s
-if(a.b!==B.e)A.k(A.j(u.k))
-s=a.a
-s.clearColor(f,e,d,c)
-s.clear(A.mv(a,b))},
-bg(a,b){var s
-if(a.b!==B.e)A.k(A.j(u.k))
-s=A.a0(b.a)
-a.a.useProgram(s)
-a.e=s},
-e(a,b,c){var s,r,q,p,o,n,m,l
-if(a.b!==B.e)A.k(A.j(u.k))
-s=a.e
-if(s==null)throw A.b(A.j("WebGl2Device.setUniform called with no bound program"))
-r=a.a
-q=A.a1(r.getUniformLocation(s,b))
-if(q==null)return
-switch(c.a.a){case 0:r.uniform1f(q,A.ib(c.b))
-break
-case 1:p=t.B.a(c.b)
-o=p.length
-if(0>=o)return A.h(p,0)
-n=p[0]
-if(1>=o)return A.h(p,1)
-r.uniform2f(q,n,p[1])
-break
-case 2:p=t.B.a(c.b)
-o=p.length
-if(0>=o)return A.h(p,0)
-n=p[0]
-if(1>=o)return A.h(p,1)
-m=p[1]
-if(2>=o)return A.h(p,2)
-r.uniform3f(q,n,m,p[2])
-break
-case 3:p=t.B.a(c.b)
-o=p.length
-if(0>=o)return A.h(p,0)
-n=p[0]
-if(1>=o)return A.h(p,1)
-m=p[1]
-if(2>=o)return A.h(p,2)
-l=p[2]
-if(3>=o)return A.h(p,3)
-A.a6(r,"uniform4f",[q,n,m,l,p[3]],t.H)
-break
-case 4:r.uniformMatrix4fv(q,!1,t.B.a(c.b))
-break
-case 5:r.uniformMatrix4fv(q,!1,t.B.a(c.b))
-break
-case 6:r.uniform1i(q,A.a(c.b))
-break}},
-ay(a,b){if(a.b!==B.e)A.k(A.j(u.k))
-a.a.bindVertexArray(A.a0(b.a))},
-a_(a,b,c){var s,r,q,p,o,n
-if(a.b!==B.e)A.k(A.j(u.k))
-s=c.a
-r=a.a
-q=v.G
-r.activeTexture(A.a(q.WebGL2RenderingContext.TEXTURE0)+b)
-if(s instanceof A.dn){p=s.d>1?A.a(q.WebGL2RenderingContext.TEXTURE_2D_ARRAY):A.a(q.WebGL2RenderingContext.TEXTURE_2D)
-r.bindTexture(p,s.a)
-return}if(s instanceof A.dm){o=s.b
-if(o!=null){r.bindTexture(A.a(q.WebGL2RenderingContext.TEXTURE_2D),o)
-return}n=s.e
-if(n!=null){r.bindTexture(A.a(q.WebGL2RenderingContext.TEXTURE_2D),n)
-return}throw A.b(A.j("WebGl2Device.bindTexture: target has no sampleable color or depth texture (multisampled targets must be resolved to a single-sample target before sampling)"))}throw A.b(A.j("WebGl2Device.bindTexture: unrecognized GpuObject handle type"))},
-my(a,b){var s
-switch(b.a){case 0:s=A.a(v.G.WebGL2RenderingContext.STATIC_DRAW)
-break
-case 1:s=A.a(v.G.WebGL2RenderingContext.DYNAMIC_DRAW)
-break
-case 2:s=A.a(v.G.WebGL2RenderingContext.STREAM_DRAW)
-break
-default:s=null}return s},
-mz(a,b){var s,r,q,p
-if(a.b!==B.e)A.k(A.j(u.k))
-s=a.a
-r=A.a1(s.createBuffer())
-if(r==null)throw A.b(A.j("WebGl2Device: gl.createBuffer() returned null"))
-q=v.G
-p=b.c===B.aZ?A.a(q.WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER):A.a(q.WebGL2RenderingContext.ARRAY_BUFFER)
-s.bindBuffer(p,r)
-s.bufferData(p,b.a,A.my(a,b.b))
-return new A.b2(r)},
-kl(a,b){var s
-switch(b.a){case 0:s=A.a(v.G.WebGL2RenderingContext.NEAREST)
-break
-case 1:s=A.a(v.G.WebGL2RenderingContext.LINEAR)
-break
-case 2:s=A.a(v.G.WebGL2RenderingContext.LINEAR_MIPMAP_LINEAR)
-break
-default:s=null}return s},
-km(a,b){var s
-switch(b.a){case 0:s=A.a(v.G.WebGL2RenderingContext.CLAMP_TO_EDGE)
-break
-case 1:s=A.a(v.G.WebGL2RenderingContext.REPEAT)
-break
-default:s=null}return s},
-kn(a,b){var s,r,q,p,o,n,m,l,k
-if(a.b!==B.e)A.k(A.j(u.k))
-s=a.a
-r=A.a1(s.createTexture())
-if(r==null)throw A.b(A.j("WebGl2Device: gl.createTexture() returned null"))
-q=v.G
-p=q.WebGL2RenderingContext
-o=A.a(p.TEXTURE_2D)
-s.bindTexture(o,r)
-p=q.WebGL2RenderingContext
-A.a6(s,"texStorage2D",[o,1,A.a(p.RGBA8),1,1],t.H)
-s.texParameteri(o,A.a(q.WebGL2RenderingContext.TEXTURE_MIN_FILTER),A.kl(a,B.a9))
-s.texParameteri(o,A.a(q.WebGL2RenderingContext.TEXTURE_MAG_FILTER),A.kl(a,B.a9))
-s.texParameteri(o,A.a(q.WebGL2RenderingContext.TEXTURE_WRAP_S),A.km(a,B.aa))
-s.texParameteri(o,A.a(q.WebGL2RenderingContext.TEXTURE_WRAP_T),A.km(a,B.aa))
-n=a.r.t(0,"EXT_texture_filter_anisotropic")
-m=n?a.bD(34047):1
-if(!isFinite(1))A.k(A.aL(1,"requested","anisotropy must be finite and in [1, 16]"))
-if(n&&isFinite(m)&&m>=1)l=m>16?16:m
-else l=1
-k=1<l?1:l
-if(k>1)s.texParameterf(o,34046,k)
-return new A.b2(new A.dn(r,1,1,1,!1))},
-ko(a,b,c,d){var s,r,q,p,o,n,m,l,k
-if(a.b!==B.e)A.k(A.j(u.k))
-s=t.R.a(b.a)
-r=s.d
-if(c>=r)throw A.b(A.r("WebGl2Device.uploadTextureLayer: layer "+c+" out of range for "+r+"-layer texture",null))
-q=s.b
-p=s.c
-o=q*p*4
-n=d.length
-if(n!==o)throw A.b(A.r("WebGl2Device.uploadTextureLayer: expected "+o+" RGBA8 bytes for "+q+"x"+p+", got "+n,null))
-r=r>1
-n=v.G
-m=r?A.a(n.WebGL2RenderingContext.TEXTURE_2D_ARRAY):A.a(n.WebGL2RenderingContext.TEXTURE_2D)
-l=a.a
-l.bindTexture(m,s.a)
-k=t.H
-if(r)A.a6(l,"texSubImage3D",[m,0,0,0,c,q,p,1,A.a(n.WebGL2RenderingContext.RGBA),A.a(n.WebGL2RenderingContext.UNSIGNED_BYTE),d],k)
-else A.a6(l,"texSubImage2D",[m,0,0,0,q,p,A.a(n.WebGL2RenderingContext.RGBA),A.a(n.WebGL2RenderingContext.UNSIGNED_BYTE),d],k)},
-mA(a,b){if(a.b!==B.e)A.k(A.j(u.k))
-t.R.a(b.a)
-return},
-eH(a,b){a.a.deleteTexture(t.R.a(b.a).a)},
-kq(a0,a1){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d=null,c="renderbufferStorageMultisample",b="texStorage2D",a="framebufferTexture2D"
-if(a0.b!==B.e)A.k(A.j(u.k))
-s=a1.a
-if(s<=0||a1.b<=0)throw A.b(A.r("WebGl2Device.createTarget requires positive dimensions, got "+s+"x"+a1.b,d))
-r=a0.a
-q=A.a1(r.createFramebuffer())
-if(q==null)throw A.b(A.j("WebGl2Device: gl.createFramebuffer() returned null"))
-p=v.G
-r.bindFramebuffer(A.a(p.WebGL2RenderingContext.FRAMEBUFFER),q)
-o=a1.d
-n=o===B.D
-if(n&&!a1.e)throw A.b(A.r("WebGl2Device.createTarget: GpuTargetAttachment.depthOnly requires hasDepth: true \u2014 a depth-only target with no depth attachment has nothing to render into",d))
-m=o===B.a8||o===B.b1
-l=d
-k=d
-j=d
-i=d
-if(n){r.drawBuffers(A.d([A.a(p.WebGL2RenderingContext.NONE)],t.n))
-r.readBuffer(A.a(p.WebGL2RenderingContext.NONE))}else{o=a1.c
-h=t.H
-g=a1.b
-if(o>1){k=A.a1(r.createRenderbuffer())
-r.bindRenderbuffer(A.a(p.WebGL2RenderingContext.RENDERBUFFER),k)
-A.a6(r,c,[A.a(p.WebGL2RenderingContext.RENDERBUFFER),o,A.a(p.WebGL2RenderingContext.RGBA8),s,g],h)
-r.framebufferRenderbuffer(A.a(p.WebGL2RenderingContext.FRAMEBUFFER),A.a(p.WebGL2RenderingContext.COLOR_ATTACHMENT0),A.a(p.WebGL2RenderingContext.RENDERBUFFER),k)
-if(m){i=A.a1(r.createRenderbuffer())
-r.bindRenderbuffer(A.a(p.WebGL2RenderingContext.RENDERBUFFER),i)
-A.a6(r,c,[A.a(p.WebGL2RenderingContext.RENDERBUFFER),o,A.a(p.WebGL2RenderingContext.RGBA8),s,g],h)
-r.framebufferRenderbuffer(A.a(p.WebGL2RenderingContext.FRAMEBUFFER),A.a(p.WebGL2RenderingContext.COLOR_ATTACHMENT1),A.a(p.WebGL2RenderingContext.RENDERBUFFER),i)
-r.drawBuffers(A.d([A.a(p.WebGL2RenderingContext.COLOR_ATTACHMENT0),A.a(p.WebGL2RenderingContext.COLOR_ATTACHMENT1)],t.n))}}else{l=A.a1(r.createTexture())
-r.bindTexture(A.a(p.WebGL2RenderingContext.TEXTURE_2D),l)
-A.a6(r,b,[A.a(p.WebGL2RenderingContext.TEXTURE_2D),1,A.a(p.WebGL2RenderingContext.RGBA8),s,g],h)
-r.texParameteri(A.a(p.WebGL2RenderingContext.TEXTURE_2D),A.a(p.WebGL2RenderingContext.TEXTURE_MIN_FILTER),A.a(p.WebGL2RenderingContext.LINEAR))
-r.texParameteri(A.a(p.WebGL2RenderingContext.TEXTURE_2D),A.a(p.WebGL2RenderingContext.TEXTURE_MAG_FILTER),A.a(p.WebGL2RenderingContext.LINEAR))
-A.a6(r,a,[A.a(p.WebGL2RenderingContext.FRAMEBUFFER),A.a(p.WebGL2RenderingContext.COLOR_ATTACHMENT0),A.a(p.WebGL2RenderingContext.TEXTURE_2D),l,0],h)
-if(m){j=A.a1(r.createTexture())
-r.bindTexture(A.a(p.WebGL2RenderingContext.TEXTURE_2D),j)
-A.a6(r,b,[A.a(p.WebGL2RenderingContext.TEXTURE_2D),1,A.a(p.WebGL2RenderingContext.RGBA8),s,g],h)
-r.texParameteri(A.a(p.WebGL2RenderingContext.TEXTURE_2D),A.a(p.WebGL2RenderingContext.TEXTURE_MIN_FILTER),A.a(p.WebGL2RenderingContext.LINEAR))
-r.texParameteri(A.a(p.WebGL2RenderingContext.TEXTURE_2D),A.a(p.WebGL2RenderingContext.TEXTURE_MAG_FILTER),A.a(p.WebGL2RenderingContext.LINEAR))
-A.a6(r,a,[A.a(p.WebGL2RenderingContext.FRAMEBUFFER),A.a(p.WebGL2RenderingContext.COLOR_ATTACHMENT1),A.a(p.WebGL2RenderingContext.TEXTURE_2D),j,0],h)
-r.drawBuffers(A.d([A.a(p.WebGL2RenderingContext.COLOR_ATTACHMENT0),A.a(p.WebGL2RenderingContext.COLOR_ATTACHMENT1)],t.n))}}}f=d
-e=d
-if(a1.e){o=a1.c
-h=t.H
-g=a1.b
-if(o>1){f=A.a1(r.createRenderbuffer())
-r.bindRenderbuffer(A.a(p.WebGL2RenderingContext.RENDERBUFFER),f)
-A.a6(r,c,[A.a(p.WebGL2RenderingContext.RENDERBUFFER),o,A.a(p.WebGL2RenderingContext.DEPTH_COMPONENT24),s,g],h)
-r.framebufferRenderbuffer(A.a(p.WebGL2RenderingContext.FRAMEBUFFER),A.a(p.WebGL2RenderingContext.DEPTH_ATTACHMENT),A.a(p.WebGL2RenderingContext.RENDERBUFFER),f)}else{e=A.a1(r.createTexture())
-r.bindTexture(A.a(p.WebGL2RenderingContext.TEXTURE_2D),e)
-A.a6(r,b,[A.a(p.WebGL2RenderingContext.TEXTURE_2D),1,A.a(p.WebGL2RenderingContext.DEPTH_COMPONENT24),s,g],h)
-r.texParameteri(A.a(p.WebGL2RenderingContext.TEXTURE_2D),A.a(p.WebGL2RenderingContext.TEXTURE_MIN_FILTER),A.a(p.WebGL2RenderingContext.NEAREST))
-r.texParameteri(A.a(p.WebGL2RenderingContext.TEXTURE_2D),A.a(p.WebGL2RenderingContext.TEXTURE_MAG_FILTER),A.a(p.WebGL2RenderingContext.NEAREST))
-A.a6(r,a,[A.a(p.WebGL2RenderingContext.FRAMEBUFFER),A.a(p.WebGL2RenderingContext.DEPTH_ATTACHMENT),A.a(p.WebGL2RenderingContext.TEXTURE_2D),e,0],h)}}o=A.a(r.checkFramebufferStatus(A.a(p.WebGL2RenderingContext.FRAMEBUFFER)))
-h=A.a(p.WebGL2RenderingContext.FRAMEBUFFER_COMPLETE)
-r.bindFramebuffer(A.a(p.WebGL2RenderingContext.FRAMEBUFFER),null)
-if(o!==h){A.jc(a0,q,l,k,f,e,j,i)
-throw A.b(A.j("WebGl2Device.createTarget: framebuffer incomplete"))}return new A.b2(new A.dm(q,l,k,f,e,j,i,s,a1.b,a1.c))},
-jc(a,b,c,d,e,f,g,h){var s=a.a
-s.deleteFramebuffer(b)
-if(c!=null)s.deleteTexture(c)
-if(d!=null)s.deleteRenderbuffer(d)
-if(e!=null)s.deleteRenderbuffer(e)
-if(f!=null)s.deleteTexture(f)
-if(g!=null)s.deleteTexture(g)
-if(h!=null)s.deleteRenderbuffer(h)},
-aF(a){var s
-if(a.b!==B.e)A.k(A.j(u.k))
-s=A.a1(a.a.createVertexArray())
-if(s==null)throw A.b(A.j("WebGl2Device: gl.createVertexArray() returned null"))
-return new A.b2(s)},
-kp(a,b,c){var s,r="WebGL2RenderingContext",q="VERTEX_SHADER",p=a.a,o=A.a1(p.createShader(b))
-if(o==null)throw A.b(A.en(b===A.l7(A.kT(A.lc(),r),q,t.S)?B.ap:B.aq,"gl.createShader() returned null"))
-p.shaderSource(o,c)
-p.compileShader(o)
-if(!J.aK(A.c9(p.getShaderParameter(o,A.a(v.G.WebGL2RenderingContext.COMPILE_STATUS))),!0)){s=A.bD(p.getShaderInfoLog(o))
-if(s==null)s="(no info log)"
-p.deleteShader(o)
-throw A.b(A.en(b===A.l7(A.kT(A.lc(),r),q,t.S)?B.ap:B.aq,s))}return o},
-mB(a,b,c,d,e){var s,r,q,p,o,n,m,l,k,j
-if(a.b!==B.e)A.k(A.j(u.k))
-q=v.G
-s=A.kp(a,A.a(q.WebGL2RenderingContext.VERTEX_SHADER),e)
-r=null
-try{r=A.kp(a,A.a(q.WebGL2RenderingContext.FRAGMENT_SHADER),b)}catch(p){a.a.deleteShader(s)
-throw p}o=a.a
-n=A.a1(o.createProgram())
-if(n==null){o.deleteShader(s)
-o.deleteShader(r)
-throw A.b(B.cn)}o.attachShader(n,s)
-o.attachShader(n,r)
-o.linkProgram(n)
-if(!J.aK(A.c9(o.getProgramParameter(n,A.a(q.WebGL2RenderingContext.LINK_STATUS))),!0)){m=A.bD(o.getProgramInfoLog(n))
-if(m==null)m="(no info log)"
-o.deleteProgram(n)
-o.deleteShader(s)
-o.deleteShader(r)
-throw A.b(A.en(B.ar,m))}for(q=c.length,l=0;l<c.length;c.length===q||(0,A.B)(c),++l){k=c[l]
-if(A.a(o.getAttribLocation(n,k))<0){o.deleteProgram(n)
-o.deleteShader(s)
-o.deleteShader(r)
-throw A.b(A.en(B.as,"missing required attribute: "+k))}}for(q=d.length,l=0;l<q;++l){j=d[l]
-if(A.a1(o.getUniformLocation(n,j))==null){o.deleteProgram(n)
-o.deleteShader(s)
-o.deleteShader(r)
-throw A.b(A.en(B.as,"missing required uniform: "+j))}}o.deleteShader(s)
-o.deleteShader(r)
-return new A.b2(n)},
-b2:function b2(a){this.a=a},
-dn:function dn(a,b,c,d,e){var _=this
-_.a=a
-_.b=b
-_.c=c
-_.d=d
-_.e=e},
-dm:function dm(a,b,c,d,e,f,g,h,i,j){var _=this
-_.a=a
-_.b=b
-_.c=c
-_.d=d
-_.e=e
-_.f=f
-_.r=g
-_.w=h
-_.x=i
-_.y=j},
-ff:function ff(a){this.a=a
-this.b=!1},
-eG:function eG(a,b,c,d){var _=this
-_.a=a
-_.b=b
-_.e=_.d=_.c=null
-_.f=c
-_.r=d
-_.w=!1},
-hB:function hB(a){this.a=a},
-hC:function hC(a){this.a=a},
-ia:function ia(){},
-fe:function fe(){},
-hD:function hD(){},
-fj(){return A.oq()},
-oq(){var s=0,r=A.nQ(t.H),q,p=2,o=[],n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0,a1,a2
-var $async$fj=A.o3(function(a3,a4){if(a3===1){o.push(a4)
-s=p}for(;;)switch(s){case 0:a={}
-a0=v.G
-a1=A.a1(A.a0(a0.document).querySelector("#minimal-canvas"))
-if(!t.m.b(a1)){s=1
-break}a1.width=A.a(a1.clientWidth)
-a1.height=A.a(a1.clientHeight)
-n=B.aP.dz(a1)
-if(n==null){a1.setAttribute("data-renderer-state","no-webgl2")
-a1.setAttribute("data-renderer-backend","legacy")
-a1.setAttribute("data-renderer-fallback","true")
-a1.setAttribute("data-renderer-fallback-reason","webgl2 unavailable")
-s=1
-break}h=A.mr().gcl().n(0,"profile")
-if(h==null)h="safe"
-A:{if("standard"===h){g=B.c2
-break A}if("high"===h){g=B.c3
-break A}g=B.y
-break A}m=g
-if(m.a===B.L)g=1
-else g=m.a===B.an?2:1
-f=m===B.y?0:1
-l=new A.ej(m,384,216,g,f)
-k=new A.eu(A.a(a1.width),A.a(a1.height),A.a(a1.width),A.a(a1.height))
-j=null
-p=4
-s=7
-return A.kP(n.c8(l,k),$async$fj)
-case 7:p=2
-s=6
-break
-case 4:p=3
-a2=o.pop()
-i=A.b5(a2)
-if(m===B.y)throw a2
-j=m.a.b+" profile failed: "+A.p(i)
-s=8
-return A.kP(n.c8(B.c4,k),$async$fj)
-case 8:s=6
-break
-case 3:s=2
-break
-case 6:g=n
-g.av()
-d=A.mf(g.w.a.b)
-B.a.j(g.d,d)
-c=A.k0(A.a(a1.width)/A.a(a1.height),100,1,0.1)
-g=new Float32Array(16)
-g[0]=1
-g[5]=1
-g[10]=1
-g[15]=1
-b=new A.cg(new A.bR(g),c,c,B.a_,B.cK,0.1,100,A.a(a1.width)/A.a(a1.height))
-n.bV(d,new A.dR(b,B.a0,B.a3,0,0))
-n.c0()
-a1.setAttribute("data-renderer-state",n.e.b)
-a1.setAttribute("data-renderer-first-frame","true")
-a1.setAttribute("data-renderer-backend","pixeldart")
-a1.setAttribute("data-renderer-requested-profile",h)
-g=n.as
-a1.setAttribute("data-renderer-effective-profile",(g==null?A.k(A.j("renderer is not initialized")):g).a.a.b)
-g=j
-if(g==null)g="false"
-a1.setAttribute("data-renderer-profile-fallback",g)
-a1.setAttribute("data-renderer-frames","1")
-a1.setAttribute("data-renderer-surface",""+A.a(a1.width)+"x"+A.a(a1.height))
-a.a=1
-a.b=0
-a.c=!1
-g=new A.iM(a1,n)
-A.a0(a0.window).addEventListener("resize",A.ds(new A.iK(g)))
-a1.addEventListener("webglcontextrestored",A.ds(new A.iL(a)))
-A.a(A.a0(a0.window).requestAnimationFrame(A.ds(new A.iN(a,g,n,b,d,a1))))
-case 1:return A.nm(q,r)
-case 2:return A.nl(o.at(-1),r)}})
-return A.nn($async$fj,r)},
-iM:function iM(a,b){this.a=a
-this.b=b},
-iK:function iK(a){this.a=a},
-iL:function iL(a){this.a=a},
-iN:function iN(a,b,c,d,e,f){var _=this
-_.a=a
-_.b=b
-_.c=c
-_.d=d
-_.e=e
-_.f=f},
-oy(a){throw A.P(A.jW(a),new Error())},
-aJ(){throw A.P(A.lV(""),new Error())},
-ld(){throw A.P(A.jW(""),new Error())},
-iT(a,b,c){var s,r,q,p,o,n,m=b.b,l=m.length
-if(l>16)throw A.b(A.aL(b.gdH(),"batch.instanceCount","exceeds the WebGL2-safe instance uniform bound of 16"))
-l*=16
-s=new Float32Array(l)
-if(c)r=new Float32Array(l)
-else r=null
-for(l=r!=null,q=0;q<m.length;++q){p=m[q].gm().ga2().ap()
-o=q*16
-n=o+16
-B.J.bl(s,o,n,p.ga6())
-if(l)B.J.bl(r,o,n,p.cg().ga6())}m=a.a
-A.e(m,"uInstanceModels",new A.f(B.ax,s))
-if(l)A.e(m,"uInstanceNormalMatrices",new A.f(B.ax,r))
-A.e(m,"uUseInstances",B.ay)}},B={}
-var w=[A,J,B]
-var $={}
-A.j2.prototype={}
-J.dW.prototype={
-R(a,b){return a===b},
-gB(a){return A.ee(a)},
-i(a){return"Instance of '"+A.ef(a)+"'"},
-gC(a){return A.aI(A.jp(this))}}
-J.dY.prototype={
-i(a){return String(a)},
-gB(a){return a?519018:218159},
-gC(a){return A.aI(t.y)},
-$iz:1,
-$iA:1}
-J.cv.prototype={
-R(a,b){return null==b},
-i(a){return"null"},
-gB(a){return 0},
-$iz:1}
-J.cx.prototype={$iE:1}
-J.bc.prototype={
-gB(a){return 0},
-gC(a){return B.cy},
-i(a){return String(a)}}
-J.ec.prototype={}
-J.bu.prototype={}
-J.bb.prototype={
-i(a){var s=a[$.lg()]
-if(s==null)s=a[$.jC()]
-if(s==null)return this.cw(a)
-return"JavaScript function for "+J.bH(s)},
-$ibm:1}
-J.cw.prototype={
-gB(a){return 0},
-i(a){return String(a)}}
-J.cy.prototype={
-gB(a){return 0},
-i(a){return String(a)}}
-J.t.prototype={
-j(a,b){A.O(a).c.a(b)
-a.$flags&1&&A.b4(a,29)
-a.push(b)},
-W(a,b){var s
-A.O(a).h("i<1>").a(b)
-a.$flags&1&&A.b4(a,"addAll",2)
-if(Array.isArray(b)){this.cD(a,b)
-return}for(s=J.X(b);s.k();)a.push(s.gl())},
-cD(a,b){var s,r
-t.p.a(b)
-s=b.length
-if(s===0)return
-if(a===b)throw A.b(A.am(a))
-for(r=0;r<s;++r)a.push(b[r])},
-X(a){a.$flags&1&&A.b4(a,"clear","clear")
-a.length=0},
-aF(a,b){var s,r=A.cC(a.length,"",!1,t.N)
-for(s=0;s<a.length;++s)this.q(r,s,A.p(a[s]))
-return r.join(b)},
-ak(a,b,c,d){var s,r,q
-d.a(b)
-A.O(a).D(d).h("1(1,2)").a(c)
-s=a.length
-for(r=b,q=0;q<s;++q){r=c.$2(r,a[q])
-if(a.length!==s)throw A.b(A.am(a))}return r},
-K(a,b){if(!(b>=0&&b<a.length))return A.h(a,b)
-return a[b]},
-gcb(a){var s=a.length
-if(s>0)return a[s-1]
-throw A.b(A.j0())},
-gbm(a){var s=a.length
-if(s===1){if(0>=s)return A.h(a,0)
-return a[0]}if(s===0)throw A.b(A.j0())
-throw A.b(A.lS())},
-af(a,b){var s,r,q,p,o,n=A.O(a)
-n.h("c(1,1)?").a(b)
-a.$flags&2&&A.b4(a,"sort")
-s=a.length
-if(s<2)return
-if(b==null)b=J.nD()
-if(s===2){r=a[0]
-q=a[1]
-n=b.$2(r,q)
-if(typeof n!=="number")return n.ed()
-if(n>0){a[0]=q
-a[1]=r}return}p=0
-if(n.c.b(null))for(o=0;o<a.length;++o)if(a[o]===void 0){a[o]=null;++p}a.sort(A.c8(b,2))
-if(p>0)this.d6(a,p)},
-cv(a){return this.af(a,null)},
-d6(a,b){var s,r=a.length
-for(;s=r-1,r>0;r=s)if(a[s]===null){a[s]=void 0;--b
-if(b===0)break}},
-aB(a,b){var s,r=a.length
-if(0>=r)return-1
-for(s=0;s<r;++s){if(!(s<a.length))return A.h(a,s)
-if(J.aK(a[s],b))return s}return-1},
-t(a,b){var s
-for(s=0;s<a.length;++s)if(J.aK(a[s],b))return!0
-return!1},
-i(a){return A.j1(a,"[","]")},
-gv(a){return new J.ce(a,a.length,A.O(a).h("ce<1>"))},
-gB(a){return A.ee(a)},
-gp(a){return a.length},
-n(a,b){if(!(b>=0&&b<a.length))throw A.b(A.iD(a,b))
-return a[b]},
-q(a,b,c){A.O(a).c.a(c)
-a.$flags&2&&A.b4(a)
-if(!(b>=0&&b<a.length))throw A.b(A.iD(a,b))
-a[b]=c},
-c6(a,b){var s
-A.O(a).h("A(1)").a(b)
-if(0>=a.length)return-1
-for(s=0;s<a.length;++s)if(b.$1(a[s]))return s
-return-1},
-gC(a){return A.aI(A.O(a))},
-$in:1,
-$ii:1,
-$iu:1}
-J.dX.prototype={
-e9(a){var s,r,q
-if(!Array.isArray(a))return null
-s=a.$flags|0
-if((s&4)!==0)r="const, "
-else if((s&2)!==0)r="unmodifiable, "
-else r=(s&1)!==0?"fixed, ":""
-q="Instance of '"+A.ef(a)+"'"
-if(r==="")return q
-return q+" ("+r+"length: "+a.length+")"}}
-J.fS.prototype={}
-J.ce.prototype={
-gl(){var s=this.d
-return s==null?this.$ti.c.a(s):s},
-k(){var s,r=this,q=r.a,p=q.length
-if(r.b!==p){q=A.B(q)
-throw A.b(q)}s=r.c
-if(s>=p){r.d=null
-return!1}r.d=q[s]
-r.c=s+1
-return!0},
-$iH:1}
-J.bO.prototype={
-H(a,b){var s
-A.jo(b)
-if(a<b)return-1
-else if(a>b)return 1
-else if(a===b){if(a===0){s=this.gb7(b)
-if(this.gb7(a)===s)return 0
-if(this.gb7(a))return-1
-return 1}return 0}else if(isNaN(a)){if(isNaN(b))return 0
-return 1}else return-1},
-gb7(a){return a===0?1/a<0:a<0},
-e7(a){var s
-if(a>=-2147483648&&a<=2147483647)return a|0
-if(isFinite(a)){s=a<0?Math.ceil(a):Math.floor(a)
-return s+0}throw A.b(A.b1(""+a+".toInt()"))},
-du(a,b,c){if(this.H(b,c)>0)throw A.b(A.ju(b))
-if(this.H(a,b)<0)return b
-if(this.H(a,c)>0)return c
-return a},
-i(a){if(a===0&&1/a<0)return"-0.0"
-else return""+a},
-gB(a){var s,r,q,p,o=a|0
-if(a===o)return o&536870911
-s=Math.abs(a)
-r=Math.log(s)/0.6931471805599453|0
-q=Math.pow(2,r)
-p=s<1?s/q:q/s
-return((p*9007199254740992|0)+(p*3542243181176521|0))*599197+r*1259&536870911},
-ae(a,b){return a+b},
-aJ(a,b){var s=a%b
-if(s===0)return 0
-if(s>0)return s
-return s+b},
-dc(a,b){return(a|0)===a?a/b|0:this.dd(a,b)},
-dd(a,b){var s=a/b
-if(s>=-2147483648&&s<=2147483647)return s|0
-if(s>0){if(s!==1/0)return Math.floor(s)}else if(s>-1/0)return Math.ceil(s)
-throw A.b(A.b1("Result of truncating division is "+A.p(s)+": "+A.p(a)+" ~/ "+b))},
-aZ(a,b){var s
-if(a>0)s=this.bN(a,b)
-else{s=b>31?31:b
-s=a>>s>>>0}return s},
-d9(a,b){if(0>b)throw A.b(A.ju(b))
-return this.bN(a,b)},
-bN(a,b){return b>31?0:a>>>b},
-bj(a,b){return a<b},
-gC(a){return A.aI(t.o)},
-$iac:1,
-$io:1,
-$ia7:1}
-J.cu.prototype={
-gC(a){return A.aI(t.S)},
-$iz:1,
-$ic:1}
-J.dZ.prototype={
-gC(a){return A.aI(t.i)},
-$iz:1}
-J.ba.prototype={
-ab(a,b,c,d){var s=A.ei(b,c,a.length)
-return a.substring(0,b)+d+a.substring(s)},
-G(a,b,c){var s
-if(c<0||c>a.length)throw A.b(A.au(c,0,a.length,null,null))
-s=c+b.length
-if(s>a.length)return!1
-return b===a.substring(c,s)},
-E(a,b){return this.G(a,b,0)},
-u(a,b,c){return a.substring(b,A.ei(b,c,a.length))},
-ar(a,b){return this.u(a,b,null)},
-a_(a,b){var s,r
-if(0>=b)return""
-if(b===1||a.length===0)return a
-if(b!==b>>>0)throw A.b(B.aN)
-for(s=a,r="";;){if((b&1)===1)r=s+r
-b=b>>>1
-if(b===0)break
-s+=s}return r},
-aC(a,b,c){var s
-if(c<0||c>a.length)throw A.b(A.au(c,0,a.length,null,null))
-s=a.indexOf(b,c)
-return s},
-aB(a,b){return this.aC(a,b,0)},
-t(a,b){return A.ox(a,b,0)},
-H(a,b){var s
-A.aH(b)
-if(a===b)s=0
-else s=a<b?-1:1
-return s},
-i(a){return a},
-gB(a){var s,r,q
-for(s=a.length,r=0,q=0;q<s;++q){r=r+a.charCodeAt(q)&536870911
-r=r+((r&524287)<<10)&536870911
-r^=r>>6}r=r+((r&67108863)<<3)&536870911
-r^=r>>11
-return r+((r&16383)<<15)&536870911},
-gC(a){return A.aI(t.N)},
-gp(a){return a.length},
-$iz:1,
-$iac:1,
-$ik2:1,
-$im:1}
-A.c0.prototype={
-gv(a){return new A.ch(J.X(this.gaA()),A.q(this).h("ch<1,2>"))},
-gp(a){return J.b6(this.gaA())},
-K(a,b){return A.q(this).y[1].a(J.iZ(this.gaA(),b))},
-i(a){return J.bH(this.gaA())}}
-A.ch.prototype={
-k(){return this.a.k()},
-gl(){return this.$ti.y[1].a(this.a.gl())},
-$iH:1}
-A.d_.prototype={
-n(a,b){return this.$ti.y[1].a(J.iY(this.a,b))},
-q(a,b,c){var s=this.$ti
-J.dx(this.a,b,s.c.a(s.y[1].a(c)))},
-$in:1,
-$iu:1}
-A.ci.prototype={
-gaA(){return this.a}}
-A.cz.prototype={
-i(a){return"LateInitializationError: "+this.a}}
-A.dH.prototype={
-gp(a){return this.a.length},
-n(a,b){var s=this.a
-if(!(b>=0&&b<s.length))return A.h(s,b)
-return s.charCodeAt(b)}}
-A.hr.prototype={}
-A.n.prototype={}
-A.V.prototype={
-gv(a){var s=this
-return new A.at(s,s.gp(s),A.q(s).h("at<V.E>"))},
-ac(a){var s,r=this,q=A.j4(A.q(r).h("V.E"))
-for(s=0;s<r.gp(r);++s)q.j(0,r.K(0,s))
-return q}}
-A.cW.prototype={
-gcZ(){var s=J.b6(this.a),r=this.c
-if(r==null||r>s)return s
-return r},
-gda(){var s=J.b6(this.a),r=this.b
-if(r>s)return s
-return r},
-gp(a){var s,r=J.b6(this.a),q=this.b
-if(q>=r)return 0
-s=this.c
-if(s==null||s>=r)return r-q
-return s-q},
-K(a,b){var s=this,r=s.gda()+b
-if(b<0||r>=s.gcZ())throw A.b(A.fR(b,s.gp(0),s,"index"))
-return J.iZ(s.a,r)},
-e8(a,b){var s,r,q,p=this,o=p.b,n=p.a,m=J.cb(n),l=m.gp(n),k=p.c
-if(k!=null&&k<l)l=k
-s=l-o
-if(s<=0){n=J.jU(0,p.$ti.c)
-return n}r=A.cC(s,m.K(n,o),!1,p.$ti.c)
-for(q=1;q<s;++q){B.a.q(r,q,m.K(n,o+q))
-if(m.gp(n)<l)throw A.b(A.am(p))}return r}}
-A.at.prototype={
-gl(){var s=this.d
-return s==null?this.$ti.c.a(s):s},
-k(){var s,r=this,q=r.a,p=J.cb(q),o=p.gp(q)
-if(r.b!==o)throw A.b(A.am(q))
-s=r.c
-if(s>=o){r.d=null
-return!1}r.d=p.K(q,s);++r.c
-return!0},
-$iH:1}
-A.aU.prototype={
-gv(a){var s=this.a
-return new A.cD(s.gv(s),this.b,A.q(this).h("cD<1,2>"))},
-gp(a){var s=this.a
-return s.gp(s)},
-K(a,b){var s=this.a
-return this.b.$1(s.K(s,b))}}
-A.cp.prototype={$in:1}
-A.cD.prototype={
-k(){var s=this,r=s.b
-if(r.k()){s.a=s.c.$1(r.gl())
-return!0}s.a=null
-return!1},
-gl(){var s=this.a
-return s==null?this.$ti.y[1].a(s):s},
-$iH:1}
-A.aV.prototype={
-gp(a){return J.b6(this.a)},
-K(a,b){return this.b.$1(J.iZ(this.a,b))}}
-A.a5.prototype={
-gv(a){return new A.G(J.X(this.a),this.b,this.$ti.h("G<1>"))}}
-A.G.prototype={
-k(){var s,r
-for(s=this.a,r=this.b;s.k();)if(r.$1(s.gl()))return!0
-return!1},
-gl(){return this.a.gl()},
-$iH:1}
-A.a8.prototype={}
-A.bv.prototype={
-q(a,b,c){A.q(this).h("bv.E").a(c)
-throw A.b(A.b1("Cannot modify an unmodifiable list"))}}
-A.bZ.prototype={}
-A.cS.prototype={
-gp(a){return J.b6(this.a)},
-K(a,b){var s=this.a,r=J.cb(s)
-return r.K(s,r.gp(s)-1-b)}}
-A.dq.prototype={}
-A.d9.prototype={$r:"+(1,2)",$s:1}
-A.da.prototype={$r:"+influence,light(1,2)",$s:2}
-A.cm.prototype={}
-A.cl.prototype={
-i(a){return A.j7(this)},
-q(a,b,c){var s=A.q(this)
-s.c.a(b)
-s.y[1].a(c)
-A.lF()},
-ga1(){return new A.aG(this.dC(),A.q(this).h("aG<Q<1,2>>"))},
-dC(){var s=this
-return function(){var r=0,q=1,p=[],o,n,m,l,k
-return function $async$ga1(a,b,c){if(b===1){p.push(c)
-r=q}for(;;)switch(r){case 0:o=s.gY(),o=o.gv(o),n=A.q(s),m=n.y[1],n=n.h("Q<1,2>")
-case 2:if(!o.k()){r=3
-break}l=o.gl()
-k=s.n(0,l)
-r=4
-return a.b=new A.Q(l,k==null?m.a(k):k,n),1
-case 4:r=2
-break
-case 3:return 0
-case 1:return a.c=p.at(-1),3}}}},
-$iW:1}
-A.K.prototype={
-gp(a){return this.b.length},
-gbC(){var s=this.$keys
-if(s==null){s=Object.keys(this.a)
-this.$keys=s}return s},
-aj(a){if(typeof a!="string")return!1
-if("__proto__"===a)return!1
-return this.a.hasOwnProperty(a)},
-n(a,b){if(!this.aj(b))return null
-return this.b[this.a[b]]},
-al(a,b){var s,r,q,p
-this.$ti.h("~(1,2)").a(b)
-s=this.gbC()
-r=this.b
-for(q=s.length,p=0;p<q;++p)b.$2(s[p],r[p])},
-gY(){return new A.by(this.gbC(),this.$ti.h("by<1>"))},
-gad(){return new A.by(this.b,this.$ti.h("by<2>"))}}
-A.by.prototype={
-gp(a){return this.a.length},
-gv(a){var s=this.a
-return new A.bz(s,s.length,this.$ti.h("bz<1>"))}}
-A.bz.prototype={
-gl(){var s=this.d
-return s==null?this.$ti.c.a(s):s},
-k(){var s=this,r=s.c
-if(r>=s.b){s.d=null
-return!1}s.d=s.a[r]
-s.c=r+1
-return!0},
-$iH:1}
-A.cn.prototype={
-j(a,b){A.q(this).c.a(b)
-A.lG()}}
-A.aM.prototype={
-gp(a){return this.b},
-gc9(a){return this.b!==0},
-gv(a){var s,r=this,q=r.$keys
-if(q==null){q=Object.keys(r.a)
-r.$keys=q}s=q
-return new A.bz(s,s.length,r.$ti.h("bz<1>"))},
-t(a,b){if(typeof b!="string")return!1
-if("__proto__"===b)return!1
-return this.a.hasOwnProperty(b)},
-ac(a){return A.j5(this,this.$ti.c)}}
-A.cT.prototype={}
-A.hv.prototype={
-Z(a){var s,r,q=this,p=new RegExp(q.a).exec(a)
-if(p==null)return null
-s=Object.create(null)
-r=q.b
-if(r!==-1)s.arguments=p[r+1]
-r=q.c
-if(r!==-1)s.argumentsExpr=p[r+1]
-r=q.d
-if(r!==-1)s.expr=p[r+1]
-r=q.e
-if(r!==-1)s.method=p[r+1]
-r=q.f
-if(r!==-1)s.receiver=p[r+1]
-return s}}
-A.cL.prototype={
-i(a){return"Null check operator used on a null value"}}
-A.e_.prototype={
-i(a){var s,r=this,q="NoSuchMethodError: method not found: '",p=r.b
-if(p==null)return"NoSuchMethodError: "+r.a
-s=r.c
-if(s==null)return q+p+"' ("+r.a+")"
-return q+p+"' on '"+s+"' ("+r.a+")"}}
-A.eA.prototype={
-i(a){var s=this.a
-return s.length===0?"Error":"Error: "+s}}
-A.h3.prototype={
-i(a){return"Throw of null ('"+(this.a===null?"null":"undefined")+"' from JavaScript)"}}
-A.cq.prototype={}
-A.dc.prototype={
-i(a){var s,r=this.b
-if(r!=null)return r
-r=this.a
-s=r!==null&&typeof r==="object"?r.stack:null
-return this.b=s==null?"":s},
-$ibe:1}
-A.b8.prototype={
-i(a){var s=this.constructor,r=s==null?null:s.name
-return"Closure '"+A.le(r==null?"unknown":r)+"'"},
-gC(a){var s=A.jw(this)
-return A.aI(s==null?A.bj(this):s)},
-$ibm:1,
-gec(){return this},
-$C:"$1",
-$R:1,
-$D:null}
-A.dF.prototype={$C:"$0",$R:0}
-A.dG.prototype={$C:"$2",$R:2}
-A.ew.prototype={}
-A.et.prototype={
-i(a){var s=this.$static_name
-if(s==null)return"Closure of unknown static method"
-return"Closure '"+A.le(s)+"'"}}
-A.bI.prototype={
-R(a,b){if(b==null)return!1
-if(this===b)return!0
-if(!(b instanceof A.bI))return!1
-return this.$_target===b.$_target&&this.a===b.a},
-gB(a){return(A.iP(this.a)^A.ee(this.$_target))>>>0},
-i(a){return"Closure '"+this.$_name+"' of "+("Instance of '"+A.ef(this.a)+"'")}}
-A.em.prototype={
-i(a){return"RuntimeError: "+this.a}}
-A.aQ.prototype={
-gp(a){return this.a},
-gY(){return new A.bp(this,A.q(this).h("bp<1>"))},
-gad(){return new A.aT(this,A.q(this).h("aT<2>"))},
-ga1(){return new A.aR(this,A.q(this).h("aR<1,2>"))},
-aj(a){var s,r
-if(typeof a=="string"){s=this.b
-if(s==null)return!1
-return s[a]!=null}else if(typeof a=="number"&&(a&0x3fffffff)===a){r=this.c
-if(r==null)return!1
-return r[a]!=null}else return this.dI(a)},
-dI(a){var s=this.d
-if(s==null)return!1
-return this.aE(s[this.aD(a)],a)>=0},
-n(a,b){var s,r,q,p,o=null
-if(typeof b=="string"){s=this.b
-if(s==null)return o
-r=s[b]
-q=r==null?o:r.b
-return q}else if(typeof b=="number"&&(b&0x3fffffff)===b){p=this.c
-if(p==null)return o
-r=p[b]
-q=r==null?o:r.b
-return q}else return this.dJ(b)},
-dJ(a){var s,r,q=this.d
-if(q==null)return null
-s=q[this.aD(a)]
-r=this.aE(s,a)
-if(r<0)return null
-return s[r].b},
-q(a,b,c){var s,r,q=this,p=A.q(q)
-p.c.a(b)
-p.y[1].a(c)
-if(typeof b=="string"){s=q.b
-q.bp(s==null?q.b=q.aX():s,b,c)}else if(typeof b=="number"&&(b&0x3fffffff)===b){r=q.c
-q.bp(r==null?q.c=q.aX():r,b,c)}else q.dL(b,c)},
-dL(a,b){var s,r,q,p,o=this,n=A.q(o)
-n.c.a(a)
-n.y[1].a(b)
-s=o.d
-if(s==null)s=o.d=o.aX()
-r=o.aD(a)
-q=s[r]
-if(q==null)s[r]=[o.aY(a,b)]
-else{p=o.aE(q,a)
-if(p>=0)q[p].b=b
-else q.push(o.aY(a,b))}},
-b9(a,b){var s,r,q=this,p=A.q(q)
-p.c.a(a)
-p.h("2()").a(b)
-if(q.aj(a)){s=q.n(0,a)
-return s==null?p.y[1].a(s):s}r=b.$0()
-q.q(0,a,r)
-return r},
-aH(a,b){if((b&0x3fffffff)===b)return this.cB(this.c,b)
-else return this.dK(b)},
-dK(a){var s,r,q,p,o=this,n=o.d
-if(n==null)return null
-s=o.aD(a)
-r=n[s]
-q=o.aE(r,a)
-if(q<0)return null
-p=r.splice(q,1)[0]
-o.bn(p)
-if(r.length===0)delete n[s]
-return p.b},
-X(a){var s=this
-if(s.a>0){s.b=s.c=s.d=s.e=s.f=null
-s.a=0
-s.aW()}},
-al(a,b){var s,r,q=this
-A.q(q).h("~(1,2)").a(b)
-s=q.e
-r=q.r
-while(s!=null){b.$2(s.a,s.b)
-if(r!==q.r)throw A.b(A.am(q))
-s=s.c}},
-bp(a,b,c){var s,r=A.q(this)
-r.c.a(b)
-r.y[1].a(c)
-s=a[b]
-if(s==null)a[b]=this.aY(b,c)
-else s.b=c},
-cB(a,b){var s
-if(a==null)return null
-s=a[b]
-if(s==null)return null
-this.bn(s)
-delete a[b]
-return s.b},
-aW(){this.r=this.r+1&1073741823},
-aY(a,b){var s=this,r=A.q(s),q=new A.fT(r.c.a(a),r.y[1].a(b))
-if(s.e==null)s.e=s.f=q
-else{r=s.f
-r.toString
-q.d=r
-s.f=r.c=q}++s.a
-s.aW()
-return q},
-bn(a){var s=this,r=a.d,q=a.c
-if(r==null)s.e=q
-else r.c=q
-if(q==null)s.f=r
-else q.d=r;--s.a
-s.aW()},
-aD(a){return J.J(a)&1073741823},
-aE(a,b){var s,r
-if(a==null)return-1
-s=a.length
-for(r=0;r<s;++r)if(J.aK(a[r].a,b))return r
-return-1},
-i(a){return A.j7(this)},
-aX(){var s=Object.create(null)
-s["<non-identifier-key>"]=s
-delete s["<non-identifier-key>"]
-return s},
-$ijX:1}
-A.fT.prototype={}
-A.bp.prototype={
-gp(a){return this.a.a},
-gv(a){var s=this.a
-return new A.cB(s,s.r,s.e,this.$ti.h("cB<1>"))}}
-A.cB.prototype={
-gl(){return this.d},
-k(){var s,r=this,q=r.a
-if(r.b!==q.r)throw A.b(A.am(q))
-s=r.c
-if(s==null){r.d=null
-return!1}else{r.d=s.a
-r.c=s.c
-return!0}},
-$iH:1}
-A.aT.prototype={
-gp(a){return this.a.a},
-gv(a){var s=this.a
-return new A.aS(s,s.r,s.e,this.$ti.h("aS<1>"))}}
-A.aS.prototype={
-gl(){return this.d},
-k(){var s,r=this,q=r.a
-if(r.b!==q.r)throw A.b(A.am(q))
-s=r.c
-if(s==null){r.d=null
-return!1}else{r.d=s.b
-r.c=s.c
-return!0}},
-$iH:1}
-A.aR.prototype={
-gp(a){return this.a.a},
-gv(a){var s=this.a
-return new A.cA(s,s.r,s.e,this.$ti.h("cA<1,2>"))}}
-A.cA.prototype={
-gl(){var s=this.d
-s.toString
-return s},
-k(){var s,r=this,q=r.a
-if(r.b!==q.r)throw A.b(A.am(q))
-s=r.c
-if(s==null){r.d=null
-return!1}else{r.d=new A.Q(s.a,s.b,r.$ti.h("Q<1,2>"))
-r.c=s.c
-return!0}},
-$iH:1}
-A.iG.prototype={
-$1(a){return this.a(a)},
-$S:19}
-A.iH.prototype={
-$2(a,b){return this.a(a,b)},
-$S:13}
-A.iI.prototype={
-$1(a){return this.a(A.aH(a))},
-$S:35}
-A.bh.prototype={
-gC(a){return A.aI(this.bB())},
-bB(){return A.oc(this.$r,this.bA())},
-i(a){return this.bR(!1)},
-bR(a){var s,r,q,p,o,n=this.d_(),m=this.bA(),l=(a?"Record ":"")+"("
-for(s=n.length,r="",q=0;q<s;++q,r=", "){l+=r
-p=n[q]
-if(typeof p=="string")l=l+p+": "
-if(!(q<m.length))return A.h(m,q)
-o=m[q]
-l=a?l+A.k5(o):l+A.p(o)}l+=")"
-return l.charCodeAt(0)==0?l:l},
-d_(){var s,r=this.$s
-while($.hZ.length<=r)B.a.j($.hZ,null)
-s=$.hZ[r]
-if(s==null){s=this.cP()
-B.a.q($.hZ,r,s)}return s},
-cP(){var s,r,q,p=this.$r,o=p.indexOf("("),n=p.substring(1,o),m=p.substring(o),l=m==="()"?0:m.replace(/[^,]/g,"").length+1,k=t.K,j=J.jT(l,k)
-for(s=0;s<l;++s)j[s]=s
-if(n!==""){r=n.split(",")
-s=r.length
-for(q=l;s>0;){--q;--s
-B.a.q(j,q,r[s])}}return A.jZ(j,k)}}
-A.bC.prototype={
-bA(){return[this.a,this.b]},
-R(a,b){if(b==null)return!1
-return b instanceof A.bC&&this.$s===b.$s&&J.aK(this.a,b.a)&&J.aK(this.b,b.b)},
-gB(a){return A.cM(this.$s,this.a,this.b,B.h,B.h,B.h)}}
-A.bS.prototype={
-gC(a){return B.cr},
-$iz:1}
-A.cI.prototype={
-d2(a,b,c,d){var s=A.au(b,0,c,d,null)
-throw A.b(s)},
-br(a,b,c,d){if(b>>>0!==b||b>c)this.d2(a,b,c,d)}}
-A.e2.prototype={
-gC(a){return B.cs},
-$iz:1}
-A.Y.prototype={
-gp(a){return a.length},
-bJ(a,b,c,d,e){var s,r=a.length
-this.br(a,b,r,"start")
-this.br(a,c,r,"end")
-if(b>c)throw A.b(A.au(b,0,c,null,null))
-s=c-b
-if(e<0)throw A.b(A.r(e,null))
-if(16-e<s)throw A.b(A.j("Not enough elements"))
-if(e!==0||16!==s)d=d.subarray(e,e+s)
-a.set(d,b)},
-$iag:1}
-A.cG.prototype={
-n(a,b){A.b3(b,a,a.length)
-return a[b]},
-q(a,b,c){A.ib(c)
-a.$flags&2&&A.b4(a)
-A.b3(b,a,a.length)
-a[b]=c},
-bl(a,b,c,d){t.bM.a(d)
-a.$flags&2&&A.b4(a,5)
-this.bJ(a,b,c,d,0)
-return},
-$in:1,
-$ii:1,
-$iu:1}
-A.cH.prototype={
-q(a,b,c){A.a(c)
-a.$flags&2&&A.b4(a)
-A.b3(b,a,a.length)
-a[b]=c},
-ct(a,b,c,d,e){t.hb.a(d)
-a.$flags&2&&A.b4(a,5)
-this.bJ(a,b,c,d,e)
-return},
-$in:1,
-$ii:1,
-$iu:1}
-A.cF.prototype={
-gC(a){return B.ct},
-$iz:1,
-$ifB:1}
-A.e3.prototype={
-gC(a){return B.cu},
-$iz:1}
-A.e4.prototype={
-gC(a){return B.cv},
-n(a,b){A.b3(b,a,a.length)
-return a[b]},
-$iz:1}
-A.e5.prototype={
-gC(a){return B.cw},
-n(a,b){A.b3(b,a,a.length)
-return a[b]},
-$iz:1}
-A.e6.prototype={
-gC(a){return B.cx},
-n(a,b){A.b3(b,a,a.length)
-return a[b]},
-$iz:1}
-A.e7.prototype={
-gC(a){return B.cA},
-n(a,b){A.b3(b,a,a.length)
-return a[b]},
-$iz:1}
-A.e8.prototype={
-gC(a){return B.cB},
-n(a,b){A.b3(b,a,a.length)
-return a[b]},
-$iz:1}
-A.cJ.prototype={
-gC(a){return B.cC},
-gp(a){return a.length},
-n(a,b){A.b3(b,a,a.length)
-return a[b]},
-$iz:1}
-A.cK.prototype={
-gC(a){return B.cD},
-gp(a){return a.length},
-n(a,b){A.b3(b,a,a.length)
-return a[b]},
-$iz:1,
-$iey:1}
-A.d5.prototype={}
-A.d6.prototype={}
-A.d7.prototype={}
-A.d8.prototype={}
-A.av.prototype={
-h(a){return A.dh(v.typeUniverse,this,a)},
-D(a){return A.kE(v.typeUniverse,this,a)}}
-A.eW.prototype={}
-A.i4.prototype={
-i(a){return A.aj(this.a,null)}}
-A.eU.prototype={
-i(a){return this.a}}
-A.dd.prototype={$iaZ:1}
-A.hG.prototype={
-$1(a){var s=this.a,r=s.a
-s.a=null
-r.$0()},
-$S:8}
-A.hF.prototype={
-$1(a){var s,r
-this.a.a=t.M.a(a)
-s=this.b
-r=this.c
-s.firstChild?s.removeChild(r):s.appendChild(r)},
-$S:18}
-A.hH.prototype={
-$0(){this.a.$0()},
-$S:9}
-A.hI.prototype={
-$0(){this.a.$0()},
-$S:9}
-A.i2.prototype={
-cA(a,b){if(self.setTimeout!=null)self.setTimeout(A.c8(new A.i3(this,b),0),a)
-else throw A.b(A.b1("`setTimeout()` not found."))}}
-A.i3.prototype={
-$0(){this.b.$0()},
-$S:0}
-A.eJ.prototype={
-b_(a){var s,r=this,q=r.$ti
-q.h("1/?").a(a)
-if(a==null)a=q.c.a(a)
-if(!r.b)r.a.aM(a)
-else{s=r.a
-if(q.h("bn<1>").b(a))s.bq(a)
-else s.bu(a)}},
-b0(a,b){var s=this.a
-if(this.b)s.aQ(new A.al(a,b))
-else s.aN(new A.al(a,b))}}
-A.ic.prototype={
-$1(a){return this.a.$2(0,a)},
-$S:5}
-A.id.prototype={
-$2(a,b){this.a.$2(1,new A.cq(a,t.l.a(b)))},
-$S:23}
-A.iz.prototype={
-$2(a,b){this.a(A.a(a),b)},
-$S:30}
-A.aA.prototype={
-gl(){var s=this.b
-return s==null?this.$ti.c.a(s):s},
-d7(a,b){var s,r,q
-a=A.a(a)
-b=b
-s=this.a
-for(;;)try{r=s(this,a,b)
-return r}catch(q){b=q
-a=1}},
-k(){var s,r,q,p,o=this,n=null,m=0
-for(;;){s=o.d
-if(s!=null)try{if(s.k()){o.b=s.gl()
-return!0}else o.d=null}catch(r){n=r
-m=1
-o.d=null}q=o.d7(m,n)
-if(1===q)return!0
-if(0===q){o.b=null
-p=o.e
-if(p==null||p.length===0){o.a=A.kz
-return!1}if(0>=p.length)return A.h(p,-1)
-o.a=p.pop()
-m=0
-n=null
-continue}if(2===q){m=0
-n=null
-continue}if(3===q){n=o.c
-o.c=null
-p=o.e
-if(p==null||p.length===0){o.b=null
-o.a=A.kz
-throw n
-return!1}if(0>=p.length)return A.h(p,-1)
-o.a=p.pop()
-m=1
-continue}throw A.b(A.j("sync*"))}return!1},
-ef(a){var s,r,q=this
-if(a instanceof A.aG){s=a.a()
-r=q.e
-if(r==null)r=q.e=[]
-B.a.j(r,q.a)
-q.a=s
-return 2}else{q.d=J.X(a)
-return 2}},
-$iH:1}
-A.aG.prototype={
-gv(a){return new A.aA(this.a(),this.$ti.h("aA<1>"))}}
-A.al.prototype={
-i(a){return A.p(this.a)},
-$iD:1,
-gag(){return this.b}}
-A.eO.prototype={
-b0(a,b){var s=this.a
-if((s.a&30)!==0)throw A.b(A.j("Future already completed"))
-s.aN(A.nC(a,b))},
-bW(a){return this.b0(a,null)}}
-A.cZ.prototype={
-b_(a){var s,r=this.$ti
-r.h("1/?").a(a)
-s=this.a
-if((s.a&30)!==0)throw A.b(A.j("Future already completed"))
-s.aM(r.h("1/").a(a))}}
-A.bw.prototype={
-dP(a){if((this.c&15)!==6)return!0
-return this.b.b.bd(t.al.a(this.d),a.a,t.y,t.K)},
-dF(a){var s,r=this,q=r.e,p=null,o=t.A,n=t.K,m=a.a,l=r.b.b
-if(t.d.b(q))p=l.e4(q,m,a.b,o,n,t.l)
-else p=l.bd(t.x.a(q),m,o,n)
-try{o=r.$ti.h("2/").a(p)
-return o}catch(s){if(t.eK.b(A.b5(s))){if((r.c&1)!==0)throw A.b(A.r("The error handler of Future.then must return a value of the returned future's type","onError"))
-throw A.b(A.r("The error handler of Future.catchError must return a value of the future's type","onError"))}else throw s}}}
-A.N.prototype={
-co(a,b,c){var s,r,q=this.$ti
-q.D(c).h("1/(2)").a(a)
-s=$.I
-if(s===B.n){if(!t.d.b(b)&&!t.x.b(b))throw A.b(A.aL(b,"onError",u.c))}else{c.h("@<0/>").D(q.c).h("1(2)").a(a)
-b=A.nT(b,s)}r=new A.N(s,c.h("N<0>"))
-this.aL(new A.bw(r,3,a,b,q.h("@<1>").D(c).h("bw<1,2>")))
-return r},
-bP(a,b,c){var s,r=this.$ti
-r.D(c).h("1/(2)").a(a)
-s=new A.N($.I,c.h("N<0>"))
-this.aL(new A.bw(s,19,a,b,r.h("@<1>").D(c).h("bw<1,2>")))
-return s},
-d8(a){this.a=this.a&1|16
-this.c=a},
-au(a){this.a=a.a&30|this.a&1
-this.c=a.c},
-aL(a){var s,r=this,q=r.a
-if(q<=3){a.a=t.F.a(r.c)
-r.c=a}else{if((q&4)!==0){s=t.c.a(r.c)
-if((s.a&24)===0){s.aL(a)
-return}r.au(s)}A.fh(null,null,r.b,t.M.a(new A.hM(r,a)))}},
-bE(a){var s,r,q,p,o,n,m=this,l={}
-l.a=a
-if(a==null)return
-s=m.a
-if(s<=3){r=t.F.a(m.c)
-m.c=a
-if(r!=null){q=a.a
-for(p=a;q!=null;p=q,q=o)o=q.a
-p.a=r}}else{if((s&4)!==0){n=t.c.a(m.c)
-if((n.a&24)===0){n.bE(a)
-return}m.au(n)}l.a=m.az(a)
-A.fh(null,null,m.b,t.M.a(new A.hQ(l,m)))}},
-aw(){var s=t.F.a(this.c)
-this.c=null
-return this.az(s)},
-az(a){var s,r,q
-for(s=a,r=null;s!=null;r=s,s=q){q=s.a
-s.a=r}return r},
-bu(a){var s,r=this
-r.$ti.c.a(a)
-s=r.aw()
-r.a=8
-r.c=a
-A.c1(r,s)},
-cO(a){var s,r,q=this
-if((a.a&16)!==0){s=q.b===a.b
-s=!(s||s)}else s=!1
-if(s)return
-r=q.aw()
-q.au(a)
-A.c1(q,r)},
-aQ(a){var s=this.aw()
-this.d8(a)
-A.c1(this,s)},
-aM(a){var s=this.$ti
-s.h("1/").a(a)
-if(s.h("bn<1>").b(a)){this.bq(a)
-return}this.cE(a)},
-cE(a){var s=this
-s.$ti.c.a(a)
-s.a^=2
-A.fh(null,null,s.b,t.M.a(new A.hO(s,a)))},
-bq(a){A.jd(this.$ti.h("bn<1>").a(a),this,!1)
-return},
-aN(a){this.a^=2
-A.fh(null,null,this.b,t.M.a(new A.hN(this,a)))},
-$ibn:1}
-A.hM.prototype={
-$0(){A.c1(this.a,this.b)},
-$S:0}
-A.hQ.prototype={
-$0(){A.c1(this.b,this.a.a)},
-$S:0}
-A.hP.prototype={
-$0(){A.jd(this.a.a,this.b,!0)},
-$S:0}
-A.hO.prototype={
-$0(){this.a.bu(this.b)},
-$S:0}
-A.hN.prototype={
-$0(){this.a.aQ(this.b)},
-$S:0}
-A.hT.prototype={
-$0(){var s,r,q,p,o,n,m,l,k=this,j=null
-try{q=k.a.a
-j=q.b.b.e3(t.fO.a(q.d),t.A)}catch(p){s=A.b5(p)
-r=A.cc(p)
-if(k.c&&t.v.a(k.b.a.c).a===s){q=k.a
-q.c=t.v.a(k.b.a.c)}else{q=s
-o=r
-if(o==null)o=A.j_(q)
-n=k.a
-n.c=new A.al(q,o)
-q=n}q.b=!0
-return}if(j instanceof A.N&&(j.a&24)!==0){if((j.a&16)!==0){q=k.a
-q.c=t.v.a(j.c)
-q.b=!0}return}if(j instanceof A.N){m=k.b.a
-l=new A.N(m.b,m.$ti)
-j.co(new A.hU(l,m),new A.hV(l),t.H)
-q=k.a
-q.c=l
-q.b=!1}},
-$S:0}
-A.hU.prototype={
-$1(a){this.a.cO(this.b)},
-$S:8}
-A.hV.prototype={
-$2(a,b){A.dr(a)
-t.l.a(b)
-this.a.aQ(new A.al(a,b))},
-$S:29}
-A.hS.prototype={
-$0(){var s,r,q,p,o,n,m,l
-try{q=this.a
-p=q.a
-o=p.$ti
-n=o.c
-m=n.a(this.b)
-q.c=p.b.b.bd(o.h("2/(1)").a(p.d),m,o.h("2/"),n)}catch(l){s=A.b5(l)
-r=A.cc(l)
-q=s
-p=r
-if(p==null)p=A.j_(q)
-o=this.a
-o.c=new A.al(q,p)
-o.b=!0}},
-$S:0}
-A.hR.prototype={
-$0(){var s,r,q,p,o,n,m,l=this
-try{s=t.v.a(l.a.a.c)
-p=l.b
-if(p.a.dP(s)&&p.a.e!=null){p.c=p.a.dF(s)
-p.b=!1}}catch(o){r=A.b5(o)
-q=A.cc(o)
-p=t.v.a(l.a.a.c)
-if(p.a===r){n=l.b
-n.c=p
-p=n}else{p=r
-n=q
-if(n==null)n=A.j_(p)
-m=l.b
-m.c=new A.al(p,n)
-p=m}p.b=!0}},
-$S:0}
-A.eK.prototype={}
-A.fa.prototype={}
-A.dp.prototype={$ikr:1}
-A.f3.prototype={
-e5(a){var s,r,q
-t.M.a(a)
-try{if(B.n===$.I){a.$0()
-return}A.kZ(null,null,this,a,t.H)}catch(q){s=A.b5(q)
-r=A.cc(q)
-A.js(A.dr(s),t.l.a(r))}},
-dn(a){return new A.i_(this,t.M.a(a))},
-e3(a,b){b.h("0()").a(a)
-if($.I===B.n)return a.$0()
-return A.kZ(null,null,this,a,b)},
-bd(a,b,c,d){c.h("@<0>").D(d).h("1(2)").a(a)
-d.a(b)
-if($.I===B.n)return a.$1(b)
-return A.nV(null,null,this,a,b,c,d)},
-e4(a,b,c,d,e,f){d.h("@<0>").D(e).D(f).h("1(2,3)").a(a)
-e.a(b)
-f.a(c)
-if($.I===B.n)return a.$2(b,c)
-return A.nU(null,null,this,a,b,c,d,e,f)},
-cn(a,b,c,d){return b.h("@<0>").D(c).D(d).h("1(2,3)").a(a)}}
-A.i_.prototype={
-$0(){return this.a.e5(this.b)},
-$S:0}
-A.iy.prototype={
-$0(){A.lK(this.a,this.b)},
-$S:0}
-A.d0.prototype={
-gp(a){return this.a},
-gY(){return new A.bx(this,this.$ti.h("bx<1>"))},
-gad(){var s=this.$ti
-return A.k_(new A.bx(this,s.h("bx<1>")),new A.hX(this),s.c,s.y[1])},
-aj(a){var s,r
-if(typeof a=="string"&&a!=="__proto__"){s=this.b
-return s==null?!1:s[a]!=null}else if(typeof a=="number"&&(a&1073741823)===a){r=this.c
-return r==null?!1:r[a]!=null}else return this.cS(a)},
-cS(a){var s=this.d
-if(s==null)return!1
-return this.a3(this.bz(s,a),a)>=0},
-n(a,b){var s,r,q
-if(typeof b=="string"&&b!=="__proto__"){s=this.b
-r=s==null?null:A.kt(s,b)
-return r}else if(typeof b=="number"&&(b&1073741823)===b){q=this.c
-r=q==null?null:A.kt(q,b)
-return r}else return this.d1(b)},
-d1(a){var s,r,q=this.d
-if(q==null)return null
-s=this.bz(q,a)
-r=this.a3(s,a)
-return r<0?null:s[r+1]},
-q(a,b,c){var s,r,q,p,o,n,m=this,l=m.$ti
-l.c.a(b)
-l.y[1].a(c)
-if(typeof b=="string"&&b!=="__proto__"){s=m.b
-m.bt(s==null?m.b=A.je():s,b,c)}else if(typeof b=="number"&&(b&1073741823)===b){r=m.c
-m.bt(r==null?m.c=A.je():r,b,c)}else{q=m.d
-if(q==null)q=m.d=A.je()
-p=A.iP(b)&1073741823
-o=q[p]
-if(o==null){A.jf(q,p,[b,c]);++m.a
-m.e=null}else{n=m.a3(o,b)
-if(n>=0)o[n+1]=c
-else{o.push(b,c);++m.a
-m.e=null}}}},
-al(a,b){var s,r,q,p,o,n,m=this,l=m.$ti
-l.h("~(1,2)").a(b)
-s=m.bv()
-for(r=s.length,q=l.c,l=l.y[1],p=0;p<r;++p){o=s[p]
-q.a(o)
-n=m.n(0,o)
-b.$2(o,n==null?l.a(n):n)
-if(s!==m.e)throw A.b(A.am(m))}},
-bv(){var s,r,q,p,o,n,m,l,k,j,i=this,h=i.e
-if(h!=null)return h
-h=A.cC(i.a,null,!1,t.A)
-s=i.b
-r=0
-if(s!=null){q=Object.getOwnPropertyNames(s)
-p=q.length
-for(o=0;o<p;++o){h[r]=q[o];++r}}n=i.c
-if(n!=null){q=Object.getOwnPropertyNames(n)
-p=q.length
-for(o=0;o<p;++o){h[r]=+q[o];++r}}m=i.d
-if(m!=null){q=Object.getOwnPropertyNames(m)
-p=q.length
-for(o=0;o<p;++o){l=m[q[o]]
-k=l.length
-for(j=0;j<k;j+=2){h[r]=l[j];++r}}}return i.e=h},
-bt(a,b,c){var s=this.$ti
-s.c.a(b)
-s.y[1].a(c)
-if(a[b]==null){++this.a
-this.e=null}A.jf(a,b,c)},
-bz(a,b){return a[A.iP(b)&1073741823]}}
-A.hX.prototype={
-$1(a){var s=this.a,r=s.$ti
-s=s.n(0,r.c.a(a))
-return s==null?r.y[1].a(s):s},
-$S(){return this.a.$ti.h("2(1)")}}
-A.d2.prototype={
-a3(a,b){var s,r,q
-if(a==null)return-1
-s=a.length
-for(r=0;r<s;r+=2){q=a[r]
-if(q==null?b==null:q===b)return r}return-1}}
-A.bx.prototype={
-gp(a){return this.a.a},
-gv(a){var s=this.a
-return new A.d1(s,s.bv(),this.$ti.h("d1<1>"))}}
-A.d1.prototype={
-gl(){var s=this.d
-return s==null?this.$ti.c.a(s):s},
-k(){var s=this,r=s.b,q=s.c,p=s.a
-if(r!==p.e)throw A.b(A.am(p))
-else if(q>=r.length){s.d=null
-return!1}else{s.d=r[q]
-s.c=q+1
-return!0}},
-$iH:1}
-A.az.prototype={
-d3(){return new A.az(A.q(this).h("az<1>"))},
-gv(a){var s=this,r=new A.bA(s,s.r,A.q(s).h("bA<1>"))
-r.c=s.e
-return r},
-gp(a){return this.a},
-t(a,b){var s,r
-if(typeof b=="string"&&b!=="__proto__"){s=this.b
-if(s==null)return!1
-return t.g.a(s[b])!=null}else if(typeof b=="number"&&(b&1073741823)===b){r=this.c
-if(r==null)return!1
-return t.g.a(r[b])!=null}else return this.cR(b)},
-cR(a){var s=this.d
-if(s==null)return!1
-return this.a3(s[this.aR(a)],a)>=0},
-j(a,b){var s,r,q=this
-A.q(q).c.a(b)
-if(typeof b=="string"&&b!=="__proto__"){s=q.b
-return q.bs(s==null?q.b=A.jh():s,b)}else if(typeof b=="number"&&(b&1073741823)===b){r=q.c
-return q.bs(r==null?q.c=A.jh():r,b)}else return q.cC(b)},
-cC(a){var s,r,q,p=this
-A.q(p).c.a(a)
-s=p.d
-if(s==null)s=p.d=A.jh()
-r=p.aR(a)
-q=s[r]
-if(q==null)s[r]=[p.aP(a)]
-else{if(p.a3(q,a)>=0)return!1
-q.push(p.aP(a))}return!0},
-aH(a,b){var s=this
-if(typeof b=="string"&&b!=="__proto__")return s.bF(s.b,b)
-else if(typeof b=="number"&&(b&1073741823)===b)return s.bF(s.c,b)
-else return s.d5(b)},
-d5(a){var s,r,q,p,o=this,n=o.d
-if(n==null)return!1
-s=o.aR(a)
-r=n[s]
-q=o.a3(r,a)
-if(q<0)return!1
-p=r.splice(q,1)[0]
-if(0===r.length)delete n[s]
-o.bS(p)
-return!0},
-X(a){var s=this
-if(s.a>0){s.b=s.c=s.d=s.e=s.f=null
-s.a=0
-s.aO()}},
-bs(a,b){A.q(this).c.a(b)
-if(t.g.a(a[b])!=null)return!1
-a[b]=this.aP(b)
-return!0},
-bF(a,b){var s
-if(a==null)return!1
-s=t.g.a(a[b])
-if(s==null)return!1
-this.bS(s)
-delete a[b]
-return!0},
-aO(){this.r=this.r+1&1073741823},
-aP(a){var s,r=this,q=new A.eY(A.q(r).c.a(a))
-if(r.e==null)r.e=r.f=q
-else{s=r.f
-s.toString
-q.c=s
-r.f=s.b=q}++r.a
-r.aO()
-return q},
-bS(a){var s=this,r=a.c,q=a.b
-if(r==null)s.e=q
-else r.b=q
-if(q==null)s.f=r
-else q.c=r;--s.a
-s.aO()},
-aR(a){return J.J(a)&1073741823},
-a3(a,b){var s,r
-if(a==null)return-1
-s=a.length
-for(r=0;r<s;++r)if(J.aK(a[r].a,b))return r
-return-1},
-$ijY:1}
-A.eY.prototype={}
-A.bA.prototype={
-gl(){var s=this.d
-return s==null?this.$ti.c.a(s):s},
-k(){var s=this,r=s.c,q=s.a
-if(s.b!==q.r)throw A.b(A.am(q))
-else if(r==null){s.d=null
-return!1}else{s.d=s.$ti.h("1?").a(r.a)
-s.c=r.b
-return!0}},
-$iH:1}
-A.fU.prototype={
-$2(a,b){this.a.q(0,this.b.a(a),this.c.a(b))},
-$S:52}
-A.w.prototype={
-gv(a){return new A.at(a,this.gp(a),A.bj(a).h("at<w.E>"))},
-K(a,b){return this.n(a,b)},
-c1(a,b){var s,r
-A.bj(a).h("A(w.E)").a(b)
-s=this.gp(a)
-for(r=0;r<s;++r){if(!b.$1(this.n(a,r)))return!1
-if(s!==this.gp(a))throw A.b(A.am(a))}return!0},
-dD(a,b,c,d){var s
-A.bj(a).h("w.E?").a(d)
-A.ei(b,c,this.gp(a))
-for(s=b;s<c;++s)this.q(a,s,d)},
-i(a){return A.j1(a,"[","]")},
-$in:1,
-$ii:1,
-$iu:1}
-A.bq.prototype={
-al(a,b){var s,r,q,p=A.q(this)
-p.h("~(1,2)").a(b)
-for(s=this.gY(),s=s.gv(s),p=p.y[1];s.k();){r=s.gl()
-q=this.n(0,r)
-b.$2(r,q==null?p.a(q):q)}},
-ga1(){var s=this.gY(),r=A.q(this).h("Q<1,2>"),q=A.q(s)
-return A.k_(s,q.D(r).h("1(i.E)").a(new A.fV(this)),q.h("i.E"),r)},
-gp(a){var s=this.gY()
-return s.gp(s)},
-gad(){return new A.d3(this,A.q(this).h("d3<1,2>"))},
-i(a){return A.j7(this)},
-$iW:1}
-A.fV.prototype={
-$1(a){var s=this.a,r=A.q(s)
-r.c.a(a)
-s=s.n(0,a)
-if(s==null)s=r.y[1].a(s)
-return new A.Q(a,s,r.h("Q<1,2>"))},
-$S(){return A.q(this.a).h("Q<1,2>(1)")}}
-A.fW.prototype={
-$2(a,b){var s,r=this.a
-if(!r.a)this.b.a+=", "
-r.a=!1
-r=this.b
-s=A.p(a)
-r.a=(r.a+=s)+": "
-s=A.p(b)
-r.a+=s},
-$S:57}
-A.d3.prototype={
-gp(a){var s=this.a
-return s.gp(s)},
-gv(a){var s=this.a,r=s.gY()
-return new A.d4(r.gv(r),s,this.$ti.h("d4<1,2>"))}}
-A.d4.prototype={
-k(){var s=this,r=s.a
-if(r.k()){s.c=s.b.n(0,r.gl())
-return!0}s.c=null
-return!1},
-gl(){var s=this.c
-return s==null?this.$ti.y[1].a(s):s},
-$iH:1}
-A.di.prototype={
-q(a,b,c){var s=A.q(this)
-s.c.a(b)
-s.y[1].a(c)
-throw A.b(A.b1("Cannot modify unmodifiable map"))}}
-A.bQ.prototype={
-n(a,b){return this.a.n(0,b)},
-q(a,b,c){var s=A.q(this)
-this.a.q(0,s.c.a(b),s.y[1].a(c))},
-gp(a){var s=this.a
-return s.gp(s)},
-gY(){return this.a.gY()},
-i(a){return this.a.i(0)},
-gad(){return this.a.gad()},
-ga1(){return this.a.ga1()},
-$iW:1}
-A.bf.prototype={}
-A.aY.prototype={
-gc9(a){return this.gp(this)!==0},
-W(a,b){var s
-A.q(this).h("i<1>").a(b)
-for(s=b.gv(b);s.k();)this.j(0,s.gl())},
-bY(a){var s,r,q=this.ac(0)
-for(s=this.gv(this);s.k();){r=s.gl()
-if(a.t(0,r))q.aH(0,r)}return q},
-i(a){return A.j1(this,"{","}")},
-aF(a,b){var s,r,q=this.gv(this)
-if(!q.k())return""
-s=J.bH(q.gl())
-if(!q.k())return s
-if(b.length===0){r=s
-do r+=A.p(q.gl())
-while(q.k())}else{r=s
-do r=r+b+A.p(q.gl())
-while(q.k())}return r.charCodeAt(0)==0?r:r},
-dj(a,b){var s
-A.q(this).h("A(1)").a(b)
-for(s=this.gv(this);s.k();)if(b.$1(s.gl()))return!0
-return!1},
-K(a,b){var s,r
-A.eh(b,"index")
-s=this.gv(this)
-for(r=b;s.k();){if(r===0)return s.gl();--r}throw A.b(A.fR(b,b-r,this,"index"))},
-$in:1,
-$ii:1,
-$ibd:1}
-A.db.prototype={
-ac(a){var s=this.d3()
-s.W(0,this)
-return s}}
-A.fc.prototype={
-j(a,b){this.$ti.c.a(b)
-return A.mY()}}
-A.cX.prototype={
-gp(a){return this.a.a},
-gv(a){var s=this.a
-return A.jg(s,s.r,A.q(s).c)},
-ac(a){return this.a.ac(0)}}
-A.c3.prototype={}
-A.dj.prototype={}
-A.i8.prototype={
-$0(){var s,r
-try{s=new TextDecoder("utf-8",{fatal:true})
-return s}catch(r){}return null},
-$S:10}
-A.i7.prototype={
-$0(){var s,r
-try{s=new TextDecoder("utf-8",{fatal:false})
-return s}catch(r){}return null},
-$S:10}
-A.dB.prototype={
-dQ(a3,a4,a5){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/",a1="Invalid base64 encoding length ",a2=a3.length
-a5=A.ei(a4,a5,a2)
-s=$.lr()
-for(r=s.length,q=a4,p=q,o=null,n=-1,m=-1,l=0;q<a5;q=k){k=q+1
-if(!(q<a2))return A.h(a3,q)
-j=a3.charCodeAt(q)
-if(j===37){i=k+2
-if(i<=a5){if(!(k<a2))return A.h(a3,k)
-h=A.iF(a3.charCodeAt(k))
-g=k+1
-if(!(g<a2))return A.h(a3,g)
-f=A.iF(a3.charCodeAt(g))
-e=h*16+f-(f&256)
-if(e===37)e=-1
-k=i}else e=-1}else e=j
-if(0<=e&&e<=127){if(!(e>=0&&e<r))return A.h(s,e)
-d=s[e]
-if(d>=0){if(!(d<64))return A.h(a0,d)
-e=a0.charCodeAt(d)
-if(e===j)continue
-j=e}else{if(d===-1){if(n<0){g=o==null?null:o.a.length
-if(g==null)g=0
-n=g+(q-p)
-m=q}++l
-if(j===61)continue}j=e}if(d!==-2){if(o==null){o=new A.ab("")
-g=o}else g=o
-g.a+=B.b.u(a3,p,q)
-c=A.bs(j)
-g.a+=c
-p=k
-continue}}throw A.b(A.a9("Invalid base64 data",a3,q))}if(o!=null){a2=B.b.u(a3,p,a5)
-a2=o.a+=a2
-r=a2.length
-if(n>=0)A.jK(a3,m,a5,n,l,r)
-else{b=B.i.aJ(r-1,4)+1
-if(b===1)throw A.b(A.a9(a1,a3,a5))
-while(b<4){a2+="="
-o.a=a2;++b}}a2=o.a
-return B.b.ab(a3,a4,a5,a2.charCodeAt(0)==0?a2:a2)}a=a5-a4
-if(n>=0)A.jK(a3,m,a5,n,l,a)
-else{b=B.i.aJ(a,4)
-if(b===1)throw A.b(A.a9(a1,a3,a5))
-if(b>1)a3=B.b.ab(a3,a5,a5,b===2?"==":"=")}return a3}}
-A.fk.prototype={}
-A.bK.prototype={}
-A.dJ.prototype={}
-A.dO.prototype={}
-A.eE.prototype={}
-A.hA.prototype={
-dv(a){return new A.i6(this.a).cT(t.L.a(a),0,null,!0)}}
-A.i6.prototype={
-cT(a,b,c,d){var s,r,q,p,o,n,m,l=this
-t.L.a(a)
-s=A.ei(b,c,J.b6(a))
-if(b===s)return""
-if(a instanceof Uint8Array){r=a
-q=r
-p=0}else{q=A.ne(a,b,s)
-s-=b
-p=b
-b=0}if(s-b>=15){o=l.a
-n=A.nd(o,q,b,s)
-if(n!=null){if(!o)return n
-if(n.indexOf("\ufffd")<0)return n}}n=l.aS(q,b,s,!0)
-o=l.b
-if((o&1)!==0){m=A.nf(o)
-l.b=0
-throw A.b(A.a9(m,a,p+l.c))}return n},
-aS(a,b,c,d){var s,r,q=this
-if(c-b>1000){s=B.i.dc(b+c,2)
-r=q.aS(a,b,s,!1)
-if((q.b&1)!==0)return r
-return r+q.aS(a,s,c,d)}return q.dA(a,b,c,d)},
-dA(a,b,a0,a1){var s,r,q,p,o,n,m,l,k=this,j="AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFFFFFFFFFFFFFFFFGGGGGGGGGGGGGGGGHHHHHHHHHHHHHHHHHHHHHHHHHHHIHHHJEEBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBKCCCCCCCCCCCCDCLONNNMEEEEEEEEEEE",i=" \x000:XECCCCCN:lDb \x000:XECCCCCNvlDb \x000:XECCCCCN:lDb AAAAA\x00\x00\x00\x00\x00AAAAA00000AAAAA:::::AAAAAGG000AAAAA00KKKAAAAAG::::AAAAA:IIIIAAAAA000\x800AAAAA\x00\x00\x00\x00 AAAAA",h=65533,g=k.b,f=k.c,e=new A.ab(""),d=b+1,c=a.length
-if(!(b>=0&&b<c))return A.h(a,b)
-s=a[b]
-A:for(r=k.a;;){for(;;d=o){if(!(s>=0&&s<256))return A.h(j,s)
-q=j.charCodeAt(s)&31
-f=g<=32?s&61694>>>q:(s&63|f<<6)>>>0
-p=g+q
-if(!(p>=0&&p<144))return A.h(i,p)
-g=i.charCodeAt(p)
-if(g===0){p=A.bs(f)
-e.a+=p
-if(d===a0)break A
-break}else if((g&1)!==0){if(r)switch(g){case 69:case 67:p=A.bs(h)
-e.a+=p
-break
-case 65:p=A.bs(h)
-e.a+=p;--d
-break
-default:p=A.bs(h)
-e.a=(e.a+=p)+p
-break}else{k.b=g
-k.c=d-1
-return""}g=0}if(d===a0)break A
-o=d+1
-if(!(d>=0&&d<c))return A.h(a,d)
-s=a[d]}o=d+1
-if(!(d>=0&&d<c))return A.h(a,d)
-s=a[d]
-if(s<128){for(;;){if(!(o<a0)){n=a0
-break}m=o+1
-if(!(o>=0&&o<c))return A.h(a,o)
-s=a[o]
-if(s>=128){n=m-1
-o=m
-break}o=m}if(n-d<20)for(l=d;l<n;++l){if(!(l<c))return A.h(a,l)
-p=A.bs(a[l])
-e.a+=p}else{p=A.kb(a,d,n)
-e.a+=p}if(n===a0)break A
-d=o}else d=o}if(a1&&g>32)if(r){c=A.bs(h)
-e.a+=c}else{k.b=77
-k.c=a0
-return""}k.b=g
-k.c=f
-c=e.a
-return c.charCodeAt(0)==0?c:c}}
-A.bl.prototype={
-R(a,b){var s
-if(b==null)return!1
-s=!1
-if(b instanceof A.bl)if(this.a===b.a)s=this.b===b.b
-return s},
-gB(a){return A.cM(this.a,this.b,B.h,B.h,B.h,B.h)},
-H(a,b){var s
-t.dy.a(b)
-s=B.i.H(this.a,b.a)
-if(s!==0)return s
-return B.i.H(this.b,b.b)},
-i(a){var s=this,r=A.lH(A.ma(s)),q=A.dK(A.m8(s)),p=A.dK(A.m4(s)),o=A.dK(A.m5(s)),n=A.dK(A.m7(s)),m=A.dK(A.m9(s)),l=A.jR(A.m6(s)),k=s.b,j=k===0?"":A.jR(k)
-return r+"-"+q+"-"+p+" "+o+":"+n+":"+m+"."+l+j+"Z"},
-$iac:1}
-A.hJ.prototype={
-i(a){return this.A()}}
-A.D.prototype={
-gag(){return A.m3(this)}}
-A.dz.prototype={
-i(a){var s=this.a
-if(s!=null)return"Assertion failed: "+A.fw(s)
-return"Assertion failed"}}
-A.aZ.prototype={}
-A.aB.prototype={
-gaV(){return"Invalid argument"+(!this.a?"(s)":"")},
-gaU(){return""},
-i(a){var s=this,r=s.c,q=r==null?"":" ("+r+")",p=s.d,o=p==null?"":": "+A.p(p),n=s.gaV()+q+o
-if(!s.a)return n
-return n+s.gaU()+": "+A.fw(s.gb6())},
-gb6(){return this.b}}
-A.cO.prototype={
-gb6(){return A.kO(this.b)},
-gaV(){return"RangeError"},
-gaU(){var s,r=this.e,q=this.f
-if(r==null)s=q!=null?": Not less than or equal to "+A.p(q):""
-else if(q==null)s=": Not greater than or equal to "+A.p(r)
-else if(q>r)s=": Not in inclusive range "+A.p(r)+".."+A.p(q)
-else s=q<r?": Valid value range is empty":": Only valid value is "+A.p(r)
-return s}}
-A.dV.prototype={
-gb6(){return A.a(this.b)},
-gaV(){return"RangeError"},
-gaU(){if(A.a(this.b)<0)return": index must not be negative"
-var s=this.f
-if(s===0)return": no indices are valid"
-return": index should be less than "+s},
-gp(a){return this.f}}
-A.cY.prototype={
-i(a){return"Unsupported operation: "+this.a}}
-A.ez.prototype={
-i(a){return"UnimplementedError: "+this.a}}
-A.bY.prototype={
-i(a){return"Bad state: "+this.a}}
-A.dI.prototype={
-i(a){var s=this.a
-if(s==null)return"Concurrent modification during iteration."
-return"Concurrent modification during iteration: "+A.fw(s)+"."}}
-A.ea.prototype={
-i(a){return"Out of Memory"},
-gag(){return null},
-$iD:1}
-A.cV.prototype={
-i(a){return"Stack Overflow"},
-gag(){return null},
-$iD:1}
-A.hK.prototype={
-i(a){return"Exception: "+this.a}}
-A.aN.prototype={
-i(a){var s,r,q,p,o,n,m,l,k,j,i,h=this.a,g=""!==h?"FormatException: "+h:"FormatException",f=this.c,e=this.b
-if(typeof e=="string"){if(f!=null)s=f<0||f>e.length
-else s=!1
-if(s)f=null
-if(f==null){if(e.length>78)e=B.b.u(e,0,75)+"..."
-return g+"\n"+e}for(r=e.length,q=1,p=0,o=!1,n=0;n<f;++n){if(!(n<r))return A.h(e,n)
-m=e.charCodeAt(n)
-if(m===10){if(p!==n||!o)++q
-p=n+1
-o=!1}else if(m===13){++q
-p=n+1
-o=!0}}g=q>1?g+(" (at line "+q+", character "+(f-p+1)+")\n"):g+(" (at character "+(f+1)+")\n")
-for(n=f;n<r;++n){if(!(n>=0))return A.h(e,n)
-m=e.charCodeAt(n)
-if(m===10||m===13){r=n
-break}}l=""
-if(r-p>78){k="..."
-if(f-p<75){j=p+75
-i=p}else{if(r-f<75){i=r-75
-j=r
-k=""}else{i=f-36
-j=f+36}l="..."}}else{j=r
-i=p
-k=""}return g+l+B.b.u(e,i,j)+k+"\n"+B.b.a_(" ",f-i+l.length)+"^\n"}else return f!=null?g+(" (at offset "+A.p(f)+")"):g}}
-A.i.prototype={
-ak(a,b,c,d){var s,r
-d.a(b)
-A.q(this).D(d).h("1(1,i.E)").a(c)
-for(s=this.gv(this),r=b;s.k();)r=c.$2(r,s.gl())
-return r},
-gp(a){var s,r=this.gv(this)
-for(s=0;r.k();)++s
-return s},
-dE(a,b){var s,r
-A.q(this).h("A(i.E)").a(b)
-for(s=this.gv(this);s.k();){r=s.gl()
-if(b.$1(r))return r}throw A.b(A.j0())},
-K(a,b){var s,r
-A.eh(b,"index")
-s=this.gv(this)
-for(r=b;s.k();){if(r===0)return s.gl();--r}throw A.b(A.fR(b,b-r,this,"index"))},
-i(a){return A.lT(this,"(",")")}}
-A.Q.prototype={
-i(a){return"MapEntry("+A.p(this.a)+": "+A.p(this.b)+")"}}
-A.S.prototype={
-gB(a){return A.v.prototype.gB.call(this,0)},
-i(a){return"null"}}
-A.v.prototype={$iv:1,
-R(a,b){return this===b},
-gB(a){return A.ee(this)},
-i(a){return"Instance of '"+A.ef(this)+"'"},
-gC(a){return A.jy(this)},
-toString(){return this.i(this)}}
-A.fb.prototype={
-i(a){return""},
-$ibe:1}
-A.ab.prototype={
-gp(a){return this.a.length},
-i(a){var s=this.a
-return s.charCodeAt(0)==0?s:s},
-$imi:1}
-A.hz.prototype={
-$2(a,b){var s,r,q,p
-t.f.a(a)
-A.aH(b)
-s=B.b.aB(b,"=")
-if(s===-1){if(b!=="")a.q(0,A.jn(b,0,b.length,this.a,!0),"")}else if(s!==0){r=B.b.u(b,0,s)
-q=B.b.ar(b,s+1)
-p=this.a
-a.q(0,A.jn(r,0,r.length,p,!0),A.jn(q,0,q.length,p,!0))}return a},
-$S:14}
-A.hy.prototype={
-$2(a,b){throw A.b(A.a9("Illegal IPv6 address, "+a,this.a,b))},
-$S:15}
-A.dk.prototype={
-gbO(){var s,r,q,p,o=this,n=o.w
-if(n===$){s=o.a
-r=s.length!==0?s+":":""
-q=o.c
-p=q==null
-if(!p||s==="file"){s=r+"//"
-r=o.b
-if(r.length!==0)s=s+r+"@"
-if(!p)s+=q
-r=o.d
-if(r!=null)s=s+":"+A.p(r)}else s=r
-s+=o.e
-r=o.f
-if(r!=null)s=s+"?"+r
-r=o.r
-if(r!=null)s=s+"#"+r
-n=o.w=s.charCodeAt(0)==0?s:s}return n},
-gB(a){var s,r=this,q=r.y
-if(q===$){s=B.b.gB(r.gbO())
-r.y!==$&&A.ld()
-r.y=s
-q=s}return q},
-gcl(){var s,r=this,q=r.z
-if(q===$){s=r.f
-s=A.kj(s==null?"":s)
-r.z!==$&&A.ld()
-q=r.z=new A.bf(s,t.h)}return q},
-gcq(){return this.b},
-gb5(){var s=this.c
-if(s==null)return""
-if(B.b.E(s,"[")&&!B.b.G(s,"v",1))return B.b.u(s,1,s.length-1)
-return s},
-gb8(){var s=this.d
-return s==null?A.kF(this.a):s},
-gba(){var s=this.f
-return s==null?"":s},
-gc2(){var s=this.r
-return s==null?"":s},
-gc3(){return this.c!=null},
-gc5(){return this.f!=null},
-gc4(){return this.r!=null},
-i(a){return this.gbO()},
-R(a,b){var s,r,q,p=this
-if(b==null)return!1
-if(p===b)return!0
-s=!1
-if(t.dD.b(b))if(p.a===b.gbk())if(p.c!=null===b.gc3())if(p.b===b.gcq())if(p.gb5()===b.gb5())if(p.gb8()===b.gb8())if(p.e===b.gck()){r=p.f
-q=r==null
-if(!q===b.gc5()){if(q)r=""
-if(r===b.gba()){r=p.r
-q=r==null
-if(!q===b.gc4()){s=q?"":r
-s=s===b.gc2()}}}}return s},
-$ieC:1,
-gbk(){return this.a},
-gck(){return this.e}}
-A.hx.prototype={
-gcp(){var s,r,q,p,o=this,n=null,m=o.c
-if(m==null){m=o.b
-if(0>=m.length)return A.h(m,0)
-s=o.a
-m=m[0]+1
-r=B.b.aC(s,"?",m)
-q=s.length
-if(r>=0){p=A.dl(s,r+1,q,256,!1,!1)
-q=r}else p=n
-m=o.c=new A.eP("data","",n,n,A.dl(s,m,q,128,!1,!1),p,n)}return m},
-i(a){var s,r=this.b
-if(0>=r.length)return A.h(r,0)
-s=this.a
-return r[0]===-1?"data:"+s:s}}
-A.f7.prototype={
-gc3(){return this.c>0},
-gc5(){return this.f<this.r},
-gc4(){return this.r<this.a.length},
-gbk(){var s=this.w
-return s==null?this.w=this.cQ():s},
-cQ(){var s,r=this,q=r.b
-if(q<=0)return""
-s=q===4
-if(s&&B.b.E(r.a,"http"))return"http"
-if(q===5&&B.b.E(r.a,"https"))return"https"
-if(s&&B.b.E(r.a,"file"))return"file"
-if(q===7&&B.b.E(r.a,"package"))return"package"
-return B.b.u(r.a,0,q)},
-gcq(){var s=this.c,r=this.b+3
-return s>r?B.b.u(this.a,r,s-1):""},
-gb5(){var s=this.c
-return s>0?B.b.u(this.a,s,this.d):""},
-gb8(){var s,r=this
-if(r.c>0&&r.d+1<r.e)return A.l9(B.b.u(r.a,r.d+1,r.e))
-s=r.b
-if(s===4&&B.b.E(r.a,"http"))return 80
-if(s===5&&B.b.E(r.a,"https"))return 443
-return 0},
-gck(){return B.b.u(this.a,this.e,this.f)},
-gba(){var s=this.f,r=this.r
-return s<r?B.b.u(this.a,s+1,r):""},
-gc2(){var s=this.r,r=this.a
-return s<r.length?B.b.ar(r,s+1):""},
-gcl(){if(this.f>=this.r)return B.bE
-return new A.bf(A.kj(this.gba()),t.h)},
-gB(a){var s=this.x
-return s==null?this.x=B.b.gB(this.a):s},
-R(a,b){if(b==null)return!1
-if(this===b)return!0
-return t.dD.b(b)&&this.a===b.i(0)},
-i(a){return this.a},
-$ieC:1}
-A.eP.prototype={}
-A.h2.prototype={
-i(a){return"Promise was rejected with a value of `"+(this.a?"undefined":"null")+"`."}}
-A.iQ.prototype={
-$1(a){return this.a.b_(this.b.h("0/?").a(a))},
-$S:5}
-A.iR.prototype={
-$1(a){if(a==null)return this.a.bW(new A.h2(a===undefined))
-return this.a.bW(a)},
-$S:5}
-A.iC.prototype={
-$1(a){var s,r,q,p,o,n,m,l,k,j,i,h
-if(A.kY(a))return a
-s=this.a
-a.toString
-if(s.aj(a))return s.n(0,a)
-if(a instanceof Date){r=a.getTime()
-if(r<-864e13||r>864e13)A.k(A.au(r,-864e13,864e13,"millisecondsSinceEpoch",null))
-A.dv(!0,"isUtc",t.y)
-return new A.bl(r,0,!0)}if(a instanceof RegExp)throw A.b(A.r("structured clone of RegExp",null))
-if(a instanceof Promise)return A.os(a,t.X)
-q=Object.getPrototypeOf(a)
-if(q===Object.prototype||q===null){p=t.X
-o=A.as(p,p)
-s.q(0,a,o)
-n=Object.keys(a)
-m=[]
-for(s=J.fi(n),p=s.gv(n);p.k();)m.push(A.c9(p.gl()))
-for(l=0;l<s.gp(n);++l){k=s.n(n,l)
-if(!(l<m.length))return A.h(m,l)
-j=m[l]
-if(k!=null)o.q(0,j,this.$1(a[k]))}return o}if(a instanceof Array){i=a
-o=[]
-s.q(0,a,o)
-h=A.a(a.length)
-for(s=J.cb(i),l=0;l<h;++l)o.push(this.$1(s.n(i,l)))
-return o}return a},
-$S:16}
-A.hc.prototype={}
-A.bV.prototype={
-A(){return"QualityProfileKind."+this.b}}
-A.bU.prototype={}
-A.fn.prototype={}
-A.fo.prototype={}
-A.h9.prototype={
-M(){var s,r,q,p
-for(s=A.lX(["exposure",1,"bloomStrength",0,"ssaoStrength",0,"depthOfFieldStrength",0,"vignette",0,"grain",0,"rainIntensity",0,"rainWindowVisibility",1,"ditherStrength",0,"colorGradeStrength",0,"affineWarpStrength",0,"vertexSnapGrid",0,"vhsChromaWeight",0,"vhsTrackingWeight",0,"vhsNoiseWeight",0,"vhsHeadSwitchWeight",0,"vhsDropoutWeight",0,"vhsGhostWeight",0],t.N,t.i),s=new A.aR(s,A.q(s).h("aR<1,2>")).gv(0);s.k();){r=s.d
-q=r.a
-p=r.b
-if(!isFinite(p)||p<0)throw A.b(A.r("PostProcessState."+q+" must be >= 0: "+A.p(p),null))}}}
-A.cg.prototype={}
-A.fD.prototype={
-M(){var s,r,q,p=null
-if(!B.bg.gT(0)||!B.G.gT(0)||!B.H.gT(0))throw A.b(A.r("FrameEnvironment colors must be finite",p))
-s=isFinite(0)
-if(s)r=!isFinite(1)
-else r=!0
-if(r)throw A.b(A.r("FrameEnvironment requires fogEnd >= fogStart, got 0/1",p))
-if(!s)throw A.b(A.r("FrameEnvironment.ambientIntensity must be >= 0: 0",p))
-for(q=0;!1;++q)B.bp[q].M()
-for(s=isFinite(1),r=isFinite(-1),q=0;!1;++q){if(!s)A.k(A.r("SpotLight.position must be finite: "+B.p.i(0),p))
-if(!r)A.k(A.r("SpotLight.direction must be finite and nonzero: "+B.u.i(0),p))}}}
-A.dR.prototype={}
-A.aW.prototype={
-R(a,b){if(b==null)return!1
-return J.dy(b)===A.jy(this)&&b instanceof A.aW&&this.a===b.a&&this.b===b.b},
-gB(a){return A.cM(A.jy(this),this.a,this.b,B.h,B.h,B.h)}}
-A.ah.prototype={
-i(a){var s=this.c
-s=s==null?"":' "'+s+'"'
-return"MeshHandle(#"+this.a+"."+this.b+s+")"}}
-A.ai.prototype={
-i(a){var s=this.c
-s=s==null?"":' "'+s+'"'
-return"TextureHandle(#"+this.a+"."+this.b+s+")"}}
-A.aD.prototype={
-i(a){var s=this.c
-s=s==null?"":' "'+s+'"'
-return"MaterialHandle(#"+this.a+"."+this.b+s+")"}}
-A.eb.prototype={
-i(a){var s=this.c
-s=s==null?"":' "'+s+'"'
-return"PipelineHandle(#"+this.a+"."+this.b+s+")"}}
-A.bo.prototype={
-i(a){var s=this.c
-s=s==null?"":' "'+s+'"'
-return"InstanceId(#"+this.a+"."+this.b+s+")"}}
-A.ct.prototype={
-A(){return"HandleRejection."+this.b}}
-A.fQ.prototype={
-i(a){return"HandleException("+this.a.b+", "+this.b.i(0)+")"}}
-A.bP.prototype={
-gT(a){return isFinite(this.a)&&isFinite(this.b)&&isFinite(this.c)},
-R(a,b){if(b==null)return!1
-return b instanceof A.bP&&this.a===b.a&&this.b===b.b&&this.c===b.c},
-gB(a){return A.cM(this.a,this.b,this.c,B.h,B.h,B.h)},
-i(a){return"LinearColor("+A.p(this.a)+", "+A.p(this.b)+", "+A.p(this.c)+")"}}
-A.ae.prototype={}
-A.iS.prototype={
-$2(a,b){var s,r=t.fk
-r.a(a)
-s=B.ag.H(r.a(b).a,a.a)
-return s===0?0:s},
-$S:17}
-A.aw.prototype={
-A(){return"VertexAttributeKind."+this.b}}
-A.fs.prototype={}
-A.h4.prototype={
-M(){var s=this.a,r=s.a
-if(!r.t(0,"sceneColor")||!r.t(0,"present"))throw A.b(A.r("resource plan must contain sceneColor and present",null))
-if(s.dj(0,new A.h6()))throw A.b(A.r("resource plan contains an empty resource ID",null))
-if(this.b!==r.t(0,"vhsOutput"))throw A.b(A.r("resource history does not match vhsOutput ownership",null))}}
-A.h6.prototype={
-$1(a){return A.aH(a).length===0},
-$S:6}
-A.ha.prototype={}
-A.el.prototype={
-c7(a){var s=this
-if(s.d)A.k(A.j("resource assembler is disposed"))
-if(s.a!=null)throw A.b(A.j("resource assembler is initialized"))
-a.M()
-s.a=a
-s.c=1},
-a5(){if(this.d)return
-this.d=!0
-this.a=null}}
-A.eu.prototype={
-M(){var s=this
-if(s.a<0||s.b<0)throw A.b(A.r("SurfaceMetrics css size must be >= 0",null))
-if(s.c<0||s.d<0)throw A.b(A.r("SurfaceMetrics pixel size must be >= 0",null))
-if(!isFinite(1))throw A.b(A.r("SurfaceMetrics.devicePixelRatio must be finite and > 0: 1",null))}}
-A.fm.prototype={
-A(){return"ColorEncoding."+this.b}}
-A.fu.prototype={
-A(){return"DiagnosticLevel."+this.b}}
-A.ej.prototype={
-M(){var s=this,r="installedFeatures",q=s.a,p=q.b,o=p.bY(B.cl)
-if(o.a!==0)A.k(A.aL(o,r,"contains unknown pipeline features"))
-if(q.a===B.L&&p.gc9(p))A.k(A.aL(p,r,"safe profiles cannot install optional features"))
-q=s.b
-if(q<=0||s.c<=0)throw A.b(A.r("RendererConfiguration internal resolution must be > 0: "+q+"x"+s.c,null))
-q=s.d
-if(q<=0)throw A.b(A.r("RendererConfiguration.sampleCount must be > 0: "+q,null))}}
-A.bW.prototype={
-A(){return"RendererState."+this.b}}
-A.L.prototype={}
-A.fF.prototype={
-i(a){var s=this
-return"FrameStats(#"+s.a+" draws="+s.b+" tris="+s.c+" culled="+s.d+" gpu="+s.r+"B)"}}
-A.e1.prototype={
-dX(a){return this.a.a4(a)}}
-A.fY.prototype={
-$3(a,b,c){return new A.aD(A.a(a),A.a(b),A.bD(c))},
-$S:20}
-A.eB.prototype={}
-A.h_.prototype={
-df(a){var s,r,q,p,o,n,m,l,k,j,i,h,g=u.k,f=this.a,e=a.gcr(),d=A.mz(f,new A.fI(e.gce(e),B.b_,B.aY))
-e=a.gcr()
-if(f.b!==B.e)A.k(A.j(g))
-s=A.a0(d.a)
-r=f.a
-q=v.G
-r.bindBuffer(A.a(q.WebGL2RenderingContext.ARRAY_BUFFER),s)
-r.bufferSubData(A.a(q.WebGL2RenderingContext.ARRAY_BUFFER),0,e)
-p=A.aF(f)
-A.ay(f,p)
-if(f.b!==B.e)A.k(A.j(g))
-r.bindBuffer(A.a(q.WebGL2RenderingContext.ARRAY_BUFFER),s)
-o=a.gcd().gee().a_(0,4)
-n=A.aC(t.S)
-for(e=a.gcd().gdk(),m=e.length,l=0;l<m;++l){k=e[l]
-j=A.l2(k.gdN())
-if(!n.j(0,j))continue
-i=A.nq(a.gcd(),j,k)
-h=k.gem().a_(0,4)
-if(f.b!==B.e)A.k(A.j(g))
-r.vertexAttribPointer.apply(r,[j,i,A.a(q.WebGL2RenderingContext.FLOAT),!1,o,h])
-if(f.b!==B.e)A.k(A.j(g))
-r.enableVertexAttribArray(j)}A.k1(a.gdG())
-return new A.eB(d,void 1,p,0,a.geJ(),!0)},
-dR(a){if(this.c.n(0,a.gU())==null)throw A.b(A.bN(B.F,a))
-this.b.a4(a)},
-bb(){var s,r,q,p,o,n
-for(s=this.b.a8(),r=s.$ti,s=new A.aA(s.a(),r.h("aA<1>")),q=this.c,r=r.c;s.k();){p=s.b
-if(p==null)p=r.a(p)
-o=p.a
-n=p.b
-q.q(0,o.a,this.df(n))}},
-gam(){return this.b.a8().ak(0,0,new A.h1(),t.S)}}
-A.h0.prototype={
-$3(a,b,c){return new A.ah(A.a(a),A.a(b),A.bD(c))},
-$S:21}
-A.h1.prototype={
-$2(a,b){var s,r
-A.a(a)
-s=t.ai.a(b).b
-r=s.gcr()
-r=B.i.ae(a,r.gce(r))
-s=A.k1(s.gdG())
-return r+s},
-$S:22}
-A.ex.prototype={
-V(a){var s=this.a,r=A.kn(s,B.aG)
-A.ko(s,r,0,a)
-return r},
-ai(a,b){this.b.a4(a)},
-dT(a){var s=this.d
-s===$&&A.aJ()
-return this.ai(a,s)},
-e0(a){var s=this.e
-s===$&&A.aJ()
-return this.ai(a,s)},
-e2(a){var s=this.f
-s===$&&A.aJ()
-return this.ai(a,s)},
-dV(a){var s=this.r
-s===$&&A.aJ()
-return this.ai(a,s)},
-dZ(a){var s=this.w
-s===$&&A.aJ()
-return this.ai(a,s)},
-a5(){var s,r,q,p,o,n=this
-for(s=n.c,r=new A.aS(s,s.r,s.e,A.q(s).h("aS<2>")),q=n.a,p=q.a,o=t.R;r.k();)p.deleteTexture(o.a(r.d.a).a)
-s.X(0)
-s=n.d
-s===$&&A.aJ()
-A.eH(q,s)
-s=n.e
-s===$&&A.aJ()
-A.eH(q,s)
-s=n.f
-s===$&&A.aJ()
-A.eH(q,s)
-s=n.r
-s===$&&A.aJ()
-A.eH(q,s)
-s=n.w
-s===$&&A.aJ()
-A.eH(q,s)},
-bb(){var s,r,q,p,o,n,m,l,k,j=this
-j.d=j.V($.jH())
-j.e=j.V($.jE())
-j.f=j.V($.jF())
-j.r=j.V($.jD())
-j.w=j.V($.jG())
-for(s=j.b.a8(),r=s.$ti,s=new A.aA(s.a(),r.h("aA<1>")),q=j.c,p=j.a,r=r.c;s.k();){o=s.b
-if(o==null)o=r.a(o)
-n=o.a
-m=o.b
-if(m.gcc().c1(0,new A.hu()))continue
-l=A.kn(p,m.gm())
-for(k=0;B.i.bj(k,m.gcc().length);++k){o=m.gcc()
-if(!(k<o.length))return A.h(o,k)
-A.ko(p,l,k,o[k])}if(m.gev())A.mA(p,l)
-q.q(0,n.a,l)}},
-gam(){return this.b.a8().ak(0,0,new A.ht(),t.S)}}
-A.hs.prototype={
-$3(a,b,c){return new A.ai(A.a(a),A.a(b),A.bD(c))},
-$S:24}
-A.hu.prototype={
-$1(a){return!1},
-$S:25}
-A.ht.prototype={
-$2(a,b){var s
-A.a(a)
-s=t.dU.a(b).b.gm()
-return B.i.ae(a,s.geL().a_(0,s.gen()).a_(0,s.gep()).a_(0,4))},
-$S:26}
-A.b9.prototype={
-gdH(){return this.b.length}}
-A.dP.prototype={
-ds(a,b,c,d){var s,r,q,p,o,n,m,l,k,j,i
-t.W.a(a)
-s=new A.hf(A.d([],t.cU),A.aC(t.N))
-for(r=this.a,q=r.length,p=0;p<r.length;r.length===q||(0,A.B)(r),++p)r[p].J(s,b)
-o=s.dr(a,!1)
-if(o.b.length!==0)return new A.dQ(o,B.bq)
-q=o.a
-n=A.O(q)
-m=new A.aV(q,n.h("m(1)").a(new A.fz()),n.h("aV<1,m>")).ac(0)
-l=A.d([],t.u)
-for(q=r.length,p=0;p<r.length;r.length===q||(0,A.B)(r),++p){k=r[p]
-for(n=k.I(d),j=0;j<1;++j){i=n[j]
-if(!m.t(0,i.gm().a))throw A.b(A.j('RenderFeature "'+k.gF()+'" created a pass "'+i.gm().a+'" that it never declared into the graph'))
-B.a.j(l,i)}}B.a.af(l,new A.fA(o))
-return new A.dQ(o,l)}}
-A.fz.prototype={
-$1(a){return t.z.a(a).a},
-$S:27}
-A.fA.prototype={
-$2(a,b){var s=t.fA
-s.a(a)
-s.a(b)
-s=this.a.a
-return B.i.H(B.a.c6(s,new A.fx(a)),B.a.c6(s,new A.fy(b)))},
-$S:28}
-A.fx.prototype={
-$1(a){return t.z.a(a).a===this.a.gm().a},
-$S:2}
-A.fy.prototype={
-$1(a){return t.z.a(a).a===this.a.gm().a},
-$S:2}
-A.dQ.prototype={}
-A.bL.prototype={
-A(){return"FrameQueueState."+this.b}}
-A.fE.prototype={}
-A.fC.prototype={
-dm(a){if(a.length===0)throw A.b(A.aL(a,"passId",null))
-this.b=a
-this.a.b9(a,A.l5())},
-cu(){var s,r,q,p,o=t.A
-o=A.as(o,o)
-for(s=this.a,s=new A.aR(s,A.q(s).h("aR<1,2>")).gv(0);s.k();){r=s.d
-q=r.a
-p=r.b
-o.q(0,q,new A.L(p.a,p.b,p.d))}return A.jQ(o,t.N,t.b)},
-a7(a,b){var s,r=this.b
-if(r==null)throw A.b(A.j("draw recorded outside an active render pass"))
-if(b<1)throw A.b(A.r("draw count and instance count must be positive",null))
-s=this.a.n(0,r);++s.a
-s.d+=b
-s.b=s.b+(a/3|0)*b}}
-A.c2.prototype={}
-A.F.prototype={
-gaa(){var s=this.c,r=A.O(s)
-return new A.a5(s,r.h("A(1)").a(new A.h7()),r.h("a5<1>"))},
-gaq(){var s=this.c,r=A.O(s)
-return new A.a5(s,r.h("A(1)").a(new A.h8()),r.h("a5<1>"))},
-i(a){return"PassDeclaration("+this.a+" @ "+this.b.i(0)+")"}}
-A.h7.prototype={
-$1(a){var s=t.J.a(a).b
-return s===B.d||s===B.o},
-$S:7}
-A.h8.prototype={
-$1(a){return t.J.a(a).b===B.f},
-$S:7}
-A.ar.prototype={
-A(){return"GraphValidationFailureKind."+this.b}}
-A.a2.prototype={
-i(a){return"GraphValidationFailure("+this.a.b+" in "+this.b+": "+this.c+")"}}
-A.ek.prototype={
-A(){return"ResourceFormat."+this.b}}
-A.aP.prototype={
-A(){return"GraphStage."+this.b}}
-A.M.prototype={
-cf(){var s=this
-return new A.M(s.a,s.b,s.c,s.d,s.e,s.f+1)},
-R(a,b){var s=this
-if(b==null)return!1
-return b instanceof A.M&&s.a===b.a&&s.b===b.b&&s.c===b.c&&s.d===b.d&&s.e===b.e&&s.f===b.f},
-gB(a){var s=this
-return A.cM(s.a,s.b,s.c,s.d,s.e,s.f)},
-i(a){var s=this,r=s.b.i(0),q=s.e
-q=q>1?" x"+q:""
-return"ResourceRef("+s.a+"#"+s.f+", "+r+", "+s.c+"x"+s.d+q+")"}}
-A.cR.prototype={
-A(){return"ResourceAccess."+this.b}}
-A.l.prototype={}
-A.ck.prototype={}
-A.hb.prototype={
-N(a){var s,r,q,p,o,n,m=this
-a.M()
-s=null
-try{r=a.d.gY()
-r=A.an(r,A.q(r).h("i.E"))
-q=t.r
-s=A.mB(m.a,a.c,q.a(r),q.a(a.f),a.b)}catch(p){if(A.b5(p) instanceof A.cU){++m.e
-throw p}else throw p}o=new A.ck(s)
-r=m.b
-q=a.a
-n=r.n(0,q)
-r.q(0,q,o);++m.d
-if(n!=null)m.a.a.deleteProgram(A.a0(n.b.a))
-return o},
-cV(a){var s,r
-t.cr.a(a)
-for(s=a.a,s=new A.aS(s,s.r,s.e,a.$ti.h("aS<1>")),r=this.a.a;s.k();)r.deleteProgram(A.a0(s.d.b.a))}}
-A.a3.prototype={
-M(){var s,r,q,p,o,n,m=null,l=this.a
-if(l.length===0)throw A.b(A.r("ProgramSource.id must not be empty",m))
-s=t.S
-r=A.aC(s)
-for(q=this.d.ga1(),q=q.gv(q);q.k();){p=q.gl()
-o=p.b
-if(o<0)throw A.b(A.r('ProgramSource "'+l+'": attribute "'+p.a+'" has a negative location',m))
-if(!r.j(0,o))throw A.b(A.r('ProgramSource "'+l+'": duplicate attribute location '+o,m))}n=A.aC(s)
-for(s=this.e.ga1(),s=s.gv(s);s.k();){q=s.gl()
-p=q.b
-if(p<0)throw A.b(A.r('ProgramSource "'+l+'": sampler "'+q.a+'" has a negative unit',m))
-if(!n.j(0,p))throw A.b(A.r('ProgramSource "'+l+'": duplicate sampler unit '+p,m))}}}
-A.hd.prototype={}
-A.Z.prototype={
-O(){var s=this
-return A.jS(B.aD,s.f,B.aC,B.aE,!0,!0,!0,!0,s.r,B.aQ,B.aR,s.d,s.e,!0,!1,!1)}}
-A.hf.prototype={
-dr(a,b){var s=this.dg(t.W.a(a),!1),r=this.a,q=A.O(r)
-return new A.he(A.jZ(new A.a5(r,q.h("A(1)").a(new A.hk()),q.h("a5<1>")),t.z),s)},
-dg(a,b){var s,r,q,p,o,n,m=this
-t.W.a(a)
-s=A.d([],t.b7)
-r=m.a
-q=A.O(r)
-p=q.h("a5<1>")
-o=A.an(new A.a5(r,q.h("A(1)").a(new A.hj()),p),p.h("i.E"))
-m.cF(o,a,s)
-m.cJ(o,s)
-m.cL(o,s)
-m.cI(o,!1,s)
-n=m.cN(o,s)
-m.cK(o,n,s)
-m.cM(o,s)
-m.cH(o,n,s)
-m.cG(o,s)
-return s},
-cF(a,b,c){var s,r,q,p
-t.O.a(a)
-t.W.a(b)
-t._.a(c)
-for(s=a.length,r=0;r<a.length;a.length===s||(0,A.B)(a),++r){q=a[r]
-p=B.P.bY(b)
-if(p.a!==0)B.a.j(c,new A.a2(B.bc,q.a,"missing capabilities: "+p.aF(0,", ")))}},
-cJ(a,b){var s,r,q,p,o,n,m
-t.O.a(a)
-t._.a(b)
-for(s=a.length,r=0;r<a.length;a.length===s||(0,A.B)(a),++r){q=a[r]
-if(q.f)continue
-for(p=q.gaa(),o=J.X(p.a),p=new A.G(o,p.b,p.$ti.h("G<1>")),n=q.a;p.k();){m=o.gl().a
-if(m.e>1)B.a.j(b,new A.a2(B.b7,n,"reads multisampled resource "+m.i(0)+" directly; resolve before sampling"))}}},
-cL(a,b){var s,r,q,p,o,n,m,l
-t.O.a(a)
-t._.a(b)
-for(s=A.O(a),r=s.h("A(1)").a(new A.hi()),q=B.a.gv(a),s=new A.G(q,r,s.h("G<1>"));s.k();){r=q.gl()
-p=r.gaa()
-o=A.an(p,p.$ti.h("i.E"))
-p=r.gaq()
-n=A.an(p,p.$ti.h("i.E"))
-if(o.length!==1||n.length!==1){B.a.j(b,new A.a2(B.E,r.a,"a resolve must read exactly one source and write exactly one destination"))
-continue}m=B.a.gbm(o).a
-l=B.a.gbm(n).a
-if(m.e<=1||l.e>1)B.a.j(b,new A.a2(B.E,r.a,"resolve requires a multisampled source and single-sample destination"))
-if(m.b!==l.b||m.c!==l.c||m.d!==l.d)B.a.j(b,new A.a2(B.E,r.a,"resolve source and destination must match format and extent"))}},
-cI(a,b,c){var s,r,q,p,o,n,m,l
-t.O.a(a)
-t._.a(c)
-for(s=a.length,r=0;r<a.length;a.length===s||(0,A.B)(a),++r){q=a[r]
-for(p=q.c,o=p.length,n=q.a,m=0;m<p.length;p.length===o||(0,A.B)(p),++m){l=p[m]
-if(l.b===B.o)B.a.j(c,new A.a2(B.ba,n,"history read of "+l.a.a+" with no valid previous frame"))}}},
-cN(a,b){var s,r,q,p,o,n,m,l,k,j
-t.O.a(a)
-t._.a(b)
-s=A.as(t.N,t.z)
-for(r=a.length,q=0;q<a.length;a.length===r||(0,A.B)(a),++q){p=a[q]
-for(o=p.gaq(),n=J.X(o.a),o=new A.G(n,o.b,o.$ti.h("G<1>")),m=p.a;o.k();){l=n.gl().a
-k=l.a+"#"+l.f
-j=s.n(0,k)
-if(j!=null){B.a.j(b,new A.a2(B.b6,m,l.i(0)+" already written by "+j.a))
-continue}s.q(0,k,p)}}return s},
-cK(a,b,c){var s,r,q,p,o,n,m
-t.O.a(a)
-t.E.a(b)
-t._.a(c)
-for(s=0;s<a.length;++s){r=a[s]
-for(q=r.gaa(),p=J.X(q.a),q=new A.G(p,q.b,q.$ti.h("G<1>")),o=r.a;q.k();){n=p.gl()
-if(n.b===B.o)continue
-n=n.a
-m=b.n(0,n.a+"#"+n.f)
-if(m==null){B.a.j(c,new A.a2(B.ad,o,"reads "+n.i(0)+" but no pass writes that version"))
-continue}if(B.a.aB(a,m)>s)B.a.j(c,new A.a2(B.ad,o,"reads "+n.i(0)+" before writer "+m.a+" runs"))}}},
-cM(a,b){var s,r,q,p,o,n,m,l,k,j,i,h
-t.O.a(a)
-t._.a(b)
-for(s=a.length,r=0;r<a.length;a.length===s||(0,A.B)(a),++r){q=a[r]
-for(p=q.gaa(),o=J.X(p.a),p=new A.G(o,p.b,p.$ti.h("G<1>")),n=q.a;p.k();){m=o.gl()
-if(m.b===B.o)continue
-for(l=q.gaq(),k=J.X(l.a),l=new A.G(k,l.b,l.$ti.h("G<1>")),m=m.a,j=m.a,i=m.f;l.k();){h=k.gl().a
-if(j===h.a&&i===h.f)B.a.j(b,new A.a2(B.b9,n,"reads and writes "+m.i(0)+" at the same version; declare a ping-pong version bump"))}}}},
-cH(a,b,c){var s,r,q,p,o,n,m,l,k,j
-t.O.a(a)
-t.E.a(b)
-t._.a(c)
-for(s=a.length,r=0;r<a.length;a.length===s||(0,A.B)(a),++r){q=a[r]
-for(p=q.gaa(),o=J.X(p.a),p=new A.G(o,p.b,p.$ti.h("G<1>")),n=q.a;p.k();){m=o.gl()
-if(m.b===B.o)continue
-l=m.a
-k=b.n(0,l.a+"#"+l.f)
-if(k==null)continue
-j=k.gaq().dE(0,new A.hh(m)).a
-if(!(j.b===l.b&&j.c===l.c&&j.d===l.d&&j.e===l.e))B.a.j(c,new A.a2(B.b8,n,"reads "+l.i(0)+" but writer "+k.a+" produced "+j.i(0)))}}},
-cG(a,b){var s,r,q,p,o,n,m,l,k,j,i,h
-t.O.a(a)
-t._.a(b)
-s=t.S
-r=A.as(t.N,s)
-for(q=0;p=a.length,q<p;++q)for(p=a[q].gaq(),o=J.X(p.a),p=new A.G(o,p.b,p.$ti.h("G<1>"));p.k();){n=o.gl().a
-r.q(0,n.a+"#"+n.f,q)}m=J.jT(p,t.cJ)
-for(l=0;l<p;++l)m[l]=A.aC(s)
-for(q=0;s=a.length,q<s;++q)for(s=a[q].gaa(),p=J.X(s.a),s=new A.G(p,s.b,s.$ti.h("G<1>"));s.k();){o=p.gl()
-if(o.b===B.o)continue
-o=o.a
-k=r.n(0,o.a+"#"+o.f)
-if(k!=null&&k!==q){if(k>>>0!==k||k>=m.length)return A.h(m,k)
-m[k].j(0,q)}}p=t.y
-j=A.cC(s,!1,!1,p)
-s=a.length
-i=A.cC(s,!1,!1,p)
-h=new A.hg(j,i,m)
-for(q=0;q<a.length;++q){if(!(q<s))return A.h(i,q)
-if(!i[q]&&h.$1(q)){if(!(q<a.length))return A.h(a,q)
-B.a.j(b,new A.a2(B.bb,a[q].a,"participates in a resource dependency cycle"))}}}}
-A.hk.prototype={
-$1(a){t.z.a(a)
-return A.j9()},
-$S:2}
-A.hj.prototype={
-$1(a){t.z.a(a)
-return A.j9()},
-$S:2}
-A.hi.prototype={
-$1(a){return t.z.a(a).f},
-$S:2}
-A.hh.prototype={
-$1(a){var s=t.J.a(a).a,r=this.a.a
-return s.a===r.a&&s.f===r.f},
-$S:7}
-A.hg.prototype={
-$1(a){var s,r,q,p,o=this,n=o.a
-if(!(a>=0&&a<n.length))return A.h(n,a)
-if(n[a])return!0
-s=o.b
-if(!(a<s.length))return A.h(s,a)
-if(s[a])return!1
-B.a.q(n,a,!0)
-r=o.c
-if(!(a<r.length))return A.h(r,a)
-r=r[a]
-r=A.jg(r,r.r,A.q(r).c)
-q=r.$ti.c
-while(r.k()){p=r.d
-if(o.$1(p==null?q.a(p):p))return!0}B.a.q(n,a,!1)
-B.a.q(s,a,!0)
-return!1},
-$S:31}
-A.he.prototype={}
-A.cP.prototype={
-dh(a){a.M()
-this.a.a4(a.gS())},
-gca(){return new A.aG(this.dM(),t.eM)},
-dM(){var s=this
-return function(){var r=0,q=1,p=[],o,n,m
-return function $async$gca(a,b,c){if(b===1){p.push(c)
-r=q}for(;;)switch(r){case 0:o=s.b.a8(),n=o.$ti,o=new A.aA(o.a(),n.h("aA<1>")),n=n.c
-case 2:if(!o.k()){r=3
-break}m=o.b
-if(m==null)m=n.a(m)
-m.a
-s.dh(m.b)
-r=4
-return a.b=void 1,1
-case 4:r=2
-break
-case 3:return 0
-case 1:return a.c=p.at(-1),3}}}},
-$ime:1}
-A.hl.prototype={
-$3(a,b,c){return new A.bo(A.a(a),A.a(b),A.bD(c))},
-$S:32}
-A.hm.prototype={
-a5(){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e=this
-if(e.x)return
-s=e.w
-r=A.an(s,A.q(s).c)
-q=r.length
-p=e.c
-o=p.c
-n=p.a.a
-m=t.R
-l=0
-for(;l<r.length;r.length===q||(0,A.B)(r),++l){k=r[l]
-j=o.aH(0,k.a)
-if(j!=null)n.deleteTexture(m.a(j.a).a)
-p.b.bc(k)}r=e.r
-q=A.an(r,A.q(r).c)
-o=q.length
-n=e.b.a
-l=0
-for(;l<q.length;q.length===o||(0,A.B)(q),++l)n.bc(q[l])
-q=e.f
-o=A.an(q,A.q(q).c)
-n=o.length
-m=e.a
-i=m.c
-h=m.a.a
-l=0
-for(;l<o.length;o.length===n||(0,A.B)(o),++l){k=o[l]
-g=i.aH(0,k.a)
-if(g!=null){h.deleteVertexArray(A.a0(g.c.a))
-h.deleteBuffer(A.a0(g.a.a))
-f=g.b
-if(f!=null)h.deleteBuffer(A.a0(f.a))}m.b.bc(k)}s.X(0)
-r.X(0)
-q.X(0)
-p.a5()
-e.x=!0}}
-A.hL.prototype={}
-A.iv.prototype={
-$1(a){var s=this.a.w.a.dR(a),r=s.b!=null,q=r?s.d:s.e
-return new A.cQ(s.c,r,q,s.f)},
-$S:33}
-A.iw.prototype={
-$2$fallback(a,b){var s=this.a.a
-if(s.t(0,a))return this.b.x.gl().cj(a)
-if(b!=null&&s.t(0,b))return this.b.x.gl().cj(b)
-throw A.b(A.j("resource is not in configured graph: "+a))},
-$1(a){return this.$2$fallback(a,null)},
-$S:34}
-A.iu.prototype={
-$0(){return this.a.$1("shadowMap")},
-$S:1}
-A.im.prototype={
-$0(){return null},
-$S:36}
-A.io.prototype={
-$0(){var s=this.a.at
-if(s==null)return B.I
-return A.ou(B.I,3,s.a.d,null)},
-$S:37}
-A.it.prototype={
-$0(){return this.a.$1("sceneDepth")},
-$S:1}
-A.ih.prototype={
-$0(){return this.a.at.a},
-$S:38}
-A.ij.prototype={
-$0(){return this.a.$2$fallback("ssaoRaw","sceneColor")},
-$S:1}
-A.ii.prototype={
-$0(){return this.a.$2$fallback("ssaoBlurred","sceneColor")},
-$S:1}
-A.is.prototype={
-$0(){var s=this.b.d>1?"sceneColor#1":"sceneColor"
-return this.a.$1(s)},
-$S:1}
-A.ie.prototype={
-$0(){return this.a.$2$fallback("bloomBlurH","sceneColor")},
-$S:1}
-A.ig.prototype={
-$0(){return this.a.$2$fallback("bloomBlurV","sceneColor")},
-$S:1}
-A.ip.prototype={
-$0(){return this.a.$2$fallback("dofBlurH","sceneColor")},
-$S:1}
-A.iq.prototype={
-$0(){return this.a.$2$fallback("dofBlurV","sceneColor")},
-$S:1}
-A.ir.prototype={
-$0(){var s=this.a.w.c.d
-s===$&&A.aJ()
-return s},
-$S:1}
-A.il.prototype={
-$0(){return this.a.$2$fallback("vhsOutput","sceneColor")},
-$S:1}
-A.ik.prototype={
-$0(){return this.a.at.w},
-$S:59}
-A.ix.prototype={
-$0(){return this.a},
-$S:40}
-A.i0.prototype={}
-A.f0.prototype={$imd:1}
-A.eV.prototype={$ilM:1}
-A.hn.prototype={
-c8(a,b){var s,r,q,p,o,n,m,l=this
-if(l.e!==B.M)throw A.b(A.j("renderer can only be initialized once"))
-a.M()
-b.M()
-s=l.a
-if(s.b===B.x)throw A.b(A.j("renderer device is context lost"))
-l.e=B.c5
-try{r=v.G
-s.ah(A.a(r.WebGL2RenderingContext.MAX_TEXTURE_SIZE))
-s.ah(A.a(r.WebGL2RenderingContext.MAX_ARRAY_TEXTURE_LAYERS))
-s.ah(A.a(r.WebGL2RenderingContext.MAX_SAMPLES))
-s.ah(A.a(r.WebGL2RenderingContext.MAX_VERTEX_ATTRIBS))
-s.ah(A.a(r.WebGL2RenderingContext.MAX_COLOR_ATTACHMENTS))
-q=s.r
-if(q.t(0,"EXT_texture_filter_anisotropic"))s.bD(34047)
-p=q.t(0,"EXT_disjoint_timer_query_webgl2")
-s.w=p
-q.t(0,"EXT_color_buffer_float")
-q.t(0,"EXT_color_buffer_half_float")
-q.t(0,"WEBGL_lose_context")
-q=s.a
-A.c9(q.getParameter(A.a(r.WebGL2RenderingContext.RENDERER)))
-A.c9(q.getParameter(A.a(r.WebGL2RenderingContext.VENDOR)))
-l.r=new A.hc(p)
-r=l.b
-o=A.h5(a)
-q=r.a
-if(q.a!=null)A.k(A.j("configuration state is already initialized"))
-a.M()
-q.a=a
-A.h5(a)
-q.d=1
-r.b.c7(o)
-r=A.m_()
-l.w=new A.hm(A.m0(s),r,A.mk(s),A.aC(t.cA),A.aC(t.eL),A.aC(t.aj))
-r=new A.el()
-q=new A.fK(s,r)
-o=A.h5(a)
-n=q.bw(o,a)
-r.c7(o)
-q.c=new A.ed(new A.ha(o),n)
-l.x=q
-l.y=new A.hb(s,A.as(t.N,t.dN))
-l.as=a
-A.kR(l)
-l.e=B.N}catch(m){s=l.y
-if(s!=null){r=s.b
-s.cV(new A.aT(r,A.q(r).h("aT<2>")))
-r.X(0)}s=l.x
-if(s!=null)s.a5()
-s=l.w
-if(s!=null)s.a5()
-l.w=null
-l.e=B.M
-throw m}s=new A.N($.I,t.cd)
-s.aM(null)
-return s},
-bV(a,b){var s,r,q,p,o,n,m=this,l=null
-m.d4()
-m.av()
-r=B.a.t(m.d,a)
-if(!r)throw A.b(A.r("world was not created by this renderer",l))
-if(m.at!=null)throw A.b(A.j("renderer.beginFrame called twice without end/abort"))
-r=b.a
-q=r.d
-if(!q.gT(0))A.k(A.r("CameraView.eye must be finite: "+q.i(0),l))
-q=r.e
-if(!q.gT(0)||q.gaG()<1e-12)A.k(A.r("CameraView.forward must be finite and nonzero: "+q.i(0),l))
-q=r.f
-if(isFinite(q)){p=r.r
-p=!isFinite(p)||q<=0||p<=q}else p=!0
-if(p)A.k(A.r("CameraView requires 0 < near < far, got "+A.p(q)+"/"+r.r,l))
-q=r.w
-if(!isFinite(q)||q<=0)A.k(A.r("CameraView.aspect must be finite and > 0: "+A.p(q),l))
-if(!r.a.gT(0)||!r.b.gT(0)||!r.c.gT(0))A.k(A.r("CameraView matrices must be finite",l))
-b.b.M()
-b.c.M()
-r=b.w
-if(!isFinite(r))A.k(A.r("FrameInput.timeSeconds must be finite: "+A.p(r),l))
-m.at=b
-m.ax=a
-o=m.c
-if(o.b===B.w)A.k(A.j("FrameQueue.beginFrame called twice without end/abort"))
-o.b=B.w
-o.c=0
-B.a.X(o.a)
-s=o
-try{r=m.r
-if((r==null?A.k(A.j("renderer is not initialized")):r).z)m.b$=m.a.dl()
-return s}catch(n){if(o.b!==B.w)A.k(A.j("FrameQueue.abortFrame called without an active frame"))
-o.c=0
-o.b=B.aV
-m.bo()
-m.ax=m.at=null
-throw n}},
-c0(){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e=this
-e.av()
-s=e.at
-r=e.ax
-if(s==null||r==null)throw A.b(A.j("renderer.endFrame called without an active frame"))
-m=e.c
-if(m.b!==B.w)A.k(A.j("FrameQueue.endFrame called without an active frame"))
-l=m.a
-k=A.kc(l,0,A.dv(m.c,"count",t.S),A.O(l).c).e8(0,!1)
-m.b=B.aU
-q=k
-try{p=A.nt(e,r,s,q)
-o=p.a.cu()
-m=o.ga1()
-l=A.q(m)
-n=new A.aU(new A.a5(m,l.h("A(i.E)").a(new A.ho()),l.h("a5<i.E>")),l.h("L(i.E)").a(new A.hp()),l.h("aU<i.E,L>")).ak(0,B.aS,new A.hq(),t.b)
-l=s.e
-m=n.a
-j=n.b
-i=p.c
-n.toString
-p.toString
-h=e.w
-g=h.a.gam()
-h=h.c.gam()
-f=e.w
-f.a.gam()
-f.c.gam()
-e.w.toString
-return new A.fF(l,m,j,i,g+h)}finally{e.d0(s.e)
-e.ax=e.at=null}},
-d4(){var s,r,q,p=this
-if(p.e!==B.z)return
-if(p.a.b===B.x)throw A.b(A.j("renderer context remains lost"))
-s=p.w
-if(s.x)A.k(A.j("resource library is disposed"))
-s.a.bb()
-s.c.bb()
-s=p.x
-s.toString
-r=p.as
-r.toString
-if(s.e)A.k(A.j("GPU resource adapter is disposed"))
-q=s.c
-if(q==null)A.k(A.j("GPU resource adapter is not initialized"))
-s.c=new A.ed(q.a,s.bw(A.h5(r),r))
-s=p.y
-s.c=null
-s.b.X(0)
-A.kR(p)
-p.e=B.N},
-av(){var s=this,r=s.e
-if(r!==B.N)throw A.b(A.j("renderer is not ready: "+r.b))
-if(s.a.b===B.x){s.cX()
-s.e=B.z
-throw A.b(A.j("renderer context lost"))}}}
-A.ho.prototype={
-$1(a){return B.b.t(t.D.a(a).a.toLowerCase(),"world")},
-$S:41}
-A.hp.prototype={
-$1(a){return t.D.a(a).b},
-$S:42}
-A.hq.prototype={
-$2(a,b){var s=t.b
-s.a(a)
-s.a(b)
-return new A.L(a.a+b.a,a.b+b.b,a.d+b.d)},
-$S:43}
-A.f_.prototype={}
-A.hW.prototype={
-d0(a){var s,r,q,p=this,o=p.b$
-p.b$=null
-if(o==null)return
-try{s=p.a
-if(s.b!==B.e)A.k(A.j(u.k))
-r=s.bQ(o)
-if(r.b)A.k(A.j("WebGl2Device: timer already ended"))
-s.a.endQuery(35007)
-r.b=!0
-B.a.j(p.a$,new A.f_(o))}catch(q){p.aT(o)}},
-bo(){var s=this.b$
-this.b$=null
-if(s!=null)this.aT(s)},
-cX(){var s,r,q
-this.bo()
-s=this.a$
-r=J.jV(s.slice(0),A.O(s).c)
-B.a.X(s)
-for(s=r.length,q=0;q<r.length;r.length===s||(0,A.B)(r),++q)this.aT(r[q].b)},
-aT(a){var s,r
-try{s=this.a
-s.a.deleteQuery(s.bQ(a).a)}catch(r){}}}
-A.f4.prototype={}
-A.eo.prototype={
-A(){return"ShadowCasterLod."+this.b}}
-A.ad.prototype={
-H(a,b){var s
-t.fy.a(b)
-s=B.i.H(this.a.a,b.a.a)
-if(s!==0)return s
-s=this.b.gU().H(0,b.b.gU())
-return s},
-$iac:1}
-A.T.prototype={}
-A.iW.prototype={
-$2(a,b){var s=t.k
-return s.a(a).a.H(0,s.a(b).a)},
-$S:44}
-A.iX.prototype={
-$1(a){return t.k.a(a).b},
-$S:45}
-A.iU.prototype={
-$2(a,b){var s=t.a
-return s.a(a).a.H(0,s.a(b).a)},
-$S:46}
-A.iV.prototype={
-$1(a){return t.a.a(a).b},
-$S:47}
-A.fr.prototype={}
-A.fq.prototype={}
-A.br.prototype={}
-A.cr.prototype={
-A(){return"FrustumTest."+this.b}}
-A.fG.prototype={
-e6(a){var s,r,q,p,o,n,m,l,k,j,i,h,g,f
-for(s=this.a,r=!1,q=0;q<6;++q){p=s[q]
-o=p.a
-n=o.a
-m=n>=0
-l=m?a.gan().gbg():a.gao().gbg()
-k=o.b
-j=k>=0
-i=j?a.gan().gbh():a.gao().gbh()
-o=o.c
-h=o>=0
-g=h?a.gan().gbi():a.gao().gbi()
-f=p.b
-if(n*l+k*i+o*g+f<0)return B.a7
-m=m?a.gao().gbg():a.gan().gbg()
-l=j?a.gao().gbh():a.gan().gbh()
-j=h?a.gao().gbi():a.gan().gbi()
-if(n*m+k*l+o*j+f<0)r=!0}return r?B.aW:B.aX}}
-A.fH.prototype={
-$4(a,b,c,d){var s=new A.ao(a,b,c),r=new A.br(s,d),q=Math.sqrt(s.gaG())
-if(q<1e-9)s=r
-else{s=1/q
-s=new A.br(new A.ao(a*s,b*s,c*s),d/q)}return s},
-$S:48}
-A.bR.prototype={
-a_(a,b){var s,r,q,p,o,n,m,l,k,j=new Float32Array(16)
-for(s=this.a,r=b.a,q=0;q<4;++q)for(p=q*4,o=0;o<4;++o){for(n=0,m=0;m<4;++m){l=m*4+o
-if(!(l<16))return A.h(s,l)
-l=s[l]
-k=p+m
-if(!(k<16))return A.h(r,k)
-n+=l*r[k]}l=p+o
-if(!(l<16))return A.h(j,l)
-j[l]=n}return new A.bR(j)},
-gT(a){return B.J.c1(this.a,new A.fX())},
-i(a){return"Mat4("+A.p(this.a)+")"}}
-A.fX.prototype={
-$1(a){return isFinite(A.ib(a))},
-$S:49}
-A.ao.prototype={
-b1(a){return this.a*a.a+this.b*a.b+this.c*a.c},
-bX(a){var s=this.b,r=a.c,q=this.c,p=a.b,o=a.a,n=this.a
-return new A.ao(s*r-q*p,q*o-n*r,n*p-s*o)},
-gaG(){var s=this.a,r=this.b,q=this.c
-return s*s+r*r+q*q},
-gp(a){return Math.sqrt(this.gaG())},
-gT(a){return isFinite(this.a)&&isFinite(this.b)&&isFinite(this.c)},
-gci(){var s=this,r=Math.sqrt(s.gaG())
-return r<1e-9?B.a_:new A.ao(s.a/r,s.b/r,s.c/r)},
-R(a,b){if(b==null)return!1
-return b instanceof A.ao&&this.a===b.a&&this.b===b.b&&this.c===b.c},
-gB(a){return A.cM(this.a,this.b,this.c,B.h,B.h,B.h)},
-i(a){return"Vec3("+A.p(this.a)+", "+A.p(this.b)+", "+A.p(this.c)+")"}}
-A.eL.prototype={
-A(){return"_BloomBlurAxis."+this.b}}
-A.cf.prototype={
-gF(){return this.f},
-J(a,b){B.a.j(a.a,new A.F(this.f,B.q,A.d([new A.l(this.x,B.d),new A.l(this.y,B.f)],t.C),!1))},
-I(a){var s=this,r=s.a.N(new A.a3(s.e,s.b,s.c,B.m,B.ak,B.ah)),q=A.aF(s.d),p=t.n,o=s.r===B.aA?new Float32Array(A.x(A.d([1/s.Q,0],p))):new Float32Array(A.x(A.d([0,1/s.as],p)))
-p=s.y
-return A.d([new A.eM(new A.Z(s.f,A.d([new A.l(s.x,B.d),new A.l(p,B.f)],t.C),!1,!1,!1,!1),r,q,s.z,s.w,o,p.a)],t.u)},
-$iC:1}
-A.eM.prototype={
-L(a){return},
-$iy:1,
-gm(){return this.a}}
-A.dD.prototype={
-gF(){return"bloomComposite"},
-J(a,b){B.a.j(a.a,new A.F("bloomComposite",B.q,A.d([new A.l(this.f,B.d),new A.l(this.r,B.d),new A.l(this.w,B.f)],t.C),!1))},
-I(a){var s=this,r="bloomComposite",q=s.a.N(new A.a3(r,s.b,s.c,B.m,B.bB,B.bt)),p=A.aF(s.d),o=s.w,n=A.d([new A.l(s.f,B.d),new A.l(s.r,B.d),new A.l(o,B.f)],t.C)
-return A.d([new A.eN(new A.Z(r,n,!1,!1,!0,!1),q,p,s.e,o)],t.u)},
-$iC:1}
-A.eN.prototype={
-L(a){return},
-$iy:1,
-gm(){return this.a}}
-A.dL.prototype={
-gF(){return"depthPrepass"},
-J(a,b){B.a.j(a.a,new A.F("depthPrepass",B.b3,A.d([new A.l(this.w,B.f)],t.C),!1))},
-I(a){var s=this,r="depthPrepass",q=s.a.N(new A.a3(r,s.b,s.c,B.aj,B.ai,B.bn))
-return A.d([new A.eQ(new A.Z(r,A.d([new A.l(s.w,B.f)],t.C),!0,!0,!1,!0),q,s.d,s.e,s.f)],t.u)},
-$iC:1}
-A.eQ.prototype={
-L(a0){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e=this,d=u.k,c=a0.b,b=a0.c,a=c.a
-A.ax(a,a0.P("sceneDepth").b)
-A.af(a,e.a.O())
-A.c_(a,B.B,1,0,0,0)
-A.bg(a,e.b.b)
-A.e(a,"uVertexSnapGrid",new A.f(B.c,0))
-A.e(a,"uAlbedo",B.t)
-for(s=b.a,r=s.length,b=b.c.c.a,q=e.c,p=v.G,o=c.b,n=a.a,m=0;m<s.length;s.length===r||(0,A.B)(s),++m){l=s[m]
-k=l.a
-j=k.gm().ga2()
-A.e(a,"uViewProjection",new A.f(B.l,new Float32Array(A.x(b))))
-A.e(a,"uModel",new A.f(B.l,new Float32Array(A.x(j.ap().ga6()))))
-A.iT(c,l,!1)
-e.cW(c,k.gm().ga9(),0)
-i=q.$1(k.gm().gS())
-j=i.a
-if(a.b!==B.e)A.k(A.j(d))
-n.bindVertexArray(A.a0(j.a))
-j=i.b
-h=i.c
-g=l.b.length
-if(j){j=i.d
-if(a.b!==B.e)A.k(A.j(d))
-f=A.a(p.WebGL2RenderingContext.TRIANGLES)
-n.drawElementsInstanced.apply(n,[f,h,j?A.a(p.WebGL2RenderingContext.UNSIGNED_INT):A.a(p.WebGL2RenderingContext.UNSIGNED_SHORT),0,g])
-o.a7(h,g)}else{if(a.b!==B.e)A.k(A.j(d))
-n.drawArraysInstanced(A.a(p.WebGL2RenderingContext.TRIANGLES),0,h,g)
-o.a7(h,g)}}},
-cW(a,b,c){var s,r=this.d.$1(b),q=a.a
-A.a_(q,0,t.j.a(this.e.$1(r.gbT())))
-r.gbU()
-A.e(q,"uAlphaCutoff",new A.f(B.c,0))
-A.e(q,"uAffineWarpStrength",new A.f(B.c,r.gdi()?c:0))
-s=this.a.O()
-A.af(q,r.gbZ()?s.bf(!1):s)},
-$iy:1,
-gm(){return this.a}}
-A.eR.prototype={
-A(){return"_DofBlurAxis."+this.b}}
-A.co.prototype={
-gF(){return this.f},
-J(a,b){B.a.j(a.a,new A.F(this.f,B.q,A.d([new A.l(this.w,B.d),new A.l(this.x,B.f)],t.C),!1))},
-I(a){var s=this,r=s.a.N(new A.a3(s.e,s.b,s.c,B.m,B.ak,B.ah)),q=A.aF(s.d),p=t.n,o=s.r===B.aB?new Float32Array(A.x(A.d([1/s.z,0],p))):new Float32Array(A.x(A.d([0,1/s.Q],p)))
-p=s.x
-return A.d([new A.eS(new A.Z(s.f,A.d([new A.l(s.w,B.d),new A.l(p,B.f)],t.C),!1,!1,!1,!1),r,q,s.y,o,p.a)],t.u)},
-$iC:1}
-A.eS.prototype={
-L(a){return},
-$iy:1,
-gm(){return this.a}}
-A.dN.prototype={
-gF(){return"dofComposite"},
-J(a,b){var s=this
-B.a.j(a.a,new A.F("dofComposite",B.q,A.d([new A.l(s.z,B.d),new A.l(s.Q,B.d),new A.l(s.as,B.d),new A.l(s.at,B.f)],t.C),!1))},
-I(a){var s=this,r="dofComposite",q=s.a.N(new A.a3(r,s.b,s.c,B.m,B.bA,B.bm)),p=A.aF(s.d)
-return A.d([new A.eT(new A.Z(r,A.d([new A.l(s.z,B.d),new A.l(s.Q,B.d),new A.l(s.as,B.d),new A.l(s.at,B.f)],t.C),!1,!1,!1,!1),q,p,s.e,s.f,s.r,s.w,5,2.8)],t.u)},
-$iC:1}
-A.eT.prototype={
-L(a){var s,r=this,q=a.P("dofOutput"),p=a.b,o=r.r.$0(),n=p.a
-A.ax(n,q.b)
-A.af(n,r.a.O())
-A.bg(n,r.b.b)
-s=t.j
-A.a_(n,0,s.a(r.d.$0()))
-A.e(n,"uSharp",B.t)
-A.a_(n,1,s.a(r.e.$0()))
-A.e(n,"uBlurred",B.A)
-A.a_(n,2,s.a(r.f.$0()))
-A.e(n,"uSceneDepth",B.az)
-A.e(n,"uNear",new A.f(B.c,o.f))
-A.e(n,"uFar",new A.f(B.c,o.r))
-A.e(n,"uFocusDistance",new A.f(B.c,r.w))
-A.e(n,"uFocusRange",new A.f(B.c,r.x))
-A.e(n,"uStrength",new A.f(B.c,0))
-A.ay(n,r.c)
-p.a0(3,0)},
-$iy:1,
-gm(){return this.a}}
-A.dU.prototype={
-gF(){return"grade"},
-J(a,b){B.a.j(a.a,new A.F("grade",B.q,A.d([new A.l(this.r,B.d),new A.l(this.w,B.f)],t.C),!1))},
-I(a){var s=this,r=s.a.N(new A.a3("grade",s.b,s.c,B.m,B.by,B.bu)),q=A.aF(s.d),p=s.r,o=s.w
-return A.d([new A.eX(new A.Z("grade",A.d([new A.l(p,B.d),new A.l(o,B.f)],t.C),!1,!1,!1,!1),r,q,s.e,16,p,o)],t.u)},
-$iC:1}
-A.eX.prototype={
-L(a){var s=this,r=a.P(s.f.a),q=a.b,p=q.a
-A.ax(p,a.P(s.r.a).b)
-A.af(p,s.a.O())
-A.bg(p,s.b.b)
-A.a_(p,0,r.b)
-A.e(p,"uScene",B.t)
-A.a_(p,1,t.j.a(s.d.$0()))
-A.e(p,"uLut",B.A)
-A.e(p,"uLutSize",new A.f(B.c,s.e))
-A.e(p,"uStrength",new A.f(B.c,0))
-A.ay(p,s.c)
-q.a0(3,0)},
-$iy:1,
-gm(){return this.a}}
-A.cE.prototype={
-gF(){return"msaaResolve"},
-J(a,b){B.a.j(a.a,new A.F("msaaResolve",B.b4,A.d([new A.l(this.b,B.d),new A.l(this.c,B.f)],t.C),!0))},
-I(a){var s=this.b,r=this.c
-return A.d([new A.eZ(new A.Z("msaaResolve",A.d([new A.l(s,B.d),new A.l(r,B.f)],t.C),!1,!1,!1,!1),this.a,s,r)],t.u)},
-$iC:1}
-A.eZ.prototype={
-L(a){var s,r,q,p,o,n,m,l="blitFramebuffer",k=a.be(this.c),j=a.be(this.d),i=this.b
-if(i.b!==B.e)A.k(A.j(u.k))
-s=t.V
-r=s.a(k.b.a)
-q=s.a(j.b.a)
-s=r.y
-if(s<=1)A.k(A.r("WebGl2Device.resolveTarget: source must be multisampled (samples > 1), got "+s,null))
-s=q.y
-if(s>1)A.k(A.r("WebGl2Device.resolveTarget: destination must be single-sample, got samples="+s,null))
-s=r.w
-p=q.w
-if(s!==p||r.x!==q.x)A.k(A.r("WebGl2Device.resolveTarget: source ("+s+"x"+r.x+") and destination ("+p+"x"+q.x+") must match",null))
-o=r.r!=null||r.f!=null
-n=q.r!=null||q.f!=null
-i=i.a
-m=v.G
-i.bindFramebuffer(A.a(m.WebGL2RenderingContext.READ_FRAMEBUFFER),r.a)
-i.bindFramebuffer(A.a(m.WebGL2RenderingContext.DRAW_FRAMEBUFFER),q.a)
-if(r.c!=null||r.b!=null){if(o){i.readBuffer(A.a(m.WebGL2RenderingContext.COLOR_ATTACHMENT0))
-i.drawBuffers(A.d([A.a(m.WebGL2RenderingContext.COLOR_ATTACHMENT0),A.a(m.WebGL2RenderingContext.NONE)],t.n))}A.a6(i,l,[0,0,s,r.x,0,0,p,q.x,A.a(m.WebGL2RenderingContext.COLOR_BUFFER_BIT),A.a(m.WebGL2RenderingContext.LINEAR)],t.H)}if(o&&n){i.readBuffer(A.a(m.WebGL2RenderingContext.COLOR_ATTACHMENT1))
-i.drawBuffers(A.d([A.a(m.WebGL2RenderingContext.NONE),A.a(m.WebGL2RenderingContext.COLOR_ATTACHMENT1)],t.n))
-A.a6(i,l,[0,0,s,r.x,0,0,p,q.x,A.a(m.WebGL2RenderingContext.COLOR_BUFFER_BIT),A.a(m.WebGL2RenderingContext.LINEAR)],t.H)}if(r.d!=null||r.e!=null)A.a6(i,l,[0,0,s,r.x,0,0,p,q.x,A.a(m.WebGL2RenderingContext.DEPTH_BUFFER_BIT),A.a(m.WebGL2RenderingContext.NEAREST)],t.H)
-if(n)i.drawBuffers(A.d([A.a(m.WebGL2RenderingContext.COLOR_ATTACHMENT0),A.a(m.WebGL2RenderingContext.COLOR_ATTACHMENT1)],t.n))
-i.bindFramebuffer(A.a(m.WebGL2RenderingContext.READ_FRAMEBUFFER),null)
-i.bindFramebuffer(A.a(m.WebGL2RenderingContext.DRAW_FRAMEBUFFER),null)},
-$iy:1,
-gm(){return this.a}}
-A.bJ.prototype={}
-A.dE.prototype={
-P(a){var s=this.a.n(0,a)
-if(s==null)throw A.b(A.j('BoundPassContext: no view declared for "'+a+'" \u2014 a pass may only access resources it named in its own PassDescriptor.uses'))
-return s},
-be(a){var s=a.a,r=this.a.n(0,s+"#"+a.f)
-if(r!=null)return r
-return this.P(s)},
-$imc:1}
-A.ja.prototype={}
-A.cN.prototype={
-gF(){return"present"},
-J(a,b){B.a.j(a.a,new A.F("present",B.b5,A.d([new A.l(this.f,B.d)],t.C),!1))},
-I(a){var s=this,r=s.a.N(new A.a3("present",s.b,s.c,B.m,B.bH,B.bo)),q=A.aF(s.d),p=s.f
-return A.d([new A.f1(new A.Z("present",A.d([new A.l(p,B.d)],t.C),!1,!1,!1,!1),r,q,p,s.r)],t.u)},
-$iC:1}
-A.f1.prototype={
-L(a){var s=this,r=a.be(s.d),q=a.b,p=q.a
-A.ax(p,null)
-A.af(p,s.a.O())
-A.bg(p,s.b.b)
-A.ay(p,s.c)
-A.a_(p,0,r.b)
-A.e(p,"uExposure",new A.f(B.c,1))
-A.e(p,"uVignette",new A.f(B.c,0))
-A.e(p,"uGrain",new A.f(B.c,0))
-A.e(p,"uRainIntensity",new A.f(B.c,0))
-A.e(p,"uRainWindowVisibility",new A.f(B.c,1))
-A.e(p,"uOutputEncoding",new A.f(B.c,s.e===B.C?1:0))
-A.e(p,"uToneMap",B.ay)
-q.a0(3,0)},
-$iy:1,
-gm(){return this.a}}
-A.eg.prototype={
-gF(){return"ps1Quantize"},
-J(a,b){B.a.j(a.a,new A.F("ps1Quantize",B.q,A.d([new A.l(this.e,B.d),new A.l(this.f,B.f)],t.C),!1))},
-I(a){var s=this,r="ps1Quantize",q=s.a.N(new A.a3(r,s.b,s.c,B.m,B.bD,B.bk)),p=A.aF(s.d),o=s.e,n=s.f
-return A.d([new A.f2(new A.Z(r,A.d([new A.l(o,B.d),new A.l(n,B.f)],t.C),!1,!1,!1,!1),q,p,o,n)],t.u)},
-$iC:1}
-A.f2.prototype={
-L(a){var s=this,r=a.P(s.d.a),q=a.b,p=q.a
-A.ax(p,a.P(s.e.a).b)
-A.af(p,s.a.O())
-A.bg(p,s.b.b)
-A.a_(p,0,r.b)
-A.e(p,"uScene",B.t)
-A.e(p,"uQuantizationBits",new A.f(B.c,8))
-A.e(p,"uDitherStrength",new A.f(B.c,0))
-A.ay(p,s.c)
-q.a0(3,0)},
-$iy:1,
-gm(){return this.a}}
-A.bt.prototype={}
-A.ep.prototype={
-gF(){return"shadow"},
-J(a,b){B.a.j(a.a,new A.F("shadowCaster",B.b2,A.d([new A.l(this.z,B.f)],t.C),!1))},
-I(a){var s=this,r="shadowCaster",q=s.a.N(new A.a3(r,s.b,s.c,B.aj,B.ai,B.bs))
-return A.d([new A.f5(new A.Z(r,A.d([new A.l(s.z,B.f)],t.C),!0,!0,!1,!0),q,s.d,s.e,s.f,s.r,s.w,s.x,s.y)],t.u)},
-$iC:1}
-A.f5.prototype={
-L(a){var s,r,q,p,o=this,n=a.P("shadowMap"),m=a.b,l=o.f.$0()
-if(l==null){s=m.a
-A.ax(s,n.b)
-A.af(s,o.a.O())
-A.c_(s,B.B,1,0,0,0)
-return}r=A.k9(l)
-o.x.$1(r)
-s=m.a
-A.ax(s,n.b)
-A.af(s,o.a.O())
-A.c_(s,B.B,1,0,0,0)
-A.bg(s,o.b.b)
-A.e(s,"uAlbedo",B.t)
-for(s=a.c.a,q=s.length,p=0;p<s.length;s.length===q||(0,A.B)(s),++p)o.cY(m,s[p],l,r)},
-bK(a,b){var s,r=this.d.$1(b),q=a.a
-A.a_(q,0,t.j.a(this.e.$1(r.gbT())))
-r.gbU()
-A.e(q,"uAlphaCutoff",new A.f(B.c,0))
-s=this.a.O()
-A.af(q,r.gbZ()?s.bf(!1):s)},
-cY(a,b,c,d){var s,r,q,p,o,n,m=this
-if(t.Y.b(b)){if(!b.gm().gdt())return
-s=a.a
-A.e(s,"uUseInstances",B.Y)
-m.bG(a,b.gm().ga2(),d)
-m.bK(a,b.gm().ga9())
-r=b.gm().gS()
-q=m.c.$1(r)
-A.ay(s,q.a)
-s=q.b
-p=q.c
-if(s)a.b3(p,q.d,0)
-else a.a0(p,0)}else if(b instanceof A.b9){o=b.a
-if(!o.gm().gdt())return
-if(m.de(b,c)===B.cp)return
-m.bG(a,o.gm().ga2(),d)
-A.iT(a,b,!1)
-m.bK(a,o.gm().ga9())
-r=o.gm().gS()
-q=m.c.$1(r)
-A.ay(a.a,q.a)
-s=q.b
-p=q.c
-n=b.b.length
-if(s)a.b4(p,q.d,n,0)
-else a.b2(p,0,n)}else throw A.b(A.r("ShadowFeature: frameScene entries must be InstanceBatch or RetainedItemView, got "+J.dy(b).i(0),null))},
-de(a,b){return B.co},
-bG(a,b,c){var s=a.a
-A.e(s,"uModel",new A.f(B.l,new Float32Array(A.x(b.ap().ga6()))))
-A.e(s,"uLightViewProjection",new A.f(B.l,new Float32Array(A.x(c.a.a))))},
-$iy:1,
-gm(){return this.a}}
-A.iA.prototype={
-$1(a){return this.a.a=a},
-$S:50}
-A.iB.prototype={
-$0(){var s=this.a.a
-return s==null?this.b:s},
-$S:51}
-A.eq.prototype={
-gF(){return"shadowedWorld"},
-J(a,b){var s=this,r=A.d([new A.l(s.db,B.d)],t.C)
-if(s.ay)r.push(new A.l(s.dx,B.d))
-r.push(new A.l(s.dy,B.f))
-B.a.j(a.a,new A.F("shadowedWorld",B.ac,r,!1))},
-I(a){var s=this,r="shadowedWorld",q=s.a.N(new A.a3(r,s.b,s.c,B.bF,B.bz,B.bi)),p=A.d([new A.l(s.db,B.d)],t.C)
-if(s.ay)p.push(new A.l(s.dx,B.d))
-p.push(new A.l(s.dy,B.f))
-return A.d([new A.f6(new A.Z(r,p,!0,!0,!1,!0),q,s.d,s.e,s.f,s.r,s.w,s.x,s.y,s.z,s.Q,s.as,s.at,s.ax,s.ch,s.CW,s.cx,s.cy)],t.u)},
-$iC:1}
-A.f6.prototype={
-L(a5){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c=this,b=null,a=a5.P("sceneColor"),a0=a5.b,a1=a5.c,a2=a1.c,a3=c.z.$0(),a4=a0.a
-A.ax(a4,a.b)
-A.af(a4,c.a.O())
-A.c_(a4,B.a6,1,0.04,0.03,0.03)
-A.bg(a4,c.b.b)
-A.e(a4,"uAlbedo",B.t)
-A.e(a4,"uNormalMap",B.cF)
-A.e(a4,"uOrmMap",B.cG)
-A.e(a4,"uEmissiveMap",B.cH)
-A.e(a4,"uLightmap",B.cI)
-s=t.j
-A.a_(a4,1,s.a(c.y.$0()))
-A.e(a4,"uShadowMap",B.A)
-r=a2.d
-q=t.n
-A.e(a4,"uCameraPosition",new A.f(B.j,new Float32Array(A.x(A.d([r.a,r.b,r.c],q)))))
-A.e(a4,"uShadowMapTexelSize",new A.f(B.aw,new Float32Array(A.x(A.d([1/c.ch,1/c.CW],q)))))
-A.a_(a4,2,s.a(c.at.$0()))
-A.e(a4,"uSsao",B.az)
-A.e(a4,"uVertexSnapGrid",new A.f(B.c,0))
-A.e(a4,"uSceneColorSize",new A.f(B.aw,new Float32Array(A.x(A.d([c.ax,c.ay],q)))))
-A.e(a4,"uViewProjection",new A.f(B.l,new Float32Array(A.x(a2.c.a))))
-A.e(a4,"uView",new A.f(B.l,new Float32Array(A.x(a2.a.a))))
-A.e(a4,"uLightViewProjection",new A.f(B.l,new Float32Array(A.x(a3.a.a))))
-A.e(a4,"uFogColor",new A.f(B.j,new Float32Array(A.x(A.d([0,0,0],q)))))
-A.e(a4,"uFogStart",new A.f(B.c,0))
-A.e(a4,"uFogEnd",new A.f(B.c,1))
-A.e(a4,"uFogHeightFalloff",new A.f(B.c,0))
-A.e(a4,"uFogDensity",new A.f(B.c,0))
-p=c.Q.$0()
-s=A.d([],t.w)
-r=c.as.$0()
-r=J.X(r==null?B.I:r)
-o=p==null
-while(r.k()){n=r.gl()
-if(-1!==(o?b:-1))s.push(n)}m=o?b:B.p
-if(m==null)m=B.p
-l=o?b:B.u
-if(l==null)l=B.u
-A.e(a4,"uLightPosition",new A.f(B.j,new Float32Array(A.x(A.d([m.a,m.b,m.c],q)))))
-A.e(a4,"uLightDirection",new A.f(B.j,new Float32Array(A.x(A.d([l.a,l.b,l.c],q)))))
-k=o?b:B.H
-if(k==null)k=B.G
-A.e(a4,"uLightColor",new A.f(B.j,new Float32Array(A.x(A.d([k.a,k.b,k.c],q)))))
-r=o?b:1
-A.e(a4,"uLightIntensity",new A.f(B.c,r==null?0:r))
-A.e(a4,"uSpotEnabled",new A.f(B.c,!o?1:0))
-A.e(a4,"uDirectionalDirection",new A.f(B.j,new Float32Array(A.x(A.d([0,1,0],q)))))
-A.e(a4,"uDirectionalColor",new A.f(B.j,new Float32Array(A.x(A.d([0,0,0],q)))))
-A.e(a4,"uDirectionalIntensity",new A.f(B.c,0))
-for(j=0;j<4;++j){r=""+j
-A.e(a4,"uPointPosition"+r,new A.f(B.j,new Float32Array(A.x(A.d([0,0,0],q)))))
-A.e(a4,"uPointColor"+r,new A.f(B.j,new Float32Array(A.x(A.d([0,0,0],q)))))
-A.e(a4,"uPointIntensity"+r,new A.f(B.c,0))
-A.e(a4,"uPointRadius"+r,new A.f(B.c,1))}for(j=0;j<3;++j){r=s.length
-if(j<r){if(!(j<r))return A.h(s,j)
-i=s[j]}else i=b
-r=i==null
-h=r?b:B.p
-if(h==null)h=B.a_
-g=r?b:B.u
-if(g==null)g=B.u
-f=r?b:B.H
-if(f==null)f=B.G
-n=""+j
-A.e(a4,"uDirectSpotPosition"+n,new A.f(B.j,new Float32Array(A.x(A.d([h.a,h.b,h.c],q)))))
-A.e(a4,"uDirectSpotDirection"+n,new A.f(B.j,new Float32Array(A.x(A.d([g.a,g.b,g.c],q)))))
-A.e(a4,"uDirectSpotColor"+n,new A.f(B.j,new Float32Array(A.x(A.d([f.a,f.b,f.c],q)))))
-e=r?b:1
-if(e==null)e=0
-A.e(a4,"uDirectSpotIntensity"+n,new A.f(B.c,e))
-e=r?b:1
-if(e==null)e=1
-A.e(a4,"uDirectSpotRange"+n,new A.f(B.c,e))
-e=r?b:0.3
-if(e==null)e=0.3
-A.e(a4,"uDirectSpotInnerCos"+n,new A.f(B.c,Math.cos(e)))
-e=r?b:0.5
-if(e==null)e=0.5
-A.e(a4,"uDirectSpotOuterCos"+n,new A.f(B.c,Math.cos(e)))
-r=r?0:1
-A.e(a4,"uDirectSpotEnabled"+n,new A.f(B.c,r))}s=o?b:1
-A.e(a4,"uLightRange",new A.f(B.c,s==null?1:s))
-s=o?b:0.3
-if(s==null)s=0.3
-A.e(a4,"uLightInnerCos",new A.f(B.c,Math.cos(s)))
-s=o?b:0.5
-if(s==null)s=0.5
-A.e(a4,"uLightOuterCos",new A.f(B.c,Math.cos(s)))
-A.e(a4,"uAmbientColor",new A.f(B.j,new Float32Array(A.x(A.d([1,1,1],q)))))
-A.e(a4,"uAmbientIntensity",new A.f(B.c,0))
-A.e(a4,"uRainWetness",new A.f(B.c,0))
-for(a4=a1.a,s=a4.length,d=0;d<a4.length;a4.length===s||(0,A.B)(a4),++d)c.bL(a0,a4[d],0)
-for(a1=a1.b,a4=a1.length,d=0;d<a1.length;a1.length===a4||(0,A.B)(a1),++d)c.bL(a0,a1[d],0)},
-bL(a,b,c){var s,r,q,p,o,n=this
-if(t.Y.b(b)){s=a.a
-A.e(s,"uUseInstances",B.Y)
-n.bM(a,b.gm().ga2())
-n.bH(a,b.gm().ga9(),b.gm().gc_(),b.gm().gdq(),c,b.gm().gcm())
-r=n.c.$1(b.gm().gS())
-A.ay(s,r.a)
-s=r.b
-q=r.c
-if(s)a.b3(q,r.d,0)
-else a.a0(q,0)}else if(b instanceof A.b9){p=b.a
-n.bM(a,p.gm().ga2())
-A.iT(a,b,!0)
-n.bH(a,p.gm().ga9(),p.gm().gc_(),p.gm().gdq(),c,p.gm().gcm())
-r=n.c.$1(p.gm().gS())
-A.ay(a.a,r.a)
-s=r.b
-q=r.c
-o=b.b.length
-if(s)a.b4(q,r.d,o,0)
-else a.b2(q,0,o)}else throw A.b(A.r("ShadowedWorldFeature: frameScene entries must be InstanceBatch or RetainedItemView, got "+J.dy(b).i(0),null))},
-bH(a,b,c,d,e,f){var s=this,r=s.d.$1(b),q=t.j,p=a.a
-A.a_(p,0,q.a(s.e.$1(r.gbT())))
-A.a_(p,3,q.a(s.f.$1(r.gex())))
-A.a_(p,4,q.a(s.r.$1(r.gez())))
-A.a_(p,5,q.a(s.w.$1(r.gek())))
-A.a_(p,6,q.a(s.x.$1(r.ger())))
-r.gbU()
-A.e(p,"uAlphaCutoff",new A.f(B.c,0))
-A.e(p,"uOpaqueCoverage",new A.f(B.c,1))
-A.e(p,"uAffineWarpStrength",new A.f(B.c,r.gdi()?e:0))
-q=t.n
-A.e(p,"uMaterialTint",new A.f(B.j,new Float32Array(A.x(A.d([r.geD(),r.geC(),r.geB()],q)))))
-A.e(p,"uEmissiveStrength",new A.f(B.c,r.gej()))
-A.e(p,"uUvScaleOffset",new A.f(B.cE,new Float32Array(A.x(A.d([r.geH(),r.geI(),r.geF(),r.geG()],q)))))
-A.e(p,"uNormalStrength",new A.f(B.c,r.gew()))
-A.e(p,"uRoughness",new A.f(B.c,r.geA()))
-A.e(p,"uMetallic",new A.f(B.c,r.geu()))
-A.e(p,"uClearcoatStrength",new A.f(B.c,r.geh()))
-A.e(p,"uClearcoatRoughness",new A.f(B.c,r.geg()))
-A.e(p,"uOcclusionStrength",new A.f(B.c,r.gey()))
-A.e(p,"uLightmapIntensity",new A.f(B.c,r.geq()))
-A.e(p,"uReceivesShadow",new A.f(B.c,r.gcm()&&f?1:0))
-A.af(p,r.gbZ()?null.bf(!1):null)},
-bM(a,b){var s=b.ap(),r=a.a
-A.e(r,"uModel",new A.f(B.l,new Float32Array(A.x(s.ga6()))))
-A.e(r,"uNormalMatrix",new A.f(B.l,new Float32Array(A.x(s.cg().ga6()))))},
-$iy:1,
-gm(){return this.a}}
-A.es.prototype={
-gF(){return"ssaoOcclusion"},
-J(a,b){B.a.j(a.a,new A.F("ssaoOcclusion",B.ab,A.d([new A.l(this.w,B.f)],t.C),!1))},
-I(a){var s=this,r="ssaoOcclusion",q=s.a.N(new A.a3(r,s.b,s.c,B.m,B.bC,B.bj)),p=A.aF(s.d)
-return A.d([new A.f9(new A.Z(r,A.d([new A.l(s.w,B.f)],t.C),!1,!1,!1,!1),q,p,s.e,s.f,0.4)],t.u)},
-$iC:1}
-A.f9.prototype={
-L(a){var s=a.b.a
-A.ax(s,a.P("ssaoRaw").b)
-A.af(s,this.a.O())
-A.c_(s,B.a5,1,1,1,1)
-return},
-$iy:1,
-gm(){return this.a}}
-A.er.prototype={
-gF(){return"ssaoBlur"},
-J(a,b){B.a.j(a.a,new A.F("ssaoBlur",B.ab,A.d([new A.l(this.y,B.d),new A.l(this.z,B.f)],t.C),!1))},
-I(a){var s=this,r="ssaoBlur",q=s.a.N(new A.a3(r,s.b,s.c,B.m,B.bw,B.bv)),p=A.aF(s.d)
-return A.d([new A.f8(new A.Z(r,A.d([new A.l(s.y,B.d),new A.l(s.z,B.f)],t.C),!1,!1,!1,!1),q,p,s.e,s.f,s.r,s.w,s.x)],t.u)},
-$iC:1}
-A.f8.prototype={
-L(a){var s=a.b.a
-A.ax(s,a.P("ssaoBlurred").b)
-A.af(s,this.a.O())
-A.c_(s,B.a5,1,1,1,1)
-return},
-$iy:1,
-gm(){return this.a}}
-A.eF.prototype={
-gF(){return"vhs"},
-J(a,b){var s=this.w
-a.b.j(0,s.a)
-B.a.j(a.a,new A.F("vhs",B.q,A.d([new A.l(this.r,B.d),new A.l(s,B.o),new A.l(s,B.f)],t.C),!1))},
-I(a){var s=this,r=s.a.N(new A.a3("vhs",s.b,s.c,B.m,B.bx,B.bl)),q=A.aF(s.d),p=s.r,o=s.w
-return A.d([new A.fd(new A.Z("vhs",A.d([new A.l(p,B.d),new A.l(o,B.o),new A.l(o,B.f)],t.C),!1,!1,!1,!1),r,q,s.e,s.f,p,o)],t.u)},
-$iC:1}
-A.fd.prototype={
-L(a){var s=this,r=a.P(s.f.a),q=a.P(s.r.a),p=a.b,o=p.a
-A.ax(o,q.b)
-A.af(o,s.a.O())
-A.bg(o,s.b.b)
-A.a_(o,0,r.b)
-A.e(o,"uScene",B.t)
-A.a_(o,1,t.j.a(s.d.$0()))
-A.e(o,"uHistory",B.A)
-A.e(o,"uTime",new A.f(B.c,s.e.$0()))
-A.e(o,"uChromaWeight",new A.f(B.c,0))
-A.e(o,"uTrackingWeight",new A.f(B.c,0))
-A.e(o,"uNoiseWeight",new A.f(B.c,0))
-A.e(o,"uHeadSwitchWeight",new A.f(B.c,0))
-A.e(o,"uDropoutWeight",new A.f(B.c,0))
-A.e(o,"uGhostWeight",new A.f(B.c,0))
-A.ay(o,s.c)
-p.a0(3,0)},
-$iy:1,
-gm(){return this.a}}
-A.cQ.prototype={}
-A.eI.prototype={
-gF(){return"world"},
-J(a,b){B.a.j(a.a,new A.F("worldOpaqueTransparent",B.ac,A.d([new A.l(this.e,B.f)],t.C),!1))},
-I(a){var s=this,r=s.a.N(new A.a3("safeWorld",s.b,s.c,B.bG,B.m,B.bh)),q=s.e
-return A.d([new A.fg(new A.Z("worldOpaqueTransparent",A.d([new A.l(q,B.f)],t.C),!0,!0,!1,!0),r,s.d,q.a)],t.u)},
-$iC:1}
-A.fg.prototype={
-L(a){var s,r,q=this,p=a.b,o=a.c,n=p.a
-A.ax(n,a.P(q.d).b)
-A.af(n,q.a.O())
-A.c_(n,B.a6,1,0.04,0.03,0.03)
-A.bg(n,q.b.b)
-A.e(n,"uViewProjection",new A.f(B.l,new Float32Array(A.x(o.c.c.a))))
-s=t.n
-A.e(n,"uLightDir",new A.f(B.j,new Float32Array(A.x(A.d([0,1,0],s)))))
-A.e(n,"uAmbientColor",new A.f(B.j,new Float32Array(A.x(A.d([1,1,1],s)))))
-A.e(n,"uAmbientIntensity",new A.f(B.c,0))
-for(n=o.a,s=n.length,r=0;r<n.length;n.length===s||(0,A.B)(n),++r)q.by(p,n[r])
-for(o=o.b,n=o.length,r=0;r<o.length;o.length===n||(0,A.B)(o),++r)q.by(p,o[r])},
-by(a,b){var s,r,q,p,o,n=this
-if(b instanceof A.b9){s=b.a
-n.bI(a,s.gm().ga2())
-A.iT(a,b,!0)
-r=n.c.$1(s.gm().gS())
-A.ay(a.a,r.a)
-q=r.b
-p=r.c
-o=b.b.length
-if(q)a.b4(p,r.d,o,0)
-else a.b2(p,0,o)}else if(t.Y.b(b)){q=a.a
-A.e(q,"uUseInstances",B.Y)
-n.bI(a,b.gm().ga2())
-r=n.c.$1(b.gm().gS())
-A.ay(q,r.a)
-q=r.b
-p=r.c
-if(q)a.b3(p,r.d,0)
-else a.a0(p,0)}else throw A.b(A.r("WorldFeature: frameScene entries must be InstanceBatch or RetainedItemView, got "+J.dy(b).i(0),null))},
-bI(a,b){var s=b.ap(),r=a.a
-A.e(r,"uModel",new A.f(B.l,new Float32Array(A.x(s.ga6()))))
-A.e(r,"uNormalMatrix",new A.f(B.l,new Float32Array(A.x(s.cg().ga6()))))},
-$iy:1,
-gm(){return this.a}}
-A.fJ.prototype={
-A(){return"GpuBufferUsage."+this.b}}
-A.dS.prototype={
-A(){return"GpuBufferKind."+this.b}}
-A.fO.prototype={
-A(){return"GpuTextureFilter."+this.b}}
-A.fP.prototype={
-A(){return"GpuTextureWrap."+this.b}}
-A.fI.prototype={}
-A.fN.prototype={}
-A.bM.prototype={
-A(){return"GpuTargetAttachment."+this.b}}
-A.cs.prototype={}
-A.dT.prototype={
-A(){return"GpuDeviceStatus."+this.b}}
-A.bX.prototype={
-A(){return"ShaderCompileStage."+this.b}}
-A.cU.prototype={
-i(a){return"ShaderCompileException("+this.a.b+": "+this.b+")"}}
-A.b0.prototype={
-A(){return"UniformType."+this.b}}
-A.f.prototype={}
-A.cj.prototype={
-A(){return"ClearMask."+this.b}}
-A.dM.prototype={
-a0(a,b){var s=this.a
-if(s.b!==B.e)A.k(A.j(u.k))
-s.a.drawArrays(A.a(v.G.WebGL2RenderingContext.TRIANGLES),b,a)
-this.b.a7(a,1)},
-b2(a,b,c){var s=this.a
-if(s.b!==B.e)A.k(A.j(u.k))
-s.a.drawArraysInstanced(A.a(v.G.WebGL2RenderingContext.TRIANGLES),b,a,c)
-this.b.a7(a,c)},
-b3(a,b,c){var s,r,q=this.a
-if(q.b!==B.e)A.k(A.j(u.k))
-s=v.G
-r=A.a(s.WebGL2RenderingContext.TRIANGLES)
-s=b?A.a(s.WebGL2RenderingContext.UNSIGNED_INT):A.a(s.WebGL2RenderingContext.UNSIGNED_SHORT)
-q.a.drawElements(r,a,s,c)
-this.b.a7(a,1)},
-b4(a,b,c,d){var s,r,q=this.a
-if(q.b!==B.e)A.k(A.j(u.k))
-s=v.G
-r=A.a(s.WebGL2RenderingContext.TRIANGLES)
-s=b?A.a(s.WebGL2RenderingContext.UNSIGNED_INT):A.a(s.WebGL2RenderingContext.UNSIGNED_SHORT)
-A.a6(q.a,"drawElementsInstanced",[r,a,s,d,c],t.H)
-this.b.a7(a,c)},
-$ilI:1}
-A.ed.prototype={
-cj(a){var s=this.b.n(0,a)
-if(s==null)throw A.b(A.j("resource is not in candidate: "+a))
-return s}}
-A.fK.prototype={
-gl(){var s=this.c
-if(s==null)throw A.b(A.j("GPU resource adapter is not initialized"))
-return s},
-a5(){var s,r=this
-if(r.e)return
-s=r.c
-if(s!=null)r.cU(s.b)
-r.b.a5()
-r.c=null
-r.e=!0},
-bw(a4,a5){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a=this,a0=t.N,a1=t.j,a2=A.as(a0,a1),a3=A.d([],t.a4)
-try{k=a4.a
-j=k.$ti
-i=j.h("A(1)")
-j=j.h("a5<1>")
-s=new A.a5(k,i.a(new A.fL()),j)
-for(h=s,g=J.X(h.a),h=new A.G(g,h.b,h.$ti.h("G<1>")),f=a.a;h.k();){r=g.gl()
-q=A.kq(f,a.bx(r,a5))
-J.jJ(a3,q)
-J.dx(a2,r,q)}e=A.an(new A.a5(k,i.a(new A.fM()),j),j.h("i.E"))
-B.a.cv(e)
-p=e
-for(k=p,j=k.length,i=a5.d===1,d=0;d<k.length;k.length===j||(0,A.B)(k),++d){o=k[d]
-n=A.l9(J.lx(o,11))
-if(i){h=J.iY(a2,"sceneColor")
-h.toString
-J.dx(a2,o,h)}else{h=n
-if(typeof h!=="number")return h.cs()
-if(h>=2){h=J.iY(a2,"sceneColor#1")
-h.toString
-J.dx(a2,o,h)}else{m=A.kq(f,a.bx(o,a5))
-J.jJ(a3,m)
-J.dx(a2,o,m)}}}a0=A.jQ(a2,a0,a1)
-return a0}catch(c){for(a0=a3,k=A.O(a0).h("cS<1>"),a0=new A.cS(a0,k),a0=new A.at(a0,a0.gp(0),k.h("at<V.E>")),j=a.a,i=t.V,k=k.h("V.E");a0.k();){h=a0.d
-l=h==null?k.a(h):h
-b=i.a(a1.a(l).a)
-A.jc(j,b.a,b.b,b.c,b.d,b.e,b.f,b.r)}throw c}},
-bx(a,b){var s,r,q,p,o,n=b.b,m=b.c
-if(a==="shadowMap")return new A.cs(512,512,1,B.D,!0)
-if(a==="sceneDepth")return new A.cs(n,m,1,B.D,!0)
-s=B.b.E(a,"ssao")||B.b.E(a,"bloomBlur")||B.b.E(a,"dofBlur")
-r=s?(n+1)/2|0:n
-q=s?(m+1)/2|0:m
-p=a==="sceneColor"
-o=p||B.b.E(a,"sceneColor#")
-p=p?b.d:1
-return new A.cs(r,q,p,o?B.a8:B.b0,o)},
-cU(a){var s,r,q,p,o,n=A.j5(t.bS.a(a).gad(),t.j)
-for(n=A.jg(n,n.r,A.q(n).c),s=this.a,r=t.V,q=n.$ti.c;n.k();){p=n.d
-o=r.a((p==null?q.a(p):p).a)
-A.jc(s,o.a,o.b,o.c,o.d,o.e,o.f,o.r)}}}
-A.fL.prototype={
-$1(a){return!B.b.E(A.aH(a),"sceneColor#")},
-$S:6}
-A.fM.prototype={
-$1(a){return B.b.E(A.aH(a),"sceneColor#")},
-$S:6}
-A.aE.prototype={
-a4(a){var s,r
-this.$ti.c.a(a)
-if(a.gU().bj(0,0)||a.gU().cs(0,0))A.k(A.bN(B.ae,a))
-s=this.b
-r=B.a.n(s,a.gU())
-r.gaI()
-a.gaI()
-A.k(A.bN(B.af,a))
-r.gaK()
-r.gaK()
-s=B.a.n(s,a.gU()).gdw()
-return s},
-bc(a){var s,r
-this.$ti.c.a(a)
-s=a.a
-if(s<0||s>=0)throw A.b(A.bN(B.ae,a))
-r=this.b
-if(!(s>=0&&s<0))return A.h(r,s)
-r[s].gaI()
-s=A.bN(B.af,a)
-throw A.b(s)},
-a8(){return new A.aG(this.dO(),this.$ti.h("aG<+(1,2)>"))},
-dO(){var s=this
-return function(){var r=0,q=2,p=[],o,n,m,l,k,j
-return function $async$a8(a,b,c){if(b===1){p.push(c)
-r=q}for(;;)switch(r){case 0:o=s.a,n=s.b,m=0
-case 3:if(!!1){r=5
-break}if(!(m<0)){A.h(n,m)
-r=1
-break}l=n[m]
-l.gaK()
-l.gaK()
-k=o.$3(m,l.gaI(),l.gei())
-j=l.gdw()
-r=6
-return a.b=new A.d9(k,j),1
-case 6:case 4:++m
-r=3
-break
-case 5:case 1:return 0
-case 2:return a.c=p.at(-1),3}}}}}
-A.fl.prototype={
-A(){return"BlendEquation."+this.b}}
-A.dC.prototype={
-A(){return"BlendFactor."+this.b}}
-A.fp.prototype={
-A(){return"CullFace."+this.b}}
-A.ft.prototype={
-A(){return"DepthFunc."+this.b}}
-A.fv.prototype={
-bf(a){var s=this
-return A.jS(s.f,s.d,s.r,s.e,!0,!0,!0,!0,!1,s.x,s.b,s.a,s.c,!0,!1,!1)}}
-A.a4.prototype={
-A(){return"StateField."+this.b}}
-A.hE.prototype={
-dB(a){var s,r=this.a
-if(r==null)return A.lZ(B.br,t.d5)
-s=A.aC(t.d5)
-if(r.a!==a.a)s.j(0,B.Q)
-if(r.b!==a.b)s.j(0,B.R)
-if(r.c!==a.c)s.j(0,B.S)
-if(r.d!==a.d)s.j(0,B.T)
-if(r.e!==a.e||r.f!==a.f)s.j(0,B.U)
-if(r.r!==a.r)s.j(0,B.V)
-if(r.w!==a.w)s.j(0,B.W)
-if(r.x!==a.x)s.j(0,B.X)
-return s}}
-A.b2.prototype={$iaO:1}
-A.dn.prototype={}
-A.dm.prototype={}
-A.ff.prototype={}
-A.eG.prototype={
-cz(a){var s=this,r=A.a0(s.a.canvas)
-s.c=A.ds(new A.hB(s))
-s.d=A.ds(new A.hC(s))
-r.addEventListener("webglcontextlost",s.c)
-r.addEventListener("webglcontextrestored",s.d)},
-ah(a){var s=A.c9(this.a.getParameter(a))
-return typeof s=="number"?B.ag.e7(s):0},
-bD(a){var s=A.c9(this.a.getParameter(a))
-return typeof s=="number"?s:0/0},
-$ilO:1}
-A.hB.prototype={
-$1(a){A.a0(a).preventDefault()
-this.a.b=B.x},
-$S:11}
-A.hC.prototype={
-$1(a){this.a.b=B.e},
-$S:11}
-A.ia.prototype={
-dl(){var s,r=this
-if(r.b!==B.e)A.k(A.j(u.k))
-s=r.w?A.a1(r.a.createQuery()):null
-if(s==null)return null
-r.a.beginQuery(35007,s)
-return new A.b2(new A.ff(s))},
-bQ(a){var s=a.a
-if(!(s instanceof A.ff))throw A.b(A.aL(a,"query","is not a GPU timer query"))
-return s}}
-A.fe.prototype={}
-A.hD.prototype={
-dz(a){var s=A.a1(a.getContext("webgl2"))
-if(!t.m.b(s))return null
-return new A.hn(A.mt(s),new A.fn(new A.fo(),new A.el()),new A.fE(A.d([],t.c4),B.aT),A.d([],t.cR),B.M,A.d([],t.cL),null)}}
-A.iM.prototype={
-$0(){var s,r,q=this.a,p=A.a(q.clientWidth)>0?A.a(q.clientWidth):A.a(q.width),o=A.a(q.clientHeight)>0?A.a(q.clientHeight):A.a(q.height)
-if(J.aK(p,A.a(q.width))&&J.aK(o,A.a(q.height)))return
-q.width=p
-q.height=o
-try{this.b.av()
-new A.eu(p,o,p,o).M()
-q.setAttribute("data-renderer-surface",A.p(p)+"x"+A.p(o))}catch(r){s=A.b5(r)
-q.setAttribute("data-renderer-resize-error",A.p(s))}},
-$S:0}
-A.iK.prototype={
-$1(a){A.a0(a)
-return this.a.$0()},
-$S:53}
-A.iL.prototype={
-$1(a){var s
-A.a0(a)
-s=this.a
-s.c=!0;++s.b},
-$S:54}
-A.iN.prototype={
-$1(a){var s,r,q,p,o,n=this
-A.jo(a)
-n.b.$0()
-q=n.c
-if(q.e!==B.z||n.a.c)try{p=n.a
-s=new A.dR(n.d,B.a0,B.a3,++p.a,a/1000)
-q.bV(n.e,s)
-q.c0()
-p.c=!1
-n.f.removeAttribute("data-renderer-frame-error")}catch(o){r=A.b5(o)
-n.f.setAttribute("data-renderer-frame-error",A.p(r))
-if(q.e===B.z)++n.a.b}p=n.f
-p.setAttribute("data-renderer-state",q.e.b)
-p.setAttribute("data-renderer-frames",""+n.a.a)
-A.a(A.a0(v.G.window).requestAnimationFrame(A.ds(n)))},
-$S:55};(function aliases(){var s=J.bc.prototype
-s.cw=s.i})();(function installTearOffs(){var s=hunkHelpers._static_2,r=hunkHelpers._static_1,q=hunkHelpers._static_0,p=hunkHelpers._instance_1u
-s(J,"nD","lU",56)
-r(A,"o4","mE",4)
-r(A,"o5","mF",4)
-r(A,"o6","mG",4)
-q(A,"l4","nZ",0)
-p(A.e1.prototype,"gdW","dX",12)
-var o
-p(o=A.ex.prototype,"gdS","dT",3)
-p(o,"ge_","e0",3)
-p(o,"ge1","e2",3)
-p(o,"gdU","dV",3)
-p(o,"gdY","dZ",3)
-q(A,"l5","mH",58)
-q(A,"p4","j9",39)})();(function inheritance(){var s=hunkHelpers.mixin,r=hunkHelpers.inherit,q=hunkHelpers.inheritMany
-r(A.v,null)
-q(A.v,[A.j2,J.dW,A.cT,J.ce,A.i,A.ch,A.D,A.w,A.hr,A.at,A.cD,A.G,A.a8,A.bv,A.bh,A.bQ,A.cl,A.bz,A.aY,A.hv,A.h3,A.cq,A.dc,A.b8,A.bq,A.fT,A.cB,A.aS,A.cA,A.av,A.eW,A.i4,A.i2,A.eJ,A.aA,A.al,A.eO,A.bw,A.N,A.eK,A.fa,A.dp,A.d1,A.eY,A.bA,A.d4,A.di,A.fc,A.bK,A.dJ,A.i6,A.bl,A.hJ,A.ea,A.cV,A.hK,A.aN,A.Q,A.S,A.fb,A.ab,A.dk,A.hx,A.f7,A.h2,A.hc,A.bU,A.fn,A.fo,A.h9,A.cg,A.fD,A.dR,A.aW,A.fQ,A.bP,A.ae,A.fs,A.h4,A.ha,A.el,A.eu,A.ej,A.L,A.fF,A.e1,A.eB,A.h_,A.ex,A.b9,A.dP,A.dQ,A.fE,A.fC,A.c2,A.F,A.a2,A.M,A.l,A.ck,A.hb,A.a3,A.hd,A.Z,A.hf,A.he,A.cP,A.hm,A.hL,A.i0,A.f0,A.eV,A.f4,A.f_,A.hW,A.ad,A.T,A.fr,A.fq,A.br,A.fG,A.bR,A.ao,A.cf,A.eM,A.dD,A.eN,A.dL,A.eQ,A.co,A.eS,A.dN,A.eT,A.dU,A.eX,A.cE,A.eZ,A.bJ,A.dE,A.ja,A.cN,A.f1,A.eg,A.f2,A.bt,A.ep,A.f5,A.eq,A.f6,A.es,A.f9,A.er,A.f8,A.eF,A.fd,A.cQ,A.eI,A.fg,A.fI,A.fN,A.cs,A.cU,A.f,A.dM,A.ed,A.fK,A.aE,A.fv,A.hE,A.b2,A.dn,A.dm,A.ff,A.fe,A.ia,A.hD])
-q(J.dW,[J.dY,J.cv,J.cx,J.cw,J.cy,J.bO,J.ba])
-q(J.cx,[J.bc,J.t,A.bS,A.cI])
-q(J.bc,[J.ec,J.bu,J.bb])
-r(J.dX,A.cT)
-r(J.fS,J.t)
-q(J.bO,[J.cu,J.dZ])
-q(A.i,[A.c0,A.n,A.aU,A.a5,A.by,A.aG])
-r(A.dq,A.c0)
-r(A.d_,A.dq)
-r(A.ci,A.d_)
-q(A.D,[A.cz,A.aZ,A.e_,A.eA,A.em,A.eU,A.dz,A.aB,A.cY,A.ez,A.bY,A.dI])
-r(A.bZ,A.w)
-r(A.dH,A.bZ)
-q(A.n,[A.V,A.bp,A.aT,A.aR,A.bx,A.d3])
-q(A.V,[A.cW,A.aV,A.cS])
-r(A.cp,A.aU)
-r(A.bC,A.bh)
-q(A.bC,[A.d9,A.da])
-r(A.c3,A.bQ)
-r(A.bf,A.c3)
-r(A.cm,A.bf)
-r(A.K,A.cl)
-q(A.aY,[A.cn,A.db,A.dj])
-r(A.aM,A.cn)
-r(A.cL,A.aZ)
-q(A.b8,[A.dF,A.dG,A.ew,A.iG,A.iI,A.hG,A.hF,A.ic,A.hU,A.hX,A.fV,A.iQ,A.iR,A.iC,A.h6,A.fY,A.h0,A.hs,A.hu,A.fz,A.fx,A.fy,A.h7,A.h8,A.hk,A.hj,A.hi,A.hh,A.hg,A.hl,A.iv,A.iw,A.ho,A.hp,A.iX,A.iV,A.fH,A.fX,A.iA,A.fL,A.fM,A.hB,A.hC,A.iK,A.iL,A.iN])
-q(A.ew,[A.et,A.bI])
-q(A.bq,[A.aQ,A.d0])
-q(A.dG,[A.iH,A.id,A.iz,A.hV,A.fU,A.fW,A.hz,A.hy,A.iS,A.h1,A.ht,A.fA,A.hq,A.iW,A.iU])
-q(A.cI,[A.e2,A.Y])
-q(A.Y,[A.d5,A.d7])
-r(A.d6,A.d5)
-r(A.cG,A.d6)
-r(A.d8,A.d7)
-r(A.cH,A.d8)
-q(A.cG,[A.cF,A.e3])
-q(A.cH,[A.e4,A.e5,A.e6,A.e7,A.e8,A.cJ,A.cK])
-r(A.dd,A.eU)
-q(A.dF,[A.hH,A.hI,A.i3,A.hM,A.hQ,A.hP,A.hO,A.hN,A.hT,A.hS,A.hR,A.i_,A.iy,A.i8,A.i7,A.iu,A.im,A.io,A.it,A.ih,A.ij,A.ii,A.is,A.ie,A.ig,A.ip,A.iq,A.ir,A.il,A.ik,A.ix,A.iB,A.iM])
-r(A.cZ,A.eO)
-r(A.f3,A.dp)
-r(A.d2,A.d0)
-r(A.az,A.db)
-r(A.cX,A.dj)
-q(A.bK,[A.dB,A.dO])
-q(A.dJ,[A.fk,A.hA])
-r(A.eE,A.dO)
-q(A.aB,[A.cO,A.dV])
-r(A.eP,A.dk)
-q(A.hJ,[A.bV,A.ct,A.aw,A.fm,A.fu,A.bW,A.bL,A.ar,A.ek,A.aP,A.cR,A.eo,A.cr,A.eL,A.eR,A.fJ,A.dS,A.fO,A.fP,A.bM,A.dT,A.bX,A.b0,A.cj,A.fl,A.dC,A.fp,A.ft,A.a4])
-q(A.aW,[A.ah,A.ai,A.aD,A.eb,A.bo])
-r(A.hn,A.f4)
-r(A.eG,A.fe)
-s(A.bZ,A.bv)
-s(A.dq,A.w)
-s(A.d5,A.w)
-s(A.d6,A.a8)
-s(A.d7,A.w)
-s(A.d8,A.a8)
-s(A.c3,A.di)
-s(A.dj,A.fc)
-s(A.f4,A.hW)
-s(A.fe,A.ia)})()
-var v={G:typeof self!="undefined"?self:globalThis,typeUniverse:{eC:new Map(),tR:{},eT:{},tPV:{},sEA:[]},mangledGlobalNames:{c:"int",o:"double",a7:"num",m:"String",A:"bool",S:"Null",u:"List",v:"Object",W:"Map",E:"JSObject"},mangledNames:{},types:["~()","aO()","A(F)","aO(ai?)","~(~())","~(@)","A(m)","A(l)","S(@)","S()","@()","S(v?)","j8(aD)","@(@,m)","W<m,m>(W<m,m>,m)","0&(m,c?)","v?(v?)","c(+influence,light(o,ae),+influence,light(o,ae))","S(~())","@(@)","aD(c,c,m?)","ah(c,c,m?)","c(c,+(ah,fZ))","S(@,be)","ai(c,c,m?)","A(ey?)","c(c,+(ai,i1))","m(F)","c(y,y)","S(v,be)","~(c,@)","A(c)","bo(c,c,m?)","cQ(ah)","aO(m{fallback:m?})","@(m)","ae?()","u<ae>()","cg()","A()","bJ()","A(Q<m,L>)","L(Q<m,L>)","L(L,L)","c(T<ad>,T<ad>)","aX(T<ad>)","c(T<b7>,T<b7>)","aX(T<b7>)","br(o,o,o,o)","A(o)","~(bt)","bt()","~(@,@)","~(E)","S(E)","~(a7)","c(@,@)","~(v?,v?)","c2()","o()"],interceptorsByTag:null,leafTags:null,arrayRti:Symbol("$ti"),rttc:{"2;":(a,b)=>c=>c instanceof A.d9&&a.b(c.a)&&b.b(c.b),"2;influence,light":(a,b)=>c=>c instanceof A.da&&a.b(c.a)&&b.b(c.b)}}
-A.mV(v.typeUniverse,JSON.parse('{"ec":"bc","bu":"bc","bb":"bc","oK":"bS","t":{"u":["1"],"n":["1"],"E":[],"i":["1"]},"dY":{"A":[],"z":[]},"cv":{"z":[]},"cx":{"E":[]},"bc":{"E":[]},"dX":{"cT":[]},"fS":{"t":["1"],"u":["1"],"n":["1"],"E":[],"i":["1"]},"ce":{"H":["1"]},"bO":{"o":[],"a7":[],"ac":["a7"]},"cu":{"o":[],"c":[],"a7":[],"ac":["a7"],"z":[]},"dZ":{"o":[],"a7":[],"ac":["a7"],"z":[]},"ba":{"m":[],"ac":["m"],"k2":[],"z":[]},"c0":{"i":["2"]},"ch":{"H":["2"]},"d_":{"w":["2"],"u":["2"],"c0":["1","2"],"n":["2"],"i":["2"]},"ci":{"d_":["1","2"],"w":["2"],"u":["2"],"c0":["1","2"],"n":["2"],"i":["2"],"w.E":"2","i.E":"2"},"cz":{"D":[]},"dH":{"w":["c"],"bv":["c"],"u":["c"],"n":["c"],"i":["c"],"w.E":"c","bv.E":"c"},"n":{"i":["1"]},"V":{"n":["1"],"i":["1"]},"cW":{"V":["1"],"n":["1"],"i":["1"],"i.E":"1","V.E":"1"},"at":{"H":["1"]},"aU":{"i":["2"],"i.E":"2"},"cp":{"aU":["1","2"],"n":["2"],"i":["2"],"i.E":"2"},"cD":{"H":["2"]},"aV":{"V":["2"],"n":["2"],"i":["2"],"i.E":"2","V.E":"2"},"a5":{"i":["1"],"i.E":"1"},"G":{"H":["1"]},"bZ":{"w":["1"],"bv":["1"],"u":["1"],"n":["1"],"i":["1"]},"cS":{"V":["1"],"n":["1"],"i":["1"],"i.E":"1","V.E":"1"},"d9":{"bC":[],"bh":[]},"da":{"bC":[],"bh":[]},"cm":{"bf":["1","2"],"c3":["1","2"],"bQ":["1","2"],"di":["1","2"],"W":["1","2"]},"cl":{"W":["1","2"]},"K":{"cl":["1","2"],"W":["1","2"]},"by":{"i":["1"],"i.E":"1"},"bz":{"H":["1"]},"cn":{"aY":["1"],"bd":["1"],"n":["1"],"i":["1"]},"aM":{"cn":["1"],"aY":["1"],"bd":["1"],"n":["1"],"i":["1"]},"cL":{"aZ":[],"D":[]},"e_":{"D":[]},"eA":{"D":[]},"dc":{"be":[]},"b8":{"bm":[]},"dF":{"bm":[]},"dG":{"bm":[]},"ew":{"bm":[]},"et":{"bm":[]},"bI":{"bm":[]},"em":{"D":[]},"aQ":{"bq":["1","2"],"jX":["1","2"],"W":["1","2"]},"bp":{"n":["1"],"i":["1"],"i.E":"1"},"cB":{"H":["1"]},"aT":{"n":["1"],"i":["1"],"i.E":"1"},"aS":{"H":["1"]},"aR":{"n":["Q<1,2>"],"i":["Q<1,2>"],"i.E":"Q<1,2>"},"cA":{"H":["Q<1,2>"]},"bC":{"bh":[]},"bS":{"E":[],"z":[]},"cI":{"E":[]},"e2":{"E":[],"z":[]},"Y":{"ag":["1"],"E":[]},"cG":{"w":["o"],"Y":["o"],"u":["o"],"ag":["o"],"n":["o"],"E":[],"i":["o"],"a8":["o"]},"cH":{"w":["c"],"Y":["c"],"u":["c"],"ag":["c"],"n":["c"],"E":[],"i":["c"],"a8":["c"]},"cF":{"fB":[],"w":["o"],"Y":["o"],"u":["o"],"ag":["o"],"n":["o"],"E":[],"i":["o"],"a8":["o"],"z":[],"w.E":"o"},"e3":{"w":["o"],"Y":["o"],"u":["o"],"ag":["o"],"n":["o"],"E":[],"i":["o"],"a8":["o"],"z":[],"w.E":"o"},"e4":{"w":["c"],"Y":["c"],"u":["c"],"ag":["c"],"n":["c"],"E":[],"i":["c"],"a8":["c"],"z":[],"w.E":"c"},"e5":{"w":["c"],"Y":["c"],"u":["c"],"ag":["c"],"n":["c"],"E":[],"i":["c"],"a8":["c"],"z":[],"w.E":"c"},"e6":{"w":["c"],"Y":["c"],"u":["c"],"ag":["c"],"n":["c"],"E":[],"i":["c"],"a8":["c"],"z":[],"w.E":"c"},"e7":{"w":["c"],"Y":["c"],"u":["c"],"ag":["c"],"n":["c"],"E":[],"i":["c"],"a8":["c"],"z":[],"w.E":"c"},"e8":{"w":["c"],"Y":["c"],"u":["c"],"ag":["c"],"n":["c"],"E":[],"i":["c"],"a8":["c"],"z":[],"w.E":"c"},"cJ":{"w":["c"],"Y":["c"],"u":["c"],"ag":["c"],"n":["c"],"E":[],"i":["c"],"a8":["c"],"z":[],"w.E":"c"},"cK":{"ey":[],"w":["c"],"Y":["c"],"u":["c"],"ag":["c"],"n":["c"],"E":[],"i":["c"],"a8":["c"],"z":[],"w.E":"c"},"eU":{"D":[]},"dd":{"aZ":[],"D":[]},"aA":{"H":["1"]},"aG":{"i":["1"],"i.E":"1"},"al":{"D":[]},"cZ":{"eO":["1"]},"N":{"bn":["1"]},"dp":{"kr":[]},"f3":{"dp":[],"kr":[]},"d0":{"bq":["1","2"],"W":["1","2"]},"d2":{"d0":["1","2"],"bq":["1","2"],"W":["1","2"]},"bx":{"n":["1"],"i":["1"],"i.E":"1"},"d1":{"H":["1"]},"az":{"aY":["1"],"jY":["1"],"bd":["1"],"n":["1"],"i":["1"]},"bA":{"H":["1"]},"w":{"u":["1"],"n":["1"],"i":["1"]},"bq":{"W":["1","2"]},"d3":{"n":["2"],"i":["2"],"i.E":"2"},"d4":{"H":["2"]},"bQ":{"W":["1","2"]},"bf":{"c3":["1","2"],"bQ":["1","2"],"di":["1","2"],"W":["1","2"]},"aY":{"bd":["1"],"n":["1"],"i":["1"]},"db":{"aY":["1"],"bd":["1"],"n":["1"],"i":["1"]},"cX":{"aY":["1"],"fc":["1"],"bd":["1"],"n":["1"],"i":["1"]},"dB":{"bK":["u<c>","m"]},"dO":{"bK":["m","u<c>"]},"eE":{"bK":["m","u<c>"]},"bl":{"ac":["bl"]},"o":{"a7":[],"ac":["a7"]},"c":{"a7":[],"ac":["a7"]},"u":{"n":["1"],"i":["1"]},"a7":{"ac":["a7"]},"bd":{"n":["1"],"i":["1"]},"m":{"ac":["m"],"k2":[]},"dz":{"D":[]},"aZ":{"D":[]},"aB":{"D":[]},"cO":{"D":[]},"dV":{"D":[]},"cY":{"D":[]},"ez":{"D":[]},"bY":{"D":[]},"dI":{"D":[]},"ea":{"D":[]},"cV":{"D":[]},"fb":{"be":[]},"ab":{"mi":[]},"dk":{"eC":[]},"f7":{"eC":[]},"eP":{"eC":[]},"ah":{"aW":[]},"ai":{"aW":[]},"aD":{"aW":[]},"bo":{"aW":[]},"eb":{"aW":[]},"cP":{"me":[]},"f0":{"md":[]},"eV":{"lM":[]},"ad":{"ac":["ad"]},"b7":{"ac":["b7"]},"cf":{"C":[]},"eM":{"y":[]},"dD":{"C":[]},"eN":{"y":[]},"dL":{"C":[]},"eQ":{"y":[]},"co":{"C":[]},"eS":{"y":[]},"dN":{"C":[]},"eT":{"y":[]},"dU":{"C":[]},"eX":{"y":[]},"cE":{"C":[]},"eZ":{"y":[]},"dE":{"mc":[]},"cN":{"C":[]},"f1":{"y":[]},"eg":{"C":[]},"f2":{"y":[]},"ep":{"C":[]},"f5":{"y":[]},"eq":{"C":[]},"f6":{"y":[]},"es":{"C":[]},"f9":{"y":[]},"er":{"C":[]},"f8":{"y":[]},"eF":{"C":[]},"fd":{"y":[]},"eI":{"C":[]},"fg":{"y":[]},"dM":{"lI":[]},"b2":{"aO":[]},"eG":{"lO":[]},"lR":{"u":["c"],"n":["c"],"i":["c"]},"ey":{"u":["c"],"n":["c"],"i":["c"]},"mn":{"u":["c"],"n":["c"],"i":["c"]},"lP":{"u":["c"],"n":["c"],"i":["c"]},"ml":{"u":["c"],"n":["c"],"i":["c"]},"lQ":{"u":["c"],"n":["c"],"i":["c"]},"mm":{"u":["c"],"n":["c"],"i":["c"]},"fB":{"u":["o"],"n":["o"],"i":["o"]},"lL":{"u":["o"],"n":["o"],"i":["o"]}}'))
-A.mU(v.typeUniverse,JSON.parse('{"bZ":1,"dq":2,"Y":1,"db":1,"dj":1,"dJ":2}'))
-var u={f:"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\u03f6\x00\u0404\u03f4 \u03f4\u03f6\u01f6\u01f6\u03f6\u03fc\u01f4\u03ff\u03ff\u0584\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u05d4\u01f4\x00\u01f4\x00\u0504\u05c4\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u0400\x00\u0400\u0200\u03f7\u0200\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u0200\u0200\u0200\u03f7\x00",l:"#version 300 es\nout vec2 vUv;\nvoid main(){\n  vec2 p=vec2(float((gl_VertexID<<1)&2),float(gl_VertexID&2));\n  vUv=p;\n  gl_Position=vec4(p*2.0-1.0,0.0,1.0);\n}\n",o:"#version 300 es\nprecision highp float;\nin vec2 vUv;\nuniform sampler2D uTex;\nuniform float uExposure;\nuniform float uVignette;\nuniform float uGrain;\nuniform float uRainIntensity;\nuniform float uRainWindowVisibility;\nuniform float uOutputEncoding;\nuniform float uToneMap;\nout vec4 oColor;\n\nfloat hash(vec2 p){\n  return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453123);\n}\n\nvec3 reinhardToneMap(vec3 color){\n  return color/(vec3(1.)+color);\n}\n\nvec3 linearToSrgb(vec3 color){\n  vec3 cutoff=step(vec3(.0031308),color);\n  vec3 low=color*12.92;\n  vec3 high=1.055*pow(max(color,vec3(0.)),vec3(1./2.4))-.055;\n  return mix(low,high,cutoff);\n}\n\nfloat rainStreak(vec2 uv){\n  // Stable diagonal streaks: no time or allocation dependency, and no work\n  // when uRainIntensity is zero. The small hash offset avoids a tiled comb.\n  vec2 cell=vec2(floor(uv.x*96.0),floor(uv.y*18.0));\n  float phase=fract(uv.x*96.0+uv.y*18.0+hash(cell));\n  float width=smoothstep(.08,.0,abs(phase-.5));\n  float sparse=step(.72,hash(cell+vec2(19.0,7.0)));\n  return width*sparse;\n}\n\nvoid main(){\n  vec4 source=texture(uTex,vUv);\n  // Exposure operates in scene-linear space; tone mapping prevents HDR\n  // highlights from clipping before the selected output transfer function.\n  vec3 color=max(source.rgb,vec3(0.))*max(uExposure,0.);\n  color=mix(color,reinhardToneMap(color),clamp(uToneMap,0.,1.));\n  float edge=distance(vUv,vec2(.5));\n  float vignette=smoothstep(.35,.78,edge);\n  color*=1.-clamp(uVignette,0.,1.)*vignette;\n  if(uOutputEncoding>.5) color=linearToSrgb(max(color,vec3(0.)));\n  float rain=clamp(uRainIntensity,0.,1.)*\n    clamp(uRainWindowVisibility,0.,1.);\n  color=mix(color,vec3(.56,.67,.76),rain*rainStreak(vUv)*.16);\n  // A stable screen-space grain keeps captures reproducible for a fixed\n  // viewport while still giving the dark gothic presentation a fine film\n  // texture. It is deliberately tiny and never changes alpha.\n  color+=((hash(gl_FragCoord.xy)-.5)*.06)*max(uGrain,0.);\n  oColor=vec4(clamp(color,0.,1.),source.a);\n}\n",c:"Error handler must accept one Object or one Object and a StackTrace as arguments, and return a value of the returned future's type",k:"WebGl2Device: operation attempted while context is not ready"}
-var t=(function rtii(){var s=A.ca
-return{v:s("al"),do:s("bJ"),e8:s("ac<@>"),dN:s("ck"),I:s("K<m,c>"),Q:s("aM<m>"),dy:s("bl"),gw:s("n<@>"),U:s("D"),B:s("fB"),b:s("L"),Z:s("bm"),j:s("aO"),cr:s("i<ck>"),bM:s("i<o>"),hf:s("i<@>"),hb:s("i<c>"),a4:s("t<aO>"),b7:s("t<a2>"),gk:s("t<b9>"),cU:s("t<F>"),dV:s("t<br>"),cw:s("t<+influence,light(o,ae)>"),e:s("t<C>"),u:s("t<y>"),cR:s("t<cP>"),C:s("t<l>"),c4:s("t<k7>"),G:s("t<aX>"),aM:s("t<T<b7>>"),c1:s("t<T<ad>>"),w:s("t<ae>"),s:s("t<m>"),cL:s("t<f_>"),ha:s("t<ji<j8>>"),c9:s("t<ji<fZ>>"),aO:s("t<ji<k7>>"),fq:s("t<ji<i1>>"),n:s("t<o>"),p:s("t<@>"),t:s("t<c>"),T:s("cv"),m:s("E"),q:s("bb"),aU:s("ag<@>"),_:s("u<a2>"),O:s("u<F>"),r:s("u<m>"),aH:s("u<@>"),L:s("u<c>"),D:s("Q<m,L>"),bS:s("W<m,aO>"),E:s("W<m,F>"),f:s("W<m,m>"),eL:s("aD"),cA:s("ah"),P:s("S"),K:s("v"),fy:s("ad"),z:s("F"),gT:s("oM"),bQ:s("+()"),ai:s("+(ah,fZ)"),dU:s("+(ai,i1)"),fk:s("+influence,light(o,ae)"),fA:s("y"),b0:s("aE<bo,k7>"),ex:s("aE<aD,j8>"),cE:s("aE<ah,fZ>"),g2:s("aE<ai,i1>"),J:s("l"),Y:s("aX"),W:s("bd<m>"),cJ:s("bd<c>"),a:s("T<b7>"),k:s("T<ad>"),l:s("be"),d5:s("a4"),N:s("m"),aj:s("ai"),dm:s("z"),eK:s("aZ"),ak:s("bu"),h:s("bf<m,m>"),am:s("cX<m>"),bw:s("eB"),dD:s("eC"),c:s("N<@>"),cd:s("N<~>"),hg:s("d2<v?,v?>"),a8:s("c2"),eM:s("aG<aX>"),V:s("dm"),R:s("dn"),y:s("A"),al:s("A(v)"),i:s("o"),A:s("@"),fO:s("@()"),x:s("@(v)"),d:s("@(v,be)"),S:s("c"),eH:s("bn<S>?"),du:s("t<v?>?"),an:s("E?"),X:s("v?"),dk:s("m?"),F:s("bw<@,@>?"),g:s("eY?"),fQ:s("A?"),cD:s("o?"),h6:s("c?"),cg:s("a7?"),o:s("a7"),H:s("~"),M:s("~()")}})();(function constants(){var s=hunkHelpers.makeConstList
-B.bd=J.dW.prototype
-B.a=J.t.prototype
-B.i=J.cu.prototype
-B.ag=J.bO.prototype
-B.b=J.ba.prototype
-B.be=J.bb.prototype
-B.bf=J.cx.prototype
-B.J=A.cF.prototype
-B.al=A.cK.prototype
-B.am=J.ec.prototype
-B.Z=J.bu.prototype
-B.aC=new A.fl(0,"add")
-B.aD=new A.dC(0,"zero")
-B.aE=new A.dC(1,"one")
-B.cX=new A.fk()
-B.aF=new A.dB()
-B.cY=new A.fs()
-B.bg=new A.bP(0.03,0.03,0.04)
-B.G=new A.bP(0,0,0)
-B.H=new A.bP(1,1,1)
-B.bp=s([],A.ca("t<oL>"))
-B.I=s([],t.w)
-B.a0=new A.fD()
-B.a9=new A.fO(1,"linear")
-B.aa=new A.fP(0,"clampToEdge")
-B.aG=new A.fN()
-B.a1=function getTagFallback(o) {
+// Generated by dart2js (, csp, intern-composite-values), the Dart to JavaScript compiler version: 3.13.0.
+// The code supports the following hooks:
+// dartPrint(message):
+//    if this function is defined it is called instead of the Dart [print]
+//    method.
+//
+// dartMainRunner(main, args):
+//    if this function is defined, the Dart [main] method will not be invoked
+//    directly. Instead, a closure that will invoke [main], and its arguments
+//    [args] is passed to [dartMainRunner].
+//
+// dartDeferredLibraryLoader(uri, successCallback, errorCallback, loadId, loadPriority):
+//    if this function is defined, it will be called when a deferred library
+//    is loaded. It should load and eval the javascript of `uri`, and call
+//    successCallback. If it fails to do so, it should call errorCallback with
+//    an error. The loadId argument is the deferred import that resulted in
+//    this uri being loaded. The loadPriority argument is an arbitrary argument
+//    string forwarded from the 'dart2js:load-priority' pragma option.
+// dartDeferredLibraryMultiLoader(uris, successCallback, errorCallback, loadId, loadPriority):
+//    if this function is defined, it will be called when a deferred library
+//    is loaded. It should load and eval the javascript of every URI in `uris`,
+//    and call successCallback. If it fails to do so, it should call
+//    errorCallback with an error. The loadId argument is the deferred import
+//    that resulted in this uri being loaded. The loadPriority argument is an
+//    arbitrary argument string forwarded from the 'dart2js:load-priority'
+//    pragma option.
+//
+// dartCallInstrumentation(id, qualifiedName):
+//    if this function is defined, it will be called at each entry of a
+//    method or constructor. Used only when compiling programs with
+//    --experiment-call-instrumentation.
+(function dartProgram() {
+  function copyProperties(from, to) {
+    var keys = Object.keys(from);
+    for (var i = 0; i < keys.length; i++) {
+      var key = keys[i];
+      to[key] = from[key];
+    }
+  }
+  function mixinPropertiesHard(from, to) {
+    var keys = Object.keys(from);
+    for (var i = 0; i < keys.length; i++) {
+      var key = keys[i];
+      if (!to.hasOwnProperty(key)) {
+        to[key] = from[key];
+      }
+    }
+  }
+  function mixinPropertiesEasy(from, to) {
+    Object.assign(to, from);
+  }
+  var supportsDirectProtoAccess = function() {
+    var cls = function() {
+    };
+    cls.prototype = {p: {}};
+    var object = new cls();
+    if (!(Object.getPrototypeOf(object) && Object.getPrototypeOf(object).p === cls.prototype.p))
+      return false;
+    try {
+      if (typeof navigator != "undefined" && typeof navigator.userAgent == "string" && navigator.userAgent.indexOf("Chrome/") >= 0)
+        return true;
+      if (typeof version == "function" && version.length == 0) {
+        var v = version();
+        if (/^\d+\.\d+\.\d+\.\d+$/.test(v))
+          return true;
+      }
+    } catch (_) {
+    }
+    return false;
+  }();
+  function inherit(cls, sup) {
+    cls.prototype.constructor = cls;
+    cls.prototype["$is" + cls.name] = cls;
+    if (sup != null) {
+      if (supportsDirectProtoAccess) {
+        Object.setPrototypeOf(cls.prototype, sup.prototype);
+        return;
+      }
+      var clsPrototype = Object.create(sup.prototype);
+      copyProperties(cls.prototype, clsPrototype);
+      cls.prototype = clsPrototype;
+    }
+  }
+  function inheritMany(sup, classes) {
+    for (var i = 0; i < classes.length; i++) {
+      inherit(classes[i], sup);
+    }
+  }
+  function mixinEasy(cls, mixin) {
+    mixinPropertiesEasy(mixin.prototype, cls.prototype);
+    cls.prototype.constructor = cls;
+  }
+  function mixinHard(cls, mixin) {
+    mixinPropertiesHard(mixin.prototype, cls.prototype);
+    cls.prototype.constructor = cls;
+  }
+  function lazy(holder, name, getterName, initializer) {
+    var uninitializedSentinel = holder;
+    holder[name] = uninitializedSentinel;
+    holder[getterName] = function() {
+      if (holder[name] === uninitializedSentinel) {
+        holder[name] = initializer();
+      }
+      holder[getterName] = function() {
+        return this[name];
+      };
+      return holder[name];
+    };
+  }
+  function lazyFinal(holder, name, getterName, initializer) {
+    var uninitializedSentinel = holder;
+    holder[name] = uninitializedSentinel;
+    holder[getterName] = function() {
+      if (holder[name] === uninitializedSentinel) {
+        var value = initializer();
+        if (holder[name] !== uninitializedSentinel) {
+          A.throwLateFieldADI(name);
+        }
+        holder[name] = value;
+      }
+      var finalValue = holder[name];
+      holder[getterName] = function() {
+        return finalValue;
+      };
+      return finalValue;
+    };
+  }
+  function makeConstList(list, rti) {
+    if (rti != null)
+      A._setArrayType(list, rti);
+    list.$flags = 7;
+    return list;
+  }
+  function convertToFastObject(properties) {
+    function t() {
+    }
+    t.prototype = properties;
+    new t();
+    return properties;
+  }
+  function convertAllToFastObject(arrayOfObjects) {
+    for (var i = 0; i < arrayOfObjects.length; ++i) {
+      convertToFastObject(arrayOfObjects[i]);
+    }
+  }
+  var functionCounter = 0;
+  function instanceTearOffGetter(isIntercepted, parameters) {
+    var cache = null;
+    return isIntercepted ? function(receiver) {
+      if (cache === null)
+        cache = A.closureFromTearOff(parameters);
+      return new cache(receiver, this);
+    } : function() {
+      if (cache === null)
+        cache = A.closureFromTearOff(parameters);
+      return new cache(this, null);
+    };
+  }
+  function staticTearOffGetter(parameters) {
+    var cache = null;
+    return function() {
+      if (cache === null)
+        cache = A.closureFromTearOff(parameters).prototype;
+      return cache;
+    };
+  }
+  var typesOffset = 0;
+  function tearOffParameters(container, isStatic, isIntercepted, requiredParameterCount, optionalParameterDefaultValues, callNames, funsOrNames, funType, applyIndex, needsDirectAccess) {
+    if (typeof funType == "number") {
+      funType += typesOffset;
+    }
+    return {co: container, iS: isStatic, iI: isIntercepted, rC: requiredParameterCount, dV: optionalParameterDefaultValues, cs: callNames, fs: funsOrNames, fT: funType, aI: applyIndex || 0, nDA: needsDirectAccess};
+  }
+  function installStaticTearOff(holder, getterName, requiredParameterCount, optionalParameterDefaultValues, callNames, funsOrNames, funType, applyIndex) {
+    var parameters = tearOffParameters(holder, true, false, requiredParameterCount, optionalParameterDefaultValues, callNames, funsOrNames, funType, applyIndex, false);
+    var getterFunction = staticTearOffGetter(parameters);
+    holder[getterName] = getterFunction;
+  }
+  function installInstanceTearOff(prototype, getterName, isIntercepted, requiredParameterCount, optionalParameterDefaultValues, callNames, funsOrNames, funType, applyIndex, needsDirectAccess) {
+    isIntercepted = !!isIntercepted;
+    var parameters = tearOffParameters(prototype, false, isIntercepted, requiredParameterCount, optionalParameterDefaultValues, callNames, funsOrNames, funType, applyIndex, !!needsDirectAccess);
+    var getterFunction = instanceTearOffGetter(isIntercepted, parameters);
+    prototype[getterName] = getterFunction;
+  }
+  function setOrUpdateInterceptorsByTag(newTags) {
+    var tags = init.interceptorsByTag;
+    if (!tags) {
+      init.interceptorsByTag = newTags;
+      return;
+    }
+    copyProperties(newTags, tags);
+  }
+  function setOrUpdateLeafTags(newTags) {
+    var tags = init.leafTags;
+    if (!tags) {
+      init.leafTags = newTags;
+      return;
+    }
+    copyProperties(newTags, tags);
+  }
+  function updateTypes(newTypes) {
+    var types = init.types;
+    var length = types.length;
+    types.push.apply(types, newTypes);
+    return length;
+  }
+  function updateHolder(holder, newHolder) {
+    copyProperties(newHolder, holder);
+    return holder;
+  }
+  var hunkHelpers = function() {
+    var mkInstance = function(isIntercepted, requiredParameterCount, optionalParameterDefaultValues, callNames, applyIndex) {
+        return function(container, getterName, name, funType) {
+          return installInstanceTearOff(container, getterName, isIntercepted, requiredParameterCount, optionalParameterDefaultValues, callNames, [name], funType, applyIndex, false);
+        };
+      },
+      mkStatic = function(requiredParameterCount, optionalParameterDefaultValues, callNames, applyIndex) {
+        return function(container, getterName, name, funType) {
+          return installStaticTearOff(container, getterName, requiredParameterCount, optionalParameterDefaultValues, callNames, [name], funType, applyIndex);
+        };
+      };
+    return {inherit: inherit, inheritMany: inheritMany, mixin: mixinEasy, mixinHard: mixinHard, installStaticTearOff: installStaticTearOff, installInstanceTearOff: installInstanceTearOff, _instance_0u: mkInstance(0, 0, null, ["call$0"], 0), _instance_1u: mkInstance(0, 1, null, ["call$1"], 0), _instance_2u: mkInstance(0, 2, null, ["call$2"], 0), _instance_0i: mkInstance(1, 0, null, ["call$0"], 0), _instance_1i: mkInstance(1, 1, null, ["call$1"], 0), _instance_2i: mkInstance(1, 2, null, ["call$2"], 0), _static_0: mkStatic(0, null, ["call$0"], 0), _static_1: mkStatic(1, null, ["call$1"], 0), _static_2: mkStatic(2, null, ["call$2"], 0), makeConstList: makeConstList, lazy: lazy, lazyFinal: lazyFinal, updateHolder: updateHolder, convertToFastObject: convertToFastObject, updateTypes: updateTypes, setOrUpdateInterceptorsByTag: setOrUpdateInterceptorsByTag, setOrUpdateLeafTags: setOrUpdateLeafTags};
+  }();
+  function initializeDeferredHunk(hunk) {
+    typesOffset = init.types.length;
+    hunk(hunkHelpers, init, holders, $);
+  }
+  var J = {
+    makeDispatchRecord(interceptor, proto, extension, indexability) {
+      return {i: interceptor, p: proto, e: extension, x: indexability};
+    },
+    getNativeInterceptor(object) {
+      var proto, objectProto, $constructor, interceptor, t1,
+        _s9_ = "_$dart_js",
+        record = object[init.dispatchPropertyName];
+      if (record == null)
+        if ($.initNativeDispatchFlag == null) {
+          A.initNativeDispatch();
+          record = object[init.dispatchPropertyName];
+        }
+      if (record != null) {
+        proto = record.p;
+        if (false === proto)
+          return record.i;
+        if (true === proto)
+          return object;
+        objectProto = Object.getPrototypeOf(object);
+        if (proto === objectProto)
+          return record.i;
+        if (record.e === objectProto)
+          throw A.wrapException(A.UnimplementedError$("Return interceptor for " + A.S(proto(object, record))));
+      }
+      $constructor = object.constructor;
+      if ($constructor == null)
+        interceptor = null;
+      else {
+        t1 = $._JS_INTEROP_INTERCEPTOR_TAG;
+        if (t1 == null)
+          t1 = $._JS_INTEROP_INTERCEPTOR_TAG = A.getIsolateAffinityTag(_s9_);
+        interceptor = $constructor[t1];
+      }
+      if (interceptor != null)
+        return interceptor;
+      interceptor = A.lookupAndCacheInterceptor(object);
+      if (interceptor != null)
+        return interceptor;
+      if (typeof object == "function")
+        return B.JavaScriptFunction_methods;
+      proto = Object.getPrototypeOf(object);
+      if (proto == null)
+        return B.PlainJavaScriptObject_methods;
+      if (proto === Object.prototype)
+        return B.PlainJavaScriptObject_methods;
+      if (typeof $constructor == "function") {
+        t1 = $._JS_INTEROP_INTERCEPTOR_TAG;
+        if (t1 == null)
+          t1 = $._JS_INTEROP_INTERCEPTOR_TAG = A.getIsolateAffinityTag(_s9_);
+        Object.defineProperty($constructor, t1, {value: B.UnknownJavaScriptObject_methods, enumerable: false, writable: true, configurable: true});
+        return B.UnknownJavaScriptObject_methods;
+      }
+      return B.UnknownJavaScriptObject_methods;
+    },
+    JSArray_JSArray$fixed($length, $E) {
+      if ($length < 0 || $length > 4294967295)
+        throw A.wrapException(A.RangeError$range($length, 0, 4294967295, "length", null));
+      return J.JSArray_JSArray$markFixed(new Array($length), $E);
+    },
+    JSArray_JSArray$allocateGrowable($length, $E) {
+      if ($length < 0)
+        throw A.wrapException(A.ArgumentError$("Length must be a non-negative integer: " + $length, null));
+      return A._setArrayType(new Array($length), $E._eval$1("JSArray<0>"));
+    },
+    JSArray_JSArray$markFixed(allocation, $E) {
+      var t1 = A._setArrayType(allocation, $E._eval$1("JSArray<0>"));
+      t1.$flags = 1;
+      return t1;
+    },
+    JSArray__compareAny(a, b) {
+      var t1 = type$.Comparable_dynamic;
+      return J.compareTo$1$ns(t1._as(a), t1._as(b));
+    },
+    getInterceptor$(receiver) {
+      if (typeof receiver == "number") {
+        if (Math.floor(receiver) == receiver)
+          return J.JSInt.prototype;
+        return J.JSNumNotInt.prototype;
+      }
+      if (typeof receiver == "string")
+        return J.JSString.prototype;
+      if (receiver == null)
+        return J.JSNull.prototype;
+      if (typeof receiver == "boolean")
+        return J.JSBool.prototype;
+      if (Array.isArray(receiver))
+        return J.JSArray.prototype;
+      if (typeof receiver != "object") {
+        if (typeof receiver == "function")
+          return J.JavaScriptFunction.prototype;
+        if (typeof receiver == "symbol")
+          return J.JavaScriptSymbol.prototype;
+        if (typeof receiver == "bigint")
+          return J.JavaScriptBigInt.prototype;
+        return receiver;
+      }
+      if (receiver instanceof A.Object)
+        return receiver;
+      return J.getNativeInterceptor(receiver);
+    },
+    getInterceptor$asx(receiver) {
+      if (typeof receiver == "string")
+        return J.JSString.prototype;
+      if (receiver == null)
+        return receiver;
+      if (Array.isArray(receiver))
+        return J.JSArray.prototype;
+      if (typeof receiver != "object") {
+        if (typeof receiver == "function")
+          return J.JavaScriptFunction.prototype;
+        if (typeof receiver == "symbol")
+          return J.JavaScriptSymbol.prototype;
+        if (typeof receiver == "bigint")
+          return J.JavaScriptBigInt.prototype;
+        return receiver;
+      }
+      if (receiver instanceof A.Object)
+        return receiver;
+      return J.getNativeInterceptor(receiver);
+    },
+    getInterceptor$ax(receiver) {
+      if (receiver == null)
+        return receiver;
+      if (Array.isArray(receiver))
+        return J.JSArray.prototype;
+      if (typeof receiver != "object") {
+        if (typeof receiver == "function")
+          return J.JavaScriptFunction.prototype;
+        if (typeof receiver == "symbol")
+          return J.JavaScriptSymbol.prototype;
+        if (typeof receiver == "bigint")
+          return J.JavaScriptBigInt.prototype;
+        return receiver;
+      }
+      if (receiver instanceof A.Object)
+        return receiver;
+      return J.getNativeInterceptor(receiver);
+    },
+    getInterceptor$ns(receiver) {
+      if (typeof receiver == "number")
+        return J.JSNumber.prototype;
+      if (typeof receiver == "string")
+        return J.JSString.prototype;
+      if (receiver == null)
+        return receiver;
+      if (!(receiver instanceof A.Object))
+        return J.UnknownJavaScriptObject.prototype;
+      return receiver;
+    },
+    getInterceptor$s(receiver) {
+      if (typeof receiver == "string")
+        return J.JSString.prototype;
+      if (receiver == null)
+        return receiver;
+      if (!(receiver instanceof A.Object))
+        return J.UnknownJavaScriptObject.prototype;
+      return receiver;
+    },
+    get$hashCode$(receiver) {
+      return J.getInterceptor$(receiver).get$hashCode(receiver);
+    },
+    get$iterator$ax(receiver) {
+      return J.getInterceptor$ax(receiver).get$iterator(receiver);
+    },
+    get$length$asx(receiver) {
+      return J.getInterceptor$asx(receiver).get$length(receiver);
+    },
+    get$runtimeType$(receiver) {
+      return J.getInterceptor$(receiver).get$runtimeType(receiver);
+    },
+    $eq$(receiver, a0) {
+      if (receiver == null)
+        return a0 == null;
+      if (typeof receiver != "object")
+        return a0 != null && receiver === a0;
+      return J.getInterceptor$(receiver).$eq(receiver, a0);
+    },
+    $index$asx(receiver, a0) {
+      if (typeof a0 === "number")
+        if (Array.isArray(receiver) || typeof receiver == "string" || A.isJsIndexable(receiver, receiver[init.dispatchPropertyName]))
+          if (a0 >>> 0 === a0 && a0 < receiver.length)
+            return receiver[a0];
+      return J.getInterceptor$asx(receiver).$index(receiver, a0);
+    },
+    $indexSet$ax(receiver, a0, a1) {
+      return J.getInterceptor$ax(receiver).$indexSet(receiver, a0, a1);
+    },
+    add$1$ax(receiver, a0) {
+      return J.getInterceptor$ax(receiver).add$1(receiver, a0);
+    },
+    compareTo$1$ns(receiver, a0) {
+      return J.getInterceptor$ns(receiver).compareTo$1(receiver, a0);
+    },
+    elementAt$1$ax(receiver, a0) {
+      return J.getInterceptor$ax(receiver).elementAt$1(receiver, a0);
+    },
+    substring$1$s(receiver, a0) {
+      return J.getInterceptor$s(receiver).substring$1(receiver, a0);
+    },
+    toString$0$(receiver) {
+      return J.getInterceptor$(receiver).toString$0(receiver);
+    },
+    Interceptor: function Interceptor() {
+    },
+    JSBool: function JSBool() {
+    },
+    JSNull: function JSNull() {
+    },
+    JavaScriptObject: function JavaScriptObject() {
+    },
+    LegacyJavaScriptObject: function LegacyJavaScriptObject() {
+    },
+    PlainJavaScriptObject: function PlainJavaScriptObject() {
+    },
+    UnknownJavaScriptObject: function UnknownJavaScriptObject() {
+    },
+    JavaScriptFunction: function JavaScriptFunction() {
+    },
+    JavaScriptBigInt: function JavaScriptBigInt() {
+    },
+    JavaScriptSymbol: function JavaScriptSymbol() {
+    },
+    JSArray: function JSArray(t0) {
+      this.$ti = t0;
+    },
+    JSArraySafeToStringHook: function JSArraySafeToStringHook() {
+    },
+    JSUnmodifiableArray: function JSUnmodifiableArray(t0) {
+      this.$ti = t0;
+    },
+    ArrayIterator: function ArrayIterator(t0, t1, t2) {
+      var _ = this;
+      _._iterable = t0;
+      _._length = t1;
+      _._index = 0;
+      _._current = null;
+      _.$ti = t2;
+    },
+    JSNumber: function JSNumber() {
+    },
+    JSInt: function JSInt() {
+    },
+    JSNumNotInt: function JSNumNotInt() {
+    },
+    JSString: function JSString() {
+    }
+  },
+  A = {JS_CONST: function JS_CONST() {
+    },
+    LateError$fieldADI(fieldName) {
+      return new A.LateError("Field '" + fieldName + "' has been assigned during initialization.");
+    },
+    LateError$fieldNI(fieldName) {
+      return new A.LateError("Field '" + fieldName + "' has not been initialized.");
+    },
+    hexDigitValue(char) {
+      var letter,
+        digit = char ^ 48;
+      if (digit <= 9)
+        return digit;
+      letter = char | 32;
+      if (97 <= letter && letter <= 102)
+        return letter - 87;
+      return -1;
+    },
+    SystemHash_combine(hash, value) {
+      hash = hash + value & 536870911;
+      hash = hash + ((hash & 524287) << 10) & 536870911;
+      return hash ^ hash >>> 6;
+    },
+    SystemHash_finish(hash) {
+      hash = hash + ((hash & 67108863) << 3) & 536870911;
+      hash ^= hash >>> 11;
+      return hash + ((hash & 16383) << 15) & 536870911;
+    },
+    checkNotNullable(value, $name, $T) {
+      return value;
+    },
+    isToStringVisiting(object) {
+      var t1, i;
+      for (t1 = $._toStringVisiting.length, i = 0; i < t1; ++i)
+        if (object === $._toStringVisiting[i])
+          return true;
+      return false;
+    },
+    SubListIterable$(_iterable, _start, _endOrLength, $E) {
+      A.RangeError_checkNotNegative(_start, "start");
+      if (_endOrLength != null) {
+        A.RangeError_checkNotNegative(_endOrLength, "end");
+        if (_start > _endOrLength)
+          A.throwExpression(A.RangeError$range(_start, 0, _endOrLength, "start", null));
+      }
+      return new A.SubListIterable(_iterable, _start, _endOrLength, $E._eval$1("SubListIterable<0>"));
+    },
+    MappedIterable_MappedIterable(iterable, $function, $S, $T) {
+      if (type$.EfficientLengthIterable_dynamic._is(iterable))
+        return new A.EfficientLengthMappedIterable(iterable, $function, $S._eval$1("@<0>")._bind$1($T)._eval$1("EfficientLengthMappedIterable<1,2>"));
+      return new A.MappedIterable(iterable, $function, $S._eval$1("@<0>")._bind$1($T)._eval$1("MappedIterable<1,2>"));
+    },
+    IterableElementError_noElement() {
+      return new A.StateError("No element");
+    },
+    IterableElementError_tooMany() {
+      return new A.StateError("Too many elements");
+    },
+    _CastIterableBase: function _CastIterableBase() {
+    },
+    CastIterator: function CastIterator(t0, t1) {
+      this._source = t0;
+      this.$ti = t1;
+    },
+    _CastListBase: function _CastListBase() {
+    },
+    CastList: function CastList(t0, t1) {
+      this._source = t0;
+      this.$ti = t1;
+    },
+    LateError: function LateError(t0) {
+      this.__internal$_message = t0;
+    },
+    CodeUnits: function CodeUnits(t0) {
+      this._string = t0;
+    },
+    SentinelValue: function SentinelValue() {
+    },
+    EfficientLengthIterable: function EfficientLengthIterable() {
+    },
+    ListIterable: function ListIterable() {
+    },
+    SubListIterable: function SubListIterable(t0, t1, t2, t3) {
+      var _ = this;
+      _.__internal$_iterable = t0;
+      _._start = t1;
+      _._endOrLength = t2;
+      _.$ti = t3;
+    },
+    ListIterator: function ListIterator(t0, t1, t2) {
+      var _ = this;
+      _.__internal$_iterable = t0;
+      _.__internal$_length = t1;
+      _.__internal$_index = 0;
+      _.__internal$_current = null;
+      _.$ti = t2;
+    },
+    MappedIterable: function MappedIterable(t0, t1, t2) {
+      this.__internal$_iterable = t0;
+      this._f = t1;
+      this.$ti = t2;
+    },
+    EfficientLengthMappedIterable: function EfficientLengthMappedIterable(t0, t1, t2) {
+      this.__internal$_iterable = t0;
+      this._f = t1;
+      this.$ti = t2;
+    },
+    MappedIterator: function MappedIterator(t0, t1, t2) {
+      var _ = this;
+      _.__internal$_current = null;
+      _._iterator = t0;
+      _._f = t1;
+      _.$ti = t2;
+    },
+    MappedListIterable: function MappedListIterable(t0, t1, t2) {
+      this._source = t0;
+      this._f = t1;
+      this.$ti = t2;
+    },
+    WhereIterable: function WhereIterable(t0, t1, t2) {
+      this.__internal$_iterable = t0;
+      this._f = t1;
+      this.$ti = t2;
+    },
+    WhereIterator: function WhereIterator(t0, t1, t2) {
+      this._iterator = t0;
+      this._f = t1;
+      this.$ti = t2;
+    },
+    FixedLengthListMixin: function FixedLengthListMixin() {
+    },
+    UnmodifiableListMixin: function UnmodifiableListMixin() {
+    },
+    UnmodifiableListBase: function UnmodifiableListBase() {
+    },
+    ReversedListIterable: function ReversedListIterable(t0, t1) {
+      this._source = t0;
+      this.$ti = t1;
+    },
+    __CastListBase__CastIterableBase_ListMixin: function __CastListBase__CastIterableBase_ListMixin() {
+    },
+    ConstantMap_ConstantMap$from(other, $K, $V) {
+      var allStrings, k, object, index, index0, values, map,
+        t1 = A._instanceType(other),
+        keys = A.List_List$from(new A.LinkedHashMapKeysIterable(other, t1._eval$1("LinkedHashMapKeysIterable<1>")), true, $K),
+        t2 = keys.length,
+        _i = 0;
+      for (;;) {
+        if (!(_i < t2)) {
+          allStrings = true;
+          break;
+        }
+        k = keys[_i];
+        if (typeof k != "string" || "__proto__" === k) {
+          allStrings = false;
+          break;
+        }
+        ++_i;
+      }
+      if (allStrings) {
+        object = {};
+        for (index = 0, _i = 0; _i < keys.length; keys.length === t2 || (0, A.throwConcurrentModificationError)(keys), ++_i, index = index0) {
+          k = keys[_i];
+          $V._as(other.$index(0, k));
+          index0 = index + 1;
+          object[k] = index;
+        }
+        values = A.List_List$from(new A.LinkedHashMapValuesIterable(other, t1._eval$1("LinkedHashMapValuesIterable<2>")), true, $V);
+        map = new A.ConstantStringMap(object, values, $K._eval$1("@<0>")._bind$1($V)._eval$1("ConstantStringMap<1,2>"));
+        map.$keys = keys;
+        return map;
+      }
+      return new A.ConstantMapView(A.LinkedHashMap_LinkedHashMap$from(other, $K, $V), $K._eval$1("@<0>")._bind$1($V)._eval$1("ConstantMapView<1,2>"));
+    },
+    ConstantMap__throwUnmodifiable() {
+      throw A.wrapException(A.UnsupportedError$("Cannot modify unmodifiable Map"));
+    },
+    ConstantSet__throwUnmodifiable() {
+      throw A.wrapException(A.UnsupportedError$("Cannot modify constant Set"));
+    },
+    unminifyOrTag(rawClassName) {
+      var preserved = A.unmangleGlobalNameIfPreservedAnyways(rawClassName);
+      if (preserved != null)
+        return preserved;
+      return rawClassName;
+    },
+    isJsIndexable(object, record) {
+      var result;
+      if (record != null) {
+        result = record.x;
+        if (result != null)
+          return result;
+      }
+      return type$.JavaScriptIndexingBehavior_dynamic._is(object);
+    },
+    S(value) {
+      var result;
+      if (typeof value == "string")
+        return value;
+      if (typeof value == "number") {
+        if (value !== 0)
+          return "" + value;
+      } else if (true === value)
+        return "true";
+      else if (false === value)
+        return "false";
+      else if (value == null)
+        return "null";
+      result = J.toString$0$(value);
+      return result;
+    },
+    Primitives_objectHashCode(object) {
+      var hash,
+        property = $.Primitives__identityHashCodeProperty;
+      if (property == null)
+        property = $.Primitives__identityHashCodeProperty = Symbol("identityHashCode");
+      hash = object[property];
+      if (hash == null) {
+        hash = Math.random() * 0x3fffffff | 0;
+        object[property] = hash;
+      }
+      return hash;
+    },
+    Primitives_parseInt(source, radix) {
+      var decimalMatch,
+        match = /^\s*[+-]?((0x[a-f0-9]+)|(\d+)|([a-z0-9]+))\s*$/i.exec(source);
+      if (match == null)
+        return null;
+      if (3 >= match.length)
+        return A.ioore(match, 3);
+      decimalMatch = match[3];
+      if (decimalMatch != null)
+        return parseInt(source, 10);
+      if (match[2] != null)
+        return parseInt(source, 16);
+      return null;
+    },
+    Primitives_objectTypeName(object) {
+      var interceptor, dispatchName, $constructor, constructorName;
+      if (object instanceof A.Object)
+        return A._rtiToString(A.instanceType(object), null);
+      interceptor = J.getInterceptor$(object);
+      if (interceptor === B.Interceptor_methods || interceptor === B.JavaScriptObject_methods || type$.UnknownJavaScriptObject._is(object)) {
+        dispatchName = B.C_JS_CONST(object);
+        if (dispatchName !== "Object" && dispatchName !== "")
+          return dispatchName;
+        $constructor = object.constructor;
+        if (typeof $constructor == "function") {
+          constructorName = $constructor.name;
+          if (typeof constructorName == "string" && constructorName !== "Object" && constructorName !== "")
+            return constructorName;
+        }
+      }
+      return A._rtiToString(A.instanceType(object), null);
+    },
+    Primitives_safeToString(object) {
+      var hooks, i, hookResult;
+      if (object == null || typeof object == "number" || A._isBool(object))
+        return J.toString$0$(object);
+      if (typeof object == "string")
+        return JSON.stringify(object);
+      if (object instanceof A.Closure)
+        return object.toString$0(0);
+      if (object instanceof A._Record)
+        return object._toString$1(true);
+      hooks = $.$get$_safeToStringHooks();
+      for (i = 0; i < 1; ++i) {
+        hookResult = hooks[i].tryFormat$1(object);
+        if (hookResult != null)
+          return hookResult;
+      }
+      return "Instance of '" + A.Primitives_objectTypeName(object) + "'";
+    },
+    Primitives_currentUri() {
+      if (!!self.location)
+        return self.location.href;
+      return null;
+    },
+    Primitives_stringFromNativeUint8List(charCodes, start, end) {
+      var i, result, i0, chunkEnd;
+      if (end <= 500 && start === 0 && end === charCodes.length)
+        return String.fromCharCode.apply(null, charCodes);
+      for (i = start, result = ""; i < end; i = i0) {
+        i0 = i + 500;
+        chunkEnd = i0 < end ? i0 : end;
+        result += String.fromCharCode.apply(null, charCodes.subarray(i, chunkEnd));
+      }
+      return result;
+    },
+    Primitives_stringFromCharCode(charCode) {
+      var bits;
+      if (0 <= charCode) {
+        if (charCode <= 65535)
+          return String.fromCharCode(charCode);
+        if (charCode <= 1114111) {
+          bits = charCode - 65536;
+          return String.fromCharCode((B.JSInt_methods._shrOtherPositive$1(bits, 10) | 55296) >>> 0, bits & 1023 | 56320);
+        }
+      }
+      throw A.wrapException(A.RangeError$range(charCode, 0, 1114111, null, null));
+    },
+    Primitives_lazyAsJsDate(receiver) {
+      if (receiver.date === void 0)
+        receiver.date = new Date(receiver._value);
+      return receiver.date;
+    },
+    Primitives_getYear(receiver) {
+      var t1 = A.Primitives_lazyAsJsDate(receiver).getUTCFullYear() + 0;
+      return t1;
+    },
+    Primitives_getMonth(receiver) {
+      var t1 = A.Primitives_lazyAsJsDate(receiver).getUTCMonth() + 1;
+      return t1;
+    },
+    Primitives_getDay(receiver) {
+      var t1 = A.Primitives_lazyAsJsDate(receiver).getUTCDate() + 0;
+      return t1;
+    },
+    Primitives_getHours(receiver) {
+      var t1 = A.Primitives_lazyAsJsDate(receiver).getUTCHours() + 0;
+      return t1;
+    },
+    Primitives_getMinutes(receiver) {
+      var t1 = A.Primitives_lazyAsJsDate(receiver).getUTCMinutes() + 0;
+      return t1;
+    },
+    Primitives_getSeconds(receiver) {
+      var t1 = A.Primitives_lazyAsJsDate(receiver).getUTCSeconds() + 0;
+      return t1;
+    },
+    Primitives_getMilliseconds(receiver) {
+      var t1 = A.Primitives_lazyAsJsDate(receiver).getUTCMilliseconds() + 0;
+      return t1;
+    },
+    Primitives_extractStackTrace(error) {
+      var jsError = error.$thrownJsError;
+      if (jsError == null)
+        return null;
+      return A.getTraceFromException(jsError);
+    },
+    Primitives_trySetStackTrace(error, stackTrace) {
+      var jsError;
+      if (error.$thrownJsError == null) {
+        jsError = new Error();
+        A.initializeExceptionWrapper(error, jsError);
+        error.$thrownJsError = jsError;
+        jsError.stack = stackTrace.toString$0(0);
+      }
+    },
+    iae(argument) {
+      throw A.wrapException(A.argumentErrorValue(argument));
+    },
+    ioore(receiver, index) {
+      if (receiver == null)
+        J.get$length$asx(receiver);
+      throw A.wrapException(A.diagnoseIndexError(receiver, index));
+    },
+    diagnoseIndexError(indexable, index) {
+      var $length, _s5_ = "index";
+      if (!A._isInt(index))
+        return new A.ArgumentError(true, index, _s5_, null);
+      $length = A._asInt(J.get$length$asx(indexable));
+      if (index < 0 || index >= $length)
+        return A.IndexError$withLength(index, $length, indexable, _s5_);
+      return new A.RangeError(null, null, true, index, _s5_, "Value not in range");
+    },
+    argumentErrorValue(object) {
+      return new A.ArgumentError(true, object, null, null);
+    },
+    wrapException(ex) {
+      return A.initializeExceptionWrapper(ex, new Error());
+    },
+    initializeExceptionWrapper(ex, wrapper) {
+      var t1;
+      if (ex == null)
+        ex = new A.TypeError();
+      wrapper.dartException = ex;
+      t1 = A.toStringWrapper;
+      if ("defineProperty" in Object) {
+        Object.defineProperty(wrapper, "message", {get: t1});
+        wrapper.name = "";
+      } else
+        wrapper.toString = t1;
+      return wrapper;
+    },
+    toStringWrapper() {
+      return J.toString$0$(this.dartException);
+    },
+    throwExpression(ex, wrapper) {
+      throw A.initializeExceptionWrapper(ex, wrapper == null ? new Error() : wrapper);
+    },
+    throwUnsupportedOperation(o, operation, verb) {
+      var wrapper;
+      if (operation == null)
+        operation = 0;
+      if (verb == null)
+        verb = 0;
+      wrapper = Error();
+      A.throwExpression(A._diagnoseUnsupportedOperation(o, operation, verb), wrapper);
+    },
+    _diagnoseUnsupportedOperation(o, encodedOperation, encodedVerb) {
+      var operation, table, tableLength, index, verb, object, flags, article, adjective;
+      if (typeof encodedOperation == "string")
+        operation = encodedOperation;
+      else {
+        table = "[]=;add;removeWhere;retainWhere;removeRange;setRange;setInt8;setInt16;setInt32;setUint8;setUint16;setUint32;setFloat32;setFloat64".split(";");
+        tableLength = table.length;
+        index = encodedOperation;
+        if (index > tableLength) {
+          encodedVerb = index / tableLength | 0;
+          index %= tableLength;
+        }
+        operation = table[index];
+      }
+      verb = typeof encodedVerb == "string" ? encodedVerb : "modify;remove from;add to".split(";")[encodedVerb];
+      object = type$.List_dynamic._is(o) ? "list" : "ByteData";
+      flags = o.$flags | 0;
+      article = "a ";
+      if ((flags & 4) !== 0)
+        adjective = "constant ";
+      else if ((flags & 2) !== 0) {
+        adjective = "unmodifiable ";
+        article = "an ";
+      } else
+        adjective = (flags & 1) !== 0 ? "fixed-length " : "";
+      return new A.UnsupportedError("'" + operation + "': Cannot " + verb + " " + article + adjective + object);
+    },
+    throwConcurrentModificationError(collection) {
+      throw A.wrapException(A.ConcurrentModificationError$(collection));
+    },
+    TypeErrorDecoder_extractPattern(message) {
+      var match, $arguments, argumentsExpr, expr, method, receiver;
+      message = A.quoteStringForRegExp(message.replace(String({}), "$receiver$"));
+      match = message.match(/\\\$[a-zA-Z]+\\\$/g);
+      if (match == null)
+        match = A._setArrayType([], type$.JSArray_String);
+      $arguments = match.indexOf("\\$arguments\\$");
+      argumentsExpr = match.indexOf("\\$argumentsExpr\\$");
+      expr = match.indexOf("\\$expr\\$");
+      method = match.indexOf("\\$method\\$");
+      receiver = match.indexOf("\\$receiver\\$");
+      return new A.TypeErrorDecoder(message.replace(new RegExp("\\\\\\$arguments\\\\\\$", "g"), "((?:x|[^x])*)").replace(new RegExp("\\\\\\$argumentsExpr\\\\\\$", "g"), "((?:x|[^x])*)").replace(new RegExp("\\\\\\$expr\\\\\\$", "g"), "((?:x|[^x])*)").replace(new RegExp("\\\\\\$method\\\\\\$", "g"), "((?:x|[^x])*)").replace(new RegExp("\\\\\\$receiver\\\\\\$", "g"), "((?:x|[^x])*)"), $arguments, argumentsExpr, expr, method, receiver);
+    },
+    TypeErrorDecoder_provokeCallErrorOn(expression) {
+      return function($expr$) {
+        var $argumentsExpr$ = "$arguments$";
+        try {
+          $expr$.$method$($argumentsExpr$);
+        } catch (e) {
+          return e.message;
+        }
+      }(expression);
+    },
+    TypeErrorDecoder_provokePropertyErrorOn(expression) {
+      return function($expr$) {
+        try {
+          $expr$.$method$;
+        } catch (e) {
+          return e.message;
+        }
+      }(expression);
+    },
+    JsNoSuchMethodError$(_message, match) {
+      var t1 = match == null,
+        t2 = t1 ? null : match.method;
+      return new A.JsNoSuchMethodError(_message, t2, t1 ? null : match.receiver);
+    },
+    unwrapException(ex) {
+      var t1;
+      if (ex == null)
+        return new A.NullThrownFromJavaScriptException(ex);
+      if (ex instanceof A.ExceptionAndStackTrace) {
+        t1 = ex.dartException;
+        return A.saveStackTrace(ex, t1 == null ? A._asObject(t1) : t1);
+      }
+      if (typeof ex !== "object")
+        return ex;
+      if ("dartException" in ex)
+        return A.saveStackTrace(ex, ex.dartException);
+      return A._unwrapNonDartException(ex);
+    },
+    saveStackTrace(ex, error) {
+      if (type$.Error._is(error))
+        if (error.$thrownJsError == null)
+          error.$thrownJsError = ex;
+      return error;
+    },
+    _unwrapNonDartException(ex) {
+      var message, number, ieErrorCode, nsme, notClosure, nullCall, nullLiteralCall, undefCall, undefLiteralCall, nullProperty, undefProperty, undefLiteralProperty, match;
+      if (!("message" in ex))
+        return ex;
+      message = ex.message;
+      if ("number" in ex && typeof ex.number == "number") {
+        number = ex.number;
+        ieErrorCode = number & 65535;
+        if ((B.JSInt_methods._shrOtherPositive$1(number, 16) & 8191) === 10)
+          switch (ieErrorCode) {
+            case 438:
+              return A.saveStackTrace(ex, A.JsNoSuchMethodError$(A.S(message) + " (Error " + ieErrorCode + ")", null));
+            case 445:
+            case 5007:
+              A.S(message);
+              return A.saveStackTrace(ex, new A.NullError());
+          }
+      }
+      if (ex instanceof TypeError) {
+        nsme = $.$get$TypeErrorDecoder_noSuchMethodPattern();
+        notClosure = $.$get$TypeErrorDecoder_notClosurePattern();
+        nullCall = $.$get$TypeErrorDecoder_nullCallPattern();
+        nullLiteralCall = $.$get$TypeErrorDecoder_nullLiteralCallPattern();
+        undefCall = $.$get$TypeErrorDecoder_undefinedCallPattern();
+        undefLiteralCall = $.$get$TypeErrorDecoder_undefinedLiteralCallPattern();
+        nullProperty = $.$get$TypeErrorDecoder_nullPropertyPattern();
+        $.$get$TypeErrorDecoder_nullLiteralPropertyPattern();
+        undefProperty = $.$get$TypeErrorDecoder_undefinedPropertyPattern();
+        undefLiteralProperty = $.$get$TypeErrorDecoder_undefinedLiteralPropertyPattern();
+        match = nsme.matchTypeError$1(message);
+        if (match != null)
+          return A.saveStackTrace(ex, A.JsNoSuchMethodError$(A._asString(message), match));
+        else {
+          match = notClosure.matchTypeError$1(message);
+          if (match != null) {
+            match.method = "call";
+            return A.saveStackTrace(ex, A.JsNoSuchMethodError$(A._asString(message), match));
+          } else if (nullCall.matchTypeError$1(message) != null || nullLiteralCall.matchTypeError$1(message) != null || undefCall.matchTypeError$1(message) != null || undefLiteralCall.matchTypeError$1(message) != null || nullProperty.matchTypeError$1(message) != null || nullLiteralCall.matchTypeError$1(message) != null || undefProperty.matchTypeError$1(message) != null || undefLiteralProperty.matchTypeError$1(message) != null) {
+            A._asString(message);
+            return A.saveStackTrace(ex, new A.NullError());
+          }
+        }
+        return A.saveStackTrace(ex, new A.UnknownJsTypeError(typeof message == "string" ? message : ""));
+      }
+      if (ex instanceof RangeError) {
+        if (typeof message == "string" && message.indexOf("call stack") !== -1)
+          return new A.StackOverflowError();
+        message = function(ex) {
+          try {
+            return String(ex);
+          } catch (e) {
+          }
+          return null;
+        }(ex);
+        return A.saveStackTrace(ex, new A.ArgumentError(false, null, null, typeof message == "string" ? message.replace(/^RangeError:\s*/, "") : message));
+      }
+      if (typeof InternalError == "function" && ex instanceof InternalError)
+        if (typeof message == "string" && message === "too much recursion")
+          return new A.StackOverflowError();
+      return ex;
+    },
+    getTraceFromException(exception) {
+      var trace;
+      if (exception instanceof A.ExceptionAndStackTrace)
+        return exception.stackTrace;
+      if (exception == null)
+        return new A._StackTrace(exception);
+      trace = exception.$cachedTrace;
+      if (trace != null)
+        return trace;
+      trace = new A._StackTrace(exception);
+      if (typeof exception === "object")
+        exception.$cachedTrace = trace;
+      return trace;
+    },
+    objectHashCode(object) {
+      if (object == null)
+        return J.get$hashCode$(object);
+      if (typeof object == "object")
+        return A.Primitives_objectHashCode(object);
+      return J.get$hashCode$(object);
+    },
+    fillLiteralMap(keyValuePairs, result) {
+      var index, index0, index1,
+        $length = keyValuePairs.length;
+      for (index = 0; index < $length; index = index1) {
+        index0 = index + 1;
+        index1 = index0 + 1;
+        result.$indexSet(0, keyValuePairs[index], keyValuePairs[index0]);
+      }
+      return result;
+    },
+    fillLiteralSet(values, result) {
+      var index,
+        $length = values.length;
+      for (index = 0; index < $length; ++index)
+        result.add$1(0, values[index]);
+      return result;
+    },
+    _invokeClosure(closure, numberOfArguments, arg1, arg2, arg3, arg4) {
+      type$.Function._as(closure);
+      switch (A._asInt(numberOfArguments)) {
+        case 0:
+          return closure.call$0();
+        case 1:
+          return closure.call$1(arg1);
+        case 2:
+          return closure.call$2(arg1, arg2);
+        case 3:
+          return closure.call$3(arg1, arg2, arg3);
+        case 4:
+          return closure.call$4(arg1, arg2, arg3, arg4);
+      }
+      throw A.wrapException(new A._Exception("Unsupported number of arguments for wrapped closure"));
+    },
+    convertDartClosureToJS(closure, arity) {
+      var $function = closure.$identity;
+      if (!!$function)
+        return $function;
+      $function = A.convertDartClosureToJSUncached(closure, arity);
+      closure.$identity = $function;
+      return $function;
+    },
+    convertDartClosureToJSUncached(closure, arity) {
+      var entry;
+      switch (arity) {
+        case 0:
+          entry = closure.call$0;
+          break;
+        case 1:
+          entry = closure.call$1;
+          break;
+        case 2:
+          entry = closure.call$2;
+          break;
+        case 3:
+          entry = closure.call$3;
+          break;
+        case 4:
+          entry = closure.call$4;
+          break;
+        default:
+          entry = null;
+      }
+      if (entry != null)
+        return entry.bind(closure);
+      return function(closure, arity, invoke) {
+        return function(a1, a2, a3, a4) {
+          return invoke(closure, arity, a1, a2, a3, a4);
+        };
+      }(closure, arity, A._invokeClosure);
+    },
+    Closure_fromTearOff(parameters) {
+      var $prototype, $constructor, t2, trampoline, applyTrampoline, i, stub, stub0, stubName, stubCallName,
+        container = parameters.co,
+        isStatic = parameters.iS,
+        isIntercepted = parameters.iI,
+        needsDirectAccess = parameters.nDA,
+        applyTrampolineIndex = parameters.aI,
+        funsOrNames = parameters.fs,
+        callNames = parameters.cs,
+        $name = funsOrNames[0],
+        callName = callNames[0],
+        $function = container[$name],
+        t1 = parameters.fT;
+      t1.toString;
+      $prototype = isStatic ? Object.create(new A.StaticClosure().constructor.prototype) : Object.create(new A.BoundClosure(null, null).constructor.prototype);
+      $prototype.$initialize = $prototype.constructor;
+      $constructor = isStatic ? function static_tear_off() {
+        this.$initialize();
+      } : function tear_off(a, b) {
+        this.$initialize(a, b);
+      };
+      $prototype.constructor = $constructor;
+      $constructor.prototype = $prototype;
+      $prototype.$_name = $name;
+      $prototype.$_target = $function;
+      t2 = !isStatic;
+      if (t2)
+        trampoline = A.Closure_forwardCallTo($name, $function, isIntercepted, needsDirectAccess);
+      else {
+        $prototype.$static_name = $name;
+        trampoline = $function;
+      }
+      $prototype.$signature = A.Closure__computeSignatureFunction(t1, isStatic, isIntercepted);
+      $prototype[callName] = trampoline;
+      for (applyTrampoline = trampoline, i = 1; i < funsOrNames.length; ++i) {
+        stub = funsOrNames[i];
+        if (typeof stub == "string") {
+          stub0 = container[stub];
+          stubName = stub;
+          stub = stub0;
+        } else
+          stubName = "";
+        stubCallName = callNames[i];
+        if (stubCallName != null) {
+          if (t2)
+            stub = A.Closure_forwardCallTo(stubName, stub, isIntercepted, needsDirectAccess);
+          $prototype[stubCallName] = stub;
+        }
+        if (i === applyTrampolineIndex)
+          applyTrampoline = stub;
+      }
+      $prototype["call*"] = applyTrampoline;
+      $prototype.$requiredArgCount = parameters.rC;
+      $prototype.$defaultValues = parameters.dV;
+      return $constructor;
+    },
+    Closure__computeSignatureFunction(functionType, isStatic, isIntercepted) {
+      if (typeof functionType == "number")
+        return functionType;
+      if (typeof functionType == "string") {
+        if (isStatic)
+          throw A.wrapException("Cannot compute signature for static tearoff.");
+        return function(recipe, evalOnReceiver) {
+          return function() {
+            return evalOnReceiver(this, recipe);
+          };
+        }(functionType, A.BoundClosure_evalRecipe);
+      }
+      throw A.wrapException("Error in functionType of tearoff");
+    },
+    Closure_cspForwardCall(arity, needsDirectAccess, stubName, $function) {
+      var getReceiver = A.BoundClosure_receiverOf;
+      switch (needsDirectAccess ? -1 : arity) {
+        case 0:
+          return function(entry, receiverOf) {
+            return function() {
+              return receiverOf(this)[entry]();
+            };
+          }(stubName, getReceiver);
+        case 1:
+          return function(entry, receiverOf) {
+            return function(a) {
+              return receiverOf(this)[entry](a);
+            };
+          }(stubName, getReceiver);
+        case 2:
+          return function(entry, receiverOf) {
+            return function(a, b) {
+              return receiverOf(this)[entry](a, b);
+            };
+          }(stubName, getReceiver);
+        case 3:
+          return function(entry, receiverOf) {
+            return function(a, b, c) {
+              return receiverOf(this)[entry](a, b, c);
+            };
+          }(stubName, getReceiver);
+        case 4:
+          return function(entry, receiverOf) {
+            return function(a, b, c, d) {
+              return receiverOf(this)[entry](a, b, c, d);
+            };
+          }(stubName, getReceiver);
+        case 5:
+          return function(entry, receiverOf) {
+            return function(a, b, c, d, e) {
+              return receiverOf(this)[entry](a, b, c, d, e);
+            };
+          }(stubName, getReceiver);
+        default:
+          return function(f, receiverOf) {
+            return function() {
+              return f.apply(receiverOf(this), arguments);
+            };
+          }($function, getReceiver);
+      }
+    },
+    Closure_forwardCallTo(stubName, $function, isIntercepted, needsDirectAccess) {
+      if (isIntercepted)
+        return A.Closure_forwardInterceptedCallTo(stubName, $function, needsDirectAccess);
+      return A.Closure_cspForwardCall($function.length, needsDirectAccess, stubName, $function);
+    },
+    Closure_cspForwardInterceptedCall(arity, needsDirectAccess, stubName, $function) {
+      var getReceiver = A.BoundClosure_receiverOf,
+        getInterceptor = A.BoundClosure_interceptorOf;
+      switch (needsDirectAccess ? -1 : arity) {
+        case 0:
+          throw A.wrapException(new A.RuntimeError("Intercepted function with no arguments."));
+        case 1:
+          return function(entry, interceptorOf, receiverOf) {
+            return function() {
+              return interceptorOf(this)[entry](receiverOf(this));
+            };
+          }(stubName, getInterceptor, getReceiver);
+        case 2:
+          return function(entry, interceptorOf, receiverOf) {
+            return function(a) {
+              return interceptorOf(this)[entry](receiverOf(this), a);
+            };
+          }(stubName, getInterceptor, getReceiver);
+        case 3:
+          return function(entry, interceptorOf, receiverOf) {
+            return function(a, b) {
+              return interceptorOf(this)[entry](receiverOf(this), a, b);
+            };
+          }(stubName, getInterceptor, getReceiver);
+        case 4:
+          return function(entry, interceptorOf, receiverOf) {
+            return function(a, b, c) {
+              return interceptorOf(this)[entry](receiverOf(this), a, b, c);
+            };
+          }(stubName, getInterceptor, getReceiver);
+        case 5:
+          return function(entry, interceptorOf, receiverOf) {
+            return function(a, b, c, d) {
+              return interceptorOf(this)[entry](receiverOf(this), a, b, c, d);
+            };
+          }(stubName, getInterceptor, getReceiver);
+        case 6:
+          return function(entry, interceptorOf, receiverOf) {
+            return function(a, b, c, d, e) {
+              return interceptorOf(this)[entry](receiverOf(this), a, b, c, d, e);
+            };
+          }(stubName, getInterceptor, getReceiver);
+        default:
+          return function(f, interceptorOf, receiverOf) {
+            return function() {
+              var a = [receiverOf(this)];
+              Array.prototype.push.apply(a, arguments);
+              return f.apply(interceptorOf(this), a);
+            };
+          }($function, getInterceptor, getReceiver);
+      }
+    },
+    Closure_forwardInterceptedCallTo(stubName, $function, needsDirectAccess) {
+      var arity, t1;
+      if ($.BoundClosure__interceptorFieldNameCache == null)
+        $.BoundClosure__interceptorFieldNameCache = A.BoundClosure__computeFieldNamed("interceptor");
+      if ($.BoundClosure__receiverFieldNameCache == null)
+        $.BoundClosure__receiverFieldNameCache = A.BoundClosure__computeFieldNamed("receiver");
+      arity = $function.length;
+      t1 = A.Closure_cspForwardInterceptedCall(arity, needsDirectAccess, stubName, $function);
+      return t1;
+    },
+    closureFromTearOff(parameters) {
+      return A.Closure_fromTearOff(parameters);
+    },
+    BoundClosure_evalRecipe(closure, recipe) {
+      return A._Universe_evalInEnvironment(init.typeUniverse, A.instanceType(closure._receiver), recipe);
+    },
+    BoundClosure_receiverOf(closure) {
+      return closure._receiver;
+    },
+    BoundClosure_interceptorOf(closure) {
+      return closure._interceptor;
+    },
+    BoundClosure__computeFieldNamed(fieldName) {
+      var names, i, $name,
+        template = new A.BoundClosure("receiver", "interceptor"),
+        t1 = Object.getOwnPropertyNames(template);
+      t1.$flags = 1;
+      names = t1;
+      for (t1 = names.length, i = 0; i < t1; ++i) {
+        $name = names[i];
+        if (template[$name] === fieldName)
+          return $name;
+      }
+      throw A.wrapException(A.ArgumentError$("Field name " + fieldName + " not found.", null));
+    },
+    getIsolateAffinityTag($name) {
+      return init.getIsolateTag($name);
+    },
+    staticInteropGlobalContext() {
+      return init.G;
+    },
+    lookupAndCacheInterceptor(obj) {
+      var interceptor, interceptorClass, altTag, mark, t1,
+        tag = A._asString($.getTagFunction.call$1(obj)),
+        record = $.dispatchRecordsForInstanceTags[tag];
+      if (record != null) {
+        Object.defineProperty(obj, init.dispatchPropertyName, {value: record, enumerable: false, writable: true, configurable: true});
+        return record.i;
+      }
+      interceptor = $.interceptorsForUncacheableTags[tag];
+      if (interceptor != null)
+        return interceptor;
+      interceptorClass = init.interceptorsByTag[tag];
+      if (interceptorClass == null) {
+        altTag = A._asStringQ($.alternateTagFunction.call$2(obj, tag));
+        if (altTag != null) {
+          record = $.dispatchRecordsForInstanceTags[altTag];
+          if (record != null) {
+            Object.defineProperty(obj, init.dispatchPropertyName, {value: record, enumerable: false, writable: true, configurable: true});
+            return record.i;
+          }
+          interceptor = $.interceptorsForUncacheableTags[altTag];
+          if (interceptor != null)
+            return interceptor;
+          interceptorClass = init.interceptorsByTag[altTag];
+          tag = altTag;
+        }
+      }
+      if (interceptorClass == null)
+        return null;
+      interceptor = interceptorClass.prototype;
+      mark = tag[0];
+      if (mark === "!") {
+        record = A.makeLeafDispatchRecord(interceptor);
+        $.dispatchRecordsForInstanceTags[tag] = record;
+        Object.defineProperty(obj, init.dispatchPropertyName, {value: record, enumerable: false, writable: true, configurable: true});
+        return record.i;
+      }
+      if (mark === "~") {
+        $.interceptorsForUncacheableTags[tag] = interceptor;
+        return interceptor;
+      }
+      if (mark === "-") {
+        t1 = A.makeLeafDispatchRecord(interceptor);
+        Object.defineProperty(Object.getPrototypeOf(obj), init.dispatchPropertyName, {value: t1, enumerable: false, writable: true, configurable: true});
+        return t1.i;
+      }
+      if (mark === "+")
+        return A.patchInteriorProto(obj, interceptor);
+      if (mark === "*")
+        throw A.wrapException(A.UnimplementedError$(tag));
+      if (init.leafTags[tag] === true) {
+        t1 = A.makeLeafDispatchRecord(interceptor);
+        Object.defineProperty(Object.getPrototypeOf(obj), init.dispatchPropertyName, {value: t1, enumerable: false, writable: true, configurable: true});
+        return t1.i;
+      } else
+        return A.patchInteriorProto(obj, interceptor);
+    },
+    patchInteriorProto(obj, interceptor) {
+      var proto = Object.getPrototypeOf(obj);
+      Object.defineProperty(proto, init.dispatchPropertyName, {value: J.makeDispatchRecord(interceptor, proto, null, null), enumerable: false, writable: true, configurable: true});
+      return interceptor;
+    },
+    makeLeafDispatchRecord(interceptor) {
+      return J.makeDispatchRecord(interceptor, false, null, !!interceptor.$isJavaScriptIndexingBehavior);
+    },
+    makeDefaultDispatchRecord(tag, interceptorClass, proto) {
+      var interceptor = interceptorClass.prototype;
+      if (init.leafTags[tag] === true)
+        return A.makeLeafDispatchRecord(interceptor);
+      else
+        return J.makeDispatchRecord(interceptor, proto, null, null);
+    },
+    initNativeDispatch() {
+      if (true === $.initNativeDispatchFlag)
+        return;
+      $.initNativeDispatchFlag = true;
+      A.initNativeDispatchContinue();
+    },
+    initNativeDispatchContinue() {
+      var map, tags, fun, i, tag, proto, record, interceptorClass;
+      $.dispatchRecordsForInstanceTags = Object.create(null);
+      $.interceptorsForUncacheableTags = Object.create(null);
+      A.initHooks();
+      map = init.interceptorsByTag;
+      tags = Object.getOwnPropertyNames(map);
+      if (typeof window != "undefined") {
+        window;
+        fun = function() {
+        };
+        for (i = 0; i < tags.length; ++i) {
+          tag = tags[i];
+          proto = $.prototypeForTagFunction.call$1(tag);
+          if (proto != null) {
+            record = A.makeDefaultDispatchRecord(tag, map[tag], proto);
+            if (record != null) {
+              Object.defineProperty(proto, init.dispatchPropertyName, {value: record, enumerable: false, writable: true, configurable: true});
+              fun.prototype = proto;
+            }
+          }
+        }
+      }
+      for (i = 0; i < tags.length; ++i) {
+        tag = tags[i];
+        if (/^[A-Za-z_]/.test(tag)) {
+          interceptorClass = map[tag];
+          map["!" + tag] = interceptorClass;
+          map["~" + tag] = interceptorClass;
+          map["-" + tag] = interceptorClass;
+          map["+" + tag] = interceptorClass;
+          map["*" + tag] = interceptorClass;
+        }
+      }
+    },
+    initHooks() {
+      var transformers, i, transformer, getTag, getUnknownTag, prototypeForTag,
+        hooks = B.C_JS_CONST0();
+      hooks = A.applyHooksTransformer(B.C_JS_CONST1, A.applyHooksTransformer(B.C_JS_CONST2, A.applyHooksTransformer(B.C_JS_CONST3, A.applyHooksTransformer(B.C_JS_CONST3, A.applyHooksTransformer(B.C_JS_CONST4, A.applyHooksTransformer(B.C_JS_CONST5, A.applyHooksTransformer(B.C_JS_CONST6(B.C_JS_CONST), hooks)))))));
+      if (typeof dartNativeDispatchHooksTransformer != "undefined") {
+        transformers = dartNativeDispatchHooksTransformer;
+        if (typeof transformers == "function")
+          transformers = [transformers];
+        if (Array.isArray(transformers))
+          for (i = 0; i < transformers.length; ++i) {
+            transformer = transformers[i];
+            if (typeof transformer == "function")
+              hooks = transformer(hooks) || hooks;
+          }
+      }
+      getTag = hooks.getTag;
+      getUnknownTag = hooks.getUnknownTag;
+      prototypeForTag = hooks.prototypeForTag;
+      $.getTagFunction = new A.initHooks_closure(getTag);
+      $.alternateTagFunction = new A.initHooks_closure0(getUnknownTag);
+      $.prototypeForTagFunction = new A.initHooks_closure1(prototypeForTag);
+    },
+    applyHooksTransformer(transformer, hooks) {
+      return transformer(hooks) || hooks;
+    },
+    createRecordTypePredicate(shape, fieldRtis) {
+      var $length = fieldRtis.length,
+        $function = init.rttc["" + $length + ";" + shape];
+      if ($function == null)
+        return null;
+      if ($length === 0)
+        return $function;
+      if ($length === $function.length)
+        return $function.apply(null, fieldRtis);
+      return $function(fieldRtis);
+    },
+    stringContainsUnchecked(receiver, other, startIndex) {
+      var t1 = receiver.indexOf(other, startIndex);
+      return t1 >= 0;
+    },
+    quoteStringForRegExp(string) {
+      if (/[[\]{}()*+?.\\^$|]/.test(string))
+        return string.replace(/[[\]{}()*+?.\\^$|]/g, "\\$&");
+      return string;
+    },
+    _Record_2: function _Record_2(t0, t1) {
+      this._0 = t0;
+      this._1 = t1;
+    },
+    _Record_2_influence_light: function _Record_2_influence_light(t0, t1) {
+      this._0 = t0;
+      this._1 = t1;
+    },
+    ConstantMapView: function ConstantMapView(t0, t1) {
+      this._collection$_map = t0;
+      this.$ti = t1;
+    },
+    ConstantMap: function ConstantMap() {
+    },
+    ConstantStringMap: function ConstantStringMap(t0, t1, t2) {
+      this._jsIndex = t0;
+      this._values = t1;
+      this.$ti = t2;
+    },
+    _KeysOrValues: function _KeysOrValues(t0, t1) {
+      this._elements = t0;
+      this.$ti = t1;
+    },
+    _KeysOrValuesOrElementsIterator: function _KeysOrValuesOrElementsIterator(t0, t1, t2) {
+      var _ = this;
+      _._elements = t0;
+      _.__js_helper$_length = t1;
+      _.__js_helper$_index = 0;
+      _.__js_helper$_current = null;
+      _.$ti = t2;
+    },
+    ConstantSet: function ConstantSet() {
+    },
+    ConstantStringSet: function ConstantStringSet(t0, t1, t2) {
+      this._jsIndex = t0;
+      this.__js_helper$_length = t1;
+      this.$ti = t2;
+    },
+    SafeToStringHook: function SafeToStringHook() {
+    },
+    TypeErrorDecoder: function TypeErrorDecoder(t0, t1, t2, t3, t4, t5) {
+      var _ = this;
+      _._pattern = t0;
+      _._arguments = t1;
+      _._argumentsExpr = t2;
+      _._expr = t3;
+      _._method = t4;
+      _._receiver = t5;
+    },
+    NullError: function NullError() {
+    },
+    JsNoSuchMethodError: function JsNoSuchMethodError(t0, t1, t2) {
+      this.__js_helper$_message = t0;
+      this._method = t1;
+      this._receiver = t2;
+    },
+    UnknownJsTypeError: function UnknownJsTypeError(t0) {
+      this.__js_helper$_message = t0;
+    },
+    NullThrownFromJavaScriptException: function NullThrownFromJavaScriptException(t0) {
+      this._irritant = t0;
+    },
+    ExceptionAndStackTrace: function ExceptionAndStackTrace(t0, t1) {
+      this.dartException = t0;
+      this.stackTrace = t1;
+    },
+    _StackTrace: function _StackTrace(t0) {
+      this._exception = t0;
+      this._trace = null;
+    },
+    Closure: function Closure() {
+    },
+    Closure0Args: function Closure0Args() {
+    },
+    Closure2Args: function Closure2Args() {
+    },
+    TearOffClosure: function TearOffClosure() {
+    },
+    StaticClosure: function StaticClosure() {
+    },
+    BoundClosure: function BoundClosure(t0, t1) {
+      this._receiver = t0;
+      this._interceptor = t1;
+    },
+    RuntimeError: function RuntimeError(t0) {
+      this.message = t0;
+    },
+    JsLinkedHashMap: function JsLinkedHashMap(t0) {
+      var _ = this;
+      _.__js_helper$_length = 0;
+      _._last = _._first = _.__js_helper$_rest = _._nums = _._strings = null;
+      _._modifications = 0;
+      _.$ti = t0;
+    },
+    LinkedHashMapCell: function LinkedHashMapCell(t0, t1) {
+      var _ = this;
+      _.hashMapCellKey = t0;
+      _.hashMapCellValue = t1;
+      _._previous = _._next = null;
+    },
+    LinkedHashMapKeysIterable: function LinkedHashMapKeysIterable(t0, t1) {
+      this._map = t0;
+      this.$ti = t1;
+    },
+    LinkedHashMapKeyIterator: function LinkedHashMapKeyIterator(t0, t1, t2, t3) {
+      var _ = this;
+      _._map = t0;
+      _._modifications = t1;
+      _._cell = t2;
+      _.__js_helper$_current = null;
+      _.$ti = t3;
+    },
+    LinkedHashMapValuesIterable: function LinkedHashMapValuesIterable(t0, t1) {
+      this._map = t0;
+      this.$ti = t1;
+    },
+    LinkedHashMapValueIterator: function LinkedHashMapValueIterator(t0, t1, t2, t3) {
+      var _ = this;
+      _._map = t0;
+      _._modifications = t1;
+      _._cell = t2;
+      _.__js_helper$_current = null;
+      _.$ti = t3;
+    },
+    LinkedHashMapEntriesIterable: function LinkedHashMapEntriesIterable(t0, t1) {
+      this._map = t0;
+      this.$ti = t1;
+    },
+    LinkedHashMapEntryIterator: function LinkedHashMapEntryIterator(t0, t1, t2, t3) {
+      var _ = this;
+      _._map = t0;
+      _._modifications = t1;
+      _._cell = t2;
+      _.__js_helper$_current = null;
+      _.$ti = t3;
+    },
+    initHooks_closure: function initHooks_closure(t0) {
+      this.getTag = t0;
+    },
+    initHooks_closure0: function initHooks_closure0(t0) {
+      this.getUnknownTag = t0;
+    },
+    initHooks_closure1: function initHooks_closure1(t0) {
+      this.prototypeForTag = t0;
+    },
+    _Record: function _Record() {
+    },
+    _Record2: function _Record2() {
+    },
+    _ensureNativeList(list) {
+      return list;
+    },
+    NativeUint8List_NativeUint8List($length) {
+      return new Uint8Array($length);
+    },
+    NativeUint8List_NativeUint8List$fromList(elements) {
+      return new Uint8Array(A._ensureNativeList(elements));
+    },
+    _checkValidIndex(index, list, $length) {
+      if (index >>> 0 !== index || index >= $length)
+        throw A.wrapException(A.diagnoseIndexError(list, index));
+    },
+    NativeByteBuffer: function NativeByteBuffer() {
+    },
+    NativeTypedData: function NativeTypedData() {
+    },
+    NativeByteData: function NativeByteData() {
+    },
+    NativeTypedArray: function NativeTypedArray() {
+    },
+    NativeTypedArrayOfDouble: function NativeTypedArrayOfDouble() {
+    },
+    NativeTypedArrayOfInt: function NativeTypedArrayOfInt() {
+    },
+    NativeFloat32List: function NativeFloat32List() {
+    },
+    NativeFloat64List: function NativeFloat64List() {
+    },
+    NativeInt16List: function NativeInt16List() {
+    },
+    NativeInt32List: function NativeInt32List() {
+    },
+    NativeInt8List: function NativeInt8List() {
+    },
+    NativeUint16List: function NativeUint16List() {
+    },
+    NativeUint32List: function NativeUint32List() {
+    },
+    NativeUint8ClampedList: function NativeUint8ClampedList() {
+    },
+    NativeUint8List: function NativeUint8List() {
+    },
+    _NativeTypedArrayOfDouble_NativeTypedArray_ListMixin: function _NativeTypedArrayOfDouble_NativeTypedArray_ListMixin() {
+    },
+    _NativeTypedArrayOfDouble_NativeTypedArray_ListMixin_FixedLengthListMixin: function _NativeTypedArrayOfDouble_NativeTypedArray_ListMixin_FixedLengthListMixin() {
+    },
+    _NativeTypedArrayOfInt_NativeTypedArray_ListMixin: function _NativeTypedArrayOfInt_NativeTypedArray_ListMixin() {
+    },
+    _NativeTypedArrayOfInt_NativeTypedArray_ListMixin_FixedLengthListMixin: function _NativeTypedArrayOfInt_NativeTypedArray_ListMixin_FixedLengthListMixin() {
+    },
+    Rti__getFutureFromFutureOr(universe, rti) {
+      var future = rti._precomputed1;
+      return future == null ? rti._precomputed1 = A._Universe__lookupInterfaceRti(universe, "Future", [rti._primary]) : future;
+    },
+    Rti__isUnionOfFunctionType(rti) {
+      var kind = rti._kind;
+      if (kind === 6 || kind === 7)
+        return A.Rti__isUnionOfFunctionType(rti._primary);
+      return kind === 11 || kind === 12;
+    },
+    Rti__getCanonicalRecipe(rti) {
+      return rti._canonicalRecipe;
+    },
+    findType(recipe) {
+      return A._Universe_eval(init.typeUniverse, recipe, false);
+    },
+    _substitute(universe, rti, typeArguments, depth) {
+      var baseType, substitutedBaseType, interfaceTypeArguments, substitutedInterfaceTypeArguments, base, substitutedBase, $arguments, substitutedArguments, t1, fields, substitutedFields, returnType, substitutedReturnType, functionParameters, substitutedFunctionParameters, bounds, substitutedBounds, index, argument,
+        kind = rti._kind;
+      switch (kind) {
+        case 5:
+        case 1:
+        case 2:
+        case 3:
+        case 4:
+          return rti;
+        case 6:
+          baseType = rti._primary;
+          substitutedBaseType = A._substitute(universe, baseType, typeArguments, depth);
+          if (substitutedBaseType === baseType)
+            return rti;
+          return A._Universe__lookupQuestionRti(universe, substitutedBaseType, true);
+        case 7:
+          baseType = rti._primary;
+          substitutedBaseType = A._substitute(universe, baseType, typeArguments, depth);
+          if (substitutedBaseType === baseType)
+            return rti;
+          return A._Universe__lookupFutureOrRti(universe, substitutedBaseType, true);
+        case 8:
+          interfaceTypeArguments = rti._rest;
+          substitutedInterfaceTypeArguments = A._substituteArray(universe, interfaceTypeArguments, typeArguments, depth);
+          if (substitutedInterfaceTypeArguments === interfaceTypeArguments)
+            return rti;
+          return A._Universe__lookupInterfaceRti(universe, rti._primary, substitutedInterfaceTypeArguments);
+        case 9:
+          base = rti._primary;
+          substitutedBase = A._substitute(universe, base, typeArguments, depth);
+          $arguments = rti._rest;
+          substitutedArguments = A._substituteArray(universe, $arguments, typeArguments, depth);
+          if (substitutedBase === base && substitutedArguments === $arguments)
+            return rti;
+          return A._Universe__lookupBindingRti(universe, substitutedBase, substitutedArguments);
+        case 10:
+          t1 = rti._primary;
+          fields = rti._rest;
+          substitutedFields = A._substituteArray(universe, fields, typeArguments, depth);
+          if (substitutedFields === fields)
+            return rti;
+          return A._Universe__lookupRecordRti(universe, t1, substitutedFields);
+        case 11:
+          returnType = rti._primary;
+          substitutedReturnType = A._substitute(universe, returnType, typeArguments, depth);
+          functionParameters = rti._rest;
+          substitutedFunctionParameters = A._substituteFunctionParameters(universe, functionParameters, typeArguments, depth);
+          if (substitutedReturnType === returnType && substitutedFunctionParameters === functionParameters)
+            return rti;
+          return A._Universe__lookupFunctionRti(universe, substitutedReturnType, substitutedFunctionParameters);
+        case 12:
+          bounds = rti._rest;
+          depth += bounds.length;
+          substitutedBounds = A._substituteArray(universe, bounds, typeArguments, depth);
+          base = rti._primary;
+          substitutedBase = A._substitute(universe, base, typeArguments, depth);
+          if (substitutedBounds === bounds && substitutedBase === base)
+            return rti;
+          return A._Universe__lookupGenericFunctionRti(universe, substitutedBase, substitutedBounds, true);
+        case 13:
+          index = rti._primary;
+          if (index < depth)
+            return rti;
+          argument = typeArguments[index - depth];
+          if (argument == null)
+            return rti;
+          return argument;
+        default:
+          throw A.wrapException(A.AssertionError$("Attempted to substitute unexpected RTI kind " + kind));
+      }
+    },
+    _substituteArray(universe, rtiArray, typeArguments, depth) {
+      var changed, i, rti, substitutedRti,
+        $length = rtiArray.length,
+        result = A._Utils_newArrayOrEmpty($length);
+      for (changed = false, i = 0; i < $length; ++i) {
+        rti = rtiArray[i];
+        substitutedRti = A._substitute(universe, rti, typeArguments, depth);
+        if (substitutedRti !== rti)
+          changed = true;
+        result[i] = substitutedRti;
+      }
+      return changed ? result : rtiArray;
+    },
+    _substituteNamed(universe, namedArray, typeArguments, depth) {
+      var changed, i, t1, t2, rti, substitutedRti,
+        $length = namedArray.length,
+        result = A._Utils_newArrayOrEmpty($length);
+      for (changed = false, i = 0; i < $length; i += 3) {
+        t1 = namedArray[i];
+        t2 = namedArray[i + 1];
+        rti = namedArray[i + 2];
+        substitutedRti = A._substitute(universe, rti, typeArguments, depth);
+        if (substitutedRti !== rti)
+          changed = true;
+        result.splice(i, 3, t1, t2, substitutedRti);
+      }
+      return changed ? result : namedArray;
+    },
+    _substituteFunctionParameters(universe, functionParameters, typeArguments, depth) {
+      var result,
+        requiredPositional = functionParameters._requiredPositional,
+        substitutedRequiredPositional = A._substituteArray(universe, requiredPositional, typeArguments, depth),
+        optionalPositional = functionParameters._optionalPositional,
+        substitutedOptionalPositional = A._substituteArray(universe, optionalPositional, typeArguments, depth),
+        named = functionParameters._named,
+        substitutedNamed = A._substituteNamed(universe, named, typeArguments, depth);
+      if (substitutedRequiredPositional === requiredPositional && substitutedOptionalPositional === optionalPositional && substitutedNamed === named)
+        return functionParameters;
+      result = new A._FunctionParameters();
+      result._requiredPositional = substitutedRequiredPositional;
+      result._optionalPositional = substitutedOptionalPositional;
+      result._named = substitutedNamed;
+      return result;
+    },
+    _setArrayType(target, rti) {
+      target[init.arrayRti] = rti;
+      return target;
+    },
+    closureFunctionType(closure) {
+      var signature = closure.$signature;
+      if (signature != null) {
+        if (typeof signature == "number")
+          return A.getTypeFromTypesTable(signature);
+        return closure.$signature();
+      }
+      return null;
+    },
+    instanceOrFunctionType(object, testRti) {
+      var rti;
+      if (A.Rti__isUnionOfFunctionType(testRti))
+        if (object instanceof A.Closure) {
+          rti = A.closureFunctionType(object);
+          if (rti != null)
+            return rti;
+        }
+      return A.instanceType(object);
+    },
+    instanceType(object) {
+      if (object instanceof A.Object)
+        return A._instanceType(object);
+      if (Array.isArray(object))
+        return A._arrayInstanceType(object);
+      return A._instanceTypeFromConstructor(J.getInterceptor$(object));
+    },
+    _arrayInstanceType(object) {
+      var rti = object[init.arrayRti],
+        defaultRti = type$.JSArray_dynamic;
+      if (rti == null)
+        return defaultRti;
+      if (rti.constructor !== defaultRti.constructor)
+        return defaultRti;
+      return rti;
+    },
+    _instanceType(object) {
+      var rti = object.$ti;
+      return rti != null ? rti : A._instanceTypeFromConstructor(object);
+    },
+    _instanceTypeFromConstructor(instance) {
+      var $constructor = instance.constructor,
+        probe = $constructor.$ccache;
+      if (probe != null)
+        return probe;
+      return A._instanceTypeFromConstructorMiss(instance, $constructor);
+    },
+    _instanceTypeFromConstructorMiss(instance, $constructor) {
+      var effectiveConstructor = instance instanceof A.Closure ? Object.getPrototypeOf(Object.getPrototypeOf(instance)).constructor : $constructor,
+        rti = A._Universe_findErasedType(init.typeUniverse, effectiveConstructor.name);
+      $constructor.$ccache = rti;
+      return rti;
+    },
+    getTypeFromTypesTable(index) {
+      var rti,
+        table = init.types,
+        type = table[index];
+      if (typeof type == "string") {
+        rti = A._Universe_eval(init.typeUniverse, type, false);
+        table[index] = rti;
+        return rti;
+      }
+      return type;
+    },
+    getRuntimeTypeOfDartObject(object) {
+      return A.createRuntimeType(A._instanceType(object));
+    },
+    _structuralTypeOf(object) {
+      var functionRti;
+      if (object instanceof A._Record)
+        return object._getRti$0();
+      functionRti = object instanceof A.Closure ? A.closureFunctionType(object) : null;
+      if (functionRti != null)
+        return functionRti;
+      if (type$.TrustedGetRuntimeType._is(object))
+        return J.get$runtimeType$(object)._rti;
+      if (Array.isArray(object))
+        return A._arrayInstanceType(object);
+      return A.instanceType(object);
+    },
+    createRuntimeType(rti) {
+      var t1 = rti._cachedRuntimeType;
+      return t1 == null ? rti._cachedRuntimeType = new A._Type(rti) : t1;
+    },
+    evaluateRtiForRecord(recordRecipe, valuesList) {
+      var bindings, i,
+        values = valuesList,
+        $length = values.length;
+      if ($length === 0)
+        return type$.Record_0;
+      if (0 >= $length)
+        return A.ioore(values, 0);
+      bindings = A._Universe_evalInEnvironment(init.typeUniverse, A._structuralTypeOf(values[0]), "@<0>");
+      for (i = 1; i < $length; ++i) {
+        if (!(i < values.length))
+          return A.ioore(values, i);
+        bindings = A._Universe_bind(init.typeUniverse, bindings, A._structuralTypeOf(values[i]));
+      }
+      return A._Universe_evalInEnvironment(init.typeUniverse, bindings, recordRecipe);
+    },
+    typeLiteral(recipe) {
+      return A.createRuntimeType(A._Universe_eval(init.typeUniverse, recipe, false));
+    },
+    _installSpecializedIsTest(object) {
+      var testRti = this;
+      testRti._is = A._specializedIsTest(testRti);
+      return testRti._is(object);
+    },
+    _specializedIsTest(testRti) {
+      var kind, simpleIsFn, $name, predicate, t1;
+      if (testRti === type$.Object)
+        return A._isObject;
+      if (A.isTopType(testRti))
+        return A._isTop;
+      kind = testRti._kind;
+      if (kind === 6)
+        return A._generalNullableIsTestImplementation;
+      if (kind === 1)
+        return A._isNever;
+      if (kind === 7)
+        return A._isFutureOr;
+      simpleIsFn = A._simpleSpecializedIsTest(testRti);
+      if (simpleIsFn != null)
+        return simpleIsFn;
+      if (kind === 8) {
+        $name = testRti._primary;
+        if (testRti._rest.every(A.isTopType)) {
+          testRti._specializedTestResource = "$is" + $name;
+          if ($name === "List")
+            return A._isListTestViaProperty;
+          if (testRti === type$.JSObject)
+            return A._isJSObject;
+          return A._isTestViaProperty;
+        }
+      } else if (kind === 10) {
+        predicate = A.createRecordTypePredicate(testRti._primary, testRti._rest);
+        t1 = predicate == null ? A._isNever : predicate;
+        return t1 == null ? A._asObject(t1) : t1;
+      }
+      return A._generalIsTestImplementation;
+    },
+    _simpleSpecializedIsTest(testRti) {
+      if (testRti._kind === 8) {
+        if (testRti === type$.int)
+          return A._isInt;
+        if (testRti === type$.double || testRti === type$.num)
+          return A._isNum;
+        if (testRti === type$.String)
+          return A._isString;
+        if (testRti === type$.bool)
+          return A._isBool;
+      }
+      return null;
+    },
+    _installSpecializedAsCheck(object) {
+      var testRti = this,
+        asFn = A._generalAsCheckImplementation;
+      if (A.isTopType(testRti))
+        asFn = A._asTop;
+      else if (testRti === type$.Object)
+        asFn = A._asObject;
+      else if (A.isNullable(testRti)) {
+        asFn = A._generalNullableAsCheckImplementation;
+        if (testRti === type$.nullable_int)
+          asFn = A._asIntQ;
+        else if (testRti === type$.nullable_String)
+          asFn = A._asStringQ;
+        else if (testRti === type$.nullable_bool)
+          asFn = A._asBoolQ;
+        else if (testRti === type$.nullable_num)
+          asFn = A._asNumQ;
+        else if (testRti === type$.nullable_double)
+          asFn = A._asDoubleQ;
+        else if (testRti === type$.nullable_JSObject)
+          asFn = A._asJSObjectQ;
+      } else if (testRti === type$.int)
+        asFn = A._asInt;
+      else if (testRti === type$.String)
+        asFn = A._asString;
+      else if (testRti === type$.bool)
+        asFn = A._asBool;
+      else if (testRti === type$.num)
+        asFn = A._asNum;
+      else if (testRti === type$.double)
+        asFn = A._asDouble;
+      else if (testRti === type$.JSObject)
+        asFn = A._asJSObject;
+      testRti._as = asFn;
+      return testRti._as(object);
+    },
+    _generalIsTestImplementation(object) {
+      var testRti = this;
+      if (object == null)
+        return A.isNullable(testRti);
+      return A.isSubtype(init.typeUniverse, A.instanceOrFunctionType(object, testRti), testRti);
+    },
+    _generalNullableIsTestImplementation(object) {
+      if (object == null)
+        return true;
+      return this._primary._is(object);
+    },
+    _isTestViaProperty(object) {
+      var tag, testRti = this;
+      if (object == null)
+        return A.isNullable(testRti);
+      tag = testRti._specializedTestResource;
+      if (object instanceof A.Object)
+        return !!object[tag];
+      return !!J.getInterceptor$(object)[tag];
+    },
+    _isListTestViaProperty(object) {
+      var tag, testRti = this;
+      if (object == null)
+        return A.isNullable(testRti);
+      if (typeof object != "object")
+        return false;
+      if (Array.isArray(object))
+        return true;
+      tag = testRti._specializedTestResource;
+      if (object instanceof A.Object)
+        return !!object[tag];
+      return !!J.getInterceptor$(object)[tag];
+    },
+    _isJSObject(object) {
+      var t1 = this;
+      if (object == null)
+        return false;
+      if (typeof object == "object") {
+        if (object instanceof A.Object)
+          return !!object[t1._specializedTestResource];
+        return true;
+      }
+      if (typeof object == "function")
+        return true;
+      return false;
+    },
+    _isJSObjectStandalone(object) {
+      if (typeof object == "object") {
+        if (object instanceof A.Object)
+          return type$.JSObject._is(object);
+        return true;
+      }
+      if (typeof object == "function")
+        return true;
+      return false;
+    },
+    _generalAsCheckImplementation(object) {
+      var testRti = this;
+      if (object == null) {
+        if (A.isNullable(testRti))
+          return object;
+      } else if (testRti._is(object))
+        return object;
+      throw A.initializeExceptionWrapper(A._errorForAsCheck(object, testRti), new Error());
+    },
+    _generalNullableAsCheckImplementation(object) {
+      var testRti = this;
+      if (object == null || testRti._is(object))
+        return object;
+      throw A.initializeExceptionWrapper(A._errorForAsCheck(object, testRti), new Error());
+    },
+    _errorForAsCheck(object, testRti) {
+      return new A._TypeError("TypeError: " + A._Error_compose(object, A._rtiToString(testRti, null)));
+    },
+    _Error_compose(object, checkedTypeDescription) {
+      return A.Error_safeToString(object) + ": type '" + A._rtiToString(A._structuralTypeOf(object), null) + "' is not a subtype of type '" + checkedTypeDescription + "'";
+    },
+    _TypeError__TypeError$forType(object, type) {
+      return new A._TypeError("TypeError: " + A._Error_compose(object, type));
+    },
+    _isFutureOr(object) {
+      var testRti = this;
+      return testRti._primary._is(object) || A.Rti__getFutureFromFutureOr(init.typeUniverse, testRti)._is(object);
+    },
+    _isObject(object) {
+      return object != null;
+    },
+    _asObject(object) {
+      if (object != null)
+        return object;
+      throw A.initializeExceptionWrapper(A._TypeError__TypeError$forType(object, "Object"), new Error());
+    },
+    _isTop(object) {
+      return true;
+    },
+    _asTop(object) {
+      return object;
+    },
+    _isNever(object) {
+      return false;
+    },
+    _isBool(object) {
+      return true === object || false === object;
+    },
+    _asBool(object) {
+      if (true === object)
+        return true;
+      if (false === object)
+        return false;
+      throw A.initializeExceptionWrapper(A._TypeError__TypeError$forType(object, "bool"), new Error());
+    },
+    _asBoolQ(object) {
+      if (true === object)
+        return true;
+      if (false === object)
+        return false;
+      if (object == null)
+        return object;
+      throw A.initializeExceptionWrapper(A._TypeError__TypeError$forType(object, "bool?"), new Error());
+    },
+    _asDouble(object) {
+      if (typeof object == "number")
+        return object;
+      throw A.initializeExceptionWrapper(A._TypeError__TypeError$forType(object, "double"), new Error());
+    },
+    _asDoubleQ(object) {
+      if (typeof object == "number")
+        return object;
+      if (object == null)
+        return object;
+      throw A.initializeExceptionWrapper(A._TypeError__TypeError$forType(object, "double?"), new Error());
+    },
+    _isInt(object) {
+      return typeof object == "number" && Math.floor(object) === object;
+    },
+    _asInt(object) {
+      if (typeof object == "number" && Math.floor(object) === object)
+        return object;
+      throw A.initializeExceptionWrapper(A._TypeError__TypeError$forType(object, "int"), new Error());
+    },
+    _asIntQ(object) {
+      if (typeof object == "number" && Math.floor(object) === object)
+        return object;
+      if (object == null)
+        return object;
+      throw A.initializeExceptionWrapper(A._TypeError__TypeError$forType(object, "int?"), new Error());
+    },
+    _isNum(object) {
+      return typeof object == "number";
+    },
+    _asNum(object) {
+      if (typeof object == "number")
+        return object;
+      throw A.initializeExceptionWrapper(A._TypeError__TypeError$forType(object, "num"), new Error());
+    },
+    _asNumQ(object) {
+      if (typeof object == "number")
+        return object;
+      if (object == null)
+        return object;
+      throw A.initializeExceptionWrapper(A._TypeError__TypeError$forType(object, "num?"), new Error());
+    },
+    _isString(object) {
+      return typeof object == "string";
+    },
+    _asString(object) {
+      if (typeof object == "string")
+        return object;
+      throw A.initializeExceptionWrapper(A._TypeError__TypeError$forType(object, "String"), new Error());
+    },
+    _asStringQ(object) {
+      if (typeof object == "string")
+        return object;
+      if (object == null)
+        return object;
+      throw A.initializeExceptionWrapper(A._TypeError__TypeError$forType(object, "String?"), new Error());
+    },
+    _asJSObject(object) {
+      if (A._isJSObjectStandalone(object))
+        return object;
+      throw A.initializeExceptionWrapper(A._TypeError__TypeError$forType(object, "JSObject"), new Error());
+    },
+    _asJSObjectQ(object) {
+      if (object == null)
+        return object;
+      if (A._isJSObjectStandalone(object))
+        return object;
+      throw A.initializeExceptionWrapper(A._TypeError__TypeError$forType(object, "JSObject?"), new Error());
+    },
+    _rtiArrayToString(array, genericContext) {
+      var s, sep, i;
+      for (s = "", sep = "", i = 0; i < array.length; ++i, sep = ", ")
+        s += sep + A._rtiToString(array[i], genericContext);
+      return s;
+    },
+    _recordRtiToString(recordType, genericContext) {
+      var fieldCount, names, namesIndex, s, comma, i,
+        partialShape = recordType._primary,
+        fields = recordType._rest;
+      if ("" === partialShape)
+        return "(" + A._rtiArrayToString(fields, genericContext) + ")";
+      fieldCount = fields.length;
+      names = partialShape.split(",");
+      namesIndex = names.length - fieldCount;
+      for (s = "(", comma = "", i = 0; i < fieldCount; ++i, comma = ", ") {
+        s += comma;
+        if (namesIndex === 0)
+          s += "{";
+        s += A._rtiToString(fields[i], genericContext);
+        if (namesIndex >= 0)
+          s += " " + names[namesIndex];
+        ++namesIndex;
+      }
+      return s + "})";
+    },
+    _functionRtiToString(functionType, genericContext, bounds) {
+      var boundsLength, offset, i, t1, typeParametersText, typeSep, t2, t3, boundRti, kind, parameters, requiredPositional, requiredPositionalLength, optionalPositional, optionalPositionalLength, named, namedLength, returnTypeText, argumentsText, sep, _s2_ = ", ", outerContextLength = null;
+      if (bounds != null) {
+        boundsLength = bounds.length;
+        if (genericContext == null)
+          genericContext = A._setArrayType([], type$.JSArray_String);
+        else
+          outerContextLength = genericContext.length;
+        offset = genericContext.length;
+        for (i = boundsLength; i > 0; --i)
+          B.JSArray_methods.add$1(genericContext, "T" + (offset + i));
+        for (t1 = type$.nullable_Object, typeParametersText = "<", typeSep = "", i = 0; i < boundsLength; ++i, typeSep = _s2_) {
+          t2 = genericContext.length;
+          t3 = t2 - 1 - i;
+          if (!(t3 >= 0))
+            return A.ioore(genericContext, t3);
+          typeParametersText = typeParametersText + typeSep + genericContext[t3];
+          boundRti = bounds[i];
+          kind = boundRti._kind;
+          if (!(kind === 2 || kind === 3 || kind === 4 || kind === 5 || boundRti === t1))
+            typeParametersText += " extends " + A._rtiToString(boundRti, genericContext);
+        }
+        typeParametersText += ">";
+      } else
+        typeParametersText = "";
+      t1 = functionType._primary;
+      parameters = functionType._rest;
+      requiredPositional = parameters._requiredPositional;
+      requiredPositionalLength = requiredPositional.length;
+      optionalPositional = parameters._optionalPositional;
+      optionalPositionalLength = optionalPositional.length;
+      named = parameters._named;
+      namedLength = named.length;
+      returnTypeText = A._rtiToString(t1, genericContext);
+      for (argumentsText = "", sep = "", i = 0; i < requiredPositionalLength; ++i, sep = _s2_)
+        argumentsText += sep + A._rtiToString(requiredPositional[i], genericContext);
+      if (optionalPositionalLength > 0) {
+        argumentsText += sep + "[";
+        for (sep = "", i = 0; i < optionalPositionalLength; ++i, sep = _s2_)
+          argumentsText += sep + A._rtiToString(optionalPositional[i], genericContext);
+        argumentsText += "]";
+      }
+      if (namedLength > 0) {
+        argumentsText += sep + "{";
+        for (sep = "", i = 0; i < namedLength; i += 3, sep = _s2_) {
+          argumentsText += sep;
+          if (named[i + 1])
+            argumentsText += "required ";
+          argumentsText += A._rtiToString(named[i + 2], genericContext) + " " + named[i];
+        }
+        argumentsText += "}";
+      }
+      if (outerContextLength != null) {
+        genericContext.toString;
+        genericContext.length = outerContextLength;
+      }
+      return typeParametersText + "(" + argumentsText + ") => " + returnTypeText;
+    },
+    _rtiToString(rti, genericContext) {
+      var questionArgument, s, argumentKind, $name, $arguments, t1, t2,
+        kind = rti._kind;
+      if (kind === 5)
+        return "erased";
+      if (kind === 2)
+        return "dynamic";
+      if (kind === 3)
+        return "void";
+      if (kind === 1)
+        return "Never";
+      if (kind === 4)
+        return "any";
+      if (kind === 6) {
+        questionArgument = rti._primary;
+        s = A._rtiToString(questionArgument, genericContext);
+        argumentKind = questionArgument._kind;
+        return (argumentKind === 11 || argumentKind === 12 ? "(" + s + ")" : s) + "?";
+      }
+      if (kind === 7)
+        return "FutureOr<" + A._rtiToString(rti._primary, genericContext) + ">";
+      if (kind === 8) {
+        $name = A._unminifyOrTag(rti._primary);
+        $arguments = rti._rest;
+        return $arguments.length > 0 ? $name + ("<" + A._rtiArrayToString($arguments, genericContext) + ">") : $name;
+      }
+      if (kind === 10)
+        return A._recordRtiToString(rti, genericContext);
+      if (kind === 11)
+        return A._functionRtiToString(rti, genericContext, null);
+      if (kind === 12)
+        return A._functionRtiToString(rti._primary, genericContext, rti._rest);
+      if (kind === 13) {
+        t1 = rti._primary;
+        t2 = genericContext.length;
+        t1 = t2 - 1 - t1;
+        if (!(t1 >= 0 && t1 < t2))
+          return A.ioore(genericContext, t1);
+        return genericContext[t1];
+      }
+      return "?";
+    },
+    _unminifyOrTag(rawClassName) {
+      var preserved = A.unmangleGlobalNameIfPreservedAnyways(rawClassName);
+      if (preserved != null)
+        return preserved;
+      return rawClassName;
+    },
+    _Universe_findRule(universe, targetType) {
+      var rule = universe.tR[targetType];
+      while (typeof rule == "string")
+        rule = universe.tR[rule];
+      return rule;
+    },
+    _Universe_findErasedType(universe, cls) {
+      var $length, erased, $arguments, i, $interface,
+        metadata = universe.eT,
+        probe = metadata[cls];
+      if (probe == null)
+        return A._Universe_eval(universe, cls, false);
+      else if (typeof probe == "number") {
+        $length = probe;
+        erased = A._Universe__lookupTerminalRti(universe, 5, "#");
+        $arguments = A._Utils_newArrayOrEmpty($length);
+        for (i = 0; i < $length; ++i)
+          $arguments[i] = erased;
+        $interface = A._Universe__lookupInterfaceRti(universe, cls, $arguments);
+        metadata[cls] = $interface;
+        return $interface;
+      } else
+        return probe;
+    },
+    _Universe_addRules(universe, rules) {
+      return A._Utils_objectAssign(universe.tR, rules);
+    },
+    _Universe_addErasedTypes(universe, types) {
+      return A._Utils_objectAssign(universe.eT, types);
+    },
+    _Universe_eval(universe, recipe, normalize) {
+      var rti,
+        cache = universe.eC,
+        probe = cache.get(recipe);
+      if (probe != null)
+        return probe;
+      rti = A._Universe__parseRecipe(universe, null, recipe, false);
+      cache.set(recipe, rti);
+      return rti;
+    },
+    _Universe_evalInEnvironment(universe, environment, recipe) {
+      var probe, rti,
+        cache = environment._evalCache;
+      if (cache == null)
+        cache = environment._evalCache = new Map();
+      probe = cache.get(recipe);
+      if (probe != null)
+        return probe;
+      rti = A._Universe__parseRecipe(universe, environment, recipe, true);
+      cache.set(recipe, rti);
+      return rti;
+    },
+    _Universe_bind(universe, environment, argumentsRti) {
+      var argumentsRecipe, probe, rti,
+        cache = environment._bindCache;
+      if (cache == null)
+        cache = environment._bindCache = new Map();
+      argumentsRecipe = argumentsRti._canonicalRecipe;
+      probe = cache.get(argumentsRecipe);
+      if (probe != null)
+        return probe;
+      rti = A._Universe__lookupBindingRti(universe, environment, argumentsRti._kind === 9 ? argumentsRti._rest : [argumentsRti]);
+      cache.set(argumentsRecipe, rti);
+      return rti;
+    },
+    _Universe__parseRecipe(universe, environment, recipe, normalize) {
+      return A._Parser_parse(A._Parser_create(universe, environment, recipe, normalize));
+    },
+    _Universe__installTypeTests(universe, rti) {
+      rti._as = A._installSpecializedAsCheck;
+      rti._is = A._installSpecializedIsTest;
+      return rti;
+    },
+    _Universe__lookupTerminalRti(universe, kind, key) {
+      var rti, t1,
+        probe = universe.eC.get(key);
+      if (probe != null)
+        return probe;
+      rti = new A.Rti(null, null);
+      rti._kind = kind;
+      rti._canonicalRecipe = key;
+      t1 = A._Universe__installTypeTests(universe, rti);
+      universe.eC.set(key, t1);
+      return t1;
+    },
+    _Universe__lookupQuestionRti(universe, baseType, normalize) {
+      var t1,
+        key = baseType._canonicalRecipe + "?",
+        probe = universe.eC.get(key);
+      if (probe != null)
+        return probe;
+      t1 = A._Universe__createQuestionRti(universe, baseType, key, normalize);
+      universe.eC.set(key, t1);
+      return t1;
+    },
+    _Universe__createQuestionRti(universe, baseType, key, normalize) {
+      var baseKind, t1, rti;
+      if (normalize) {
+        baseKind = baseType._kind;
+        t1 = true;
+        if (!A.isTopType(baseType))
+          if (!(baseType === type$.Null || baseType === type$.JSNull))
+            if (baseKind !== 6)
+              t1 = baseKind === 7 && A.isNullable(baseType._primary);
+        if (t1)
+          return baseType;
+        else if (baseKind === 1)
+          return type$.Null;
+      }
+      rti = new A.Rti(null, null);
+      rti._kind = 6;
+      rti._primary = baseType;
+      rti._canonicalRecipe = key;
+      return A._Universe__installTypeTests(universe, rti);
+    },
+    _Universe__lookupFutureOrRti(universe, baseType, normalize) {
+      var t1,
+        key = baseType._canonicalRecipe + "/",
+        probe = universe.eC.get(key);
+      if (probe != null)
+        return probe;
+      t1 = A._Universe__createFutureOrRti(universe, baseType, key, normalize);
+      universe.eC.set(key, t1);
+      return t1;
+    },
+    _Universe__createFutureOrRti(universe, baseType, key, normalize) {
+      var t1, rti;
+      if (normalize) {
+        t1 = baseType._kind;
+        if (A.isTopType(baseType) || baseType === type$.Object)
+          return baseType;
+        else if (t1 === 1)
+          return A._Universe__lookupInterfaceRti(universe, "Future", [baseType]);
+        else if (baseType === type$.Null || baseType === type$.JSNull)
+          return type$.nullable_Future_Null;
+      }
+      rti = new A.Rti(null, null);
+      rti._kind = 7;
+      rti._primary = baseType;
+      rti._canonicalRecipe = key;
+      return A._Universe__installTypeTests(universe, rti);
+    },
+    _Universe__lookupGenericFunctionParameterRti(universe, index) {
+      var rti, t1,
+        key = "" + index + "^",
+        probe = universe.eC.get(key);
+      if (probe != null)
+        return probe;
+      rti = new A.Rti(null, null);
+      rti._kind = 13;
+      rti._primary = index;
+      rti._canonicalRecipe = key;
+      t1 = A._Universe__installTypeTests(universe, rti);
+      universe.eC.set(key, t1);
+      return t1;
+    },
+    _Universe__canonicalRecipeJoin($arguments) {
+      var s, sep, i,
+        $length = $arguments.length;
+      for (s = "", sep = "", i = 0; i < $length; ++i, sep = ",")
+        s += sep + $arguments[i]._canonicalRecipe;
+      return s;
+    },
+    _Universe__canonicalRecipeJoinNamed($arguments) {
+      var s, sep, i, t1, nameSep,
+        $length = $arguments.length;
+      for (s = "", sep = "", i = 0; i < $length; i += 3, sep = ",") {
+        t1 = $arguments[i];
+        nameSep = $arguments[i + 1] ? "!" : ":";
+        s += sep + t1 + nameSep + $arguments[i + 2]._canonicalRecipe;
+      }
+      return s;
+    },
+    _Universe__lookupInterfaceRti(universe, $name, $arguments) {
+      var probe, rti, t1,
+        s = $name;
+      if ($arguments.length > 0)
+        s += "<" + A._Universe__canonicalRecipeJoin($arguments) + ">";
+      probe = universe.eC.get(s);
+      if (probe != null)
+        return probe;
+      rti = new A.Rti(null, null);
+      rti._kind = 8;
+      rti._primary = $name;
+      rti._rest = $arguments;
+      if ($arguments.length > 0)
+        rti._precomputed1 = $arguments[0];
+      rti._canonicalRecipe = s;
+      t1 = A._Universe__installTypeTests(universe, rti);
+      universe.eC.set(s, t1);
+      return t1;
+    },
+    _Universe__lookupBindingRti(universe, base, $arguments) {
+      var newBase, newArguments, key, probe, rti, t1;
+      if (base._kind === 9) {
+        newBase = base._primary;
+        newArguments = base._rest.concat($arguments);
+      } else {
+        newArguments = $arguments;
+        newBase = base;
+      }
+      key = newBase._canonicalRecipe + (";<" + A._Universe__canonicalRecipeJoin(newArguments) + ">");
+      probe = universe.eC.get(key);
+      if (probe != null)
+        return probe;
+      rti = new A.Rti(null, null);
+      rti._kind = 9;
+      rti._primary = newBase;
+      rti._rest = newArguments;
+      rti._canonicalRecipe = key;
+      t1 = A._Universe__installTypeTests(universe, rti);
+      universe.eC.set(key, t1);
+      return t1;
+    },
+    _Universe__lookupRecordRti(universe, partialShapeTag, fields) {
+      var rti, t1,
+        key = "+" + (partialShapeTag + "(" + A._Universe__canonicalRecipeJoin(fields) + ")"),
+        probe = universe.eC.get(key);
+      if (probe != null)
+        return probe;
+      rti = new A.Rti(null, null);
+      rti._kind = 10;
+      rti._primary = partialShapeTag;
+      rti._rest = fields;
+      rti._canonicalRecipe = key;
+      t1 = A._Universe__installTypeTests(universe, rti);
+      universe.eC.set(key, t1);
+      return t1;
+    },
+    _Universe__lookupFunctionRti(universe, returnType, parameters) {
+      var sep, key, probe, rti, t1,
+        s = returnType._canonicalRecipe,
+        requiredPositional = parameters._requiredPositional,
+        requiredPositionalLength = requiredPositional.length,
+        optionalPositional = parameters._optionalPositional,
+        optionalPositionalLength = optionalPositional.length,
+        named = parameters._named,
+        namedLength = named.length,
+        recipe = "(" + A._Universe__canonicalRecipeJoin(requiredPositional);
+      if (optionalPositionalLength > 0) {
+        sep = requiredPositionalLength > 0 ? "," : "";
+        recipe += sep + "[" + A._Universe__canonicalRecipeJoin(optionalPositional) + "]";
+      }
+      if (namedLength > 0) {
+        sep = requiredPositionalLength > 0 ? "," : "";
+        recipe += sep + "{" + A._Universe__canonicalRecipeJoinNamed(named) + "}";
+      }
+      key = s + (recipe + ")");
+      probe = universe.eC.get(key);
+      if (probe != null)
+        return probe;
+      rti = new A.Rti(null, null);
+      rti._kind = 11;
+      rti._primary = returnType;
+      rti._rest = parameters;
+      rti._canonicalRecipe = key;
+      t1 = A._Universe__installTypeTests(universe, rti);
+      universe.eC.set(key, t1);
+      return t1;
+    },
+    _Universe__lookupGenericFunctionRti(universe, baseFunctionType, bounds, normalize) {
+      var t1,
+        key = baseFunctionType._canonicalRecipe + ("<" + A._Universe__canonicalRecipeJoin(bounds) + ">"),
+        probe = universe.eC.get(key);
+      if (probe != null)
+        return probe;
+      t1 = A._Universe__createGenericFunctionRti(universe, baseFunctionType, bounds, key, normalize);
+      universe.eC.set(key, t1);
+      return t1;
+    },
+    _Universe__createGenericFunctionRti(universe, baseFunctionType, bounds, key, normalize) {
+      var $length, typeArguments, count, i, bound, substitutedBase, substitutedBounds, rti;
+      if (normalize) {
+        $length = bounds.length;
+        typeArguments = A._Utils_newArrayOrEmpty($length);
+        for (count = 0, i = 0; i < $length; ++i) {
+          bound = bounds[i];
+          if (bound._kind === 1) {
+            typeArguments[i] = bound;
+            ++count;
+          }
+        }
+        if (count > 0) {
+          substitutedBase = A._substitute(universe, baseFunctionType, typeArguments, 0);
+          substitutedBounds = A._substituteArray(universe, bounds, typeArguments, 0);
+          return A._Universe__lookupGenericFunctionRti(universe, substitutedBase, substitutedBounds, bounds !== substitutedBounds);
+        }
+      }
+      rti = new A.Rti(null, null);
+      rti._kind = 12;
+      rti._primary = baseFunctionType;
+      rti._rest = bounds;
+      rti._canonicalRecipe = key;
+      return A._Universe__installTypeTests(universe, rti);
+    },
+    _Parser_create(universe, environment, recipe, normalize) {
+      return {u: universe, e: environment, r: recipe, s: [], p: 0, n: normalize};
+    },
+    _Parser_parse(parser) {
+      var t1, i, ch, u, array, end, item,
+        source = parser.r,
+        stack = parser.s;
+      for (t1 = source.length, i = 0; i < t1;) {
+        ch = source.charCodeAt(i);
+        if (ch >= 48 && ch <= 57)
+          i = A._Parser_handleDigit(i + 1, ch, source, stack);
+        else if ((((ch | 32) >>> 0) - 97 & 65535) < 26 || ch === 95 || ch === 36 || ch === 124)
+          i = A._Parser_handleIdentifier(parser, i, source, stack, false);
+        else if (ch === 46)
+          i = A._Parser_handleIdentifier(parser, i, source, stack, true);
+        else {
+          ++i;
+          switch (ch) {
+            case 44:
+              break;
+            case 58:
+              stack.push(false);
+              break;
+            case 33:
+              stack.push(true);
+              break;
+            case 59:
+              stack.push(A._Parser_toType(parser.u, parser.e, stack.pop()));
+              break;
+            case 94:
+              stack.push(A._Universe__lookupGenericFunctionParameterRti(parser.u, stack.pop()));
+              break;
+            case 35:
+              stack.push(A._Universe__lookupTerminalRti(parser.u, 5, "#"));
+              break;
+            case 64:
+              stack.push(A._Universe__lookupTerminalRti(parser.u, 2, "@"));
+              break;
+            case 126:
+              stack.push(A._Universe__lookupTerminalRti(parser.u, 3, "~"));
+              break;
+            case 60:
+              stack.push(parser.p);
+              parser.p = stack.length;
+              break;
+            case 62:
+              A._Parser_handleTypeArguments(parser, stack);
+              break;
+            case 38:
+              A._Parser_handleExtendedOperations(parser, stack);
+              break;
+            case 63:
+              u = parser.u;
+              stack.push(A._Universe__lookupQuestionRti(u, A._Parser_toType(u, parser.e, stack.pop()), parser.n));
+              break;
+            case 47:
+              u = parser.u;
+              stack.push(A._Universe__lookupFutureOrRti(u, A._Parser_toType(u, parser.e, stack.pop()), parser.n));
+              break;
+            case 40:
+              stack.push(-3);
+              stack.push(parser.p);
+              parser.p = stack.length;
+              break;
+            case 41:
+              A._Parser_handleArguments(parser, stack);
+              break;
+            case 91:
+              stack.push(parser.p);
+              parser.p = stack.length;
+              break;
+            case 93:
+              array = stack.splice(parser.p);
+              A._Parser_toTypes(parser.u, parser.e, array);
+              parser.p = stack.pop();
+              stack.push(array);
+              stack.push(-1);
+              break;
+            case 123:
+              stack.push(parser.p);
+              parser.p = stack.length;
+              break;
+            case 125:
+              array = stack.splice(parser.p);
+              A._Parser_toTypesNamed(parser.u, parser.e, array);
+              parser.p = stack.pop();
+              stack.push(array);
+              stack.push(-2);
+              break;
+            case 43:
+              end = source.indexOf("(", i);
+              stack.push(source.substring(i, end));
+              stack.push(-4);
+              stack.push(parser.p);
+              parser.p = stack.length;
+              i = end + 1;
+              break;
+            default:
+              throw "Bad character " + ch;
+          }
+        }
+      }
+      item = stack.pop();
+      return A._Parser_toType(parser.u, parser.e, item);
+    },
+    _Parser_handleDigit(i, digit, source, stack) {
+      var t1, ch,
+        value = digit - 48;
+      for (t1 = source.length; i < t1; ++i) {
+        ch = source.charCodeAt(i);
+        if (!(ch >= 48 && ch <= 57))
+          break;
+        value = value * 10 + (ch - 48);
+      }
+      stack.push(value);
+      return i;
+    },
+    _Parser_handleIdentifier(parser, start, source, stack, hasPeriod) {
+      var t1, ch, t2, string, environment, recipe,
+        i = start + 1;
+      for (t1 = source.length; i < t1; ++i) {
+        ch = source.charCodeAt(i);
+        if (ch === 46) {
+          if (hasPeriod)
+            break;
+          hasPeriod = true;
+        } else {
+          if (!((((ch | 32) >>> 0) - 97 & 65535) < 26 || ch === 95 || ch === 36 || ch === 124))
+            t2 = ch >= 48 && ch <= 57;
+          else
+            t2 = true;
+          if (!t2)
+            break;
+        }
+      }
+      string = source.substring(start, i);
+      if (hasPeriod) {
+        t1 = parser.u;
+        environment = parser.e;
+        if (environment._kind === 9)
+          environment = environment._primary;
+        recipe = A._Universe_findRule(t1, environment._primary)[string];
+        if (recipe == null)
+          A.throwExpression('No "' + string + '" in "' + A.Rti__getCanonicalRecipe(environment) + '"');
+        stack.push(A._Universe_evalInEnvironment(t1, environment, recipe));
+      } else
+        stack.push(string);
+      return i;
+    },
+    _Parser_handleTypeArguments(parser, stack) {
+      var base,
+        universe = parser.u,
+        $arguments = A._Parser_collectArray(parser, stack),
+        head = stack.pop();
+      if (typeof head == "string")
+        stack.push(A._Universe__lookupInterfaceRti(universe, head, $arguments));
+      else {
+        base = A._Parser_toType(universe, parser.e, head);
+        switch (base._kind) {
+          case 11:
+            stack.push(A._Universe__lookupGenericFunctionRti(universe, base, $arguments, parser.n));
+            break;
+          default:
+            stack.push(A._Universe__lookupBindingRti(universe, base, $arguments));
+            break;
+        }
+      }
+    },
+    _Parser_handleArguments(parser, stack) {
+      var requiredPositional, returnType, parameters,
+        universe = parser.u,
+        head = stack.pop(),
+        optionalPositional = null, named = null;
+      if (typeof head == "number")
+        switch (head) {
+          case -1:
+            optionalPositional = stack.pop();
+            break;
+          case -2:
+            named = stack.pop();
+            break;
+          default:
+            stack.push(head);
+            break;
+        }
+      else
+        stack.push(head);
+      requiredPositional = A._Parser_collectArray(parser, stack);
+      head = stack.pop();
+      switch (head) {
+        case -3:
+          head = stack.pop();
+          if (optionalPositional == null)
+            optionalPositional = universe.sEA;
+          if (named == null)
+            named = universe.sEA;
+          returnType = A._Parser_toType(universe, parser.e, head);
+          parameters = new A._FunctionParameters();
+          parameters._requiredPositional = requiredPositional;
+          parameters._optionalPositional = optionalPositional;
+          parameters._named = named;
+          stack.push(A._Universe__lookupFunctionRti(universe, returnType, parameters));
+          return;
+        case -4:
+          stack.push(A._Universe__lookupRecordRti(universe, stack.pop(), requiredPositional));
+          return;
+        default:
+          throw A.wrapException(A.AssertionError$("Unexpected state under `()`: " + A.S(head)));
+      }
+    },
+    _Parser_handleExtendedOperations(parser, stack) {
+      var $top = stack.pop();
+      if (0 === $top) {
+        stack.push(A._Universe__lookupTerminalRti(parser.u, 1, "0&"));
+        return;
+      }
+      if (1 === $top) {
+        stack.push(A._Universe__lookupTerminalRti(parser.u, 4, "1&"));
+        return;
+      }
+      throw A.wrapException(A.AssertionError$("Unexpected extended operation " + A.S($top)));
+    },
+    _Parser_collectArray(parser, stack) {
+      var array = stack.splice(parser.p);
+      A._Parser_toTypes(parser.u, parser.e, array);
+      parser.p = stack.pop();
+      return array;
+    },
+    _Parser_toType(universe, environment, item) {
+      if (typeof item == "string")
+        return A._Universe__lookupInterfaceRti(universe, item, universe.sEA);
+      else if (typeof item == "number") {
+        environment.toString;
+        return A._Parser_indexToType(universe, environment, item);
+      } else
+        return item;
+    },
+    _Parser_toTypes(universe, environment, items) {
+      var i,
+        $length = items.length;
+      for (i = 0; i < $length; ++i)
+        items[i] = A._Parser_toType(universe, environment, items[i]);
+    },
+    _Parser_toTypesNamed(universe, environment, items) {
+      var i,
+        $length = items.length;
+      for (i = 2; i < $length; i += 3)
+        items[i] = A._Parser_toType(universe, environment, items[i]);
+    },
+    _Parser_indexToType(universe, environment, index) {
+      var typeArguments, len,
+        kind = environment._kind;
+      if (kind === 9) {
+        if (index === 0)
+          return environment._primary;
+        typeArguments = environment._rest;
+        len = typeArguments.length;
+        if (index <= len)
+          return typeArguments[index - 1];
+        index -= len;
+        environment = environment._primary;
+        kind = environment._kind;
+      } else if (index === 0)
+        return environment;
+      if (kind !== 8)
+        throw A.wrapException(A.AssertionError$("Indexed base must be an interface type"));
+      typeArguments = environment._rest;
+      if (index <= typeArguments.length)
+        return typeArguments[index - 1];
+      throw A.wrapException(A.AssertionError$("Bad index " + index + " for " + environment.toString$0(0)));
+    },
+    isSubtype(universe, s, t) {
+      var result,
+        sCache = s._isSubtypeCache;
+      if (sCache == null)
+        sCache = s._isSubtypeCache = new Map();
+      result = sCache.get(t);
+      if (result == null) {
+        result = A._isSubtype(universe, s, null, t, null);
+        sCache.set(t, result);
+      }
+      return result;
+    },
+    _isSubtype(universe, s, sEnv, t, tEnv) {
+      var sKind, leftTypeVariable, tKind, t1, t2, sBounds, tBounds, sLength, i, sBound, tBound;
+      if (s === t)
+        return true;
+      if (A.isTopType(t))
+        return true;
+      sKind = s._kind;
+      if (sKind === 4)
+        return true;
+      if (A.isTopType(s))
+        return false;
+      if (s._kind === 1)
+        return true;
+      leftTypeVariable = sKind === 13;
+      if (leftTypeVariable)
+        if (A._isSubtype(universe, sEnv[s._primary], sEnv, t, tEnv))
+          return true;
+      tKind = t._kind;
+      t1 = type$.Null;
+      if (s === t1 || s === type$.JSNull) {
+        if (tKind === 7)
+          return A._isSubtype(universe, s, sEnv, t._primary, tEnv);
+        return t === t1 || t === type$.JSNull || tKind === 6;
+      }
+      if (t === type$.Object) {
+        if (sKind === 7)
+          return A._isSubtype(universe, s._primary, sEnv, t, tEnv);
+        return sKind !== 6;
+      }
+      if (sKind === 7) {
+        if (!A._isSubtype(universe, s._primary, sEnv, t, tEnv))
+          return false;
+        return A._isSubtype(universe, A.Rti__getFutureFromFutureOr(universe, s), sEnv, t, tEnv);
+      }
+      if (sKind === 6)
+        return A._isSubtype(universe, t1, sEnv, t, tEnv) && A._isSubtype(universe, s._primary, sEnv, t, tEnv);
+      if (tKind === 7) {
+        if (A._isSubtype(universe, s, sEnv, t._primary, tEnv))
+          return true;
+        return A._isSubtype(universe, s, sEnv, A.Rti__getFutureFromFutureOr(universe, t), tEnv);
+      }
+      if (tKind === 6)
+        return A._isSubtype(universe, s, sEnv, t1, tEnv) || A._isSubtype(universe, s, sEnv, t._primary, tEnv);
+      if (leftTypeVariable)
+        return false;
+      t1 = sKind !== 11;
+      if ((!t1 || sKind === 12) && t === type$.Function)
+        return true;
+      t2 = sKind === 10;
+      if (t2 && t === type$.Record)
+        return true;
+      if (tKind === 12) {
+        if (s === type$.JavaScriptFunction)
+          return true;
+        if (sKind !== 12)
+          return false;
+        sBounds = s._rest;
+        tBounds = t._rest;
+        sLength = sBounds.length;
+        if (sLength !== tBounds.length)
+          return false;
+        sEnv = sEnv == null ? sBounds : sBounds.concat(sEnv);
+        tEnv = tEnv == null ? tBounds : tBounds.concat(tEnv);
+        for (i = 0; i < sLength; ++i) {
+          sBound = sBounds[i];
+          tBound = tBounds[i];
+          if (!A._isSubtype(universe, sBound, sEnv, tBound, tEnv) || !A._isSubtype(universe, tBound, tEnv, sBound, sEnv))
+            return false;
+        }
+        return A._isFunctionSubtype(universe, s._primary, sEnv, t._primary, tEnv);
+      }
+      if (tKind === 11) {
+        if (s === type$.JavaScriptFunction)
+          return true;
+        if (t1)
+          return false;
+        return A._isFunctionSubtype(universe, s, sEnv, t, tEnv);
+      }
+      if (sKind === 8) {
+        if (tKind !== 8)
+          return false;
+        return A._isInterfaceSubtype(universe, s, sEnv, t, tEnv);
+      }
+      if (t2 && tKind === 10)
+        return A._isRecordSubtype(universe, s, sEnv, t, tEnv);
+      return false;
+    },
+    _isFunctionSubtype(universe, s, sEnv, t, tEnv) {
+      var sParameters, tParameters, sRequiredPositional, tRequiredPositional, sRequiredPositionalLength, tRequiredPositionalLength, requiredPositionalDelta, sOptionalPositional, tOptionalPositional, sOptionalPositionalLength, tOptionalPositionalLength, i, t1, sNamed, tNamed, sNamedLength, tNamedLength, sIndex, tIndex, tName, sName, sIsRequired;
+      if (!A._isSubtype(universe, s._primary, sEnv, t._primary, tEnv))
+        return false;
+      sParameters = s._rest;
+      tParameters = t._rest;
+      sRequiredPositional = sParameters._requiredPositional;
+      tRequiredPositional = tParameters._requiredPositional;
+      sRequiredPositionalLength = sRequiredPositional.length;
+      tRequiredPositionalLength = tRequiredPositional.length;
+      if (sRequiredPositionalLength > tRequiredPositionalLength)
+        return false;
+      requiredPositionalDelta = tRequiredPositionalLength - sRequiredPositionalLength;
+      sOptionalPositional = sParameters._optionalPositional;
+      tOptionalPositional = tParameters._optionalPositional;
+      sOptionalPositionalLength = sOptionalPositional.length;
+      tOptionalPositionalLength = tOptionalPositional.length;
+      if (sRequiredPositionalLength + sOptionalPositionalLength < tRequiredPositionalLength + tOptionalPositionalLength)
+        return false;
+      for (i = 0; i < sRequiredPositionalLength; ++i) {
+        t1 = sRequiredPositional[i];
+        if (!A._isSubtype(universe, tRequiredPositional[i], tEnv, t1, sEnv))
+          return false;
+      }
+      for (i = 0; i < requiredPositionalDelta; ++i) {
+        t1 = sOptionalPositional[i];
+        if (!A._isSubtype(universe, tRequiredPositional[sRequiredPositionalLength + i], tEnv, t1, sEnv))
+          return false;
+      }
+      for (i = 0; i < tOptionalPositionalLength; ++i) {
+        t1 = sOptionalPositional[requiredPositionalDelta + i];
+        if (!A._isSubtype(universe, tOptionalPositional[i], tEnv, t1, sEnv))
+          return false;
+      }
+      sNamed = sParameters._named;
+      tNamed = tParameters._named;
+      sNamedLength = sNamed.length;
+      tNamedLength = tNamed.length;
+      for (sIndex = 0, tIndex = 0; tIndex < tNamedLength; tIndex += 3) {
+        tName = tNamed[tIndex];
+        for (;;) {
+          if (sIndex >= sNamedLength)
+            return false;
+          sName = sNamed[sIndex];
+          sIndex += 3;
+          if (tName < sName)
+            return false;
+          sIsRequired = sNamed[sIndex - 2];
+          if (sName < tName) {
+            if (sIsRequired)
+              return false;
+            continue;
+          }
+          t1 = tNamed[tIndex + 1];
+          if (sIsRequired && !t1)
+            return false;
+          t1 = sNamed[sIndex - 1];
+          if (!A._isSubtype(universe, tNamed[tIndex + 2], tEnv, t1, sEnv))
+            return false;
+          break;
+        }
+      }
+      while (sIndex < sNamedLength) {
+        if (sNamed[sIndex + 1])
+          return false;
+        sIndex += 3;
+      }
+      return true;
+    },
+    _isInterfaceSubtype(universe, s, sEnv, t, tEnv) {
+      var rule, recipes, $length, supertypeArgs, i,
+        sName = s._primary,
+        tName = t._primary;
+      while (sName !== tName) {
+        rule = universe.tR[sName];
+        if (rule == null)
+          return false;
+        if (typeof rule == "string") {
+          sName = rule;
+          continue;
+        }
+        recipes = rule[tName];
+        if (recipes == null)
+          return false;
+        $length = recipes.length;
+        supertypeArgs = $length > 0 ? new Array($length) : init.typeUniverse.sEA;
+        for (i = 0; i < $length; ++i)
+          supertypeArgs[i] = A._Universe_evalInEnvironment(universe, s, recipes[i]);
+        return A._areArgumentsSubtypes(universe, supertypeArgs, null, sEnv, t._rest, tEnv);
+      }
+      return A._areArgumentsSubtypes(universe, s._rest, null, sEnv, t._rest, tEnv);
+    },
+    _areArgumentsSubtypes(universe, sArgs, sVariances, sEnv, tArgs, tEnv) {
+      var i,
+        $length = sArgs.length;
+      for (i = 0; i < $length; ++i)
+        if (!A._isSubtype(universe, sArgs[i], sEnv, tArgs[i], tEnv))
+          return false;
+      return true;
+    },
+    _isRecordSubtype(universe, s, sEnv, t, tEnv) {
+      var i,
+        sFields = s._rest,
+        tFields = t._rest,
+        sCount = sFields.length;
+      if (sCount !== tFields.length)
+        return false;
+      if (s._primary !== t._primary)
+        return false;
+      for (i = 0; i < sCount; ++i)
+        if (!A._isSubtype(universe, sFields[i], sEnv, tFields[i], tEnv))
+          return false;
+      return true;
+    },
+    isNullable(t) {
+      var kind = t._kind,
+        t1 = true;
+      if (!(t === type$.Null || t === type$.JSNull))
+        if (!A.isTopType(t))
+          if (kind !== 6)
+            t1 = kind === 7 && A.isNullable(t._primary);
+      return t1;
+    },
+    isTopType(t) {
+      var kind = t._kind;
+      return kind === 2 || kind === 3 || kind === 4 || kind === 5 || t === type$.nullable_Object;
+    },
+    _Utils_objectAssign(o, other) {
+      var i, key,
+        keys = Object.keys(other),
+        $length = keys.length;
+      for (i = 0; i < $length; ++i) {
+        key = keys[i];
+        o[key] = other[key];
+      }
+    },
+    _Utils_newArrayOrEmpty($length) {
+      return $length > 0 ? new Array($length) : init.typeUniverse.sEA;
+    },
+    Rti: function Rti(t0, t1) {
+      var _ = this;
+      _._as = t0;
+      _._is = t1;
+      _._cachedRuntimeType = _._specializedTestResource = _._isSubtypeCache = _._precomputed1 = null;
+      _._kind = 0;
+      _._canonicalRecipe = _._bindCache = _._evalCache = _._rest = _._primary = null;
+    },
+    _FunctionParameters: function _FunctionParameters() {
+      this._named = this._optionalPositional = this._requiredPositional = null;
+    },
+    _Type: function _Type(t0) {
+      this._rti = t0;
+    },
+    _Error: function _Error() {
+    },
+    _TypeError: function _TypeError(t0) {
+      this._message = t0;
+    },
+    _AsyncRun__initializeScheduleImmediate() {
+      var t1, div, span;
+      if (self.scheduleImmediate != null)
+        return A.async__AsyncRun__scheduleImmediateJsOverride$closure();
+      if (self.MutationObserver != null && self.document != null) {
+        t1 = {};
+        div = self.document.createElement("div");
+        span = self.document.createElement("span");
+        t1.storedCallback = null;
+        new self.MutationObserver(A.convertDartClosureToJS(new A._AsyncRun__initializeScheduleImmediate_internalCallback(t1), 1)).observe(div, {childList: true});
+        return new A._AsyncRun__initializeScheduleImmediate_closure(t1, div, span);
+      } else if (self.setImmediate != null)
+        return A.async__AsyncRun__scheduleImmediateWithSetImmediate$closure();
+      return A.async__AsyncRun__scheduleImmediateWithTimer$closure();
+    },
+    _AsyncRun__scheduleImmediateJsOverride(callback) {
+      self.scheduleImmediate(A.convertDartClosureToJS(new A._AsyncRun__scheduleImmediateJsOverride_internalCallback(type$.void_Function._as(callback)), 0));
+    },
+    _AsyncRun__scheduleImmediateWithSetImmediate(callback) {
+      self.setImmediate(A.convertDartClosureToJS(new A._AsyncRun__scheduleImmediateWithSetImmediate_internalCallback(type$.void_Function._as(callback)), 0));
+    },
+    _AsyncRun__scheduleImmediateWithTimer(callback) {
+      type$.void_Function._as(callback);
+      A._TimerImpl$(0, callback);
+    },
+    _TimerImpl$(milliseconds, callback) {
+      var t1 = new A._TimerImpl();
+      t1._TimerImpl$2(milliseconds, callback);
+      return t1;
+    },
+    _makeAsyncAwaitCompleter($T) {
+      return new A._AsyncAwaitCompleter(new A._Future($.Zone__current, $T._eval$1("_Future<0>")), $T._eval$1("_AsyncAwaitCompleter<0>"));
+    },
+    _asyncStartSync(bodyFunction, completer) {
+      bodyFunction.call$2(0, null);
+      completer.isSync = true;
+      return completer._future;
+    },
+    _asyncAwait(object, bodyFunction) {
+      A._awaitOnObject(object, bodyFunction);
+    },
+    _asyncReturn(object, completer) {
+      completer.complete$1(object);
+    },
+    _asyncRethrow(object, completer) {
+      completer.completeError$2(A.unwrapException(object), A.getTraceFromException(object));
+    },
+    _awaitOnObject(object, bodyFunction) {
+      var t1, future,
+        thenCallback = new A._awaitOnObject_closure(bodyFunction),
+        errorCallback = new A._awaitOnObject_closure0(bodyFunction);
+      if (object instanceof A._Future)
+        object._thenAwait$1$2(thenCallback, errorCallback, type$.dynamic);
+      else {
+        t1 = type$.dynamic;
+        if (object instanceof A._Future)
+          object.then$1$2$onError(thenCallback, errorCallback, t1);
+        else {
+          future = new A._Future($.Zone__current, type$._Future_dynamic);
+          future._state = 8;
+          future._resultOrListeners = object;
+          future._thenAwait$1$2(thenCallback, errorCallback, t1);
+        }
+      }
+    },
+    _wrapJsFunctionForAsync($function) {
+      var $protected = function(fn, ERROR) {
+        return function(errorCode, result) {
+          while (true) {
+            try {
+              fn(errorCode, result);
+              break;
+            } catch (error) {
+              result = error;
+              errorCode = ERROR;
+            }
+          }
+        };
+      }($function, 1);
+      return $.Zone__current.registerBinaryCallback$3$1(new A._wrapJsFunctionForAsync_closure($protected), type$.void, type$.int, type$.dynamic);
+    },
+    _SyncStarIterator__terminatedBody(_1, _2, _3) {
+      return 0;
+    },
+    AsyncError_defaultStackTrace(error) {
+      var stackTrace;
+      if (type$.Error._is(error)) {
+        stackTrace = error.get$stackTrace();
+        if (stackTrace != null)
+          return stackTrace;
+      }
+      return B.C__StringStackTrace;
+    },
+    _interceptError(error, stackTrace) {
+      if ($.Zone__current === B.C__RootZone)
+        return null;
+      return null;
+    },
+    _interceptUserError(error, stackTrace) {
+      if ($.Zone__current !== B.C__RootZone)
+        A._interceptError(error, stackTrace);
+      if (stackTrace == null)
+        if (type$.Error._is(error)) {
+          stackTrace = error.get$stackTrace();
+          if (stackTrace == null) {
+            A.Primitives_trySetStackTrace(error, B.C__StringStackTrace);
+            stackTrace = B.C__StringStackTrace;
+          }
+        } else
+          stackTrace = B.C__StringStackTrace;
+      else if (type$.Error._is(error))
+        A.Primitives_trySetStackTrace(error, stackTrace);
+      return new A.AsyncError(error, stackTrace);
+    },
+    _Future__chainCoreFuture(source, target, sync) {
+      var t2, t3, ignoreError, listeners, _box_0 = {},
+        t1 = _box_0.source = source;
+      for (t2 = type$._Future_dynamic; t3 = t1._state, (t3 & 4) !== 0; t1 = source) {
+        source = t2._as(t1._resultOrListeners);
+        _box_0.source = source;
+      }
+      if (t1 === target) {
+        t2 = A.StackTrace_current();
+        target._asyncCompleteErrorObject$1(new A.AsyncError(new A.ArgumentError(true, t1, null, "Cannot complete a future with itself"), t2));
+        return;
+      }
+      ignoreError = target._state & 1;
+      t2 = t1._state = t3 | ignoreError;
+      if ((t2 & 24) === 0) {
+        listeners = type$.nullable__FutureListener_dynamic_dynamic._as(target._resultOrListeners);
+        target._state = target._state & 1 | 4;
+        target._resultOrListeners = t1;
+        t1._prependListeners$1(listeners);
+        return;
+      }
+      if (!sync)
+        if (target._resultOrListeners == null)
+          t1 = (t2 & 16) === 0 || ignoreError !== 0;
+        else
+          t1 = false;
+      else
+        t1 = true;
+      if (t1) {
+        listeners = target._removeListeners$0();
+        target._cloneResult$1(_box_0.source);
+        A._Future__propagateToListeners(target, listeners);
+        return;
+      }
+      target._state ^= 2;
+      A._rootScheduleMicrotask(null, null, target._zone, type$.void_Function._as(new A._Future__chainCoreFuture_closure(_box_0, target)));
+    },
+    _Future__propagateToListeners(source, listeners) {
+      var t2, t3, _box_0, t4, t5, hasError, asyncError, nextListener, nextListener0, sourceResult, t6, zone, oldZone, result, current, _box_1 = {},
+        t1 = _box_1.source = source;
+      for (t2 = type$.AsyncError, t3 = type$.nullable__FutureListener_dynamic_dynamic;;) {
+        _box_0 = {};
+        t4 = t1._state;
+        t5 = (t4 & 16) === 0;
+        hasError = !t5;
+        if (listeners == null) {
+          if (hasError && (t4 & 1) === 0) {
+            asyncError = t2._as(t1._resultOrListeners);
+            A._rootHandleError(asyncError.error, asyncError.stackTrace);
+          }
+          return;
+        }
+        _box_0.listener = listeners;
+        nextListener = listeners._nextListener;
+        for (t1 = listeners; nextListener != null; t1 = nextListener, nextListener = nextListener0) {
+          t1._nextListener = null;
+          A._Future__propagateToListeners(_box_1.source, t1);
+          _box_0.listener = nextListener;
+          nextListener0 = nextListener._nextListener;
+        }
+        t4 = _box_1.source;
+        sourceResult = t4._resultOrListeners;
+        _box_0.listenerHasError = hasError;
+        _box_0.listenerValueOrError = sourceResult;
+        if (t5) {
+          t6 = t1.state;
+          t6 = (t6 & 1) !== 0 || (t6 & 15) === 8;
+        } else
+          t6 = true;
+        if (t6) {
+          zone = t1.result._zone;
+          if (hasError) {
+            t4 = t4._zone === zone;
+            t4 = !(t4 || t4);
+          } else
+            t4 = false;
+          if (t4) {
+            t2._as(sourceResult);
+            A._rootHandleError(sourceResult.error, sourceResult.stackTrace);
+            return;
+          }
+          oldZone = $.Zone__current;
+          if (oldZone !== zone)
+            $.Zone__current = zone;
+          else
+            oldZone = null;
+          t1 = t1.state;
+          if ((t1 & 15) === 8)
+            new A._Future__propagateToListeners_handleWhenCompleteCallback(_box_0, _box_1, hasError).call$0();
+          else if (t5) {
+            if ((t1 & 1) !== 0)
+              new A._Future__propagateToListeners_handleValueCallback(_box_0, sourceResult).call$0();
+          } else if ((t1 & 2) !== 0)
+            new A._Future__propagateToListeners_handleError(_box_1, _box_0).call$0();
+          if (oldZone != null)
+            $.Zone__current = oldZone;
+          t1 = _box_0.listenerValueOrError;
+          if (t1 instanceof A._Future) {
+            t4 = _box_0.listener.$ti;
+            t4 = t4._eval$1("Future<2>")._is(t1) || !t4._rest[1]._is(t1);
+          } else
+            t4 = false;
+          if (t4) {
+            result = _box_0.listener.result;
+            if ((t1._state & 24) !== 0) {
+              current = t3._as(result._resultOrListeners);
+              result._resultOrListeners = null;
+              listeners = result._reverseListeners$1(current);
+              result._state = t1._state & 30 | result._state & 1;
+              result._resultOrListeners = t1._resultOrListeners;
+              _box_1.source = t1;
+              continue;
+            } else
+              A._Future__chainCoreFuture(t1, result, true);
+            return;
+          }
+        }
+        result = _box_0.listener.result;
+        current = t3._as(result._resultOrListeners);
+        result._resultOrListeners = null;
+        listeners = result._reverseListeners$1(current);
+        t1 = _box_0.listenerHasError;
+        t4 = _box_0.listenerValueOrError;
+        if (!t1) {
+          result.$ti._precomputed1._as(t4);
+          result._state = 8;
+          result._resultOrListeners = t4;
+        } else {
+          t2._as(t4);
+          result._state = result._state & 1 | 16;
+          result._resultOrListeners = t4;
+        }
+        _box_1.source = result;
+        t1 = result;
+      }
+    },
+    _registerErrorHandler(errorHandler, zone) {
+      var t1;
+      if (type$.dynamic_Function_Object_StackTrace._is(errorHandler))
+        return zone.registerBinaryCallback$3$1(errorHandler, type$.dynamic, type$.Object, type$.StackTrace);
+      t1 = type$.dynamic_Function_Object;
+      if (t1._is(errorHandler))
+        return t1._as(errorHandler);
+      throw A.wrapException(A.ArgumentError$value(errorHandler, "onError", string$.Error_));
+    },
+    _microtaskLoop() {
+      var entry, next;
+      for (entry = $._nextCallback; entry != null; entry = $._nextCallback) {
+        $._lastPriorityCallback = null;
+        next = entry.next;
+        $._nextCallback = next;
+        if (next == null)
+          $._lastCallback = null;
+        entry.callback.call$0();
+      }
+    },
+    _startMicrotaskLoop() {
+      $._isInCallbackLoop = true;
+      try {
+        A._microtaskLoop();
+      } finally {
+        $._lastPriorityCallback = null;
+        $._isInCallbackLoop = false;
+        if ($._nextCallback != null)
+          $.$get$_AsyncRun__scheduleImmediateClosure().call$1(A.async___startMicrotaskLoop$closure());
+      }
+    },
+    _scheduleAsyncCallback(callback) {
+      var newEntry = new A._AsyncCallbackEntry(callback),
+        lastCallback = $._lastCallback;
+      if (lastCallback == null) {
+        $._nextCallback = $._lastCallback = newEntry;
+        if (!$._isInCallbackLoop)
+          $.$get$_AsyncRun__scheduleImmediateClosure().call$1(A.async___startMicrotaskLoop$closure());
+      } else
+        $._lastCallback = lastCallback.next = newEntry;
+    },
+    _schedulePriorityAsyncCallback(callback) {
+      var entry, lastPriorityCallback, next,
+        t1 = $._nextCallback;
+      if (t1 == null) {
+        A._scheduleAsyncCallback(callback);
+        $._lastPriorityCallback = $._lastCallback;
+        return;
+      }
+      entry = new A._AsyncCallbackEntry(callback);
+      lastPriorityCallback = $._lastPriorityCallback;
+      if (lastPriorityCallback == null) {
+        entry.next = t1;
+        $._nextCallback = $._lastPriorityCallback = entry;
+      } else {
+        next = lastPriorityCallback.next;
+        entry.next = next;
+        $._lastPriorityCallback = lastPriorityCallback.next = entry;
+        if (next == null)
+          $._lastCallback = entry;
+      }
+    },
+    StreamIterator_StreamIterator(stream, $T) {
+      A.checkNotNullable(stream, "stream", type$.Object);
+      return new A._StreamIterator($T._eval$1("_StreamIterator<0>"));
+    },
+    _rootHandleError(error, stackTrace) {
+      A._schedulePriorityAsyncCallback(new A._rootHandleError_closure(error, stackTrace));
+    },
+    _rootRun($self, $parent, zone, f, $R) {
+      var old,
+        t1 = $.Zone__current;
+      if (t1 === zone)
+        return f.call$0();
+      $.Zone__current = zone;
+      old = t1;
+      try {
+        t1 = f.call$0();
+        return t1;
+      } finally {
+        $.Zone__current = old;
+      }
+    },
+    _rootRunUnary($self, $parent, zone, f, arg, $R, $T) {
+      var old,
+        t1 = $.Zone__current;
+      if (t1 === zone)
+        return f.call$1(arg);
+      $.Zone__current = zone;
+      old = t1;
+      try {
+        t1 = f.call$1(arg);
+        return t1;
+      } finally {
+        $.Zone__current = old;
+      }
+    },
+    _rootRunBinary($self, $parent, zone, f, arg1, arg2, $R, $T1, $T2) {
+      var old,
+        t1 = $.Zone__current;
+      if (t1 === zone)
+        return f.call$2(arg1, arg2);
+      $.Zone__current = zone;
+      old = t1;
+      try {
+        t1 = f.call$2(arg1, arg2);
+        return t1;
+      } finally {
+        $.Zone__current = old;
+      }
+    },
+    _rootScheduleMicrotask($self, $parent, zone, f) {
+      type$.void_Function._as(f);
+      if (B.C__RootZone !== zone) {
+        f = zone.bindCallbackGuarded$1(f);
+        f = f;
+      }
+      A._scheduleAsyncCallback(f);
+    },
+    _AsyncRun__initializeScheduleImmediate_internalCallback: function _AsyncRun__initializeScheduleImmediate_internalCallback(t0) {
+      this._box_0 = t0;
+    },
+    _AsyncRun__initializeScheduleImmediate_closure: function _AsyncRun__initializeScheduleImmediate_closure(t0, t1, t2) {
+      this._box_0 = t0;
+      this.div = t1;
+      this.span = t2;
+    },
+    _AsyncRun__scheduleImmediateJsOverride_internalCallback: function _AsyncRun__scheduleImmediateJsOverride_internalCallback(t0) {
+      this.callback = t0;
+    },
+    _AsyncRun__scheduleImmediateWithSetImmediate_internalCallback: function _AsyncRun__scheduleImmediateWithSetImmediate_internalCallback(t0) {
+      this.callback = t0;
+    },
+    _TimerImpl: function _TimerImpl() {
+    },
+    _TimerImpl_internalCallback: function _TimerImpl_internalCallback(t0, t1) {
+      this.$this = t0;
+      this.callback = t1;
+    },
+    _AsyncAwaitCompleter: function _AsyncAwaitCompleter(t0, t1) {
+      this._future = t0;
+      this.isSync = false;
+      this.$ti = t1;
+    },
+    _awaitOnObject_closure: function _awaitOnObject_closure(t0) {
+      this.bodyFunction = t0;
+    },
+    _awaitOnObject_closure0: function _awaitOnObject_closure0(t0) {
+      this.bodyFunction = t0;
+    },
+    _wrapJsFunctionForAsync_closure: function _wrapJsFunctionForAsync_closure(t0) {
+      this.$protected = t0;
+    },
+    _SyncStarIterator: function _SyncStarIterator(t0, t1) {
+      var _ = this;
+      _._body = t0;
+      _._suspendedBodies = _._nestedIterator = _._datum = _._async$_current = null;
+      _.$ti = t1;
+    },
+    _SyncStarIterable: function _SyncStarIterable(t0, t1) {
+      this._outerHelper = t0;
+      this.$ti = t1;
+    },
+    AsyncError: function AsyncError(t0, t1) {
+      this.error = t0;
+      this.stackTrace = t1;
+    },
+    _Completer: function _Completer() {
+    },
+    _AsyncCompleter: function _AsyncCompleter(t0, t1) {
+      this.future = t0;
+      this.$ti = t1;
+    },
+    _FutureListener: function _FutureListener(t0, t1, t2, t3, t4) {
+      var _ = this;
+      _._nextListener = null;
+      _.result = t0;
+      _.state = t1;
+      _.callback = t2;
+      _.errorCallback = t3;
+      _.$ti = t4;
+    },
+    _Future: function _Future(t0, t1) {
+      var _ = this;
+      _._state = 0;
+      _._zone = t0;
+      _._resultOrListeners = null;
+      _.$ti = t1;
+    },
+    _Future__addListener_closure: function _Future__addListener_closure(t0, t1) {
+      this.$this = t0;
+      this.listener = t1;
+    },
+    _Future__prependListeners_closure: function _Future__prependListeners_closure(t0, t1) {
+      this._box_0 = t0;
+      this.$this = t1;
+    },
+    _Future__chainCoreFuture_closure: function _Future__chainCoreFuture_closure(t0, t1) {
+      this._box_0 = t0;
+      this.target = t1;
+    },
+    _Future__asyncCompleteWithValue_closure: function _Future__asyncCompleteWithValue_closure(t0, t1) {
+      this.$this = t0;
+      this.value = t1;
+    },
+    _Future__asyncCompleteErrorObject_closure: function _Future__asyncCompleteErrorObject_closure(t0, t1) {
+      this.$this = t0;
+      this.error = t1;
+    },
+    _Future__propagateToListeners_handleWhenCompleteCallback: function _Future__propagateToListeners_handleWhenCompleteCallback(t0, t1, t2) {
+      this._box_0 = t0;
+      this._box_1 = t1;
+      this.hasError = t2;
+    },
+    _Future__propagateToListeners_handleWhenCompleteCallback_closure: function _Future__propagateToListeners_handleWhenCompleteCallback_closure(t0, t1) {
+      this.joinedResult = t0;
+      this.originalSource = t1;
+    },
+    _Future__propagateToListeners_handleWhenCompleteCallback_closure0: function _Future__propagateToListeners_handleWhenCompleteCallback_closure0(t0) {
+      this.joinedResult = t0;
+    },
+    _Future__propagateToListeners_handleValueCallback: function _Future__propagateToListeners_handleValueCallback(t0, t1) {
+      this._box_0 = t0;
+      this.sourceResult = t1;
+    },
+    _Future__propagateToListeners_handleError: function _Future__propagateToListeners_handleError(t0, t1) {
+      this._box_1 = t0;
+      this._box_0 = t1;
+    },
+    _AsyncCallbackEntry: function _AsyncCallbackEntry(t0) {
+      this.callback = t0;
+      this.next = null;
+    },
+    _StreamIterator: function _StreamIterator(t0) {
+      this.$ti = t0;
+    },
+    _Zone: function _Zone() {
+    },
+    _RootZone: function _RootZone() {
+    },
+    _RootZone_bindCallbackGuarded_closure: function _RootZone_bindCallbackGuarded_closure(t0, t1) {
+      this.$this = t0;
+      this.f = t1;
+    },
+    _rootHandleError_closure: function _rootHandleError_closure(t0, t1) {
+      this.error = t0;
+      this.stackTrace = t1;
+    },
+    _HashMap__getTableEntry(table, key) {
+      var entry = table[key];
+      return entry === table ? null : entry;
+    },
+    _HashMap__setTableEntry(table, key, value) {
+      if (value == null)
+        table[key] = table;
+      else
+        table[key] = value;
+    },
+    _HashMap__newHashTable() {
+      var table = Object.create(null);
+      A._HashMap__setTableEntry(table, "<non-identifier-key>", table);
+      delete table["<non-identifier-key>"];
+      return table;
+    },
+    LinkedHashMap_LinkedHashMap($K, $V) {
+      return new A.JsLinkedHashMap($K._eval$1("@<0>")._bind$1($V)._eval$1("JsLinkedHashMap<1,2>"));
+    },
+    LinkedHashMap_LinkedHashMap$_literal(keyValuePairs, $K, $V) {
+      return $K._eval$1("@<0>")._bind$1($V)._eval$1("LinkedHashMap<1,2>")._as(A.fillLiteralMap(keyValuePairs, new A.JsLinkedHashMap($K._eval$1("@<0>")._bind$1($V)._eval$1("JsLinkedHashMap<1,2>"))));
+    },
+    LinkedHashMap_LinkedHashMap$_empty($K, $V) {
+      return new A.JsLinkedHashMap($K._eval$1("@<0>")._bind$1($V)._eval$1("JsLinkedHashMap<1,2>"));
+    },
+    LinkedHashSet_LinkedHashSet($E) {
+      return new A._LinkedHashSet($E._eval$1("_LinkedHashSet<0>"));
+    },
+    LinkedHashSet_LinkedHashSet$_empty($E) {
+      return new A._LinkedHashSet($E._eval$1("_LinkedHashSet<0>"));
+    },
+    LinkedHashSet_LinkedHashSet$_literal(values, $E) {
+      return $E._eval$1("LinkedHashSet<0>")._as(A.fillLiteralSet(values, new A._LinkedHashSet($E._eval$1("_LinkedHashSet<0>"))));
+    },
+    _LinkedHashSet__newHashTable() {
+      var table = Object.create(null);
+      table["<non-identifier-key>"] = table;
+      delete table["<non-identifier-key>"];
+      return table;
+    },
+    _LinkedHashSetIterator$(_set, _modifications, $E) {
+      var t1 = new A._LinkedHashSetIterator(_set, _modifications, $E._eval$1("_LinkedHashSetIterator<0>"));
+      t1._collection$_cell = _set._collection$_first;
+      return t1;
+    },
+    LinkedHashMap_LinkedHashMap$from(other, $K, $V) {
+      var result = A.LinkedHashMap_LinkedHashMap($K, $V);
+      other.forEach$1(0, new A.LinkedHashMap_LinkedHashMap$from_closure(result, $K, $V));
+      return result;
+    },
+    LinkedHashSet_LinkedHashSet$from(elements, $E) {
+      var t1, _i,
+        result = A.LinkedHashSet_LinkedHashSet($E);
+      for (t1 = elements.length, _i = 0; _i < elements.length; elements.length === t1 || (0, A.throwConcurrentModificationError)(elements), ++_i)
+        result.add$1(0, $E._as(elements[_i]));
+      return result;
+    },
+    LinkedHashSet_LinkedHashSet$of(elements, $E) {
+      var t1 = A.LinkedHashSet_LinkedHashSet($E);
+      t1.addAll$1(0, elements);
+      return t1;
+    },
+    MapBase_mapToString(m) {
+      var result, t1;
+      if (A.isToStringVisiting(m))
+        return "{...}";
+      result = new A.StringBuffer("");
+      try {
+        t1 = {};
+        B.JSArray_methods.add$1($._toStringVisiting, m);
+        result._contents += "{";
+        t1.first = true;
+        m.forEach$1(0, new A.MapBase_mapToString_closure(t1, result));
+        result._contents += "}";
+      } finally {
+        if (0 >= $._toStringVisiting.length)
+          return A.ioore($._toStringVisiting, -1);
+        $._toStringVisiting.pop();
+      }
+      t1 = result._contents;
+      return t1.charCodeAt(0) == 0 ? t1 : t1;
+    },
+    _UnmodifiableSetMixin__throwUnmodifiable() {
+      throw A.wrapException(A.UnsupportedError$("Cannot change an unmodifiable set"));
+    },
+    _HashMap: function _HashMap() {
+    },
+    _HashMap_values_closure: function _HashMap_values_closure(t0) {
+      this.$this = t0;
+    },
+    _IdentityHashMap: function _IdentityHashMap(t0) {
+      var _ = this;
+      _._collection$_length = 0;
+      _._collection$_keys = _._collection$_rest = _._collection$_nums = _._collection$_strings = null;
+      _.$ti = t0;
+    },
+    _HashMapKeyIterable: function _HashMapKeyIterable(t0, t1) {
+      this._collection$_map = t0;
+      this.$ti = t1;
+    },
+    _HashMapKeyIterator: function _HashMapKeyIterator(t0, t1, t2) {
+      var _ = this;
+      _._collection$_map = t0;
+      _._collection$_keys = t1;
+      _._offset = 0;
+      _._collection$_current = null;
+      _.$ti = t2;
+    },
+    _LinkedHashSet: function _LinkedHashSet(t0) {
+      var _ = this;
+      _._collection$_length = 0;
+      _._collection$_last = _._collection$_first = _._collection$_rest = _._collection$_nums = _._collection$_strings = null;
+      _._collection$_modifications = 0;
+      _.$ti = t0;
+    },
+    _LinkedHashSetCell: function _LinkedHashSetCell(t0) {
+      this._element = t0;
+      this._collection$_previous = this._collection$_next = null;
+    },
+    _LinkedHashSetIterator: function _LinkedHashSetIterator(t0, t1, t2) {
+      var _ = this;
+      _._set = t0;
+      _._collection$_modifications = t1;
+      _._collection$_current = _._collection$_cell = null;
+      _.$ti = t2;
+    },
+    LinkedHashMap_LinkedHashMap$from_closure: function LinkedHashMap_LinkedHashMap$from_closure(t0, t1, t2) {
+      this.result = t0;
+      this.K = t1;
+      this.V = t2;
+    },
+    ListBase: function ListBase() {
+    },
+    MapBase: function MapBase() {
+    },
+    MapBase_entries_closure: function MapBase_entries_closure(t0) {
+      this.$this = t0;
+    },
+    MapBase_mapToString_closure: function MapBase_mapToString_closure(t0, t1) {
+      this._box_0 = t0;
+      this.result = t1;
+    },
+    _MapBaseValueIterable: function _MapBaseValueIterable(t0, t1) {
+      this._collection$_map = t0;
+      this.$ti = t1;
+    },
+    _MapBaseValueIterator: function _MapBaseValueIterator(t0, t1, t2) {
+      var _ = this;
+      _._collection$_keys = t0;
+      _._collection$_map = t1;
+      _._collection$_current = null;
+      _.$ti = t2;
+    },
+    _UnmodifiableMapMixin: function _UnmodifiableMapMixin() {
+    },
+    MapView: function MapView() {
+    },
+    UnmodifiableMapView: function UnmodifiableMapView(t0, t1) {
+      this._collection$_map = t0;
+      this.$ti = t1;
+    },
+    SetBase: function SetBase() {
+    },
+    _SetBase: function _SetBase() {
+    },
+    _UnmodifiableSetMixin: function _UnmodifiableSetMixin() {
+    },
+    UnmodifiableSetView: function UnmodifiableSetView(t0, t1) {
+      this._collection$_source = t0;
+      this.$ti = t1;
+    },
+    _UnmodifiableMapView_MapView__UnmodifiableMapMixin: function _UnmodifiableMapView_MapView__UnmodifiableMapMixin() {
+    },
+    _UnmodifiableSetView_SetBase__UnmodifiableSetMixin: function _UnmodifiableSetView_SetBase__UnmodifiableSetMixin() {
+    },
+    _Utf8Decoder__makeNativeUint8List(codeUnits, start, end) {
+      var bytes, t1, i, b,
+        $length = end - start;
+      if ($length <= 4096)
+        bytes = $.$get$_Utf8Decoder__reusableBuffer();
+      else
+        bytes = new Uint8Array($length);
+      for (t1 = J.getInterceptor$asx(codeUnits), i = 0; i < $length; ++i) {
+        b = t1.$index(codeUnits, start + i);
+        if ((b & 255) !== b)
+          b = 255;
+        bytes[i] = b;
+      }
+      return bytes;
+    },
+    _Utf8Decoder__convertInterceptedUint8List(allowMalformed, codeUnits, start, end) {
+      var decoder = allowMalformed ? $.$get$_Utf8Decoder__decoderNonfatal() : $.$get$_Utf8Decoder__decoder();
+      if (decoder == null)
+        return null;
+      if (0 === start && end === codeUnits.length)
+        return A._Utf8Decoder__useTextDecoder(decoder, codeUnits);
+      return A._Utf8Decoder__useTextDecoder(decoder, codeUnits.subarray(start, end));
+    },
+    _Utf8Decoder__useTextDecoder(decoder, codeUnits) {
+      var t1, exception;
+      try {
+        t1 = decoder.decode(codeUnits);
+        return t1;
+      } catch (exception) {
+      }
+      return null;
+    },
+    Base64Codec__checkPadding(source, sourceIndex, sourceEnd, firstPadding, paddingCount, $length) {
+      if (B.JSInt_methods.$mod($length, 4) !== 0)
+        throw A.wrapException(A.FormatException$("Invalid base64 padding, padded length must be multiple of four, is " + $length, source, sourceEnd));
+      if (firstPadding + paddingCount !== $length)
+        throw A.wrapException(A.FormatException$("Invalid base64 padding, '=' not at the end", source, sourceIndex));
+      if (paddingCount > 2)
+        throw A.wrapException(A.FormatException$("Invalid base64 padding, more than two '=' characters", source, sourceIndex));
+    },
+    _Utf8Decoder_errorDescription(state) {
+      switch (state) {
+        case 65:
+          return "Missing extension byte";
+        case 67:
+          return "Unexpected extension byte";
+        case 69:
+          return "Invalid UTF-8 byte";
+        case 71:
+          return "Overlong encoding";
+        case 73:
+          return "Out of unicode range";
+        case 75:
+          return "Encoded surrogate";
+        case 77:
+          return "Unfinished UTF-8 octet sequence";
+        default:
+          return "";
+      }
+    },
+    _Utf8Decoder__decoder_closure: function _Utf8Decoder__decoder_closure() {
+    },
+    _Utf8Decoder__decoderNonfatal_closure: function _Utf8Decoder__decoderNonfatal_closure() {
+    },
+    Base64Codec: function Base64Codec() {
+    },
+    Base64Encoder: function Base64Encoder() {
+    },
+    Codec: function Codec() {
+    },
+    Converter: function Converter() {
+    },
+    Encoding: function Encoding() {
+    },
+    Utf8Codec: function Utf8Codec() {
+    },
+    Utf8Decoder: function Utf8Decoder(t0) {
+      this._allowMalformed = t0;
+    },
+    _Utf8Decoder: function _Utf8Decoder(t0) {
+      this.allowMalformed = t0;
+      this._convert$_state = 16;
+      this._charOrIndex = 0;
+    },
+    int_parse(source) {
+      var value = A.Primitives_parseInt(source, null);
+      if (value != null)
+        return value;
+      throw A.wrapException(A.FormatException$(source, null, null));
+    },
+    Error__throw(error, stackTrace) {
+      error = A.initializeExceptionWrapper(error, new Error());
+      if (error == null)
+        error = A._asObject(error);
+      error.stack = stackTrace.toString$0(0);
+      throw error;
+    },
+    List_List$filled($length, fill, growable, $E) {
+      var i,
+        result = J.JSArray_JSArray$fixed($length, $E);
+      if ($length !== 0 && fill != null)
+        for (i = 0; i < $length; ++i)
+          result[i] = fill;
+      return result;
+    },
+    List_List$from(elements, growable, $E) {
+      var t1,
+        list = A._setArrayType([], $E._eval$1("JSArray<0>"));
+      for (t1 = J.get$iterator$ax(elements); t1.moveNext$0();)
+        B.JSArray_methods.add$1(list, $E._as(t1.get$current()));
+      if (growable)
+        return list;
+      list.$flags = 1;
+      return list;
+    },
+    List_List$_of(elements, $E) {
+      var list, t1;
+      if (Array.isArray(elements))
+        return A._setArrayType(elements.slice(0), $E._eval$1("JSArray<0>"));
+      list = A._setArrayType([], $E._eval$1("JSArray<0>"));
+      for (t1 = J.get$iterator$ax(elements); t1.moveNext$0();)
+        B.JSArray_methods.add$1(list, t1.get$current());
+      return list;
+    },
+    List_List$unmodifiable(elements, $E) {
+      var result = A.List_List$from(elements, false, $E);
+      result.$flags = 3;
+      return result;
+    },
+    String_String$fromCharCodes(charCodes, start, end) {
+      var maxLength, t1;
+      A.RangeError_checkNotNegative(start, "start");
+      if (end != null) {
+        maxLength = end - start;
+        if (maxLength < 0)
+          throw A.wrapException(A.RangeError$range(end, start, null, "end", null));
+        if (maxLength === 0)
+          return "";
+      }
+      t1 = A.String__stringFromUint8List(charCodes, start, end);
+      return t1;
+    },
+    String__stringFromUint8List(charCodes, start, endOrNull) {
+      var len = charCodes.length;
+      if (start >= len)
+        return "";
+      return A.Primitives_stringFromNativeUint8List(charCodes, start, endOrNull == null || endOrNull > len ? len : endOrNull);
+    },
+    StringBuffer__writeAll(string, objects, separator) {
+      var iterator = J.get$iterator$ax(objects);
+      if (!iterator.moveNext$0())
+        return string;
+      if (separator.length === 0) {
+        do
+          string += A.S(iterator.get$current());
+        while (iterator.moveNext$0());
+      } else {
+        string += A.S(iterator.get$current());
+        while (iterator.moveNext$0())
+          string = string + separator + A.S(iterator.get$current());
+      }
+      return string;
+    },
+    Uri_base() {
+      var cachedUri, uri,
+        current = A.Primitives_currentUri();
+      if (current == null)
+        throw A.wrapException(A.UnsupportedError$("'Uri.base' is not supported"));
+      cachedUri = $.Uri__cachedBaseUri;
+      if (cachedUri != null && current === $.Uri__cachedBaseString)
+        return cachedUri;
+      uri = A.Uri_parse(current);
+      $.Uri__cachedBaseUri = uri;
+      $.Uri__cachedBaseString = current;
+      return uri;
+    },
+    StackTrace_current() {
+      return A.getTraceFromException(new Error());
+    },
+    DateTime__fourDigits(n) {
+      var absN = Math.abs(n),
+        sign = n < 0 ? "-" : "";
+      if (absN >= 1000)
+        return "" + n;
+      if (absN >= 100)
+        return sign + "0" + absN;
+      if (absN >= 10)
+        return sign + "00" + absN;
+      return sign + "000" + absN;
+    },
+    DateTime__threeDigits(n) {
+      if (n >= 100)
+        return "" + n;
+      if (n >= 10)
+        return "0" + n;
+      return "00" + n;
+    },
+    DateTime__twoDigits(n) {
+      if (n >= 10)
+        return "" + n;
+      return "0" + n;
+    },
+    Error_safeToString(object) {
+      if (typeof object == "number" || A._isBool(object) || object == null)
+        return J.toString$0$(object);
+      if (typeof object == "string")
+        return JSON.stringify(object);
+      return A.Primitives_safeToString(object);
+    },
+    Error_throwWithStackTrace(error, stackTrace) {
+      A.checkNotNullable(error, "error", type$.Object);
+      A.checkNotNullable(stackTrace, "stackTrace", type$.StackTrace);
+      A.Error__throw(error, stackTrace);
+    },
+    AssertionError$(message) {
+      return new A.AssertionError(message);
+    },
+    ArgumentError$(message, $name) {
+      return new A.ArgumentError(false, null, $name, message);
+    },
+    ArgumentError$value(value, $name, message) {
+      return new A.ArgumentError(true, value, $name, message);
+    },
+    RangeError$range(invalidValue, minValue, maxValue, $name, message) {
+      return new A.RangeError(minValue, maxValue, true, invalidValue, $name, "Invalid value");
+    },
+    RangeError_checkValidRange(start, end, $length) {
+      if (0 > start || start > $length)
+        throw A.wrapException(A.RangeError$range(start, 0, $length, "start", null));
+      if (end != null) {
+        if (start > end || end > $length)
+          throw A.wrapException(A.RangeError$range(end, start, $length, "end", null));
+        return end;
+      }
+      return $length;
+    },
+    RangeError_checkNotNegative(value, $name) {
+      if (value < 0)
+        throw A.wrapException(A.RangeError$range(value, 0, null, $name, null));
+      return value;
+    },
+    IndexError$withLength(invalidValue, $length, indexable, $name) {
+      return new A.IndexError($length, true, invalidValue, $name, "Index out of range");
+    },
+    UnsupportedError$(message) {
+      return new A.UnsupportedError(message);
+    },
+    UnimplementedError$(message) {
+      return new A.UnimplementedError(message);
+    },
+    StateError$(message) {
+      return new A.StateError(message);
+    },
+    ConcurrentModificationError$(modifiedObject) {
+      return new A.ConcurrentModificationError(modifiedObject);
+    },
+    FormatException$(message, source, offset) {
+      return new A.FormatException(message, source, offset);
+    },
+    Iterable_iterableToShortString(iterable, leftDelimiter, rightDelimiter) {
+      var parts, t1;
+      if (A.isToStringVisiting(iterable)) {
+        if (leftDelimiter === "(" && rightDelimiter === ")")
+          return "(...)";
+        return leftDelimiter + "..." + rightDelimiter;
+      }
+      parts = A._setArrayType([], type$.JSArray_String);
+      B.JSArray_methods.add$1($._toStringVisiting, iterable);
+      try {
+        A._iterablePartsToStrings(iterable, parts);
+      } finally {
+        if (0 >= $._toStringVisiting.length)
+          return A.ioore($._toStringVisiting, -1);
+        $._toStringVisiting.pop();
+      }
+      t1 = A.StringBuffer__writeAll(leftDelimiter, type$.Iterable_dynamic._as(parts), ", ") + rightDelimiter;
+      return t1.charCodeAt(0) == 0 ? t1 : t1;
+    },
+    Iterable_iterableToFullString(iterable, leftDelimiter, rightDelimiter) {
+      var buffer, t1;
+      if (A.isToStringVisiting(iterable))
+        return leftDelimiter + "..." + rightDelimiter;
+      buffer = new A.StringBuffer(leftDelimiter);
+      B.JSArray_methods.add$1($._toStringVisiting, iterable);
+      try {
+        t1 = buffer;
+        t1._contents = A.StringBuffer__writeAll(t1._contents, iterable, ", ");
+      } finally {
+        if (0 >= $._toStringVisiting.length)
+          return A.ioore($._toStringVisiting, -1);
+        $._toStringVisiting.pop();
+      }
+      buffer._contents += rightDelimiter;
+      t1 = buffer._contents;
+      return t1.charCodeAt(0) == 0 ? t1 : t1;
+    },
+    _iterablePartsToStrings(iterable, parts) {
+      var next, ultimateString, penultimateString, penultimate, ultimate, ultimate0, elision,
+        it = iterable.get$iterator(iterable),
+        $length = 0, count = 0;
+      for (;;) {
+        if (!($length < 80 || count < 3))
+          break;
+        if (!it.moveNext$0())
+          return;
+        next = A.S(it.get$current());
+        B.JSArray_methods.add$1(parts, next);
+        $length += next.length + 2;
+        ++count;
+      }
+      if (!it.moveNext$0()) {
+        if (count <= 5)
+          return;
+        if (0 >= parts.length)
+          return A.ioore(parts, -1);
+        ultimateString = parts.pop();
+        if (0 >= parts.length)
+          return A.ioore(parts, -1);
+        penultimateString = parts.pop();
+      } else {
+        penultimate = it.get$current();
+        ++count;
+        if (!it.moveNext$0()) {
+          if (count <= 4) {
+            B.JSArray_methods.add$1(parts, A.S(penultimate));
+            return;
+          }
+          ultimateString = A.S(penultimate);
+          if (0 >= parts.length)
+            return A.ioore(parts, -1);
+          penultimateString = parts.pop();
+          $length += ultimateString.length + 2;
+        } else {
+          ultimate = it.get$current();
+          ++count;
+          for (; it.moveNext$0(); penultimate = ultimate, ultimate = ultimate0) {
+            ultimate0 = it.get$current();
+            ++count;
+            if (count > 100) {
+              for (;;) {
+                if (!($length > 75 && count > 3))
+                  break;
+                if (0 >= parts.length)
+                  return A.ioore(parts, -1);
+                $length -= parts.pop().length + 2;
+                --count;
+              }
+              B.JSArray_methods.add$1(parts, "...");
+              return;
+            }
+          }
+          penultimateString = A.S(penultimate);
+          ultimateString = A.S(ultimate);
+          $length += ultimateString.length + penultimateString.length + 4;
+        }
+      }
+      if (count > parts.length + 2) {
+        $length += 5;
+        elision = "...";
+      } else
+        elision = null;
+      for (;;) {
+        if (!($length > 80 && parts.length > 3))
+          break;
+        if (0 >= parts.length)
+          return A.ioore(parts, -1);
+        $length -= parts.pop().length + 2;
+        if (elision == null) {
+          $length += 5;
+          elision = "...";
+        }
+      }
+      if (elision != null)
+        B.JSArray_methods.add$1(parts, elision);
+      B.JSArray_methods.add$1(parts, penultimateString);
+      B.JSArray_methods.add$1(parts, ultimateString);
+    },
+    Object_hash(object1, object2, object3, object4, object5, object6) {
+      var t1;
+      if (B.C_SentinelValue === object3) {
+        t1 = J.get$hashCode$(object1);
+        object2 = J.get$hashCode$(object2);
+        return A.SystemHash_finish(A.SystemHash_combine(A.SystemHash_combine($.$get$_hashSeed(), t1), object2));
+      }
+      if (B.C_SentinelValue === object4) {
+        t1 = J.get$hashCode$(object1);
+        object2 = J.get$hashCode$(object2);
+        object3 = J.get$hashCode$(object3);
+        return A.SystemHash_finish(A.SystemHash_combine(A.SystemHash_combine(A.SystemHash_combine($.$get$_hashSeed(), t1), object2), object3));
+      }
+      if (B.C_SentinelValue === object5) {
+        t1 = J.get$hashCode$(object1);
+        object2 = J.get$hashCode$(object2);
+        object3 = J.get$hashCode$(object3);
+        object4 = J.get$hashCode$(object4);
+        return A.SystemHash_finish(A.SystemHash_combine(A.SystemHash_combine(A.SystemHash_combine(A.SystemHash_combine($.$get$_hashSeed(), t1), object2), object3), object4));
+      }
+      if (B.C_SentinelValue === object6) {
+        t1 = J.get$hashCode$(object1);
+        object2 = J.get$hashCode$(object2);
+        object3 = J.get$hashCode$(object3);
+        object4 = J.get$hashCode$(object4);
+        object5 = J.get$hashCode$(object5);
+        return A.SystemHash_finish(A.SystemHash_combine(A.SystemHash_combine(A.SystemHash_combine(A.SystemHash_combine(A.SystemHash_combine($.$get$_hashSeed(), t1), object2), object3), object4), object5));
+      }
+      t1 = J.get$hashCode$(object1);
+      object2 = J.get$hashCode$(object2);
+      object3 = J.get$hashCode$(object3);
+      object4 = J.get$hashCode$(object4);
+      object5 = J.get$hashCode$(object5);
+      object6 = J.get$hashCode$(object6);
+      object6 = A.SystemHash_finish(A.SystemHash_combine(A.SystemHash_combine(A.SystemHash_combine(A.SystemHash_combine(A.SystemHash_combine(A.SystemHash_combine($.$get$_hashSeed(), t1), object2), object3), object4), object5), object6));
+      return object6;
+    },
+    Uri_parse(uri) {
+      var delta, indices, schemeEnd, hostStart, portStart, pathStart, queryStart, fragmentStart, isSimple, scheme, t1, t2, schemeAuth, queryStart0, pathStart0, port, userInfoStart, userInfo, host, portNumber, path, query, _null = null,
+        end = uri.length;
+      if (end >= 5) {
+        if (4 >= end)
+          return A.ioore(uri, 4);
+        delta = ((uri.charCodeAt(4) ^ 58) * 3 | uri.charCodeAt(0) ^ 100 | uri.charCodeAt(1) ^ 97 | uri.charCodeAt(2) ^ 116 | uri.charCodeAt(3) ^ 97) >>> 0;
+        if (delta === 0)
+          return A.UriData__parse(end < end ? B.JSString_methods.substring$2(uri, 0, end) : uri, 5, _null).get$uri();
+        else if (delta === 32)
+          return A.UriData__parse(B.JSString_methods.substring$2(uri, 5, end), 0, _null).get$uri();
+      }
+      indices = A.List_List$filled(8, 0, false, type$.int);
+      B.JSArray_methods.$indexSet(indices, 0, 0);
+      B.JSArray_methods.$indexSet(indices, 1, -1);
+      B.JSArray_methods.$indexSet(indices, 2, -1);
+      B.JSArray_methods.$indexSet(indices, 7, -1);
+      B.JSArray_methods.$indexSet(indices, 3, 0);
+      B.JSArray_methods.$indexSet(indices, 4, 0);
+      B.JSArray_methods.$indexSet(indices, 5, end);
+      B.JSArray_methods.$indexSet(indices, 6, end);
+      if (A._scan(uri, 0, end, 0, indices) >= 14)
+        B.JSArray_methods.$indexSet(indices, 7, end);
+      schemeEnd = indices[1];
+      if (schemeEnd >= 0)
+        if (A._scan(uri, 0, schemeEnd, 20, indices) === 20)
+          indices[7] = schemeEnd;
+      hostStart = indices[2] + 1;
+      portStart = indices[3];
+      pathStart = indices[4];
+      queryStart = indices[5];
+      fragmentStart = indices[6];
+      if (fragmentStart < queryStart)
+        queryStart = fragmentStart;
+      if (pathStart < hostStart)
+        pathStart = queryStart;
+      else if (pathStart <= schemeEnd)
+        pathStart = schemeEnd + 1;
+      if (portStart < hostStart)
+        portStart = pathStart;
+      isSimple = indices[7] < 0;
+      scheme = _null;
+      if (isSimple) {
+        isSimple = false;
+        if (!(hostStart > schemeEnd + 3)) {
+          t1 = portStart > 0;
+          if (!(t1 && portStart + 1 === pathStart)) {
+            if (!B.JSString_methods.startsWith$2(uri, "\\", pathStart))
+              if (hostStart > 0)
+                t2 = B.JSString_methods.startsWith$2(uri, "\\", hostStart - 1) || B.JSString_methods.startsWith$2(uri, "\\", hostStart - 2);
+              else
+                t2 = false;
+            else
+              t2 = true;
+            if (!t2) {
+              if (!(queryStart < end && queryStart === pathStart + 2 && B.JSString_methods.startsWith$2(uri, "..", pathStart)))
+                t2 = queryStart > pathStart + 2 && B.JSString_methods.startsWith$2(uri, "/..", queryStart - 3);
+              else
+                t2 = true;
+              if (!t2)
+                if (schemeEnd === 4) {
+                  if (B.JSString_methods.startsWith$2(uri, "file", 0)) {
+                    if (hostStart <= 0) {
+                      if (!B.JSString_methods.startsWith$2(uri, "/", pathStart)) {
+                        schemeAuth = "file:///";
+                        delta = 3;
+                      } else {
+                        schemeAuth = "file://";
+                        delta = 2;
+                      }
+                      uri = schemeAuth + B.JSString_methods.substring$2(uri, pathStart, end);
+                      queryStart += delta;
+                      fragmentStart += delta;
+                      end = uri.length;
+                      hostStart = 7;
+                      portStart = 7;
+                      pathStart = 7;
+                    } else if (pathStart === queryStart) {
+                      ++fragmentStart;
+                      queryStart0 = queryStart + 1;
+                      uri = B.JSString_methods.replaceRange$3(uri, pathStart, queryStart, "/");
+                      ++end;
+                      queryStart = queryStart0;
+                    }
+                    scheme = "file";
+                  } else if (B.JSString_methods.startsWith$2(uri, "http", 0)) {
+                    if (t1 && portStart + 3 === pathStart && B.JSString_methods.startsWith$2(uri, "80", portStart + 1)) {
+                      fragmentStart -= 3;
+                      pathStart0 = pathStart - 3;
+                      queryStart -= 3;
+                      uri = B.JSString_methods.replaceRange$3(uri, portStart, pathStart, "");
+                      end -= 3;
+                      pathStart = pathStart0;
+                    }
+                    scheme = "http";
+                  }
+                } else if (schemeEnd === 5 && B.JSString_methods.startsWith$2(uri, "https", 0)) {
+                  if (t1 && portStart + 4 === pathStart && B.JSString_methods.startsWith$2(uri, "443", portStart + 1)) {
+                    fragmentStart -= 4;
+                    pathStart0 = pathStart - 4;
+                    queryStart -= 4;
+                    uri = B.JSString_methods.replaceRange$3(uri, portStart, pathStart, "");
+                    end -= 3;
+                    pathStart = pathStart0;
+                  }
+                  scheme = "https";
+                }
+              isSimple = !t2;
+            }
+          }
+        }
+      }
+      if (isSimple)
+        return new A._SimpleUri(end < uri.length ? B.JSString_methods.substring$2(uri, 0, end) : uri, schemeEnd, hostStart, portStart, pathStart, queryStart, fragmentStart, scheme);
+      if (scheme == null)
+        if (schemeEnd > 0)
+          scheme = A._Uri__makeScheme(uri, 0, schemeEnd);
+        else {
+          if (schemeEnd === 0)
+            A._Uri__fail(uri, 0, "Invalid empty scheme");
+          scheme = "";
+        }
+      port = _null;
+      if (hostStart > 0) {
+        userInfoStart = schemeEnd + 3;
+        userInfo = userInfoStart < hostStart ? A._Uri__makeUserInfo(uri, userInfoStart, hostStart - 1) : "";
+        host = A._Uri__makeHost(uri, hostStart, portStart, false);
+        t1 = portStart + 1;
+        if (t1 < pathStart) {
+          portNumber = A.Primitives_parseInt(B.JSString_methods.substring$2(uri, t1, pathStart), _null);
+          port = A._Uri__makePort(portNumber == null ? A.throwExpression(A.FormatException$("Invalid port", uri, t1)) : portNumber, scheme);
+        }
+      } else {
+        host = _null;
+        userInfo = "";
+      }
+      path = A._Uri__makePath(uri, pathStart, queryStart, _null, scheme, host != null);
+      query = queryStart < fragmentStart ? A._Uri__makeQuery(uri, queryStart + 1, fragmentStart, _null) : _null;
+      return A._Uri$_internal(scheme, userInfo, host, port, path, query, fragmentStart < end ? A._Uri__makeFragment(uri, fragmentStart + 1, end) : _null);
+    },
+    Uri_splitQueryString(query) {
+      var t1 = type$.String;
+      return B.JSArray_methods.fold$1$2(A._setArrayType(query.split("&"), type$.JSArray_String), A.LinkedHashMap_LinkedHashMap$_empty(t1, t1), new A.Uri_splitQueryString_closure(B.C_Utf8Codec), type$.Map_String_String);
+    },
+    Uri__ipv4FormatError(msg, source, position) {
+      throw A.wrapException(A.FormatException$("Illegal IPv4 address, " + msg, source, position));
+    },
+    Uri__parseIPv4Address(host, start, end, target, targetOffset) {
+      var t1, octetStart, cursor, octetIndex, octetValue, char, digit, octetIndex0, t2,
+        _s17_ = "invalid character";
+      for (t1 = host.length, octetStart = start, cursor = octetStart, octetIndex = 0, octetValue = 0;;) {
+        if (cursor >= end)
+          char = 0;
+        else {
+          if (!(cursor >= 0 && cursor < t1))
+            return A.ioore(host, cursor);
+          char = host.charCodeAt(cursor);
+        }
+        digit = char ^ 48;
+        if (digit <= 9) {
+          if (octetValue !== 0 || cursor === octetStart) {
+            octetValue = octetValue * 10 + digit;
+            if (octetValue <= 255) {
+              ++cursor;
+              continue;
+            }
+            A.Uri__ipv4FormatError("each part must be in the range 0..255", host, octetStart);
+          }
+          A.Uri__ipv4FormatError("parts must not have leading zeros", host, octetStart);
+        }
+        if (cursor === octetStart) {
+          if (cursor === end)
+            break;
+          A.Uri__ipv4FormatError(_s17_, host, cursor);
+        }
+        octetIndex0 = octetIndex + 1;
+        t2 = targetOffset + octetIndex;
+        target.$flags & 2 && A.throwUnsupportedOperation(target);
+        if (!(t2 < 16))
+          return A.ioore(target, t2);
+        target[t2] = octetValue;
+        if (char === 46) {
+          if (octetIndex0 < 4) {
+            ++cursor;
+            octetIndex = octetIndex0;
+            octetStart = cursor;
+            octetValue = 0;
+            continue;
+          }
+          break;
+        }
+        if (cursor === end) {
+          if (octetIndex0 === 4)
+            return;
+          break;
+        }
+        A.Uri__ipv4FormatError(_s17_, host, cursor);
+        octetIndex = octetIndex0;
+      }
+      A.Uri__ipv4FormatError("IPv4 address should contain exactly 4 parts", host, cursor);
+    },
+    Uri__validateIPvAddress(host, start, end) {
+      var error;
+      if (start === end)
+        throw A.wrapException(A.FormatException$("Empty IP address", host, start));
+      if (!(start >= 0 && start < host.length))
+        return A.ioore(host, start);
+      if (host.charCodeAt(start) === 118) {
+        error = A.Uri__validateIPvFutureAddress(host, start, end);
+        if (error != null)
+          throw A.wrapException(error);
+        return false;
+      }
+      A.Uri_parseIPv6Address(host, start, end);
+      return true;
+    },
+    Uri__validateIPvFutureAddress(host, start, end) {
+      var t1, cursor, cursor0, char, ucChar,
+        _s38_ = "Missing hex-digit in IPvFuture address",
+        _s128_ = string$.x00_____;
+      ++start;
+      for (t1 = host.length, cursor = start;; cursor = cursor0) {
+        if (cursor < end) {
+          cursor0 = cursor + 1;
+          if (!(cursor >= 0 && cursor < t1))
+            return A.ioore(host, cursor);
+          char = host.charCodeAt(cursor);
+          if ((char ^ 48) <= 9)
+            continue;
+          ucChar = char | 32;
+          if (ucChar >= 97 && ucChar <= 102)
+            continue;
+          if (char === 46) {
+            if (cursor0 - 1 === start)
+              return new A.FormatException(_s38_, host, cursor0);
+            cursor = cursor0;
+            break;
+          }
+          return new A.FormatException("Unexpected character", host, cursor0 - 1);
+        }
+        if (cursor - 1 === start)
+          return new A.FormatException(_s38_, host, cursor);
+        return new A.FormatException("Missing '.' in IPvFuture address", host, cursor);
+      }
+      if (cursor === end)
+        return new A.FormatException("Missing address in IPvFuture address, host, cursor", null, null);
+      for (;;) {
+        if (!(cursor >= 0 && cursor < t1))
+          return A.ioore(host, cursor);
+        char = host.charCodeAt(cursor);
+        if (!(char < 128))
+          return A.ioore(_s128_, char);
+        if ((_s128_.charCodeAt(char) & 16) !== 0) {
+          ++cursor;
+          if (cursor < end)
+            continue;
+          return null;
+        }
+        return new A.FormatException("Invalid IPvFuture address character", host, cursor);
+      }
+    },
+    Uri_parseIPv6Address(host, start, end) {
+      var result, t1, wildcardAt, partCount, t2, cursor, partStart, hexValue, decValue, char, _0_0, decValue0, hexDigit, _1_0, t3, partCount0, partAfterWildcard, partsAfterWildcard, positionAfterWildcard, newPositionAfterWildcard,
+        _s39_ = "an address must contain at most 8 parts",
+        error = new A.Uri_parseIPv6Address_error(host);
+      if (end - start < 2)
+        error.call$2("address is too short", null);
+      result = new Uint8Array(16);
+      t1 = host.length;
+      if (!(start >= 0 && start < t1))
+        return A.ioore(host, start);
+      wildcardAt = -1;
+      partCount = 0;
+      if (host.charCodeAt(start) === 58) {
+        t2 = start + 1;
+        if (!(t2 < t1))
+          return A.ioore(host, t2);
+        if (host.charCodeAt(t2) === 58) {
+          cursor = start + 2;
+          partStart = cursor;
+          wildcardAt = 0;
+          partCount = 1;
+        } else {
+          error.call$2("invalid start colon", start);
+          cursor = start;
+          partStart = cursor;
+        }
+      } else {
+        cursor = start;
+        partStart = cursor;
+      }
+      for (hexValue = 0, decValue = true;;) {
+        if (cursor >= end)
+          char = 0;
+        else {
+          if (!(cursor < t1))
+            return A.ioore(host, cursor);
+          char = host.charCodeAt(cursor);
+        }
+        $label0$0: {
+          _0_0 = char ^ 48;
+          decValue0 = false;
+          if (_0_0 <= 9)
+            hexDigit = _0_0;
+          else {
+            _1_0 = char | 32;
+            if (_1_0 >= 97 && _1_0 <= 102)
+              hexDigit = _1_0 - 87;
+            else
+              break $label0$0;
+            decValue = decValue0;
+          }
+          if (cursor < partStart + 4) {
+            hexValue = hexValue * 16 + hexDigit;
+            ++cursor;
+            continue;
+          }
+          error.call$2("an IPv6 part can contain a maximum of 4 hex digits", partStart);
+        }
+        if (cursor > partStart) {
+          if (char === 46) {
+            if (decValue) {
+              if (partCount <= 6) {
+                A.Uri__parseIPv4Address(host, partStart, end, result, partCount * 2);
+                partCount += 2;
+                cursor = end;
+                break;
+              }
+              error.call$2(_s39_, partStart);
+            }
+            break;
+          }
+          t2 = partCount * 2;
+          t3 = B.JSInt_methods._shrOtherPositive$1(hexValue, 8);
+          if (!(t2 < 16))
+            return A.ioore(result, t2);
+          result[t2] = t3;
+          ++t2;
+          if (!(t2 < 16))
+            return A.ioore(result, t2);
+          result[t2] = hexValue & 255;
+          ++partCount;
+          if (char === 58) {
+            if (partCount < 8) {
+              ++cursor;
+              partStart = cursor;
+              hexValue = 0;
+              decValue = true;
+              continue;
+            }
+            error.call$2(_s39_, cursor);
+          }
+          break;
+        }
+        if (char === 58) {
+          if (wildcardAt < 0) {
+            partCount0 = partCount + 1;
+            ++cursor;
+            wildcardAt = partCount;
+            partCount = partCount0;
+            partStart = cursor;
+            continue;
+          }
+          error.call$2("only one wildcard `::` is allowed", cursor);
+        }
+        if (wildcardAt !== partCount - 1)
+          error.call$2("missing part", cursor);
+        break;
+      }
+      if (cursor < end)
+        error.call$2("invalid character", cursor);
+      if (partCount < 8) {
+        if (wildcardAt < 0)
+          error.call$2("an address without a wildcard must contain exactly 8 parts", end);
+        partAfterWildcard = wildcardAt + 1;
+        partsAfterWildcard = partCount - partAfterWildcard;
+        if (partsAfterWildcard > 0) {
+          positionAfterWildcard = partAfterWildcard * 2;
+          newPositionAfterWildcard = 16 - partsAfterWildcard * 2;
+          B.NativeUint8List_methods.setRange$4(result, newPositionAfterWildcard, 16, result, positionAfterWildcard);
+          B.NativeUint8List_methods.fillRange$3(result, positionAfterWildcard, newPositionAfterWildcard, 0);
+        }
+      }
+      return result;
+    },
+    _Uri$_internal(scheme, _userInfo, _host, _port, path, _query, _fragment) {
+      return new A._Uri(scheme, _userInfo, _host, _port, path, _query, _fragment);
+    },
+    _Uri__defaultPort(scheme) {
+      if (scheme === "http")
+        return 80;
+      if (scheme === "https")
+        return 443;
+      return 0;
+    },
+    _Uri__fail(uri, index, message) {
+      throw A.wrapException(A.FormatException$(message, uri, index));
+    },
+    _Uri__makePort(port, scheme) {
+      var t1 = A._Uri__defaultPort(scheme);
+      if (port === t1)
+        return null;
+      return port;
+    },
+    _Uri__makeHost(host, start, end, strictIPv6) {
+      var t1, t2, t3, zoneID, index, zoneIDstart, isIPv6, hostChars, i;
+      if (start === end)
+        return "";
+      t1 = host.length;
+      if (!(start >= 0 && start < t1))
+        return A.ioore(host, start);
+      if (host.charCodeAt(start) === 91) {
+        t2 = end - 1;
+        if (!(t2 >= 0 && t2 < t1))
+          return A.ioore(host, t2);
+        if (host.charCodeAt(t2) !== 93)
+          A._Uri__fail(host, start, "Missing end `]` to match `[` in host");
+        t3 = start + 1;
+        if (!(t3 < t1))
+          return A.ioore(host, t3);
+        zoneID = "";
+        if (host.charCodeAt(t3) !== 118) {
+          index = A._Uri__checkZoneID(host, t3, t2);
+          if (index < t2) {
+            zoneIDstart = index + 1;
+            zoneID = A._Uri__normalizeZoneID(host, B.JSString_methods.startsWith$2(host, "25", zoneIDstart) ? index + 3 : zoneIDstart, t2, "%25");
+          }
+        } else
+          index = t2;
+        isIPv6 = A.Uri__validateIPvAddress(host, t3, index);
+        hostChars = B.JSString_methods.substring$2(host, t3, index);
+        return "[" + (isIPv6 ? hostChars.toLowerCase() : hostChars) + zoneID + "]";
+      }
+      for (i = start; i < end; ++i) {
+        if (!(i < t1))
+          return A.ioore(host, i);
+        if (host.charCodeAt(i) === 58) {
+          index = B.JSString_methods.indexOf$2(host, "%", start);
+          index = index >= start && index < end ? index : end;
+          if (index < end) {
+            zoneIDstart = index + 1;
+            zoneID = A._Uri__normalizeZoneID(host, B.JSString_methods.startsWith$2(host, "25", zoneIDstart) ? index + 3 : zoneIDstart, end, "%25");
+          } else
+            zoneID = "";
+          A.Uri_parseIPv6Address(host, start, index);
+          return "[" + B.JSString_methods.substring$2(host, start, index) + zoneID + "]";
+        }
+      }
+      return A._Uri__normalizeRegName(host, start, end);
+    },
+    _Uri__checkZoneID(host, start, end) {
+      var index = B.JSString_methods.indexOf$2(host, "%", start);
+      return index >= start && index < end ? index : end;
+    },
+    _Uri__normalizeZoneID(host, start, end, prefix) {
+      var t1, index, sectionStart, isNormalized, char, replacement, t2, t3, sourceLength, tail, slice,
+        buffer = prefix !== "" ? new A.StringBuffer(prefix) : null;
+      for (t1 = host.length, index = start, sectionStart = index, isNormalized = true; index < end;) {
+        if (!(index >= 0 && index < t1))
+          return A.ioore(host, index);
+        char = host.charCodeAt(index);
+        if (char === 37) {
+          replacement = A._Uri__normalizeEscape(host, index, true);
+          t2 = replacement == null;
+          if (t2 && isNormalized) {
+            index += 3;
+            continue;
+          }
+          if (buffer == null)
+            buffer = new A.StringBuffer("");
+          t3 = buffer._contents += B.JSString_methods.substring$2(host, sectionStart, index);
+          if (t2)
+            replacement = B.JSString_methods.substring$2(host, index, index + 3);
+          else if (replacement === "%")
+            A._Uri__fail(host, index, "ZoneID should not contain % anymore");
+          buffer._contents = t3 + replacement;
+          index += 3;
+          sectionStart = index;
+          isNormalized = true;
+        } else if (char < 127 && (string$.x00_____.charCodeAt(char) & 1) !== 0) {
+          if (isNormalized && 65 <= char && 90 >= char) {
+            if (buffer == null)
+              buffer = new A.StringBuffer("");
+            if (sectionStart < index) {
+              buffer._contents += B.JSString_methods.substring$2(host, sectionStart, index);
+              sectionStart = index;
+            }
+            isNormalized = false;
+          }
+          ++index;
+        } else {
+          sourceLength = 1;
+          if ((char & 64512) === 55296 && index + 1 < end) {
+            t2 = index + 1;
+            if (!(t2 < t1))
+              return A.ioore(host, t2);
+            tail = host.charCodeAt(t2);
+            if ((tail & 64512) === 56320) {
+              char = 65536 + ((char & 1023) << 10) + (tail & 1023);
+              sourceLength = 2;
+            }
+          }
+          slice = B.JSString_methods.substring$2(host, sectionStart, index);
+          if (buffer == null) {
+            buffer = new A.StringBuffer("");
+            t2 = buffer;
+          } else
+            t2 = buffer;
+          t2._contents += slice;
+          t3 = A._Uri__escapeChar(char);
+          t2._contents += t3;
+          index += sourceLength;
+          sectionStart = index;
+        }
+      }
+      if (buffer == null)
+        return B.JSString_methods.substring$2(host, start, end);
+      if (sectionStart < end) {
+        slice = B.JSString_methods.substring$2(host, sectionStart, end);
+        buffer._contents += slice;
+      }
+      t1 = buffer._contents;
+      return t1.charCodeAt(0) == 0 ? t1 : t1;
+    },
+    _Uri__normalizeRegName(host, start, end) {
+      var t1, index, sectionStart, buffer, isNormalized, char, replacement, t2, slice, t3, sourceLength, tail,
+        _s128_ = string$.x00_____;
+      for (t1 = host.length, index = start, sectionStart = index, buffer = null, isNormalized = true; index < end;) {
+        if (!(index >= 0 && index < t1))
+          return A.ioore(host, index);
+        char = host.charCodeAt(index);
+        if (char === 37) {
+          replacement = A._Uri__normalizeEscape(host, index, true);
+          t2 = replacement == null;
+          if (t2 && isNormalized) {
+            index += 3;
+            continue;
+          }
+          if (buffer == null)
+            buffer = new A.StringBuffer("");
+          slice = B.JSString_methods.substring$2(host, sectionStart, index);
+          if (!isNormalized)
+            slice = slice.toLowerCase();
+          t3 = buffer._contents += slice;
+          sourceLength = 3;
+          if (t2)
+            replacement = B.JSString_methods.substring$2(host, index, index + 3);
+          else if (replacement === "%") {
+            replacement = "%25";
+            sourceLength = 1;
+          }
+          buffer._contents = t3 + replacement;
+          index += sourceLength;
+          sectionStart = index;
+          isNormalized = true;
+        } else if (char < 127 && (_s128_.charCodeAt(char) & 32) !== 0) {
+          if (isNormalized && 65 <= char && 90 >= char) {
+            if (buffer == null)
+              buffer = new A.StringBuffer("");
+            if (sectionStart < index) {
+              buffer._contents += B.JSString_methods.substring$2(host, sectionStart, index);
+              sectionStart = index;
+            }
+            isNormalized = false;
+          }
+          ++index;
+        } else if (char <= 93 && (_s128_.charCodeAt(char) & 1024) !== 0)
+          A._Uri__fail(host, index, "Invalid character");
+        else {
+          sourceLength = 1;
+          if ((char & 64512) === 55296 && index + 1 < end) {
+            t2 = index + 1;
+            if (!(t2 < t1))
+              return A.ioore(host, t2);
+            tail = host.charCodeAt(t2);
+            if ((tail & 64512) === 56320) {
+              char = 65536 + ((char & 1023) << 10) + (tail & 1023);
+              sourceLength = 2;
+            }
+          }
+          slice = B.JSString_methods.substring$2(host, sectionStart, index);
+          if (!isNormalized)
+            slice = slice.toLowerCase();
+          if (buffer == null) {
+            buffer = new A.StringBuffer("");
+            t2 = buffer;
+          } else
+            t2 = buffer;
+          t2._contents += slice;
+          t3 = A._Uri__escapeChar(char);
+          t2._contents += t3;
+          index += sourceLength;
+          sectionStart = index;
+        }
+      }
+      if (buffer == null)
+        return B.JSString_methods.substring$2(host, start, end);
+      if (sectionStart < end) {
+        slice = B.JSString_methods.substring$2(host, sectionStart, end);
+        if (!isNormalized)
+          slice = slice.toLowerCase();
+        buffer._contents += slice;
+      }
+      t1 = buffer._contents;
+      return t1.charCodeAt(0) == 0 ? t1 : t1;
+    },
+    _Uri__makeScheme(scheme, start, end) {
+      var t1, i, containsUpperCase, codeUnit;
+      if (start === end)
+        return "";
+      t1 = scheme.length;
+      if (!(start < t1))
+        return A.ioore(scheme, start);
+      if (!A._Uri__isAlphabeticCharacter(scheme.charCodeAt(start)))
+        A._Uri__fail(scheme, start, "Scheme not starting with alphabetic character");
+      for (i = start, containsUpperCase = false; i < end; ++i) {
+        if (!(i < t1))
+          return A.ioore(scheme, i);
+        codeUnit = scheme.charCodeAt(i);
+        if (!(codeUnit < 128 && (string$.x00_____.charCodeAt(codeUnit) & 8) !== 0))
+          A._Uri__fail(scheme, i, "Illegal scheme character");
+        if (65 <= codeUnit && codeUnit <= 90)
+          containsUpperCase = true;
+      }
+      scheme = B.JSString_methods.substring$2(scheme, start, end);
+      return A._Uri__canonicalizeScheme(containsUpperCase ? scheme.toLowerCase() : scheme);
+    },
+    _Uri__canonicalizeScheme(scheme) {
+      if (scheme === "http")
+        return "http";
+      if (scheme === "file")
+        return "file";
+      if (scheme === "https")
+        return "https";
+      if (scheme === "package")
+        return "package";
+      return scheme;
+    },
+    _Uri__makeUserInfo(userInfo, start, end) {
+      return A._Uri__normalizeOrSubstring(userInfo, start, end, 16, false, false);
+    },
+    _Uri__makePath(path, start, end, pathSegments, scheme, hasAuthority) {
+      var isFile = scheme === "file",
+        ensureLeadingSlash = isFile || hasAuthority,
+        result = A._Uri__normalizeOrSubstring(path, start, end, 128, true, true);
+      if (result.length === 0) {
+        if (isFile)
+          return "/";
+      } else if (ensureLeadingSlash && !B.JSString_methods.startsWith$1(result, "/"))
+        result = "/" + result;
+      return A._Uri__normalizePath(result, scheme, hasAuthority);
+    },
+    _Uri__normalizePath(path, scheme, hasAuthority) {
+      var t1 = scheme.length === 0;
+      if (t1 && !hasAuthority && !B.JSString_methods.startsWith$1(path, "/") && !B.JSString_methods.startsWith$1(path, "\\"))
+        return A._Uri__normalizeRelativePath(path, !t1 || hasAuthority);
+      return A._Uri__removeDotSegments(path);
+    },
+    _Uri__makeQuery(query, start, end, queryParameters) {
+      return A._Uri__normalizeOrSubstring(query, start, end, 256, true, false);
+    },
+    _Uri__makeFragment(fragment, start, end) {
+      return A._Uri__normalizeOrSubstring(fragment, start, end, 256, true, false);
+    },
+    _Uri__normalizeEscape(source, index, lowerCase) {
+      var t3, firstDigit, secondDigit, firstDigitValue, secondDigitValue, value,
+        _s128_ = string$.x00_____,
+        t1 = index + 2,
+        t2 = source.length;
+      if (t1 >= t2)
+        return "%";
+      t3 = index + 1;
+      if (!(t3 >= 0 && t3 < t2))
+        return A.ioore(source, t3);
+      firstDigit = source.charCodeAt(t3);
+      if (!(t1 >= 0))
+        return A.ioore(source, t1);
+      secondDigit = source.charCodeAt(t1);
+      firstDigitValue = A.hexDigitValue(firstDigit);
+      secondDigitValue = A.hexDigitValue(secondDigit);
+      if (firstDigitValue < 0 || secondDigitValue < 0)
+        return "%";
+      value = firstDigitValue * 16 + secondDigitValue;
+      if (value < 127) {
+        if (!(value >= 0))
+          return A.ioore(_s128_, value);
+        t1 = (_s128_.charCodeAt(value) & 1) !== 0;
+      } else
+        t1 = false;
+      if (t1)
+        return A.Primitives_stringFromCharCode(lowerCase && 65 <= value && 90 >= value ? (value | 32) >>> 0 : value);
+      if (firstDigit >= 97 || secondDigit >= 97)
+        return B.JSString_methods.substring$2(source, index, index + 3).toUpperCase();
+      return null;
+    },
+    _Uri__escapeChar(char) {
+      var codeUnits, t1, flag, encodedBytes, index, byte, t2, t3,
+        _s16_ = "0123456789ABCDEF";
+      if (char <= 127) {
+        codeUnits = new Uint8Array(3);
+        codeUnits[0] = 37;
+        t1 = char >>> 4;
+        if (!(t1 < 16))
+          return A.ioore(_s16_, t1);
+        codeUnits[1] = _s16_.charCodeAt(t1);
+        codeUnits[2] = _s16_.charCodeAt(char & 15);
+      } else {
+        if (char > 2047)
+          if (char > 65535) {
+            flag = 240;
+            encodedBytes = 4;
+          } else {
+            flag = 224;
+            encodedBytes = 3;
+          }
+        else {
+          flag = 192;
+          encodedBytes = 2;
+        }
+        t1 = 3 * encodedBytes;
+        codeUnits = new Uint8Array(t1);
+        for (index = 0; --encodedBytes, encodedBytes >= 0; flag = 128) {
+          byte = B.JSInt_methods._shrReceiverPositive$1(char, 6 * encodedBytes) & 63 | flag;
+          if (!(index < t1))
+            return A.ioore(codeUnits, index);
+          codeUnits[index] = 37;
+          t2 = index + 1;
+          t3 = byte >>> 4;
+          if (!(t3 < 16))
+            return A.ioore(_s16_, t3);
+          if (!(t2 < t1))
+            return A.ioore(codeUnits, t2);
+          codeUnits[t2] = _s16_.charCodeAt(t3);
+          t3 = index + 2;
+          if (!(t3 < t1))
+            return A.ioore(codeUnits, t3);
+          codeUnits[t3] = _s16_.charCodeAt(byte & 15);
+          index += 3;
+        }
+      }
+      return A.String_String$fromCharCodes(codeUnits, 0, null);
+    },
+    _Uri__normalizeOrSubstring(component, start, end, charMask, escapeDelimiters, replaceBackslash) {
+      var t1 = A._Uri__normalize(component, start, end, charMask, escapeDelimiters, replaceBackslash);
+      return t1 == null ? B.JSString_methods.substring$2(component, start, end) : t1;
+    },
+    _Uri__normalize(component, start, end, charMask, escapeDelimiters, replaceBackslash) {
+      var t1, t2, index, sectionStart, buffer, char, sourceLength, replacement, t3, tail, _null = null,
+        _s128_ = string$.x00_____;
+      for (t1 = !escapeDelimiters, t2 = component.length, index = start, sectionStart = index, buffer = _null; index < end;) {
+        if (!(index >= 0 && index < t2))
+          return A.ioore(component, index);
+        char = component.charCodeAt(index);
+        if (char < 127 && (_s128_.charCodeAt(char) & charMask) !== 0)
+          ++index;
+        else {
+          sourceLength = 1;
+          if (char === 37) {
+            replacement = A._Uri__normalizeEscape(component, index, false);
+            if (replacement == null) {
+              index += 3;
+              continue;
+            }
+            if ("%" === replacement)
+              replacement = "%25";
+            else
+              sourceLength = 3;
+          } else if (char === 92 && replaceBackslash)
+            replacement = "/";
+          else if (t1 && char <= 93 && (_s128_.charCodeAt(char) & 1024) !== 0) {
+            A._Uri__fail(component, index, "Invalid character");
+            sourceLength = _null;
+            replacement = sourceLength;
+          } else {
+            if ((char & 64512) === 55296) {
+              t3 = index + 1;
+              if (t3 < end) {
+                if (!(t3 < t2))
+                  return A.ioore(component, t3);
+                tail = component.charCodeAt(t3);
+                if ((tail & 64512) === 56320) {
+                  char = 65536 + ((char & 1023) << 10) + (tail & 1023);
+                  sourceLength = 2;
+                }
+              }
+            }
+            replacement = A._Uri__escapeChar(char);
+          }
+          if (buffer == null) {
+            buffer = new A.StringBuffer("");
+            t3 = buffer;
+          } else
+            t3 = buffer;
+          t3._contents = (t3._contents += B.JSString_methods.substring$2(component, sectionStart, index)) + replacement;
+          if (typeof sourceLength !== "number")
+            return A.iae(sourceLength);
+          index += sourceLength;
+          sectionStart = index;
+        }
+      }
+      if (buffer == null)
+        return _null;
+      if (sectionStart < end) {
+        t1 = B.JSString_methods.substring$2(component, sectionStart, end);
+        buffer._contents += t1;
+      }
+      t1 = buffer._contents;
+      return t1.charCodeAt(0) == 0 ? t1 : t1;
+    },
+    _Uri__mayContainDotSegments(path) {
+      if (B.JSString_methods.startsWith$1(path, "."))
+        return true;
+      return B.JSString_methods.indexOf$1(path, "/.") !== -1;
+    },
+    _Uri__removeDotSegments(path) {
+      var output, t1, t2, appendSlash, _i, segment, t3;
+      if (!A._Uri__mayContainDotSegments(path))
+        return path;
+      output = A._setArrayType([], type$.JSArray_String);
+      for (t1 = path.split("/"), t2 = t1.length, appendSlash = false, _i = 0; _i < t2; ++_i) {
+        segment = t1[_i];
+        if (segment === "..") {
+          t3 = output.length;
+          if (t3 !== 0) {
+            if (0 >= t3)
+              return A.ioore(output, -1);
+            output.pop();
+            if (output.length === 0)
+              B.JSArray_methods.add$1(output, "");
+          }
+          appendSlash = true;
+        } else {
+          appendSlash = "." === segment;
+          if (!appendSlash)
+            B.JSArray_methods.add$1(output, segment);
+        }
+      }
+      if (appendSlash)
+        B.JSArray_methods.add$1(output, "");
+      return B.JSArray_methods.join$1(output, "/");
+    },
+    _Uri__normalizeRelativePath(path, allowScheme) {
+      var output, t1, t2, appendSlash, _i, segment;
+      if (!A._Uri__mayContainDotSegments(path))
+        return !allowScheme ? A._Uri__escapeScheme(path) : path;
+      output = A._setArrayType([], type$.JSArray_String);
+      for (t1 = path.split("/"), t2 = t1.length, appendSlash = false, _i = 0; _i < t2; ++_i) {
+        segment = t1[_i];
+        if (".." === segment) {
+          if (output.length !== 0 && B.JSArray_methods.get$last(output) !== "..") {
+            if (0 >= output.length)
+              return A.ioore(output, -1);
+            output.pop();
+          } else
+            B.JSArray_methods.add$1(output, "..");
+          appendSlash = true;
+        } else {
+          appendSlash = "." === segment;
+          if (!appendSlash)
+            B.JSArray_methods.add$1(output, segment.length === 0 && output.length === 0 ? "./" : segment);
+        }
+      }
+      if (output.length === 0)
+        return "./";
+      if (appendSlash)
+        B.JSArray_methods.add$1(output, "");
+      if (!allowScheme) {
+        if (0 >= output.length)
+          return A.ioore(output, 0);
+        B.JSArray_methods.$indexSet(output, 0, A._Uri__escapeScheme(output[0]));
+      }
+      return B.JSArray_methods.join$1(output, "/");
+    },
+    _Uri__escapeScheme(path) {
+      var i, char, t2,
+        _s128_ = string$.x00_____,
+        t1 = path.length;
+      if (t1 >= 2 && A._Uri__isAlphabeticCharacter(path.charCodeAt(0)))
+        for (i = 1; i < t1; ++i) {
+          char = path.charCodeAt(i);
+          if (char === 58)
+            return B.JSString_methods.substring$2(path, 0, i) + "%3A" + B.JSString_methods.substring$1(path, i + 1);
+          if (char <= 127) {
+            if (!(char < 128))
+              return A.ioore(_s128_, char);
+            t2 = (_s128_.charCodeAt(char) & 8) === 0;
+          } else
+            t2 = true;
+          if (t2)
+            break;
+        }
+      return path;
+    },
+    _Uri__hexCharPairToByte(s, pos) {
+      var t1, byte, i, t2, charCode;
+      for (t1 = s.length, byte = 0, i = 0; i < 2; ++i) {
+        t2 = pos + i;
+        if (!(t2 < t1))
+          return A.ioore(s, t2);
+        charCode = s.charCodeAt(t2);
+        if (48 <= charCode && charCode <= 57)
+          byte = byte * 16 + charCode - 48;
+        else {
+          charCode |= 32;
+          if (97 <= charCode && charCode <= 102)
+            byte = byte * 16 + charCode - 87;
+          else
+            throw A.wrapException(A.ArgumentError$("Invalid URL encoding", null));
+        }
+      }
+      return byte;
+    },
+    _Uri__uriDecode(text, start, end, encoding, plusToSpace) {
+      var simple, codeUnit, t2, bytes,
+        t1 = text.length,
+        i = start;
+      for (;;) {
+        if (!(i < end)) {
+          simple = true;
+          break;
+        }
+        if (!(i < t1))
+          return A.ioore(text, i);
+        codeUnit = text.charCodeAt(i);
+        t2 = true;
+        if (codeUnit <= 127)
+          if (codeUnit !== 37)
+            t2 = codeUnit === 43;
+        if (t2) {
+          simple = false;
+          break;
+        }
+        ++i;
+      }
+      if (simple)
+        if (B.C_Utf8Codec === encoding)
+          return B.JSString_methods.substring$2(text, start, end);
+        else
+          bytes = new A.CodeUnits(B.JSString_methods.substring$2(text, start, end));
+      else {
+        bytes = A._setArrayType([], type$.JSArray_int);
+        for (i = start; i < end; ++i) {
+          if (!(i < t1))
+            return A.ioore(text, i);
+          codeUnit = text.charCodeAt(i);
+          if (codeUnit > 127)
+            throw A.wrapException(A.ArgumentError$("Illegal percent encoding in URI", null));
+          if (codeUnit === 37) {
+            if (i + 3 > t1)
+              throw A.wrapException(A.ArgumentError$("Truncated URI", null));
+            B.JSArray_methods.add$1(bytes, A._Uri__hexCharPairToByte(text, i + 1));
+            i += 2;
+          } else if (codeUnit === 43)
+            B.JSArray_methods.add$1(bytes, 32);
+          else
+            B.JSArray_methods.add$1(bytes, codeUnit);
+        }
+      }
+      type$.List_int._as(bytes);
+      return B.Utf8Decoder_false.convert$1(bytes);
+    },
+    _Uri__isAlphabeticCharacter(codeUnit) {
+      var lowerCase = codeUnit | 32;
+      return 97 <= lowerCase && lowerCase <= 122;
+    },
+    UriData__parse(text, start, sourceUri) {
+      var t1, i, slashIndex, char, equalsIndex, lastSeparator, t2, data,
+        _s17_ = "Invalid MIME type",
+        indices = A._setArrayType([start - 1], type$.JSArray_int);
+      for (t1 = text.length, i = start, slashIndex = -1, char = null; i < t1; ++i) {
+        char = text.charCodeAt(i);
+        if (char === 44 || char === 59)
+          break;
+        if (char === 47) {
+          if (slashIndex < 0) {
+            slashIndex = i;
+            continue;
+          }
+          throw A.wrapException(A.FormatException$(_s17_, text, i));
+        }
+      }
+      if (slashIndex < 0 && i > start)
+        throw A.wrapException(A.FormatException$(_s17_, text, i));
+      while (char !== 44) {
+        B.JSArray_methods.add$1(indices, i);
+        ++i;
+        for (equalsIndex = -1; i < t1; ++i) {
+          if (!(i >= 0))
+            return A.ioore(text, i);
+          char = text.charCodeAt(i);
+          if (char === 61) {
+            if (equalsIndex < 0)
+              equalsIndex = i;
+          } else if (char === 59 || char === 44)
+            break;
+        }
+        if (equalsIndex >= 0)
+          B.JSArray_methods.add$1(indices, equalsIndex);
+        else {
+          lastSeparator = B.JSArray_methods.get$last(indices);
+          if (char !== 44 || i !== lastSeparator + 7 || !B.JSString_methods.startsWith$2(text, "base64", lastSeparator + 1))
+            throw A.wrapException(A.FormatException$("Expecting '='", text, i));
+          break;
+        }
+      }
+      B.JSArray_methods.add$1(indices, i);
+      t2 = i + 1;
+      if ((indices.length & 1) === 1)
+        text = B.C_Base64Codec.normalize$3(text, t2, t1);
+      else {
+        data = A._Uri__normalize(text, t2, t1, 256, true, false);
+        if (data != null)
+          text = B.JSString_methods.replaceRange$3(text, t2, t1, data);
+      }
+      return new A.UriData(text, indices, sourceUri);
+    },
+    _scan(uri, start, end, state, indices) {
+      var t1, i, char, t2, transition,
+        _s2112_ = '\xe1\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\xe1\xe1\xe1\x01\xe1\xe1\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\xe1\xe3\xe1\xe1\x01\xe1\x01\xe1\xcd\x01\xe1\x01\x01\x01\x01\x01\x01\x01\x01\x0e\x03\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01"\x01\xe1\x01\xe1\xac\xe1\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\xe1\xe1\xe1\x01\xe1\xe1\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\xe1\xea\xe1\xe1\x01\xe1\x01\xe1\xcd\x01\xe1\x01\x01\x01\x01\x01\x01\x01\x01\x01\n\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01"\x01\xe1\x01\xe1\xac\xeb\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\xeb\xeb\xeb\x8b\xeb\xeb\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\xeb\x83\xeb\xeb\x8b\xeb\x8b\xeb\xcd\x8b\xeb\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x92\x83\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\xeb\x8b\xeb\x8b\xeb\xac\xeb\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\xeb\xeb\xeb\v\xeb\xeb\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\xebD\xeb\xeb\v\xeb\v\xeb\xcd\v\xeb\v\v\v\v\v\v\v\v\x12D\v\v\v\v\v\v\v\v\v\v\xeb\v\xeb\v\xeb\xac\xe5\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\xe5\xe5\xe5\x05\xe5D\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe8\x8a\xe5\xe5\x05\xe5\x05\xe5\xcd\x05\xe5\x05\x05\x05\x05\x05\x05\x05\x05\x05\x8a\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05f\x05\xe5\x05\xe5\xac\xe5\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\xe5\xe5\xe5\x05\xe5D\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\xe5\x8a\xe5\xe5\x05\xe5\x05\xe5\xcd\x05\xe5\x05\x05\x05\x05\x05\x05\x05\x05\x05\x8a\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05f\x05\xe5\x05\xe5\xac\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7D\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\x8a\xe7\xe7\xe7\xe7\xe7\xe7\xcd\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\x8a\xe7\x07\x07\x07\x07\x07\x07\x07\x07\x07\xe7\xe7\xe7\xe7\xe7\xac\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7D\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\x8a\xe7\xe7\xe7\xe7\xe7\xe7\xcd\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\xe7\x8a\x07\x07\x07\x07\x07\x07\x07\x07\x07\x07\xe7\xe7\xe7\xe7\xe7\xac\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\x05\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\xeb\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\xeb\xeb\xeb\v\xeb\xeb\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\xeb\xea\xeb\xeb\v\xeb\v\xeb\xcd\v\xeb\v\v\v\v\v\v\v\v\x10\xea\v\v\v\v\v\v\v\v\v\v\xeb\v\xeb\v\xeb\xac\xeb\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\xeb\xeb\xeb\v\xeb\xeb\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\xeb\xea\xeb\xeb\v\xeb\v\xeb\xcd\v\xeb\v\v\v\v\v\v\v\v\x12\n\v\v\v\v\v\v\v\v\v\v\xeb\v\xeb\v\xeb\xac\xeb\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\xeb\xeb\xeb\v\xeb\xeb\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\xeb\xea\xeb\xeb\v\xeb\v\xeb\xcd\v\xeb\v\v\v\v\v\v\v\v\v\n\v\v\v\v\v\v\v\v\v\v\xeb\v\xeb\v\xeb\xac\xec\f\f\f\f\f\f\f\f\f\f\f\f\f\f\f\f\f\f\f\f\f\f\f\f\f\f\xec\xec\xec\f\xec\xec\f\f\f\f\f\f\f\f\f\f\f\f\f\f\f\f\f\f\f\f\f\f\f\f\f\f\xec\xec\xec\xec\f\xec\f\xec\xcd\f\xec\f\f\f\f\f\f\f\f\f\xec\f\f\f\f\f\f\f\f\f\f\xec\f\xec\f\xec\f\xed\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\xed\xed\xed\r\xed\xed\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\xed\xed\xed\xed\r\xed\r\xed\xed\r\xed\r\r\r\r\r\r\r\r\r\xed\r\r\r\r\r\r\r\r\r\r\xed\r\xed\r\xed\r\xe1\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\xe1\xe1\xe1\x01\xe1\xe1\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\xe1\xea\xe1\xe1\x01\xe1\x01\xe1\xcd\x01\xe1\x01\x01\x01\x01\x01\x01\x01\x01\x0f\xea\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01"\x01\xe1\x01\xe1\xac\xe1\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\xe1\xe1\xe1\x01\xe1\xe1\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\xe1\xe9\xe1\xe1\x01\xe1\x01\xe1\xcd\x01\xe1\x01\x01\x01\x01\x01\x01\x01\x01\x01\t\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01"\x01\xe1\x01\xe1\xac\xeb\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\xeb\xeb\xeb\v\xeb\xeb\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\xeb\xea\xeb\xeb\v\xeb\v\xeb\xcd\v\xeb\v\v\v\v\v\v\v\v\x11\xea\v\v\v\v\v\v\v\v\v\v\xeb\v\xeb\v\xeb\xac\xeb\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\xeb\xeb\xeb\v\xeb\xeb\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\xeb\xe9\xeb\xeb\v\xeb\v\xeb\xcd\v\xeb\v\v\v\v\v\v\v\v\v\t\v\v\v\v\v\v\v\v\v\v\xeb\v\xeb\v\xeb\xac\xeb\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\xeb\xeb\xeb\v\xeb\xeb\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\xeb\xea\xeb\xeb\v\xeb\v\xeb\xcd\v\xeb\v\v\v\v\v\v\v\v\x13\xea\v\v\v\v\v\v\v\v\v\v\xeb\v\xeb\v\xeb\xac\xeb\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\xeb\xeb\xeb\v\xeb\xeb\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\v\xeb\xea\xeb\xeb\v\xeb\v\xeb\xcd\v\xeb\v\v\v\v\v\v\v\v\v\xea\v\v\v\v\v\v\v\v\v\v\xeb\v\xeb\v\xeb\xac\xf5\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\x15\xf5\x15\x15\xf5\x15\x15\x15\x15\x15\x15\x15\x15\x15\x15\xf5\xf5\xf5\xf5\xf5\xf5';
+      for (t1 = uri.length, i = start; i < end; ++i) {
+        if (!(i < t1))
+          return A.ioore(uri, i);
+        char = uri.charCodeAt(i) ^ 96;
+        if (char > 95)
+          char = 31;
+        t2 = state * 96 + char;
+        if (!(t2 < 2112))
+          return A.ioore(_s2112_, t2);
+        transition = _s2112_.charCodeAt(t2);
+        state = transition & 31;
+        B.JSArray_methods.$indexSet(indices, transition >>> 5, i);
+      }
+      return state;
+    },
+    DateTime: function DateTime(t0, t1, t2) {
+      this._value = t0;
+      this._microsecond = t1;
+      this.isUtc = t2;
+    },
+    _Enum: function _Enum() {
+    },
+    Error: function Error() {
+    },
+    AssertionError: function AssertionError(t0) {
+      this.message = t0;
+    },
+    TypeError: function TypeError() {
+    },
+    ArgumentError: function ArgumentError(t0, t1, t2, t3) {
+      var _ = this;
+      _._hasValue = t0;
+      _.invalidValue = t1;
+      _.name = t2;
+      _.message = t3;
+    },
+    RangeError: function RangeError(t0, t1, t2, t3, t4, t5) {
+      var _ = this;
+      _.start = t0;
+      _.end = t1;
+      _._hasValue = t2;
+      _.invalidValue = t3;
+      _.name = t4;
+      _.message = t5;
+    },
+    IndexError: function IndexError(t0, t1, t2, t3, t4) {
+      var _ = this;
+      _.length = t0;
+      _._hasValue = t1;
+      _.invalidValue = t2;
+      _.name = t3;
+      _.message = t4;
+    },
+    UnsupportedError: function UnsupportedError(t0) {
+      this.message = t0;
+    },
+    UnimplementedError: function UnimplementedError(t0) {
+      this.message = t0;
+    },
+    StateError: function StateError(t0) {
+      this.message = t0;
+    },
+    ConcurrentModificationError: function ConcurrentModificationError(t0) {
+      this.modifiedObject = t0;
+    },
+    OutOfMemoryError: function OutOfMemoryError() {
+    },
+    StackOverflowError: function StackOverflowError() {
+    },
+    _Exception: function _Exception(t0) {
+      this.message = t0;
+    },
+    FormatException: function FormatException(t0, t1, t2) {
+      this.message = t0;
+      this.source = t1;
+      this.offset = t2;
+    },
+    Iterable: function Iterable() {
+    },
+    MapEntry: function MapEntry(t0, t1, t2) {
+      this.key = t0;
+      this.value = t1;
+      this.$ti = t2;
+    },
+    Null: function Null() {
+    },
+    Object: function Object() {
+    },
+    _StringStackTrace: function _StringStackTrace() {
+    },
+    StringBuffer: function StringBuffer(t0) {
+      this._contents = t0;
+    },
+    Uri_splitQueryString_closure: function Uri_splitQueryString_closure(t0) {
+      this.encoding = t0;
+    },
+    Uri_parseIPv6Address_error: function Uri_parseIPv6Address_error(t0) {
+      this.host = t0;
+    },
+    _Uri: function _Uri(t0, t1, t2, t3, t4, t5, t6) {
+      var _ = this;
+      _.scheme = t0;
+      _._userInfo = t1;
+      _._host = t2;
+      _._port = t3;
+      _.path = t4;
+      _._query = t5;
+      _._fragment = t6;
+      _.___Uri_queryParameters_FI = _.___Uri_hashCode_FI = _.___Uri__text_FI = $;
+    },
+    UriData: function UriData(t0, t1, t2) {
+      this._text = t0;
+      this._separatorIndices = t1;
+      this._uriCache = t2;
+    },
+    _SimpleUri: function _SimpleUri(t0, t1, t2, t3, t4, t5, t6, t7) {
+      var _ = this;
+      _._uri = t0;
+      _._schemeEnd = t1;
+      _._hostStart = t2;
+      _._portStart = t3;
+      _._pathStart = t4;
+      _._queryStart = t5;
+      _._fragmentStart = t6;
+      _._schemeCache = t7;
+      _._hashCodeCache = null;
+    },
+    _DataUri: function _DataUri(t0, t1, t2, t3, t4, t5, t6) {
+      var _ = this;
+      _.scheme = t0;
+      _._userInfo = t1;
+      _._host = t2;
+      _._port = t3;
+      _.path = t4;
+      _._query = t5;
+      _._fragment = t6;
+      _.___Uri_queryParameters_FI = _.___Uri_hashCode_FI = _.___Uri__text_FI = $;
+    },
+    NullRejectionException: function NullRejectionException(t0) {
+      this.isUndefined = t0;
+    },
+    _functionToJS1(f) {
+      var result;
+      if (typeof f == "function")
+        throw A.wrapException(A.ArgumentError$("Attempting to rewrap a JS function.", null));
+      result = function(_call, f) {
+        return function(arg1) {
+          return _call(f, arg1, arguments.length);
+        };
+      }(A._callDartFunctionFast1, f);
+      result[$.$get$DART_CLOSURE_DART_JSINTEROP_PROPERTY_NAME()] = f;
+      return result;
+    },
+    _callDartFunctionFast1(callback, arg1, $length) {
+      type$.Function._as(callback);
+      if (A._asInt($length) >= 1)
+        return callback.call$1(arg1);
+      return callback.call$0();
+    },
+    getProperty(o, $name, $T) {
+      return $T._as(o[$name]);
+    },
+    _getPropertyTrustType(o, $name) {
+      return o[$name];
+    },
+    callMethod(o, method, args, $T) {
+      return $T._as(o[method].apply(o, args));
+    },
+    promiseToFuture(jsPromise, $T) {
+      var t1 = new A._Future($.Zone__current, $T._eval$1("_Future<0>")),
+        completer = new A._AsyncCompleter(t1, $T._eval$1("_AsyncCompleter<0>"));
+      jsPromise.then(A.convertDartClosureToJS(new A.promiseToFuture_closure(completer, $T), 1), A.convertDartClosureToJS(new A.promiseToFuture_closure0(completer), 1));
+      return t1;
+    },
+    _noDartifyRequired(o) {
+      return o == null || typeof o === "boolean" || typeof o === "number" || typeof o === "string" || o instanceof Int8Array || o instanceof Uint8Array || o instanceof Uint8ClampedArray || o instanceof Int16Array || o instanceof Uint16Array || o instanceof Int32Array || o instanceof Uint32Array || o instanceof Float32Array || o instanceof Float64Array || o instanceof ArrayBuffer || o instanceof DataView;
+    },
+    dartify(o) {
+      if (A._noDartifyRequired(o))
+        return o;
+      return new A.dartify_convert(new A._IdentityHashMap(type$._IdentityHashMap_of_nullable_Object_and_nullable_Object)).call$1(o);
+    },
+    promiseToFuture_closure: function promiseToFuture_closure(t0, t1) {
+      this.completer = t0;
+      this.T = t1;
+    },
+    promiseToFuture_closure0: function promiseToFuture_closure0(t0) {
+      this.completer = t0;
+    },
+    dartify_convert: function dartify_convert(t0) {
+      this._convertedObjects = t0;
+    },
+    RenderCapabilities: function RenderCapabilities(t0) {
+      this.disjointTimerQuery = t0;
+    },
+    QualityProfileKind: function QualityProfileKind(t0, t1) {
+      this.index = t0;
+      this._name = t1;
+    },
+    QualityProfile: function QualityProfile(t0, t1) {
+      this.kind = t0;
+      this.installedFeatures = t1;
+    },
+    ConfigurationCoordinator: function ConfigurationCoordinator(t0, t1) {
+      this._configuration_coordinator$_configuration = t0;
+      this._configuration_coordinator$_resources = t1;
+    },
+    ConfigurationStateMachine: function ConfigurationStateMachine() {
+      this._configuration_transition$_current = null;
+      this._configuration_transition$_generation = 0;
+    },
+    PostProcessState: function PostProcessState() {
+    },
+    CameraView: function CameraView(t0, t1, t2, t3, t4, t5, t6, t7) {
+      var _ = this;
+      _.view = t0;
+      _.projection = t1;
+      _.viewProjection = t2;
+      _.eye = t3;
+      _.forward = t4;
+      _.near = t5;
+      _.far = t6;
+      _.aspect = t7;
+    },
+    FrameEnvironment: function FrameEnvironment() {
+    },
+    FrameInput: function FrameInput(t0, t1, t2, t3, t4) {
+      var _ = this;
+      _.camera = t0;
+      _.environment = t1;
+      _.post = t2;
+      _.frameIndex = t3;
+      _.timeSeconds = t4;
+    },
+    HandleException$(reason, handle) {
+      return new A.HandleException(reason, handle);
+    },
+    ResourceHandle: function ResourceHandle() {
+    },
+    MeshHandle: function MeshHandle(t0, t1, t2) {
+      this.slot = t0;
+      this.generation = t1;
+      this.debugLabel = t2;
+    },
+    TextureHandle: function TextureHandle(t0, t1, t2) {
+      this.slot = t0;
+      this.generation = t1;
+      this.debugLabel = t2;
+    },
+    MaterialHandle: function MaterialHandle(t0, t1, t2) {
+      this.slot = t0;
+      this.generation = t1;
+      this.debugLabel = t2;
+    },
+    PipelineHandle: function PipelineHandle(t0, t1, t2) {
+      this.slot = t0;
+      this.generation = t1;
+      this.debugLabel = t2;
+    },
+    InstanceId: function InstanceId(t0, t1, t2) {
+      this.slot = t0;
+      this.generation = t1;
+      this.debugLabel = t2;
+    },
+    HandleRejection: function HandleRejection(t0, t1) {
+      this.index = t0;
+      this._name = t1;
+    },
+    HandleException: function HandleException(t0, t1) {
+      this.reason = t0;
+      this.handle = t1;
+    },
+    selectSpotLights(lights, limit, referencePosition, shadowCaster) {
+      var t1, t2, t3, _i, light, entry,
+        ranked = A._setArrayType([], type$.JSArray_Record_2_double_influence_and_SpotLight_light);
+      for (t1 = 0 - referencePosition.x, t2 = 1 - referencePosition.y, t3 = 0 - referencePosition.z, t3 = 1 + (t1 * t1 + t2 * t2 + t3 * t3), _i = 0; false; ++_i) {
+        light = lights[_i];
+        B.JSArray_methods.add$1(ranked, new A._Record_2_influence_light(Math.max(Math.max(1, Math.max(1, 1)), 0.000001) / t3, light));
+      }
+      B.JSArray_methods.sort$1(ranked, new A.selectSpotLights_closure());
+      t1 = A._setArrayType([], type$.JSArray_SpotLight);
+      for (t2 = A.SubListIterable$(ranked, 0, A.checkNotNullable(limit, "count", type$.int), type$.Record_2_double_influence_and_SpotLight_light), t3 = t2.$ti, t2 = new A.ListIterator(t2, t2.get$length(0), t3._eval$1("ListIterator<ListIterable.E>")), t3 = t3._eval$1("ListIterable.E"); t2.moveNext$0();) {
+        entry = t2.__internal$_current;
+        t1.push((entry == null ? t3._as(entry) : entry)._1);
+      }
+      return t1;
+    },
+    LinearColor: function LinearColor(t0, t1, t2) {
+      this.r = t0;
+      this.g = t1;
+      this.b = t2;
+    },
+    SpotLight: function SpotLight() {
+    },
+    selectSpotLights_closure: function selectSpotLights_closure() {
+    },
+    VertexAttributeKind: function VertexAttributeKind(t0, t1) {
+      this.index = t0;
+      this._name = t1;
+    },
+    DefaultSceneRendererFactory: function DefaultSceneRendererFactory() {
+    },
+    OwnedResourcePlan_OwnedResourcePlan$forConfiguration(configuration) {
+      var hasHistory,
+        t1 = type$.String,
+        resources = A.LinkedHashSet_LinkedHashSet$_literal(["sceneColor", "present"], t1),
+        t2 = configuration.profile.installedFeatures;
+      if (t2.contains$1(0, "shadows"))
+        resources.addAll$1(0, A.LinkedHashSet_LinkedHashSet$_literal(["shadowMap", "sceneDepth"], t1));
+      if (t2.contains$1(0, "ssao"))
+        resources.addAll$1(0, A.LinkedHashSet_LinkedHashSet$_literal(["ssaoRaw", "ssaoBlurred"], t1));
+      if (t2.contains$1(0, "bloom"))
+        resources.addAll$1(0, A.LinkedHashSet_LinkedHashSet$_literal(["bloomBlurH", "bloomBlurV", "sceneColor#" + (configuration.sampleCount > 1 ? 2 : 1)], t1));
+      if (configuration.sampleCount > 1)
+        resources.add$1(0, "sceneColor#1");
+      if (t2.contains$1(0, "dof"))
+        resources.addAll$1(0, A.LinkedHashSet_LinkedHashSet$_literal(["dofBlurH", "dofBlurV", "dofOutput"], t1));
+      if (t2.contains$1(0, "grade"))
+        resources.add$1(0, "gradeOutput");
+      if (t2.contains$1(0, "ps1"))
+        resources.add$1(0, "ps1Output");
+      hasHistory = t2.contains$1(0, "vhs");
+      if (hasHistory)
+        resources.add$1(0, "vhsOutput");
+      return new A.OwnedResourcePlan(new A.UnmodifiableSetView(A.LinkedHashSet_LinkedHashSet$of(resources, t1), type$.UnmodifiableSetView_String), hasHistory);
+    },
+    OwnedResourcePlan: function OwnedResourcePlan(t0, t1) {
+      this.resources = t0;
+      this.hasHistory = t1;
+    },
+    OwnedResourcePlan_validate_closure: function OwnedResourcePlan_validate_closure() {
+    },
+    PreparedResourceAssembly: function PreparedResourceAssembly(t0) {
+      this.plan = t0;
+    },
+    ResourcePlanAssembler: function ResourcePlanAssembler() {
+      this._resource_plan$_current = null;
+      this._generation = 0;
+      this._disposed = false;
+    },
+    SurfaceMetrics: function SurfaceMetrics(t0, t1, t2, t3) {
+      var _ = this;
+      _.cssWidth = t0;
+      _.cssHeight = t1;
+      _.pixelWidth = t2;
+      _.pixelHeight = t3;
+    },
+    ColorEncoding: function ColorEncoding(t0, t1) {
+      this.index = t0;
+      this._name = t1;
+    },
+    DiagnosticLevel: function DiagnosticLevel(t0, t1) {
+      this.index = t0;
+      this._name = t1;
+    },
+    RendererConfiguration: function RendererConfiguration(t0, t1, t2, t3, t4) {
+      var _ = this;
+      _.profile = t0;
+      _.internalWidth = t1;
+      _.internalHeight = t2;
+      _.sampleCount = t3;
+      _.shadowMapCount = t4;
+    },
+    RendererState: function RendererState(t0, t1) {
+      this.index = t0;
+      this._name = t1;
+    },
+    FramePassStats: function FramePassStats(t0, t1, t2) {
+      this.drawCalls = t0;
+      this.trianglesSubmitted = t1;
+      this.instancesSubmitted = t2;
+    },
+    FrameStats: function FrameStats(t0, t1, t2, t3, t4) {
+      var _ = this;
+      _.frameIndex = t0;
+      _.drawCalls = t1;
+      _.trianglesSubmitted = t2;
+      _.trianglesCulled = t3;
+      _.liveGpuBytes = t4;
+    },
+    MaterialStore$() {
+      return new A.MaterialStore(new A.ResourceRegistry(new A.MaterialStore__registry_closure(), A._setArrayType([], type$.JSArray__Slot_MaterialDefinition), A._setArrayType([], type$.JSArray_int), type$.ResourceRegistry_MaterialHandle_MaterialDefinition));
+    },
+    MaterialStore: function MaterialStore(t0) {
+      this._material_store$_registry = t0;
+    },
+    MaterialStore__registry_closure: function MaterialStore__registry_closure() {
+    },
+    _shaderLocationFor(kind) {
+      var t1 = 4;
+      switch (kind) {
+        case B.VertexAttributeKind_0:
+          t1 = 0;
+          break;
+        case B.VertexAttributeKind_1:
+          t1 = 1;
+          break;
+        case B.VertexAttributeKind_2:
+          t1 = 2;
+          break;
+        case B.VertexAttributeKind_4:
+          t1 = 3;
+          break;
+        case B.VertexAttributeKind_5:
+          break;
+        case B.VertexAttributeKind_6:
+          t1 = 5;
+          break;
+        case B.VertexAttributeKind_7:
+          t1 = 6;
+          break;
+        case B.VertexAttributeKind_8:
+          break;
+        case B.VertexAttributeKind_3:
+          t1 = A.throwExpression(A.UnsupportedError$("MeshStore: no shader location reserved for VertexAttributeKind.emissive yet \u2014 safe_world.vert has no emissive input"));
+          break;
+        default:
+          t1 = null;
+      }
+      return t1;
+    },
+    _componentCountAtLocation(layout, $location, firstSlot) {
+      var t1, t2, total, _i, attr;
+      for (t1 = layout.get$attributes(), t2 = t1.length, total = 0, _i = 0; _i < t2; ++_i) {
+        attr = t1[_i];
+        if (A._shaderLocationFor(attr.get$kind()) === $location)
+          total = B.JSInt_methods.$add(total, attr.get$floatCount());
+      }
+      return total;
+    },
+    MeshStore$(_device) {
+      return new A.MeshStore(_device, new A.ResourceRegistry(new A.MeshStore_closure(), A._setArrayType([], type$.JSArray__Slot_MeshData), A._setArrayType([], type$.JSArray_int), type$.ResourceRegistry_MeshHandle_MeshData), A.LinkedHashMap_LinkedHashMap$_empty(type$.int, type$.UploadedMesh));
+    },
+    MeshStore__indexByteLength(indices) {
+      var t1;
+      $label0$0: {
+        t1 = indices.get$lengthInBytes(indices);
+        break $label0$0;
+      }
+      return t1;
+    },
+    UploadedMesh: function UploadedMesh(t0, t1, t2, t3, t4, t5) {
+      var _ = this;
+      _.vertexBuffer = t0;
+      _.indexBuffer = t1;
+      _.vao = t2;
+      _.indexCount = t3;
+      _.vertexCount = t4;
+      _.usesUint32Indices = t5;
+    },
+    MeshStore: function MeshStore(t0, t1, t2) {
+      this._mesh_store$_device = t0;
+      this._registry = t1;
+      this._uploadsBySlot = t2;
+    },
+    MeshStore_closure: function MeshStore_closure() {
+    },
+    MeshStore_liveGpuBytes_closure: function MeshStore_liveGpuBytes_closure() {
+    },
+    TextureStore$(_device) {
+      var t1 = new A.TextureStore(_device, new A.ResourceRegistry(new A.TextureStore_closure(), A._setArrayType([], type$.JSArray__Slot__TextureRecord), A._setArrayType([], type$.JSArray_int), type$.ResourceRegistry_TextureHandle__TextureRecord), A.LinkedHashMap_LinkedHashMap$_empty(type$.int, type$.GpuObject));
+      t1.__TextureStore__fallbackAlbedo_A = t1._createFallback$1($.$get$FallbackPixels_whiteAlbedo());
+      t1.__TextureStore__fallbackNormal_A = t1._createFallback$1($.$get$FallbackPixels_flatNormal());
+      t1.__TextureStore__fallbackOrm_A = t1._createFallback$1($.$get$FallbackPixels_identityOrm());
+      t1.__TextureStore__fallbackEmissive_A = t1._createFallback$1($.$get$FallbackPixels_blackEmissive());
+      t1.__TextureStore__fallbackLightmap_A = t1._createFallback$1($.$get$FallbackPixels_neutralLightmap());
+      return t1;
+    },
+    TextureStore: function TextureStore(t0, t1, t2) {
+      var _ = this;
+      _._texture_store$_device = t0;
+      _._texture_store$_registry = t1;
+      _._texturesBySlot = t2;
+      _.__TextureStore__fallbackLightmap_A = _.__TextureStore__fallbackEmissive_A = _.__TextureStore__fallbackOrm_A = _.__TextureStore__fallbackNormal_A = _.__TextureStore__fallbackAlbedo_A = $;
+    },
+    TextureStore_closure: function TextureStore_closure() {
+    },
+    TextureStore_rehydrateAfterContextRestore_closure: function TextureStore_rehydrateAfterContextRestore_closure() {
+    },
+    TextureStore_liveGpuBytes_closure: function TextureStore_liveGpuBytes_closure() {
+    },
+    batchOpaque(sortedOpaqueItems) {
+      var t1, t2, _i, item, familyKey, key, existingIndex, t3, t4,
+        batches = A._setArrayType([], type$.JSArray_InstanceBatch),
+        groupIndexByKey = A.LinkedHashMap_LinkedHashMap$_empty(type$.String, type$.int);
+      for (t1 = sortedOpaqueItems.length, t2 = type$.JSArray_RetainedItemView, _i = 0; _i < sortedOpaqueItems.length; sortedOpaqueItems.length === t1 || (0, A.throwConcurrentModificationError)(sortedOpaqueItems), ++_i) {
+        item = sortedOpaqueItems[_i];
+        familyKey = item.get$descriptor().get$instanceFamilyKey();
+        key = A.S(item.get$descriptor().get$mesh().get$slot()) + ":" + A.S(item.get$descriptor().get$material().get$slot()) + ":" + A.S(familyKey);
+        existingIndex = groupIndexByKey.$index(0, key);
+        if (existingIndex == null) {
+          groupIndexByKey.$indexSet(0, key, batches.length);
+          B.JSArray_methods.add$1(batches, new A.InstanceBatch(item, A._setArrayType([item], t2)));
+        } else {
+          t3 = batches.length;
+          if (existingIndex >>> 0 !== existingIndex || existingIndex >= t3)
+            return A.ioore(batches, existingIndex);
+          t4 = batches[existingIndex].members;
+          if (t4.length >= 16) {
+            groupIndexByKey.$indexSet(0, key, t3);
+            B.JSArray_methods.add$1(batches, new A.InstanceBatch(item, A._setArrayType([item], t2)));
+          } else
+            B.JSArray_methods.add$1(t4, item);
+        }
+      }
+      return batches;
+    },
+    InstanceBatch: function InstanceBatch(t0, t1) {
+      this.representative = t0;
+      this.members = t1;
+    },
+    FeatureGraph: function FeatureGraph(t0) {
+      this._installedFeatures = t0;
+    },
+    FeatureGraph_build_closure: function FeatureGraph_build_closure() {
+    },
+    FeatureGraph_build_closure0: function FeatureGraph_build_closure0(t0) {
+      this.graph = t0;
+    },
+    FeatureGraph_build__closure: function FeatureGraph_build__closure(t0) {
+      this.a = t0;
+    },
+    FeatureGraph_build__closure0: function FeatureGraph_build__closure0(t0) {
+      this.b = t0;
+    },
+    FeatureGraphResult: function FeatureGraphResult(t0, t1) {
+      this.graph = t0;
+      this.passes = t1;
+    },
+    FrameQueueState: function FrameQueueState(t0, t1) {
+      this.index = t0;
+      this._name = t1;
+    },
+    FrameQueue: function FrameQueue(t0, t1) {
+      this._transientItems = t0;
+      this._frame_queue$_state = t1;
+      this._submittedThisFrame = 0;
+    },
+    _MutablePassStats___new_tearOff() {
+      return new A._MutablePassStats();
+    },
+    FrameDrawTelemetry: function FrameDrawTelemetry(t0) {
+      this._passes = t0;
+      this._activePass = null;
+    },
+    _MutablePassStats: function _MutablePassStats() {
+      var _ = this;
+      _.instancesCulled = _.instancesSubmitted = _.trianglesCulled = _.trianglesSubmitted = _.drawCalls = 0;
+    },
+    PassDeclaration__alwaysEnabled() {
+      return true;
+    },
+    PassDeclaration: function PassDeclaration(t0, t1, t2, t3) {
+      var _ = this;
+      _.id = t0;
+      _.stage = t1;
+      _.uses = t2;
+      _.isResolve = t3;
+    },
+    PassDeclaration_reads_closure: function PassDeclaration_reads_closure() {
+    },
+    PassDeclaration_writes_closure: function PassDeclaration_writes_closure() {
+    },
+    GraphValidationFailureKind: function GraphValidationFailureKind(t0, t1) {
+      this.index = t0;
+      this._name = t1;
+    },
+    GraphValidationFailure: function GraphValidationFailure(t0, t1, t2) {
+      this.kind = t0;
+      this.passId = t1;
+      this.detail = t2;
+    },
+    ResourceFormat: function ResourceFormat(t0, t1) {
+      this.index = t0;
+      this._name = t1;
+    },
+    GraphStage: function GraphStage(t0, t1) {
+      this.index = t0;
+      this._name = t1;
+    },
+    ResourceRef: function ResourceRef(t0, t1, t2, t3, t4, t5) {
+      var _ = this;
+      _.name = t0;
+      _.format = t1;
+      _.width = t2;
+      _.height = t3;
+      _.samples = t4;
+      _.version = t5;
+    },
+    ResourceAccess: function ResourceAccess(t0, t1) {
+      this.index = t0;
+      this._name = t1;
+    },
+    ResourceUse: function ResourceUse(t0, t1) {
+      this.resource = t0;
+      this.access = t1;
+    },
+    CompiledProgram: function CompiledProgram(t0) {
+      this.handle = t0;
+    },
+    ProgramLibrary: function ProgramLibrary(t0, t1) {
+      var _ = this;
+      _._device = t0;
+      _._live = t1;
+      _._openSet = null;
+      _.rejectedReloadCount = _.publishCount = 0;
+    },
+    ProgramSource: function ProgramSource(t0, t1, t2, t3, t4, t5) {
+      var _ = this;
+      _.id = t0;
+      _.vertexSource = t1;
+      _.fragmentSource = t2;
+      _.attributeLocations = t3;
+      _.samplerUnits = t4;
+      _.requiredUniforms = t5;
+    },
+    RenderFeatureContext: function RenderFeatureContext() {
+    },
+    PassDescriptor: function PassDescriptor(t0, t1, t2, t3, t4, t5) {
+      var _ = this;
+      _.id = t0;
+      _.uses = t1;
+      _.depthTest = t2;
+      _.depthWrite = t3;
+      _.blendEnable = t4;
+      _.cullEnable = t5;
+    },
+    RenderGraphBuilder: function RenderGraphBuilder(t0, t1) {
+      this._render_graph$_passes = t0;
+      this._declaredHistoryResources = t1;
+    },
+    RenderGraphBuilder_build_closure: function RenderGraphBuilder_build_closure() {
+    },
+    RenderGraphBuilder__validate_closure: function RenderGraphBuilder__validate_closure() {
+    },
+    RenderGraphBuilder__checkResolves_closure: function RenderGraphBuilder__checkResolves_closure() {
+    },
+    RenderGraphBuilder__checkFormatAndSizeMismatch_closure: function RenderGraphBuilder__checkFormatAndSizeMismatch_closure(t0) {
+      this.use = t0;
+    },
+    RenderGraphBuilder__checkDependencyCycles_hasCycleFrom: function RenderGraphBuilder__checkDependencyCycles_hasCycleFrom(t0, t1, t2) {
+      this.visiting = t0;
+      this.visited = t1;
+      this.adjacency = t2;
+    },
+    RenderGraph: function RenderGraph(t0, t1) {
+      this.orderedPasses = t0;
+      this.failures = t1;
+    },
+    RenderWorldImpl$(_meshRegistry) {
+      return new A.RenderWorldImpl(_meshRegistry, new A.ResourceRegistry(new A.RenderWorldImpl__instances_closure(), A._setArrayType([], type$.JSArray__Slot_RetainedItemDescriptor), A._setArrayType([], type$.JSArray_int), type$.ResourceRegistry_InstanceId_RetainedItemDescriptor));
+    },
+    RenderWorldImpl: function RenderWorldImpl(t0, t1) {
+      this._meshRegistry = t0;
+      this._instances = t1;
+    },
+    RenderWorldImpl__instances_closure: function RenderWorldImpl__instances_closure() {
+    },
+    _extension_0__buildSafeGraph(_this) {
+      var t2,
+        t1 = _this._programs;
+      t1.toString;
+      t2 = _this._configuration;
+      t2.toString;
+      _this._graph = A._extension_0__assembleSafeGraph(_this, t1, t2, _this._gpuResources.get$current().logical.plan.resources).result;
+    },
+    _extension_0__assembleSafeGraph(_this, programs, configuration, resourceNames) {
+      var t8, t9, featureGraph, sceneColor, resolvedSceneColor, resolve, result,
+        _s10_ = "sceneColor",
+        t1 = new A._extension_0__assembleSafeGraph_resolveMesh(_this),
+        t2 = new A._extension_0__assembleSafeGraph_resolveResource(resourceNames, _this),
+        t3 = configuration.profile,
+        t4 = _this.device,
+        t5 = configuration.internalWidth,
+        t6 = configuration.internalHeight,
+        t7 = configuration.sampleCount;
+      if (t3.installedFeatures.contains$1(0, "shadows")) {
+        t8 = _this._resources;
+        t9 = t8._materials;
+        t8 = t8._textures;
+        featureGraph = A.buildShadowGraph(programs, t4, B.ColorEncoding_1, t3, t8.get$resolveAlbedo(), new A._extension_0__assembleSafeGraph_closure(t2), new A._extension_0__assembleSafeGraph_closure0(t2), new A._extension_0__assembleSafeGraph_closure1(_this), new A._extension_0__assembleSafeGraph_closure2(_this), new A._extension_0__assembleSafeGraph_closure3(_this), new A._extension_0__assembleSafeGraph_closure4(t2), new A._extension_0__assembleSafeGraph_closure5(t2), t8.get$resolveEmissive(), new A._extension_0__assembleSafeGraph_closure6(_this), t8.get$resolveLightmap(), t9.get$resolveForPass(), t1, t8.get$resolveNormal(), t8.get$resolveOrm(), new A._extension_0__assembleSafeGraph_closure7(t2, configuration), new A._extension_0__assembleSafeGraph_closure8(t2), new A._extension_0__assembleSafeGraph_closure9(t2), new A._extension_0__assembleSafeGraph_closure10(t2), new A._extension_0__assembleSafeGraph_closure11(t2), new A._extension_0__assembleSafeGraph_closure12(_this), new A._extension_0__assembleSafeGraph_closure13(t2), t7, t6, t5, 512);
+      } else {
+        sceneColor = new A.ResourceRef(_s10_, B.ResourceFormat_0, t5, t6, t7, 0);
+        resolvedSceneColor = new A.ResourceRef(_s10_, B.ResourceFormat_0, t5, t6, 1, 1);
+        t2 = t7 > 1;
+        t3 = t2 ? resolvedSceneColor : sceneColor;
+        resolve = t2 ? new A.MsaaResolveFeature(t4, sceneColor, resolvedSceneColor) : null;
+        t1 = A._setArrayType([new A.WorldFeature(programs, "#version 300 es\nlayout(location=0) in vec3 aPosition;\nlayout(location=1) in vec3 aNormal;\nlayout(location=2) in vec4 aColor;\nlayout(location=3) in float aAlpha;\nlayout(location=4) in vec3 aUvMat;\nuniform mat4 uViewProjection;\nuniform mat4 uModel;\nuniform mat4 uNormalMatrix;\nuniform mat4 uInstanceModels[16];\nuniform mat4 uInstanceNormalMatrices[16];\nuniform float uUseInstances;\nout vec4 vColor;\nout vec3 vNormal;\nvoid main(){\n  mat4 model=uModel;\n  mat4 normalMatrix=uNormalMatrix;\n  if(uUseInstances>0.5){model=uInstanceModels[gl_InstanceID];normalMatrix=uInstanceNormalMatrices[gl_InstanceID];}\n  vColor=vec4(aColor.rgb,aAlpha);\n  vNormal=mat3(normalMatrix)*aNormal;\n  gl_Position=uViewProjection*model*vec4(aPosition,1.0);\n}\n", "#version 300 es\nprecision highp float;\nin vec4 vColor;\nin vec3 vNormal;\nuniform vec3 uLightDir;\nuniform vec3 uAmbientColor;\nuniform float uAmbientIntensity;\nout vec4 oColor;\nvoid main(){\n  vec3 n=normalize(vNormal);\n  float ndotl=max(dot(n,normalize(uLightDir)),0.0);\n  vec3 lit=vColor.rgb*clamp(uAmbientColor*uAmbientIntensity+vec3(ndotl),0.0,1.0);\n  oColor=vec4(lit,vColor.a);\n}\n", t1, sceneColor)], type$.JSArray_RenderFeature);
+        if (resolve != null)
+          t1.push(resolve);
+        t1.push(new A.PresentFeature(programs, string$.x23versio, string$.x23versip, t4, t3, B.ColorEncoding_1));
+        featureGraph = new A.FeatureGraph(t1);
+      }
+      _this._capabilities.toString;
+      result = featureGraph.build$4$availableCapabilities$featureContext$hasValidPreviousFrame$resources(B.Set_empty, new A.RenderFeatureContext(), false, new A._PlanResources());
+      t1 = result.graph.failures;
+      if (t1.length !== 0)
+        throw A.wrapException(A.StateError$("safe renderer graph is invalid: " + A.S(t1)));
+      return new A._SafeGraphAssembly(featureGraph, result);
+    },
+    _extension_0__executeGraph(_this, world, frame, transient) {
+      var t1, i, descriptor, t2, cull, t3, candidateTriangles, _i, t4, t5, visibleTriangles, telemetry, passId, stats, opaque, blended, t6, t7, item, scene, encoder, pass, views, t8, _i0, resource, value, t9, t10, t11, object, view, _null = null,
+        graph = _this._graph,
+        resources = _this._gpuResources;
+      if (graph == null || resources == null)
+        throw A.wrapException(A.StateError$("renderer graph is not initialized"));
+      t1 = A.List_List$_of(world.get$items(), type$.RetainedItemView);
+      for (i = 0; i < transient.length; ++i) {
+        descriptor = transient[i];
+        _this._resources._meshes._registry.descriptorOf$1(descriptor.get$mesh()).get$localBounds().transformed$1(descriptor.get$transform().toMat4$0());
+      }
+      t2 = frame.camera;
+      cull = A.cullItems(A.Frustum_Frustum$fromViewProjection(t2.viewProjection), t1, -1);
+      for (t3 = t1.length, candidateTriangles = 0, _i = 0; _i < t1.length; t1.length === t3 || (0, A.throwConcurrentModificationError)(t1), ++_i) {
+        t4 = t1[_i].get$descriptor().get$mesh();
+        t5 = _this._resources._meshes;
+        if (t5._uploadsBySlot.$index(0, t4.get$slot()) == null)
+          A.throwExpression(A.HandleException$(B.HandleRejection_3, t4));
+        t5._registry.descriptorOf$1(t4);
+        candidateTriangles = B.JSInt_methods.$add(candidateTriangles, _null);
+      }
+      for (t1 = cull.visible, t3 = t1.length, visibleTriangles = 0, _i = 0; _i < t1.length; t1.length === t3 || (0, A.throwConcurrentModificationError)(t1), ++_i) {
+        t4 = t1[_i].get$descriptor().get$mesh();
+        t5 = _this._resources._meshes;
+        if (t5._uploadsBySlot.$index(0, t4.get$slot()) == null)
+          A.throwExpression(A.HandleException$(B.HandleRejection_3, t4));
+        t5._registry.descriptorOf$1(t4);
+        visibleTriangles = B.JSInt_methods.$add(visibleTriangles, _null);
+      }
+      t3 = type$.String;
+      t4 = A.LinkedHashMap_LinkedHashMap$_empty(t3, type$._MutablePassStats);
+      telemetry = new A.FrameDrawTelemetry(t4);
+      telemetry.beginPass$1("cull");
+      t5 = candidateTriangles - visibleTriangles;
+      passId = telemetry._activePass;
+      if (passId == null)
+        A.throwExpression(A.StateError$("cull recorded outside an active frame"));
+      if (t5 < 0)
+        A.throwExpression(A.ArgumentError$("cull totals must be non-negative", _null));
+      stats = t4.$index(0, passId);
+      stats.trianglesCulled += t5;
+      stats.instancesCulled += cull.stats.culled;
+      opaque = A._setArrayType([], type$.JSArray_SortableItem_OpaqueSortKey);
+      blended = A._setArrayType([], type$.JSArray_SortableItem_BlendedSortKey);
+      for (t6 = t1.length, t7 = type$.SortableItem_OpaqueSortKey, _i = 0; _i < t1.length; t1.length === t6 || (0, A.throwConcurrentModificationError)(t1), ++_i) {
+        item = t1[_i];
+        item.get$descriptor().get$drawMode();
+        B.JSArray_methods.add$1(opaque, new A.SortableItem(new A.OpaqueSortKey(B.PipelineHandle_0_1_null, item.get$descriptor().get$material(), item.get$descriptor().get$mesh(), item.get$id().slot), item, t7));
+      }
+      scene = new A._FrameScene(A.batchOpaque(A.sortOpaque(opaque)), A.sortBlended(blended), t2, frame.environment, frame.post);
+      encoder = new A.DeviceDrawCommandEncoder(_this.device, telemetry);
+      for (t1 = graph.passes, t2 = t1.length, t6 = type$.BoundResourceView, _i = 0; _i < t1.length; t1.length === t2 || (0, A.throwConcurrentModificationError)(t1), ++_i) {
+        pass = t1[_i];
+        t7 = pass.get$descriptor().id;
+        if (t7.length === 0)
+          A.throwExpression(A.ArgumentError$value(t7, "passId", _null));
+        telemetry._activePass = t7;
+        t4.putIfAbsent$2(t7, A.frame_telemetry__MutablePassStats___new_tearOff$closure());
+        views = A.LinkedHashMap_LinkedHashMap$_empty(t3, t6);
+        for (t7 = pass.get$descriptor().uses, t8 = t7.length, _i0 = 0; _i0 < t7.length; t7.length === t8 || (0, A.throwConcurrentModificationError)(t7), ++_i0) {
+          resource = t7[_i0].resource;
+          value = resources._resource_plan_adapter$_current;
+          if (value == null)
+            A.throwExpression(A.StateError$("GPU resource adapter is not initialized"));
+          t9 = resource.version;
+          t10 = resource.name;
+          t11 = t9 === 0 ? t10 : t10 + "#" + t9;
+          object = value.objects.$index(0, t11);
+          if (object == null)
+            A.throwExpression(A.StateError$("resource is not in candidate: " + t11));
+          view = new A.BoundResourceView(object);
+          views.$indexSet(0, t10 + "#" + t9, view);
+          views.putIfAbsent$2(t10, new A._extension_0__executeGraph_closure(view));
+        }
+        pass.execute$1(new A.BoundPassContext(views, encoder, scene));
+      }
+      return new A._FrameExecution(telemetry, cull, t5);
+    },
+    ResourceLibraryImpl: function ResourceLibraryImpl(t0, t1, t2, t3, t4, t5) {
+      var _ = this;
+      _._meshes = t0;
+      _._materials = t1;
+      _._textures = t2;
+      _._meshHandles = t3;
+      _._materialHandles = t4;
+      _._textureHandles = t5;
+      _._scene_renderer_impl$_disposed = false;
+    },
+    _FrameExecution: function _FrameExecution(t0, t1, t2) {
+      this.telemetry = t0;
+      this.cull = t1;
+      this.trianglesCulled = t2;
+    },
+    _extension_0__assembleSafeGraph_resolveMesh: function _extension_0__assembleSafeGraph_resolveMesh(t0) {
+      this._this = t0;
+    },
+    _extension_0__assembleSafeGraph_resolveResource: function _extension_0__assembleSafeGraph_resolveResource(t0, t1) {
+      this.resourceNames = t0;
+      this._this = t1;
+    },
+    _extension_0__assembleSafeGraph_closure9: function _extension_0__assembleSafeGraph_closure9(t0) {
+      this.resolveResource = t0;
+    },
+    _extension_0__assembleSafeGraph_closure2: function _extension_0__assembleSafeGraph_closure2(t0) {
+      this._this = t0;
+    },
+    _extension_0__assembleSafeGraph_closure3: function _extension_0__assembleSafeGraph_closure3(t0) {
+      this._this = t0;
+    },
+    _extension_0__assembleSafeGraph_closure8: function _extension_0__assembleSafeGraph_closure8(t0) {
+      this.resolveResource = t0;
+    },
+    _extension_0__assembleSafeGraph_closure1: function _extension_0__assembleSafeGraph_closure1(t0) {
+      this._this = t0;
+    },
+    _extension_0__assembleSafeGraph_closure11: function _extension_0__assembleSafeGraph_closure11(t0) {
+      this.resolveResource = t0;
+    },
+    _extension_0__assembleSafeGraph_closure10: function _extension_0__assembleSafeGraph_closure10(t0) {
+      this.resolveResource = t0;
+    },
+    _extension_0__assembleSafeGraph_closure7: function _extension_0__assembleSafeGraph_closure7(t0, t1) {
+      this.resolveResource = t0;
+      this.configuration = t1;
+    },
+    _extension_0__assembleSafeGraph_closure: function _extension_0__assembleSafeGraph_closure(t0) {
+      this.resolveResource = t0;
+    },
+    _extension_0__assembleSafeGraph_closure0: function _extension_0__assembleSafeGraph_closure0(t0) {
+      this.resolveResource = t0;
+    },
+    _extension_0__assembleSafeGraph_closure4: function _extension_0__assembleSafeGraph_closure4(t0) {
+      this.resolveResource = t0;
+    },
+    _extension_0__assembleSafeGraph_closure5: function _extension_0__assembleSafeGraph_closure5(t0) {
+      this.resolveResource = t0;
+    },
+    _extension_0__assembleSafeGraph_closure6: function _extension_0__assembleSafeGraph_closure6(t0) {
+      this._this = t0;
+    },
+    _extension_0__assembleSafeGraph_closure13: function _extension_0__assembleSafeGraph_closure13(t0) {
+      this.resolveResource = t0;
+    },
+    _extension_0__assembleSafeGraph_closure12: function _extension_0__assembleSafeGraph_closure12(t0) {
+      this._this = t0;
+    },
+    _extension_0__executeGraph_closure: function _extension_0__executeGraph_closure(t0) {
+      this.view = t0;
+    },
+    _SafeGraphAssembly: function _SafeGraphAssembly(t0, t1) {
+      this.featureGraph = t0;
+      this.result = t1;
+    },
+    _PlanResources: function _PlanResources() {
+    },
+    _FrameScene: function _FrameScene(t0, t1, t2, t3, t4) {
+      var _ = this;
+      _.opaqueBatches = t0;
+      _.blendedItemsBackToFront = t1;
+      _.camera = t2;
+      _.environment = t3;
+      _.post = t4;
+    },
+    SceneRendererImpl: function SceneRendererImpl(t0, t1, t2, t3, t4, t5, t6) {
+      var _ = this;
+      _.device = t0;
+      _._configurations = t1;
+      _._frames = t2;
+      _._worlds = t3;
+      _._scene_renderer_impl$_state = t4;
+      _._activeWorld = _._activeFrame = _._configuration = _._graph = _._programs = _._gpuResources = _._resources = _._capabilities = null;
+      _._GpuTimingSupport__pendingGpuTimings = t5;
+      _._GpuTimingSupport__activeGpuTimer = t6;
+    },
+    SceneRendererImpl_endFrame_closure: function SceneRendererImpl_endFrame_closure() {
+    },
+    SceneRendererImpl_endFrame_closure0: function SceneRendererImpl_endFrame_closure0() {
+    },
+    SceneRendererImpl_endFrame_closure1: function SceneRendererImpl_endFrame_closure1() {
+    },
+    _PendingGpuTiming: function _PendingGpuTiming(t0) {
+      this.query = t0;
+    },
+    _GpuTimingSupport: function _GpuTimingSupport() {
+    },
+    _SceneRendererImpl_Object__GpuTimingSupport: function _SceneRendererImpl_Object__GpuTimingSupport() {
+    },
+    ShadowCasterLod: function ShadowCasterLod(t0, t1) {
+      this.index = t0;
+      this._name = t1;
+    },
+    sortOpaque(items) {
+      var t1, t2,
+        sorted = A.List_List$_of(items, type$.SortableItem_OpaqueSortKey);
+      B.JSArray_methods.sort$1(sorted, new A.sortOpaque_closure());
+      t1 = A._arrayInstanceType(sorted);
+      t2 = t1._eval$1("MappedListIterable<1,RetainedItemView>");
+      t1 = A.List_List$_of(new A.MappedListIterable(sorted, t1._eval$1("RetainedItemView(1)")._as(new A.sortOpaque_closure0()), t2), t2._eval$1("ListIterable.E"));
+      t1.$flags = 1;
+      return t1;
+    },
+    sortBlended(items) {
+      var t1, t2,
+        sorted = A.List_List$_of(items, type$.SortableItem_BlendedSortKey);
+      B.JSArray_methods.sort$1(sorted, new A.sortBlended_closure());
+      t1 = A._arrayInstanceType(sorted);
+      t2 = t1._eval$1("MappedListIterable<1,RetainedItemView>");
+      t1 = A.List_List$_of(new A.MappedListIterable(sorted, t1._eval$1("RetainedItemView(1)")._as(new A.sortBlended_closure0()), t2), t2._eval$1("ListIterable.E"));
+      t1.$flags = 1;
+      return t1;
+    },
+    OpaqueSortKey: function OpaqueSortKey(t0, t1, t2, t3) {
+      var _ = this;
+      _.pipeline = t0;
+      _.material = t1;
+      _.mesh = t2;
+      _.instanceId = t3;
+    },
+    SortableItem: function SortableItem(t0, t1, t2) {
+      this.key = t0;
+      this.view = t1;
+      this.$ti = t2;
+    },
+    sortOpaque_closure: function sortOpaque_closure() {
+    },
+    sortOpaque_closure0: function sortOpaque_closure0() {
+    },
+    sortBlended_closure: function sortBlended_closure() {
+    },
+    sortBlended_closure0: function sortBlended_closure0() {
+    },
+    cullItems(frustum, items, visibilityMask) {
+      var t1, candidates, culled, _i, item, t2,
+        visible = A._setArrayType([], type$.JSArray_RetainedItemView);
+      for (t1 = items.length, candidates = 0, culled = 0, _i = 0; _i < items.length; items.length === t1 || (0, A.throwConcurrentModificationError)(items), ++_i) {
+        item = items[_i];
+        ++candidates;
+        item.get$descriptor().get$visibilityMask().$and(0, visibilityMask);
+        t2 = item.get$worldBounds();
+        if (!t2.get$isFinite(t2))
+          throw A.wrapException(A.ArgumentError$("cullItems: non-finite world bounds for instance " + item.get$id().toString$0(0), null));
+        if (frustum.testAabb$1(item.get$worldBounds()) === B.FrustumTest_0) {
+          ++culled;
+          continue;
+        }
+        B.JSArray_methods.add$1(visible, item);
+      }
+      return new A.CullResult(visible, new A.CullStats(culled));
+    },
+    CullStats: function CullStats(t0) {
+      this.culled = t0;
+    },
+    CullResult: function CullResult(t0, t1) {
+      this.visible = t0;
+      this.stats = t1;
+    },
+    Frustum_Frustum$fromViewProjection(vp) {
+      var m = vp.m,
+        t1 = new A.Frustum_Frustum$fromViewProjection_row();
+      return new A.Frustum(A._setArrayType([t1.call$4(m[3] + m[0], m[7] + m[4], m[11] + m[8], m[15] + m[12]), t1.call$4(m[3] - m[0], m[7] - m[4], m[11] - m[8], m[15] - m[12]), t1.call$4(m[3] + m[1], m[7] + m[5], m[11] + m[9], m[15] + m[13]), t1.call$4(m[3] - m[1], m[7] - m[5], m[11] - m[9], m[15] - m[13]), t1.call$4(m[3] + m[2], m[7] + m[6], m[11] + m[10], m[15] + m[14]), t1.call$4(m[3] - m[2], m[7] - m[6], m[11] - m[10], m[15] - m[14])], type$.JSArray_Plane));
+    },
+    Plane: function Plane(t0, t1) {
+      this.normal = t0;
+      this.d = t1;
+    },
+    FrustumTest: function FrustumTest(t0, t1) {
+      this.index = t0;
+      this._name = t1;
+    },
+    Frustum: function Frustum(t0) {
+      this.planes = t0;
+    },
+    Frustum_Frustum$fromViewProjection_row: function Frustum_Frustum$fromViewProjection_row() {
+    },
+    Mat4_Mat4$perspective(aspect, far, fovYRadians, near) {
+      var f = 1 / Math.tan(fovYRadians / 2),
+        nf = 1 / (near - far),
+        t1 = new Float32Array(16);
+      t1[0] = f / aspect;
+      t1[5] = f;
+      t1[10] = (far + near) * nf;
+      t1[11] = -1;
+      t1[14] = 2 * far * near * nf;
+      return new A.Mat4(t1);
+    },
+    Mat4: function Mat4(t0) {
+      this.m = t0;
+    },
+    Mat4_isFinite_closure: function Mat4_isFinite_closure() {
+    },
+    Vec3: function Vec3(t0, t1, t2) {
+      this.x = t0;
+      this.y = t1;
+      this.z = t2;
+    },
+    _BloomBlurAxis: function _BloomBlurAxis(t0, t1) {
+      this.index = t0;
+      this._name = t1;
+    },
+    BloomBlurFeature: function BloomBlurFeature(t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12) {
+      var _ = this;
+      _.programLibrary = t0;
+      _.vertexSource = t1;
+      _.fragmentSource = t2;
+      _.device = t3;
+      _.programId = t4;
+      _.passId = t5;
+      _._bloom$_axis = t6;
+      _.sampleGlowAttachment = t7;
+      _.sourceResource = t8;
+      _.destResource = t9;
+      _.resolveSource = t10;
+      _.texelWidth = t11;
+      _.texelHeight = t12;
+    },
+    _BloomBlurPass: function _BloomBlurPass(t0, t1, t2, t3, t4, t5, t6) {
+      var _ = this;
+      _.descriptor = t0;
+      _.program = t1;
+      _.emptyVao = t2;
+      _.resolveSource = t3;
+      _.sampleGlowAttachment = t4;
+      _.texelStep = t5;
+      _.destResourceName = t6;
+    },
+    BloomCompositeFeature: function BloomCompositeFeature(t0, t1, t2, t3, t4, t5, t6, t7) {
+      var _ = this;
+      _.programLibrary = t0;
+      _.vertexSource = t1;
+      _.fragmentSource = t2;
+      _.device = t3;
+      _.resolveBloom = t4;
+      _.bloomResource = t5;
+      _.sceneColorResource = t6;
+      _.sceneColorPostBloomResource = t7;
+    },
+    _BloomCompositePass: function _BloomCompositePass(t0, t1, t2, t3, t4) {
+      var _ = this;
+      _.descriptor = t0;
+      _.program = t1;
+      _.emptyVao = t2;
+      _.resolveBloom = t3;
+      _.outputResource = t4;
+    },
+    DepthPrepassFeature: function DepthPrepassFeature(t0, t1, t2, t3, t4, t5, t6) {
+      var _ = this;
+      _.programLibrary = t0;
+      _.vertexSource = t1;
+      _.fragmentSource = t2;
+      _.resolveMesh = t3;
+      _.resolveMaterial = t4;
+      _.resolveAlbedo = t5;
+      _.sceneDepthResource = t6;
+    },
+    _DepthPrepassPass: function _DepthPrepassPass(t0, t1, t2, t3, t4) {
+      var _ = this;
+      _.descriptor = t0;
+      _.program = t1;
+      _.resolveMesh = t2;
+      _.resolveMaterial = t3;
+      _.resolveAlbedo = t4;
+    },
+    _DofBlurAxis: function _DofBlurAxis(t0, t1) {
+      this.index = t0;
+      this._name = t1;
+    },
+    DofBlurFeature: function DofBlurFeature(t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11) {
+      var _ = this;
+      _.programLibrary = t0;
+      _.vertexSource = t1;
+      _.fragmentSource = t2;
+      _.device = t3;
+      _.programId = t4;
+      _.passId = t5;
+      _._axis = t6;
+      _.sourceResource = t7;
+      _.destResource = t8;
+      _.resolveSource = t9;
+      _.texelWidth = t10;
+      _.texelHeight = t11;
+    },
+    _DofBlurPass: function _DofBlurPass(t0, t1, t2, t3, t4, t5) {
+      var _ = this;
+      _.descriptor = t0;
+      _.program = t1;
+      _.emptyVao = t2;
+      _.resolveSource = t3;
+      _.texelStep = t4;
+      _.destResourceName = t5;
+    },
+    DofCompositeFeature: function DofCompositeFeature(t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11) {
+      var _ = this;
+      _.programLibrary = t0;
+      _.vertexSource = t1;
+      _.fragmentSource = t2;
+      _.device = t3;
+      _.resolveSharp = t4;
+      _.resolveBlurred = t5;
+      _.resolveSceneDepth = t6;
+      _.resolveCamera = t7;
+      _.sourceResource = t8;
+      _.sceneDepthResource = t9;
+      _.dofBlurredResource = t10;
+      _.dofOutputResource = t11;
+    },
+    _DofCompositePass: function _DofCompositePass(t0, t1, t2, t3, t4, t5, t6, t7, t8) {
+      var _ = this;
+      _.descriptor = t0;
+      _.program = t1;
+      _.emptyVao = t2;
+      _.resolveSharp = t3;
+      _.resolveBlurred = t4;
+      _.resolveSceneDepth = t5;
+      _.resolveCamera = t6;
+      _.focusDistance = t7;
+      _.focusRange = t8;
+    },
+    GradeFeature: function GradeFeature(t0, t1, t2, t3, t4, t5, t6) {
+      var _ = this;
+      _.programLibrary = t0;
+      _.vertexSource = t1;
+      _.fragmentSource = t2;
+      _.device = t3;
+      _.resolveLut = t4;
+      _.inputResource = t5;
+      _.outputResource = t6;
+    },
+    _GradePass: function _GradePass(t0, t1, t2, t3, t4, t5, t6) {
+      var _ = this;
+      _.descriptor = t0;
+      _.program = t1;
+      _.emptyVao = t2;
+      _.resolveLut = t3;
+      _.lutSize = t4;
+      _.inputResource = t5;
+      _.outputResource = t6;
+    },
+    MsaaResolveFeature: function MsaaResolveFeature(t0, t1, t2) {
+      this.device = t0;
+      this.sourceResource = t1;
+      this.destinationResource = t2;
+    },
+    _MsaaResolvePass: function _MsaaResolvePass(t0, t1, t2, t3) {
+      var _ = this;
+      _.descriptor = t0;
+      _.device = t1;
+      _.sourceResource = t2;
+      _.destinationResource = t3;
+    },
+    BoundResourceView: function BoundResourceView(t0) {
+      this.gpuObject = t0;
+    },
+    BoundPassContext: function BoundPassContext(t0, t1, t2) {
+      this.views = t0;
+      this.encoder = t1;
+      this.frameScene = t2;
+    },
+    PipelineResourceLayout__sized(base, width, height, samples, version) {
+      var t1 = samples == null ? base.samples : samples,
+        t2 = version == null ? base.version : version;
+      return new A.ResourceRef(base.name, base.format, width, height, t1, t2);
+    },
+    PipelineResourceLayout: function PipelineResourceLayout(t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16) {
+      var _ = this;
+      _.halfWidth = t0;
+      _.halfHeight = t1;
+      _.sceneColor = t2;
+      _.sceneColorResolved = t3;
+      _.sceneDepth = t4;
+      _.shadowMap = t5;
+      _.ssaoRaw = t6;
+      _.ssaoBlurred = t7;
+      _.bloomBlurH = t8;
+      _.bloomBlurV = t9;
+      _.sceneColorPostBloom = t10;
+      _.dofBlurH = t11;
+      _.dofBlurV = t12;
+      _.dofOutput = t13;
+      _.gradeOutput = t14;
+      _.ps1Output = t15;
+      _.vhsOutput = t16;
+    },
+    PresentFeature: function PresentFeature(t0, t1, t2, t3, t4, t5) {
+      var _ = this;
+      _.programLibrary = t0;
+      _.vertexSource = t1;
+      _.fragmentSource = t2;
+      _.device = t3;
+      _.sceneColorResource = t4;
+      _.outputEncoding = t5;
+    },
+    _PresentPass: function _PresentPass(t0, t1, t2, t3, t4) {
+      var _ = this;
+      _.descriptor = t0;
+      _.program = t1;
+      _.emptyVao = t2;
+      _.sceneColorResource = t3;
+      _.outputEncoding = t4;
+    },
+    Ps1QuantizeFeature: function Ps1QuantizeFeature(t0, t1, t2, t3, t4, t5) {
+      var _ = this;
+      _.programLibrary = t0;
+      _.vertexSource = t1;
+      _.fragmentSource = t2;
+      _.device = t3;
+      _.inputResource = t4;
+      _.outputResource = t5;
+    },
+    _Ps1QuantizePass: function _Ps1QuantizePass(t0, t1, t2, t3, t4) {
+      var _ = this;
+      _.descriptor = t0;
+      _.program = t1;
+      _.emptyVao = t2;
+      _.inputResource = t3;
+      _.outputResource = t4;
+    },
+    ShadowLightView_ShadowLightView$fromSpotLight(light) {
+      var t1 = Math.abs(0) < 0.99 ? B.Vec3_1_0_0 : B.Vec3_0_1_0,
+        f = B.Vec3_0_m1_0.get$normalized(),
+        r = t1.cross$1(f).get$normalized(),
+        u = f.cross$1(r);
+      t1 = new Float32Array(16);
+      t1[0] = r.x;
+      t1[1] = u.x;
+      t1[2] = -f.x;
+      t1[3] = 0;
+      t1[4] = r.y;
+      t1[5] = u.y;
+      t1[6] = -f.y;
+      t1[7] = 0;
+      t1[8] = r.z;
+      t1[9] = u.z;
+      t1[10] = -f.z;
+      t1[11] = 0;
+      t1[12] = -r.dot$1(B.Vec3_0_1_0);
+      t1[13] = -u.dot$1(B.Vec3_0_1_0);
+      t1[14] = f.dot$1(B.Vec3_0_1_0);
+      t1[15] = 1;
+      return new A.ShadowLightView(A.Mat4_Mat4$perspective(1, 1, B.JSInt_methods.clamp$2(1, 0.1, 3), 0.05).$mul(0, new A.Mat4(t1)));
+    },
+    ShadowLightView: function ShadowLightView(t0) {
+      this.viewProjection = t0;
+    },
+    ShadowFeature: function ShadowFeature(t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10) {
+      var _ = this;
+      _.programLibrary = t0;
+      _.vertexSource = t1;
+      _.fragmentSource = t2;
+      _.resolveMesh = t3;
+      _.resolveMaterial = t4;
+      _.resolveAlbedo = t5;
+      _.resolveCasterLight = t6;
+      _.resolveCasterLod = t7;
+      _.resolveCasterMesh = t8;
+      _.onLightViewComputed = t9;
+      _.shadowMapResource = t10;
+    },
+    _ShadowCasterPass: function _ShadowCasterPass(t0, t1, t2, t3, t4, t5, t6, t7, t8) {
+      var _ = this;
+      _.descriptor = t0;
+      _.program = t1;
+      _.resolveMesh = t2;
+      _.resolveMaterial = t3;
+      _.resolveAlbedo = t4;
+      _.resolveCasterLight = t5;
+      _.resolveCasterLod = t6;
+      _.resolveCasterMesh = t7;
+      _.onLightViewComputed = t8;
+    },
+    buildShadowGraph(programLibrary, device, outputEncoding, profile, resolveAlbedo, resolveBloomBlurH, resolveBloomBlurV, resolveCamera, resolveCasterLight, resolveDirectSpotLights, resolveDofBlurH, resolveDofBlurV, resolveEmissive, resolveGradeLut, resolveLightmap, resolveMaterial, resolveMesh, resolveNormal, resolveOrm, resolveResolvedSceneColor, resolveSceneDepth, resolveShadowMap, resolveSsaoBlurred, resolveSsaoRaw, resolveTime, resolveVhsHistory, sampleCount, sceneColorHeight, sceneColorWidth, shadowMapSize) {
+      var hasSsao, hasBloom, hasDof, hasGrade, hasPs1, hasVhs, t3, postResource, postResource0, t4, t5, t6, t7, t8, t9, t10, t11, postResource1, t12, postResource2, postResource3, postResource4, postResource5, msaaResolve, fallbackLightView, t13, postFeatures, _null = null,
+        _s156_ = string$.x23versio,
+        _s462_ = "#version 300 es\nprecision highp float;\nin vec2 vUv;\nuniform sampler2D uSource;\nuniform vec2 uTexelStep;\nout vec4 oColor;\n\nconst float WEIGHTS[5]=float[5](0.227027,0.1945946,0.1216216,0.054054,0.016216);\n\nvoid main(){\n  vec3 sum=texture(uSource,vUv).rgb*WEIGHTS[0];\n  for(int i=1;i<5;i++){\n    vec2 offset=uTexelStep*float(i);\n    sum+=texture(uSource,vUv+offset).rgb*WEIGHTS[i];\n    sum+=texture(uSource,vUv-offset).rgb*WEIGHTS[i];\n  }\n  oColor=vec4(sum,1.0);\n}\n",
+        _s10_ = "bloomBlurH",
+        _s10_0 = "bloomBlurV",
+        _s8_ = "dofBlurH",
+        _s8_0 = "dofBlurV",
+        t1 = {},
+        t2 = profile.installedFeatures;
+      if (!t2.contains$1(0, "shadows"))
+        throw A.wrapException(A.ArgumentError$value(profile, "profile", "buildShadowGraph requires the shadows feature; use buildSafeGraph for a shadow-free profile"));
+      hasSsao = t2.contains$1(0, "ssao");
+      hasBloom = t2.contains$1(0, "bloom");
+      hasDof = t2.contains$1(0, "dof");
+      hasGrade = t2.contains$1(0, "grade");
+      hasPs1 = t2.contains$1(0, "ps1");
+      hasVhs = t2.contains$1(0, "vhs");
+      t2 = (sceneColorWidth + 1) / 2 | 0;
+      t3 = (sceneColorHeight + 1) / 2 | 0;
+      postResource = A.PipelineResourceLayout__sized(B.ResourceRef_rRS, sceneColorWidth, sceneColorHeight, sampleCount, _null);
+      postResource0 = A.PipelineResourceLayout__sized(B.ResourceRef_rRS.nextVersion$0(), sceneColorWidth, sceneColorHeight, _null, _null);
+      A.PipelineResourceLayout__sized(B.ResourceRef_qfj, sceneColorWidth, sceneColorHeight, _null, _null);
+      t4 = A.PipelineResourceLayout__sized(B.ResourceRef_ZYz, sceneColorWidth, sceneColorHeight, _null, _null);
+      t5 = A.PipelineResourceLayout__sized(B.ResourceRef_Bey, shadowMapSize, shadowMapSize, _null, _null);
+      t6 = A.PipelineResourceLayout__sized(B.ResourceRef_PIK, t2, t3, _null, _null);
+      t7 = A.PipelineResourceLayout__sized(B.ResourceRef_Rap, t2, t3, _null, _null);
+      t8 = A.PipelineResourceLayout__sized(B.ResourceRef_bI5, t2, t3, _null, _null);
+      t9 = A.PipelineResourceLayout__sized(B.ResourceRef_bI50, t2, t3, _null, _null);
+      t10 = $.$get$BloomResources_sceneColorPostBloom();
+      t11 = sampleCount > 1;
+      postResource1 = A.PipelineResourceLayout__sized(t10, sceneColorWidth, sceneColorHeight, _null, t11 ? 2 : 1);
+      t10 = A.PipelineResourceLayout__sized(B.ResourceRef_570, t2, t3, _null, _null);
+      t12 = A.PipelineResourceLayout__sized(B.ResourceRef_5700, t2, t3, _null, _null);
+      postResource2 = A.PipelineResourceLayout__sized(B.ResourceRef_9Ho, sceneColorWidth, sceneColorHeight, _null, _null);
+      postResource3 = A.PipelineResourceLayout__sized(B.ResourceRef_SSV, sceneColorWidth, sceneColorHeight, _null, _null);
+      postResource4 = A.PipelineResourceLayout__sized(B.ResourceRef_tcv, sceneColorWidth, sceneColorHeight, _null, _null);
+      postResource5 = A.PipelineResourceLayout__sized(B.ResourceRef_Yiz, sceneColorWidth, sceneColorHeight, _null, _null);
+      msaaResolve = t11 ? new A.MsaaResolveFeature(device, postResource, postResource0) : _null;
+      t1.lastLightView = null;
+      fallbackLightView = A.ShadowLightView_ShadowLightView$fromSpotLight(B.C_SpotLight);
+      t13 = type$.JSArray_RenderFeature;
+      postFeatures = A._setArrayType([], t13);
+      postResource0 = t11 ? postResource0 : postResource;
+      if (hasBloom) {
+        B.JSArray_methods.addAll$1(postFeatures, A._setArrayType([new A.BloomBlurFeature(programLibrary, _s156_, _s462_, device, _s10_, _s10_, B._BloomBlurAxis_0, true, postResource0, t8, resolveResolvedSceneColor, t2, t3), new A.BloomBlurFeature(programLibrary, _s156_, _s462_, device, _s10_0, _s10_0, B._BloomBlurAxis_1, false, t8, t9, resolveBloomBlurH, t2, t3), new A.BloomCompositeFeature(programLibrary, _s156_, "#version 300 es\nprecision highp float;\nin vec2 vUv;\nuniform sampler2D uBloom;\nuniform float uBloomStrength;\nout vec4 oColor;\n\nvoid main(){\n  oColor=vec4(texture(uBloom,vUv).rgb*uBloomStrength,1.0);\n}\n", device, resolveBloomBlurV, t9, postResource0, postResource1)], t13));
+        postResource0 = postResource1;
+      }
+      if (hasDof) {
+        B.JSArray_methods.addAll$1(postFeatures, A._setArrayType([new A.DofBlurFeature(programLibrary, _s156_, _s462_, device, _s8_, _s8_, B._DofBlurAxis_0, postResource0, t10, resolveResolvedSceneColor, t2, t3), new A.DofBlurFeature(programLibrary, _s156_, _s462_, device, _s8_0, _s8_0, B._DofBlurAxis_1, t10, t12, resolveDofBlurH, t2, t3), new A.DofCompositeFeature(programLibrary, _s156_, "#version 300 es\nprecision highp float;\nin vec2 vUv;\nuniform sampler2D uSharp;\nuniform sampler2D uBlurred;\nuniform sampler2D uSceneDepth;\nuniform float uNear;\nuniform float uFar;\nuniform float uFocusDistance;\nuniform float uFocusRange;\nuniform float uStrength;\nout vec4 oColor;\n\nfloat linearDepth(float raw){\n  float ndc=raw*2.0-1.0;\n  return (2.0*uNear*uFar)/(uFar+uNear-ndc*(uFar-uNear));\n}\n\n// Circle-of-confusion is a simple linear ramp from the focus distance\n// outward (front and back treated the same \u2014 no separate near/far falloff\n// curve), clamped to [0,1] and scaled by uStrength so\n// PostProcessState.depthOfFieldStrength == 0 is a true no-op (coc == 0\n// everywhere, oColor == the sharp source exactly).\nvoid main(){\n  float depth=linearDepth(texture(uSceneDepth,vUv).r);\n  float coc=clamp(abs(depth-uFocusDistance)/max(uFocusRange,0.0001),0.0,1.0)*uStrength;\n  vec3 sharp=texture(uSharp,vUv).rgb;\n  vec3 blurred=texture(uBlurred,vUv).rgb;\n  oColor=vec4(mix(sharp,blurred,coc),1.0);\n}\n", device, resolveResolvedSceneColor, resolveDofBlurV, resolveSceneDepth, resolveCamera, postResource0, t4, t12, postResource2)], t13));
+        postResource0 = postResource2;
+      }
+      if (hasGrade) {
+        B.JSArray_methods.add$1(postFeatures, new A.GradeFeature(programLibrary, _s156_, "#version 300 es\nprecision highp float;\nin vec2 vUv;\nuniform sampler2D uScene;\nuniform sampler2D uLut;\nuniform float uLutSize;\nuniform float uStrength;\nout vec4 oColor;\n\n// \xa75.3's \"identity LUT\" baseline resource and this shader's actual grade LUT\n// are both just textures in this same unwrapped-3D-LUT layout (width =\n// size*size, height = size, blue index selects a size*size horizontal\n// slice) \u2014 there is nothing identity-specific about the sampling path\n// itself, only about what a given LUT texture's texels happen to encode.\nvec3 sampleLut(vec3 color){\n  float size=uLutSize;\n  float maxIndex=size-1.0;\n  vec3 scaled=clamp(color,0.0,1.0)*maxIndex;\n  float bLow=floor(scaled.b);\n  float bHigh=min(bLow+1.0,maxIndex);\n  float bFrac=scaled.b-bLow;\n  vec2 texel=vec2(1.0/(size*size),1.0/size);\n  vec2 rg=vec2(scaled.r+0.5,scaled.g+0.5);\n  vec2 uvLow=vec2((bLow*size+rg.x)*texel.x,rg.y*texel.y);\n  vec2 uvHigh=vec2((bHigh*size+rg.x)*texel.x,rg.y*texel.y);\n  vec3 colorLow=texture(uLut,uvLow).rgb;\n  vec3 colorHigh=texture(uLut,uvHigh).rgb;\n  return mix(colorLow,colorHigh,bFrac);\n}\n\nvoid main(){\n  vec3 scene=texture(uScene,vUv).rgb;\n  vec3 graded=sampleLut(scene);\n  oColor=vec4(mix(scene,graded,uStrength),1.0);\n}\n", device, resolveGradeLut, postResource0, postResource3));
+        postResource0 = postResource3;
+      }
+      if (hasPs1) {
+        B.JSArray_methods.add$1(postFeatures, new A.Ps1QuantizeFeature(programLibrary, _s156_, "#version 300 es\nprecision highp float;\nin vec2 vUv;\nuniform sampler2D uScene;\nuniform float uQuantizationBits;\nuniform float uDitherStrength;\nout vec4 oColor;\n\nconst float BAYER4X4[16]=float[16](\n  0.0,8.0,2.0,10.0,\n  12.0,4.0,14.0,6.0,\n  3.0,11.0,1.0,9.0,\n  15.0,7.0,13.0,5.0\n);\n\nfloat bayerValue(vec2 fragCoord){\n  int x=int(mod(fragCoord.x,4.0));\n  int y=int(mod(fragCoord.y,4.0));\n  return BAYER4X4[y*4+x]/16.0;\n}\n\n// \xa76.2's \"quantization/dither is an explicit composite after LUT grade\":\n// an ordered (Bayer 4x4) dither offset, scaled to one quantization step, is\n// added before rounding to uQuantizationBits levels per channel \u2014 this is\n// what breaks a hard quantization boundary into a dithered gradient instead\n// of a flat color band. uQuantizationBits==8 (RGBA8's own native precision)\n// with uDitherStrength==0 round-trips the source exactly: no dither offset\n// is added, and floor(x*255+0.5)/255 returns an already-8-bit value\n// unchanged.\nvoid main(){\n  vec3 scene=texture(uScene,vUv).rgb;\n  float levels=pow(2.0,uQuantizationBits)-1.0;\n  float dither=(bayerValue(gl_FragCoord.xy)-0.5)*uDitherStrength/levels;\n  vec3 dithered=clamp(scene+dither,0.0,1.0);\n  vec3 quantized=floor(dithered*levels+0.5)/levels;\n  oColor=vec4(quantized,1.0);\n}\n", device, postResource0, postResource4));
+        postResource0 = postResource4;
+      }
+      if (hasVhs) {
+        B.JSArray_methods.add$1(postFeatures, new A.VhsFeature(programLibrary, _s156_, '#version 300 es\nprecision highp float;\nin vec2 vUv;\nuniform sampler2D uScene;\nuniform sampler2D uHistory;\nuniform float uTime;\nuniform float uChromaWeight;\nuniform float uTrackingWeight;\nuniform float uNoiseWeight;\nuniform float uHeadSwitchWeight;\nuniform float uDropoutWeight;\nuniform float uGhostWeight;\nout vec4 oColor;\n\nfloat hash(vec2 p){\n  return fract(sin(dot(p,vec2(12.9898,78.233)))*43758.5453);\n}\n\n// \xa78.10: "sample the jittered/tracking UV before YIQ/chroma work so later\n// sampling does not overwrite earlier effects" \u2014 tracking jitter is\n// computed and applied to the UV exactly once, up front; every later\n// effect either operates on the resulting single sample or samples a\n// further offset FROM that same jittered UV, never re-reading uScene at\n// the original vUv.\nvoid main(){\n  float scanline=vUv.y;\n\n  // Tracking: a per-scanline horizontal jitter, re-rolled roughly 8 times\n  // a second (not per-frame) so it reads as tape wobble rather than\n  // high-frequency noise. Comfort clamp: 0.02 UV (a few source texels at\n  // this bootstrap\'s 384-wide internal resolution) is the max displacement\n  // regardless of weight \u2014 a weight of 1.0 must read as "visibly glitchy,"\n  // never as "the image is unreadable."\n  float trackingNoise=hash(vec2(floor(scanline*216.0),floor(uTime*8.0)))-0.5;\n  float jitter=trackingNoise*0.02*uTrackingWeight;\n  vec2 uv=vec2(clamp(vUv.x+jitter,0.0,1.0),vUv.y);\n  vec3 raw=texture(uScene,uv).rgb;\n\n  // Chroma bleed: convert to YIQ, sample a second, further-offset UV for\n  // the chroma (I/Q) channels only \u2014 luma (what reads as "sharp" to the\n  // eye) stays exactly where tracking already put it; only color smears.\n  vec2 chromaUv=vec2(clamp(uv.x+0.01*uChromaWeight,0.0,1.0),uv.y);\n  vec3 rawChroma=texture(uScene,chromaUv).rgb;\n  float y=dot(raw,vec3(0.299,0.587,0.114));\n  float i=dot(rawChroma,vec3(0.596,-0.274,-0.322));\n  float q=dot(rawChroma,vec3(0.211,-0.523,0.312));\n  vec3 yiqColor=vec3(\n    y+0.956*i+0.621*q,\n    y-0.272*i-0.647*q,\n    y-1.106*i+1.703*q\n  );\n  vec3 color=mix(raw,yiqColor,uChromaWeight);\n\n  // Static/snow: modeled in YIQ (luma + chroma), the same conversion\n  // chroma bleed already uses above, not independent RGB \u2014 real analog\n  // colour noise comes from the chroma subcarrier, so its hues are\n  // correlated/limited rather than arbitrary per-channel static. Noise\n  // cells are quantized coarser along x than y, giving each speckle a\n  // short horizontal dash instead of an isolated dot \u2014 a "vague line\n  // shape," matching how scanline-based static actually streaks. A\n  // sparser, stronger sparkle layer and a rare single-sample micro-\n  // distortion (an actual tiny position offset, not just colour) are both\n  // gated by a high-threshold mask so only occasional pixels carry the\n  // effect \u2014 small magnitude on top of that sparsity, for a sprinkle, not\n  // a wash.\n  vec2 noiseCell=vec2(floor(gl_FragCoord.x/3.0),gl_FragCoord.y)+uTime*60.0;\n  float noiseY=(hash(noiseCell)-0.5)*0.05;\n  float noiseI=(hash(noiseCell+vec2(17.0,3.0))-0.5)*0.14;\n  float noiseQ=(hash(noiseCell+vec2(53.0,29.0))-0.5)*0.14;\n  vec3 noiseYiq=vec3(\n    noiseY+0.956*noiseI+0.621*noiseQ,\n    noiseY-0.272*noiseI-0.647*noiseQ,\n    noiseY-1.106*noiseI+1.703*noiseQ\n  );\n  color+=noiseYiq*uNoiseWeight;\n  float sparkleMask=step(0.995,hash(noiseCell+vec2(97.0,3.0)));\n  float sparkleI=(hash(noiseCell+5.0)-0.5)*2.0;\n  float sparkleQ=(hash(noiseCell+9.0)-0.5)*2.0;\n  vec3 sparkleYiq=0.5+0.5*vec3(\n    0.956*sparkleI+0.621*sparkleQ,\n    -0.272*sparkleI-0.647*sparkleQ,\n    -1.106*sparkleI+1.703*sparkleQ\n  );\n  color+=sparkleYiq*sparkleMask*0.3*uNoiseWeight;\n  float distortMask=step(0.997,hash(noiseCell+vec2(43.0,61.0)));\n  vec2 distortOffset=\n    vec2(hash(noiseCell+1.0)-0.5,hash(noiseCell+2.0)-0.5)*0.01;\n  vec3 distortColor=texture(uScene,clamp(uv+distortOffset,0.0,1.0)).rgb;\n  color=mix(color,distortColor,distortMask*0.5*uNoiseWeight);\n\n  // Head-switch band: a thin strip near the bottom of frame (where a real\n  // VCR\'s playback head crosses the tape edge) gets a stronger tear,\n  // fading smoothly over the band\'s height rather than a hard cutoff.\n  float headSwitchBand=smoothstep(0.06,0.0,abs(scanline-0.98));\n  float headSwitchJitter=(hash(vec2(uTime*30.0,scanline))-0.5)*0.06;\n  vec2 headSwitchUv=vec2(\n    clamp(uv.x+headSwitchJitter*uHeadSwitchWeight*headSwitchBand,0.0,1.0),\n    uv.y\n  );\n  vec3 headSwitchColor=texture(uScene,headSwitchUv).rgb;\n  color=mix(color,headSwitchColor,uHeadSwitchWeight*headSwitchBand);\n\n  // Dropout: sparse, per-scanline streaks mimicking analog tape dropout.\n  // Real dropout is neither a flat full-width bar nor a fixed brightness \u2014\n  // a per-x noise mask (smoothstepped, not a hard cutoff) makes each\n  // streak\'s width and edges vary along its length, and a per-streak\n  // random intensity keeps consecutive dropouts from looking identical. A\n  // slow ~6Hz reroll (not per-frame) and a high activation threshold keep\n  // this an occasional glitch rather than a strobe \u2014 subtle enough not to\n  // distract during continuous play, even at uDropoutWeight\'s full value.\n  float dropoutCell=floor(uTime*6.0);\n  float dropoutRoll=hash(vec2(floor(scanline*216.0),dropoutCell));\n  float dropoutActive=step(0.994,dropoutRoll);\n  float dropoutIntensity=hash(vec2(dropoutCell,17.0))*0.5+0.4;\n  float dropoutMask=hash(\n    vec2(floor(uv.x*48.0),floor(scanline*216.0)+dropoutCell*3.0)\n  );\n  float dropoutStripe=\n    dropoutActive*uDropoutWeight*smoothstep(0.3,0.9,dropoutMask);\n  color=mix(color,vec3(dropoutIntensity),dropoutStripe*0.8);\n\n  // Ghosting: blends in last frame\'s own VHS *output* (uHistory, never\n  // uScene), horizontally offset, for a trailing double-image echo \u2014\n  // reading the previous frame\'s already-composited result is what makes\n  // this a genuine feedback trail rather than a static double-exposure.\n  vec2 ghostUv=vec2(clamp(uv.x-0.015,0.0,1.0),uv.y);\n  vec3 ghostColor=texture(uHistory,ghostUv).rgb;\n  color=mix(color,ghostColor,uGhostWeight*0.5);\n\n  oColor=vec4(clamp(color,0.0,1.0),1.0);\n}\n', device, resolveVhsHistory, resolveTime, postResource0, postResource5));
+        postResource0 = postResource5;
+      }
+      t4 = A._setArrayType([new A.DepthPrepassFeature(programLibrary, "#version 300 es\nlayout(location=0) in vec3 aPosition;\nlayout(location=4) in vec3 aUvMat;\nuniform mat4 uViewProjection;\nuniform mat4 uModel;\nuniform mat4 uInstanceModels[16];\nuniform float uUseInstances;\nuniform float uVertexSnapGrid;\nuniform float uAffineWarpStrength;\nout highp vec2 vUv;\nout highp float vUvW;\n// This prepass must land geometry on exactly the same pixels shadowedWorld\n// will, because its depth is what SSAO occludes against and what\n// shadowedWorld then samples back at its *own* gl_FragCoord. Snapping there\n// and not here would mean the AO texel a fragment reads was computed for a\n// slightly different surface than the one being shaded, and the error grows\n// with the grid. The snap math below is deliberately identical to\n// shadowed_world.vert's, including uVertexSnapGrid==0 skipping the branch.\n// The same reasoning now covers UVs: an alpha-masked surface's holes must\n// land on the same pixels in both passes, and affine sampling moves where a\n// given texel lands, so the w-premultiply below is the same expression\n// shadowed_world.vert uses and is driven from the same per-material weight.\nvoid main(){\n  mat4 model=uModel;\n  if(uUseInstances>0.5){model=uInstanceModels[gl_InstanceID];}\n  vec4 clip=uViewProjection*model*vec4(aPosition,1.0);\n  if(uVertexSnapGrid>0.0){\n    vec2 ndc=clip.xy/clip.w;\n    ndc=floor(ndc/uVertexSnapGrid+0.5)*uVertexSnapGrid;\n    clip.xy=ndc*clip.w;\n  }\n  gl_Position=clip;\n  float affineW=mix(1.0,clip.w,uAffineWarpStrength);\n  vUv=aUvMat.xy*affineW;\n  vUvW=affineW;\n}\n", "#version 300 es\nprecision highp float;\nin highp vec2 vUv;\nin highp float vUvW;\nuniform sampler2D uAlbedo;\nuniform float uAlphaCutoff;\nuniform float uAffineWarpStrength;\n// \xa76.2: \"includes opaque + alpha-masked depth.\" A masked surface's holes\n// must not write depth, or SSAO occludes against geometry the world pass\n// discarded and DOF's CoC defocuses against a surface nothing shaded. The\n// compare is bit-identical to shadowed_world.frag's \u2014 same uv recovery,\n// same threshold, same direction \u2014 because any divergence reintroduces\n// exactly the class of bug the vertex-snap parity fix (bug 17) closed.\n// Everything is inside the uAlphaCutoff>0. branch, so an unmasked draw\n// costs no texture fetch at all here, only the interpolation the varyings\n// were already going to do.\nvoid main(){\n  if(uAlphaCutoff>0.){\n    vec2 uv=uAffineWarpStrength>0.?vUv/vUvW:vUv;\n    if(texture(uAlbedo,uv).a<uAlphaCutoff)discard;\n  }\n}\n", resolveMesh, resolveMaterial, resolveAlbedo, t4)], t13);
+      if (hasSsao)
+        t4.push(new A.SsaoOcclusionFeature(programLibrary, _s156_, "#version 300 es\nprecision highp float;\nin vec2 vUv;\nuniform sampler2D uSceneDepth;\nuniform float uNear;\nuniform float uFar;\nuniform float uProjScaleX;\nuniform float uProjScaleY;\nuniform float uRadius;\nuniform float uStrength;\nout vec4 oColor;\n\nconst int KERNEL_SIZE=8;\nconst vec3 KERNEL[8]=vec3[8](\n  vec3( 0.35, 0.23, 0.45),\n  vec3(-0.28, 0.41, 0.32),\n  vec3( 0.18,-0.36, 0.55),\n  vec3(-0.42,-0.19, 0.28),\n  vec3( 0.51, 0.08, 0.18),\n  vec3(-0.11, 0.53, 0.16),\n  vec3( 0.07,-0.48, 0.38),\n  vec3(-0.33,-0.31, 0.48)\n);\n\nfloat linearDepth(float raw){\n  float ndc=raw*2.0-1.0;\n  return (2.0*uNear*uFar)/(uFar+uNear-ndc*(uFar-uNear));\n}\n\nvec3 viewPosAt(vec2 uv){\n  float viewZ=-linearDepth(texture(uSceneDepth,uv).r);\n  vec2 ndc=uv*2.0-1.0;\n  float viewX=ndc.x*(-viewZ)/uProjScaleX;\n  float viewY=ndc.y*(-viewZ)/uProjScaleY;\n  return vec3(viewX,viewY,viewZ);\n}\n\n// Pinned per-pixel kernel rotation \u2014 a deterministic hash of screen\n// position, not per-frame randomness, matching \xa78.5's \"rotates a small\n// kernel from pinned blue noise\" without the extra machinery of an actual\n// noise texture: the rotation angle is stable across frames for a given\n// pixel, which is what \"pinned\" requires (temporal stability), while still\n// varying spatially enough to break up banding between neighboring samples.\nfloat pinnedRotation(vec2 fragCoord){\n  return fract(sin(dot(fragCoord,vec2(12.9898,78.233)))*43758.5453)*6.2831853;\n}\n\nvoid main(){\n  vec3 originView=viewPosAt(vUv);\n  // Screen-space derivatives reconstruct a per-fragment normal from\n  // neighboring depth samples alone \u2014 no G-buffer normal attachment exists\n  // (deferred; see depth_prepass.dart's doc comment), which is sufficient\n  // for a chunky/stylized AO term rather than a precision-critical one.\n  vec3 normalView=normalize(cross(dFdx(originView),dFdy(originView)));\n\n  // Rotates each kernel sample's tangent-plane (x,y) offset in place, before\n  // it's transformed into view space by tbn below \u2014 this is what actually\n  // varies the kernel per pixel; rotating the already-reprojected screen UV\n  // afterward would rotate around the wrong origin and misalign every\n  // sample from the surface it's meant to test.\n  float angle=pinnedRotation(gl_FragCoord.xy);\n  float ca=cos(angle);\n  float sa=sin(angle);\n  mat2 rot=mat2(ca,sa,-sa,ca);\n\n  vec3 up=abs(normalView.z)<0.99?vec3(0.0,0.0,1.0):vec3(1.0,0.0,0.0);\n  vec3 tangent=normalize(cross(up,normalView));\n  vec3 bitangent=cross(normalView,tangent);\n  mat3 tbn=mat3(tangent,bitangent,normalView);\n\n  float occlusion=0.0;\n  for(int i=0;i<KERNEL_SIZE;i++){\n    vec3 kernelSample=KERNEL[i];\n    kernelSample.xy=rot*kernelSample.xy;\n    vec3 samplePos=originView+tbn*kernelSample*uRadius;\n    // Project the sample's view-space position back to screen UV using the\n    // same scale factors used to reconstruct it, inverted.\n    vec2 sampleUv=vec2(\n      samplePos.x*uProjScaleX/(-samplePos.z),\n      samplePos.y*uProjScaleY/(-samplePos.z)\n    );\n    // NDC [-1,1] -> UV [0,1] requires the constant 0.5, not vUv (the\n    // *current* fragment's own UV) \u2014 adding vUv here was a real bug: it\n    // conflated \"this sample's own absolute reprojected screen position\"\n    // with \"an offset relative to the current fragment,\" producing an\n    // error of (vUv-0.5) per axis that grows with distance from screen\n    // center. That's exactly what produced a huge, blobby, non-local dark\n    // region instead of contact occlusion \u2014 every sample tested a wildly\n    // wrong depth location except right at screen center, where the error\n    // happened to be near zero.\n    sampleUv=sampleUv*0.5+0.5;\n    if(sampleUv.x<0.0||sampleUv.x>1.0||sampleUv.y<0.0||sampleUv.y>1.0){\n      continue;\n    }\n    vec3 occluderView=viewPosAt(sampleUv);\n    float rangeCheck=smoothstep(0.0,1.0,uRadius/max(abs(originView.z-occluderView.z),0.0001));\n    occlusion+=(occluderView.z>=samplePos.z+0.02?1.0:0.0)*rangeCheck;\n  }\n  float ao=1.0-clamp((occlusion/float(KERNEL_SIZE))*uStrength,0.0,1.0);\n  oColor=vec4(vec3(ao),1.0);\n}\n", device, resolveSceneDepth, resolveCamera, t6));
+      if (hasSsao)
+        t4.push(new A.SsaoBlurFeature(programLibrary, _s156_, '#version 300 es\nprecision highp float;\nin vec2 vUv;\nuniform sampler2D uSsaoRaw;\nuniform sampler2D uSceneDepth;\nuniform vec2 uTexelSize;\nuniform float uNear;\nuniform float uFar;\nout vec4 oColor;\n\nfloat linearDepth(float raw){\n  float ndc=raw*2.0-1.0;\n  return (2.0*uNear*uFar)/(uFar+uNear-ndc*(uFar-uNear));\n}\n\n// \xa78.5: "uses a depth-aware bilateral blur rather than smearing across\n// silhouettes" \u2014 a plain box blur would bleed occlusion from a near object\n// onto a far background behind it (or vice versa) whenever they share\n// screen-space pixels near a silhouette edge; weighting each tap by how\n// close its depth is to the center tap\'s depth is what keeps the blur\n// confined to one surface at a time.\nvoid main(){\n  float centerDepth=linearDepth(texture(uSceneDepth,vUv).r);\n  float sum=0.0;\n  float weightSum=0.0;\n  for(int y=-2;y<=2;y++){\n    for(int x=-2;x<=2;x++){\n      vec2 offset=vec2(float(x),float(y))*uTexelSize;\n      vec2 sampleUv=vUv+offset;\n      float sampleDepth=linearDepth(texture(uSceneDepth,sampleUv).r);\n      float depthWeight=1.0/(1.0+abs(sampleDepth-centerDepth)*4.0);\n      sum+=texture(uSsaoRaw,sampleUv).r*depthWeight;\n      weightSum+=depthWeight;\n    }\n  }\n  float blurred=sum/max(weightSum,0.0001);\n  oColor=vec4(vec3(blurred),1.0);\n}\n', device, resolveSsaoRaw, resolveSceneDepth, resolveCamera, t2, t3, t6, t7));
+      t4.push(new A.ShadowFeature(programLibrary, "#version 300 es\nlayout(location=0) in vec3 aPosition;\nlayout(location=4) in vec3 aUvMat;\nuniform mat4 uLightViewProjection;\nuniform mat4 uModel;\nuniform mat4 uInstanceModels[16];\nuniform float uUseInstances;\nout highp vec2 vUv;\n// No affine premultiply here, unlike depth_prepass.vert. Affine sampling is\n// an artifact of *this camera's* screen-space rasterization; the shadow map\n// rasterizes the same triangle from the light, where the equivalent warp\n// would be a different, unrelated distortion. A masked surface therefore\n// cuts its shadow from the perspective-correct UVs \u2014 the geometrically\n// right holes \u2014 while the camera passes cut theirs from whatever the PS1\n// profile asked for. That divergence is deliberate: the two rasterizations\n// have no shared screen space to agree in.\nvoid main(){\n  mat4 model=uModel;\n  if(uUseInstances>0.5){model=uInstanceModels[gl_InstanceID];}\n  vUv=aUvMat.xy;\n  gl_Position=uLightViewProjection*model*vec4(aPosition,1.0);\n}\n", '#version 300 es\nprecision highp float;\nin highp vec2 vUv;\nuniform sampler2D uAlbedo;\nuniform float uAlphaCutoff;\n// \xa76.2: "alpha-masked geometry participates in shadow, prepass, and opaque\n// depth-writing routes." Without this discard a lattice, a leaf or a grille\n// casts the solid shadow of its bounding quad \u2014 the single most obvious way\n// a masked material reads as fake. uAlphaCutoff==0 skips the fetch, so\n// every opaque caster costs exactly what it did before this existed.\nvoid main(){\n  if(uAlphaCutoff>0.&&texture(uAlbedo,vUv).a<uAlphaCutoff)discard;\n}\n', resolveMesh, resolveMaterial, resolveAlbedo, resolveCasterLight, _null, _null, new A.buildShadowGraph_closure(t1), t5));
+      t4.push(new A.ShadowedWorldFeature(programLibrary, "#version 300 es\nlayout(location=0) in vec3 aPosition;\nlayout(location=1) in vec3 aNormal;\nlayout(location=2) in vec4 aColor;\nlayout(location=3) in float aAlpha;\nlayout(location=4) in vec3 aUvMat;\nlayout(location=5) in vec4 aTangent;\nlayout(location=6) in vec2 aUv1;\nuniform mat4 uViewProjection;\nuniform mat4 uView;\nuniform mat4 uModel;\nuniform mat4 uNormalMatrix;\nuniform mat4 uInstanceModels[16];\nuniform mat4 uInstanceNormalMatrices[16];\nuniform float uUseInstances;\nuniform mat4 uLightViewProjection;\nuniform float uVertexSnapGrid;\nuniform float uAffineWarpStrength;\nout vec4 vColor;\nout vec3 vNormal;\nout highp vec2 vUv;\nout highp float vUvW;\nout highp vec2 vUv1;\nout vec4 vLightSpacePos;\nout vec3 vWorldPos;\nout vec4 vTangent;\nout float vViewDepth;\nvoid main(){\n  mat4 model=uModel;\n  mat4 normalMatrix=uNormalMatrix;\n  if(uUseInstances>0.5){model=uInstanceModels[gl_InstanceID];normalMatrix=uInstanceNormalMatrices[gl_InstanceID];}\n  vColor=vec4(aColor.rgb,aAlpha);\n  vNormal=mat3(normalMatrix)*aNormal;\n  vec4 worldPos=model*vec4(aPosition,1.0);\n  vWorldPos=worldPos.xyz;\n  vTangent=vec4(mat3(normalMatrix)*aTangent.xyz,aTangent.w);\n  vLightSpacePos=uLightViewProjection*worldPos;\n  // RV-09 rung 5's fog: the same \"linear view depth\" convention SSAO/DOF\n  // already reconstruct from a depth texture, computed directly here\n  // instead \u2014 this pass rasterizes the actual geometry, so there is a true\n  // view-space Z per-vertex already, with no texture round-trip needed.\n  vViewDepth=-(uView*worldPos).z;\n  vec4 clip=uViewProjection*worldPos;\n  // RV-09 rung 3's PS1 profile: snaps clip-space xy to a fixed grid before\n  // the perspective divide, emulating the fixed-point vertex transform\n  // precision loss that gives PS1 geometry its characteristic wobble as it\n  // moves. uVertexSnapGrid==0 skips the branch entirely, so the default/\n  // safe path is bit-for-bit unchanged from before this rung.\n  if(uVertexSnapGrid>0.0){\n    vec2 ndc=clip.xy/clip.w;\n    ndc=floor(ndc/uVertexSnapGrid+0.5)*uVertexSnapGrid;\n    clip.xy=ndc*clip.w;\n  }\n  gl_Position=clip;\n  // Affine UV, the PS1 rung's deferred half. GLSL ES 300 has no\n  // `noperspective` qualifier, so the divide the rasterizer already performs\n  // is cancelled instead of disabled: hardware hands the fragment\n  // interp(v/w)/interp(1/w), so premultiplying a varying by w makes that\n  // expression collapse to interp(v) \u2014 screen-space linear, which *is*\n  // affine. Both varyings are scaled by the same factor so the fragment's\n  // vUv/vUvW recovers exactly that, and the intermediate blend between the\n  // two regimes stays continuous rather than popping at any strength.\n  // uAffineWarpStrength==0 gives affineW==1.0 exactly, leaving vUv equal to\n  // aUvMat.xy bit-for-bit; the fragment then skips the divide entirely on\n  // the same uniform, so the perspective-correct path is untouched rather\n  // than merely round-tripped. Snapping above only rewrites clip.xy, never\n  // clip.w, so the two PS1 halves are independent.\n  float affineW=mix(1.0,clip.w,uAffineWarpStrength);\n  vUv=aUvMat.xy*affineW;\n  vUvW=affineW;\n  vUv1=aUv1;\n}\n", "#version 300 es\nprecision highp float;\nin vec4 vColor;\nin vec3 vNormal;\nin highp vec2 vUv;\nin highp float vUvW;\nin highp vec2 vUv1;\nin vec4 vLightSpacePos;\nin vec3 vWorldPos;\nin vec4 vTangent;\nin float vViewDepth;\nuniform sampler2D uAlbedo;\nuniform sampler2D uNormalMap;\nuniform sampler2D uOrmMap;\nuniform sampler2D uEmissiveMap;\nuniform sampler2D uLightmap;\nuniform sampler2D uShadowMap;\nuniform vec3 uCameraPosition;\nuniform vec3 uLightPosition;\nuniform vec3 uLightDirection;\nuniform vec3 uLightColor;\nuniform float uLightIntensity;\nuniform float uLightRange;\nuniform float uLightInnerCos;\nuniform float uLightOuterCos;\nuniform float uSpotEnabled;\nuniform vec3 uDirectionalDirection;\nuniform vec3 uDirectionalColor;\nuniform float uDirectionalIntensity;\nuniform vec3 uPointPosition0;\nuniform vec3 uPointColor0;\nuniform float uPointIntensity0;\nuniform float uPointRadius0;\nuniform vec3 uPointPosition1;\nuniform vec3 uPointColor1;\nuniform float uPointIntensity1;\nuniform float uPointRadius1;\nuniform vec3 uPointPosition2;\nuniform vec3 uPointColor2;\nuniform float uPointIntensity2;\nuniform float uPointRadius2;\nuniform vec3 uPointPosition3;\nuniform vec3 uPointColor3;\nuniform float uPointIntensity3;\nuniform float uPointRadius3;\nuniform vec3 uDirectSpotPosition0;\nuniform vec3 uDirectSpotDirection0;\nuniform vec3 uDirectSpotColor0;\nuniform float uDirectSpotIntensity0;\nuniform float uDirectSpotRange0;\nuniform float uDirectSpotInnerCos0;\nuniform float uDirectSpotOuterCos0;\nuniform float uDirectSpotEnabled0;\nuniform vec3 uDirectSpotPosition1;\nuniform vec3 uDirectSpotDirection1;\nuniform vec3 uDirectSpotColor1;\nuniform float uDirectSpotIntensity1;\nuniform float uDirectSpotRange1;\nuniform float uDirectSpotInnerCos1;\nuniform float uDirectSpotOuterCos1;\nuniform float uDirectSpotEnabled1;\nuniform vec3 uDirectSpotPosition2;\nuniform vec3 uDirectSpotDirection2;\nuniform vec3 uDirectSpotColor2;\nuniform float uDirectSpotIntensity2;\nuniform float uDirectSpotRange2;\nuniform float uDirectSpotInnerCos2;\nuniform float uDirectSpotOuterCos2;\nuniform float uDirectSpotEnabled2;\nuniform vec3 uAmbientColor;\nuniform float uAmbientIntensity;\nuniform vec2 uShadowMapTexelSize;\nuniform vec3 uMaterialTint;\nuniform vec4 uUvScaleOffset;\nuniform sampler2D uSsao;\nuniform vec2 uSceneColorSize;\nuniform float uEmissiveStrength;\nuniform float uNormalStrength;\nuniform float uRoughness;\nuniform float uMetallic;\nuniform float uOcclusionStrength;\nuniform float uClearcoatStrength;\nuniform float uClearcoatRoughness;\nuniform float uLightmapIntensity;\nuniform float uAffineWarpStrength;\nuniform float uAlphaCutoff;\nuniform float uOpaqueCoverage;\nuniform vec3 uFogColor;\nuniform float uFogStart;\nuniform float uFogEnd;\nuniform float uFogHeightFalloff;\nuniform float uFogDensity;\nuniform float uReceivesShadow;\nuniform float uRainWetness;\nlayout(location=0)out vec4 oColor;\nlayout(location=1)out vec4 oGlow;\n\n// Distance falloff (smooth to zero at uLightRange, matching SpotLight.range\n// rather than an unbounded inverse-square that never reaches zero) times\n// cone-edge falloff (smoothstep between the outer and inner cone angles,\n  // SpotLight.outerConeRadians/innerConeRadians \u2014 both fields existed on the\n  // API already but nothing read them before this, so the light previously\n  // had a hard-edged, non-attenuating cone that read as flat/harsh instead of\n// a graduated pool of light).\nfloat rangeAttenuation(float dist,float range){\n  float normalized=clamp(dist/max(range,.001),0.,1.);\n  // Smooth quartic cutoff avoids a visible ring at the authored range while\n  // retaining an inverse-square response inside the light's influence.\n  float cutoff=1.-normalized*normalized*normalized*normalized;\n  float inverseSquare=1./(1.+(dist*dist)/max(range*range,.001));\n  return cutoff*cutoff*inverseSquare;\n}\n\nfloat lightAttenuation(vec3 worldPos){\n  vec3 toFrag=worldPos-uLightPosition;\n  float dist=length(toFrag);\n  float cosAngle=dot(normalize(toFrag),normalize(uLightDirection));\n  float coneFalloff=smoothstep(uLightOuterCos,uLightInnerCos,cosAngle);\n  return rangeAttenuation(dist,uLightRange)*coneFalloff;\n}\n\nfloat pointAttenuation(vec3 worldPos,vec3 lightPosition,float lightRadius){\n  float dist=length(lightPosition-worldPos);\n  return rangeAttenuation(dist,lightRadius);\n}\n\nvec3 pointContribution(vec3 normal,vec3 worldPos,vec3 lightPosition,\n  vec3 lightColor,float lightIntensity,float lightRadius){\n  vec3 toLight=lightPosition-worldPos;\n  float ndotl=max(dot(normal,normalize(toLight)),0.);\n  return lightColor*lightIntensity*ndotl*\n    pointAttenuation(worldPos,lightPosition,lightRadius);\n}\n\nvec3 directSpotContribution(vec3 normal,vec3 worldPos,vec3 lightPosition,\n  vec3 lightDirection,vec3 lightColor,float lightIntensity,float lightRange,\n  float innerCos,float outerCos,float enabled){\n  vec3 toLight=lightPosition-worldPos;\n  float ndotl=max(dot(normal,normalize(toLight)),0.);\n  vec3 toFrag=worldPos-lightPosition;\n  float cosAngle=dot(normalize(toFrag),normalize(lightDirection));\n  float coneFalloff=smoothstep(outerCos,innerCos,cosAngle);\n  float distanceFalloff=rangeAttenuation(length(toFrag),lightRange);\n  return lightColor*lightIntensity*ndotl*coneFalloff*\n    distanceFalloff*enabled;\n}\n\n// Compact Cook-Torrance response for the clean/high path. The bounded\n// per-light evaluation makes roughness and metallic maps visibly useful\n// without introducing a deferred light buffer.\nfloat distributionGgx(float ndoth,float roughness){\n  float a=roughness*roughness;\n  float a2=a*a;\n  float denom=ndoth*ndoth*(a2-1.0)+1.0;\n  return a2/(3.14159265*denom*denom);\n}\n\nfloat geometrySchlick(float ndotv,float roughness){\n  float k=(roughness+1.0)*(roughness+1.0)/8.0;\n  return ndotv/(ndotv*(1.0-k)+k);\n}\n\nfloat geometrySmith(float ndotv,float ndotl,float roughness){\n  return geometrySchlick(ndotv,roughness)*geometrySchlick(ndotl,roughness);\n}\n\nvec3 fresnelSchlick(float cosTheta,vec3 f0){\n  return f0+(1.0-f0)*pow(1.0-clamp(cosTheta,0.0,1.0),5.0);\n}\n\nvec3 specularContribution(vec3 normal,vec3 viewDir,vec3 lightDir,\n  vec3 lightColor,float lightIntensity,float attenuation,vec3 baseColor,\n  float roughness,float metallic){\n  vec3 halfDir=normalize(viewDir+lightDir);\n  float ndotv=max(dot(normal,viewDir),0.0);\n  float ndotl=max(dot(normal,lightDir),0.0);\n  float ndoth=max(dot(normal,halfDir),0.0);\n  float hdotv=max(dot(halfDir,viewDir),0.0);\n  vec3 f0=mix(vec3(0.04),baseColor,metallic);\n  vec3 fresnel=fresnelSchlick(hdotv,f0);\n  float distribution=distributionGgx(ndoth,roughness);\n  float geometry=geometrySmith(ndotv,ndotl,roughness);\n  vec3 numerator=distribution*geometry*fresnel;\n  float denominator=max(4.0*ndotv*ndotl,0.001);\n  return numerator/denominator*lightColor*lightIntensity*attenuation*ndotl;\n}\n\nfloat sampleShadow(vec3 projCoord,float bias){\n  float shadowDepth=texture(uShadowMap,projCoord.xy).r;\n  return projCoord.z-bias>shadowDepth?0.:1.;\n}\n\n// \xa78.5's fog: \"distance plus restrained height/damp modulation\" \u2014 the base\n// term is a smoothstepped distance ramp (uFogStart..uFogEnd), not a plain\n// linear one: a linear ramp's density right at uFogStart is already\n// visibly nonzero, which reads as a hard onset band across a large\n// continuous surface like the ground plane. smoothstep's derivative is\n// zero at both ends, so density stays low just past uFogStart and eases\n// in gradually instead. Height falloff and density are each optional in\n// FrameEnvironment (nullable there, 0.0 here) and each written so 0.0 is\n// an exact no-op, rather than needing a separate enabled flag per term:\n//   - height: exp(-0*y) == 1, an identity multiply, when no falloff is set;\n//   - density: 1-exp(-0*depth) == 0, so max(distance, 0) leaves the plain\n//     distance term untouched when no density is set. Density can only\n//     ever push fog stronger than the base distance ramp, never weaker \u2014\n//     \"restrained\" in the sense that it augments, never overrides.\nfloat fogFactor(float viewDepth,float worldY){\n  float distFactor=smoothstep(uFogStart,uFogEnd,viewDepth);\n  float densityFactor=1.-exp(-uFogDensity*viewDepth);\n  float factor=max(distFactor,densityFactor);\n  float heightFactor=exp(-uFogHeightFalloff*max(worldY,0.));\n  return clamp(factor*heightFactor,0.,1.);\n}\n\nfloat shadowFactor(float ndotl){\n  vec3 projCoord=vLightSpacePos.xyz/vLightSpacePos.w;\n  projCoord=projCoord*.5+.5;\n  if(projCoord.x<0.||projCoord.x>1.||projCoord.y<0.||projCoord.y>1.||projCoord.z>1.){\n    return 1.;\n  }\n  // Receiver-plane style slope bias keeps grazing surfaces from acne while\n  // avoiding the detached-shadow look of a large constant offset.\n  float bias=max(.003*(1.-ndotl),.0008);\n  // Fixed low-discrepancy offsets avoid the directional shimmer of a regular\n  // square lattice while remaining deterministic and free of per-frame noise.\n  vec2 t=uShadowMapTexelSize;\n  float sum=0.;\n  sum+=sampleShadow(projCoord+vec3(vec2(-.942,-.399)*t,0.),bias);\n  sum+=sampleShadow(projCoord+vec3(vec2(.945,-.768)*t,0.),bias);\n  sum+=sampleShadow(projCoord+vec3(vec2(-.094,.886)*t,0.),bias);\n  sum+=sampleShadow(projCoord+vec3(vec2(.344,.294)*t,0.),bias);\n  sum+=sampleShadow(projCoord+vec3(vec2(-.716,.642)*t,0.),bias);\n  sum+=sampleShadow(projCoord+vec3(vec2(.688,-.089)*t,0.),bias);\n  sum+=sampleShadow(projCoord+vec3(vec2(-.287,-.885)*t,0.),bias);\n  sum+=sampleShadow(projCoord+vec3(vec2(.052,.008)*t,0.),bias);\n  sum+=sampleShadow(projCoord+vec3(vec2(.831,.486)*t,0.),bias);\n  return sum/9.;\n}\n\nvoid main(){\n  // The divide that undoes the rasterizer's own perspective correction (see\n  // shadowed_world.vert). Branched on the uniform rather than always\n  // dividing, so a zero-strength draw samples the untouched vUv and is\n  // bit-identical to the pre-affine path \u2014 the divisor is 1.0 there, but\n  // only after an interpolate/divide round-trip that need not return\n  // exactly 1.0. The branch is uniform across the whole draw, so it costs\n  // no divergence.\n  vec2 uv=uAffineWarpStrength>0.?vUv/vUvW:vUv;\n  uv=uv*uUvScaleOffset.xy+uUvScaleOffset.zw;\n  vec4 tex=texture(uAlbedo,uv);\n  // \xa76.2's alpha-masked route. Deliberately the first thing after the\n  // fetch it depends on, and ahead of all the lighting below: a discarded\n  // fragment must not pay for four shadow-map taps and two normalizes it\n  // will never use. uAlphaCutoff==0 is the pass's \"this material has no\n  // cutout\" sentinel (MaterialDefinition.validate forbids a real zero), so\n  // opaque and blended draws take a path containing no alpha compare at\n  // all rather than one comparing against an unreachable threshold. The\n  // same test, against the same uv, runs in depth_prepass.frag and\n  // shadow_caster.frag \u2014 three passes must agree on which fragments exist\n  // or SSAO, DOF and shadowing all occlude against holes this pass shaded\n  // through.\n  if(uAlphaCutoff>0.&&tex.a<uAlphaCutoff)discard;\n  vec3 n=normalize(vNormal);\n  // Surface-v2 supplies a tangent4 with OpenGL's +/-1 handedness in W.\n  // Compatibility14 meshes leave the attribute at its default zero and use\n  // the derivative frame below, so old content and authored tangents share\n  // one shader contract.\n  if(uNormalStrength>0.0){\n    vec3 dp1=dFdx(vWorldPos),dp2=dFdy(vWorldPos);\n    vec2 duv1=dFdx(uv),duv2=dFdy(uv);\n    vec3 derivativeT=normalize(dp1*duv2.y-dp2*duv1.y);\n    vec3 derivativeB=normalize(-dp1*duv2.x+dp2*duv1.x);\n    vec3 authoredT=normalize(vTangent.xyz-n*dot(n,vTangent.xyz));\n    bool hasAuthoredT=dot(vTangent.xyz,vTangent.xyz)>0.25;\n    vec3 t=hasAuthoredT?authoredT:derivativeT;\n    vec3 b=hasAuthoredT?normalize(cross(n,t)*vTangent.w):derivativeB;\n    vec3 map=texture(uNormalMap,uv).xyz*2.0-1.0;\n    map.xy*=uNormalStrength;\n    n=normalize(mat3(t,b,n)*normalize(map));\n  }\n  vec3 orm=texture(uOrmMap,uv).rgb;\n  float normalVariance=0.0;\n  if(uNormalStrength>0.0){\n    // Toksvig-style widening suppresses sub-pixel normal sparkle when a high\n    // resolution map is minified. It preserves authored relief at distance\n    // while converting unresolved detail into a stable roughness increase.\n    vec3 normalSample=texture(uNormalMap,uv).xyz*2.0-1.0;\n    vec3 normalDx=dFdx(normalSample);\n    vec3 normalDy=dFdy(normalSample);\n    normalVariance=dot(normalDx,normalDx)+dot(normalDy,normalDy);\n  }\n  float ao=texture(uSsao,gl_FragCoord.xy/uSceneColorSize).r;\n  ao*=mix(1.0,orm.r,clamp(uOcclusionStrength,0.0,1.0));\n  vec3 direct=vec3(0.);\n  float directionalNdotL=max(dot(n,normalize(uDirectionalDirection)),0.);\n  direct+=uDirectionalColor*uDirectionalIntensity*directionalNdotL;\n  direct+=pointContribution(n,vWorldPos,uPointPosition0,uPointColor0,\n    uPointIntensity0,uPointRadius0);\n  direct+=pointContribution(n,vWorldPos,uPointPosition1,uPointColor1,\n    uPointIntensity1,uPointRadius1);\n  direct+=pointContribution(n,vWorldPos,uPointPosition2,uPointColor2,\n    uPointIntensity2,uPointRadius2);\n  direct+=pointContribution(n,vWorldPos,uPointPosition3,uPointColor3,\n    uPointIntensity3,uPointRadius3);\n  direct+=directSpotContribution(n,vWorldPos,uDirectSpotPosition0,\n    uDirectSpotDirection0,uDirectSpotColor0,uDirectSpotIntensity0,\n    uDirectSpotRange0,uDirectSpotInnerCos0,uDirectSpotOuterCos0,\n    uDirectSpotEnabled0);\n  direct+=directSpotContribution(n,vWorldPos,uDirectSpotPosition1,\n    uDirectSpotDirection1,uDirectSpotColor1,uDirectSpotIntensity1,\n    uDirectSpotRange1,uDirectSpotInnerCos1,uDirectSpotOuterCos1,\n    uDirectSpotEnabled1);\n  direct+=directSpotContribution(n,vWorldPos,uDirectSpotPosition2,\n    uDirectSpotDirection2,uDirectSpotColor2,uDirectSpotIntensity2,\n    uDirectSpotRange2,uDirectSpotInnerCos2,uDirectSpotOuterCos2,\n    uDirectSpotEnabled2);\n  vec3 toSpot=normalize(uLightPosition-vWorldPos);\n  float spotNdotL=max(dot(n,toSpot),0.);\n  float shadow=uReceivesShadow>0.5?shadowFactor(spotNdotL):1.;\n  float attenuation=lightAttenuation(vWorldPos);\n  direct+=uLightColor*uLightIntensity*spotNdotL*shadow*attenuation*uSpotEnabled;\n  // \xa78.5: \"modulates ambient only\" \u2014 SSAO must never darken the direct\n  // (N.L * shadow * attenuation) term, only the ambient fill, or it would\n  // double up with real shadowing and read as an incorrect global darkening\n  // rather than contact occlusion specifically.\n  vec3 ambient=uAmbientColor*uAmbientIntensity*ao;\n  vec3 baseColor=vColor.rgb*tex.rgb*uMaterialTint;\n  // Metallic surfaces contribute less diffuse energy; roughness keeps a\n  // small, stable broadening factor until the surface-v2 camera/specular\n  // block lands. Both channels therefore affect the live output rather than\n  // being metadata-only fields.\n  float metal=clamp(uMetallic*orm.b,0.0,1.0);\n  float rough=clamp(uRoughness*orm.g,0.0,1.0);\n  // Avoid singular highlights while retaining a visibly sharp porcelain\n  // response at the authored low end of the roughness range.\n  float specRough=max(0.045,sqrt(rough*rough+normalVariance*0.18));\n  vec3 viewDir=normalize(uCameraPosition-vWorldPos);\n  vec3 specular=vec3(0.0);\n  specular+=specularContribution(n,viewDir,normalize(uDirectionalDirection),\n    uDirectionalColor,uDirectionalIntensity,1.0,baseColor,specRough,metal);\n  specular+=specularContribution(n,viewDir,\n    normalize(uPointPosition0-vWorldPos),uPointColor0,uPointIntensity0,\n    pointAttenuation(vWorldPos,uPointPosition0,uPointRadius0),baseColor,\n    specRough,metal);\n  specular+=specularContribution(n,viewDir,\n    normalize(uPointPosition1-vWorldPos),uPointColor1,uPointIntensity1,\n    pointAttenuation(vWorldPos,uPointPosition1,uPointRadius1),baseColor,\n    specRough,metal);\n  specular+=specularContribution(n,viewDir,\n    normalize(uPointPosition2-vWorldPos),uPointColor2,uPointIntensity2,\n    pointAttenuation(vWorldPos,uPointPosition2,uPointRadius2),baseColor,\n    specRough,metal);\n  specular+=specularContribution(n,viewDir,\n    normalize(uPointPosition3-vWorldPos),uPointColor3,uPointIntensity3,\n    pointAttenuation(vWorldPos,uPointPosition3,uPointRadius3),baseColor,\n    specRough,metal);\n  specular+=specularContribution(n,viewDir,\n    normalize(uLightPosition-vWorldPos),uLightColor,uLightIntensity,\n    lightAttenuation(vWorldPos)*uSpotEnabled*shadow,baseColor,specRough,metal);\n  // Rain response stays in the world pass so it follows geometry depth rather\n  // than painting streaks over the whole screen. Near surfaces receive a\n  // restrained cool darkening and a broad wet highlight; distant surfaces\n  // fade back to their authored material before the fog composite.\n  float wetDepth=1.0-smoothstep(2.0,18.0,max(vViewDepth,0.0));\n  float wetness=clamp(uRainWetness,0.0,1.0)*wetDepth;\n  baseColor=mix(baseColor,baseColor*vec3(0.84,0.90,0.98),wetness*0.22);\n  // Keep reflected energy available to the specular lobe. The previous\n  // diffuse-first clamp clipped bright ceramic response before tone mapping,\n  // producing the broad plastic patches visible in low-roughness samples.\n  // This split is bounded by the material metalness and lets the final\n  // composite perform the intentional HDR compression once.\n  vec3 diffuseEnergy=baseColor*(1.0-metal)*\n    (ambient+direct*(1.0-0.25*rough));\n  vec3 lit=diffuseEnergy+specular;\n  // A restrained dielectric clearcoat is intentionally separate from the\n  // base roughness/metalness response. It gives porcelain a broad, stable\n  // grazing highlight without turning the surface into a mirror.\n  vec3 coatLight=normalize(uDirectionalDirection);\n  vec3 coatHalf=normalize(viewDir+coatLight);\n  float coatNdotV=max(dot(n,viewDir),0.);\n  float coatNdotH=max(dot(n,coatHalf),0.);\n  float coatNdotL=max(dot(n,coatLight),0.);\n  float coatPower=mix(128.0,8.0,clamp(uClearcoatRoughness,0.0,1.0));\n  float coatFresnel=0.04+0.96*pow(1.0-coatNdotV,5.0);\n  float coat=clamp(uClearcoatStrength,0.0,1.0)*coatFresnel*\n    pow(coatNdotH,coatPower)*coatNdotL*uDirectionalIntensity;\n  lit+=uDirectionalColor*coat;\n  lit+=direct*(wetness*(0.035+0.075*(1.0-rough)));\n  vec3 emissive=texture(uEmissiveMap,uv).rgb*uMaterialTint*uEmissiveStrength;\n  lit+=emissive;\n  if(uLightmapIntensity>0.0){\n    lit+=baseColor*texture(uLightmap,vUv1).rgb*uLightmapIntensity;\n  }\n  // Fog blends the surface's own lit color toward uFogColor only \u2014 never\n  // oGlow below, which stays a declared emissive quantity independent of\n  // how much atmosphere sits between the surface and the camera, matching\n  // \xa78.7's \"does not infer glow from final luma\" scoping: fog is a\n  // property of oColor's reflected/lit light, not of emission.\n  float fog=fogFactor(vViewDepth,vWorldPos.y);\n  vec3 foggedLit=mix(lit,uFogColor,fog);\n  // Bug 18: vColor.a*tex.a is the correct alpha for a blended draw and the\n  // wrong one for everything else. present.frag copies this channel\n  // straight through to a canvas created with the default alpha:true, so an\n  // opaque or masked surface that emitted a texel's own alpha would show\n  // the *page* through solid geometry. Coverage, not transparency, is what\n  // an opaque or masked fragment writes: whatever survived the discard\n  // above is fully covering, and an opaque draw always was. uOpaqueCoverage\n  // is exactly 0 or 1, so the mix is exact in both directions and the\n  // blended path keeps its pre-existing expression bit-for-bit.\n  float outAlpha=mix(vColor.a*tex.a,1.,uOpaqueCoverage);\n  oColor=vec4(foggedLit,outAlpha);\n  // \xa78.7: bloom reads this declared attachment directly, never inferring\n  // glow from oColor's final luma \u2014 a bright-but-non-emissive lit surface\n  // (e.g. the checkerboard floor under strong light) must never bloom, only\n  // a material with real emissiveStrength does, independent of how the\n  // surface happens to be lit this frame.\n  oGlow=vec4(emissive,1.);\n}\n", resolveMesh, resolveMaterial, resolveAlbedo, resolveNormal, resolveOrm, resolveEmissive, resolveLightmap, resolveShadowMap, new A.buildShadowGraph_closure0(t1, fallbackLightView), resolveCasterLight, resolveDirectSpotLights, resolveSsaoBlurred, hasSsao, sceneColorWidth, sceneColorHeight, shadowMapSize, shadowMapSize, t5, t7, postResource));
+      if (msaaResolve != null)
+        t4.push(msaaResolve);
+      B.JSArray_methods.addAll$1(t4, postFeatures);
+      t4.push(new A.PresentFeature(programLibrary, _s156_, string$.x23versip, device, postResource0, outputEncoding));
+      return new A.FeatureGraph(t4);
+    },
+    buildShadowGraph_closure: function buildShadowGraph_closure(t0) {
+      this._box_0 = t0;
+    },
+    buildShadowGraph_closure0: function buildShadowGraph_closure0(t0, t1) {
+      this._box_0 = t0;
+      this.fallbackLightView = t1;
+    },
+    ShadowedWorldFeature: function ShadowedWorldFeature(t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19, t20, t21, t22) {
+      var _ = this;
+      _.programLibrary = t0;
+      _.vertexSource = t1;
+      _.fragmentSource = t2;
+      _.resolveMesh = t3;
+      _.resolveMaterial = t4;
+      _.resolveAlbedo = t5;
+      _.resolveNormal = t6;
+      _.resolveOrm = t7;
+      _.resolveEmissive = t8;
+      _.resolveLightmap = t9;
+      _.resolveShadowMap = t10;
+      _.resolveLightView = t11;
+      _.resolveCasterLight = t12;
+      _.resolveDirectSpotLights = t13;
+      _.resolveSsaoBlurred = t14;
+      _.useSsao = t15;
+      _.sceneColorWidth = t16;
+      _.sceneColorHeight = t17;
+      _.shadowMapWidth = t18;
+      _.shadowMapHeight = t19;
+      _.shadowMapResource = t20;
+      _.ssaoResource = t21;
+      _.sceneColorResource = t22;
+    },
+    _ShadowedWorldPass: function _ShadowedWorldPass(t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17) {
+      var _ = this;
+      _.descriptor = t0;
+      _.program = t1;
+      _.resolveMesh = t2;
+      _.resolveMaterial = t3;
+      _.resolveAlbedo = t4;
+      _.resolveNormal = t5;
+      _.resolveOrm = t6;
+      _.resolveEmissive = t7;
+      _.resolveLightmap = t8;
+      _.resolveShadowMap = t9;
+      _.resolveLightView = t10;
+      _.resolveCasterLight = t11;
+      _.resolveDirectSpotLights = t12;
+      _.resolveSsaoBlurred = t13;
+      _.sceneColorWidth = t14;
+      _.sceneColorHeight = t15;
+      _.shadowMapWidth = t16;
+      _.shadowMapHeight = t17;
+    },
+    SsaoOcclusionFeature: function SsaoOcclusionFeature(t0, t1, t2, t3, t4, t5, t6) {
+      var _ = this;
+      _.programLibrary = t0;
+      _.vertexSource = t1;
+      _.fragmentSource = t2;
+      _.device = t3;
+      _.resolveSceneDepth = t4;
+      _.resolveCamera = t5;
+      _.ssaoRawResource = t6;
+    },
+    _SsaoOcclusionPass: function _SsaoOcclusionPass(t0, t1, t2, t3, t4, t5) {
+      var _ = this;
+      _.descriptor = t0;
+      _.program = t1;
+      _.emptyVao = t2;
+      _.resolveSceneDepth = t3;
+      _.resolveCamera = t4;
+      _.radius = t5;
+    },
+    SsaoBlurFeature: function SsaoBlurFeature(t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10) {
+      var _ = this;
+      _.programLibrary = t0;
+      _.vertexSource = t1;
+      _.fragmentSource = t2;
+      _.device = t3;
+      _.resolveSsaoRaw = t4;
+      _.resolveSceneDepth = t5;
+      _.resolveCamera = t6;
+      _.ssaoWidth = t7;
+      _.ssaoHeight = t8;
+      _.ssaoRawResource = t9;
+      _.ssaoBlurredResource = t10;
+    },
+    _SsaoBlurPass: function _SsaoBlurPass(t0, t1, t2, t3, t4, t5, t6, t7) {
+      var _ = this;
+      _.descriptor = t0;
+      _.program = t1;
+      _.emptyVao = t2;
+      _.resolveSsaoRaw = t3;
+      _.resolveSceneDepth = t4;
+      _.resolveCamera = t5;
+      _.ssaoWidth = t6;
+      _.ssaoHeight = t7;
+    },
+    VhsFeature: function VhsFeature(t0, t1, t2, t3, t4, t5, t6, t7) {
+      var _ = this;
+      _.programLibrary = t0;
+      _.vertexSource = t1;
+      _.fragmentSource = t2;
+      _.device = t3;
+      _.resolveHistory = t4;
+      _.resolveTime = t5;
+      _.inputResource = t6;
+      _.outputResource = t7;
+    },
+    _VhsPass: function _VhsPass(t0, t1, t2, t3, t4, t5, t6) {
+      var _ = this;
+      _.descriptor = t0;
+      _.program = t1;
+      _.emptyVao = t2;
+      _.resolveHistory = t3;
+      _.resolveTime = t4;
+      _.inputResource = t5;
+      _.outputResource = t6;
+    },
+    ResolvedMesh: function ResolvedMesh(t0, t1, t2, t3) {
+      var _ = this;
+      _.vao = t0;
+      _.isIndexed = t1;
+      _.drawCount = t2;
+      _.usesUint32Indices = t3;
+    },
+    WorldFeature: function WorldFeature(t0, t1, t2, t3, t4) {
+      var _ = this;
+      _.programLibrary = t0;
+      _.vertexSource = t1;
+      _.fragmentSource = t2;
+      _.resolveMesh = t3;
+      _.sceneColorResource = t4;
+    },
+    _WorldPass: function _WorldPass(t0, t1, t2, t3) {
+      var _ = this;
+      _.descriptor = t0;
+      _.program = t1;
+      _.resolveMesh = t2;
+      _.sceneColorResourceName = t3;
+    },
+    ShaderCompileException$(stage, message) {
+      return new A.ShaderCompileException(stage, message);
+    },
+    GpuBufferUsage: function GpuBufferUsage(t0, t1) {
+      this.index = t0;
+      this._name = t1;
+    },
+    GpuBufferKind: function GpuBufferKind(t0, t1) {
+      this.index = t0;
+      this._name = t1;
+    },
+    GpuTextureFilter: function GpuTextureFilter(t0, t1) {
+      this.index = t0;
+      this._name = t1;
+    },
+    GpuTextureWrap: function GpuTextureWrap(t0, t1) {
+      this.index = t0;
+      this._name = t1;
+    },
+    GpuBufferDescriptor: function GpuBufferDescriptor(t0, t1, t2) {
+      this.byteLength = t0;
+      this.usage = t1;
+      this.kind = t2;
+    },
+    GpuTextureDescriptor: function GpuTextureDescriptor() {
+    },
+    GpuTargetAttachment: function GpuTargetAttachment(t0, t1) {
+      this.index = t0;
+      this._name = t1;
+    },
+    GpuTargetDescriptor: function GpuTargetDescriptor(t0, t1, t2, t3, t4) {
+      var _ = this;
+      _.width = t0;
+      _.height = t1;
+      _.samples = t2;
+      _.attachments = t3;
+      _.hasDepth = t4;
+    },
+    GpuDeviceStatus: function GpuDeviceStatus(t0, t1) {
+      this.index = t0;
+      this._name = t1;
+    },
+    ShaderCompileStage: function ShaderCompileStage(t0, t1) {
+      this.index = t0;
+      this._name = t1;
+    },
+    ShaderCompileException: function ShaderCompileException(t0, t1) {
+      this.stage = t0;
+      this.message = t1;
+    },
+    UniformType: function UniformType(t0, t1) {
+      this.index = t0;
+      this._name = t1;
+    },
+    UniformValue: function UniformValue(t0, t1) {
+      this.type = t0;
+      this.value = t1;
+    },
+    ClearMask: function ClearMask(t0, t1) {
+      this.index = t0;
+      this._name = t1;
+    },
+    DeviceDrawCommandEncoder: function DeviceDrawCommandEncoder(t0, t1) {
+      this.device = t0;
+      this.telemetry = t1;
+    },
+    PreparedGpuResourcePlan: function PreparedGpuResourcePlan(t0, t1) {
+      this.logical = t0;
+      this.objects = t1;
+    },
+    GpuResourcePlanAdapter: function GpuResourcePlanAdapter(t0, t1) {
+      var _ = this;
+      _.device = t0;
+      _._logical = t1;
+      _._resource_plan_adapter$_current = null;
+      _._resource_plan_adapter$_disposed = false;
+    },
+    GpuResourcePlanAdapter__createObjects_closure: function GpuResourcePlanAdapter__createObjects_closure() {
+    },
+    GpuResourcePlanAdapter__createObjects_closure0: function GpuResourcePlanAdapter__createObjects_closure0() {
+    },
+    ResourceRegistry: function ResourceRegistry(t0, t1, t2, t3) {
+      var _ = this;
+      _._makeHandle = t0;
+      _._slots = t1;
+      _._freeSlots = t2;
+      _._deleteCount = 0;
+      _.$ti = t3;
+    },
+    DrawStateDescriptor$(blendDst, blendEnable, blendEquation, blendSrc, colorMaskA, colorMaskB, colorMaskG, colorMaskR, cullEnable, cullFace, depthFunc, depthTest, depthWrite, frontFaceCcw, scissorEnable, stencilEnable) {
+      return new A.DrawStateDescriptor(depthTest, depthFunc, depthWrite, blendEnable, blendSrc, blendDst, blendEquation, cullEnable, cullFace, true, false, true, true, true, true, false);
+    },
+    BlendEquation: function BlendEquation(t0, t1) {
+      this.index = t0;
+      this._name = t1;
+    },
+    BlendFactor: function BlendFactor(t0, t1) {
+      this.index = t0;
+      this._name = t1;
+    },
+    CullFace: function CullFace(t0, t1) {
+      this.index = t0;
+      this._name = t1;
+    },
+    DepthFunc: function DepthFunc(t0, t1) {
+      this.index = t0;
+      this._name = t1;
+    },
+    DrawStateDescriptor: function DrawStateDescriptor(t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15) {
+      var _ = this;
+      _.depthTest = t0;
+      _.depthFunc = t1;
+      _.depthWrite = t2;
+      _.blendEnable = t3;
+      _.blendSrc = t4;
+      _.blendDst = t5;
+      _.blendEquation = t6;
+      _.cullEnable = t7;
+      _.cullFace = t8;
+      _.frontFaceCcw = t9;
+      _.stencilEnable = t10;
+      _.colorMaskR = t11;
+      _.colorMaskG = t12;
+      _.colorMaskB = t13;
+      _.colorMaskA = t14;
+      _.scissorEnable = t15;
+    },
+    StateField: function StateField(t0, t1) {
+      this.index = t0;
+      this._name = t1;
+    },
+    WebGlStateCache: function WebGlStateCache() {
+      this._applied = null;
+    },
+    WebGl2Device$(gl) {
+      var t1 = new A.WebGl2Device(gl, B.GpuDeviceStatus_0, new A.WebGlStateCache(), A.WebGl2Device__readSupportedExtensions(gl));
+      t1.WebGl2Device$1(gl);
+      return t1;
+    },
+    WebGl2Device__readSupportedExtensions(gl) {
+      var t1, t2,
+        extensions = type$.nullable_JSArray_nullable_Object._as(gl.getSupportedExtensions());
+      if (extensions == null)
+        return A.LinkedHashSet_LinkedHashSet$_empty(type$.String);
+      t1 = A.LinkedHashSet_LinkedHashSet$_empty(type$.String);
+      t2 = J.get$iterator$ax(type$.List_String._is(extensions) ? extensions : new A.CastList(extensions, A._arrayInstanceType(extensions)._eval$1("CastList<1,String>")));
+      while (t2.moveNext$0())
+        t1.add$1(0, t2.get$current());
+      return t1;
+    },
+    WebGl2DeviceDraw_bindTargetImpl(_this, target) {
+      var t1, fb;
+      if (_this._status !== B.GpuDeviceStatus_0)
+        A.throwExpression(A.StateError$(string$.WebGl2));
+      if (target == null) {
+        t1 = _this.gl;
+        t1.bindFramebuffer(A._asInt(init.G.WebGL2RenderingContext.FRAMEBUFFER), null);
+        t1.viewport(0, 0, A._asInt(t1.drawingBufferWidth), A._asInt(t1.drawingBufferHeight));
+        return;
+      }
+      fb = type$._WebGlFramebuffer._as(target.handle);
+      t1 = _this.gl;
+      t1.bindFramebuffer(A._asInt(init.G.WebGL2RenderingContext.FRAMEBUFFER), fb.fbo);
+      t1.viewport(0, 0, fb.width, fb.height);
+    },
+    WebGl2DeviceDraw__glDepthFunc(_this, fn) {
+      var t1;
+      switch (fn.index) {
+        case 0:
+          t1 = A._asInt(init.G.WebGL2RenderingContext.LESS);
+          break;
+        case 1:
+          t1 = A._asInt(init.G.WebGL2RenderingContext.LEQUAL);
+          break;
+        case 2:
+          t1 = A._asInt(init.G.WebGL2RenderingContext.ALWAYS);
+          break;
+        case 3:
+          t1 = A._asInt(init.G.WebGL2RenderingContext.NEVER);
+          break;
+        default:
+          t1 = null;
+      }
+      return t1;
+    },
+    WebGl2DeviceDraw__glCullFace(_this, face) {
+      var t1;
+      switch (face.index) {
+        case 0:
+          t1 = A._asInt(init.G.WebGL2RenderingContext.FRONT);
+          break;
+        case 1:
+          t1 = A._asInt(init.G.WebGL2RenderingContext.BACK);
+          break;
+        default:
+          t1 = null;
+      }
+      return t1;
+    },
+    WebGl2DeviceDraw__glBlendFactor(_this, factor) {
+      var t1;
+      switch (factor.index) {
+        case 0:
+          t1 = A._asInt(init.G.WebGL2RenderingContext.ZERO);
+          break;
+        case 1:
+          t1 = A._asInt(init.G.WebGL2RenderingContext.ONE);
+          break;
+        case 2:
+          t1 = A._asInt(init.G.WebGL2RenderingContext.SRC_ALPHA);
+          break;
+        case 3:
+          t1 = A._asInt(init.G.WebGL2RenderingContext.ONE_MINUS_SRC_ALPHA);
+          break;
+        case 4:
+          t1 = A._asInt(init.G.WebGL2RenderingContext.DST_ALPHA);
+          break;
+        case 5:
+          t1 = A._asInt(init.G.WebGL2RenderingContext.ONE_MINUS_DST_ALPHA);
+          break;
+        default:
+          t1 = null;
+      }
+      return t1;
+    },
+    WebGl2DeviceDraw__glBlendEquation(_this, eq) {
+      var t1;
+      switch (eq.index) {
+        case 0:
+          t1 = A._asInt(init.G.WebGL2RenderingContext.FUNC_ADD);
+          break;
+        case 1:
+          t1 = A._asInt(init.G.WebGL2RenderingContext.FUNC_SUBTRACT);
+          break;
+        case 2:
+          t1 = A._asInt(init.G.WebGL2RenderingContext.FUNC_REVERSE_SUBTRACT);
+          break;
+        default:
+          t1 = null;
+      }
+      return t1;
+    },
+    WebGl2DeviceDraw_applyDrawStateImpl(_this, state) {
+      var t1, changed, t2, t3;
+      if (_this._status !== B.GpuDeviceStatus_0)
+        A.throwExpression(A.StateError$(string$.WebGl2));
+      t1 = _this._stateCache;
+      changed = t1.diff$1(state);
+      if (changed._collection$_length === 0)
+        return;
+      if (changed.contains$1(0, B.StateField_0)) {
+        t2 = init.G;
+        t3 = _this.gl;
+        if (state.depthTest)
+          t3.enable(A._asInt(t2.WebGL2RenderingContext.DEPTH_TEST));
+        else
+          t3.disable(A._asInt(t2.WebGL2RenderingContext.DEPTH_TEST));
+      }
+      if (changed.contains$1(0, B.StateField_1))
+        _this.gl.depthFunc(A.WebGl2DeviceDraw__glDepthFunc(_this, state.depthFunc));
+      if (changed.contains$1(0, B.StateField_2))
+        _this.gl.depthMask(state.depthWrite);
+      if (changed.contains$1(0, B.StateField_6)) {
+        t2 = init.G;
+        t3 = _this.gl;
+        if (state.cullEnable)
+          t3.enable(A._asInt(t2.WebGL2RenderingContext.CULL_FACE));
+        else
+          t3.disable(A._asInt(t2.WebGL2RenderingContext.CULL_FACE));
+      }
+      if (changed.contains$1(0, B.StateField_7))
+        _this.gl.cullFace(A.WebGl2DeviceDraw__glCullFace(_this, state.cullFace));
+      if (changed.contains$1(0, B.StateField_8)) {
+        t2 = init.G.WebGL2RenderingContext;
+        t2 = A._asInt(t2.CCW);
+        _this.gl.frontFace(t2);
+      }
+      if (changed.contains$1(0, B.StateField_3)) {
+        t2 = init.G;
+        t3 = _this.gl;
+        if (state.blendEnable)
+          t3.enable(A._asInt(t2.WebGL2RenderingContext.BLEND));
+        else
+          t3.disable(A._asInt(t2.WebGL2RenderingContext.BLEND));
+      }
+      if (changed.contains$1(0, B.StateField_4))
+        _this.gl.blendFunc(A.WebGl2DeviceDraw__glBlendFactor(_this, state.blendSrc), A.WebGl2DeviceDraw__glBlendFactor(_this, state.blendDst));
+      if (changed.contains$1(0, B.StateField_5))
+        _this.gl.blendEquation(A.WebGl2DeviceDraw__glBlendEquation(_this, state.blendEquation));
+      if (changed.contains$1(0, B.StateField_10))
+        _this.gl.colorMask(true, true, true, true);
+      if (changed.contains$1(0, B.StateField_11)) {
+        t2 = init.G.WebGL2RenderingContext;
+        _this.gl.disable(A._asInt(t2.SCISSOR_TEST));
+      }
+      t1._applied = state;
+    },
+    WebGl2DeviceDraw__glClearBits(_this, mask) {
+      var t1;
+      switch (mask.index) {
+        case 0:
+          t1 = A._asInt(init.G.WebGL2RenderingContext.COLOR_BUFFER_BIT);
+          break;
+        case 1:
+          t1 = init.G;
+          t1 = (A._asInt(t1.WebGL2RenderingContext.COLOR_BUFFER_BIT) | A._asInt(t1.WebGL2RenderingContext.DEPTH_BUFFER_BIT)) >>> 0;
+          break;
+        case 2:
+          t1 = A._asInt(init.G.WebGL2RenderingContext.DEPTH_BUFFER_BIT);
+          break;
+        default:
+          t1 = null;
+      }
+      return t1;
+    },
+    WebGl2DeviceDraw_clearImpl(_this, mask, a, b, g, r) {
+      var t1;
+      if (_this._status !== B.GpuDeviceStatus_0)
+        A.throwExpression(A.StateError$(string$.WebGl2));
+      t1 = _this.gl;
+      t1.clearColor(r, g, b, a);
+      t1.clear(A.WebGl2DeviceDraw__glClearBits(_this, mask));
+    },
+    WebGl2DeviceDraw_useProgramImpl(_this, program) {
+      var handle;
+      if (_this._status !== B.GpuDeviceStatus_0)
+        A.throwExpression(A.StateError$(string$.WebGl2));
+      handle = A._asJSObject(program.handle);
+      _this.gl.useProgram(handle);
+      _this._boundProgram = handle;
+    },
+    WebGl2DeviceDraw_setUniformImpl(_this, $name, value) {
+      var program, t1, $location, v, t2, t3, t4, t5;
+      if (_this._status !== B.GpuDeviceStatus_0)
+        A.throwExpression(A.StateError$(string$.WebGl2));
+      program = _this._boundProgram;
+      if (program == null)
+        throw A.wrapException(A.StateError$("WebGl2Device.setUniform called with no bound program"));
+      t1 = _this.gl;
+      $location = A._asJSObjectQ(t1.getUniformLocation(program, $name));
+      if ($location == null)
+        return;
+      switch (value.type.index) {
+        case 0:
+          t1.uniform1f($location, A._asDouble(value.value));
+          break;
+        case 1:
+          v = type$.Float32List._as(value.value);
+          t2 = v.length;
+          if (0 >= t2)
+            return A.ioore(v, 0);
+          t3 = v[0];
+          if (1 >= t2)
+            return A.ioore(v, 1);
+          t1.uniform2f($location, t3, v[1]);
+          break;
+        case 2:
+          v = type$.Float32List._as(value.value);
+          t2 = v.length;
+          if (0 >= t2)
+            return A.ioore(v, 0);
+          t3 = v[0];
+          if (1 >= t2)
+            return A.ioore(v, 1);
+          t4 = v[1];
+          if (2 >= t2)
+            return A.ioore(v, 2);
+          t1.uniform3f($location, t3, t4, v[2]);
+          break;
+        case 3:
+          v = type$.Float32List._as(value.value);
+          t2 = v.length;
+          if (0 >= t2)
+            return A.ioore(v, 0);
+          t3 = v[0];
+          if (1 >= t2)
+            return A.ioore(v, 1);
+          t4 = v[1];
+          if (2 >= t2)
+            return A.ioore(v, 2);
+          t5 = v[2];
+          if (3 >= t2)
+            return A.ioore(v, 3);
+          A.callMethod(t1, "uniform4f", [$location, t3, t4, t5, v[3]], type$.void);
+          break;
+        case 4:
+          t1.uniformMatrix4fv($location, false, type$.Float32List._as(value.value));
+          break;
+        case 5:
+          t1.uniformMatrix4fv($location, false, type$.Float32List._as(value.value));
+          break;
+        case 6:
+          t1.uniform1i($location, A._asInt(value.value));
+          break;
+      }
+    },
+    WebGl2DeviceDraw_bindVertexArrayImpl(_this, vao) {
+      if (_this._status !== B.GpuDeviceStatus_0)
+        A.throwExpression(A.StateError$(string$.WebGl2));
+      _this.gl.bindVertexArray(A._asJSObject(vao.handle));
+    },
+    WebGl2DeviceDraw_bindTextureImpl(_this, unit, texture) {
+      var handle, t1, t2, target, colorTex, depthTex;
+      if (_this._status !== B.GpuDeviceStatus_0)
+        A.throwExpression(A.StateError$(string$.WebGl2));
+      handle = texture.handle;
+      t1 = _this.gl;
+      t2 = init.G;
+      t1.activeTexture(A._asInt(t2.WebGL2RenderingContext.TEXTURE0) + unit);
+      if (handle instanceof A._WebGlTexture) {
+        target = handle.layers > 1 ? A._asInt(t2.WebGL2RenderingContext.TEXTURE_2D_ARRAY) : A._asInt(t2.WebGL2RenderingContext.TEXTURE_2D);
+        t1.bindTexture(target, handle.handle);
+        return;
+      }
+      if (handle instanceof A._WebGlFramebuffer) {
+        colorTex = handle.colorTex;
+        if (colorTex != null) {
+          t1.bindTexture(A._asInt(t2.WebGL2RenderingContext.TEXTURE_2D), colorTex);
+          return;
+        }
+        depthTex = handle.depthTex;
+        if (depthTex != null) {
+          t1.bindTexture(A._asInt(t2.WebGL2RenderingContext.TEXTURE_2D), depthTex);
+          return;
+        }
+        throw A.wrapException(A.StateError$("WebGl2Device.bindTexture: target has no sampleable color or depth texture (multisampled targets must be resolved to a single-sample target before sampling)"));
+      }
+      throw A.wrapException(A.StateError$("WebGl2Device.bindTexture: unrecognized GpuObject handle type"));
+    },
+    WebGl2DeviceResources__glUsage(_this, usage) {
+      var t1;
+      switch (usage.index) {
+        case 0:
+          t1 = A._asInt(init.G.WebGL2RenderingContext.STATIC_DRAW);
+          break;
+        case 1:
+          t1 = A._asInt(init.G.WebGL2RenderingContext.DYNAMIC_DRAW);
+          break;
+        case 2:
+          t1 = A._asInt(init.G.WebGL2RenderingContext.STREAM_DRAW);
+          break;
+        default:
+          t1 = null;
+      }
+      return t1;
+    },
+    WebGl2DeviceResources_createBufferImpl(_this, descriptor) {
+      var t1, buffer, t2, target;
+      if (_this._status !== B.GpuDeviceStatus_0)
+        A.throwExpression(A.StateError$(string$.WebGl2));
+      t1 = _this.gl;
+      buffer = A._asJSObjectQ(t1.createBuffer());
+      if (buffer == null)
+        throw A.wrapException(A.StateError$("WebGl2Device: gl.createBuffer() returned null"));
+      t2 = init.G;
+      target = descriptor.kind === B.GpuBufferKind_1 ? A._asInt(t2.WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER) : A._asInt(t2.WebGL2RenderingContext.ARRAY_BUFFER);
+      t1.bindBuffer(target, buffer);
+      t1.bufferData(target, descriptor.byteLength, A.WebGl2DeviceResources__glUsage(_this, descriptor.usage));
+      return new A._WebGpuObject(buffer);
+    },
+    WebGl2DeviceResources__glFilter(_this, filter) {
+      var t1;
+      switch (filter.index) {
+        case 0:
+          t1 = A._asInt(init.G.WebGL2RenderingContext.NEAREST);
+          break;
+        case 1:
+          t1 = A._asInt(init.G.WebGL2RenderingContext.LINEAR);
+          break;
+        case 2:
+          t1 = A._asInt(init.G.WebGL2RenderingContext.LINEAR_MIPMAP_LINEAR);
+          break;
+        default:
+          t1 = null;
+      }
+      return t1;
+    },
+    WebGl2DeviceResources__glWrap(_this, wrap) {
+      var t1;
+      switch (wrap.index) {
+        case 0:
+          t1 = A._asInt(init.G.WebGL2RenderingContext.CLAMP_TO_EDGE);
+          break;
+        case 1:
+          t1 = A._asInt(init.G.WebGL2RenderingContext.REPEAT);
+          break;
+        default:
+          t1 = null;
+      }
+      return t1;
+    },
+    WebGl2DeviceResources_createTextureImpl(_this, descriptor) {
+      var t1, texture, t2, t3, target, extensionAvailable, maxAnisotropy, usableMax, effective;
+      if (_this._status !== B.GpuDeviceStatus_0)
+        A.throwExpression(A.StateError$(string$.WebGl2));
+      t1 = _this.gl;
+      texture = A._asJSObjectQ(t1.createTexture());
+      if (texture == null)
+        throw A.wrapException(A.StateError$("WebGl2Device: gl.createTexture() returned null"));
+      t2 = init.G;
+      t3 = t2.WebGL2RenderingContext;
+      target = A._asInt(t3.TEXTURE_2D);
+      t1.bindTexture(target, texture);
+      t3 = t2.WebGL2RenderingContext;
+      A.callMethod(t1, "texStorage2D", [target, 1, A._asInt(t3.RGBA8), 1, 1], type$.void);
+      t1.texParameteri(target, A._asInt(t2.WebGL2RenderingContext.TEXTURE_MIN_FILTER), A.WebGl2DeviceResources__glFilter(_this, B.GpuTextureFilter_1));
+      t1.texParameteri(target, A._asInt(t2.WebGL2RenderingContext.TEXTURE_MAG_FILTER), A.WebGl2DeviceResources__glFilter(_this, B.GpuTextureFilter_1));
+      t1.texParameteri(target, A._asInt(t2.WebGL2RenderingContext.TEXTURE_WRAP_S), A.WebGl2DeviceResources__glWrap(_this, B.GpuTextureWrap_0));
+      t1.texParameteri(target, A._asInt(t2.WebGL2RenderingContext.TEXTURE_WRAP_T), A.WebGl2DeviceResources__glWrap(_this, B.GpuTextureWrap_0));
+      extensionAvailable = _this._supportedExtensions.contains$1(0, "EXT_texture_filter_anisotropic");
+      maxAnisotropy = extensionAvailable ? _this._paramDouble$1(34047) : 1;
+      if (!isFinite(1))
+        A.throwExpression(A.ArgumentError$value(1, "requested", "anisotropy must be finite and in [1, 16]"));
+      if (extensionAvailable && isFinite(maxAnisotropy) && maxAnisotropy >= 1)
+        usableMax = maxAnisotropy > 16 ? 16 : maxAnisotropy;
+      else
+        usableMax = 1;
+      effective = 1 < usableMax ? 1 : usableMax;
+      if (effective > 1)
+        t1.texParameterf(target, 34046, effective);
+      return new A._WebGpuObject(new A._WebGlTexture(texture, 1, 1, 1, false));
+    },
+    WebGl2DeviceResources_uploadTextureLayerImpl(_this, texture, layer, pixels) {
+      var tex, t1, t2, t3, expectedBytes, t4, target, t5, t6;
+      if (_this._status !== B.GpuDeviceStatus_0)
+        A.throwExpression(A.StateError$(string$.WebGl2));
+      tex = type$._WebGlTexture._as(texture.handle);
+      t1 = tex.layers;
+      if (layer >= t1)
+        throw A.wrapException(A.ArgumentError$("WebGl2Device.uploadTextureLayer: layer " + layer + " out of range for " + t1 + "-layer texture", null));
+      t2 = tex.width;
+      t3 = tex.height;
+      expectedBytes = t2 * t3 * 4;
+      t4 = pixels.length;
+      if (t4 !== expectedBytes)
+        throw A.wrapException(A.ArgumentError$("WebGl2Device.uploadTextureLayer: expected " + expectedBytes + " RGBA8 bytes for " + t2 + "x" + t3 + ", got " + t4, null));
+      t1 = t1 > 1;
+      t4 = init.G;
+      target = t1 ? A._asInt(t4.WebGL2RenderingContext.TEXTURE_2D_ARRAY) : A._asInt(t4.WebGL2RenderingContext.TEXTURE_2D);
+      t5 = _this.gl;
+      t5.bindTexture(target, tex.handle);
+      t6 = type$.void;
+      if (t1)
+        A.callMethod(t5, "texSubImage3D", [target, 0, 0, 0, layer, t2, t3, 1, A._asInt(t4.WebGL2RenderingContext.RGBA), A._asInt(t4.WebGL2RenderingContext.UNSIGNED_BYTE), pixels], t6);
+      else
+        A.callMethod(t5, "texSubImage2D", [target, 0, 0, 0, t2, t3, A._asInt(t4.WebGL2RenderingContext.RGBA), A._asInt(t4.WebGL2RenderingContext.UNSIGNED_BYTE), pixels], t6);
+    },
+    WebGl2DeviceResources_finalizeMipsImpl(_this, texture) {
+      if (_this._status !== B.GpuDeviceStatus_0)
+        A.throwExpression(A.StateError$(string$.WebGl2));
+      type$._WebGlTexture._as(texture.handle);
+      return;
+    },
+    WebGl2DeviceResources_deleteTextureImpl(_this, texture) {
+      _this.gl.deleteTexture(type$._WebGlTexture._as(texture.handle).handle);
+    },
+    WebGl2DeviceTargets_createTargetImpl(_this, descriptor) {
+      var t1, t2, fbo, t3, t4, depthOnly, hasGlow, colorTex, colorRb, glowTex, glowRb, t5, t6, depthRb, depthTex, _null = null,
+        _s30_ = "renderbufferStorageMultisample",
+        _s12_ = "texStorage2D",
+        _s20_ = "framebufferTexture2D";
+      if (_this._status !== B.GpuDeviceStatus_0)
+        A.throwExpression(A.StateError$(string$.WebGl2));
+      t1 = descriptor.width;
+      if (t1 <= 0 || descriptor.height <= 0)
+        throw A.wrapException(A.ArgumentError$("WebGl2Device.createTarget requires positive dimensions, got " + t1 + "x" + descriptor.height, _null));
+      t2 = _this.gl;
+      fbo = A._asJSObjectQ(t2.createFramebuffer());
+      if (fbo == null)
+        throw A.wrapException(A.StateError$("WebGl2Device: gl.createFramebuffer() returned null"));
+      t3 = init.G;
+      t2.bindFramebuffer(A._asInt(t3.WebGL2RenderingContext.FRAMEBUFFER), fbo);
+      t4 = descriptor.attachments;
+      depthOnly = t4 === B.GpuTargetAttachment_3;
+      if (depthOnly && !descriptor.hasDepth)
+        throw A.wrapException(A.ArgumentError$("WebGl2Device.createTarget: GpuTargetAttachment.depthOnly requires hasDepth: true \u2014 a depth-only target with no depth attachment has nothing to render into", _null));
+      hasGlow = t4 === B.GpuTargetAttachment_1 || t4 === B.GpuTargetAttachment_2;
+      colorTex = _null;
+      colorRb = _null;
+      glowTex = _null;
+      glowRb = _null;
+      if (depthOnly) {
+        t2.drawBuffers(A._setArrayType([A._asInt(t3.WebGL2RenderingContext.NONE)], type$.JSArray_double));
+        t2.readBuffer(A._asInt(t3.WebGL2RenderingContext.NONE));
+      } else {
+        t4 = descriptor.samples;
+        t5 = type$.void;
+        t6 = descriptor.height;
+        if (t4 > 1) {
+          colorRb = A._asJSObjectQ(t2.createRenderbuffer());
+          t2.bindRenderbuffer(A._asInt(t3.WebGL2RenderingContext.RENDERBUFFER), colorRb);
+          A.callMethod(t2, _s30_, [A._asInt(t3.WebGL2RenderingContext.RENDERBUFFER), t4, A._asInt(t3.WebGL2RenderingContext.RGBA8), t1, t6], t5);
+          t2.framebufferRenderbuffer(A._asInt(t3.WebGL2RenderingContext.FRAMEBUFFER), A._asInt(t3.WebGL2RenderingContext.COLOR_ATTACHMENT0), A._asInt(t3.WebGL2RenderingContext.RENDERBUFFER), colorRb);
+          if (hasGlow) {
+            glowRb = A._asJSObjectQ(t2.createRenderbuffer());
+            t2.bindRenderbuffer(A._asInt(t3.WebGL2RenderingContext.RENDERBUFFER), glowRb);
+            A.callMethod(t2, _s30_, [A._asInt(t3.WebGL2RenderingContext.RENDERBUFFER), t4, A._asInt(t3.WebGL2RenderingContext.RGBA8), t1, t6], t5);
+            t2.framebufferRenderbuffer(A._asInt(t3.WebGL2RenderingContext.FRAMEBUFFER), A._asInt(t3.WebGL2RenderingContext.COLOR_ATTACHMENT1), A._asInt(t3.WebGL2RenderingContext.RENDERBUFFER), glowRb);
+            t2.drawBuffers(A._setArrayType([A._asInt(t3.WebGL2RenderingContext.COLOR_ATTACHMENT0), A._asInt(t3.WebGL2RenderingContext.COLOR_ATTACHMENT1)], type$.JSArray_double));
+          }
+        } else {
+          colorTex = A._asJSObjectQ(t2.createTexture());
+          t2.bindTexture(A._asInt(t3.WebGL2RenderingContext.TEXTURE_2D), colorTex);
+          A.callMethod(t2, _s12_, [A._asInt(t3.WebGL2RenderingContext.TEXTURE_2D), 1, A._asInt(t3.WebGL2RenderingContext.RGBA8), t1, t6], t5);
+          t2.texParameteri(A._asInt(t3.WebGL2RenderingContext.TEXTURE_2D), A._asInt(t3.WebGL2RenderingContext.TEXTURE_MIN_FILTER), A._asInt(t3.WebGL2RenderingContext.LINEAR));
+          t2.texParameteri(A._asInt(t3.WebGL2RenderingContext.TEXTURE_2D), A._asInt(t3.WebGL2RenderingContext.TEXTURE_MAG_FILTER), A._asInt(t3.WebGL2RenderingContext.LINEAR));
+          A.callMethod(t2, _s20_, [A._asInt(t3.WebGL2RenderingContext.FRAMEBUFFER), A._asInt(t3.WebGL2RenderingContext.COLOR_ATTACHMENT0), A._asInt(t3.WebGL2RenderingContext.TEXTURE_2D), colorTex, 0], t5);
+          if (hasGlow) {
+            glowTex = A._asJSObjectQ(t2.createTexture());
+            t2.bindTexture(A._asInt(t3.WebGL2RenderingContext.TEXTURE_2D), glowTex);
+            A.callMethod(t2, _s12_, [A._asInt(t3.WebGL2RenderingContext.TEXTURE_2D), 1, A._asInt(t3.WebGL2RenderingContext.RGBA8), t1, t6], t5);
+            t2.texParameteri(A._asInt(t3.WebGL2RenderingContext.TEXTURE_2D), A._asInt(t3.WebGL2RenderingContext.TEXTURE_MIN_FILTER), A._asInt(t3.WebGL2RenderingContext.LINEAR));
+            t2.texParameteri(A._asInt(t3.WebGL2RenderingContext.TEXTURE_2D), A._asInt(t3.WebGL2RenderingContext.TEXTURE_MAG_FILTER), A._asInt(t3.WebGL2RenderingContext.LINEAR));
+            A.callMethod(t2, _s20_, [A._asInt(t3.WebGL2RenderingContext.FRAMEBUFFER), A._asInt(t3.WebGL2RenderingContext.COLOR_ATTACHMENT1), A._asInt(t3.WebGL2RenderingContext.TEXTURE_2D), glowTex, 0], t5);
+            t2.drawBuffers(A._setArrayType([A._asInt(t3.WebGL2RenderingContext.COLOR_ATTACHMENT0), A._asInt(t3.WebGL2RenderingContext.COLOR_ATTACHMENT1)], type$.JSArray_double));
+          }
+        }
+      }
+      depthRb = _null;
+      depthTex = _null;
+      if (descriptor.hasDepth) {
+        t4 = descriptor.samples;
+        t5 = type$.void;
+        t6 = descriptor.height;
+        if (t4 > 1) {
+          depthRb = A._asJSObjectQ(t2.createRenderbuffer());
+          t2.bindRenderbuffer(A._asInt(t3.WebGL2RenderingContext.RENDERBUFFER), depthRb);
+          A.callMethod(t2, _s30_, [A._asInt(t3.WebGL2RenderingContext.RENDERBUFFER), t4, A._asInt(t3.WebGL2RenderingContext.DEPTH_COMPONENT24), t1, t6], t5);
+          t2.framebufferRenderbuffer(A._asInt(t3.WebGL2RenderingContext.FRAMEBUFFER), A._asInt(t3.WebGL2RenderingContext.DEPTH_ATTACHMENT), A._asInt(t3.WebGL2RenderingContext.RENDERBUFFER), depthRb);
+        } else {
+          depthTex = A._asJSObjectQ(t2.createTexture());
+          t2.bindTexture(A._asInt(t3.WebGL2RenderingContext.TEXTURE_2D), depthTex);
+          A.callMethod(t2, _s12_, [A._asInt(t3.WebGL2RenderingContext.TEXTURE_2D), 1, A._asInt(t3.WebGL2RenderingContext.DEPTH_COMPONENT24), t1, t6], t5);
+          t2.texParameteri(A._asInt(t3.WebGL2RenderingContext.TEXTURE_2D), A._asInt(t3.WebGL2RenderingContext.TEXTURE_MIN_FILTER), A._asInt(t3.WebGL2RenderingContext.NEAREST));
+          t2.texParameteri(A._asInt(t3.WebGL2RenderingContext.TEXTURE_2D), A._asInt(t3.WebGL2RenderingContext.TEXTURE_MAG_FILTER), A._asInt(t3.WebGL2RenderingContext.NEAREST));
+          A.callMethod(t2, _s20_, [A._asInt(t3.WebGL2RenderingContext.FRAMEBUFFER), A._asInt(t3.WebGL2RenderingContext.DEPTH_ATTACHMENT), A._asInt(t3.WebGL2RenderingContext.TEXTURE_2D), depthTex, 0], t5);
+        }
+      }
+      t4 = A._asInt(t2.checkFramebufferStatus(A._asInt(t3.WebGL2RenderingContext.FRAMEBUFFER)));
+      t5 = A._asInt(t3.WebGL2RenderingContext.FRAMEBUFFER_COMPLETE);
+      t2.bindFramebuffer(A._asInt(t3.WebGL2RenderingContext.FRAMEBUFFER), null);
+      if (t4 !== t5) {
+        A.WebGl2DeviceTargets__deleteFramebufferParts(_this, fbo, colorTex, colorRb, depthRb, depthTex, glowTex, glowRb);
+        throw A.wrapException(A.StateError$("WebGl2Device.createTarget: framebuffer incomplete"));
+      }
+      return new A._WebGpuObject(new A._WebGlFramebuffer(fbo, colorTex, colorRb, depthRb, depthTex, glowTex, glowRb, t1, descriptor.height, descriptor.samples));
+    },
+    WebGl2DeviceTargets__deleteFramebufferParts(_this, fbo, colorTex, colorRb, depthRb, depthTex, glowTex, glowRb) {
+      var t1 = _this.gl;
+      t1.deleteFramebuffer(fbo);
+      if (colorTex != null)
+        t1.deleteTexture(colorTex);
+      if (colorRb != null)
+        t1.deleteRenderbuffer(colorRb);
+      if (depthRb != null)
+        t1.deleteRenderbuffer(depthRb);
+      if (depthTex != null)
+        t1.deleteTexture(depthTex);
+      if (glowTex != null)
+        t1.deleteTexture(glowTex);
+      if (glowRb != null)
+        t1.deleteRenderbuffer(glowRb);
+    },
+    WebGl2DeviceTargets_createVertexArrayImpl(_this) {
+      var vao;
+      if (_this._status !== B.GpuDeviceStatus_0)
+        A.throwExpression(A.StateError$(string$.WebGl2));
+      vao = A._asJSObjectQ(_this.gl.createVertexArray());
+      if (vao == null)
+        throw A.wrapException(A.StateError$("WebGl2Device: gl.createVertexArray() returned null"));
+      return new A._WebGpuObject(vao);
+    },
+    WebGl2DeviceTargets__compileStage(_this, type, source) {
+      var log,
+        _s22_ = "WebGL2RenderingContext",
+        _s13_ = "VERTEX_SHADER",
+        t1 = _this.gl,
+        shader = A._asJSObjectQ(t1.createShader(type));
+      if (shader == null)
+        throw A.wrapException(A.ShaderCompileException$(type === A.getProperty(A._getPropertyTrustType(A.staticInteropGlobalContext(), _s22_), _s13_, type$.int) ? B.ShaderCompileStage_0 : B.ShaderCompileStage_1, "gl.createShader() returned null"));
+      t1.shaderSource(shader, source);
+      t1.compileShader(shader);
+      if (!J.$eq$(A.dartify(t1.getShaderParameter(shader, A._asInt(init.G.WebGL2RenderingContext.COMPILE_STATUS))), true)) {
+        log = A._asStringQ(t1.getShaderInfoLog(shader));
+        if (log == null)
+          log = "(no info log)";
+        t1.deleteShader(shader);
+        throw A.wrapException(A.ShaderCompileException$(type === A.getProperty(A._getPropertyTrustType(A.staticInteropGlobalContext(), _s22_), _s13_, type$.int) ? B.ShaderCompileStage_0 : B.ShaderCompileStage_1, log));
+      }
+      return shader;
+    },
+    WebGl2DeviceTargets_compileProgramImpl(_this, fragmentSource, requiredAttributes, requiredUniforms, vertexSource) {
+      var vertexShader, fragmentShader, t1, exception, t2, program, log, _i, attr, uniform;
+      if (_this._status !== B.GpuDeviceStatus_0)
+        A.throwExpression(A.StateError$(string$.WebGl2));
+      t1 = init.G;
+      vertexShader = A.WebGl2DeviceTargets__compileStage(_this, A._asInt(t1.WebGL2RenderingContext.VERTEX_SHADER), vertexSource);
+      fragmentShader = null;
+      try {
+        fragmentShader = A.WebGl2DeviceTargets__compileStage(_this, A._asInt(t1.WebGL2RenderingContext.FRAGMENT_SHADER), fragmentSource);
+      } catch (exception) {
+        _this.gl.deleteShader(vertexShader);
+        throw exception;
+      }
+      t2 = _this.gl;
+      program = A._asJSObjectQ(t2.createProgram());
+      if (program == null) {
+        t2.deleteShader(vertexShader);
+        t2.deleteShader(fragmentShader);
+        throw A.wrapException(B.ShaderCompileException_MjR);
+      }
+      t2.attachShader(program, vertexShader);
+      t2.attachShader(program, fragmentShader);
+      t2.linkProgram(program);
+      if (!J.$eq$(A.dartify(t2.getProgramParameter(program, A._asInt(t1.WebGL2RenderingContext.LINK_STATUS))), true)) {
+        log = A._asStringQ(t2.getProgramInfoLog(program));
+        if (log == null)
+          log = "(no info log)";
+        t2.deleteProgram(program);
+        t2.deleteShader(vertexShader);
+        t2.deleteShader(fragmentShader);
+        throw A.wrapException(A.ShaderCompileException$(B.ShaderCompileStage_2, log));
+      }
+      for (t1 = requiredAttributes.length, _i = 0; _i < requiredAttributes.length; requiredAttributes.length === t1 || (0, A.throwConcurrentModificationError)(requiredAttributes), ++_i) {
+        attr = requiredAttributes[_i];
+        if (A._asInt(t2.getAttribLocation(program, attr)) < 0) {
+          t2.deleteProgram(program);
+          t2.deleteShader(vertexShader);
+          t2.deleteShader(fragmentShader);
+          throw A.wrapException(A.ShaderCompileException$(B.ShaderCompileStage_3, "missing required attribute: " + attr));
+        }
+      }
+      for (t1 = requiredUniforms.length, _i = 0; _i < t1; ++_i) {
+        uniform = requiredUniforms[_i];
+        if (A._asJSObjectQ(t2.getUniformLocation(program, uniform)) == null) {
+          t2.deleteProgram(program);
+          t2.deleteShader(vertexShader);
+          t2.deleteShader(fragmentShader);
+          throw A.wrapException(A.ShaderCompileException$(B.ShaderCompileStage_3, "missing required uniform: " + uniform));
+        }
+      }
+      t2.deleteShader(vertexShader);
+      t2.deleteShader(fragmentShader);
+      return new A._WebGpuObject(program);
+    },
+    _WebGpuObject: function _WebGpuObject(t0) {
+      this.handle = t0;
+    },
+    _WebGlTexture: function _WebGlTexture(t0, t1, t2, t3, t4) {
+      var _ = this;
+      _.handle = t0;
+      _.width = t1;
+      _.height = t2;
+      _.layers = t3;
+      _.hasMips = t4;
+    },
+    _WebGlFramebuffer: function _WebGlFramebuffer(t0, t1, t2, t3, t4, t5, t6, t7, t8, t9) {
+      var _ = this;
+      _.fbo = t0;
+      _.colorTex = t1;
+      _.colorRb = t2;
+      _.depthRb = t3;
+      _.depthTex = t4;
+      _.glowTex = t5;
+      _.glowRb = t6;
+      _.width = t7;
+      _.height = t8;
+      _.samples = t9;
+    },
+    _WebGlTimerQuery: function _WebGlTimerQuery(t0) {
+      this.query = t0;
+      this.ended = false;
+    },
+    WebGl2Device: function WebGl2Device(t0, t1, t2, t3) {
+      var _ = this;
+      _.gl = t0;
+      _._status = t1;
+      _._boundProgram = _._restoredListener = _._lostListener = null;
+      _._stateCache = t2;
+      _._supportedExtensions = t3;
+      _._timerExtensionAvailable = false;
+    },
+    WebGl2Device_closure: function WebGl2Device_closure(t0) {
+      this.$this = t0;
+    },
+    WebGl2Device_closure0: function WebGl2Device_closure0(t0) {
+      this.$this = t0;
+    },
+    _WebGlTimerSupport: function _WebGlTimerSupport() {
+    },
+    _WebGl2Device_Object__WebGlTimerSupport: function _WebGl2Device_Object__WebGlTimerSupport() {
+    },
+    WebGl2DeviceLease: function WebGl2DeviceLease(t0) {
+      this.device = t0;
+    },
+    WebGl2RendererFactory: function WebGl2RendererFactory() {
+    },
+    main() {
+      return A.main$body();
+    },
+    main$body() {
+      var $async$goto = 0,
+        $async$completer = A._makeAsyncAwaitCompleter(type$.void),
+        $async$returnValue, $async$handler = 2, $async$errorStack = [], renderer, profile, configuration, surface, profileFallbackReason, error, lease, requestedProfile, t2, t3, exception, world, projection, camera, _box_0, t1, canvas, $async$exception;
+      var $async$main = A._wrapJsFunctionForAsync(function($async$errorCode, $async$result) {
+        if ($async$errorCode === 1) {
+          $async$errorStack.push($async$result);
+          $async$goto = $async$handler;
+        }
+        for (;;)
+          switch ($async$goto) {
+            case 0:
+              // Function start
+              _box_0 = {};
+              t1 = init.G;
+              canvas = A._asJSObjectQ(A._asJSObject(t1.document).querySelector("#minimal-canvas"));
+              if (!type$.JSObject._is(canvas)) {
+                // goto return
+                $async$goto = 1;
+                break;
+              }
+              canvas.width = A._asInt(canvas.clientWidth);
+              canvas.height = A._asInt(canvas.clientHeight);
+              lease = B.C_WebGl2RendererFactory.createLease$1(canvas);
+              renderer = lease == null ? null : new A.SceneRendererImpl(lease.device, new A.ConfigurationCoordinator(new A.ConfigurationStateMachine(), new A.ResourcePlanAssembler()), new A.FrameQueue(A._setArrayType([], type$.JSArray_RetainedItemDescriptor), B.FrameQueueState_0), A._setArrayType([], type$.JSArray_RenderWorldImpl), B.RendererState_0, A._setArrayType([], type$.JSArray__PendingGpuTiming), null);
+              if (renderer == null) {
+                canvas.setAttribute("data-renderer-state", "renderer-unavailable");
+                canvas.setAttribute("data-renderer-backend", "pixeldart");
+                canvas.setAttribute("data-renderer-fallback", "false");
+                canvas.setAttribute("data-renderer-failure-reason", "webgl2 unavailable");
+                // goto return
+                $async$goto = 1;
+                break;
+              }
+              requestedProfile = A.Uri_base().get$queryParameters().$index(0, "profile");
+              if (requestedProfile == null)
+                requestedProfile = "safe";
+              $label0$0: {
+                if ("standard" === requestedProfile) {
+                  t2 = B.QualityProfile_QualityProfileKind_1_Set_zc2Dw;
+                  break $label0$0;
+                }
+                if ("high" === requestedProfile) {
+                  t2 = B.QualityProfile_QualityProfileKind_2_Set_Ma1c8;
+                  break $label0$0;
+                }
+                t2 = B.QualityProfile_QualityProfileKind_0_Set_empty;
+                break $label0$0;
+              }
+              profile = t2;
+              if (profile.kind === B.QualityProfileKind_0)
+                t2 = 1;
+              else
+                t2 = profile.kind === B.QualityProfileKind_2 ? 2 : 1;
+              t3 = profile === B.QualityProfile_QualityProfileKind_0_Set_empty ? 0 : 1;
+              configuration = new A.RendererConfiguration(profile, 384, 216, t2, t3);
+              surface = new A.SurfaceMetrics(A._asInt(canvas.width), A._asInt(canvas.height), A._asInt(canvas.width), A._asInt(canvas.height));
+              profileFallbackReason = null;
+              $async$handler = 4;
+              $async$goto = 7;
+              return A._asyncAwait(renderer.initialize$2(configuration, surface), $async$main);
+            case 7:
+              // returning from await.
+              $async$handler = 2;
+              // goto after finally
+              $async$goto = 6;
+              break;
+            case 4:
+              // catch
+              $async$handler = 3;
+              $async$exception = $async$errorStack.pop();
+              error = A.unwrapException($async$exception);
+              if (profile === B.QualityProfile_QualityProfileKind_0_Set_empty)
+                throw $async$exception;
+              profileFallbackReason = profile.kind._name + " profile failed: " + A.S(error);
+              $async$goto = 8;
+              return A._asyncAwait(renderer.initialize$2(B.RendererConfiguration_7v0, surface), $async$main);
+            case 8:
+              // returning from await.
+              // goto after finally
+              $async$goto = 6;
+              break;
+            case 3:
+              // uncaught
+              // goto rethrow
+              $async$goto = 2;
+              break;
+            case 6:
+              // after finally
+              t2 = renderer;
+              t2._ensureReady$0();
+              world = A.RenderWorldImpl$(t2._resources._meshes._registry);
+              B.JSArray_methods.add$1(t2._worlds, world);
+              projection = A.Mat4_Mat4$perspective(A._asInt(canvas.width) / A._asInt(canvas.height), 100, 1, 0.1);
+              t2 = new Float32Array(16);
+              t2[0] = 1;
+              t2[5] = 1;
+              t2[10] = 1;
+              t2[15] = 1;
+              camera = new A.CameraView(new A.Mat4(t2), projection, projection, B.Vec3_0_0_0, B.Vec3_0_0_1, 0.1, 100, A._asInt(canvas.width) / A._asInt(canvas.height));
+              renderer.beginFrame$2(world, new A.FrameInput(camera, B.C_FrameEnvironment, B.C_PostProcessState, 0, 0));
+              renderer.endFrame$0();
+              canvas.setAttribute("data-renderer-state", renderer._scene_renderer_impl$_state._name);
+              canvas.setAttribute("data-renderer-first-frame", "true");
+              canvas.setAttribute("data-renderer-backend", "pixeldart");
+              canvas.setAttribute("data-renderer-requested-profile", requestedProfile);
+              t2 = renderer._configuration;
+              canvas.setAttribute("data-renderer-effective-profile", (t2 == null ? A.throwExpression(A.StateError$("renderer is not initialized")) : t2).profile.kind._name);
+              t2 = profileFallbackReason;
+              if (t2 == null)
+                t2 = "false";
+              canvas.setAttribute("data-renderer-profile-fallback", t2);
+              canvas.setAttribute("data-renderer-frames", "1");
+              canvas.setAttribute("data-renderer-surface", "" + A._asInt(canvas.width) + "x" + A._asInt(canvas.height));
+              _box_0.frameIndex = 1;
+              _box_0.historyEpoch = 0;
+              _box_0.contextRestoredPending = false;
+              t2 = new A.main_resize(canvas, renderer);
+              A._asJSObject(t1.window).addEventListener("resize", A._functionToJS1(new A.main_closure(t2)));
+              canvas.addEventListener("webglcontextrestored", A._functionToJS1(new A.main_closure0(_box_0)));
+              A._asInt(A._asJSObject(t1.window).requestAnimationFrame(A._functionToJS1(new A.main_tick(_box_0, t2, renderer, camera, world, canvas))));
+            case 1:
+              // return
+              return A._asyncReturn($async$returnValue, $async$completer);
+            case 2:
+              // rethrow
+              return A._asyncRethrow($async$errorStack.at(-1), $async$completer);
+          }
+      });
+      return A._asyncStartSync($async$main, $async$completer);
+    },
+    main_resize: function main_resize(t0, t1) {
+      this.canvas = t0;
+      this.renderer = t1;
+    },
+    main_closure: function main_closure(t0) {
+      this.resize = t0;
+    },
+    main_closure0: function main_closure0(t0) {
+      this._box_0 = t0;
+    },
+    main_tick: function main_tick(t0, t1, t2, t3, t4, t5) {
+      var _ = this;
+      _._box_0 = t0;
+      _.resize = t1;
+      _.renderer = t2;
+      _.camera = t3;
+      _.world = t4;
+      _.canvas = t5;
+    },
+    unmangleGlobalNameIfPreservedAnyways($name) {
+      return init.mangledGlobalNames[$name];
+    },
+    throwLateFieldNI(fieldName) {
+      throw A.initializeExceptionWrapper(A.LateError$fieldNI(fieldName), new Error());
+    },
+    throwLateFieldADI(fieldName) {
+      throw A.initializeExceptionWrapper(A.LateError$fieldADI(fieldName), new Error());
+    },
+    setInstanceTransformUniforms(encoder, batch, includeNormalMatrices) {
+      var models, normals, i, model, t3, t4,
+        t1 = batch.members,
+        t2 = t1.length;
+      if (t2 > 16)
+        throw A.wrapException(A.ArgumentError$value(batch.get$instanceCount(), "batch.instanceCount", "exceeds the WebGL2-safe instance uniform bound of 16"));
+      t2 *= 16;
+      models = new Float32Array(t2);
+      if (includeNormalMatrices)
+        normals = new Float32Array(t2);
+      else
+        normals = null;
+      for (t2 = normals != null, i = 0; i < t1.length; ++i) {
+        model = t1[i].get$descriptor().get$transform().toMat4$0();
+        t3 = i * 16;
+        t4 = t3 + 16;
+        B.NativeFloat32List_methods.setRange$3(models, t3, t4, model.get$m());
+        if (t2)
+          B.NativeFloat32List_methods.setRange$3(normals, t3, t4, model.normalMatrix$0().get$m());
+      }
+      t1 = encoder.device;
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uInstanceModels", new A.UniformValue(B.UniformType_5, models));
+      if (t2)
+        A.WebGl2DeviceDraw_setUniformImpl(t1, "uInstanceNormalMatrices", new A.UniformValue(B.UniformType_5, normals));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uUseInstances", B.UniformValue_UniformType_0_1);
+    }
+  },
+  B = {};
+  var holders = [A, J, B];
+  var $ = {};
+  A.JS_CONST.prototype = {};
+  J.Interceptor.prototype = {
+    $eq(receiver, other) {
+      return receiver === other;
+    },
+    get$hashCode(receiver) {
+      return A.Primitives_objectHashCode(receiver);
+    },
+    toString$0(receiver) {
+      return "Instance of '" + A.Primitives_objectTypeName(receiver) + "'";
+    },
+    get$runtimeType(receiver) {
+      return A.createRuntimeType(A._instanceTypeFromConstructor(this));
+    }
+  };
+  J.JSBool.prototype = {
+    toString$0(receiver) {
+      return String(receiver);
+    },
+    get$hashCode(receiver) {
+      return receiver ? 519018 : 218159;
+    },
+    get$runtimeType(receiver) {
+      return A.createRuntimeType(type$.bool);
+    },
+    $isTrustedGetRuntimeType: 1,
+    $isbool: 1
+  };
+  J.JSNull.prototype = {
+    $eq(receiver, other) {
+      return null == other;
+    },
+    toString$0(receiver) {
+      return "null";
+    },
+    get$hashCode(receiver) {
+      return 0;
+    },
+    $isTrustedGetRuntimeType: 1
+  };
+  J.JavaScriptObject.prototype = {$isJSObject: 1};
+  J.LegacyJavaScriptObject.prototype = {
+    get$hashCode(receiver) {
+      return 0;
+    },
+    get$runtimeType(receiver) {
+      return B.Type_JSObject_ttY;
+    },
+    toString$0(receiver) {
+      return String(receiver);
+    }
+  };
+  J.PlainJavaScriptObject.prototype = {};
+  J.UnknownJavaScriptObject.prototype = {};
+  J.JavaScriptFunction.prototype = {
+    toString$0(receiver) {
+      var dartClosure = receiver[$.$get$DART_CLOSURE_PROPERTY_NAME()];
+      if (dartClosure == null)
+        dartClosure = receiver[$.$get$DART_CLOSURE_DART_JSINTEROP_PROPERTY_NAME()];
+      if (dartClosure == null)
+        return this.super$LegacyJavaScriptObject$toString(receiver);
+      return "JavaScript function for " + J.toString$0$(dartClosure);
+    },
+    $isFunction: 1
+  };
+  J.JavaScriptBigInt.prototype = {
+    get$hashCode(receiver) {
+      return 0;
+    },
+    toString$0(receiver) {
+      return String(receiver);
+    }
+  };
+  J.JavaScriptSymbol.prototype = {
+    get$hashCode(receiver) {
+      return 0;
+    },
+    toString$0(receiver) {
+      return String(receiver);
+    }
+  };
+  J.JSArray.prototype = {
+    add$1(receiver, value) {
+      A._arrayInstanceType(receiver)._precomputed1._as(value);
+      receiver.$flags & 1 && A.throwUnsupportedOperation(receiver, 29);
+      receiver.push(value);
+    },
+    addAll$1(receiver, collection) {
+      var t1;
+      A._arrayInstanceType(receiver)._eval$1("Iterable<1>")._as(collection);
+      receiver.$flags & 1 && A.throwUnsupportedOperation(receiver, "addAll", 2);
+      if (Array.isArray(collection)) {
+        this._addAllFromArray$1(receiver, collection);
+        return;
+      }
+      for (t1 = J.get$iterator$ax(collection); t1.moveNext$0();)
+        receiver.push(t1.get$current());
+    },
+    _addAllFromArray$1(receiver, array) {
+      var len, i;
+      type$.JSArray_dynamic._as(array);
+      len = array.length;
+      if (len === 0)
+        return;
+      if (receiver === array)
+        throw A.wrapException(A.ConcurrentModificationError$(receiver));
+      for (i = 0; i < len; ++i)
+        receiver.push(array[i]);
+    },
+    clear$0(receiver) {
+      receiver.$flags & 1 && A.throwUnsupportedOperation(receiver, "clear", "clear");
+      receiver.length = 0;
+    },
+    join$1(receiver, separator) {
+      var i,
+        list = A.List_List$filled(receiver.length, "", false, type$.String);
+      for (i = 0; i < receiver.length; ++i)
+        this.$indexSet(list, i, A.S(receiver[i]));
+      return list.join(separator);
+    },
+    fold$1$2(receiver, initialValue, combine, $T) {
+      var $length, value, i;
+      $T._as(initialValue);
+      A._arrayInstanceType(receiver)._bind$1($T)._eval$1("1(1,2)")._as(combine);
+      $length = receiver.length;
+      for (value = initialValue, i = 0; i < $length; ++i) {
+        value = combine.call$2(value, receiver[i]);
+        if (receiver.length !== $length)
+          throw A.wrapException(A.ConcurrentModificationError$(receiver));
+      }
+      return value;
+    },
+    elementAt$1(receiver, index) {
+      if (!(index >= 0 && index < receiver.length))
+        return A.ioore(receiver, index);
+      return receiver[index];
+    },
+    get$last(receiver) {
+      var t1 = receiver.length;
+      if (t1 > 0)
+        return receiver[t1 - 1];
+      throw A.wrapException(A.IterableElementError_noElement());
+    },
+    get$single(receiver) {
+      var t1 = receiver.length;
+      if (t1 === 1) {
+        if (0 >= t1)
+          return A.ioore(receiver, 0);
+        return receiver[0];
+      }
+      if (t1 === 0)
+        throw A.wrapException(A.IterableElementError_noElement());
+      throw A.wrapException(A.IterableElementError_tooMany());
+    },
+    sort$1(receiver, compare) {
+      var len, a, b, undefineds, i,
+        t1 = A._arrayInstanceType(receiver);
+      t1._eval$1("int(1,1)?")._as(compare);
+      receiver.$flags & 2 && A.throwUnsupportedOperation(receiver, "sort");
+      len = receiver.length;
+      if (len < 2)
+        return;
+      if (compare == null)
+        compare = J._interceptors_JSArray__compareAny$closure();
+      if (len === 2) {
+        a = receiver[0];
+        b = receiver[1];
+        t1 = compare.call$2(a, b);
+        if (typeof t1 !== "number")
+          return t1.$gt();
+        if (t1 > 0) {
+          receiver[0] = b;
+          receiver[1] = a;
+        }
+        return;
+      }
+      undefineds = 0;
+      if (t1._precomputed1._is(null))
+        for (i = 0; i < receiver.length; ++i)
+          if (receiver[i] === void 0) {
+            receiver[i] = null;
+            ++undefineds;
+          }
+      receiver.sort(A.convertDartClosureToJS(compare, 2));
+      if (undefineds > 0)
+        this._replaceSomeNullsWithUndefined$1(receiver, undefineds);
+    },
+    sort$0(receiver) {
+      return this.sort$1(receiver, null);
+    },
+    _replaceSomeNullsWithUndefined$1(receiver, count) {
+      var i0,
+        i = receiver.length;
+      for (; i0 = i - 1, i > 0; i = i0)
+        if (receiver[i0] === null) {
+          receiver[i0] = void 0;
+          --count;
+          if (count === 0)
+            break;
+        }
+    },
+    indexOf$1(receiver, element) {
+      var i,
+        $length = receiver.length;
+      if (0 >= $length)
+        return -1;
+      for (i = 0; i < $length; ++i) {
+        if (!(i < receiver.length))
+          return A.ioore(receiver, i);
+        if (J.$eq$(receiver[i], element))
+          return i;
+      }
+      return -1;
+    },
+    contains$1(receiver, other) {
+      var i;
+      for (i = 0; i < receiver.length; ++i)
+        if (J.$eq$(receiver[i], other))
+          return true;
+      return false;
+    },
+    toString$0(receiver) {
+      return A.Iterable_iterableToFullString(receiver, "[", "]");
+    },
+    get$iterator(receiver) {
+      return new J.ArrayIterator(receiver, receiver.length, A._arrayInstanceType(receiver)._eval$1("ArrayIterator<1>"));
+    },
+    get$hashCode(receiver) {
+      return A.Primitives_objectHashCode(receiver);
+    },
+    get$length(receiver) {
+      return receiver.length;
+    },
+    $index(receiver, index) {
+      if (!(index >= 0 && index < receiver.length))
+        throw A.wrapException(A.diagnoseIndexError(receiver, index));
+      return receiver[index];
+    },
+    $indexSet(receiver, index, value) {
+      A._arrayInstanceType(receiver)._precomputed1._as(value);
+      receiver.$flags & 2 && A.throwUnsupportedOperation(receiver);
+      if (!(index >= 0 && index < receiver.length))
+        throw A.wrapException(A.diagnoseIndexError(receiver, index));
+      receiver[index] = value;
+    },
+    indexWhere$1(receiver, test) {
+      var i;
+      A._arrayInstanceType(receiver)._eval$1("bool(1)")._as(test);
+      if (0 >= receiver.length)
+        return -1;
+      for (i = 0; i < receiver.length; ++i)
+        if (test.call$1(receiver[i]))
+          return i;
+      return -1;
+    },
+    get$runtimeType(receiver) {
+      return A.createRuntimeType(A._arrayInstanceType(receiver));
+    },
+    $isEfficientLengthIterable: 1,
+    $isIterable: 1,
+    $isList: 1
+  };
+  J.JSArraySafeToStringHook.prototype = {
+    tryFormat$1(array) {
+      var flags, info, base;
+      if (!Array.isArray(array))
+        return null;
+      flags = array.$flags | 0;
+      if ((flags & 4) !== 0)
+        info = "const, ";
+      else if ((flags & 2) !== 0)
+        info = "unmodifiable, ";
+      else
+        info = (flags & 1) !== 0 ? "fixed, " : "";
+      base = "Instance of '" + A.Primitives_objectTypeName(array) + "'";
+      if (info === "")
+        return base;
+      return base + " (" + info + "length: " + array.length + ")";
+    }
+  };
+  J.JSUnmodifiableArray.prototype = {};
+  J.ArrayIterator.prototype = {
+    get$current() {
+      var t1 = this._current;
+      return t1 == null ? this.$ti._precomputed1._as(t1) : t1;
+    },
+    moveNext$0() {
+      var t2, _this = this,
+        t1 = _this._iterable,
+        $length = t1.length;
+      if (_this._length !== $length) {
+        t1 = A.throwConcurrentModificationError(t1);
+        throw A.wrapException(t1);
+      }
+      t2 = _this._index;
+      if (t2 >= $length) {
+        _this._current = null;
+        return false;
+      }
+      _this._current = t1[t2];
+      _this._index = t2 + 1;
+      return true;
+    },
+    $isIterator: 1
+  };
+  J.JSNumber.prototype = {
+    compareTo$1(receiver, b) {
+      var bIsNegative;
+      A._asNum(b);
+      if (receiver < b)
+        return -1;
+      else if (receiver > b)
+        return 1;
+      else if (receiver === b) {
+        if (receiver === 0) {
+          bIsNegative = this.get$isNegative(b);
+          if (this.get$isNegative(receiver) === bIsNegative)
+            return 0;
+          if (this.get$isNegative(receiver))
+            return -1;
+          return 1;
+        }
+        return 0;
+      } else if (isNaN(receiver)) {
+        if (isNaN(b))
+          return 0;
+        return 1;
+      } else
+        return -1;
+    },
+    get$isNegative(receiver) {
+      return receiver === 0 ? 1 / receiver < 0 : receiver < 0;
+    },
+    toInt$0(receiver) {
+      var t1;
+      if (receiver >= -2147483648 && receiver <= 2147483647)
+        return receiver | 0;
+      if (isFinite(receiver)) {
+        t1 = receiver < 0 ? Math.ceil(receiver) : Math.floor(receiver);
+        return t1 + 0;
+      }
+      throw A.wrapException(A.UnsupportedError$("" + receiver + ".toInt()"));
+    },
+    clamp$2(receiver, lowerLimit, upperLimit) {
+      if (this.compareTo$1(lowerLimit, upperLimit) > 0)
+        throw A.wrapException(A.argumentErrorValue(lowerLimit));
+      if (this.compareTo$1(receiver, lowerLimit) < 0)
+        return lowerLimit;
+      if (this.compareTo$1(receiver, upperLimit) > 0)
+        return upperLimit;
+      return receiver;
+    },
+    toString$0(receiver) {
+      if (receiver === 0 && 1 / receiver < 0)
+        return "-0.0";
+      else
+        return "" + receiver;
+    },
+    get$hashCode(receiver) {
+      var absolute, floorLog2, factor, scaled,
+        intValue = receiver | 0;
+      if (receiver === intValue)
+        return intValue & 536870911;
+      absolute = Math.abs(receiver);
+      floorLog2 = Math.log(absolute) / 0.6931471805599453 | 0;
+      factor = Math.pow(2, floorLog2);
+      scaled = absolute < 1 ? absolute / factor : factor / absolute;
+      return ((scaled * 9007199254740992 | 0) + (scaled * 3542243181176521 | 0)) * 599197 + floorLog2 * 1259 & 536870911;
+    },
+    $add(receiver, other) {
+      return receiver + other;
+    },
+    $mod(receiver, other) {
+      var result = receiver % other;
+      if (result === 0)
+        return 0;
+      if (result > 0)
+        return result;
+      return result + other;
+    },
+    _tdivFast$1(receiver, other) {
+      return (receiver | 0) === receiver ? receiver / other | 0 : this._tdivSlow$1(receiver, other);
+    },
+    _tdivSlow$1(receiver, other) {
+      var quotient = receiver / other;
+      if (quotient >= -2147483648 && quotient <= 2147483647)
+        return quotient | 0;
+      if (quotient > 0) {
+        if (quotient !== 1 / 0)
+          return Math.floor(quotient);
+      } else if (quotient > -1 / 0)
+        return Math.ceil(quotient);
+      throw A.wrapException(A.UnsupportedError$("Result of truncating division is " + A.S(quotient) + ": " + A.S(receiver) + " ~/ " + other));
+    },
+    _shrOtherPositive$1(receiver, other) {
+      var t1;
+      if (receiver > 0)
+        t1 = this._shrBothPositive$1(receiver, other);
+      else {
+        t1 = other > 31 ? 31 : other;
+        t1 = receiver >> t1 >>> 0;
+      }
+      return t1;
+    },
+    _shrReceiverPositive$1(receiver, other) {
+      if (0 > other)
+        throw A.wrapException(A.argumentErrorValue(other));
+      return this._shrBothPositive$1(receiver, other);
+    },
+    _shrBothPositive$1(receiver, other) {
+      return other > 31 ? 0 : receiver >>> other;
+    },
+    $lt(receiver, other) {
+      return receiver < other;
+    },
+    get$runtimeType(receiver) {
+      return A.createRuntimeType(type$.num);
+    },
+    $isComparable: 1,
+    $isdouble: 1,
+    $isnum: 1
+  };
+  J.JSInt.prototype = {
+    get$runtimeType(receiver) {
+      return A.createRuntimeType(type$.int);
+    },
+    $isTrustedGetRuntimeType: 1,
+    $isint: 1
+  };
+  J.JSNumNotInt.prototype = {
+    get$runtimeType(receiver) {
+      return A.createRuntimeType(type$.double);
+    },
+    $isTrustedGetRuntimeType: 1
+  };
+  J.JSString.prototype = {
+    replaceRange$3(receiver, start, end, replacement) {
+      var e = A.RangeError_checkValidRange(start, end, receiver.length);
+      return receiver.substring(0, start) + replacement + receiver.substring(e);
+    },
+    startsWith$2(receiver, pattern, index) {
+      var endIndex;
+      if (index < 0 || index > receiver.length)
+        throw A.wrapException(A.RangeError$range(index, 0, receiver.length, null, null));
+      endIndex = index + pattern.length;
+      if (endIndex > receiver.length)
+        return false;
+      return pattern === receiver.substring(index, endIndex);
+    },
+    startsWith$1(receiver, pattern) {
+      return this.startsWith$2(receiver, pattern, 0);
+    },
+    substring$2(receiver, start, end) {
+      return receiver.substring(start, A.RangeError_checkValidRange(start, end, receiver.length));
+    },
+    substring$1(receiver, start) {
+      return this.substring$2(receiver, start, null);
+    },
+    $mul(receiver, times) {
+      var s, result;
+      if (0 >= times)
+        return "";
+      if (times === 1 || receiver.length === 0)
+        return receiver;
+      if (times !== times >>> 0)
+        throw A.wrapException(B.C_OutOfMemoryError);
+      for (s = receiver, result = "";;) {
+        if ((times & 1) === 1)
+          result = s + result;
+        times = times >>> 1;
+        if (times === 0)
+          break;
+        s += s;
+      }
+      return result;
+    },
+    indexOf$2(receiver, pattern, start) {
+      var t1;
+      if (start < 0 || start > receiver.length)
+        throw A.wrapException(A.RangeError$range(start, 0, receiver.length, null, null));
+      t1 = receiver.indexOf(pattern, start);
+      return t1;
+    },
+    indexOf$1(receiver, pattern) {
+      return this.indexOf$2(receiver, pattern, 0);
+    },
+    contains$1(receiver, other) {
+      return A.stringContainsUnchecked(receiver, other, 0);
+    },
+    compareTo$1(receiver, other) {
+      var t1;
+      A._asString(other);
+      if (receiver === other)
+        t1 = 0;
+      else
+        t1 = receiver < other ? -1 : 1;
+      return t1;
+    },
+    toString$0(receiver) {
+      return receiver;
+    },
+    get$hashCode(receiver) {
+      var t1, hash, i;
+      for (t1 = receiver.length, hash = 0, i = 0; i < t1; ++i) {
+        hash = hash + receiver.charCodeAt(i) & 536870911;
+        hash = hash + ((hash & 524287) << 10) & 536870911;
+        hash ^= hash >> 6;
+      }
+      hash = hash + ((hash & 67108863) << 3) & 536870911;
+      hash ^= hash >> 11;
+      return hash + ((hash & 16383) << 15) & 536870911;
+    },
+    get$runtimeType(receiver) {
+      return A.createRuntimeType(type$.String);
+    },
+    get$length(receiver) {
+      return receiver.length;
+    },
+    $isTrustedGetRuntimeType: 1,
+    $isComparable: 1,
+    $isPattern: 1,
+    $isString: 1
+  };
+  A._CastIterableBase.prototype = {
+    get$iterator(_) {
+      return new A.CastIterator(J.get$iterator$ax(this.get$_source()), A._instanceType(this)._eval$1("CastIterator<1,2>"));
+    },
+    get$length(_) {
+      return J.get$length$asx(this.get$_source());
+    },
+    elementAt$1(_, index) {
+      return A._instanceType(this)._rest[1]._as(J.elementAt$1$ax(this.get$_source(), index));
+    },
+    toString$0(_) {
+      return J.toString$0$(this.get$_source());
+    }
+  };
+  A.CastIterator.prototype = {
+    moveNext$0() {
+      return this._source.moveNext$0();
+    },
+    get$current() {
+      return this.$ti._rest[1]._as(this._source.get$current());
+    },
+    $isIterator: 1
+  };
+  A._CastListBase.prototype = {
+    $index(_, index) {
+      return this.$ti._rest[1]._as(J.$index$asx(this._source, index));
+    },
+    $indexSet(_, index, value) {
+      var t1 = this.$ti;
+      J.$indexSet$ax(this._source, index, t1._precomputed1._as(t1._rest[1]._as(value)));
+    },
+    $isEfficientLengthIterable: 1,
+    $isList: 1
+  };
+  A.CastList.prototype = {
+    get$_source() {
+      return this._source;
+    }
+  };
+  A.LateError.prototype = {
+    toString$0(_) {
+      return "LateInitializationError: " + this.__internal$_message;
+    }
+  };
+  A.CodeUnits.prototype = {
+    get$length(_) {
+      return this._string.length;
+    },
+    $index(_, i) {
+      var t1 = this._string;
+      if (!(i >= 0 && i < t1.length))
+        return A.ioore(t1, i);
+      return t1.charCodeAt(i);
+    }
+  };
+  A.SentinelValue.prototype = {};
+  A.EfficientLengthIterable.prototype = {};
+  A.ListIterable.prototype = {
+    get$iterator(_) {
+      var _this = this;
+      return new A.ListIterator(_this, _this.get$length(_this), A._instanceType(_this)._eval$1("ListIterator<ListIterable.E>"));
+    },
+    toSet$0(_) {
+      var i, _this = this,
+        result = A.LinkedHashSet_LinkedHashSet(A._instanceType(_this)._eval$1("ListIterable.E"));
+      for (i = 0; i < _this.get$length(_this); ++i)
+        result.add$1(0, _this.elementAt$1(0, i));
+      return result;
+    }
+  };
+  A.SubListIterable.prototype = {
+    get$_endIndex() {
+      var $length = J.get$length$asx(this.__internal$_iterable),
+        endOrLength = this._endOrLength;
+      if (endOrLength == null || endOrLength > $length)
+        return $length;
+      return endOrLength;
+    },
+    get$_startIndex() {
+      var $length = J.get$length$asx(this.__internal$_iterable),
+        t1 = this._start;
+      if (t1 > $length)
+        return $length;
+      return t1;
+    },
+    get$length(_) {
+      var endOrLength,
+        $length = J.get$length$asx(this.__internal$_iterable),
+        t1 = this._start;
+      if (t1 >= $length)
+        return 0;
+      endOrLength = this._endOrLength;
+      if (endOrLength == null || endOrLength >= $length)
+        return $length - t1;
+      return endOrLength - t1;
+    },
+    elementAt$1(_, index) {
+      var _this = this,
+        realIndex = _this.get$_startIndex() + index;
+      if (index < 0 || realIndex >= _this.get$_endIndex())
+        throw A.wrapException(A.IndexError$withLength(index, _this.get$length(0), _this, "index"));
+      return J.elementAt$1$ax(_this.__internal$_iterable, realIndex);
+    },
+    toList$1$growable(_, growable) {
+      var $length, result, i, _this = this,
+        start = _this._start,
+        t1 = _this.__internal$_iterable,
+        t2 = J.getInterceptor$asx(t1),
+        end = t2.get$length(t1),
+        endOrLength = _this._endOrLength;
+      if (endOrLength != null && endOrLength < end)
+        end = endOrLength;
+      $length = end - start;
+      if ($length <= 0) {
+        t1 = J.JSArray_JSArray$fixed(0, _this.$ti._precomputed1);
+        return t1;
+      }
+      result = A.List_List$filled($length, t2.elementAt$1(t1, start), false, _this.$ti._precomputed1);
+      for (i = 1; i < $length; ++i) {
+        B.JSArray_methods.$indexSet(result, i, t2.elementAt$1(t1, start + i));
+        if (t2.get$length(t1) < end)
+          throw A.wrapException(A.ConcurrentModificationError$(_this));
+      }
+      return result;
+    }
+  };
+  A.ListIterator.prototype = {
+    get$current() {
+      var t1 = this.__internal$_current;
+      return t1 == null ? this.$ti._precomputed1._as(t1) : t1;
+    },
+    moveNext$0() {
+      var t3, _this = this,
+        t1 = _this.__internal$_iterable,
+        t2 = J.getInterceptor$asx(t1),
+        $length = t2.get$length(t1);
+      if (_this.__internal$_length !== $length)
+        throw A.wrapException(A.ConcurrentModificationError$(t1));
+      t3 = _this.__internal$_index;
+      if (t3 >= $length) {
+        _this.__internal$_current = null;
+        return false;
+      }
+      _this.__internal$_current = t2.elementAt$1(t1, t3);
+      ++_this.__internal$_index;
+      return true;
+    },
+    $isIterator: 1
+  };
+  A.MappedIterable.prototype = {
+    get$iterator(_) {
+      var t1 = this.__internal$_iterable;
+      return new A.MappedIterator(t1.get$iterator(t1), this._f, A._instanceType(this)._eval$1("MappedIterator<1,2>"));
+    },
+    get$length(_) {
+      var t1 = this.__internal$_iterable;
+      return t1.get$length(t1);
+    },
+    elementAt$1(_, index) {
+      var t1 = this.__internal$_iterable;
+      return this._f.call$1(t1.elementAt$1(t1, index));
+    }
+  };
+  A.EfficientLengthMappedIterable.prototype = {$isEfficientLengthIterable: 1};
+  A.MappedIterator.prototype = {
+    moveNext$0() {
+      var _this = this,
+        t1 = _this._iterator;
+      if (t1.moveNext$0()) {
+        _this.__internal$_current = _this._f.call$1(t1.get$current());
+        return true;
+      }
+      _this.__internal$_current = null;
+      return false;
+    },
+    get$current() {
+      var t1 = this.__internal$_current;
+      return t1 == null ? this.$ti._rest[1]._as(t1) : t1;
+    },
+    $isIterator: 1
+  };
+  A.MappedListIterable.prototype = {
+    get$length(_) {
+      return J.get$length$asx(this._source);
+    },
+    elementAt$1(_, index) {
+      return this._f.call$1(J.elementAt$1$ax(this._source, index));
+    }
+  };
+  A.WhereIterable.prototype = {
+    get$iterator(_) {
+      return new A.WhereIterator(J.get$iterator$ax(this.__internal$_iterable), this._f, this.$ti._eval$1("WhereIterator<1>"));
+    }
+  };
+  A.WhereIterator.prototype = {
+    moveNext$0() {
+      var t1, t2;
+      for (t1 = this._iterator, t2 = this._f; t1.moveNext$0();)
+        if (t2.call$1(t1.get$current()))
+          return true;
+      return false;
+    },
+    get$current() {
+      return this._iterator.get$current();
+    },
+    $isIterator: 1
+  };
+  A.FixedLengthListMixin.prototype = {};
+  A.UnmodifiableListMixin.prototype = {
+    $indexSet(_, index, value) {
+      A._instanceType(this)._eval$1("UnmodifiableListMixin.E")._as(value);
+      throw A.wrapException(A.UnsupportedError$("Cannot modify an unmodifiable list"));
+    }
+  };
+  A.UnmodifiableListBase.prototype = {};
+  A.ReversedListIterable.prototype = {
+    get$length(_) {
+      return J.get$length$asx(this._source);
+    },
+    elementAt$1(_, index) {
+      var t1 = this._source,
+        t2 = J.getInterceptor$asx(t1);
+      return t2.elementAt$1(t1, t2.get$length(t1) - 1 - index);
+    }
+  };
+  A.__CastListBase__CastIterableBase_ListMixin.prototype = {};
+  A._Record_2.prototype = {$recipe: "+(1,2)", $shape: 1};
+  A._Record_2_influence_light.prototype = {$recipe: "+influence,light(1,2)", $shape: 2};
+  A.ConstantMapView.prototype = {};
+  A.ConstantMap.prototype = {
+    toString$0(_) {
+      return A.MapBase_mapToString(this);
+    },
+    $indexSet(_, key, value) {
+      var t1 = A._instanceType(this);
+      t1._precomputed1._as(key);
+      t1._rest[1]._as(value);
+      A.ConstantMap__throwUnmodifiable();
+    },
+    get$entries() {
+      return new A._SyncStarIterable(this.entries$body$ConstantMap(), A._instanceType(this)._eval$1("_SyncStarIterable<MapEntry<1,2>>"));
+    },
+    entries$body$ConstantMap() {
+      var $async$self = this;
+      return function() {
+        var $async$goto = 0, $async$handler = 1, $async$errorStack = [], t1, t2, t3, key, t4;
+        return function $async$get$entries($async$iterator, $async$errorCode, $async$result) {
+          if ($async$errorCode === 1) {
+            $async$errorStack.push($async$result);
+            $async$goto = $async$handler;
+          }
+          for (;;)
+            switch ($async$goto) {
+              case 0:
+                // Function start
+                t1 = $async$self.get$keys(), t1 = t1.get$iterator(t1), t2 = A._instanceType($async$self), t3 = t2._rest[1], t2 = t2._eval$1("MapEntry<1,2>");
+              case 2:
+                // for condition
+                if (!t1.moveNext$0()) {
+                  // goto after for
+                  $async$goto = 3;
+                  break;
+                }
+                key = t1.get$current();
+                t4 = $async$self.$index(0, key);
+                $async$goto = 4;
+                return $async$iterator._async$_current = new A.MapEntry(key, t4 == null ? t3._as(t4) : t4, t2), 1;
+              case 4:
+                // after yield
+                // goto for condition
+                $async$goto = 2;
+                break;
+              case 3:
+                // after for
+                // implicit return
+                return 0;
+              case 1:
+                // rethrow
+                return $async$iterator._datum = $async$errorStack.at(-1), 3;
+            }
+        };
+      };
+    },
+    $isMap: 1
+  };
+  A.ConstantStringMap.prototype = {
+    get$length(_) {
+      return this._values.length;
+    },
+    get$_keys() {
+      var keys = this.$keys;
+      if (keys == null) {
+        keys = Object.keys(this._jsIndex);
+        this.$keys = keys;
+      }
+      return keys;
+    },
+    containsKey$1(key) {
+      if (typeof key != "string")
+        return false;
+      if ("__proto__" === key)
+        return false;
+      return this._jsIndex.hasOwnProperty(key);
+    },
+    $index(_, key) {
+      if (!this.containsKey$1(key))
+        return null;
+      return this._values[this._jsIndex[key]];
+    },
+    forEach$1(_, f) {
+      var keys, values, t1, i;
+      this.$ti._eval$1("~(1,2)")._as(f);
+      keys = this.get$_keys();
+      values = this._values;
+      for (t1 = keys.length, i = 0; i < t1; ++i)
+        f.call$2(keys[i], values[i]);
+    },
+    get$keys() {
+      return new A._KeysOrValues(this.get$_keys(), this.$ti._eval$1("_KeysOrValues<1>"));
+    },
+    get$values() {
+      return new A._KeysOrValues(this._values, this.$ti._eval$1("_KeysOrValues<2>"));
+    }
+  };
+  A._KeysOrValues.prototype = {
+    get$length(_) {
+      return this._elements.length;
+    },
+    get$iterator(_) {
+      var t1 = this._elements;
+      return new A._KeysOrValuesOrElementsIterator(t1, t1.length, this.$ti._eval$1("_KeysOrValuesOrElementsIterator<1>"));
+    }
+  };
+  A._KeysOrValuesOrElementsIterator.prototype = {
+    get$current() {
+      var t1 = this.__js_helper$_current;
+      return t1 == null ? this.$ti._precomputed1._as(t1) : t1;
+    },
+    moveNext$0() {
+      var _this = this,
+        t1 = _this.__js_helper$_index;
+      if (t1 >= _this.__js_helper$_length) {
+        _this.__js_helper$_current = null;
+        return false;
+      }
+      _this.__js_helper$_current = _this._elements[t1];
+      _this.__js_helper$_index = t1 + 1;
+      return true;
+    },
+    $isIterator: 1
+  };
+  A.ConstantSet.prototype = {
+    add$1(_, value) {
+      A._instanceType(this)._precomputed1._as(value);
+      A.ConstantSet__throwUnmodifiable();
+    }
+  };
+  A.ConstantStringSet.prototype = {
+    get$length(_) {
+      return this.__js_helper$_length;
+    },
+    get$isNotEmpty(_) {
+      return this.__js_helper$_length !== 0;
+    },
+    get$iterator(_) {
+      var t1, _this = this,
+        keys = _this.$keys;
+      if (keys == null) {
+        keys = Object.keys(_this._jsIndex);
+        _this.$keys = keys;
+      }
+      t1 = keys;
+      return new A._KeysOrValuesOrElementsIterator(t1, t1.length, _this.$ti._eval$1("_KeysOrValuesOrElementsIterator<1>"));
+    },
+    contains$1(_, key) {
+      if (typeof key != "string")
+        return false;
+      if ("__proto__" === key)
+        return false;
+      return this._jsIndex.hasOwnProperty(key);
+    },
+    toSet$0(_) {
+      return A.LinkedHashSet_LinkedHashSet$of(this, this.$ti._precomputed1);
+    }
+  };
+  A.SafeToStringHook.prototype = {};
+  A.TypeErrorDecoder.prototype = {
+    matchTypeError$1(message) {
+      var result, t1, _this = this,
+        match = new RegExp(_this._pattern).exec(message);
+      if (match == null)
+        return null;
+      result = Object.create(null);
+      t1 = _this._arguments;
+      if (t1 !== -1)
+        result.arguments = match[t1 + 1];
+      t1 = _this._argumentsExpr;
+      if (t1 !== -1)
+        result.argumentsExpr = match[t1 + 1];
+      t1 = _this._expr;
+      if (t1 !== -1)
+        result.expr = match[t1 + 1];
+      t1 = _this._method;
+      if (t1 !== -1)
+        result.method = match[t1 + 1];
+      t1 = _this._receiver;
+      if (t1 !== -1)
+        result.receiver = match[t1 + 1];
+      return result;
+    }
+  };
+  A.NullError.prototype = {
+    toString$0(_) {
+      return "Null check operator used on a null value";
+    }
+  };
+  A.JsNoSuchMethodError.prototype = {
+    toString$0(_) {
+      var t2, _this = this,
+        _s38_ = "NoSuchMethodError: method not found: '",
+        t1 = _this._method;
+      if (t1 == null)
+        return "NoSuchMethodError: " + _this.__js_helper$_message;
+      t2 = _this._receiver;
+      if (t2 == null)
+        return _s38_ + t1 + "' (" + _this.__js_helper$_message + ")";
+      return _s38_ + t1 + "' on '" + t2 + "' (" + _this.__js_helper$_message + ")";
+    }
+  };
+  A.UnknownJsTypeError.prototype = {
+    toString$0(_) {
+      var t1 = this.__js_helper$_message;
+      return t1.length === 0 ? "Error" : "Error: " + t1;
+    }
+  };
+  A.NullThrownFromJavaScriptException.prototype = {
+    toString$0(_) {
+      return "Throw of null ('" + (this._irritant === null ? "null" : "undefined") + "' from JavaScript)";
+    }
+  };
+  A.ExceptionAndStackTrace.prototype = {};
+  A._StackTrace.prototype = {
+    toString$0(_) {
+      var trace,
+        t1 = this._trace;
+      if (t1 != null)
+        return t1;
+      t1 = this._exception;
+      trace = t1 !== null && typeof t1 === "object" ? t1.stack : null;
+      return this._trace = trace == null ? "" : trace;
+    },
+    $isStackTrace: 1
+  };
+  A.Closure.prototype = {
+    toString$0(_) {
+      var $constructor = this.constructor,
+        $name = $constructor == null ? null : $constructor.name;
+      return "Closure '" + A.unminifyOrTag($name == null ? "unknown" : $name) + "'";
+    },
+    get$runtimeType(_) {
+      var rti = A.closureFunctionType(this);
+      return A.createRuntimeType(rti == null ? A.instanceType(this) : rti);
+    },
+    $isFunction: 1,
+    get$$call() {
+      return this;
+    },
+    "call*": "call$1",
+    $requiredArgCount: 1,
+    $defaultValues: null
+  };
+  A.Closure0Args.prototype = {"call*": "call$0", $requiredArgCount: 0};
+  A.Closure2Args.prototype = {"call*": "call$2", $requiredArgCount: 2};
+  A.TearOffClosure.prototype = {};
+  A.StaticClosure.prototype = {
+    toString$0(_) {
+      var $name = this.$static_name;
+      if ($name == null)
+        return "Closure of unknown static method";
+      return "Closure '" + A.unminifyOrTag($name) + "'";
+    }
+  };
+  A.BoundClosure.prototype = {
+    $eq(_, other) {
+      if (other == null)
+        return false;
+      if (this === other)
+        return true;
+      if (!(other instanceof A.BoundClosure))
+        return false;
+      return this.$_target === other.$_target && this._receiver === other._receiver;
+    },
+    get$hashCode(_) {
+      return (A.objectHashCode(this._receiver) ^ A.Primitives_objectHashCode(this.$_target)) >>> 0;
+    },
+    toString$0(_) {
+      return "Closure '" + this.$_name + "' of " + ("Instance of '" + A.Primitives_objectTypeName(this._receiver) + "'");
+    }
+  };
+  A.RuntimeError.prototype = {
+    toString$0(_) {
+      return "RuntimeError: " + this.message;
+    }
+  };
+  A.JsLinkedHashMap.prototype = {
+    get$length(_) {
+      return this.__js_helper$_length;
+    },
+    get$keys() {
+      return new A.LinkedHashMapKeysIterable(this, A._instanceType(this)._eval$1("LinkedHashMapKeysIterable<1>"));
+    },
+    get$values() {
+      return new A.LinkedHashMapValuesIterable(this, A._instanceType(this)._eval$1("LinkedHashMapValuesIterable<2>"));
+    },
+    get$entries() {
+      return new A.LinkedHashMapEntriesIterable(this, A._instanceType(this)._eval$1("LinkedHashMapEntriesIterable<1,2>"));
+    },
+    containsKey$1(key) {
+      var strings, nums;
+      if (typeof key == "string") {
+        strings = this._strings;
+        if (strings == null)
+          return false;
+        return strings[key] != null;
+      } else if (typeof key == "number" && (key & 0x3fffffff) === key) {
+        nums = this._nums;
+        if (nums == null)
+          return false;
+        return nums[key] != null;
+      } else
+        return this.internalContainsKey$1(key);
+    },
+    internalContainsKey$1(key) {
+      var rest = this.__js_helper$_rest;
+      if (rest == null)
+        return false;
+      return this.internalFindBucketIndex$2(this._getBucket$2(rest, key), key) >= 0;
+    },
+    $index(_, key) {
+      var strings, cell, t1, nums, _null = null;
+      if (typeof key == "string") {
+        strings = this._strings;
+        if (strings == null)
+          return _null;
+        cell = strings[key];
+        t1 = cell == null ? _null : cell.hashMapCellValue;
+        return t1;
+      } else if (typeof key == "number" && (key & 0x3fffffff) === key) {
+        nums = this._nums;
+        if (nums == null)
+          return _null;
+        cell = nums[key];
+        t1 = cell == null ? _null : cell.hashMapCellValue;
+        return t1;
+      } else
+        return this.internalGet$1(key);
+    },
+    internalGet$1(key) {
+      var bucket, index,
+        rest = this.__js_helper$_rest;
+      if (rest == null)
+        return null;
+      bucket = this._getBucket$2(rest, key);
+      index = this.internalFindBucketIndex$2(bucket, key);
+      if (index < 0)
+        return null;
+      return bucket[index].hashMapCellValue;
+    },
+    $indexSet(_, key, value) {
+      var strings, nums, _this = this,
+        t1 = A._instanceType(_this);
+      t1._precomputed1._as(key);
+      t1._rest[1]._as(value);
+      if (typeof key == "string") {
+        strings = _this._strings;
+        _this._addHashTableEntry$3(strings == null ? _this._strings = _this._newHashTable$0() : strings, key, value);
+      } else if (typeof key == "number" && (key & 0x3fffffff) === key) {
+        nums = _this._nums;
+        _this._addHashTableEntry$3(nums == null ? _this._nums = _this._newHashTable$0() : nums, key, value);
+      } else
+        _this.internalSet$2(key, value);
+    },
+    internalSet$2(key, value) {
+      var rest, hash, bucket, index, _this = this,
+        t1 = A._instanceType(_this);
+      t1._precomputed1._as(key);
+      t1._rest[1]._as(value);
+      rest = _this.__js_helper$_rest;
+      if (rest == null)
+        rest = _this.__js_helper$_rest = _this._newHashTable$0();
+      hash = _this.internalComputeHashCode$1(key);
+      bucket = rest[hash];
+      if (bucket == null)
+        rest[hash] = [_this._newLinkedCell$2(key, value)];
+      else {
+        index = _this.internalFindBucketIndex$2(bucket, key);
+        if (index >= 0)
+          bucket[index].hashMapCellValue = value;
+        else
+          bucket.push(_this._newLinkedCell$2(key, value));
+      }
+    },
+    putIfAbsent$2(key, ifAbsent) {
+      var t2, value, _this = this,
+        t1 = A._instanceType(_this);
+      t1._precomputed1._as(key);
+      t1._eval$1("2()")._as(ifAbsent);
+      if (_this.containsKey$1(key)) {
+        t2 = _this.$index(0, key);
+        return t2 == null ? t1._rest[1]._as(t2) : t2;
+      }
+      value = ifAbsent.call$0();
+      _this.$indexSet(0, key, value);
+      return value;
+    },
+    remove$1(_, key) {
+      if ((key & 0x3fffffff) === key)
+        return this.__js_helper$_removeHashTableEntry$2(this._nums, key);
+      else
+        return this.internalRemove$1(key);
+    },
+    internalRemove$1(key) {
+      var hash, bucket, index, cell, _this = this,
+        rest = _this.__js_helper$_rest;
+      if (rest == null)
+        return null;
+      hash = _this.internalComputeHashCode$1(key);
+      bucket = rest[hash];
+      index = _this.internalFindBucketIndex$2(bucket, key);
+      if (index < 0)
+        return null;
+      cell = bucket.splice(index, 1)[0];
+      _this.__js_helper$_unlinkCell$1(cell);
+      if (bucket.length === 0)
+        delete rest[hash];
+      return cell.hashMapCellValue;
+    },
+    clear$0(_) {
+      var _this = this;
+      if (_this.__js_helper$_length > 0) {
+        _this._strings = _this._nums = _this.__js_helper$_rest = _this._first = _this._last = null;
+        _this.__js_helper$_length = 0;
+        _this._modified$0();
+      }
+    },
+    forEach$1(_, action) {
+      var cell, modifications, _this = this;
+      A._instanceType(_this)._eval$1("~(1,2)")._as(action);
+      cell = _this._first;
+      modifications = _this._modifications;
+      while (cell != null) {
+        action.call$2(cell.hashMapCellKey, cell.hashMapCellValue);
+        if (modifications !== _this._modifications)
+          throw A.wrapException(A.ConcurrentModificationError$(_this));
+        cell = cell._next;
+      }
+    },
+    _addHashTableEntry$3(table, key, value) {
+      var cell,
+        t1 = A._instanceType(this);
+      t1._precomputed1._as(key);
+      t1._rest[1]._as(value);
+      cell = table[key];
+      if (cell == null)
+        table[key] = this._newLinkedCell$2(key, value);
+      else
+        cell.hashMapCellValue = value;
+    },
+    __js_helper$_removeHashTableEntry$2(table, key) {
+      var cell;
+      if (table == null)
+        return null;
+      cell = table[key];
+      if (cell == null)
+        return null;
+      this.__js_helper$_unlinkCell$1(cell);
+      delete table[key];
+      return cell.hashMapCellValue;
+    },
+    _modified$0() {
+      this._modifications = this._modifications + 1 & 1073741823;
+    },
+    _newLinkedCell$2(key, value) {
+      var _this = this,
+        t1 = A._instanceType(_this),
+        cell = new A.LinkedHashMapCell(t1._precomputed1._as(key), t1._rest[1]._as(value));
+      if (_this._first == null)
+        _this._first = _this._last = cell;
+      else {
+        t1 = _this._last;
+        t1.toString;
+        cell._previous = t1;
+        _this._last = t1._next = cell;
+      }
+      ++_this.__js_helper$_length;
+      _this._modified$0();
+      return cell;
+    },
+    __js_helper$_unlinkCell$1(cell) {
+      var _this = this,
+        previous = cell._previous,
+        next = cell._next;
+      if (previous == null)
+        _this._first = next;
+      else
+        previous._next = next;
+      if (next == null)
+        _this._last = previous;
+      else
+        next._previous = previous;
+      --_this.__js_helper$_length;
+      _this._modified$0();
+    },
+    internalComputeHashCode$1(key) {
+      return J.get$hashCode$(key) & 1073741823;
+    },
+    _getBucket$2(table, key) {
+      return table[this.internalComputeHashCode$1(key)];
+    },
+    internalFindBucketIndex$2(bucket, key) {
+      var $length, i;
+      if (bucket == null)
+        return -1;
+      $length = bucket.length;
+      for (i = 0; i < $length; ++i)
+        if (J.$eq$(bucket[i].hashMapCellKey, key))
+          return i;
+      return -1;
+    },
+    toString$0(_) {
+      return A.MapBase_mapToString(this);
+    },
+    _newHashTable$0() {
+      var table = Object.create(null);
+      table["<non-identifier-key>"] = table;
+      delete table["<non-identifier-key>"];
+      return table;
+    },
+    $isLinkedHashMap: 1
+  };
+  A.LinkedHashMapCell.prototype = {};
+  A.LinkedHashMapKeysIterable.prototype = {
+    get$length(_) {
+      return this._map.__js_helper$_length;
+    },
+    get$iterator(_) {
+      var t1 = this._map;
+      return new A.LinkedHashMapKeyIterator(t1, t1._modifications, t1._first, this.$ti._eval$1("LinkedHashMapKeyIterator<1>"));
+    }
+  };
+  A.LinkedHashMapKeyIterator.prototype = {
+    get$current() {
+      return this.__js_helper$_current;
+    },
+    moveNext$0() {
+      var cell, _this = this,
+        t1 = _this._map;
+      if (_this._modifications !== t1._modifications)
+        throw A.wrapException(A.ConcurrentModificationError$(t1));
+      cell = _this._cell;
+      if (cell == null) {
+        _this.__js_helper$_current = null;
+        return false;
+      } else {
+        _this.__js_helper$_current = cell.hashMapCellKey;
+        _this._cell = cell._next;
+        return true;
+      }
+    },
+    $isIterator: 1
+  };
+  A.LinkedHashMapValuesIterable.prototype = {
+    get$length(_) {
+      return this._map.__js_helper$_length;
+    },
+    get$iterator(_) {
+      var t1 = this._map;
+      return new A.LinkedHashMapValueIterator(t1, t1._modifications, t1._first, this.$ti._eval$1("LinkedHashMapValueIterator<1>"));
+    }
+  };
+  A.LinkedHashMapValueIterator.prototype = {
+    get$current() {
+      return this.__js_helper$_current;
+    },
+    moveNext$0() {
+      var cell, _this = this,
+        t1 = _this._map;
+      if (_this._modifications !== t1._modifications)
+        throw A.wrapException(A.ConcurrentModificationError$(t1));
+      cell = _this._cell;
+      if (cell == null) {
+        _this.__js_helper$_current = null;
+        return false;
+      } else {
+        _this.__js_helper$_current = cell.hashMapCellValue;
+        _this._cell = cell._next;
+        return true;
+      }
+    },
+    $isIterator: 1
+  };
+  A.LinkedHashMapEntriesIterable.prototype = {
+    get$length(_) {
+      return this._map.__js_helper$_length;
+    },
+    get$iterator(_) {
+      var t1 = this._map;
+      return new A.LinkedHashMapEntryIterator(t1, t1._modifications, t1._first, this.$ti._eval$1("LinkedHashMapEntryIterator<1,2>"));
+    }
+  };
+  A.LinkedHashMapEntryIterator.prototype = {
+    get$current() {
+      var t1 = this.__js_helper$_current;
+      t1.toString;
+      return t1;
+    },
+    moveNext$0() {
+      var cell, _this = this,
+        t1 = _this._map;
+      if (_this._modifications !== t1._modifications)
+        throw A.wrapException(A.ConcurrentModificationError$(t1));
+      cell = _this._cell;
+      if (cell == null) {
+        _this.__js_helper$_current = null;
+        return false;
+      } else {
+        _this.__js_helper$_current = new A.MapEntry(cell.hashMapCellKey, cell.hashMapCellValue, _this.$ti._eval$1("MapEntry<1,2>"));
+        _this._cell = cell._next;
+        return true;
+      }
+    },
+    $isIterator: 1
+  };
+  A.initHooks_closure.prototype = {
+    call$1(o) {
+      return this.getTag(o);
+    },
+    $signature: 19
+  };
+  A.initHooks_closure0.prototype = {
+    call$2(o, tag) {
+      return this.getUnknownTag(o, tag);
+    },
+    $signature: 13
+  };
+  A.initHooks_closure1.prototype = {
+    call$1(tag) {
+      return this.prototypeForTag(A._asString(tag));
+    },
+    $signature: 35
+  };
+  A._Record.prototype = {
+    get$runtimeType(_) {
+      return A.createRuntimeType(this._getRti$0());
+    },
+    _getRti$0() {
+      return A.evaluateRtiForRecord(this.$recipe, this._getFieldValues$0());
+    },
+    toString$0(_) {
+      return this._toString$1(false);
+    },
+    _toString$1(safe) {
+      var t2, separator, i, key, value,
+        keys = this._fieldKeys$0(),
+        values = this._getFieldValues$0(),
+        t1 = (safe ? "Record " : "") + "(";
+      for (t2 = keys.length, separator = "", i = 0; i < t2; ++i, separator = ", ") {
+        t1 += separator;
+        key = keys[i];
+        if (typeof key == "string")
+          t1 = t1 + key + ": ";
+        if (!(i < values.length))
+          return A.ioore(values, i);
+        value = values[i];
+        t1 = safe ? t1 + A.Primitives_safeToString(value) : t1 + A.S(value);
+      }
+      t1 += ")";
+      return t1.charCodeAt(0) == 0 ? t1 : t1;
+    },
+    _fieldKeys$0() {
+      var t1,
+        shapeTag = this.$shape;
+      while ($._Record__computedFieldKeys.length <= shapeTag)
+        B.JSArray_methods.add$1($._Record__computedFieldKeys, null);
+      t1 = $._Record__computedFieldKeys[shapeTag];
+      if (t1 == null) {
+        t1 = this._computeFieldKeys$0();
+        B.JSArray_methods.$indexSet($._Record__computedFieldKeys, shapeTag, t1);
+      }
+      return t1;
+    },
+    _computeFieldKeys$0() {
+      var i, names, last,
+        recipe = this.$recipe,
+        position = recipe.indexOf("("),
+        joinedNames = recipe.substring(1, position),
+        fields = recipe.substring(position),
+        arity = fields === "()" ? 0 : fields.replace(/[^,]/g, "").length + 1,
+        t1 = type$.Object,
+        result = J.JSArray_JSArray$allocateGrowable(arity, t1);
+      for (i = 0; i < arity; ++i)
+        result[i] = i;
+      if (joinedNames !== "") {
+        names = joinedNames.split(",");
+        i = names.length;
+        for (last = arity; i > 0;) {
+          --last;
+          --i;
+          B.JSArray_methods.$indexSet(result, last, names[i]);
+        }
+      }
+      return A.List_List$unmodifiable(result, t1);
+    }
+  };
+  A._Record2.prototype = {
+    _getFieldValues$0() {
+      return [this._0, this._1];
+    },
+    $eq(_, other) {
+      if (other == null)
+        return false;
+      return other instanceof A._Record2 && this.$shape === other.$shape && J.$eq$(this._0, other._0) && J.$eq$(this._1, other._1);
+    },
+    get$hashCode(_) {
+      return A.Object_hash(this.$shape, this._0, this._1, B.C_SentinelValue, B.C_SentinelValue, B.C_SentinelValue);
+    }
+  };
+  A.NativeByteBuffer.prototype = {
+    get$runtimeType(receiver) {
+      return B.Type_ByteBuffer_rqD;
+    },
+    $isTrustedGetRuntimeType: 1
+  };
+  A.NativeTypedData.prototype = {
+    _invalidPosition$3(receiver, position, $length, $name) {
+      var t1 = A.RangeError$range(position, 0, $length, $name, null);
+      throw A.wrapException(t1);
+    },
+    _checkPosition$3(receiver, position, $length, $name) {
+      if (position >>> 0 !== position || position > $length)
+        this._invalidPosition$3(receiver, position, $length, $name);
+    }
+  };
+  A.NativeByteData.prototype = {
+    get$runtimeType(receiver) {
+      return B.Type_ByteData_9dB;
+    },
+    $isTrustedGetRuntimeType: 1
+  };
+  A.NativeTypedArray.prototype = {
+    get$length(receiver) {
+      return receiver.length;
+    },
+    _setRangeFast$4(receiver, start, end, source, skipCount) {
+      var count,
+        targetLength = receiver.length;
+      this._checkPosition$3(receiver, start, targetLength, "start");
+      this._checkPosition$3(receiver, end, targetLength, "end");
+      if (start > end)
+        throw A.wrapException(A.RangeError$range(start, 0, end, null, null));
+      count = end - start;
+      if (skipCount < 0)
+        throw A.wrapException(A.ArgumentError$(skipCount, null));
+      if (16 - skipCount < count)
+        throw A.wrapException(A.StateError$("Not enough elements"));
+      if (skipCount !== 0 || 16 !== count)
+        source = source.subarray(skipCount, skipCount + count);
+      receiver.set(source, start);
+    },
+    $isJavaScriptIndexingBehavior: 1
+  };
+  A.NativeTypedArrayOfDouble.prototype = {
+    $index(receiver, index) {
+      A._checkValidIndex(index, receiver, receiver.length);
+      return receiver[index];
+    },
+    $indexSet(receiver, index, value) {
+      A._asDouble(value);
+      receiver.$flags & 2 && A.throwUnsupportedOperation(receiver);
+      A._checkValidIndex(index, receiver, receiver.length);
+      receiver[index] = value;
+    },
+    setRange$3(receiver, start, end, iterable) {
+      type$.Iterable_double._as(iterable);
+      receiver.$flags & 2 && A.throwUnsupportedOperation(receiver, 5);
+      this._setRangeFast$4(receiver, start, end, iterable, 0);
+      return;
+    },
+    $isEfficientLengthIterable: 1,
+    $isIterable: 1,
+    $isList: 1
+  };
+  A.NativeTypedArrayOfInt.prototype = {
+    $indexSet(receiver, index, value) {
+      A._asInt(value);
+      receiver.$flags & 2 && A.throwUnsupportedOperation(receiver);
+      A._checkValidIndex(index, receiver, receiver.length);
+      receiver[index] = value;
+    },
+    setRange$4(receiver, start, end, iterable, skipCount) {
+      type$.Iterable_int._as(iterable);
+      receiver.$flags & 2 && A.throwUnsupportedOperation(receiver, 5);
+      this._setRangeFast$4(receiver, start, end, iterable, skipCount);
+      return;
+    },
+    $isEfficientLengthIterable: 1,
+    $isIterable: 1,
+    $isList: 1
+  };
+  A.NativeFloat32List.prototype = {
+    get$runtimeType(receiver) {
+      return B.Type_Float32List_9Kz;
+    },
+    $isTrustedGetRuntimeType: 1,
+    $isFloat32List: 1
+  };
+  A.NativeFloat64List.prototype = {
+    get$runtimeType(receiver) {
+      return B.Type_Float64List_9Kz;
+    },
+    $isTrustedGetRuntimeType: 1
+  };
+  A.NativeInt16List.prototype = {
+    get$runtimeType(receiver) {
+      return B.Type_Int16List_s5h;
+    },
+    $index(receiver, index) {
+      A._checkValidIndex(index, receiver, receiver.length);
+      return receiver[index];
+    },
+    $isTrustedGetRuntimeType: 1
+  };
+  A.NativeInt32List.prototype = {
+    get$runtimeType(receiver) {
+      return B.Type_Int32List_O8Z;
+    },
+    $index(receiver, index) {
+      A._checkValidIndex(index, receiver, receiver.length);
+      return receiver[index];
+    },
+    $isTrustedGetRuntimeType: 1
+  };
+  A.NativeInt8List.prototype = {
+    get$runtimeType(receiver) {
+      return B.Type_Int8List_rFV;
+    },
+    $index(receiver, index) {
+      A._checkValidIndex(index, receiver, receiver.length);
+      return receiver[index];
+    },
+    $isTrustedGetRuntimeType: 1
+  };
+  A.NativeUint16List.prototype = {
+    get$runtimeType(receiver) {
+      return B.Type_Uint16List_kmP;
+    },
+    $index(receiver, index) {
+      A._checkValidIndex(index, receiver, receiver.length);
+      return receiver[index];
+    },
+    $isTrustedGetRuntimeType: 1
+  };
+  A.NativeUint32List.prototype = {
+    get$runtimeType(receiver) {
+      return B.Type_Uint32List_kmP;
+    },
+    $index(receiver, index) {
+      A._checkValidIndex(index, receiver, receiver.length);
+      return receiver[index];
+    },
+    $isTrustedGetRuntimeType: 1
+  };
+  A.NativeUint8ClampedList.prototype = {
+    get$runtimeType(receiver) {
+      return B.Type_Uint8ClampedList_04U;
+    },
+    get$length(receiver) {
+      return receiver.length;
+    },
+    $index(receiver, index) {
+      A._checkValidIndex(index, receiver, receiver.length);
+      return receiver[index];
+    },
+    $isTrustedGetRuntimeType: 1
+  };
+  A.NativeUint8List.prototype = {
+    get$runtimeType(receiver) {
+      return B.Type_Uint8List_8Eb;
+    },
+    get$length(receiver) {
+      return receiver.length;
+    },
+    $index(receiver, index) {
+      A._checkValidIndex(index, receiver, receiver.length);
+      return receiver[index];
+    },
+    $isTrustedGetRuntimeType: 1,
+    $isUint8List: 1
+  };
+  A._NativeTypedArrayOfDouble_NativeTypedArray_ListMixin.prototype = {};
+  A._NativeTypedArrayOfDouble_NativeTypedArray_ListMixin_FixedLengthListMixin.prototype = {};
+  A._NativeTypedArrayOfInt_NativeTypedArray_ListMixin.prototype = {};
+  A._NativeTypedArrayOfInt_NativeTypedArray_ListMixin_FixedLengthListMixin.prototype = {};
+  A.Rti.prototype = {
+    _eval$1(recipe) {
+      return A._Universe_evalInEnvironment(init.typeUniverse, this, recipe);
+    },
+    _bind$1(typeOrTuple) {
+      return A._Universe_bind(init.typeUniverse, this, typeOrTuple);
+    }
+  };
+  A._FunctionParameters.prototype = {};
+  A._Type.prototype = {
+    toString$0(_) {
+      return A._rtiToString(this._rti, null);
+    }
+  };
+  A._Error.prototype = {
+    toString$0(_) {
+      return this._message;
+    }
+  };
+  A._TypeError.prototype = {$isTypeError: 1};
+  A._AsyncRun__initializeScheduleImmediate_internalCallback.prototype = {
+    call$1(__wc0_formal) {
+      var t1 = this._box_0,
+        f = t1.storedCallback;
+      t1.storedCallback = null;
+      f.call$0();
+    },
+    $signature: 8
+  };
+  A._AsyncRun__initializeScheduleImmediate_closure.prototype = {
+    call$1(callback) {
+      var t1, t2;
+      this._box_0.storedCallback = type$.void_Function._as(callback);
+      t1 = this.div;
+      t2 = this.span;
+      t1.firstChild ? t1.removeChild(t2) : t1.appendChild(t2);
+    },
+    $signature: 18
+  };
+  A._AsyncRun__scheduleImmediateJsOverride_internalCallback.prototype = {
+    call$0() {
+      this.callback.call$0();
+    },
+    $signature: 9
+  };
+  A._AsyncRun__scheduleImmediateWithSetImmediate_internalCallback.prototype = {
+    call$0() {
+      this.callback.call$0();
+    },
+    $signature: 9
+  };
+  A._TimerImpl.prototype = {
+    _TimerImpl$2(milliseconds, callback) {
+      if (self.setTimeout != null)
+        self.setTimeout(A.convertDartClosureToJS(new A._TimerImpl_internalCallback(this, callback), 0), milliseconds);
+      else
+        throw A.wrapException(A.UnsupportedError$("`setTimeout()` not found."));
+    }
+  };
+  A._TimerImpl_internalCallback.prototype = {
+    call$0() {
+      this.callback.call$0();
+    },
+    $signature: 0
+  };
+  A._AsyncAwaitCompleter.prototype = {
+    complete$1(value) {
+      var t2, _this = this,
+        t1 = _this.$ti;
+      t1._eval$1("1/?")._as(value);
+      if (value == null)
+        value = t1._precomputed1._as(value);
+      if (!_this.isSync)
+        _this._future._asyncComplete$1(value);
+      else {
+        t2 = _this._future;
+        if (t1._eval$1("Future<1>")._is(value))
+          t2._chainFuture$1(value);
+        else
+          t2._completeWithValue$1(value);
+      }
+    },
+    completeError$2(e, st) {
+      var t1 = this._future;
+      if (this.isSync)
+        t1._completeErrorObject$1(new A.AsyncError(e, st));
+      else
+        t1._asyncCompleteErrorObject$1(new A.AsyncError(e, st));
+    }
+  };
+  A._awaitOnObject_closure.prototype = {
+    call$1(result) {
+      return this.bodyFunction.call$2(0, result);
+    },
+    $signature: 5
+  };
+  A._awaitOnObject_closure0.prototype = {
+    call$2(error, stackTrace) {
+      this.bodyFunction.call$2(1, new A.ExceptionAndStackTrace(error, type$.StackTrace._as(stackTrace)));
+    },
+    $signature: 23
+  };
+  A._wrapJsFunctionForAsync_closure.prototype = {
+    call$2(errorCode, result) {
+      this.$protected(A._asInt(errorCode), result);
+    },
+    $signature: 30
+  };
+  A._SyncStarIterator.prototype = {
+    get$current() {
+      var t1 = this._async$_current;
+      return t1 == null ? this.$ti._precomputed1._as(t1) : t1;
+    },
+    _resumeBody$2(errorCode, errorValue) {
+      var body, t1, exception;
+      errorCode = A._asInt(errorCode);
+      errorValue = errorValue;
+      body = this._body;
+      for (;;)
+        try {
+          t1 = body(this, errorCode, errorValue);
+          return t1;
+        } catch (exception) {
+          errorValue = exception;
+          errorCode = 1;
+        }
+    },
+    moveNext$0() {
+      var nestedIterator, exception, value, suspendedBodies, _this = this, errorValue = null, errorCode = 0;
+      for (;;) {
+        nestedIterator = _this._nestedIterator;
+        if (nestedIterator != null)
+          try {
+            if (nestedIterator.moveNext$0()) {
+              _this._async$_current = nestedIterator.get$current();
+              return true;
+            } else
+              _this._nestedIterator = null;
+          } catch (exception) {
+            errorValue = exception;
+            errorCode = 1;
+            _this._nestedIterator = null;
+          }
+        value = _this._resumeBody$2(errorCode, errorValue);
+        if (1 === value)
+          return true;
+        if (0 === value) {
+          _this._async$_current = null;
+          suspendedBodies = _this._suspendedBodies;
+          if (suspendedBodies == null || suspendedBodies.length === 0) {
+            _this._body = A._SyncStarIterator__terminatedBody;
+            return false;
+          }
+          if (0 >= suspendedBodies.length)
+            return A.ioore(suspendedBodies, -1);
+          _this._body = suspendedBodies.pop();
+          errorCode = 0;
+          errorValue = null;
+          continue;
+        }
+        if (2 === value) {
+          errorCode = 0;
+          errorValue = null;
+          continue;
+        }
+        if (3 === value) {
+          errorValue = _this._datum;
+          _this._datum = null;
+          suspendedBodies = _this._suspendedBodies;
+          if (suspendedBodies == null || suspendedBodies.length === 0) {
+            _this._async$_current = null;
+            _this._body = A._SyncStarIterator__terminatedBody;
+            throw errorValue;
+            return false;
+          }
+          if (0 >= suspendedBodies.length)
+            return A.ioore(suspendedBodies, -1);
+          _this._body = suspendedBodies.pop();
+          errorCode = 1;
+          continue;
+        }
+        throw A.wrapException(A.StateError$("sync*"));
+      }
+      return false;
+    },
+    _yieldStar$1(iterable) {
+      var t1, t2, _this = this;
+      if (iterable instanceof A._SyncStarIterable) {
+        t1 = iterable._outerHelper();
+        t2 = _this._suspendedBodies;
+        if (t2 == null)
+          t2 = _this._suspendedBodies = [];
+        B.JSArray_methods.add$1(t2, _this._body);
+        _this._body = t1;
+        return 2;
+      } else {
+        _this._nestedIterator = J.get$iterator$ax(iterable);
+        return 2;
+      }
+    },
+    $isIterator: 1
+  };
+  A._SyncStarIterable.prototype = {
+    get$iterator(_) {
+      return new A._SyncStarIterator(this._outerHelper(), this.$ti._eval$1("_SyncStarIterator<1>"));
+    }
+  };
+  A.AsyncError.prototype = {
+    toString$0(_) {
+      return A.S(this.error);
+    },
+    $isError: 1,
+    get$stackTrace() {
+      return this.stackTrace;
+    }
+  };
+  A._Completer.prototype = {
+    completeError$2(error, stackTrace) {
+      var t1 = this.future;
+      if ((t1._state & 30) !== 0)
+        throw A.wrapException(A.StateError$("Future already completed"));
+      t1._asyncCompleteErrorObject$1(A._interceptUserError(error, stackTrace));
+    },
+    completeError$1(error) {
+      return this.completeError$2(error, null);
+    }
+  };
+  A._AsyncCompleter.prototype = {
+    complete$1(value) {
+      var t2,
+        t1 = this.$ti;
+      t1._eval$1("1/?")._as(value);
+      t2 = this.future;
+      if ((t2._state & 30) !== 0)
+        throw A.wrapException(A.StateError$("Future already completed"));
+      t2._asyncComplete$1(t1._eval$1("1/")._as(value));
+    }
+  };
+  A._FutureListener.prototype = {
+    matchesErrorTest$1(asyncError) {
+      if ((this.state & 15) !== 6)
+        return true;
+      return this.result._zone.runUnary$2$2(type$.bool_Function_Object._as(this.callback), asyncError.error, type$.bool, type$.Object);
+    },
+    handleError$1(asyncError) {
+      var exception, _this = this,
+        errorCallback = _this.errorCallback,
+        result = null,
+        t1 = type$.dynamic,
+        t2 = type$.Object,
+        t3 = asyncError.error,
+        t4 = _this.result._zone;
+      if (type$.dynamic_Function_Object_StackTrace._is(errorCallback))
+        result = t4.runBinary$3$3(errorCallback, t3, asyncError.stackTrace, t1, t2, type$.StackTrace);
+      else
+        result = t4.runUnary$2$2(type$.dynamic_Function_Object._as(errorCallback), t3, t1, t2);
+      try {
+        t1 = _this.$ti._eval$1("2/")._as(result);
+        return t1;
+      } catch (exception) {
+        if (type$.TypeError._is(A.unwrapException(exception))) {
+          if ((_this.state & 1) !== 0)
+            throw A.wrapException(A.ArgumentError$("The error handler of Future.then must return a value of the returned future's type", "onError"));
+          throw A.wrapException(A.ArgumentError$("The error handler of Future.catchError must return a value of the future's type", "onError"));
+        } else
+          throw exception;
+      }
+    }
+  };
+  A._Future.prototype = {
+    then$1$2$onError(f, onError, $R) {
+      var currentZone, result,
+        t1 = this.$ti;
+      t1._bind$1($R)._eval$1("1/(2)")._as(f);
+      currentZone = $.Zone__current;
+      if (currentZone === B.C__RootZone) {
+        if (!type$.dynamic_Function_Object_StackTrace._is(onError) && !type$.dynamic_Function_Object._is(onError))
+          throw A.wrapException(A.ArgumentError$value(onError, "onError", string$.Error_));
+      } else {
+        $R._eval$1("@<0/>")._bind$1(t1._precomputed1)._eval$1("1(2)")._as(f);
+        onError = A._registerErrorHandler(onError, currentZone);
+      }
+      result = new A._Future(currentZone, $R._eval$1("_Future<0>"));
+      this._addListener$1(new A._FutureListener(result, 3, f, onError, t1._eval$1("@<1>")._bind$1($R)._eval$1("_FutureListener<1,2>")));
+      return result;
+    },
+    _thenAwait$1$2(f, onError, $E) {
+      var result,
+        t1 = this.$ti;
+      t1._bind$1($E)._eval$1("1/(2)")._as(f);
+      result = new A._Future($.Zone__current, $E._eval$1("_Future<0>"));
+      this._addListener$1(new A._FutureListener(result, 19, f, onError, t1._eval$1("@<1>")._bind$1($E)._eval$1("_FutureListener<1,2>")));
+      return result;
+    },
+    _setErrorObject$1(error) {
+      this._state = this._state & 1 | 16;
+      this._resultOrListeners = error;
+    },
+    _cloneResult$1(source) {
+      this._state = source._state & 30 | this._state & 1;
+      this._resultOrListeners = source._resultOrListeners;
+    },
+    _addListener$1(listener) {
+      var source, _this = this,
+        t1 = _this._state;
+      if (t1 <= 3) {
+        listener._nextListener = type$.nullable__FutureListener_dynamic_dynamic._as(_this._resultOrListeners);
+        _this._resultOrListeners = listener;
+      } else {
+        if ((t1 & 4) !== 0) {
+          source = type$._Future_dynamic._as(_this._resultOrListeners);
+          if ((source._state & 24) === 0) {
+            source._addListener$1(listener);
+            return;
+          }
+          _this._cloneResult$1(source);
+        }
+        A._rootScheduleMicrotask(null, null, _this._zone, type$.void_Function._as(new A._Future__addListener_closure(_this, listener)));
+      }
+    },
+    _prependListeners$1(listeners) {
+      var t1, existingListeners, next, cursor, next0, source, _this = this, _box_0 = {};
+      _box_0.listeners = listeners;
+      if (listeners == null)
+        return;
+      t1 = _this._state;
+      if (t1 <= 3) {
+        existingListeners = type$.nullable__FutureListener_dynamic_dynamic._as(_this._resultOrListeners);
+        _this._resultOrListeners = listeners;
+        if (existingListeners != null) {
+          next = listeners._nextListener;
+          for (cursor = listeners; next != null; cursor = next, next = next0)
+            next0 = next._nextListener;
+          cursor._nextListener = existingListeners;
+        }
+      } else {
+        if ((t1 & 4) !== 0) {
+          source = type$._Future_dynamic._as(_this._resultOrListeners);
+          if ((source._state & 24) === 0) {
+            source._prependListeners$1(listeners);
+            return;
+          }
+          _this._cloneResult$1(source);
+        }
+        _box_0.listeners = _this._reverseListeners$1(listeners);
+        A._rootScheduleMicrotask(null, null, _this._zone, type$.void_Function._as(new A._Future__prependListeners_closure(_box_0, _this)));
+      }
+    },
+    _removeListeners$0() {
+      var current = type$.nullable__FutureListener_dynamic_dynamic._as(this._resultOrListeners);
+      this._resultOrListeners = null;
+      return this._reverseListeners$1(current);
+    },
+    _reverseListeners$1(listeners) {
+      var current, prev, next;
+      for (current = listeners, prev = null; current != null; prev = current, current = next) {
+        next = current._nextListener;
+        current._nextListener = prev;
+      }
+      return prev;
+    },
+    _completeWithValue$1(value) {
+      var listeners, _this = this;
+      _this.$ti._precomputed1._as(value);
+      listeners = _this._removeListeners$0();
+      _this._state = 8;
+      _this._resultOrListeners = value;
+      A._Future__propagateToListeners(_this, listeners);
+    },
+    _completeWithResultOf$1(source) {
+      var t1, listeners, _this = this;
+      if ((source._state & 16) !== 0) {
+        t1 = _this._zone === source._zone;
+        t1 = !(t1 || t1);
+      } else
+        t1 = false;
+      if (t1)
+        return;
+      listeners = _this._removeListeners$0();
+      _this._cloneResult$1(source);
+      A._Future__propagateToListeners(_this, listeners);
+    },
+    _completeErrorObject$1(error) {
+      var listeners = this._removeListeners$0();
+      this._setErrorObject$1(error);
+      A._Future__propagateToListeners(this, listeners);
+    },
+    _asyncComplete$1(value) {
+      var t1 = this.$ti;
+      t1._eval$1("1/")._as(value);
+      if (t1._eval$1("Future<1>")._is(value)) {
+        this._chainFuture$1(value);
+        return;
+      }
+      this._asyncCompleteWithValue$1(value);
+    },
+    _asyncCompleteWithValue$1(value) {
+      var _this = this;
+      _this.$ti._precomputed1._as(value);
+      _this._state ^= 2;
+      A._rootScheduleMicrotask(null, null, _this._zone, type$.void_Function._as(new A._Future__asyncCompleteWithValue_closure(_this, value)));
+    },
+    _chainFuture$1(value) {
+      A._Future__chainCoreFuture(this.$ti._eval$1("Future<1>")._as(value), this, false);
+      return;
+    },
+    _asyncCompleteErrorObject$1(error) {
+      this._state ^= 2;
+      A._rootScheduleMicrotask(null, null, this._zone, type$.void_Function._as(new A._Future__asyncCompleteErrorObject_closure(this, error)));
+    },
+    $isFuture: 1
+  };
+  A._Future__addListener_closure.prototype = {
+    call$0() {
+      A._Future__propagateToListeners(this.$this, this.listener);
+    },
+    $signature: 0
+  };
+  A._Future__prependListeners_closure.prototype = {
+    call$0() {
+      A._Future__propagateToListeners(this.$this, this._box_0.listeners);
+    },
+    $signature: 0
+  };
+  A._Future__chainCoreFuture_closure.prototype = {
+    call$0() {
+      A._Future__chainCoreFuture(this._box_0.source, this.target, true);
+    },
+    $signature: 0
+  };
+  A._Future__asyncCompleteWithValue_closure.prototype = {
+    call$0() {
+      this.$this._completeWithValue$1(this.value);
+    },
+    $signature: 0
+  };
+  A._Future__asyncCompleteErrorObject_closure.prototype = {
+    call$0() {
+      this.$this._completeErrorObject$1(this.error);
+    },
+    $signature: 0
+  };
+  A._Future__propagateToListeners_handleWhenCompleteCallback.prototype = {
+    call$0() {
+      var e, s, t1, exception, t2, t3, originalSource, joinedResult, _this = this, completeResult = null;
+      try {
+        t1 = _this._box_0.listener;
+        completeResult = t1.result._zone.run$1$1(type$.dynamic_Function._as(t1.callback), type$.dynamic);
+      } catch (exception) {
+        e = A.unwrapException(exception);
+        s = A.getTraceFromException(exception);
+        if (_this.hasError && type$.AsyncError._as(_this._box_1.source._resultOrListeners).error === e) {
+          t1 = _this._box_0;
+          t1.listenerValueOrError = type$.AsyncError._as(_this._box_1.source._resultOrListeners);
+        } else {
+          t1 = e;
+          t2 = s;
+          if (t2 == null)
+            t2 = A.AsyncError_defaultStackTrace(t1);
+          t3 = _this._box_0;
+          t3.listenerValueOrError = new A.AsyncError(t1, t2);
+          t1 = t3;
+        }
+        t1.listenerHasError = true;
+        return;
+      }
+      if (completeResult instanceof A._Future && (completeResult._state & 24) !== 0) {
+        if ((completeResult._state & 16) !== 0) {
+          t1 = _this._box_0;
+          t1.listenerValueOrError = type$.AsyncError._as(completeResult._resultOrListeners);
+          t1.listenerHasError = true;
+        }
+        return;
+      }
+      if (completeResult instanceof A._Future) {
+        originalSource = _this._box_1.source;
+        joinedResult = new A._Future(originalSource._zone, originalSource.$ti);
+        completeResult.then$1$2$onError(new A._Future__propagateToListeners_handleWhenCompleteCallback_closure(joinedResult, originalSource), new A._Future__propagateToListeners_handleWhenCompleteCallback_closure0(joinedResult), type$.void);
+        t1 = _this._box_0;
+        t1.listenerValueOrError = joinedResult;
+        t1.listenerHasError = false;
+      }
+    },
+    $signature: 0
+  };
+  A._Future__propagateToListeners_handleWhenCompleteCallback_closure.prototype = {
+    call$1(__wc0_formal) {
+      this.joinedResult._completeWithResultOf$1(this.originalSource);
+    },
+    $signature: 8
+  };
+  A._Future__propagateToListeners_handleWhenCompleteCallback_closure0.prototype = {
+    call$2(e, s) {
+      A._asObject(e);
+      type$.StackTrace._as(s);
+      this.joinedResult._completeErrorObject$1(new A.AsyncError(e, s));
+    },
+    $signature: 29
+  };
+  A._Future__propagateToListeners_handleValueCallback.prototype = {
+    call$0() {
+      var e, s, t1, t2, t3, t4, t5, exception;
+      try {
+        t1 = this._box_0;
+        t2 = t1.listener;
+        t3 = t2.$ti;
+        t4 = t3._precomputed1;
+        t5 = t4._as(this.sourceResult);
+        t1.listenerValueOrError = t2.result._zone.runUnary$2$2(t3._eval$1("2/(1)")._as(t2.callback), t5, t3._eval$1("2/"), t4);
+      } catch (exception) {
+        e = A.unwrapException(exception);
+        s = A.getTraceFromException(exception);
+        t1 = e;
+        t2 = s;
+        if (t2 == null)
+          t2 = A.AsyncError_defaultStackTrace(t1);
+        t3 = this._box_0;
+        t3.listenerValueOrError = new A.AsyncError(t1, t2);
+        t3.listenerHasError = true;
+      }
+    },
+    $signature: 0
+  };
+  A._Future__propagateToListeners_handleError.prototype = {
+    call$0() {
+      var asyncError, e, s, t1, exception, t2, t3, _this = this;
+      try {
+        asyncError = type$.AsyncError._as(_this._box_1.source._resultOrListeners);
+        t1 = _this._box_0;
+        if (t1.listener.matchesErrorTest$1(asyncError) && t1.listener.errorCallback != null) {
+          t1.listenerValueOrError = t1.listener.handleError$1(asyncError);
+          t1.listenerHasError = false;
+        }
+      } catch (exception) {
+        e = A.unwrapException(exception);
+        s = A.getTraceFromException(exception);
+        t1 = type$.AsyncError._as(_this._box_1.source._resultOrListeners);
+        if (t1.error === e) {
+          t2 = _this._box_0;
+          t2.listenerValueOrError = t1;
+          t1 = t2;
+        } else {
+          t1 = e;
+          t2 = s;
+          if (t2 == null)
+            t2 = A.AsyncError_defaultStackTrace(t1);
+          t3 = _this._box_0;
+          t3.listenerValueOrError = new A.AsyncError(t1, t2);
+          t1 = t3;
+        }
+        t1.listenerHasError = true;
+      }
+    },
+    $signature: 0
+  };
+  A._AsyncCallbackEntry.prototype = {};
+  A._StreamIterator.prototype = {};
+  A._Zone.prototype = {$isZone: 1};
+  A._RootZone.prototype = {
+    runGuarded$1(f) {
+      var e, s, exception;
+      type$.void_Function._as(f);
+      try {
+        if (B.C__RootZone === $.Zone__current) {
+          f.call$0();
+          return;
+        }
+        A._rootRun(null, null, this, f, type$.void);
+      } catch (exception) {
+        e = A.unwrapException(exception);
+        s = A.getTraceFromException(exception);
+        A._rootHandleError(A._asObject(e), type$.StackTrace._as(s));
+      }
+    },
+    bindCallbackGuarded$1(f) {
+      return new A._RootZone_bindCallbackGuarded_closure(this, type$.void_Function._as(f));
+    },
+    run$1$1(f, $R) {
+      $R._eval$1("0()")._as(f);
+      if ($.Zone__current === B.C__RootZone)
+        return f.call$0();
+      return A._rootRun(null, null, this, f, $R);
+    },
+    runUnary$2$2(f, arg, $R, $T) {
+      $R._eval$1("@<0>")._bind$1($T)._eval$1("1(2)")._as(f);
+      $T._as(arg);
+      if ($.Zone__current === B.C__RootZone)
+        return f.call$1(arg);
+      return A._rootRunUnary(null, null, this, f, arg, $R, $T);
+    },
+    runBinary$3$3(f, arg1, arg2, $R, $T1, $T2) {
+      $R._eval$1("@<0>")._bind$1($T1)._bind$1($T2)._eval$1("1(2,3)")._as(f);
+      $T1._as(arg1);
+      $T2._as(arg2);
+      if ($.Zone__current === B.C__RootZone)
+        return f.call$2(arg1, arg2);
+      return A._rootRunBinary(null, null, this, f, arg1, arg2, $R, $T1, $T2);
+    },
+    registerBinaryCallback$3$1(f, $R, $T1, $T2) {
+      return $R._eval$1("@<0>")._bind$1($T1)._bind$1($T2)._eval$1("1(2,3)")._as(f);
+    }
+  };
+  A._RootZone_bindCallbackGuarded_closure.prototype = {
+    call$0() {
+      return this.$this.runGuarded$1(this.f);
+    },
+    $signature: 0
+  };
+  A._rootHandleError_closure.prototype = {
+    call$0() {
+      A.Error_throwWithStackTrace(this.error, this.stackTrace);
+    },
+    $signature: 0
+  };
+  A._HashMap.prototype = {
+    get$length(_) {
+      return this._collection$_length;
+    },
+    get$keys() {
+      return new A._HashMapKeyIterable(this, this.$ti._eval$1("_HashMapKeyIterable<1>"));
+    },
+    get$values() {
+      var t1 = this.$ti;
+      return A.MappedIterable_MappedIterable(new A._HashMapKeyIterable(this, t1._eval$1("_HashMapKeyIterable<1>")), new A._HashMap_values_closure(this), t1._precomputed1, t1._rest[1]);
+    },
+    containsKey$1(key) {
+      var strings, nums;
+      if (typeof key == "string" && key !== "__proto__") {
+        strings = this._collection$_strings;
+        return strings == null ? false : strings[key] != null;
+      } else if (typeof key == "number" && (key & 1073741823) === key) {
+        nums = this._collection$_nums;
+        return nums == null ? false : nums[key] != null;
+      } else
+        return this._containsKey$1(key);
+    },
+    _containsKey$1(key) {
+      var rest = this._collection$_rest;
+      if (rest == null)
+        return false;
+      return this._findBucketIndex$2(this._collection$_getBucket$2(rest, key), key) >= 0;
+    },
+    $index(_, key) {
+      var strings, t1, nums;
+      if (typeof key == "string" && key !== "__proto__") {
+        strings = this._collection$_strings;
+        t1 = strings == null ? null : A._HashMap__getTableEntry(strings, key);
+        return t1;
+      } else if (typeof key == "number" && (key & 1073741823) === key) {
+        nums = this._collection$_nums;
+        t1 = nums == null ? null : A._HashMap__getTableEntry(nums, key);
+        return t1;
+      } else
+        return this._get$1(key);
+    },
+    _get$1(key) {
+      var bucket, index,
+        rest = this._collection$_rest;
+      if (rest == null)
+        return null;
+      bucket = this._collection$_getBucket$2(rest, key);
+      index = this._findBucketIndex$2(bucket, key);
+      return index < 0 ? null : bucket[index + 1];
+    },
+    $indexSet(_, key, value) {
+      var strings, nums, rest, hash, bucket, index, _this = this,
+        t1 = _this.$ti;
+      t1._precomputed1._as(key);
+      t1._rest[1]._as(value);
+      if (typeof key == "string" && key !== "__proto__") {
+        strings = _this._collection$_strings;
+        _this._collection$_addHashTableEntry$3(strings == null ? _this._collection$_strings = A._HashMap__newHashTable() : strings, key, value);
+      } else if (typeof key == "number" && (key & 1073741823) === key) {
+        nums = _this._collection$_nums;
+        _this._collection$_addHashTableEntry$3(nums == null ? _this._collection$_nums = A._HashMap__newHashTable() : nums, key, value);
+      } else {
+        rest = _this._collection$_rest;
+        if (rest == null)
+          rest = _this._collection$_rest = A._HashMap__newHashTable();
+        hash = A.objectHashCode(key) & 1073741823;
+        bucket = rest[hash];
+        if (bucket == null) {
+          A._HashMap__setTableEntry(rest, hash, [key, value]);
+          ++_this._collection$_length;
+          _this._collection$_keys = null;
+        } else {
+          index = _this._findBucketIndex$2(bucket, key);
+          if (index >= 0)
+            bucket[index + 1] = value;
+          else {
+            bucket.push(key, value);
+            ++_this._collection$_length;
+            _this._collection$_keys = null;
+          }
+        }
+      }
+    },
+    forEach$1(_, action) {
+      var keys, $length, t2, i, key, t3, _this = this,
+        t1 = _this.$ti;
+      t1._eval$1("~(1,2)")._as(action);
+      keys = _this._computeKeys$0();
+      for ($length = keys.length, t2 = t1._precomputed1, t1 = t1._rest[1], i = 0; i < $length; ++i) {
+        key = keys[i];
+        t2._as(key);
+        t3 = _this.$index(0, key);
+        action.call$2(key, t3 == null ? t1._as(t3) : t3);
+        if (keys !== _this._collection$_keys)
+          throw A.wrapException(A.ConcurrentModificationError$(_this));
+      }
+    },
+    _computeKeys$0() {
+      var strings, index, names, entries, i, nums, rest, bucket, $length, i0, _this = this,
+        result = _this._collection$_keys;
+      if (result != null)
+        return result;
+      result = A.List_List$filled(_this._collection$_length, null, false, type$.dynamic);
+      strings = _this._collection$_strings;
+      index = 0;
+      if (strings != null) {
+        names = Object.getOwnPropertyNames(strings);
+        entries = names.length;
+        for (i = 0; i < entries; ++i) {
+          result[index] = names[i];
+          ++index;
+        }
+      }
+      nums = _this._collection$_nums;
+      if (nums != null) {
+        names = Object.getOwnPropertyNames(nums);
+        entries = names.length;
+        for (i = 0; i < entries; ++i) {
+          result[index] = +names[i];
+          ++index;
+        }
+      }
+      rest = _this._collection$_rest;
+      if (rest != null) {
+        names = Object.getOwnPropertyNames(rest);
+        entries = names.length;
+        for (i = 0; i < entries; ++i) {
+          bucket = rest[names[i]];
+          $length = bucket.length;
+          for (i0 = 0; i0 < $length; i0 += 2) {
+            result[index] = bucket[i0];
+            ++index;
+          }
+        }
+      }
+      return _this._collection$_keys = result;
+    },
+    _collection$_addHashTableEntry$3(table, key, value) {
+      var t1 = this.$ti;
+      t1._precomputed1._as(key);
+      t1._rest[1]._as(value);
+      if (table[key] == null) {
+        ++this._collection$_length;
+        this._collection$_keys = null;
+      }
+      A._HashMap__setTableEntry(table, key, value);
+    },
+    _collection$_getBucket$2(table, key) {
+      return table[A.objectHashCode(key) & 1073741823];
+    }
+  };
+  A._HashMap_values_closure.prototype = {
+    call$1(each) {
+      var t1 = this.$this,
+        t2 = t1.$ti;
+      t1 = t1.$index(0, t2._precomputed1._as(each));
+      return t1 == null ? t2._rest[1]._as(t1) : t1;
+    },
+    $signature() {
+      return this.$this.$ti._eval$1("2(1)");
+    }
+  };
+  A._IdentityHashMap.prototype = {
+    _findBucketIndex$2(bucket, key) {
+      var $length, i, t1;
+      if (bucket == null)
+        return -1;
+      $length = bucket.length;
+      for (i = 0; i < $length; i += 2) {
+        t1 = bucket[i];
+        if (t1 == null ? key == null : t1 === key)
+          return i;
+      }
+      return -1;
+    }
+  };
+  A._HashMapKeyIterable.prototype = {
+    get$length(_) {
+      return this._collection$_map._collection$_length;
+    },
+    get$iterator(_) {
+      var t1 = this._collection$_map;
+      return new A._HashMapKeyIterator(t1, t1._computeKeys$0(), this.$ti._eval$1("_HashMapKeyIterator<1>"));
+    }
+  };
+  A._HashMapKeyIterator.prototype = {
+    get$current() {
+      var t1 = this._collection$_current;
+      return t1 == null ? this.$ti._precomputed1._as(t1) : t1;
+    },
+    moveNext$0() {
+      var _this = this,
+        keys = _this._collection$_keys,
+        offset = _this._offset,
+        t1 = _this._collection$_map;
+      if (keys !== t1._collection$_keys)
+        throw A.wrapException(A.ConcurrentModificationError$(t1));
+      else if (offset >= keys.length) {
+        _this._collection$_current = null;
+        return false;
+      } else {
+        _this._collection$_current = keys[offset];
+        _this._offset = offset + 1;
+        return true;
+      }
+    },
+    $isIterator: 1
+  };
+  A._LinkedHashSet.prototype = {
+    _newSet$0() {
+      return new A._LinkedHashSet(A._instanceType(this)._eval$1("_LinkedHashSet<1>"));
+    },
+    get$iterator(_) {
+      var _this = this,
+        t1 = new A._LinkedHashSetIterator(_this, _this._collection$_modifications, A._instanceType(_this)._eval$1("_LinkedHashSetIterator<1>"));
+      t1._collection$_cell = _this._collection$_first;
+      return t1;
+    },
+    get$length(_) {
+      return this._collection$_length;
+    },
+    contains$1(_, object) {
+      var strings, nums;
+      if (typeof object == "string" && object !== "__proto__") {
+        strings = this._collection$_strings;
+        if (strings == null)
+          return false;
+        return type$.nullable__LinkedHashSetCell._as(strings[object]) != null;
+      } else if (typeof object == "number" && (object & 1073741823) === object) {
+        nums = this._collection$_nums;
+        if (nums == null)
+          return false;
+        return type$.nullable__LinkedHashSetCell._as(nums[object]) != null;
+      } else
+        return this._contains$1(object);
+    },
+    _contains$1(object) {
+      var rest = this._collection$_rest;
+      if (rest == null)
+        return false;
+      return this._findBucketIndex$2(rest[this._computeHashCode$1(object)], object) >= 0;
+    },
+    add$1(_, element) {
+      var strings, nums, _this = this;
+      A._instanceType(_this)._precomputed1._as(element);
+      if (typeof element == "string" && element !== "__proto__") {
+        strings = _this._collection$_strings;
+        return _this._collection$_addHashTableEntry$2(strings == null ? _this._collection$_strings = A._LinkedHashSet__newHashTable() : strings, element);
+      } else if (typeof element == "number" && (element & 1073741823) === element) {
+        nums = _this._collection$_nums;
+        return _this._collection$_addHashTableEntry$2(nums == null ? _this._collection$_nums = A._LinkedHashSet__newHashTable() : nums, element);
+      } else
+        return _this._add$1(element);
+    },
+    _add$1(element) {
+      var rest, hash, bucket, _this = this;
+      A._instanceType(_this)._precomputed1._as(element);
+      rest = _this._collection$_rest;
+      if (rest == null)
+        rest = _this._collection$_rest = A._LinkedHashSet__newHashTable();
+      hash = _this._computeHashCode$1(element);
+      bucket = rest[hash];
+      if (bucket == null)
+        rest[hash] = [_this._collection$_newLinkedCell$1(element)];
+      else {
+        if (_this._findBucketIndex$2(bucket, element) >= 0)
+          return false;
+        bucket.push(_this._collection$_newLinkedCell$1(element));
+      }
+      return true;
+    },
+    remove$1(_, object) {
+      var _this = this;
+      if (typeof object == "string" && object !== "__proto__")
+        return _this._removeHashTableEntry$2(_this._collection$_strings, object);
+      else if (typeof object == "number" && (object & 1073741823) === object)
+        return _this._removeHashTableEntry$2(_this._collection$_nums, object);
+      else
+        return _this._remove$1(object);
+    },
+    _remove$1(object) {
+      var hash, bucket, index, cell, _this = this,
+        rest = _this._collection$_rest;
+      if (rest == null)
+        return false;
+      hash = _this._computeHashCode$1(object);
+      bucket = rest[hash];
+      index = _this._findBucketIndex$2(bucket, object);
+      if (index < 0)
+        return false;
+      cell = bucket.splice(index, 1)[0];
+      if (0 === bucket.length)
+        delete rest[hash];
+      _this._unlinkCell$1(cell);
+      return true;
+    },
+    clear$0(_) {
+      var _this = this;
+      if (_this._collection$_length > 0) {
+        _this._collection$_strings = _this._collection$_nums = _this._collection$_rest = _this._collection$_first = _this._collection$_last = null;
+        _this._collection$_length = 0;
+        _this._collection$_modified$0();
+      }
+    },
+    _collection$_addHashTableEntry$2(table, element) {
+      A._instanceType(this)._precomputed1._as(element);
+      if (type$.nullable__LinkedHashSetCell._as(table[element]) != null)
+        return false;
+      table[element] = this._collection$_newLinkedCell$1(element);
+      return true;
+    },
+    _removeHashTableEntry$2(table, element) {
+      var cell;
+      if (table == null)
+        return false;
+      cell = type$.nullable__LinkedHashSetCell._as(table[element]);
+      if (cell == null)
+        return false;
+      this._unlinkCell$1(cell);
+      delete table[element];
+      return true;
+    },
+    _collection$_modified$0() {
+      this._collection$_modifications = this._collection$_modifications + 1 & 1073741823;
+    },
+    _collection$_newLinkedCell$1(element) {
+      var t1, _this = this,
+        cell = new A._LinkedHashSetCell(A._instanceType(_this)._precomputed1._as(element));
+      if (_this._collection$_first == null)
+        _this._collection$_first = _this._collection$_last = cell;
+      else {
+        t1 = _this._collection$_last;
+        t1.toString;
+        cell._collection$_previous = t1;
+        _this._collection$_last = t1._collection$_next = cell;
+      }
+      ++_this._collection$_length;
+      _this._collection$_modified$0();
+      return cell;
+    },
+    _unlinkCell$1(cell) {
+      var _this = this,
+        previous = cell._collection$_previous,
+        next = cell._collection$_next;
+      if (previous == null)
+        _this._collection$_first = next;
+      else
+        previous._collection$_next = next;
+      if (next == null)
+        _this._collection$_last = previous;
+      else
+        next._collection$_previous = previous;
+      --_this._collection$_length;
+      _this._collection$_modified$0();
+    },
+    _computeHashCode$1(element) {
+      return J.get$hashCode$(element) & 1073741823;
+    },
+    _findBucketIndex$2(bucket, element) {
+      var $length, i;
+      if (bucket == null)
+        return -1;
+      $length = bucket.length;
+      for (i = 0; i < $length; ++i)
+        if (J.$eq$(bucket[i]._element, element))
+          return i;
+      return -1;
+    },
+    $isLinkedHashSet: 1
+  };
+  A._LinkedHashSetCell.prototype = {};
+  A._LinkedHashSetIterator.prototype = {
+    get$current() {
+      var t1 = this._collection$_current;
+      return t1 == null ? this.$ti._precomputed1._as(t1) : t1;
+    },
+    moveNext$0() {
+      var _this = this,
+        cell = _this._collection$_cell,
+        t1 = _this._set;
+      if (_this._collection$_modifications !== t1._collection$_modifications)
+        throw A.wrapException(A.ConcurrentModificationError$(t1));
+      else if (cell == null) {
+        _this._collection$_current = null;
+        return false;
+      } else {
+        _this._collection$_current = _this.$ti._eval$1("1?")._as(cell._element);
+        _this._collection$_cell = cell._collection$_next;
+        return true;
+      }
+    },
+    $isIterator: 1
+  };
+  A.LinkedHashMap_LinkedHashMap$from_closure.prototype = {
+    call$2(k, v) {
+      this.result.$indexSet(0, this.K._as(k), this.V._as(v));
+    },
+    $signature: 52
+  };
+  A.ListBase.prototype = {
+    get$iterator(receiver) {
+      return new A.ListIterator(receiver, this.get$length(receiver), A.instanceType(receiver)._eval$1("ListIterator<ListBase.E>"));
+    },
+    elementAt$1(receiver, index) {
+      return this.$index(receiver, index);
+    },
+    every$1(receiver, test) {
+      var $length, i;
+      A.instanceType(receiver)._eval$1("bool(ListBase.E)")._as(test);
+      $length = this.get$length(receiver);
+      for (i = 0; i < $length; ++i) {
+        if (!test.call$1(this.$index(receiver, i)))
+          return false;
+        if ($length !== this.get$length(receiver))
+          throw A.wrapException(A.ConcurrentModificationError$(receiver));
+      }
+      return true;
+    },
+    fillRange$3(receiver, start, end, fill) {
+      var i;
+      A.instanceType(receiver)._eval$1("ListBase.E?")._as(fill);
+      A.RangeError_checkValidRange(start, end, this.get$length(receiver));
+      for (i = start; i < end; ++i)
+        this.$indexSet(receiver, i, fill);
+    },
+    toString$0(receiver) {
+      return A.Iterable_iterableToFullString(receiver, "[", "]");
+    },
+    $isEfficientLengthIterable: 1,
+    $isIterable: 1,
+    $isList: 1
+  };
+  A.MapBase.prototype = {
+    forEach$1(_, action) {
+      var t2, key, t3,
+        t1 = A._instanceType(this);
+      t1._eval$1("~(1,2)")._as(action);
+      for (t2 = this.get$keys(), t2 = t2.get$iterator(t2), t1 = t1._rest[1]; t2.moveNext$0();) {
+        key = t2.get$current();
+        t3 = this.$index(0, key);
+        action.call$2(key, t3 == null ? t1._as(t3) : t3);
+      }
+    },
+    get$entries() {
+      var t1 = this.get$keys(),
+        t2 = A._instanceType(this)._eval$1("MapEntry<1,2>"),
+        t3 = A._instanceType(t1);
+      return A.MappedIterable_MappedIterable(t1, t3._bind$1(t2)._eval$1("1(Iterable.E)")._as(new A.MapBase_entries_closure(this)), t3._eval$1("Iterable.E"), t2);
+    },
+    get$length(_) {
+      var t1 = this.get$keys();
+      return t1.get$length(t1);
+    },
+    get$values() {
+      return new A._MapBaseValueIterable(this, A._instanceType(this)._eval$1("_MapBaseValueIterable<1,2>"));
+    },
+    toString$0(_) {
+      return A.MapBase_mapToString(this);
+    },
+    $isMap: 1
+  };
+  A.MapBase_entries_closure.prototype = {
+    call$1(key) {
+      var t1 = this.$this,
+        t2 = A._instanceType(t1);
+      t2._precomputed1._as(key);
+      t1 = t1.$index(0, key);
+      if (t1 == null)
+        t1 = t2._rest[1]._as(t1);
+      return new A.MapEntry(key, t1, t2._eval$1("MapEntry<1,2>"));
+    },
+    $signature() {
+      return A._instanceType(this.$this)._eval$1("MapEntry<1,2>(1)");
+    }
+  };
+  A.MapBase_mapToString_closure.prototype = {
+    call$2(k, v) {
+      var t2,
+        t1 = this._box_0;
+      if (!t1.first)
+        this.result._contents += ", ";
+      t1.first = false;
+      t1 = this.result;
+      t2 = A.S(k);
+      t1._contents = (t1._contents += t2) + ": ";
+      t2 = A.S(v);
+      t1._contents += t2;
+    },
+    $signature: 57
+  };
+  A._MapBaseValueIterable.prototype = {
+    get$length(_) {
+      var t1 = this._collection$_map;
+      return t1.get$length(t1);
+    },
+    get$iterator(_) {
+      var t1 = this._collection$_map,
+        t2 = t1.get$keys();
+      return new A._MapBaseValueIterator(t2.get$iterator(t2), t1, this.$ti._eval$1("_MapBaseValueIterator<1,2>"));
+    }
+  };
+  A._MapBaseValueIterator.prototype = {
+    moveNext$0() {
+      var _this = this,
+        t1 = _this._collection$_keys;
+      if (t1.moveNext$0()) {
+        _this._collection$_current = _this._collection$_map.$index(0, t1.get$current());
+        return true;
+      }
+      _this._collection$_current = null;
+      return false;
+    },
+    get$current() {
+      var t1 = this._collection$_current;
+      return t1 == null ? this.$ti._rest[1]._as(t1) : t1;
+    },
+    $isIterator: 1
+  };
+  A._UnmodifiableMapMixin.prototype = {
+    $indexSet(_, key, value) {
+      var t1 = A._instanceType(this);
+      t1._precomputed1._as(key);
+      t1._rest[1]._as(value);
+      throw A.wrapException(A.UnsupportedError$("Cannot modify unmodifiable map"));
+    }
+  };
+  A.MapView.prototype = {
+    $index(_, key) {
+      return this._collection$_map.$index(0, key);
+    },
+    $indexSet(_, key, value) {
+      var t1 = A._instanceType(this);
+      this._collection$_map.$indexSet(0, t1._precomputed1._as(key), t1._rest[1]._as(value));
+    },
+    get$length(_) {
+      var t1 = this._collection$_map;
+      return t1.get$length(t1);
+    },
+    get$keys() {
+      return this._collection$_map.get$keys();
+    },
+    toString$0(_) {
+      return this._collection$_map.toString$0(0);
+    },
+    get$values() {
+      return this._collection$_map.get$values();
+    },
+    get$entries() {
+      return this._collection$_map.get$entries();
+    },
+    $isMap: 1
+  };
+  A.UnmodifiableMapView.prototype = {};
+  A.SetBase.prototype = {
+    get$isNotEmpty(_) {
+      return this.get$length(this) !== 0;
+    },
+    addAll$1(_, elements) {
+      var t1;
+      A._instanceType(this)._eval$1("Iterable<1>")._as(elements);
+      for (t1 = elements.get$iterator(elements); t1.moveNext$0();)
+        this.add$1(0, t1.get$current());
+    },
+    difference$1(other) {
+      var t1, element,
+        result = this.toSet$0(0);
+      for (t1 = this.get$iterator(this); t1.moveNext$0();) {
+        element = t1.get$current();
+        if (other.contains$1(0, element))
+          result.remove$1(0, element);
+      }
+      return result;
+    },
+    toString$0(_) {
+      return A.Iterable_iterableToFullString(this, "{", "}");
+    },
+    join$1(_, separator) {
+      var first, t1,
+        iterator = this.get$iterator(this);
+      if (!iterator.moveNext$0())
+        return "";
+      first = J.toString$0$(iterator.get$current());
+      if (!iterator.moveNext$0())
+        return first;
+      if (separator.length === 0) {
+        t1 = first;
+        do
+          t1 += A.S(iterator.get$current());
+        while (iterator.moveNext$0());
+      } else {
+        t1 = first;
+        do
+          t1 = t1 + separator + A.S(iterator.get$current());
+        while (iterator.moveNext$0());
+      }
+      return t1.charCodeAt(0) == 0 ? t1 : t1;
+    },
+    any$1(_, test) {
+      var t1;
+      A._instanceType(this)._eval$1("bool(1)")._as(test);
+      for (t1 = this.get$iterator(this); t1.moveNext$0();)
+        if (test.call$1(t1.get$current()))
+          return true;
+      return false;
+    },
+    elementAt$1(_, index) {
+      var iterator, skipCount;
+      A.RangeError_checkNotNegative(index, "index");
+      iterator = this.get$iterator(this);
+      for (skipCount = index; iterator.moveNext$0();) {
+        if (skipCount === 0)
+          return iterator.get$current();
+        --skipCount;
+      }
+      throw A.wrapException(A.IndexError$withLength(index, index - skipCount, this, "index"));
+    },
+    $isEfficientLengthIterable: 1,
+    $isIterable: 1,
+    $isSet: 1
+  };
+  A._SetBase.prototype = {
+    toSet$0(_) {
+      var t1 = this._newSet$0();
+      t1.addAll$1(0, this);
+      return t1;
+    }
+  };
+  A._UnmodifiableSetMixin.prototype = {
+    add$1(_, value) {
+      this.$ti._precomputed1._as(value);
+      return A._UnmodifiableSetMixin__throwUnmodifiable();
+    }
+  };
+  A.UnmodifiableSetView.prototype = {
+    get$length(_) {
+      return this._collection$_source._collection$_length;
+    },
+    get$iterator(_) {
+      var t1 = this._collection$_source;
+      return A._LinkedHashSetIterator$(t1, t1._collection$_modifications, A._instanceType(t1)._precomputed1);
+    },
+    toSet$0(_) {
+      return this._collection$_source.toSet$0(0);
+    }
+  };
+  A._UnmodifiableMapView_MapView__UnmodifiableMapMixin.prototype = {};
+  A._UnmodifiableSetView_SetBase__UnmodifiableSetMixin.prototype = {};
+  A._Utf8Decoder__decoder_closure.prototype = {
+    call$0() {
+      var t1, exception;
+      try {
+        t1 = new TextDecoder("utf-8", {fatal: true});
+        return t1;
+      } catch (exception) {
+      }
+      return null;
+    },
+    $signature: 10
+  };
+  A._Utf8Decoder__decoderNonfatal_closure.prototype = {
+    call$0() {
+      var t1, exception;
+      try {
+        t1 = new TextDecoder("utf-8", {fatal: false});
+        return t1;
+      } catch (exception) {
+      }
+      return null;
+    },
+    $signature: 10
+  };
+  A.Base64Codec.prototype = {
+    normalize$3(source, start, end) {
+      var inverseAlphabet, t2, i, sliceStart, buffer, firstPadding, firstPaddingSourceIndex, paddingCount, i0, char, i1, digit1, t3, digit2, char0, value, t4, endLength, $length,
+        _s64_ = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/",
+        _s31_ = "Invalid base64 encoding length ",
+        t1 = source.length;
+      end = A.RangeError_checkValidRange(start, end, t1);
+      inverseAlphabet = $.$get$_Base64Decoder__inverseAlphabet();
+      for (t2 = inverseAlphabet.length, i = start, sliceStart = i, buffer = null, firstPadding = -1, firstPaddingSourceIndex = -1, paddingCount = 0; i < end; i = i0) {
+        i0 = i + 1;
+        if (!(i < t1))
+          return A.ioore(source, i);
+        char = source.charCodeAt(i);
+        if (char === 37) {
+          i1 = i0 + 2;
+          if (i1 <= end) {
+            if (!(i0 < t1))
+              return A.ioore(source, i0);
+            digit1 = A.hexDigitValue(source.charCodeAt(i0));
+            t3 = i0 + 1;
+            if (!(t3 < t1))
+              return A.ioore(source, t3);
+            digit2 = A.hexDigitValue(source.charCodeAt(t3));
+            char0 = digit1 * 16 + digit2 - (digit2 & 256);
+            if (char0 === 37)
+              char0 = -1;
+            i0 = i1;
+          } else
+            char0 = -1;
+        } else
+          char0 = char;
+        if (0 <= char0 && char0 <= 127) {
+          if (!(char0 >= 0 && char0 < t2))
+            return A.ioore(inverseAlphabet, char0);
+          value = inverseAlphabet[char0];
+          if (value >= 0) {
+            if (!(value < 64))
+              return A.ioore(_s64_, value);
+            char0 = _s64_.charCodeAt(value);
+            if (char0 === char)
+              continue;
+            char = char0;
+          } else {
+            if (value === -1) {
+              if (firstPadding < 0) {
+                t3 = buffer == null ? null : buffer._contents.length;
+                if (t3 == null)
+                  t3 = 0;
+                firstPadding = t3 + (i - sliceStart);
+                firstPaddingSourceIndex = i;
+              }
+              ++paddingCount;
+              if (char === 61)
+                continue;
+            }
+            char = char0;
+          }
+          if (value !== -2) {
+            if (buffer == null) {
+              buffer = new A.StringBuffer("");
+              t3 = buffer;
+            } else
+              t3 = buffer;
+            t3._contents += B.JSString_methods.substring$2(source, sliceStart, i);
+            t4 = A.Primitives_stringFromCharCode(char);
+            t3._contents += t4;
+            sliceStart = i0;
+            continue;
+          }
+        }
+        throw A.wrapException(A.FormatException$("Invalid base64 data", source, i));
+      }
+      if (buffer != null) {
+        t1 = B.JSString_methods.substring$2(source, sliceStart, end);
+        t1 = buffer._contents += t1;
+        t2 = t1.length;
+        if (firstPadding >= 0)
+          A.Base64Codec__checkPadding(source, firstPaddingSourceIndex, end, firstPadding, paddingCount, t2);
+        else {
+          endLength = B.JSInt_methods.$mod(t2 - 1, 4) + 1;
+          if (endLength === 1)
+            throw A.wrapException(A.FormatException$(_s31_, source, end));
+          while (endLength < 4) {
+            t1 += "=";
+            buffer._contents = t1;
+            ++endLength;
+          }
+        }
+        t1 = buffer._contents;
+        return B.JSString_methods.replaceRange$3(source, start, end, t1.charCodeAt(0) == 0 ? t1 : t1);
+      }
+      $length = end - start;
+      if (firstPadding >= 0)
+        A.Base64Codec__checkPadding(source, firstPaddingSourceIndex, end, firstPadding, paddingCount, $length);
+      else {
+        endLength = B.JSInt_methods.$mod($length, 4);
+        if (endLength === 1)
+          throw A.wrapException(A.FormatException$(_s31_, source, end));
+        if (endLength > 1)
+          source = B.JSString_methods.replaceRange$3(source, end, end, endLength === 2 ? "==" : "=");
+      }
+      return source;
+    }
+  };
+  A.Base64Encoder.prototype = {};
+  A.Codec.prototype = {};
+  A.Converter.prototype = {};
+  A.Encoding.prototype = {};
+  A.Utf8Codec.prototype = {};
+  A.Utf8Decoder.prototype = {
+    convert$1(codeUnits) {
+      return new A._Utf8Decoder(this._allowMalformed)._convertGeneral$4(type$.List_int._as(codeUnits), 0, null, true);
+    }
+  };
+  A._Utf8Decoder.prototype = {
+    _convertGeneral$4(codeUnits, start, maybeEnd, single) {
+      var end, casted, bytes, errorOffset, t1, result, message, _this = this;
+      type$.List_int._as(codeUnits);
+      end = A.RangeError_checkValidRange(start, maybeEnd, J.get$length$asx(codeUnits));
+      if (start === end)
+        return "";
+      if (codeUnits instanceof Uint8Array) {
+        casted = codeUnits;
+        bytes = casted;
+        errorOffset = 0;
+      } else {
+        bytes = A._Utf8Decoder__makeNativeUint8List(codeUnits, start, end);
+        end -= start;
+        errorOffset = start;
+        start = 0;
+      }
+      if (end - start >= 15) {
+        t1 = _this.allowMalformed;
+        result = A._Utf8Decoder__convertInterceptedUint8List(t1, bytes, start, end);
+        if (result != null) {
+          if (!t1)
+            return result;
+          if (result.indexOf("\ufffd") < 0)
+            return result;
+        }
+      }
+      result = _this._decodeRecursive$4(bytes, start, end, true);
+      t1 = _this._convert$_state;
+      if ((t1 & 1) !== 0) {
+        message = A._Utf8Decoder_errorDescription(t1);
+        _this._convert$_state = 0;
+        throw A.wrapException(A.FormatException$(message, codeUnits, errorOffset + _this._charOrIndex));
+      }
+      return result;
+    },
+    _decodeRecursive$4(bytes, start, end, single) {
+      var mid, s1, _this = this;
+      if (end - start > 1000) {
+        mid = B.JSInt_methods._tdivFast$1(start + end, 2);
+        s1 = _this._decodeRecursive$4(bytes, start, mid, false);
+        if ((_this._convert$_state & 1) !== 0)
+          return s1;
+        return s1 + _this._decodeRecursive$4(bytes, mid, end, single);
+      }
+      return _this.decodeGeneral$4(bytes, start, end, single);
+    },
+    decodeGeneral$4(bytes, start, end, single) {
+      var byte, t2, type, t3, i0, markEnd, i1, m, _this = this,
+        _s256_ = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFFFFFFFFFFFFFFFFGGGGGGGGGGGGGGGGHHHHHHHHHHHHHHHHHHHHHHHHHHHIHHHJEEBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBKCCCCCCCCCCCCDCLONNNMEEEEEEEEEEE",
+        _s144_ = " \x000:XECCCCCN:lDb \x000:XECCCCCNvlDb \x000:XECCCCCN:lDb AAAAA\x00\x00\x00\x00\x00AAAAA00000AAAAA:::::AAAAAGG000AAAAA00KKKAAAAAG::::AAAAA:IIIIAAAAA000\x800AAAAA\x00\x00\x00\x00 AAAAA",
+        _65533 = 65533,
+        state = _this._convert$_state,
+        char = _this._charOrIndex,
+        buffer = new A.StringBuffer(""),
+        i = start + 1,
+        t1 = bytes.length;
+      if (!(start >= 0 && start < t1))
+        return A.ioore(bytes, start);
+      byte = bytes[start];
+      $label0$0:
+        for (t2 = _this.allowMalformed;;) {
+          for (;; i = i0) {
+            if (!(byte >= 0 && byte < 256))
+              return A.ioore(_s256_, byte);
+            type = _s256_.charCodeAt(byte) & 31;
+            char = state <= 32 ? byte & 61694 >>> type : (byte & 63 | char << 6) >>> 0;
+            t3 = state + type;
+            if (!(t3 >= 0 && t3 < 144))
+              return A.ioore(_s144_, t3);
+            state = _s144_.charCodeAt(t3);
+            if (state === 0) {
+              t3 = A.Primitives_stringFromCharCode(char);
+              buffer._contents += t3;
+              if (i === end)
+                break $label0$0;
+              break;
+            } else if ((state & 1) !== 0) {
+              if (t2)
+                switch (state) {
+                  case 69:
+                  case 67:
+                    t3 = A.Primitives_stringFromCharCode(_65533);
+                    buffer._contents += t3;
+                    break;
+                  case 65:
+                    t3 = A.Primitives_stringFromCharCode(_65533);
+                    buffer._contents += t3;
+                    --i;
+                    break;
+                  default:
+                    t3 = A.Primitives_stringFromCharCode(_65533);
+                    buffer._contents = (buffer._contents += t3) + t3;
+                    break;
+                }
+              else {
+                _this._convert$_state = state;
+                _this._charOrIndex = i - 1;
+                return "";
+              }
+              state = 0;
+            }
+            if (i === end)
+              break $label0$0;
+            i0 = i + 1;
+            if (!(i >= 0 && i < t1))
+              return A.ioore(bytes, i);
+            byte = bytes[i];
+          }
+          i0 = i + 1;
+          if (!(i >= 0 && i < t1))
+            return A.ioore(bytes, i);
+          byte = bytes[i];
+          if (byte < 128) {
+            for (;;) {
+              if (!(i0 < end)) {
+                markEnd = end;
+                break;
+              }
+              i1 = i0 + 1;
+              if (!(i0 >= 0 && i0 < t1))
+                return A.ioore(bytes, i0);
+              byte = bytes[i0];
+              if (byte >= 128) {
+                markEnd = i1 - 1;
+                i0 = i1;
+                break;
+              }
+              i0 = i1;
+            }
+            if (markEnd - i < 20)
+              for (m = i; m < markEnd; ++m) {
+                if (!(m < t1))
+                  return A.ioore(bytes, m);
+                t3 = A.Primitives_stringFromCharCode(bytes[m]);
+                buffer._contents += t3;
+              }
+            else {
+              t3 = A.String_String$fromCharCodes(bytes, i, markEnd);
+              buffer._contents += t3;
+            }
+            if (markEnd === end)
+              break $label0$0;
+            i = i0;
+          } else
+            i = i0;
+        }
+      if (single && state > 32)
+        if (t2) {
+          t1 = A.Primitives_stringFromCharCode(_65533);
+          buffer._contents += t1;
+        } else {
+          _this._convert$_state = 77;
+          _this._charOrIndex = end;
+          return "";
+        }
+      _this._convert$_state = state;
+      _this._charOrIndex = char;
+      t1 = buffer._contents;
+      return t1.charCodeAt(0) == 0 ? t1 : t1;
+    }
+  };
+  A.DateTime.prototype = {
+    $eq(_, other) {
+      var t1;
+      if (other == null)
+        return false;
+      t1 = false;
+      if (other instanceof A.DateTime)
+        if (this._value === other._value)
+          t1 = this._microsecond === other._microsecond;
+      return t1;
+    },
+    get$hashCode(_) {
+      return A.Object_hash(this._value, this._microsecond, B.C_SentinelValue, B.C_SentinelValue, B.C_SentinelValue, B.C_SentinelValue);
+    },
+    compareTo$1(_, other) {
+      var r;
+      type$.DateTime._as(other);
+      r = B.JSInt_methods.compareTo$1(this._value, other._value);
+      if (r !== 0)
+        return r;
+      return B.JSInt_methods.compareTo$1(this._microsecond, other._microsecond);
+    },
+    toString$0(_) {
+      var _this = this,
+        y = A.DateTime__fourDigits(A.Primitives_getYear(_this)),
+        m = A.DateTime__twoDigits(A.Primitives_getMonth(_this)),
+        d = A.DateTime__twoDigits(A.Primitives_getDay(_this)),
+        h = A.DateTime__twoDigits(A.Primitives_getHours(_this)),
+        min = A.DateTime__twoDigits(A.Primitives_getMinutes(_this)),
+        sec = A.DateTime__twoDigits(A.Primitives_getSeconds(_this)),
+        ms = A.DateTime__threeDigits(A.Primitives_getMilliseconds(_this)),
+        t1 = _this._microsecond,
+        us = t1 === 0 ? "" : A.DateTime__threeDigits(t1);
+      return y + "-" + m + "-" + d + " " + h + ":" + min + ":" + sec + "." + ms + us + "Z";
+    },
+    $isComparable: 1
+  };
+  A._Enum.prototype = {
+    toString$0(_) {
+      return this._enumToString$0();
+    }
+  };
+  A.Error.prototype = {
+    get$stackTrace() {
+      return A.Primitives_extractStackTrace(this);
+    }
+  };
+  A.AssertionError.prototype = {
+    toString$0(_) {
+      var t1 = this.message;
+      if (t1 != null)
+        return "Assertion failed: " + A.Error_safeToString(t1);
+      return "Assertion failed";
+    }
+  };
+  A.TypeError.prototype = {};
+  A.ArgumentError.prototype = {
+    get$_errorName() {
+      return "Invalid argument" + (!this._hasValue ? "(s)" : "");
+    },
+    get$_errorExplanation() {
+      return "";
+    },
+    toString$0(_) {
+      var _this = this,
+        $name = _this.name,
+        nameString = $name == null ? "" : " (" + $name + ")",
+        message = _this.message,
+        messageString = message == null ? "" : ": " + A.S(message),
+        prefix = _this.get$_errorName() + nameString + messageString;
+      if (!_this._hasValue)
+        return prefix;
+      return prefix + _this.get$_errorExplanation() + ": " + A.Error_safeToString(_this.get$invalidValue());
+    },
+    get$invalidValue() {
+      return this.invalidValue;
+    }
+  };
+  A.RangeError.prototype = {
+    get$invalidValue() {
+      return A._asNumQ(this.invalidValue);
+    },
+    get$_errorName() {
+      return "RangeError";
+    },
+    get$_errorExplanation() {
+      var explanation,
+        start = this.start,
+        end = this.end;
+      if (start == null)
+        explanation = end != null ? ": Not less than or equal to " + A.S(end) : "";
+      else if (end == null)
+        explanation = ": Not greater than or equal to " + A.S(start);
+      else if (end > start)
+        explanation = ": Not in inclusive range " + A.S(start) + ".." + A.S(end);
+      else
+        explanation = end < start ? ": Valid value range is empty" : ": Only valid value is " + A.S(start);
+      return explanation;
+    }
+  };
+  A.IndexError.prototype = {
+    get$invalidValue() {
+      return A._asInt(this.invalidValue);
+    },
+    get$_errorName() {
+      return "RangeError";
+    },
+    get$_errorExplanation() {
+      if (A._asInt(this.invalidValue) < 0)
+        return ": index must not be negative";
+      var t1 = this.length;
+      if (t1 === 0)
+        return ": no indices are valid";
+      return ": index should be less than " + t1;
+    },
+    get$length(receiver) {
+      return this.length;
+    }
+  };
+  A.UnsupportedError.prototype = {
+    toString$0(_) {
+      return "Unsupported operation: " + this.message;
+    }
+  };
+  A.UnimplementedError.prototype = {
+    toString$0(_) {
+      return "UnimplementedError: " + this.message;
+    }
+  };
+  A.StateError.prototype = {
+    toString$0(_) {
+      return "Bad state: " + this.message;
+    }
+  };
+  A.ConcurrentModificationError.prototype = {
+    toString$0(_) {
+      var t1 = this.modifiedObject;
+      if (t1 == null)
+        return "Concurrent modification during iteration.";
+      return "Concurrent modification during iteration: " + A.Error_safeToString(t1) + ".";
+    }
+  };
+  A.OutOfMemoryError.prototype = {
+    toString$0(_) {
+      return "Out of Memory";
+    },
+    get$stackTrace() {
+      return null;
+    },
+    $isError: 1
+  };
+  A.StackOverflowError.prototype = {
+    toString$0(_) {
+      return "Stack Overflow";
+    },
+    get$stackTrace() {
+      return null;
+    },
+    $isError: 1
+  };
+  A._Exception.prototype = {
+    toString$0(_) {
+      return "Exception: " + this.message;
+    }
+  };
+  A.FormatException.prototype = {
+    toString$0(_) {
+      var t1, lineEnd, lineNum, lineStart, previousCharWasCR, i, char, prefix, postfix, end, start,
+        message = this.message,
+        report = "" !== message ? "FormatException: " + message : "FormatException",
+        offset = this.offset,
+        source = this.source;
+      if (typeof source == "string") {
+        if (offset != null)
+          t1 = offset < 0 || offset > source.length;
+        else
+          t1 = false;
+        if (t1)
+          offset = null;
+        if (offset == null) {
+          if (source.length > 78)
+            source = B.JSString_methods.substring$2(source, 0, 75) + "...";
+          return report + "\n" + source;
+        }
+        for (lineEnd = source.length, lineNum = 1, lineStart = 0, previousCharWasCR = false, i = 0; i < offset; ++i) {
+          if (!(i < lineEnd))
+            return A.ioore(source, i);
+          char = source.charCodeAt(i);
+          if (char === 10) {
+            if (lineStart !== i || !previousCharWasCR)
+              ++lineNum;
+            lineStart = i + 1;
+            previousCharWasCR = false;
+          } else if (char === 13) {
+            ++lineNum;
+            lineStart = i + 1;
+            previousCharWasCR = true;
+          }
+        }
+        report = lineNum > 1 ? report + (" (at line " + lineNum + ", character " + (offset - lineStart + 1) + ")\n") : report + (" (at character " + (offset + 1) + ")\n");
+        for (i = offset; i < lineEnd; ++i) {
+          if (!(i >= 0))
+            return A.ioore(source, i);
+          char = source.charCodeAt(i);
+          if (char === 10 || char === 13) {
+            lineEnd = i;
+            break;
+          }
+        }
+        prefix = "";
+        if (lineEnd - lineStart > 78) {
+          postfix = "...";
+          if (offset - lineStart < 75) {
+            end = lineStart + 75;
+            start = lineStart;
+          } else {
+            if (lineEnd - offset < 75) {
+              start = lineEnd - 75;
+              end = lineEnd;
+              postfix = "";
+            } else {
+              start = offset - 36;
+              end = offset + 36;
+            }
+            prefix = "...";
+          }
+        } else {
+          end = lineEnd;
+          start = lineStart;
+          postfix = "";
+        }
+        return report + prefix + B.JSString_methods.substring$2(source, start, end) + postfix + "\n" + B.JSString_methods.$mul(" ", offset - start + prefix.length) + "^\n";
+      } else
+        return offset != null ? report + (" (at offset " + A.S(offset) + ")") : report;
+    }
+  };
+  A.Iterable.prototype = {
+    fold$1$2(_, initialValue, combine, $T) {
+      var t1, value;
+      $T._as(initialValue);
+      A._instanceType(this)._bind$1($T)._eval$1("1(1,Iterable.E)")._as(combine);
+      for (t1 = this.get$iterator(this), value = initialValue; t1.moveNext$0();)
+        value = combine.call$2(value, t1.get$current());
+      return value;
+    },
+    get$length(_) {
+      var count,
+        it = this.get$iterator(this);
+      for (count = 0; it.moveNext$0();)
+        ++count;
+      return count;
+    },
+    firstWhere$1(_, test) {
+      var t1, element;
+      A._instanceType(this)._eval$1("bool(Iterable.E)")._as(test);
+      for (t1 = this.get$iterator(this); t1.moveNext$0();) {
+        element = t1.get$current();
+        if (test.call$1(element))
+          return element;
+      }
+      throw A.wrapException(A.IterableElementError_noElement());
+    },
+    elementAt$1(_, index) {
+      var iterator, skipCount;
+      A.RangeError_checkNotNegative(index, "index");
+      iterator = this.get$iterator(this);
+      for (skipCount = index; iterator.moveNext$0();) {
+        if (skipCount === 0)
+          return iterator.get$current();
+        --skipCount;
+      }
+      throw A.wrapException(A.IndexError$withLength(index, index - skipCount, this, "index"));
+    },
+    toString$0(_) {
+      return A.Iterable_iterableToShortString(this, "(", ")");
+    }
+  };
+  A.MapEntry.prototype = {
+    toString$0(_) {
+      return "MapEntry(" + A.S(this.key) + ": " + A.S(this.value) + ")";
+    }
+  };
+  A.Null.prototype = {
+    get$hashCode(_) {
+      return A.Object.prototype.get$hashCode.call(this, 0);
+    },
+    toString$0(_) {
+      return "null";
+    }
+  };
+  A.Object.prototype = {$isObject: 1,
+    $eq(_, other) {
+      return this === other;
+    },
+    get$hashCode(_) {
+      return A.Primitives_objectHashCode(this);
+    },
+    toString$0(_) {
+      return "Instance of '" + A.Primitives_objectTypeName(this) + "'";
+    },
+    get$runtimeType(_) {
+      return A.getRuntimeTypeOfDartObject(this);
+    },
+    toString() {
+      return this.toString$0(this);
+    }
+  };
+  A._StringStackTrace.prototype = {
+    toString$0(_) {
+      return "";
+    },
+    $isStackTrace: 1
+  };
+  A.StringBuffer.prototype = {
+    get$length(_) {
+      return this._contents.length;
+    },
+    toString$0(_) {
+      var t1 = this._contents;
+      return t1.charCodeAt(0) == 0 ? t1 : t1;
+    },
+    $isStringSink: 1
+  };
+  A.Uri_splitQueryString_closure.prototype = {
+    call$2(map, element) {
+      var index, key, value, t1;
+      type$.Map_String_String._as(map);
+      A._asString(element);
+      index = B.JSString_methods.indexOf$1(element, "=");
+      if (index === -1) {
+        if (element !== "")
+          map.$indexSet(0, A._Uri__uriDecode(element, 0, element.length, this.encoding, true), "");
+      } else if (index !== 0) {
+        key = B.JSString_methods.substring$2(element, 0, index);
+        value = B.JSString_methods.substring$1(element, index + 1);
+        t1 = this.encoding;
+        map.$indexSet(0, A._Uri__uriDecode(key, 0, key.length, t1, true), A._Uri__uriDecode(value, 0, value.length, t1, true));
+      }
+      return map;
+    },
+    $signature: 14
+  };
+  A.Uri_parseIPv6Address_error.prototype = {
+    call$2(msg, position) {
+      throw A.wrapException(A.FormatException$("Illegal IPv6 address, " + msg, this.host, position));
+    },
+    $signature: 15
+  };
+  A._Uri.prototype = {
+    get$_text() {
+      var t1, t2, t3, t4, _this = this,
+        value = _this.___Uri__text_FI;
+      if (value === $) {
+        t1 = _this.scheme;
+        t2 = t1.length !== 0 ? t1 + ":" : "";
+        t3 = _this._host;
+        t4 = t3 == null;
+        if (!t4 || t1 === "file") {
+          t1 = t2 + "//";
+          t2 = _this._userInfo;
+          if (t2.length !== 0)
+            t1 = t1 + t2 + "@";
+          if (!t4)
+            t1 += t3;
+          t2 = _this._port;
+          if (t2 != null)
+            t1 = t1 + ":" + A.S(t2);
+        } else
+          t1 = t2;
+        t1 += _this.path;
+        t2 = _this._query;
+        if (t2 != null)
+          t1 = t1 + "?" + t2;
+        t2 = _this._fragment;
+        if (t2 != null)
+          t1 = t1 + "#" + t2;
+        value = _this.___Uri__text_FI = t1.charCodeAt(0) == 0 ? t1 : t1;
+      }
+      return value;
+    },
+    get$hashCode(_) {
+      var result, _this = this,
+        value = _this.___Uri_hashCode_FI;
+      if (value === $) {
+        result = B.JSString_methods.get$hashCode(_this.get$_text());
+        _this.___Uri_hashCode_FI !== $ && A.throwLateFieldADI("hashCode");
+        _this.___Uri_hashCode_FI = result;
+        value = result;
+      }
+      return value;
+    },
+    get$queryParameters() {
+      var t1, _this = this,
+        value = _this.___Uri_queryParameters_FI;
+      if (value === $) {
+        t1 = _this._query;
+        t1 = A.Uri_splitQueryString(t1 == null ? "" : t1);
+        _this.___Uri_queryParameters_FI !== $ && A.throwLateFieldADI("queryParameters");
+        value = _this.___Uri_queryParameters_FI = new A.UnmodifiableMapView(t1, type$.UnmodifiableMapView_String_String);
+      }
+      return value;
+    },
+    get$userInfo() {
+      return this._userInfo;
+    },
+    get$host() {
+      var host = this._host;
+      if (host == null)
+        return "";
+      if (B.JSString_methods.startsWith$1(host, "[") && !B.JSString_methods.startsWith$2(host, "v", 1))
+        return B.JSString_methods.substring$2(host, 1, host.length - 1);
+      return host;
+    },
+    get$port() {
+      var t1 = this._port;
+      return t1 == null ? A._Uri__defaultPort(this.scheme) : t1;
+    },
+    get$query() {
+      var t1 = this._query;
+      return t1 == null ? "" : t1;
+    },
+    get$fragment() {
+      var t1 = this._fragment;
+      return t1 == null ? "" : t1;
+    },
+    get$hasAuthority() {
+      return this._host != null;
+    },
+    get$hasQuery() {
+      return this._query != null;
+    },
+    get$hasFragment() {
+      return this._fragment != null;
+    },
+    toString$0(_) {
+      return this.get$_text();
+    },
+    $eq(_, other) {
+      var t1, t2, t3, _this = this;
+      if (other == null)
+        return false;
+      if (_this === other)
+        return true;
+      t1 = false;
+      if (type$.Uri._is(other))
+        if (_this.scheme === other.get$scheme())
+          if (_this._host != null === other.get$hasAuthority())
+            if (_this._userInfo === other.get$userInfo())
+              if (_this.get$host() === other.get$host())
+                if (_this.get$port() === other.get$port())
+                  if (_this.path === other.get$path()) {
+                    t2 = _this._query;
+                    t3 = t2 == null;
+                    if (!t3 === other.get$hasQuery()) {
+                      if (t3)
+                        t2 = "";
+                      if (t2 === other.get$query()) {
+                        t2 = _this._fragment;
+                        t3 = t2 == null;
+                        if (!t3 === other.get$hasFragment()) {
+                          t1 = t3 ? "" : t2;
+                          t1 = t1 === other.get$fragment();
+                        }
+                      }
+                    }
+                  }
+      return t1;
+    },
+    $isUri: 1,
+    get$scheme() {
+      return this.scheme;
+    },
+    get$path() {
+      return this.path;
+    }
+  };
+  A.UriData.prototype = {
+    get$uri() {
+      var t2, queryIndex, end, query, _this = this, _null = null,
+        t1 = _this._uriCache;
+      if (t1 == null) {
+        t1 = _this._separatorIndices;
+        if (0 >= t1.length)
+          return A.ioore(t1, 0);
+        t2 = _this._text;
+        t1 = t1[0] + 1;
+        queryIndex = B.JSString_methods.indexOf$2(t2, "?", t1);
+        end = t2.length;
+        if (queryIndex >= 0) {
+          query = A._Uri__normalizeOrSubstring(t2, queryIndex + 1, end, 256, false, false);
+          end = queryIndex;
+        } else
+          query = _null;
+        t1 = _this._uriCache = new A._DataUri("data", "", _null, _null, A._Uri__normalizeOrSubstring(t2, t1, end, 128, false, false), query, _null);
+      }
+      return t1;
+    },
+    toString$0(_) {
+      var t2,
+        t1 = this._separatorIndices;
+      if (0 >= t1.length)
+        return A.ioore(t1, 0);
+      t2 = this._text;
+      return t1[0] === -1 ? "data:" + t2 : t2;
+    }
+  };
+  A._SimpleUri.prototype = {
+    get$hasAuthority() {
+      return this._hostStart > 0;
+    },
+    get$hasQuery() {
+      return this._queryStart < this._fragmentStart;
+    },
+    get$hasFragment() {
+      return this._fragmentStart < this._uri.length;
+    },
+    get$scheme() {
+      var t1 = this._schemeCache;
+      return t1 == null ? this._schemeCache = this._computeScheme$0() : t1;
+    },
+    _computeScheme$0() {
+      var t2, _this = this,
+        t1 = _this._schemeEnd;
+      if (t1 <= 0)
+        return "";
+      t2 = t1 === 4;
+      if (t2 && B.JSString_methods.startsWith$1(_this._uri, "http"))
+        return "http";
+      if (t1 === 5 && B.JSString_methods.startsWith$1(_this._uri, "https"))
+        return "https";
+      if (t2 && B.JSString_methods.startsWith$1(_this._uri, "file"))
+        return "file";
+      if (t1 === 7 && B.JSString_methods.startsWith$1(_this._uri, "package"))
+        return "package";
+      return B.JSString_methods.substring$2(_this._uri, 0, t1);
+    },
+    get$userInfo() {
+      var t1 = this._hostStart,
+        t2 = this._schemeEnd + 3;
+      return t1 > t2 ? B.JSString_methods.substring$2(this._uri, t2, t1 - 1) : "";
+    },
+    get$host() {
+      var t1 = this._hostStart;
+      return t1 > 0 ? B.JSString_methods.substring$2(this._uri, t1, this._portStart) : "";
+    },
+    get$port() {
+      var t1, _this = this;
+      if (_this._hostStart > 0 && _this._portStart + 1 < _this._pathStart)
+        return A.int_parse(B.JSString_methods.substring$2(_this._uri, _this._portStart + 1, _this._pathStart));
+      t1 = _this._schemeEnd;
+      if (t1 === 4 && B.JSString_methods.startsWith$1(_this._uri, "http"))
+        return 80;
+      if (t1 === 5 && B.JSString_methods.startsWith$1(_this._uri, "https"))
+        return 443;
+      return 0;
+    },
+    get$path() {
+      return B.JSString_methods.substring$2(this._uri, this._pathStart, this._queryStart);
+    },
+    get$query() {
+      var t1 = this._queryStart,
+        t2 = this._fragmentStart;
+      return t1 < t2 ? B.JSString_methods.substring$2(this._uri, t1 + 1, t2) : "";
+    },
+    get$fragment() {
+      var t1 = this._fragmentStart,
+        t2 = this._uri;
+      return t1 < t2.length ? B.JSString_methods.substring$1(t2, t1 + 1) : "";
+    },
+    get$queryParameters() {
+      if (this._queryStart >= this._fragmentStart)
+        return B.Map_empty0;
+      return new A.UnmodifiableMapView(A.Uri_splitQueryString(this.get$query()), type$.UnmodifiableMapView_String_String);
+    },
+    get$hashCode(_) {
+      var t1 = this._hashCodeCache;
+      return t1 == null ? this._hashCodeCache = B.JSString_methods.get$hashCode(this._uri) : t1;
+    },
+    $eq(_, other) {
+      if (other == null)
+        return false;
+      if (this === other)
+        return true;
+      return type$.Uri._is(other) && this._uri === other.toString$0(0);
+    },
+    toString$0(_) {
+      return this._uri;
+    },
+    $isUri: 1
+  };
+  A._DataUri.prototype = {};
+  A.NullRejectionException.prototype = {
+    toString$0(_) {
+      return "Promise was rejected with a value of `" + (this.isUndefined ? "undefined" : "null") + "`.";
+    }
+  };
+  A.promiseToFuture_closure.prototype = {
+    call$1(r) {
+      return this.completer.complete$1(this.T._eval$1("0/?")._as(r));
+    },
+    $signature: 5
+  };
+  A.promiseToFuture_closure0.prototype = {
+    call$1(e) {
+      if (e == null)
+        return this.completer.completeError$1(new A.NullRejectionException(e === undefined));
+      return this.completer.completeError$1(e);
+    },
+    $signature: 5
+  };
+  A.dartify_convert.prototype = {
+    call$1(o) {
+      var t1, millisSinceEpoch, proto, t2, dartObject, originalKeys, dartKeys, i, jsKey, dartKey, l, $length;
+      if (A._noDartifyRequired(o))
+        return o;
+      t1 = this._convertedObjects;
+      o.toString;
+      if (t1.containsKey$1(o))
+        return t1.$index(0, o);
+      if (o instanceof Date) {
+        millisSinceEpoch = o.getTime();
+        if (millisSinceEpoch < -864e13 || millisSinceEpoch > 864e13)
+          A.throwExpression(A.RangeError$range(millisSinceEpoch, -864e13, 864e13, "millisecondsSinceEpoch", null));
+        A.checkNotNullable(true, "isUtc", type$.bool);
+        return new A.DateTime(millisSinceEpoch, 0, true);
+      }
+      if (o instanceof RegExp)
+        throw A.wrapException(A.ArgumentError$("structured clone of RegExp", null));
+      if (o instanceof Promise)
+        return A.promiseToFuture(o, type$.nullable_Object);
+      proto = Object.getPrototypeOf(o);
+      if (proto === Object.prototype || proto === null) {
+        t2 = type$.nullable_Object;
+        dartObject = A.LinkedHashMap_LinkedHashMap$_empty(t2, t2);
+        t1.$indexSet(0, o, dartObject);
+        originalKeys = Object.keys(o);
+        dartKeys = [];
+        for (t1 = J.getInterceptor$ax(originalKeys), t2 = t1.get$iterator(originalKeys); t2.moveNext$0();)
+          dartKeys.push(A.dartify(t2.get$current()));
+        for (i = 0; i < t1.get$length(originalKeys); ++i) {
+          jsKey = t1.$index(originalKeys, i);
+          if (!(i < dartKeys.length))
+            return A.ioore(dartKeys, i);
+          dartKey = dartKeys[i];
+          if (jsKey != null)
+            dartObject.$indexSet(0, dartKey, this.call$1(o[jsKey]));
+        }
+        return dartObject;
+      }
+      if (o instanceof Array) {
+        l = o;
+        dartObject = [];
+        t1.$indexSet(0, o, dartObject);
+        $length = A._asInt(o.length);
+        for (t1 = J.getInterceptor$asx(l), i = 0; i < $length; ++i)
+          dartObject.push(this.call$1(t1.$index(l, i)));
+        return dartObject;
+      }
+      return o;
+    },
+    $signature: 16
+  };
+  A.RenderCapabilities.prototype = {};
+  A.QualityProfileKind.prototype = {
+    _enumToString$0() {
+      return "QualityProfileKind." + this._name;
+    }
+  };
+  A.QualityProfile.prototype = {};
+  A.ConfigurationCoordinator.prototype = {};
+  A.ConfigurationStateMachine.prototype = {};
+  A.PostProcessState.prototype = {
+    validate$0() {
+      var t1, t2, key, value;
+      for (t1 = A.LinkedHashMap_LinkedHashMap$_literal(["exposure", 1, "bloomStrength", 0, "ssaoStrength", 0, "depthOfFieldStrength", 0, "vignette", 0, "grain", 0, "rainIntensity", 0, "surfaceWetness", 0, "rainWindowVisibility", 1, "ditherStrength", 0, "colorGradeStrength", 0, "affineWarpStrength", 0, "vertexSnapGrid", 0, "vhsChromaWeight", 0, "vhsTrackingWeight", 0, "vhsNoiseWeight", 0, "vhsHeadSwitchWeight", 0, "vhsDropoutWeight", 0, "vhsGhostWeight", 0], type$.String, type$.double), t1 = new A.LinkedHashMapEntriesIterable(t1, A._instanceType(t1)._eval$1("LinkedHashMapEntriesIterable<1,2>")).get$iterator(0); t1.moveNext$0();) {
+        t2 = t1.__js_helper$_current;
+        key = t2.key;
+        value = t2.value;
+        if (!isFinite(value) || value < 0)
+          throw A.wrapException(A.ArgumentError$("PostProcessState." + key + " must be >= 0: " + A.S(value), null));
+      }
+    }
+  };
+  A.CameraView.prototype = {};
+  A.FrameEnvironment.prototype = {
+    validate$0() {
+      var t1, t2, _i, _null = null;
+      if (!B.LinearColor_Rsl.get$isFinite(0) || !B.LinearColor_0_0_0.get$isFinite(0) || !B.LinearColor_1_1_1.get$isFinite(0))
+        throw A.wrapException(A.ArgumentError$("FrameEnvironment colors must be finite", _null));
+      t1 = isFinite(0);
+      if (t1)
+        t2 = !isFinite(1);
+      else
+        t2 = true;
+      if (t2)
+        throw A.wrapException(A.ArgumentError$("FrameEnvironment requires fogEnd >= fogStart, got 0/1", _null));
+      if (!t1)
+        throw A.wrapException(A.ArgumentError$("FrameEnvironment.ambientIntensity must be >= 0: 0", _null));
+      for (_i = 0; false; ++_i)
+        B.List_empty[_i].validate$0();
+      for (t1 = isFinite(1), t2 = isFinite(-1), _i = 0; false; ++_i) {
+        if (!t1)
+          A.throwExpression(A.ArgumentError$("SpotLight.position must be finite: " + B.Vec3_0_1_0.toString$0(0), _null));
+        if (!t2)
+          A.throwExpression(A.ArgumentError$("SpotLight.direction must be finite and nonzero: " + B.Vec3_0_m1_0.toString$0(0), _null));
+      }
+    }
+  };
+  A.FrameInput.prototype = {};
+  A.ResourceHandle.prototype = {
+    $eq(_, other) {
+      if (other == null)
+        return false;
+      return J.get$runtimeType$(other) === A.getRuntimeTypeOfDartObject(this) && other instanceof A.ResourceHandle && this.slot === other.slot && this.generation === other.generation;
+    },
+    get$hashCode(_) {
+      return A.Object_hash(A.getRuntimeTypeOfDartObject(this), this.slot, this.generation, B.C_SentinelValue, B.C_SentinelValue, B.C_SentinelValue);
+    }
+  };
+  A.MeshHandle.prototype = {
+    toString$0(_) {
+      var t1 = this.debugLabel;
+      t1 = t1 == null ? "" : ' "' + t1 + '"';
+      return "MeshHandle(#" + this.slot + "." + this.generation + t1 + ")";
+    }
+  };
+  A.TextureHandle.prototype = {
+    toString$0(_) {
+      var t1 = this.debugLabel;
+      t1 = t1 == null ? "" : ' "' + t1 + '"';
+      return "TextureHandle(#" + this.slot + "." + this.generation + t1 + ")";
+    }
+  };
+  A.MaterialHandle.prototype = {
+    toString$0(_) {
+      var t1 = this.debugLabel;
+      t1 = t1 == null ? "" : ' "' + t1 + '"';
+      return "MaterialHandle(#" + this.slot + "." + this.generation + t1 + ")";
+    }
+  };
+  A.PipelineHandle.prototype = {
+    toString$0(_) {
+      var t1 = this.debugLabel;
+      t1 = t1 == null ? "" : ' "' + t1 + '"';
+      return "PipelineHandle(#" + this.slot + "." + this.generation + t1 + ")";
+    }
+  };
+  A.InstanceId.prototype = {
+    toString$0(_) {
+      var t1 = this.debugLabel;
+      t1 = t1 == null ? "" : ' "' + t1 + '"';
+      return "InstanceId(#" + this.slot + "." + this.generation + t1 + ")";
+    }
+  };
+  A.HandleRejection.prototype = {
+    _enumToString$0() {
+      return "HandleRejection." + this._name;
+    }
+  };
+  A.HandleException.prototype = {
+    toString$0(_) {
+      return "HandleException(" + this.reason._name + ", " + this.handle.toString$0(0) + ")";
+    }
+  };
+  A.LinearColor.prototype = {
+    get$isFinite(_) {
+      return isFinite(this.r) && isFinite(this.g) && isFinite(this.b);
+    },
+    $eq(_, other) {
+      if (other == null)
+        return false;
+      return other instanceof A.LinearColor && this.r === other.r && this.g === other.g && this.b === other.b;
+    },
+    get$hashCode(_) {
+      return A.Object_hash(this.r, this.g, this.b, B.C_SentinelValue, B.C_SentinelValue, B.C_SentinelValue);
+    },
+    toString$0(_) {
+      return "LinearColor(" + A.S(this.r) + ", " + A.S(this.g) + ", " + A.S(this.b) + ")";
+    }
+  };
+  A.SpotLight.prototype = {};
+  A.selectSpotLights_closure.prototype = {
+    call$2(a, b) {
+      var byInfluence,
+        t1 = type$.Record_2_double_influence_and_SpotLight_light;
+      t1._as(a);
+      byInfluence = B.JSNumber_methods.compareTo$1(t1._as(b)._0, a._0);
+      return byInfluence === 0 ? 0 : byInfluence;
+    },
+    $signature: 17
+  };
+  A.VertexAttributeKind.prototype = {
+    _enumToString$0() {
+      return "VertexAttributeKind." + this._name;
+    }
+  };
+  A.DefaultSceneRendererFactory.prototype = {};
+  A.OwnedResourcePlan.prototype = {
+    validate$0() {
+      var t1 = this.resources,
+        t2 = t1._collection$_source;
+      if (!t2.contains$1(0, "sceneColor") || !t2.contains$1(0, "present"))
+        throw A.wrapException(A.ArgumentError$("resource plan must contain sceneColor and present", null));
+      if (t1.any$1(0, new A.OwnedResourcePlan_validate_closure()))
+        throw A.wrapException(A.ArgumentError$("resource plan contains an empty resource ID", null));
+      if (this.hasHistory !== t2.contains$1(0, "vhsOutput"))
+        throw A.wrapException(A.ArgumentError$("resource history does not match vhsOutput ownership", null));
+    }
+  };
+  A.OwnedResourcePlan_validate_closure.prototype = {
+    call$1(resource) {
+      return A._asString(resource).length === 0;
+    },
+    $signature: 6
+  };
+  A.PreparedResourceAssembly.prototype = {};
+  A.ResourcePlanAssembler.prototype = {
+    initialize$1(plan) {
+      var _this = this;
+      if (_this._disposed)
+        A.throwExpression(A.StateError$("resource assembler is disposed"));
+      if (_this._resource_plan$_current != null)
+        throw A.wrapException(A.StateError$("resource assembler is initialized"));
+      plan.validate$0();
+      _this._resource_plan$_current = plan;
+      _this._generation = 1;
+    },
+    dispose$0() {
+      if (this._disposed)
+        return;
+      this._disposed = true;
+      this._resource_plan$_current = null;
+    }
+  };
+  A.SurfaceMetrics.prototype = {
+    validate$0() {
+      var _this = this;
+      if (_this.cssWidth < 0 || _this.cssHeight < 0)
+        throw A.wrapException(A.ArgumentError$("SurfaceMetrics css size must be >= 0", null));
+      if (_this.pixelWidth < 0 || _this.pixelHeight < 0)
+        throw A.wrapException(A.ArgumentError$("SurfaceMetrics pixel size must be >= 0", null));
+      if (!isFinite(1))
+        throw A.wrapException(A.ArgumentError$("SurfaceMetrics.devicePixelRatio must be finite and > 0: 1", null));
+    }
+  };
+  A.ColorEncoding.prototype = {
+    _enumToString$0() {
+      return "ColorEncoding." + this._name;
+    }
+  };
+  A.DiagnosticLevel.prototype = {
+    _enumToString$0() {
+      return "DiagnosticLevel." + this._name;
+    }
+  };
+  A.RendererConfiguration.prototype = {
+    validate$0() {
+      var _this = this,
+        _s17_ = "installedFeatures",
+        t1 = _this.profile,
+        t2 = t1.installedFeatures,
+        unknown = t2.difference$1(B.Set_wtCB7);
+      if (unknown._collection$_length !== 0)
+        A.throwExpression(A.ArgumentError$value(unknown, _s17_, "contains unknown pipeline features"));
+      if (t1.kind === B.QualityProfileKind_0 && t2.get$isNotEmpty(t2))
+        A.throwExpression(A.ArgumentError$value(t2, _s17_, "safe profiles cannot install optional features"));
+      t1 = _this.internalWidth;
+      if (t1 <= 0 || _this.internalHeight <= 0)
+        throw A.wrapException(A.ArgumentError$("RendererConfiguration internal resolution must be > 0: " + t1 + "x" + _this.internalHeight, null));
+      t1 = _this.sampleCount;
+      if (t1 <= 0)
+        throw A.wrapException(A.ArgumentError$("RendererConfiguration.sampleCount must be > 0: " + t1, null));
+    }
+  };
+  A.RendererState.prototype = {
+    _enumToString$0() {
+      return "RendererState." + this._name;
+    }
+  };
+  A.FramePassStats.prototype = {};
+  A.FrameStats.prototype = {
+    toString$0(_) {
+      var _this = this;
+      return "FrameStats(#" + _this.frameIndex + " draws=" + _this.drawCalls + " tris=" + _this.trianglesSubmitted + " culled=" + _this.trianglesCulled + " gpu=" + _this.liveGpuBytes + "B)";
+    }
+  };
+  A.MaterialStore.prototype = {
+    resolveForPass$1(handle) {
+      return this._material_store$_registry.descriptorOf$1(handle);
+    }
+  };
+  A.MaterialStore__registry_closure.prototype = {
+    call$3(slot, generation, label) {
+      return new A.MaterialHandle(A._asInt(slot), A._asInt(generation), A._asStringQ(label));
+    },
+    $signature: 20
+  };
+  A.UploadedMesh.prototype = {};
+  A.MeshStore.prototype = {
+    _uploadToGpu$1(mesh) {
+      var handle, t3, t4, vao, strideBytes, boundLocations, t5, _i, attr, $location, componentCount, t6,
+        _s60_ = string$.WebGl2,
+        t1 = this._mesh_store$_device,
+        t2 = mesh.get$vertices(),
+        vertexBuffer = A.WebGl2DeviceResources_createBufferImpl(t1, new A.GpuBufferDescriptor(t2.get$lengthInBytes(t2), B.GpuBufferUsage_0, B.GpuBufferKind_0));
+      t2 = mesh.get$vertices();
+      if (t1._status !== B.GpuDeviceStatus_0)
+        A.throwExpression(A.StateError$(_s60_));
+      handle = A._asJSObject(vertexBuffer.handle);
+      t3 = t1.gl;
+      t4 = init.G;
+      t3.bindBuffer(A._asInt(t4.WebGL2RenderingContext.ARRAY_BUFFER), handle);
+      t3.bufferSubData(A._asInt(t4.WebGL2RenderingContext.ARRAY_BUFFER), 0, t2);
+      vao = A.WebGl2DeviceTargets_createVertexArrayImpl(t1);
+      A.WebGl2DeviceDraw_bindVertexArrayImpl(t1, vao);
+      if (t1._status !== B.GpuDeviceStatus_0)
+        A.throwExpression(A.StateError$(_s60_));
+      t3.bindBuffer(A._asInt(t4.WebGL2RenderingContext.ARRAY_BUFFER), handle);
+      strideBytes = mesh.get$layout().get$strideFloats().$mul(0, 4);
+      boundLocations = A.LinkedHashSet_LinkedHashSet$_empty(type$.int);
+      for (t2 = mesh.get$layout().get$attributes(), t5 = t2.length, _i = 0; _i < t5; ++_i) {
+        attr = t2[_i];
+        $location = A._shaderLocationFor(attr.get$kind());
+        if (!boundLocations.add$1(0, $location))
+          continue;
+        componentCount = A._componentCountAtLocation(mesh.get$layout(), $location, attr);
+        t6 = attr.get$floatOffset().$mul(0, 4);
+        if (t1._status !== B.GpuDeviceStatus_0)
+          A.throwExpression(A.StateError$(_s60_));
+        t3.vertexAttribPointer.apply(t3, [$location, componentCount, A._asInt(t4.WebGL2RenderingContext.FLOAT), false, strideBytes, t6]);
+        if (t1._status !== B.GpuDeviceStatus_0)
+          A.throwExpression(A.StateError$(_s60_));
+        t3.enableVertexAttribArray($location);
+      }
+      A.MeshStore__indexByteLength(mesh.get$indices());
+      return new A.UploadedMesh(vertexBuffer, void 1, vao, 0, mesh.get$vertexCount(), true);
+    },
+    resolve$1(handle) {
+      if (this._uploadsBySlot.$index(0, handle.get$slot()) == null)
+        throw A.wrapException(A.HandleException$(B.HandleRejection_3, handle));
+      this._registry.descriptorOf$1(handle);
+    },
+    rehydrateAfterContextRestore$0() {
+      var t1, t2, t3, t4, handle, mesh;
+      for (t1 = this._registry.liveDescriptors$0(), t2 = t1.$ti, t1 = new A._SyncStarIterator(t1._outerHelper(), t2._eval$1("_SyncStarIterator<1>")), t3 = this._uploadsBySlot, t2 = t2._precomputed1; t1.moveNext$0();) {
+        t4 = t1._async$_current;
+        if (t4 == null)
+          t4 = t2._as(t4);
+        handle = t4._0;
+        mesh = t4._1;
+        t3.$indexSet(0, handle.slot, this._uploadToGpu$1(mesh));
+      }
+    },
+    get$liveGpuBytes() {
+      return this._registry.liveDescriptors$0().fold$1$2(0, 0, new A.MeshStore_liveGpuBytes_closure(), type$.int);
+    }
+  };
+  A.MeshStore_closure.prototype = {
+    call$3(slot, generation, label) {
+      return new A.MeshHandle(A._asInt(slot), A._asInt(generation), A._asStringQ(label));
+    },
+    $signature: 21
+  };
+  A.MeshStore_liveGpuBytes_closure.prototype = {
+    call$2(total, entry) {
+      var t1, t2;
+      A._asInt(total);
+      t1 = type$.Record_2_MeshHandle_and_MeshData._as(entry)._1;
+      t2 = t1.get$vertices();
+      t2 = B.JSInt_methods.$add(total, t2.get$lengthInBytes(t2));
+      t1 = A.MeshStore__indexByteLength(t1.get$indices());
+      return t2 + t1;
+    },
+    $signature: 22
+  };
+  A.TextureStore.prototype = {
+    _createFallback$1(pixels) {
+      var t1 = this._texture_store$_device,
+        texture = A.WebGl2DeviceResources_createTextureImpl(t1, B.C_GpuTextureDescriptor);
+      A.WebGl2DeviceResources_uploadTextureLayerImpl(t1, texture, 0, pixels);
+      return texture;
+    },
+    _resolve$2(handle, fallback) {
+      this._texture_store$_registry.descriptorOf$1(handle);
+    },
+    resolveAlbedo$1(handle) {
+      var t1 = this.__TextureStore__fallbackAlbedo_A;
+      t1 === $ && A.throwLateFieldNI("_fallbackAlbedo");
+      return this._resolve$2(handle, t1);
+    },
+    resolveNormal$1(handle) {
+      var t1 = this.__TextureStore__fallbackNormal_A;
+      t1 === $ && A.throwLateFieldNI("_fallbackNormal");
+      return this._resolve$2(handle, t1);
+    },
+    resolveOrm$1(handle) {
+      var t1 = this.__TextureStore__fallbackOrm_A;
+      t1 === $ && A.throwLateFieldNI("_fallbackOrm");
+      return this._resolve$2(handle, t1);
+    },
+    resolveEmissive$1(handle) {
+      var t1 = this.__TextureStore__fallbackEmissive_A;
+      t1 === $ && A.throwLateFieldNI("_fallbackEmissive");
+      return this._resolve$2(handle, t1);
+    },
+    resolveLightmap$1(handle) {
+      var t1 = this.__TextureStore__fallbackLightmap_A;
+      t1 === $ && A.throwLateFieldNI("_fallbackLightmap");
+      return this._resolve$2(handle, t1);
+    },
+    dispose$0() {
+      var t1, t2, t3, t4, t5, _this = this;
+      for (t1 = _this._texturesBySlot, t2 = new A.LinkedHashMapValueIterator(t1, t1._modifications, t1._first, A._instanceType(t1)._eval$1("LinkedHashMapValueIterator<2>")), t3 = _this._texture_store$_device, t4 = t3.gl, t5 = type$._WebGlTexture; t2.moveNext$0();)
+        t4.deleteTexture(t5._as(t2.__js_helper$_current.handle).handle);
+      t1.clear$0(0);
+      t1 = _this.__TextureStore__fallbackAlbedo_A;
+      t1 === $ && A.throwLateFieldNI("_fallbackAlbedo");
+      A.WebGl2DeviceResources_deleteTextureImpl(t3, t1);
+      t1 = _this.__TextureStore__fallbackNormal_A;
+      t1 === $ && A.throwLateFieldNI("_fallbackNormal");
+      A.WebGl2DeviceResources_deleteTextureImpl(t3, t1);
+      t1 = _this.__TextureStore__fallbackOrm_A;
+      t1 === $ && A.throwLateFieldNI("_fallbackOrm");
+      A.WebGl2DeviceResources_deleteTextureImpl(t3, t1);
+      t1 = _this.__TextureStore__fallbackEmissive_A;
+      t1 === $ && A.throwLateFieldNI("_fallbackEmissive");
+      A.WebGl2DeviceResources_deleteTextureImpl(t3, t1);
+      t1 = _this.__TextureStore__fallbackLightmap_A;
+      t1 === $ && A.throwLateFieldNI("_fallbackLightmap");
+      A.WebGl2DeviceResources_deleteTextureImpl(t3, t1);
+    },
+    rehydrateAfterContextRestore$0() {
+      var t1, t2, t3, t4, t5, handle, record, texture, layer, _this = this;
+      _this.__TextureStore__fallbackAlbedo_A = _this._createFallback$1($.$get$FallbackPixels_whiteAlbedo());
+      _this.__TextureStore__fallbackNormal_A = _this._createFallback$1($.$get$FallbackPixels_flatNormal());
+      _this.__TextureStore__fallbackOrm_A = _this._createFallback$1($.$get$FallbackPixels_identityOrm());
+      _this.__TextureStore__fallbackEmissive_A = _this._createFallback$1($.$get$FallbackPixels_blackEmissive());
+      _this.__TextureStore__fallbackLightmap_A = _this._createFallback$1($.$get$FallbackPixels_neutralLightmap());
+      for (t1 = _this._texture_store$_registry.liveDescriptors$0(), t2 = t1.$ti, t1 = new A._SyncStarIterator(t1._outerHelper(), t2._eval$1("_SyncStarIterator<1>")), t3 = _this._texturesBySlot, t4 = _this._texture_store$_device, t2 = t2._precomputed1; t1.moveNext$0();) {
+        t5 = t1._async$_current;
+        if (t5 == null)
+          t5 = t2._as(t5);
+        handle = t5._0;
+        record = t5._1;
+        if (record.get$layerPixels().every$1(0, new A.TextureStore_rehydrateAfterContextRestore_closure()))
+          continue;
+        texture = A.WebGl2DeviceResources_createTextureImpl(t4, record.get$descriptor());
+        for (layer = 0; B.JSInt_methods.$lt(layer, record.get$layerPixels().length); ++layer) {
+          t5 = record.get$layerPixels();
+          if (!(layer < t5.length))
+            return A.ioore(t5, layer);
+          A.WebGl2DeviceResources_uploadTextureLayerImpl(t4, texture, layer, t5[layer]);
+        }
+        if (record.get$mipsFinalized())
+          A.WebGl2DeviceResources_finalizeMipsImpl(t4, texture);
+        t3.$indexSet(0, handle.slot, texture);
+      }
+    },
+    get$liveGpuBytes() {
+      return this._texture_store$_registry.liveDescriptors$0().fold$1$2(0, 0, new A.TextureStore_liveGpuBytes_closure(), type$.int);
+    }
+  };
+  A.TextureStore_closure.prototype = {
+    call$3(slot, generation, label) {
+      return new A.TextureHandle(A._asInt(slot), A._asInt(generation), A._asStringQ(label));
+    },
+    $signature: 24
+  };
+  A.TextureStore_rehydrateAfterContextRestore_closure.prototype = {
+    call$1(pixels) {
+      return false;
+    },
+    $signature: 25
+  };
+  A.TextureStore_liveGpuBytes_closure.prototype = {
+    call$2(total, entry) {
+      var descriptor;
+      A._asInt(total);
+      descriptor = type$.Record_2_TextureHandle_and__TextureRecord._as(entry)._1.get$descriptor();
+      return B.JSInt_methods.$add(total, descriptor.get$width().$mul(0, descriptor.get$height()).$mul(0, descriptor.get$layers()).$mul(0, 4));
+    },
+    $signature: 26
+  };
+  A.InstanceBatch.prototype = {
+    get$instanceCount() {
+      return this.members.length;
+    }
+  };
+  A.FeatureGraph.prototype = {
+    build$4$availableCapabilities$featureContext$hasValidPreviousFrame$resources(availableCapabilities, featureContext, hasValidPreviousFrame, resources) {
+      var builder, t1, t2, _i, graph, t3, declaredIds, passes, feature, _i0, pass;
+      type$.Set_String._as(availableCapabilities);
+      builder = new A.RenderGraphBuilder(A._setArrayType([], type$.JSArray_PassDeclaration), A.LinkedHashSet_LinkedHashSet$_empty(type$.String));
+      for (t1 = this._installedFeatures, t2 = t1.length, _i = 0; _i < t1.length; t1.length === t2 || (0, A.throwConcurrentModificationError)(t1), ++_i)
+        t1[_i].declare$2(builder, featureContext);
+      graph = builder.build$2$availableCapabilities$hasValidPreviousFrame(availableCapabilities, false);
+      if (graph.failures.length !== 0)
+        return new A.FeatureGraphResult(graph, B.List_empty0);
+      t2 = graph.orderedPasses;
+      t3 = A._arrayInstanceType(t2);
+      declaredIds = new A.MappedListIterable(t2, t3._eval$1("String(1)")._as(new A.FeatureGraph_build_closure()), t3._eval$1("MappedListIterable<1,String>")).toSet$0(0);
+      passes = A._setArrayType([], type$.JSArray_RenderPass);
+      for (t2 = t1.length, _i = 0; _i < t1.length; t1.length === t2 || (0, A.throwConcurrentModificationError)(t1), ++_i) {
+        feature = t1[_i];
+        for (t3 = feature.createPasses$1(resources), _i0 = 0; _i0 < 1; ++_i0) {
+          pass = t3[_i0];
+          if (!declaredIds.contains$1(0, pass.get$descriptor().id))
+            throw A.wrapException(A.StateError$('RenderFeature "' + feature.get$id() + '" created a pass "' + pass.get$descriptor().id + '" that it never declared into the graph'));
+          B.JSArray_methods.add$1(passes, pass);
+        }
+      }
+      B.JSArray_methods.sort$1(passes, new A.FeatureGraph_build_closure0(graph));
+      return new A.FeatureGraphResult(graph, passes);
+    }
+  };
+  A.FeatureGraph_build_closure.prototype = {
+    call$1(p) {
+      return type$.PassDeclaration._as(p).id;
+    },
+    $signature: 27
+  };
+  A.FeatureGraph_build_closure0.prototype = {
+    call$2(a, b) {
+      var t1 = type$.RenderPass;
+      t1._as(a);
+      t1._as(b);
+      t1 = this.graph.orderedPasses;
+      return B.JSInt_methods.compareTo$1(B.JSArray_methods.indexWhere$1(t1, new A.FeatureGraph_build__closure(a)), B.JSArray_methods.indexWhere$1(t1, new A.FeatureGraph_build__closure0(b)));
+    },
+    $signature: 28
+  };
+  A.FeatureGraph_build__closure.prototype = {
+    call$1(p) {
+      return type$.PassDeclaration._as(p).id === this.a.get$descriptor().id;
+    },
+    $signature: 2
+  };
+  A.FeatureGraph_build__closure0.prototype = {
+    call$1(p) {
+      return type$.PassDeclaration._as(p).id === this.b.get$descriptor().id;
+    },
+    $signature: 2
+  };
+  A.FeatureGraphResult.prototype = {};
+  A.FrameQueueState.prototype = {
+    _enumToString$0() {
+      return "FrameQueueState." + this._name;
+    }
+  };
+  A.FrameQueue.prototype = {};
+  A.FrameDrawTelemetry.prototype = {
+    beginPass$1(passId) {
+      if (passId.length === 0)
+        throw A.wrapException(A.ArgumentError$value(passId, "passId", null));
+      this._activePass = passId;
+      this._passes.putIfAbsent$2(passId, A.frame_telemetry__MutablePassStats___new_tearOff$closure());
+    },
+    snapshot$0() {
+      var t2, entry, t3, t4,
+        t1 = type$.dynamic;
+      t1 = A.LinkedHashMap_LinkedHashMap$_empty(t1, t1);
+      for (t2 = this._passes, t2 = new A.LinkedHashMapEntriesIterable(t2, A._instanceType(t2)._eval$1("LinkedHashMapEntriesIterable<1,2>")).get$iterator(0); t2.moveNext$0();) {
+        entry = t2.__js_helper$_current;
+        t3 = entry.key;
+        t4 = entry.value;
+        t1.$indexSet(0, t3, new A.FramePassStats(t4.drawCalls, t4.trianglesSubmitted, t4.instancesSubmitted));
+      }
+      return A.ConstantMap_ConstantMap$from(t1, type$.String, type$.FramePassStats);
+    },
+    _record$2(count, instanceCount) {
+      var stats,
+        passId = this._activePass;
+      if (passId == null)
+        throw A.wrapException(A.StateError$("draw recorded outside an active render pass"));
+      if (instanceCount < 1)
+        throw A.wrapException(A.ArgumentError$("draw count and instance count must be positive", null));
+      stats = this._passes.$index(0, passId);
+      ++stats.drawCalls;
+      stats.instancesSubmitted += instanceCount;
+      stats.trianglesSubmitted = stats.trianglesSubmitted + (count / 3 | 0) * instanceCount;
+    }
+  };
+  A._MutablePassStats.prototype = {};
+  A.PassDeclaration.prototype = {
+    get$reads() {
+      var t1 = this.uses,
+        t2 = A._arrayInstanceType(t1);
+      return new A.WhereIterable(t1, t2._eval$1("bool(1)")._as(new A.PassDeclaration_reads_closure()), t2._eval$1("WhereIterable<1>"));
+    },
+    get$writes() {
+      var t1 = this.uses,
+        t2 = A._arrayInstanceType(t1);
+      return new A.WhereIterable(t1, t2._eval$1("bool(1)")._as(new A.PassDeclaration_writes_closure()), t2._eval$1("WhereIterable<1>"));
+    },
+    toString$0(_) {
+      return "PassDeclaration(" + this.id + " @ " + this.stage.toString$0(0) + ")";
+    }
+  };
+  A.PassDeclaration_reads_closure.prototype = {
+    call$1(u) {
+      var t1 = type$.ResourceUse._as(u).access;
+      return t1 === B.ResourceAccess_0 || t1 === B.ResourceAccess_2;
+    },
+    $signature: 7
+  };
+  A.PassDeclaration_writes_closure.prototype = {
+    call$1(u) {
+      return type$.ResourceUse._as(u).access === B.ResourceAccess_1;
+    },
+    $signature: 7
+  };
+  A.GraphValidationFailureKind.prototype = {
+    _enumToString$0() {
+      return "GraphValidationFailureKind." + this._name;
+    }
+  };
+  A.GraphValidationFailure.prototype = {
+    toString$0(_) {
+      return "GraphValidationFailure(" + this.kind._name + " in " + this.passId + ": " + this.detail + ")";
+    }
+  };
+  A.ResourceFormat.prototype = {
+    _enumToString$0() {
+      return "ResourceFormat." + this._name;
+    }
+  };
+  A.GraphStage.prototype = {
+    _enumToString$0() {
+      return "GraphStage." + this._name;
+    }
+  };
+  A.ResourceRef.prototype = {
+    nextVersion$0() {
+      var _this = this;
+      return new A.ResourceRef(_this.name, _this.format, _this.width, _this.height, _this.samples, _this.version + 1);
+    },
+    $eq(_, other) {
+      var _this = this;
+      if (other == null)
+        return false;
+      return other instanceof A.ResourceRef && _this.name === other.name && _this.format === other.format && _this.width === other.width && _this.height === other.height && _this.samples === other.samples && _this.version === other.version;
+    },
+    get$hashCode(_) {
+      var _this = this;
+      return A.Object_hash(_this.name, _this.format, _this.width, _this.height, _this.samples, _this.version);
+    },
+    toString$0(_) {
+      var _this = this,
+        t1 = _this.format.toString$0(0),
+        t2 = _this.samples;
+      t2 = t2 > 1 ? " x" + t2 : "";
+      return "ResourceRef(" + _this.name + "#" + _this.version + ", " + t1 + ", " + _this.width + "x" + _this.height + t2 + ")";
+    }
+  };
+  A.ResourceAccess.prototype = {
+    _enumToString$0() {
+      return "ResourceAccess." + this._name;
+    }
+  };
+  A.ResourceUse.prototype = {};
+  A.CompiledProgram.prototype = {};
+  A.ProgramLibrary.prototype = {
+    publish$1(source) {
+      var handle, t1, t2, exception, compiled, previous, _this = this;
+      source.validate$0();
+      handle = null;
+      try {
+        t1 = source.attributeLocations.get$keys();
+        t1 = A.List_List$_of(t1, A._instanceType(t1)._eval$1("Iterable.E"));
+        t2 = type$.List_String;
+        handle = A.WebGl2DeviceTargets_compileProgramImpl(_this._device, source.fragmentSource, t2._as(t1), t2._as(source.requiredUniforms), source.vertexSource);
+      } catch (exception) {
+        if (A.unwrapException(exception) instanceof A.ShaderCompileException) {
+          ++_this.rejectedReloadCount;
+          throw exception;
+        } else
+          throw exception;
+      }
+      compiled = new A.CompiledProgram(handle);
+      t1 = _this._live;
+      t2 = source.id;
+      previous = t1.$index(0, t2);
+      t1.$indexSet(0, t2, compiled);
+      ++_this.publishCount;
+      if (previous != null)
+        _this._device.gl.deleteProgram(A._asJSObject(previous.handle.handle));
+      return compiled;
+    },
+    _deletePrograms$1(programs) {
+      var t1, t2;
+      type$.Iterable_CompiledProgram._as(programs);
+      for (t1 = programs._map, t1 = new A.LinkedHashMapValueIterator(t1, t1._modifications, t1._first, programs.$ti._eval$1("LinkedHashMapValueIterator<1>")), t2 = this._device.gl; t1.moveNext$0();)
+        t2.deleteProgram(A._asJSObject(t1.__js_helper$_current.handle.handle));
+    }
+  };
+  A.ProgramSource.prototype = {
+    validate$0() {
+      var t2, usedLocations, t3, t4, t5, usedUnits, _null = null,
+        t1 = this.id;
+      if (t1.length === 0)
+        throw A.wrapException(A.ArgumentError$("ProgramSource.id must not be empty", _null));
+      t2 = type$.int;
+      usedLocations = A.LinkedHashSet_LinkedHashSet$_empty(t2);
+      for (t3 = this.attributeLocations.get$entries(), t3 = t3.get$iterator(t3); t3.moveNext$0();) {
+        t4 = t3.get$current();
+        t5 = t4.value;
+        if (t5 < 0)
+          throw A.wrapException(A.ArgumentError$('ProgramSource "' + t1 + '": attribute "' + t4.key + '" has a negative location', _null));
+        if (!usedLocations.add$1(0, t5))
+          throw A.wrapException(A.ArgumentError$('ProgramSource "' + t1 + '": duplicate attribute location ' + t5, _null));
+      }
+      usedUnits = A.LinkedHashSet_LinkedHashSet$_empty(t2);
+      for (t2 = this.samplerUnits.get$entries(), t2 = t2.get$iterator(t2); t2.moveNext$0();) {
+        t3 = t2.get$current();
+        t4 = t3.value;
+        if (t4 < 0)
+          throw A.wrapException(A.ArgumentError$('ProgramSource "' + t1 + '": sampler "' + t3.key + '" has a negative unit', _null));
+        if (!usedUnits.add$1(0, t4))
+          throw A.wrapException(A.ArgumentError$('ProgramSource "' + t1 + '": duplicate sampler unit ' + t4, _null));
+      }
+    }
+  };
+  A.RenderFeatureContext.prototype = {};
+  A.PassDescriptor.prototype = {
+    toDrawState$0() {
+      var _this = this;
+      return A.DrawStateDescriptor$(B.BlendFactor_0, _this.blendEnable, B.BlendEquation_0, B.BlendFactor_1, true, true, true, true, _this.cullEnable, B.CullFace_1, B.DepthFunc_0, _this.depthTest, _this.depthWrite, true, false, false);
+    }
+  };
+  A.RenderGraphBuilder.prototype = {
+    build$2$availableCapabilities$hasValidPreviousFrame(availableCapabilities, hasValidPreviousFrame) {
+      var failures = this._validate$2$availableCapabilities$hasValidPreviousFrame(type$.Set_String._as(availableCapabilities), false),
+        t1 = this._render_graph$_passes,
+        t2 = A._arrayInstanceType(t1);
+      return new A.RenderGraph(A.List_List$unmodifiable(new A.WhereIterable(t1, t2._eval$1("bool(1)")._as(new A.RenderGraphBuilder_build_closure()), t2._eval$1("WhereIterable<1>")), type$.PassDeclaration), failures);
+    },
+    _validate$2$availableCapabilities$hasValidPreviousFrame(availableCapabilities, hasValidPreviousFrame) {
+      var failures, t1, t2, t3, enabledPasses, writers, _this = this;
+      type$.Set_String._as(availableCapabilities);
+      failures = A._setArrayType([], type$.JSArray_GraphValidationFailure);
+      t1 = _this._render_graph$_passes;
+      t2 = A._arrayInstanceType(t1);
+      t3 = t2._eval$1("WhereIterable<1>");
+      enabledPasses = A.List_List$_of(new A.WhereIterable(t1, t2._eval$1("bool(1)")._as(new A.RenderGraphBuilder__validate_closure()), t3), t3._eval$1("Iterable.E"));
+      _this._checkCapabilities$3(enabledPasses, availableCapabilities, failures);
+      _this._checkMultisampleSampling$2(enabledPasses, failures);
+      _this._checkResolves$2(enabledPasses, failures);
+      _this._checkHistoryReads$3(enabledPasses, false, failures);
+      writers = _this._collectWriters$2(enabledPasses, failures);
+      _this._checkReadBeforeWrite$3(enabledPasses, writers, failures);
+      _this._checkUnversionedReadWrite$2(enabledPasses, failures);
+      _this._checkFormatAndSizeMismatch$3(enabledPasses, writers, failures);
+      _this._checkDependencyCycles$2(enabledPasses, failures);
+      return failures;
+    },
+    _checkCapabilities$3(passes, available, failures) {
+      var t1, _i, pass, missing;
+      type$.List_PassDeclaration._as(passes);
+      type$.Set_String._as(available);
+      type$.List_GraphValidationFailure._as(failures);
+      for (t1 = passes.length, _i = 0; _i < passes.length; passes.length === t1 || (0, A.throwConcurrentModificationError)(passes), ++_i) {
+        pass = passes[_i];
+        missing = B.Set_empty.difference$1(available);
+        if (missing._collection$_length !== 0)
+          B.JSArray_methods.add$1(failures, new A.GraphValidationFailure(B.GraphValidationFailureKind_8, pass.id, "missing capabilities: " + missing.join$1(0, ", ")));
+      }
+    },
+    _checkMultisampleSampling$2(passes, failures) {
+      var t1, _i, pass, t2, t3, t4, t5;
+      type$.List_PassDeclaration._as(passes);
+      type$.List_GraphValidationFailure._as(failures);
+      for (t1 = passes.length, _i = 0; _i < passes.length; passes.length === t1 || (0, A.throwConcurrentModificationError)(passes), ++_i) {
+        pass = passes[_i];
+        if (pass.isResolve)
+          continue;
+        for (t2 = pass.get$reads(), t3 = J.get$iterator$ax(t2.__internal$_iterable), t2 = new A.WhereIterator(t3, t2._f, t2.$ti._eval$1("WhereIterator<1>")), t4 = pass.id; t2.moveNext$0();) {
+          t5 = t3.get$current().resource;
+          if (t5.samples > 1)
+            B.JSArray_methods.add$1(failures, new A.GraphValidationFailure(B.GraphValidationFailureKind_2, t4, "reads multisampled resource " + t5.toString$0(0) + " directly; resolve before sampling"));
+        }
+      }
+    },
+    _checkResolves$2(passes, failures) {
+      var t1, t2, t3, t4, reads, writes, source, destination;
+      type$.List_PassDeclaration._as(passes);
+      type$.List_GraphValidationFailure._as(failures);
+      for (t1 = A._arrayInstanceType(passes), t2 = t1._eval$1("bool(1)")._as(new A.RenderGraphBuilder__checkResolves_closure()), t3 = B.JSArray_methods.get$iterator(passes), t1 = new A.WhereIterator(t3, t2, t1._eval$1("WhereIterator<1>")); t1.moveNext$0();) {
+        t2 = t3.get$current();
+        t4 = t2.get$reads();
+        reads = A.List_List$_of(t4, t4.$ti._eval$1("Iterable.E"));
+        t4 = t2.get$writes();
+        writes = A.List_List$_of(t4, t4.$ti._eval$1("Iterable.E"));
+        if (reads.length !== 1 || writes.length !== 1) {
+          B.JSArray_methods.add$1(failures, new A.GraphValidationFailure(B.GraphValidationFailureKind_3, t2.id, "a resolve must read exactly one source and write exactly one destination"));
+          continue;
+        }
+        source = B.JSArray_methods.get$single(reads).resource;
+        destination = B.JSArray_methods.get$single(writes).resource;
+        if (source.samples <= 1 || destination.samples > 1)
+          B.JSArray_methods.add$1(failures, new A.GraphValidationFailure(B.GraphValidationFailureKind_3, t2.id, "resolve requires a multisampled source and single-sample destination"));
+        if (source.format !== destination.format || source.width !== destination.width || source.height !== destination.height)
+          B.JSArray_methods.add$1(failures, new A.GraphValidationFailure(B.GraphValidationFailureKind_3, t2.id, "resolve source and destination must match format and extent"));
+      }
+    },
+    _checkHistoryReads$3(passes, hasValidPreviousFrame, failures) {
+      var t1, _i, pass, t2, t3, t4, _i0, use;
+      type$.List_PassDeclaration._as(passes);
+      type$.List_GraphValidationFailure._as(failures);
+      for (t1 = passes.length, _i = 0; _i < passes.length; passes.length === t1 || (0, A.throwConcurrentModificationError)(passes), ++_i) {
+        pass = passes[_i];
+        for (t2 = pass.uses, t3 = t2.length, t4 = pass.id, _i0 = 0; _i0 < t2.length; t2.length === t3 || (0, A.throwConcurrentModificationError)(t2), ++_i0) {
+          use = t2[_i0];
+          if (use.access === B.ResourceAccess_2)
+            B.JSArray_methods.add$1(failures, new A.GraphValidationFailure(B.GraphValidationFailureKind_6, t4, "history read of " + use.resource.name + " with no valid previous frame"));
+        }
+      }
+    },
+    _collectWriters$2(passes, failures) {
+      var writerOf, t1, _i, pass, t2, t3, t4, t5, key, existing;
+      type$.List_PassDeclaration._as(passes);
+      type$.List_GraphValidationFailure._as(failures);
+      writerOf = A.LinkedHashMap_LinkedHashMap$_empty(type$.String, type$.PassDeclaration);
+      for (t1 = passes.length, _i = 0; _i < passes.length; passes.length === t1 || (0, A.throwConcurrentModificationError)(passes), ++_i) {
+        pass = passes[_i];
+        for (t2 = pass.get$writes(), t3 = J.get$iterator$ax(t2.__internal$_iterable), t2 = new A.WhereIterator(t3, t2._f, t2.$ti._eval$1("WhereIterator<1>")), t4 = pass.id; t2.moveNext$0();) {
+          t5 = t3.get$current().resource;
+          key = t5.name + "#" + t5.version;
+          existing = writerOf.$index(0, key);
+          if (existing != null) {
+            B.JSArray_methods.add$1(failures, new A.GraphValidationFailure(B.GraphValidationFailureKind_1, t4, t5.toString$0(0) + " already written by " + existing.id));
+            continue;
+          }
+          writerOf.$indexSet(0, key, pass);
+        }
+      }
+      return writerOf;
+    },
+    _checkReadBeforeWrite$3(passes, writerOf, failures) {
+      var i, pass, t1, t2, t3, t4, writer;
+      type$.List_PassDeclaration._as(passes);
+      type$.Map_String_PassDeclaration._as(writerOf);
+      type$.List_GraphValidationFailure._as(failures);
+      for (i = 0; i < passes.length; ++i) {
+        pass = passes[i];
+        for (t1 = pass.get$reads(), t2 = J.get$iterator$ax(t1.__internal$_iterable), t1 = new A.WhereIterator(t2, t1._f, t1.$ti._eval$1("WhereIterator<1>")), t3 = pass.id; t1.moveNext$0();) {
+          t4 = t2.get$current();
+          if (t4.access === B.ResourceAccess_2)
+            continue;
+          t4 = t4.resource;
+          writer = writerOf.$index(0, t4.name + "#" + t4.version);
+          if (writer == null) {
+            B.JSArray_methods.add$1(failures, new A.GraphValidationFailure(B.GraphValidationFailureKind_0, t3, "reads " + t4.toString$0(0) + " but no pass writes that version"));
+            continue;
+          }
+          if (B.JSArray_methods.indexOf$1(passes, writer) > i)
+            B.JSArray_methods.add$1(failures, new A.GraphValidationFailure(B.GraphValidationFailureKind_0, t3, "reads " + t4.toString$0(0) + " before writer " + writer.id + " runs"));
+        }
+      }
+    },
+    _checkUnversionedReadWrite$2(passes, failures) {
+      var t1, _i, pass, t2, t3, t4, t5, t6, t7, t8, t9, t10;
+      type$.List_PassDeclaration._as(passes);
+      type$.List_GraphValidationFailure._as(failures);
+      for (t1 = passes.length, _i = 0; _i < passes.length; passes.length === t1 || (0, A.throwConcurrentModificationError)(passes), ++_i) {
+        pass = passes[_i];
+        for (t2 = pass.get$reads(), t3 = J.get$iterator$ax(t2.__internal$_iterable), t2 = new A.WhereIterator(t3, t2._f, t2.$ti._eval$1("WhereIterator<1>")), t4 = pass.id; t2.moveNext$0();) {
+          t5 = t3.get$current();
+          if (t5.access === B.ResourceAccess_2)
+            continue;
+          for (t6 = pass.get$writes(), t7 = J.get$iterator$ax(t6.__internal$_iterable), t6 = new A.WhereIterator(t7, t6._f, t6.$ti._eval$1("WhereIterator<1>")), t5 = t5.resource, t8 = t5.name, t9 = t5.version; t6.moveNext$0();) {
+            t10 = t7.get$current().resource;
+            if (t8 === t10.name && t9 === t10.version)
+              B.JSArray_methods.add$1(failures, new A.GraphValidationFailure(B.GraphValidationFailureKind_5, t4, "reads and writes " + t5.toString$0(0) + " at the same version; declare a ping-pong version bump"));
+          }
+        }
+      }
+    },
+    _checkFormatAndSizeMismatch$3(passes, writerOf, failures) {
+      var t1, _i, pass, t2, t3, t4, t5, t6, writer, writtenRef;
+      type$.List_PassDeclaration._as(passes);
+      type$.Map_String_PassDeclaration._as(writerOf);
+      type$.List_GraphValidationFailure._as(failures);
+      for (t1 = passes.length, _i = 0; _i < passes.length; passes.length === t1 || (0, A.throwConcurrentModificationError)(passes), ++_i) {
+        pass = passes[_i];
+        for (t2 = pass.get$reads(), t3 = J.get$iterator$ax(t2.__internal$_iterable), t2 = new A.WhereIterator(t3, t2._f, t2.$ti._eval$1("WhereIterator<1>")), t4 = pass.id; t2.moveNext$0();) {
+          t5 = t3.get$current();
+          if (t5.access === B.ResourceAccess_2)
+            continue;
+          t6 = t5.resource;
+          writer = writerOf.$index(0, t6.name + "#" + t6.version);
+          if (writer == null)
+            continue;
+          writtenRef = writer.get$writes().firstWhere$1(0, new A.RenderGraphBuilder__checkFormatAndSizeMismatch_closure(t5)).resource;
+          if (!(writtenRef.format === t6.format && writtenRef.width === t6.width && writtenRef.height === t6.height && writtenRef.samples === t6.samples))
+            B.JSArray_methods.add$1(failures, new A.GraphValidationFailure(B.GraphValidationFailureKind_4, t4, "reads " + t6.toString$0(0) + " but writer " + writer.id + " produced " + writtenRef.toString$0(0)));
+        }
+      }
+    },
+    _checkDependencyCycles$2(passes, failures) {
+      var t1, resourceToWriteIndex, i, t2, t3, t4, adjacency, __wc0_formal, writerIndex, visiting, visited, hasCycleFrom;
+      type$.List_PassDeclaration._as(passes);
+      type$.List_GraphValidationFailure._as(failures);
+      t1 = type$.int;
+      resourceToWriteIndex = A.LinkedHashMap_LinkedHashMap$_empty(type$.String, t1);
+      for (i = 0; t2 = passes.length, i < t2; ++i)
+        for (t2 = passes[i].get$writes(), t3 = J.get$iterator$ax(t2.__internal$_iterable), t2 = new A.WhereIterator(t3, t2._f, t2.$ti._eval$1("WhereIterator<1>")); t2.moveNext$0();) {
+          t4 = t3.get$current().resource;
+          resourceToWriteIndex.$indexSet(0, t4.name + "#" + t4.version, i);
+        }
+      adjacency = J.JSArray_JSArray$allocateGrowable(t2, type$.Set_int);
+      for (__wc0_formal = 0; __wc0_formal < t2; ++__wc0_formal)
+        adjacency[__wc0_formal] = A.LinkedHashSet_LinkedHashSet$_empty(t1);
+      for (i = 0; t1 = passes.length, i < t1; ++i)
+        for (t1 = passes[i].get$reads(), t2 = J.get$iterator$ax(t1.__internal$_iterable), t1 = new A.WhereIterator(t2, t1._f, t1.$ti._eval$1("WhereIterator<1>")); t1.moveNext$0();) {
+          t3 = t2.get$current();
+          if (t3.access === B.ResourceAccess_2)
+            continue;
+          t3 = t3.resource;
+          writerIndex = resourceToWriteIndex.$index(0, t3.name + "#" + t3.version);
+          if (writerIndex != null && writerIndex !== i) {
+            if (writerIndex >>> 0 !== writerIndex || writerIndex >= adjacency.length)
+              return A.ioore(adjacency, writerIndex);
+            adjacency[writerIndex].add$1(0, i);
+          }
+        }
+      t2 = type$.bool;
+      visiting = A.List_List$filled(t1, false, false, t2);
+      t1 = passes.length;
+      visited = A.List_List$filled(t1, false, false, t2);
+      hasCycleFrom = new A.RenderGraphBuilder__checkDependencyCycles_hasCycleFrom(visiting, visited, adjacency);
+      for (i = 0; i < passes.length; ++i) {
+        if (!(i < t1))
+          return A.ioore(visited, i);
+        if (!visited[i] && hasCycleFrom.call$1(i)) {
+          if (!(i < passes.length))
+            return A.ioore(passes, i);
+          B.JSArray_methods.add$1(failures, new A.GraphValidationFailure(B.GraphValidationFailureKind_7, passes[i].id, "participates in a resource dependency cycle"));
+        }
+      }
+    }
+  };
+  A.RenderGraphBuilder_build_closure.prototype = {
+    call$1(p) {
+      type$.PassDeclaration._as(p);
+      return A.PassDeclaration__alwaysEnabled();
+    },
+    $signature: 2
+  };
+  A.RenderGraphBuilder__validate_closure.prototype = {
+    call$1(p) {
+      type$.PassDeclaration._as(p);
+      return A.PassDeclaration__alwaysEnabled();
+    },
+    $signature: 2
+  };
+  A.RenderGraphBuilder__checkResolves_closure.prototype = {
+    call$1(pass) {
+      return type$.PassDeclaration._as(pass).isResolve;
+    },
+    $signature: 2
+  };
+  A.RenderGraphBuilder__checkFormatAndSizeMismatch_closure.prototype = {
+    call$1(w) {
+      var t1 = type$.ResourceUse._as(w).resource,
+        t2 = this.use.resource;
+      return t1.name === t2.name && t1.version === t2.version;
+    },
+    $signature: 7
+  };
+  A.RenderGraphBuilder__checkDependencyCycles_hasCycleFrom.prototype = {
+    call$1(node) {
+      var t2, t3, t4, t5, _this = this,
+        t1 = _this.visiting;
+      if (!(node >= 0 && node < t1.length))
+        return A.ioore(t1, node);
+      if (t1[node])
+        return true;
+      t2 = _this.visited;
+      if (!(node < t2.length))
+        return A.ioore(t2, node);
+      if (t2[node])
+        return false;
+      B.JSArray_methods.$indexSet(t1, node, true);
+      t3 = _this.adjacency;
+      if (!(node < t3.length))
+        return A.ioore(t3, node);
+      t3 = t3[node];
+      t3 = A._LinkedHashSetIterator$(t3, t3._collection$_modifications, A._instanceType(t3)._precomputed1);
+      t4 = t3.$ti._precomputed1;
+      while (t3.moveNext$0()) {
+        t5 = t3._collection$_current;
+        if (_this.call$1(t5 == null ? t4._as(t5) : t5))
+          return true;
+      }
+      B.JSArray_methods.$indexSet(t1, node, false);
+      B.JSArray_methods.$indexSet(t2, node, true);
+      return false;
+    },
+    $signature: 31
+  };
+  A.RenderGraph.prototype = {};
+  A.RenderWorldImpl.prototype = {
+    _worldBoundsFor$1(descriptor) {
+      descriptor.validate$0();
+      this._meshRegistry.descriptorOf$1(descriptor.get$mesh());
+    },
+    get$items() {
+      return new A._SyncStarIterable(this.items$body$RenderWorldImpl(), type$._SyncStarIterable_RetainedItemView);
+    },
+    items$body$RenderWorldImpl() {
+      var $async$self = this;
+      return function() {
+        var $async$goto = 0, $async$handler = 1, $async$errorStack = [], t1, t2, t3;
+        return function $async$get$items($async$iterator, $async$errorCode, $async$result) {
+          if ($async$errorCode === 1) {
+            $async$errorStack.push($async$result);
+            $async$goto = $async$handler;
+          }
+          for (;;)
+            switch ($async$goto) {
+              case 0:
+                // Function start
+                t1 = $async$self._instances.liveDescriptors$0(), t2 = t1.$ti, t1 = new A._SyncStarIterator(t1._outerHelper(), t2._eval$1("_SyncStarIterator<1>")), t2 = t2._precomputed1;
+              case 2:
+                // for condition
+                if (!t1.moveNext$0()) {
+                  // goto after for
+                  $async$goto = 3;
+                  break;
+                }
+                t3 = t1._async$_current;
+                if (t3 == null)
+                  t3 = t2._as(t3);
+                t3._0;
+                $async$self._worldBoundsFor$1(t3._1);
+                $async$goto = 4;
+                return $async$iterator._async$_current = void 1, 1;
+              case 4:
+                // after yield
+                // goto for condition
+                $async$goto = 2;
+                break;
+              case 3:
+                // after for
+                // implicit return
+                return 0;
+              case 1:
+                // rethrow
+                return $async$iterator._datum = $async$errorStack.at(-1), 3;
+            }
+        };
+      };
+    },
+    $isRenderWorld: 1
+  };
+  A.RenderWorldImpl__instances_closure.prototype = {
+    call$3(slot, generation, label) {
+      return new A.InstanceId(A._asInt(slot), A._asInt(generation), A._asStringQ(label));
+    },
+    $signature: 32
+  };
+  A.ResourceLibraryImpl.prototype = {
+    dispose$0() {
+      var t1, t2, t3, t4, t5, t6, t7, _i, handle, texture, t8, t9, upload, indexBuffer, _this = this;
+      if (_this._scene_renderer_impl$_disposed)
+        return;
+      t1 = _this._textureHandles;
+      t2 = A.List_List$_of(t1, A._instanceType(t1)._precomputed1);
+      t3 = t2.length;
+      t4 = _this._textures;
+      t5 = t4._texturesBySlot;
+      t6 = t4._texture_store$_device.gl;
+      t7 = type$._WebGlTexture;
+      _i = 0;
+      for (; _i < t2.length; t2.length === t3 || (0, A.throwConcurrentModificationError)(t2), ++_i) {
+        handle = t2[_i];
+        texture = t5.remove$1(0, handle.slot);
+        if (texture != null)
+          t6.deleteTexture(t7._as(texture.handle).handle);
+        t4._texture_store$_registry.release$1(handle);
+      }
+      t2 = _this._materialHandles;
+      t3 = A.List_List$_of(t2, A._instanceType(t2)._precomputed1);
+      t5 = t3.length;
+      t6 = _this._materials._material_store$_registry;
+      _i = 0;
+      for (; _i < t3.length; t3.length === t5 || (0, A.throwConcurrentModificationError)(t3), ++_i)
+        t6.release$1(t3[_i]);
+      t3 = _this._meshHandles;
+      t5 = A.List_List$_of(t3, A._instanceType(t3)._precomputed1);
+      t6 = t5.length;
+      t7 = _this._meshes;
+      t8 = t7._uploadsBySlot;
+      t9 = t7._mesh_store$_device.gl;
+      _i = 0;
+      for (; _i < t5.length; t5.length === t6 || (0, A.throwConcurrentModificationError)(t5), ++_i) {
+        handle = t5[_i];
+        upload = t8.remove$1(0, handle.slot);
+        if (upload != null) {
+          t9.deleteVertexArray(A._asJSObject(upload.vao.handle));
+          t9.deleteBuffer(A._asJSObject(upload.vertexBuffer.handle));
+          indexBuffer = upload.indexBuffer;
+          if (indexBuffer != null)
+            t9.deleteBuffer(A._asJSObject(indexBuffer.handle));
+        }
+        t7._registry.release$1(handle);
+      }
+      t1.clear$0(0);
+      t2.clear$0(0);
+      t3.clear$0(0);
+      t4.dispose$0();
+      _this._scene_renderer_impl$_disposed = true;
+    }
+  };
+  A._FrameExecution.prototype = {};
+  A._extension_0__assembleSafeGraph_resolveMesh.prototype = {
+    call$1(handle) {
+      var mesh = this._this._resources._meshes.resolve$1(handle),
+        t1 = mesh.indexBuffer != null,
+        t2 = t1 ? mesh.indexCount : mesh.vertexCount;
+      return new A.ResolvedMesh(mesh.vao, t1, t2, mesh.usesUint32Indices);
+    },
+    $signature: 33
+  };
+  A._extension_0__assembleSafeGraph_resolveResource.prototype = {
+    call$2$fallback($name, fallback) {
+      var t1 = this.resourceNames._collection$_source;
+      if (t1.contains$1(0, $name))
+        return this._this._gpuResources.get$current().objectFor$1($name);
+      if (fallback != null && t1.contains$1(0, fallback))
+        return this._this._gpuResources.get$current().objectFor$1(fallback);
+      throw A.wrapException(A.StateError$("resource is not in configured graph: " + $name));
+    },
+    call$1($name) {
+      return this.call$2$fallback($name, null);
+    },
+    $signature: 34
+  };
+  A._extension_0__assembleSafeGraph_closure9.prototype = {
+    call$0() {
+      return this.resolveResource.call$1("shadowMap");
+    },
+    $signature: 1
+  };
+  A._extension_0__assembleSafeGraph_closure2.prototype = {
+    call$0() {
+      return null;
+    },
+    $signature: 36
+  };
+  A._extension_0__assembleSafeGraph_closure3.prototype = {
+    call$0() {
+      var frame = this._this._activeFrame;
+      if (frame == null)
+        return B.List_empty1;
+      return A.selectSpotLights(B.List_empty1, 3, frame.camera.eye, null);
+    },
+    $signature: 37
+  };
+  A._extension_0__assembleSafeGraph_closure8.prototype = {
+    call$0() {
+      return this.resolveResource.call$1("sceneDepth");
+    },
+    $signature: 1
+  };
+  A._extension_0__assembleSafeGraph_closure1.prototype = {
+    call$0() {
+      return this._this._activeFrame.camera;
+    },
+    $signature: 38
+  };
+  A._extension_0__assembleSafeGraph_closure11.prototype = {
+    call$0() {
+      return this.resolveResource.call$2$fallback("ssaoRaw", "sceneColor");
+    },
+    $signature: 1
+  };
+  A._extension_0__assembleSafeGraph_closure10.prototype = {
+    call$0() {
+      return this.resolveResource.call$2$fallback("ssaoBlurred", "sceneColor");
+    },
+    $signature: 1
+  };
+  A._extension_0__assembleSafeGraph_closure7.prototype = {
+    call$0() {
+      var t1 = this.configuration.sampleCount > 1 ? "sceneColor#1" : "sceneColor";
+      return this.resolveResource.call$1(t1);
+    },
+    $signature: 1
+  };
+  A._extension_0__assembleSafeGraph_closure.prototype = {
+    call$0() {
+      return this.resolveResource.call$2$fallback("bloomBlurH", "sceneColor");
+    },
+    $signature: 1
+  };
+  A._extension_0__assembleSafeGraph_closure0.prototype = {
+    call$0() {
+      return this.resolveResource.call$2$fallback("bloomBlurV", "sceneColor");
+    },
+    $signature: 1
+  };
+  A._extension_0__assembleSafeGraph_closure4.prototype = {
+    call$0() {
+      return this.resolveResource.call$2$fallback("dofBlurH", "sceneColor");
+    },
+    $signature: 1
+  };
+  A._extension_0__assembleSafeGraph_closure5.prototype = {
+    call$0() {
+      return this.resolveResource.call$2$fallback("dofBlurV", "sceneColor");
+    },
+    $signature: 1
+  };
+  A._extension_0__assembleSafeGraph_closure6.prototype = {
+    call$0() {
+      var t1 = this._this._resources._textures.__TextureStore__fallbackAlbedo_A;
+      t1 === $ && A.throwLateFieldNI("_fallbackAlbedo");
+      return t1;
+    },
+    $signature: 1
+  };
+  A._extension_0__assembleSafeGraph_closure13.prototype = {
+    call$0() {
+      return this.resolveResource.call$2$fallback("vhsOutput", "sceneColor");
+    },
+    $signature: 1
+  };
+  A._extension_0__assembleSafeGraph_closure12.prototype = {
+    call$0() {
+      return this._this._activeFrame.timeSeconds;
+    },
+    $signature: 59
+  };
+  A._extension_0__executeGraph_closure.prototype = {
+    call$0() {
+      return this.view;
+    },
+    $signature: 40
+  };
+  A._SafeGraphAssembly.prototype = {};
+  A._PlanResources.prototype = {$isRenderPassResources: 1};
+  A._FrameScene.prototype = {$isFrameSceneData: 1};
+  A.SceneRendererImpl.prototype = {
+    initialize$2(configuration, surface) {
+      var t1, t2, t3, t4, plan, objects, exception, _this = this;
+      if (_this._scene_renderer_impl$_state !== B.RendererState_0)
+        throw A.wrapException(A.StateError$("renderer can only be initialized once"));
+      configuration.validate$0();
+      surface.validate$0();
+      t1 = _this.device;
+      if (t1._status === B.GpuDeviceStatus_1)
+        throw A.wrapException(A.StateError$("renderer device is context lost"));
+      _this._scene_renderer_impl$_state = B.RendererState_1;
+      try {
+        t2 = init.G;
+        t1._paramInt$1(A._asInt(t2.WebGL2RenderingContext.MAX_TEXTURE_SIZE));
+        t1._paramInt$1(A._asInt(t2.WebGL2RenderingContext.MAX_ARRAY_TEXTURE_LAYERS));
+        t1._paramInt$1(A._asInt(t2.WebGL2RenderingContext.MAX_SAMPLES));
+        t1._paramInt$1(A._asInt(t2.WebGL2RenderingContext.MAX_VERTEX_ATTRIBS));
+        t1._paramInt$1(A._asInt(t2.WebGL2RenderingContext.MAX_COLOR_ATTACHMENTS));
+        t3 = t1._supportedExtensions;
+        if (t3.contains$1(0, "EXT_texture_filter_anisotropic"))
+          t1._paramDouble$1(34047);
+        t4 = t3.contains$1(0, "EXT_disjoint_timer_query_webgl2");
+        t1._timerExtensionAvailable = t4;
+        t3.contains$1(0, "EXT_color_buffer_float");
+        t3.contains$1(0, "EXT_color_buffer_half_float");
+        t3.contains$1(0, "WEBGL_lose_context");
+        t3 = t1.gl;
+        A.dartify(t3.getParameter(A._asInt(t2.WebGL2RenderingContext.RENDERER)));
+        A.dartify(t3.getParameter(A._asInt(t2.WebGL2RenderingContext.VENDOR)));
+        _this._capabilities = new A.RenderCapabilities(t4);
+        t2 = _this._configurations;
+        plan = A.OwnedResourcePlan_OwnedResourcePlan$forConfiguration(configuration);
+        t3 = t2._configuration_coordinator$_configuration;
+        if (t3._configuration_transition$_current != null)
+          A.throwExpression(A.StateError$("configuration state is already initialized"));
+        configuration.validate$0();
+        t3._configuration_transition$_current = configuration;
+        A.OwnedResourcePlan_OwnedResourcePlan$forConfiguration(configuration);
+        t3._configuration_transition$_generation = 1;
+        t2._configuration_coordinator$_resources.initialize$1(plan);
+        t2 = A.MaterialStore$();
+        _this._resources = new A.ResourceLibraryImpl(A.MeshStore$(t1), t2, A.TextureStore$(t1), A.LinkedHashSet_LinkedHashSet$_empty(type$.MeshHandle), A.LinkedHashSet_LinkedHashSet$_empty(type$.MaterialHandle), A.LinkedHashSet_LinkedHashSet$_empty(type$.TextureHandle));
+        t2 = new A.ResourcePlanAssembler();
+        t3 = new A.GpuResourcePlanAdapter(t1, t2);
+        plan = A.OwnedResourcePlan_OwnedResourcePlan$forConfiguration(configuration);
+        objects = t3._createObjects$2(plan, configuration);
+        t2.initialize$1(plan);
+        t3._resource_plan_adapter$_current = new A.PreparedGpuResourcePlan(new A.PreparedResourceAssembly(plan), objects);
+        _this._gpuResources = t3;
+        _this._programs = new A.ProgramLibrary(t1, A.LinkedHashMap_LinkedHashMap$_empty(type$.String, type$.CompiledProgram));
+        _this._configuration = configuration;
+        A._extension_0__buildSafeGraph(_this);
+        _this._scene_renderer_impl$_state = B.RendererState_2;
+      } catch (exception) {
+        t1 = _this._programs;
+        if (t1 != null) {
+          t2 = t1._live;
+          t1._deletePrograms$1(new A.LinkedHashMapValuesIterable(t2, A._instanceType(t2)._eval$1("LinkedHashMapValuesIterable<2>")));
+          t2.clear$0(0);
+        }
+        t1 = _this._gpuResources;
+        if (t1 != null)
+          t1.dispose$0();
+        t1 = _this._resources;
+        if (t1 != null)
+          t1.dispose$0();
+        _this._resources = null;
+        _this._scene_renderer_impl$_state = B.RendererState_0;
+        throw exception;
+      }
+      t1 = new A._Future($.Zone__current, type$._Future_void);
+      t1._asyncComplete$1(null);
+      return t1;
+    },
+    beginFrame$2(world, frame) {
+      var encoder, t1, t2, t3, encoder0, exception, _this = this, _null = null;
+      _this._recoverIfNeeded$0();
+      _this._ensureReady$0();
+      t1 = B.JSArray_methods.contains$1(_this._worlds, world);
+      if (!t1)
+        throw A.wrapException(A.ArgumentError$("world was not created by this renderer", _null));
+      if (_this._activeFrame != null)
+        throw A.wrapException(A.StateError$("renderer.beginFrame called twice without end/abort"));
+      t1 = frame.camera;
+      t2 = t1.eye;
+      if (!t2.get$isFinite(0))
+        A.throwExpression(A.ArgumentError$("CameraView.eye must be finite: " + t2.toString$0(0), _null));
+      t2 = t1.forward;
+      if (!t2.get$isFinite(0) || t2.get$lengthSquared() < 1e-12)
+        A.throwExpression(A.ArgumentError$("CameraView.forward must be finite and nonzero: " + t2.toString$0(0), _null));
+      t2 = t1.near;
+      if (isFinite(t2)) {
+        t3 = t1.far;
+        t3 = !isFinite(t3) || t2 <= 0 || t3 <= t2;
+      } else
+        t3 = true;
+      if (t3)
+        A.throwExpression(A.ArgumentError$("CameraView requires 0 < near < far, got " + A.S(t2) + "/" + t1.far, _null));
+      t2 = t1.aspect;
+      if (!isFinite(t2) || t2 <= 0)
+        A.throwExpression(A.ArgumentError$("CameraView.aspect must be finite and > 0: " + A.S(t2), _null));
+      if (!t1.view.get$isFinite(0) || !t1.projection.get$isFinite(0) || !t1.viewProjection.get$isFinite(0))
+        A.throwExpression(A.ArgumentError$("CameraView matrices must be finite", _null));
+      frame.environment.validate$0();
+      frame.post.validate$0();
+      t1 = frame.timeSeconds;
+      if (!isFinite(t1))
+        A.throwExpression(A.ArgumentError$("FrameInput.timeSeconds must be finite: " + A.S(t1), _null));
+      _this._activeFrame = frame;
+      _this._activeWorld = world;
+      encoder0 = _this._frames;
+      if (encoder0._frame_queue$_state === B.FrameQueueState_1)
+        A.throwExpression(A.StateError$("FrameQueue.beginFrame called twice without end/abort"));
+      encoder0._frame_queue$_state = B.FrameQueueState_1;
+      encoder0._submittedThisFrame = 0;
+      B.JSArray_methods.clear$0(encoder0._transientItems);
+      encoder = encoder0;
+      try {
+        t1 = _this._capabilities;
+        if ((t1 == null ? A.throwExpression(A.StateError$("renderer is not initialized")) : t1).disjointTimerQuery)
+          _this._GpuTimingSupport__activeGpuTimer = _this.device.beginGpuTimer$0();
+        return encoder;
+      } catch (exception) {
+        if (encoder0._frame_queue$_state !== B.FrameQueueState_1)
+          A.throwExpression(A.StateError$("FrameQueue.abortFrame called without an active frame"));
+        encoder0._submittedThisFrame = 0;
+        encoder0._frame_queue$_state = B.FrameQueueState_3;
+        _this._abortGpuTiming$0();
+        _this._activeWorld = _this._activeFrame = null;
+        throw exception;
+      }
+    },
+    endFrame$0() {
+      var frame, world, transient, execution, passStats, sceneStats, t1, t2, submitted, t3, t4, t5, t6, t7, _this = this;
+      _this._ensureReady$0();
+      frame = _this._activeFrame;
+      world = _this._activeWorld;
+      if (frame == null || world == null)
+        throw A.wrapException(A.StateError$("renderer.endFrame called without an active frame"));
+      t1 = _this._frames;
+      if (t1._frame_queue$_state !== B.FrameQueueState_1)
+        A.throwExpression(A.StateError$("FrameQueue.endFrame called without an active frame"));
+      t2 = t1._transientItems;
+      submitted = A.SubListIterable$(t2, 0, A.checkNotNullable(t1._submittedThisFrame, "count", type$.int), A._arrayInstanceType(t2)._precomputed1).toList$1$growable(0, false);
+      t1._frame_queue$_state = B.FrameQueueState_2;
+      transient = submitted;
+      try {
+        execution = A._extension_0__executeGraph(_this, world, frame, transient);
+        passStats = execution.telemetry.snapshot$0();
+        t1 = passStats.get$entries();
+        t2 = A._instanceType(t1);
+        sceneStats = new A.MappedIterable(new A.WhereIterable(t1, t2._eval$1("bool(Iterable.E)")._as(new A.SceneRendererImpl_endFrame_closure()), t2._eval$1("WhereIterable<Iterable.E>")), t2._eval$1("FramePassStats(Iterable.E)")._as(new A.SceneRendererImpl_endFrame_closure0()), t2._eval$1("MappedIterable<Iterable.E,FramePassStats>")).fold$1$2(0, B.FramePassStats_0_0_0, new A.SceneRendererImpl_endFrame_closure1(), type$.FramePassStats);
+        t2 = frame.frameIndex;
+        t1 = sceneStats.drawCalls;
+        t3 = sceneStats.trianglesSubmitted;
+        t4 = execution.trianglesCulled;
+        sceneStats.toString;
+        execution.toString;
+        t5 = _this._resources;
+        t6 = t5._meshes.get$liveGpuBytes();
+        t5 = t5._textures.get$liveGpuBytes();
+        t7 = _this._resources;
+        t7._meshes.get$liveGpuBytes();
+        t7._textures.get$liveGpuBytes();
+        _this._resources.toString;
+        return new A.FrameStats(t2, t1, t3, t4, t6 + t5);
+      } finally {
+        _this._finishGpuTiming$1(frame.frameIndex);
+        _this._activeWorld = _this._activeFrame = null;
+      }
+    },
+    _recoverIfNeeded$0() {
+      var t1, t2, current, _this = this;
+      if (_this._scene_renderer_impl$_state !== B.RendererState_3)
+        return;
+      if (_this.device._status === B.GpuDeviceStatus_1)
+        throw A.wrapException(A.StateError$("renderer context remains lost"));
+      t1 = _this._resources;
+      if (t1._scene_renderer_impl$_disposed)
+        A.throwExpression(A.StateError$("resource library is disposed"));
+      t1._meshes.rehydrateAfterContextRestore$0();
+      t1._textures.rehydrateAfterContextRestore$0();
+      t1 = _this._gpuResources;
+      t1.toString;
+      t2 = _this._configuration;
+      t2.toString;
+      if (t1._resource_plan_adapter$_disposed)
+        A.throwExpression(A.StateError$("GPU resource adapter is disposed"));
+      current = t1._resource_plan_adapter$_current;
+      if (current == null)
+        A.throwExpression(A.StateError$("GPU resource adapter is not initialized"));
+      t1._resource_plan_adapter$_current = new A.PreparedGpuResourcePlan(current.logical, t1._createObjects$2(A.OwnedResourcePlan_OwnedResourcePlan$forConfiguration(t2), t2));
+      t1 = _this._programs;
+      t1._openSet = null;
+      t1._live.clear$0(0);
+      A._extension_0__buildSafeGraph(_this);
+      _this._scene_renderer_impl$_state = B.RendererState_2;
+    },
+    _ensureReady$0() {
+      var _this = this,
+        t1 = _this._scene_renderer_impl$_state;
+      if (t1 !== B.RendererState_2)
+        throw A.wrapException(A.StateError$("renderer is not ready: " + t1._name));
+      if (_this.device._status === B.GpuDeviceStatus_1) {
+        _this._discardGpuTimings$0();
+        _this._scene_renderer_impl$_state = B.RendererState_3;
+        throw A.wrapException(A.StateError$("renderer context lost"));
+      }
+    }
+  };
+  A.SceneRendererImpl_endFrame_closure.prototype = {
+    call$1(entry) {
+      return B.JSString_methods.contains$1(type$.MapEntry_String_FramePassStats._as(entry).key.toLowerCase(), "world");
+    },
+    $signature: 41
+  };
+  A.SceneRendererImpl_endFrame_closure0.prototype = {
+    call$1(entry) {
+      return type$.MapEntry_String_FramePassStats._as(entry).value;
+    },
+    $signature: 42
+  };
+  A.SceneRendererImpl_endFrame_closure1.prototype = {
+    call$2(total, pass) {
+      var t1 = type$.FramePassStats;
+      t1._as(total);
+      t1._as(pass);
+      return new A.FramePassStats(total.drawCalls + pass.drawCalls, total.trianglesSubmitted + pass.trianglesSubmitted, total.instancesSubmitted + pass.instancesSubmitted);
+    },
+    $signature: 43
+  };
+  A._PendingGpuTiming.prototype = {};
+  A._GpuTimingSupport.prototype = {
+    _finishGpuTiming$1(frameIndex) {
+      var t1, timer0, exception, _this = this,
+        timer = _this._GpuTimingSupport__activeGpuTimer;
+      _this._GpuTimingSupport__activeGpuTimer = null;
+      if (timer == null)
+        return;
+      try {
+        t1 = _this.device;
+        if (t1._status !== B.GpuDeviceStatus_0)
+          A.throwExpression(A.StateError$(string$.WebGl2));
+        timer0 = t1._timerQuery$1(timer);
+        if (timer0.ended)
+          A.throwExpression(A.StateError$("WebGl2Device: timer already ended"));
+        t1.gl.endQuery(35007);
+        timer0.ended = true;
+        B.JSArray_methods.add$1(_this._GpuTimingSupport__pendingGpuTimings, new A._PendingGpuTiming(timer));
+      } catch (exception) {
+        _this._deleteGpuTimerSafely$1(timer);
+      }
+    },
+    _abortGpuTiming$0() {
+      var timer = this._GpuTimingSupport__activeGpuTimer;
+      this._GpuTimingSupport__activeGpuTimer = null;
+      if (timer != null)
+        this._deleteGpuTimerSafely$1(timer);
+    },
+    _discardGpuTimings$0() {
+      var t1, pending, _i;
+      this._abortGpuTiming$0();
+      t1 = this._GpuTimingSupport__pendingGpuTimings;
+      pending = J.JSArray_JSArray$markFixed(t1.slice(0), A._arrayInstanceType(t1)._precomputed1);
+      B.JSArray_methods.clear$0(t1);
+      for (t1 = pending.length, _i = 0; _i < pending.length; pending.length === t1 || (0, A.throwConcurrentModificationError)(pending), ++_i)
+        this._deleteGpuTimerSafely$1(pending[_i].query);
+    },
+    _deleteGpuTimerSafely$1(query) {
+      var t1, exception;
+      try {
+        t1 = this.device;
+        t1.gl.deleteQuery(t1._timerQuery$1(query).query);
+      } catch (exception) {
+      }
+    }
+  };
+  A._SceneRendererImpl_Object__GpuTimingSupport.prototype = {};
+  A.ShadowCasterLod.prototype = {
+    _enumToString$0() {
+      return "ShadowCasterLod." + this._name;
+    }
+  };
+  A.OpaqueSortKey.prototype = {
+    compareTo$1(_, other) {
+      var c;
+      type$.OpaqueSortKey._as(other);
+      c = B.JSInt_methods.compareTo$1(this.pipeline.slot, other.pipeline.slot);
+      if (c !== 0)
+        return c;
+      c = this.material.get$slot().compareTo$1(0, other.material.get$slot());
+      return c;
+    },
+    $isComparable: 1
+  };
+  A.SortableItem.prototype = {};
+  A.sortOpaque_closure.prototype = {
+    call$2(a, b) {
+      var t1 = type$.SortableItem_OpaqueSortKey;
+      return t1._as(a).key.compareTo$1(0, t1._as(b).key);
+    },
+    $signature: 44
+  };
+  A.sortOpaque_closure0.prototype = {
+    call$1(e) {
+      return type$.SortableItem_OpaqueSortKey._as(e).view;
+    },
+    $signature: 45
+  };
+  A.sortBlended_closure.prototype = {
+    call$2(a, b) {
+      var t1 = type$.SortableItem_BlendedSortKey;
+      return t1._as(a).key.compareTo$1(0, t1._as(b).key);
+    },
+    $signature: 46
+  };
+  A.sortBlended_closure0.prototype = {
+    call$1(e) {
+      return type$.SortableItem_BlendedSortKey._as(e).view;
+    },
+    $signature: 47
+  };
+  A.CullStats.prototype = {};
+  A.CullResult.prototype = {};
+  A.Plane.prototype = {};
+  A.FrustumTest.prototype = {
+    _enumToString$0() {
+      return "FrustumTest." + this._name;
+    }
+  };
+  A.Frustum.prototype = {
+    testAabb$1(box) {
+      var t1, intersecting, _i, plane, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11;
+      for (t1 = this.planes, intersecting = false, _i = 0; _i < 6; ++_i) {
+        plane = t1[_i];
+        t2 = plane.normal;
+        t3 = t2.x;
+        t4 = t3 >= 0;
+        t5 = t4 ? box.get$max().get$x() : box.get$min().get$x();
+        t6 = t2.y;
+        t7 = t6 >= 0;
+        t8 = t7 ? box.get$max().get$y() : box.get$min().get$y();
+        t2 = t2.z;
+        t9 = t2 >= 0;
+        t10 = t9 ? box.get$max().get$z() : box.get$min().get$z();
+        t11 = plane.d;
+        if (t3 * t5 + t6 * t8 + t2 * t10 + t11 < 0)
+          return B.FrustumTest_0;
+        t4 = t4 ? box.get$min().get$x() : box.get$max().get$x();
+        t5 = t7 ? box.get$min().get$y() : box.get$max().get$y();
+        t7 = t9 ? box.get$min().get$z() : box.get$max().get$z();
+        if (t3 * t4 + t6 * t5 + t2 * t7 + t11 < 0)
+          intersecting = true;
+      }
+      return intersecting ? B.FrustumTest_1 : B.FrustumTest_2;
+    }
+  };
+  A.Frustum_Frustum$fromViewProjection_row.prototype = {
+    call$4(a, b, c, d) {
+      var t1 = new A.Vec3(a, b, c),
+        t2 = new A.Plane(t1, d),
+        len = Math.sqrt(t1.get$lengthSquared());
+      if (len < 1e-9)
+        t1 = t2;
+      else {
+        t1 = 1 / len;
+        t1 = new A.Plane(new A.Vec3(a * t1, b * t1, c * t1), d / len);
+      }
+      return t1;
+    },
+    $signature: 48
+  };
+  A.Mat4.prototype = {
+    $mul(_, other) {
+      var t1, t2, column, t3, row, sum, k, t4, t5,
+        result = new Float32Array(16);
+      for (t1 = this.m, t2 = other.m, column = 0; column < 4; ++column)
+        for (t3 = column * 4, row = 0; row < 4; ++row) {
+          for (sum = 0, k = 0; k < 4; ++k) {
+            t4 = k * 4 + row;
+            if (!(t4 < 16))
+              return A.ioore(t1, t4);
+            t4 = t1[t4];
+            t5 = t3 + k;
+            if (!(t5 < 16))
+              return A.ioore(t2, t5);
+            sum += t4 * t2[t5];
+          }
+          t4 = t3 + row;
+          if (!(t4 < 16))
+            return A.ioore(result, t4);
+          result[t4] = sum;
+        }
+      return new A.Mat4(result);
+    },
+    get$isFinite(_) {
+      return B.NativeFloat32List_methods.every$1(this.m, new A.Mat4_isFinite_closure());
+    },
+    toString$0(_) {
+      return "Mat4(" + A.S(this.m) + ")";
+    }
+  };
+  A.Mat4_isFinite_closure.prototype = {
+    call$1(v) {
+      return isFinite(A._asDouble(v));
+    },
+    $signature: 49
+  };
+  A.Vec3.prototype = {
+    dot$1(o) {
+      return this.x * o.x + this.y * o.y + this.z * o.z;
+    },
+    cross$1(o) {
+      var t1 = this.y,
+        t2 = o.z,
+        t3 = this.z,
+        t4 = o.y,
+        t5 = o.x,
+        t6 = this.x;
+      return new A.Vec3(t1 * t2 - t3 * t4, t3 * t5 - t6 * t2, t6 * t4 - t1 * t5);
+    },
+    get$lengthSquared() {
+      var t1 = this.x,
+        t2 = this.y,
+        t3 = this.z;
+      return t1 * t1 + t2 * t2 + t3 * t3;
+    },
+    get$length(_) {
+      return Math.sqrt(this.get$lengthSquared());
+    },
+    get$isFinite(_) {
+      return isFinite(this.x) && isFinite(this.y) && isFinite(this.z);
+    },
+    get$normalized() {
+      var _this = this,
+        len = Math.sqrt(_this.get$lengthSquared());
+      return len < 1e-9 ? B.Vec3_0_0_0 : new A.Vec3(_this.x / len, _this.y / len, _this.z / len);
+    },
+    $eq(_, other) {
+      if (other == null)
+        return false;
+      return other instanceof A.Vec3 && this.x === other.x && this.y === other.y && this.z === other.z;
+    },
+    get$hashCode(_) {
+      return A.Object_hash(this.x, this.y, this.z, B.C_SentinelValue, B.C_SentinelValue, B.C_SentinelValue);
+    },
+    toString$0(_) {
+      return "Vec3(" + A.S(this.x) + ", " + A.S(this.y) + ", " + A.S(this.z) + ")";
+    }
+  };
+  A._BloomBlurAxis.prototype = {
+    _enumToString$0() {
+      return "_BloomBlurAxis." + this._name;
+    }
+  };
+  A.BloomBlurFeature.prototype = {
+    get$id() {
+      return this.passId;
+    },
+    declare$2(graph, context) {
+      B.JSArray_methods.add$1(graph._render_graph$_passes, new A.PassDeclaration(this.passId, B.GraphStage_6, A._setArrayType([new A.ResourceUse(this.sourceResource, B.ResourceAccess_0), new A.ResourceUse(this.destResource, B.ResourceAccess_1)], type$.JSArray_ResourceUse), false));
+    },
+    createPasses$1(resources) {
+      var _this = this,
+        program = _this.programLibrary.publish$1(new A.ProgramSource(_this.programId, _this.vertexSource, _this.fragmentSource, B.Map_empty, B.Map_Nhox7, B.List_uTexelStep)),
+        emptyVao = A.WebGl2DeviceTargets_createVertexArrayImpl(_this.device),
+        t1 = type$.JSArray_double,
+        texelStep = _this._bloom$_axis === B._BloomBlurAxis_0 ? new Float32Array(A._ensureNativeList(A._setArrayType([1 / _this.texelWidth, 0], t1))) : new Float32Array(A._ensureNativeList(A._setArrayType([0, 1 / _this.texelHeight], t1)));
+      t1 = _this.destResource;
+      return A._setArrayType([new A._BloomBlurPass(new A.PassDescriptor(_this.passId, A._setArrayType([new A.ResourceUse(_this.sourceResource, B.ResourceAccess_0), new A.ResourceUse(t1, B.ResourceAccess_1)], type$.JSArray_ResourceUse), false, false, false, false), program, emptyVao, _this.resolveSource, _this.sampleGlowAttachment, texelStep, t1.name)], type$.JSArray_RenderPass);
+    },
+    $isRenderFeature: 1
+  };
+  A._BloomBlurPass.prototype = {
+    execute$1(context) {
+      return;
+    },
+    $isRenderPass: 1,
+    get$descriptor() {
+      return this.descriptor;
+    }
+  };
+  A.BloomCompositeFeature.prototype = {
+    get$id() {
+      return "bloomComposite";
+    },
+    declare$2(graph, context) {
+      B.JSArray_methods.add$1(graph._render_graph$_passes, new A.PassDeclaration("bloomComposite", B.GraphStage_6, A._setArrayType([new A.ResourceUse(this.bloomResource, B.ResourceAccess_0), new A.ResourceUse(this.sceneColorResource, B.ResourceAccess_0), new A.ResourceUse(this.sceneColorPostBloomResource, B.ResourceAccess_1)], type$.JSArray_ResourceUse), false));
+    },
+    createPasses$1(resources) {
+      var _this = this,
+        _s14_ = "bloomComposite",
+        program = _this.programLibrary.publish$1(new A.ProgramSource(_s14_, _this.vertexSource, _this.fragmentSource, B.Map_empty, B.Map_eEHw8, B.List_uBloomStrength)),
+        emptyVao = A.WebGl2DeviceTargets_createVertexArrayImpl(_this.device),
+        t1 = _this.sceneColorPostBloomResource,
+        t2 = A._setArrayType([new A.ResourceUse(_this.bloomResource, B.ResourceAccess_0), new A.ResourceUse(_this.sceneColorResource, B.ResourceAccess_0), new A.ResourceUse(t1, B.ResourceAccess_1)], type$.JSArray_ResourceUse);
+      return A._setArrayType([new A._BloomCompositePass(new A.PassDescriptor(_s14_, t2, false, false, true, false), program, emptyVao, _this.resolveBloom, t1)], type$.JSArray_RenderPass);
+    },
+    $isRenderFeature: 1
+  };
+  A._BloomCompositePass.prototype = {
+    execute$1(context) {
+      return;
+    },
+    $isRenderPass: 1,
+    get$descriptor() {
+      return this.descriptor;
+    }
+  };
+  A.DepthPrepassFeature.prototype = {
+    get$id() {
+      return "depthPrepass";
+    },
+    declare$2(graph, context) {
+      B.JSArray_methods.add$1(graph._render_graph$_passes, new A.PassDeclaration("depthPrepass", B.GraphStage_2, A._setArrayType([new A.ResourceUse(this.sceneDepthResource, B.ResourceAccess_1)], type$.JSArray_ResourceUse), false));
+    },
+    createPasses$1(resources) {
+      var _this = this,
+        _s12_ = "depthPrepass",
+        program = _this.programLibrary.publish$1(new A.ProgramSource(_s12_, _this.vertexSource, _this.fragmentSource, B.Map_JgyPq, B.Map_6Y6km, B.List_NFc));
+      return A._setArrayType([new A._DepthPrepassPass(new A.PassDescriptor(_s12_, A._setArrayType([new A.ResourceUse(_this.sceneDepthResource, B.ResourceAccess_1)], type$.JSArray_ResourceUse), true, true, false, true), program, _this.resolveMesh, _this.resolveMaterial, _this.resolveAlbedo)], type$.JSArray_RenderPass);
+    },
+    $isRenderFeature: 1
+  };
+  A._DepthPrepassPass.prototype = {
+    execute$1(context) {
+      var t3, t4, t5, t6, t7, t8, _i, batch, representative, t9, mesh, t10, t11, t12, _this = this,
+        _s60_ = string$.WebGl2,
+        encoder = context.encoder,
+        t1 = context.frameScene,
+        t2 = encoder.device;
+      A.WebGl2DeviceDraw_bindTargetImpl(t2, context.viewOf$1("sceneDepth").gpuObject);
+      A.WebGl2DeviceDraw_applyDrawStateImpl(t2, _this.descriptor.toDrawState$0());
+      A.WebGl2DeviceDraw_clearImpl(t2, B.ClearMask_2, 1, 0, 0, 0);
+      A.WebGl2DeviceDraw_useProgramImpl(t2, _this.program.handle);
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uVertexSnapGrid", new A.UniformValue(B.UniformType_0, 0));
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uAlbedo", B.UniformValue_UniformType_6_0);
+      for (t3 = t1.opaqueBatches, t4 = t3.length, t1 = t1.camera.viewProjection.m, t5 = _this.resolveMesh, t6 = init.G, t7 = encoder.telemetry, t8 = t2.gl, _i = 0; _i < t3.length; t3.length === t4 || (0, A.throwConcurrentModificationError)(t3), ++_i) {
+        batch = t3[_i];
+        representative = batch.representative;
+        t9 = representative.get$descriptor().get$transform();
+        A.WebGl2DeviceDraw_setUniformImpl(t2, "uViewProjection", new A.UniformValue(B.UniformType_4, new Float32Array(A._ensureNativeList(t1))));
+        A.WebGl2DeviceDraw_setUniformImpl(t2, "uModel", new A.UniformValue(B.UniformType_4, new Float32Array(A._ensureNativeList(t9.toMat4$0().get$m()))));
+        A.setInstanceTransformUniforms(encoder, batch, false);
+        _this._depth_prepass$_setMaterialState$3(encoder, representative.get$descriptor().get$material(), 0);
+        mesh = t5.call$1(representative.get$descriptor().get$mesh());
+        t9 = mesh.vao;
+        if (t2._status !== B.GpuDeviceStatus_0)
+          A.throwExpression(A.StateError$(_s60_));
+        t8.bindVertexArray(A._asJSObject(t9.handle));
+        t9 = mesh.isIndexed;
+        t10 = mesh.drawCount;
+        t11 = batch.members.length;
+        if (t9) {
+          t9 = mesh.usesUint32Indices;
+          if (t2._status !== B.GpuDeviceStatus_0)
+            A.throwExpression(A.StateError$(_s60_));
+          t12 = A._asInt(t6.WebGL2RenderingContext.TRIANGLES);
+          t8.drawElementsInstanced.apply(t8, [t12, t10, t9 ? A._asInt(t6.WebGL2RenderingContext.UNSIGNED_INT) : A._asInt(t6.WebGL2RenderingContext.UNSIGNED_SHORT), 0, t11]);
+          t7._record$2(t10, t11);
+        } else {
+          if (t2._status !== B.GpuDeviceStatus_0)
+            A.throwExpression(A.StateError$(_s60_));
+          t8.drawArraysInstanced(A._asInt(t6.WebGL2RenderingContext.TRIANGLES), 0, t10, t11);
+          t7._record$2(t10, t11);
+        }
+      }
+    },
+    _depth_prepass$_setMaterialState$3(encoder, handle, affineWarpStrength) {
+      var baseState,
+        material = this.resolveMaterial.call$1(handle),
+        t1 = encoder.device;
+      A.WebGl2DeviceDraw_bindTextureImpl(t1, 0, type$.GpuObject._as(this.resolveAlbedo.call$1(material.get$albedoTexture())));
+      material.get$alphaMode();
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uAlphaCutoff", new A.UniformValue(B.UniformType_0, 0));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uAffineWarpStrength", new A.UniformValue(B.UniformType_0, material.get$affineSampling() ? affineWarpStrength : 0));
+      baseState = this.descriptor.toDrawState$0();
+      A.WebGl2DeviceDraw_applyDrawStateImpl(t1, material.get$doubleSided() ? baseState.withCullEnable$1(false) : baseState);
+    },
+    $isRenderPass: 1,
+    get$descriptor() {
+      return this.descriptor;
+    }
+  };
+  A._DofBlurAxis.prototype = {
+    _enumToString$0() {
+      return "_DofBlurAxis." + this._name;
+    }
+  };
+  A.DofBlurFeature.prototype = {
+    get$id() {
+      return this.passId;
+    },
+    declare$2(graph, context) {
+      B.JSArray_methods.add$1(graph._render_graph$_passes, new A.PassDeclaration(this.passId, B.GraphStage_6, A._setArrayType([new A.ResourceUse(this.sourceResource, B.ResourceAccess_0), new A.ResourceUse(this.destResource, B.ResourceAccess_1)], type$.JSArray_ResourceUse), false));
+    },
+    createPasses$1(resources) {
+      var _this = this,
+        program = _this.programLibrary.publish$1(new A.ProgramSource(_this.programId, _this.vertexSource, _this.fragmentSource, B.Map_empty, B.Map_Nhox7, B.List_uTexelStep)),
+        emptyVao = A.WebGl2DeviceTargets_createVertexArrayImpl(_this.device),
+        t1 = type$.JSArray_double,
+        texelStep = _this._axis === B._DofBlurAxis_0 ? new Float32Array(A._ensureNativeList(A._setArrayType([1 / _this.texelWidth, 0], t1))) : new Float32Array(A._ensureNativeList(A._setArrayType([0, 1 / _this.texelHeight], t1)));
+      t1 = _this.destResource;
+      return A._setArrayType([new A._DofBlurPass(new A.PassDescriptor(_this.passId, A._setArrayType([new A.ResourceUse(_this.sourceResource, B.ResourceAccess_0), new A.ResourceUse(t1, B.ResourceAccess_1)], type$.JSArray_ResourceUse), false, false, false, false), program, emptyVao, _this.resolveSource, texelStep, t1.name)], type$.JSArray_RenderPass);
+    },
+    $isRenderFeature: 1
+  };
+  A._DofBlurPass.prototype = {
+    execute$1(context) {
+      return;
+    },
+    $isRenderPass: 1,
+    get$descriptor() {
+      return this.descriptor;
+    }
+  };
+  A.DofCompositeFeature.prototype = {
+    get$id() {
+      return "dofComposite";
+    },
+    declare$2(graph, context) {
+      var _this = this;
+      B.JSArray_methods.add$1(graph._render_graph$_passes, new A.PassDeclaration("dofComposite", B.GraphStage_6, A._setArrayType([new A.ResourceUse(_this.sourceResource, B.ResourceAccess_0), new A.ResourceUse(_this.sceneDepthResource, B.ResourceAccess_0), new A.ResourceUse(_this.dofBlurredResource, B.ResourceAccess_0), new A.ResourceUse(_this.dofOutputResource, B.ResourceAccess_1)], type$.JSArray_ResourceUse), false));
+    },
+    createPasses$1(resources) {
+      var _this = this,
+        _s12_ = "dofComposite",
+        program = _this.programLibrary.publish$1(new A.ProgramSource(_s12_, _this.vertexSource, _this.fragmentSource, B.Map_empty, B.Map_Vt6q7, B.List_KZn)),
+        emptyVao = A.WebGl2DeviceTargets_createVertexArrayImpl(_this.device);
+      return A._setArrayType([new A._DofCompositePass(new A.PassDescriptor(_s12_, A._setArrayType([new A.ResourceUse(_this.sourceResource, B.ResourceAccess_0), new A.ResourceUse(_this.sceneDepthResource, B.ResourceAccess_0), new A.ResourceUse(_this.dofBlurredResource, B.ResourceAccess_0), new A.ResourceUse(_this.dofOutputResource, B.ResourceAccess_1)], type$.JSArray_ResourceUse), false, false, false, false), program, emptyVao, _this.resolveSharp, _this.resolveBlurred, _this.resolveSceneDepth, _this.resolveCamera, 5, 2.8)], type$.JSArray_RenderPass);
+    },
+    $isRenderFeature: 1
+  };
+  A._DofCompositePass.prototype = {
+    execute$1(context) {
+      var t2, _this = this,
+        view = context.viewOf$1("dofOutput"),
+        encoder = context.encoder,
+        camera = _this.resolveCamera.call$0(),
+        t1 = encoder.device;
+      A.WebGl2DeviceDraw_bindTargetImpl(t1, view.gpuObject);
+      A.WebGl2DeviceDraw_applyDrawStateImpl(t1, _this.descriptor.toDrawState$0());
+      A.WebGl2DeviceDraw_useProgramImpl(t1, _this.program.handle);
+      t2 = type$.GpuObject;
+      A.WebGl2DeviceDraw_bindTextureImpl(t1, 0, t2._as(_this.resolveSharp.call$0()));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uSharp", B.UniformValue_UniformType_6_0);
+      A.WebGl2DeviceDraw_bindTextureImpl(t1, 1, t2._as(_this.resolveBlurred.call$0()));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uBlurred", B.UniformValue_UniformType_6_1);
+      A.WebGl2DeviceDraw_bindTextureImpl(t1, 2, t2._as(_this.resolveSceneDepth.call$0()));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uSceneDepth", B.UniformValue_UniformType_6_2);
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uNear", new A.UniformValue(B.UniformType_0, camera.near));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uFar", new A.UniformValue(B.UniformType_0, camera.far));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uFocusDistance", new A.UniformValue(B.UniformType_0, _this.focusDistance));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uFocusRange", new A.UniformValue(B.UniformType_0, _this.focusRange));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uStrength", new A.UniformValue(B.UniformType_0, 0));
+      A.WebGl2DeviceDraw_bindVertexArrayImpl(t1, _this.emptyVao);
+      encoder.drawArrays$2$count$first(3, 0);
+    },
+    $isRenderPass: 1,
+    get$descriptor() {
+      return this.descriptor;
+    }
+  };
+  A.GradeFeature.prototype = {
+    get$id() {
+      return "grade";
+    },
+    declare$2(graph, context) {
+      B.JSArray_methods.add$1(graph._render_graph$_passes, new A.PassDeclaration("grade", B.GraphStage_6, A._setArrayType([new A.ResourceUse(this.inputResource, B.ResourceAccess_0), new A.ResourceUse(this.outputResource, B.ResourceAccess_1)], type$.JSArray_ResourceUse), false));
+    },
+    createPasses$1(resources) {
+      var _this = this,
+        program = _this.programLibrary.publish$1(new A.ProgramSource("grade", _this.vertexSource, _this.fragmentSource, B.Map_empty, B.Map_LjSTj, B.List_uLutSize_uStrength)),
+        emptyVao = A.WebGl2DeviceTargets_createVertexArrayImpl(_this.device),
+        t1 = _this.inputResource,
+        t2 = _this.outputResource;
+      return A._setArrayType([new A._GradePass(new A.PassDescriptor("grade", A._setArrayType([new A.ResourceUse(t1, B.ResourceAccess_0), new A.ResourceUse(t2, B.ResourceAccess_1)], type$.JSArray_ResourceUse), false, false, false, false), program, emptyVao, _this.resolveLut, 16, t1, t2)], type$.JSArray_RenderPass);
+    },
+    $isRenderFeature: 1
+  };
+  A._GradePass.prototype = {
+    execute$1(context) {
+      var _this = this,
+        sceneView = context.viewOf$1(_this.inputResource.name),
+        encoder = context.encoder,
+        t1 = encoder.device;
+      A.WebGl2DeviceDraw_bindTargetImpl(t1, context.viewOf$1(_this.outputResource.name).gpuObject);
+      A.WebGl2DeviceDraw_applyDrawStateImpl(t1, _this.descriptor.toDrawState$0());
+      A.WebGl2DeviceDraw_useProgramImpl(t1, _this.program.handle);
+      A.WebGl2DeviceDraw_bindTextureImpl(t1, 0, sceneView.gpuObject);
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uScene", B.UniformValue_UniformType_6_0);
+      A.WebGl2DeviceDraw_bindTextureImpl(t1, 1, type$.GpuObject._as(_this.resolveLut.call$0()));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uLut", B.UniformValue_UniformType_6_1);
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uLutSize", new A.UniformValue(B.UniformType_0, _this.lutSize));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uStrength", new A.UniformValue(B.UniformType_0, 0));
+      A.WebGl2DeviceDraw_bindVertexArrayImpl(t1, _this.emptyVao);
+      encoder.drawArrays$2$count$first(3, 0);
+    },
+    $isRenderPass: 1,
+    get$descriptor() {
+      return this.descriptor;
+    }
+  };
+  A.MsaaResolveFeature.prototype = {
+    get$id() {
+      return "msaaResolve";
+    },
+    declare$2(graph, context) {
+      B.JSArray_methods.add$1(graph._render_graph$_passes, new A.PassDeclaration("msaaResolve", B.GraphStage_5, A._setArrayType([new A.ResourceUse(this.sourceResource, B.ResourceAccess_0), new A.ResourceUse(this.destinationResource, B.ResourceAccess_1)], type$.JSArray_ResourceUse), true));
+    },
+    createPasses$1(resources) {
+      var t1 = this.sourceResource,
+        t2 = this.destinationResource;
+      return A._setArrayType([new A._MsaaResolvePass(new A.PassDescriptor("msaaResolve", A._setArrayType([new A.ResourceUse(t1, B.ResourceAccess_0), new A.ResourceUse(t2, B.ResourceAccess_1)], type$.JSArray_ResourceUse), false, false, false, false), this.device, t1, t2)], type$.JSArray_RenderPass);
+    },
+    $isRenderFeature: 1
+  };
+  A._MsaaResolvePass.prototype = {
+    execute$1(context) {
+      var t2, src, dst, t3, srcHasGlow, dstHasGlow, t4,
+        _s15_ = "blitFramebuffer",
+        source = context.viewOfResource$1(this.sourceResource),
+        destination = context.viewOfResource$1(this.destinationResource),
+        t1 = this.device;
+      if (t1._status !== B.GpuDeviceStatus_0)
+        A.throwExpression(A.StateError$(string$.WebGl2));
+      t2 = type$._WebGlFramebuffer;
+      src = t2._as(source.gpuObject.handle);
+      dst = t2._as(destination.gpuObject.handle);
+      t2 = src.samples;
+      if (t2 <= 1)
+        A.throwExpression(A.ArgumentError$("WebGl2Device.resolveTarget: source must be multisampled (samples > 1), got " + t2, null));
+      t2 = dst.samples;
+      if (t2 > 1)
+        A.throwExpression(A.ArgumentError$("WebGl2Device.resolveTarget: destination must be single-sample, got samples=" + t2, null));
+      t2 = src.width;
+      t3 = dst.width;
+      if (t2 !== t3 || src.height !== dst.height)
+        A.throwExpression(A.ArgumentError$("WebGl2Device.resolveTarget: source (" + t2 + "x" + src.height + ") and destination (" + t3 + "x" + dst.height + ") must match", null));
+      srcHasGlow = src.glowRb != null || src.glowTex != null;
+      dstHasGlow = dst.glowRb != null || dst.glowTex != null;
+      t1 = t1.gl;
+      t4 = init.G;
+      t1.bindFramebuffer(A._asInt(t4.WebGL2RenderingContext.READ_FRAMEBUFFER), src.fbo);
+      t1.bindFramebuffer(A._asInt(t4.WebGL2RenderingContext.DRAW_FRAMEBUFFER), dst.fbo);
+      if (src.colorRb != null || src.colorTex != null) {
+        if (srcHasGlow) {
+          t1.readBuffer(A._asInt(t4.WebGL2RenderingContext.COLOR_ATTACHMENT0));
+          t1.drawBuffers(A._setArrayType([A._asInt(t4.WebGL2RenderingContext.COLOR_ATTACHMENT0), A._asInt(t4.WebGL2RenderingContext.NONE)], type$.JSArray_double));
+        }
+        A.callMethod(t1, _s15_, [0, 0, t2, src.height, 0, 0, t3, dst.height, A._asInt(t4.WebGL2RenderingContext.COLOR_BUFFER_BIT), A._asInt(t4.WebGL2RenderingContext.LINEAR)], type$.void);
+      }
+      if (srcHasGlow && dstHasGlow) {
+        t1.readBuffer(A._asInt(t4.WebGL2RenderingContext.COLOR_ATTACHMENT1));
+        t1.drawBuffers(A._setArrayType([A._asInt(t4.WebGL2RenderingContext.NONE), A._asInt(t4.WebGL2RenderingContext.COLOR_ATTACHMENT1)], type$.JSArray_double));
+        A.callMethod(t1, _s15_, [0, 0, t2, src.height, 0, 0, t3, dst.height, A._asInt(t4.WebGL2RenderingContext.COLOR_BUFFER_BIT), A._asInt(t4.WebGL2RenderingContext.LINEAR)], type$.void);
+      }
+      if (src.depthRb != null || src.depthTex != null)
+        A.callMethod(t1, _s15_, [0, 0, t2, src.height, 0, 0, t3, dst.height, A._asInt(t4.WebGL2RenderingContext.DEPTH_BUFFER_BIT), A._asInt(t4.WebGL2RenderingContext.NEAREST)], type$.void);
+      if (dstHasGlow)
+        t1.drawBuffers(A._setArrayType([A._asInt(t4.WebGL2RenderingContext.COLOR_ATTACHMENT0), A._asInt(t4.WebGL2RenderingContext.COLOR_ATTACHMENT1)], type$.JSArray_double));
+      t1.bindFramebuffer(A._asInt(t4.WebGL2RenderingContext.READ_FRAMEBUFFER), null);
+      t1.bindFramebuffer(A._asInt(t4.WebGL2RenderingContext.DRAW_FRAMEBUFFER), null);
+    },
+    $isRenderPass: 1,
+    get$descriptor() {
+      return this.descriptor;
+    }
+  };
+  A.BoundResourceView.prototype = {};
+  A.BoundPassContext.prototype = {
+    viewOf$1(resourceName) {
+      var view = this.views.$index(0, resourceName);
+      if (view == null)
+        throw A.wrapException(A.StateError$('BoundPassContext: no view declared for "' + resourceName + '" \u2014 a pass may only access resources it named in its own PassDescriptor.uses'));
+      return view;
+    },
+    viewOfResource$1(resource) {
+      var t1 = resource.name,
+        exact = this.views.$index(0, t1 + "#" + resource.version);
+      if (exact != null)
+        return exact;
+      return this.viewOf$1(t1);
+    },
+    $isRenderPassContext: 1
+  };
+  A.PipelineResourceLayout.prototype = {};
+  A.PresentFeature.prototype = {
+    get$id() {
+      return "present";
+    },
+    declare$2(graph, context) {
+      B.JSArray_methods.add$1(graph._render_graph$_passes, new A.PassDeclaration("present", B.GraphStage_9, A._setArrayType([new A.ResourceUse(this.sceneColorResource, B.ResourceAccess_0)], type$.JSArray_ResourceUse), false));
+    },
+    createPasses$1(resources) {
+      var _this = this,
+        program = _this.programLibrary.publish$1(new A.ProgramSource("present", _this.vertexSource, _this.fragmentSource, B.Map_empty, B.Map_xTGca, B.List_bt2)),
+        emptyVao = A.WebGl2DeviceTargets_createVertexArrayImpl(_this.device),
+        t1 = _this.sceneColorResource;
+      return A._setArrayType([new A._PresentPass(new A.PassDescriptor("present", A._setArrayType([new A.ResourceUse(t1, B.ResourceAccess_0)], type$.JSArray_ResourceUse), false, false, false, false), program, emptyVao, t1, _this.outputEncoding)], type$.JSArray_RenderPass);
+    },
+    $isRenderFeature: 1
+  };
+  A._PresentPass.prototype = {
+    execute$1(context) {
+      var _this = this,
+        source = context.viewOfResource$1(_this.sceneColorResource),
+        encoder = context.encoder,
+        t1 = encoder.device;
+      A.WebGl2DeviceDraw_bindTargetImpl(t1, null);
+      A.WebGl2DeviceDraw_applyDrawStateImpl(t1, _this.descriptor.toDrawState$0());
+      A.WebGl2DeviceDraw_useProgramImpl(t1, _this.program.handle);
+      A.WebGl2DeviceDraw_bindVertexArrayImpl(t1, _this.emptyVao);
+      A.WebGl2DeviceDraw_bindTextureImpl(t1, 0, source.gpuObject);
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uExposure", new A.UniformValue(B.UniformType_0, 1));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uVignette", new A.UniformValue(B.UniformType_0, 0));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uGrain", new A.UniformValue(B.UniformType_0, 0));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uRainIntensity", new A.UniformValue(B.UniformType_0, 0));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uRainWindowVisibility", new A.UniformValue(B.UniformType_0, 1));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uOutputEncoding", new A.UniformValue(B.UniformType_0, _this.outputEncoding === B.ColorEncoding_1 ? 1 : 0));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uToneMap", B.UniformValue_UniformType_0_1);
+      encoder.drawArrays$2$count$first(3, 0);
+    },
+    $isRenderPass: 1,
+    get$descriptor() {
+      return this.descriptor;
+    }
+  };
+  A.Ps1QuantizeFeature.prototype = {
+    get$id() {
+      return "ps1Quantize";
+    },
+    declare$2(graph, context) {
+      B.JSArray_methods.add$1(graph._render_graph$_passes, new A.PassDeclaration("ps1Quantize", B.GraphStage_6, A._setArrayType([new A.ResourceUse(this.inputResource, B.ResourceAccess_0), new A.ResourceUse(this.outputResource, B.ResourceAccess_1)], type$.JSArray_ResourceUse), false));
+    },
+    createPasses$1(resources) {
+      var _this = this,
+        _s11_ = "ps1Quantize",
+        program = _this.programLibrary.publish$1(new A.ProgramSource(_s11_, _this.vertexSource, _this.fragmentSource, B.Map_empty, B.Map_eWjtK, B.List_Es0)),
+        emptyVao = A.WebGl2DeviceTargets_createVertexArrayImpl(_this.device),
+        t1 = _this.inputResource,
+        t2 = _this.outputResource;
+      return A._setArrayType([new A._Ps1QuantizePass(new A.PassDescriptor(_s11_, A._setArrayType([new A.ResourceUse(t1, B.ResourceAccess_0), new A.ResourceUse(t2, B.ResourceAccess_1)], type$.JSArray_ResourceUse), false, false, false, false), program, emptyVao, t1, t2)], type$.JSArray_RenderPass);
+    },
+    $isRenderFeature: 1
+  };
+  A._Ps1QuantizePass.prototype = {
+    execute$1(context) {
+      var _this = this,
+        sceneView = context.viewOf$1(_this.inputResource.name),
+        encoder = context.encoder,
+        t1 = encoder.device;
+      A.WebGl2DeviceDraw_bindTargetImpl(t1, context.viewOf$1(_this.outputResource.name).gpuObject);
+      A.WebGl2DeviceDraw_applyDrawStateImpl(t1, _this.descriptor.toDrawState$0());
+      A.WebGl2DeviceDraw_useProgramImpl(t1, _this.program.handle);
+      A.WebGl2DeviceDraw_bindTextureImpl(t1, 0, sceneView.gpuObject);
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uScene", B.UniformValue_UniformType_6_0);
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uQuantizationBits", new A.UniformValue(B.UniformType_0, 8));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uDitherStrength", new A.UniformValue(B.UniformType_0, 0));
+      A.WebGl2DeviceDraw_bindVertexArrayImpl(t1, _this.emptyVao);
+      encoder.drawArrays$2$count$first(3, 0);
+    },
+    $isRenderPass: 1,
+    get$descriptor() {
+      return this.descriptor;
+    }
+  };
+  A.ShadowLightView.prototype = {};
+  A.ShadowFeature.prototype = {
+    get$id() {
+      return "shadow";
+    },
+    declare$2(graph, context) {
+      B.JSArray_methods.add$1(graph._render_graph$_passes, new A.PassDeclaration("shadowCaster", B.GraphStage_0, A._setArrayType([new A.ResourceUse(this.shadowMapResource, B.ResourceAccess_1)], type$.JSArray_ResourceUse), false));
+    },
+    createPasses$1(resources) {
+      var _this = this,
+        _s12_ = "shadowCaster",
+        program = _this.programLibrary.publish$1(new A.ProgramSource(_s12_, _this.vertexSource, _this.fragmentSource, B.Map_JgyPq, B.Map_6Y6km, B.List_u6B));
+      return A._setArrayType([new A._ShadowCasterPass(new A.PassDescriptor(_s12_, A._setArrayType([new A.ResourceUse(_this.shadowMapResource, B.ResourceAccess_1)], type$.JSArray_ResourceUse), true, true, false, true), program, _this.resolveMesh, _this.resolveMaterial, _this.resolveAlbedo, _this.resolveCasterLight, _this.resolveCasterLod, _this.resolveCasterMesh, _this.onLightViewComputed)], type$.JSArray_RenderPass);
+    },
+    $isRenderFeature: 1
+  };
+  A._ShadowCasterPass.prototype = {
+    execute$1(context) {
+      var t1, lightView, t2, _i, _this = this,
+        view = context.viewOf$1("shadowMap"),
+        encoder = context.encoder,
+        light = _this.resolveCasterLight.call$0();
+      if (light == null) {
+        t1 = encoder.device;
+        A.WebGl2DeviceDraw_bindTargetImpl(t1, view.gpuObject);
+        A.WebGl2DeviceDraw_applyDrawStateImpl(t1, _this.descriptor.toDrawState$0());
+        A.WebGl2DeviceDraw_clearImpl(t1, B.ClearMask_2, 1, 0, 0, 0);
+        return;
+      }
+      lightView = A.ShadowLightView_ShadowLightView$fromSpotLight(light);
+      _this.onLightViewComputed.call$1(lightView);
+      t1 = encoder.device;
+      A.WebGl2DeviceDraw_bindTargetImpl(t1, view.gpuObject);
+      A.WebGl2DeviceDraw_applyDrawStateImpl(t1, _this.descriptor.toDrawState$0());
+      A.WebGl2DeviceDraw_clearImpl(t1, B.ClearMask_2, 1, 0, 0, 0);
+      A.WebGl2DeviceDraw_useProgramImpl(t1, _this.program.handle);
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uAlbedo", B.UniformValue_UniformType_6_0);
+      for (t1 = context.frameScene.opaqueBatches, t2 = t1.length, _i = 0; _i < t1.length; t1.length === t2 || (0, A.throwConcurrentModificationError)(t1), ++_i)
+        _this._drawCaster$4(encoder, t1[_i], light, lightView);
+    },
+    _shadow$_setMaterialState$2(encoder, handle) {
+      var baseState,
+        material = this.resolveMaterial.call$1(handle),
+        t1 = encoder.device;
+      A.WebGl2DeviceDraw_bindTextureImpl(t1, 0, type$.GpuObject._as(this.resolveAlbedo.call$1(material.get$albedoTexture())));
+      material.get$alphaMode();
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uAlphaCutoff", new A.UniformValue(B.UniformType_0, 0));
+      baseState = this.descriptor.toDrawState$0();
+      A.WebGl2DeviceDraw_applyDrawStateImpl(t1, material.get$doubleSided() ? baseState.withCullEnable$1(false) : baseState);
+    },
+    _drawCaster$4(encoder, batch, light, lightView) {
+      var t1, meshHandle, mesh, t2, representative, t3, _this = this;
+      if (type$.RetainedItemView._is(batch)) {
+        if (!batch.get$descriptor().get$castsShadow())
+          return;
+        t1 = encoder.device;
+        A.WebGl2DeviceDraw_setUniformImpl(t1, "uUseInstances", B.UniformValue_UniformType_0_0);
+        _this._setLightUniforms$3(encoder, batch.get$descriptor().get$transform(), lightView);
+        _this._shadow$_setMaterialState$2(encoder, batch.get$descriptor().get$material());
+        meshHandle = batch.get$descriptor().get$mesh();
+        mesh = _this.resolveMesh.call$1(meshHandle);
+        A.WebGl2DeviceDraw_bindVertexArrayImpl(t1, mesh.vao);
+        t1 = mesh.isIndexed;
+        t2 = mesh.drawCount;
+        if (t1)
+          encoder.drawElements$3$count$index32$offsetBytes(t2, mesh.usesUint32Indices, 0);
+        else
+          encoder.drawArrays$2$count$first(t2, 0);
+      } else if (batch instanceof A.InstanceBatch) {
+        representative = batch.representative;
+        if (!representative.get$descriptor().get$castsShadow())
+          return;
+        if (_this._uniformBatchLod$2(batch, light) === B.ShadowCasterLod_2)
+          return;
+        _this._setLightUniforms$3(encoder, representative.get$descriptor().get$transform(), lightView);
+        A.setInstanceTransformUniforms(encoder, batch, false);
+        _this._shadow$_setMaterialState$2(encoder, representative.get$descriptor().get$material());
+        meshHandle = representative.get$descriptor().get$mesh();
+        mesh = _this.resolveMesh.call$1(meshHandle);
+        A.WebGl2DeviceDraw_bindVertexArrayImpl(encoder.device, mesh.vao);
+        t1 = mesh.isIndexed;
+        t2 = mesh.drawCount;
+        t3 = batch.members.length;
+        if (t1)
+          encoder.drawElementsInstanced$4$count$index32$instanceCount$offsetBytes(t2, mesh.usesUint32Indices, t3, 0);
+        else
+          encoder.drawArraysInstanced$3$count$first$instanceCount(t2, 0, t3);
+      } else
+        throw A.wrapException(A.ArgumentError$("ShadowFeature: frameScene entries must be InstanceBatch or RetainedItemView, got " + J.get$runtimeType$(batch).toString$0(0), null));
+    },
+    _uniformBatchLod$2(batch, light) {
+      return B.ShadowCasterLod_0;
+    },
+    _setLightUniforms$3(encoder, transform, lightView) {
+      var t1 = encoder.device;
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uModel", new A.UniformValue(B.UniformType_4, new Float32Array(A._ensureNativeList(transform.toMat4$0().get$m()))));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uLightViewProjection", new A.UniformValue(B.UniformType_4, new Float32Array(A._ensureNativeList(lightView.viewProjection.m))));
+    },
+    $isRenderPass: 1,
+    get$descriptor() {
+      return this.descriptor;
+    }
+  };
+  A.buildShadowGraph_closure.prototype = {
+    call$1(view) {
+      return this._box_0.lastLightView = view;
+    },
+    $signature: 50
+  };
+  A.buildShadowGraph_closure0.prototype = {
+    call$0() {
+      var t1 = this._box_0.lastLightView;
+      return t1 == null ? this.fallbackLightView : t1;
+    },
+    $signature: 51
+  };
+  A.ShadowedWorldFeature.prototype = {
+    get$id() {
+      return "shadowedWorld";
+    },
+    declare$2(graph, context) {
+      var _this = this,
+        t1 = A._setArrayType([new A.ResourceUse(_this.shadowMapResource, B.ResourceAccess_0)], type$.JSArray_ResourceUse);
+      if (_this.useSsao)
+        t1.push(new A.ResourceUse(_this.ssaoResource, B.ResourceAccess_0));
+      t1.push(new A.ResourceUse(_this.sceneColorResource, B.ResourceAccess_1));
+      B.JSArray_methods.add$1(graph._render_graph$_passes, new A.PassDeclaration("shadowedWorld", B.GraphStage_4, t1, false));
+    },
+    createPasses$1(resources) {
+      var _this = this,
+        _s13_ = "shadowedWorld",
+        program = _this.programLibrary.publish$1(new A.ProgramSource(_s13_, _this.vertexSource, _this.fragmentSource, B.Map_jaYU8, B.Map_RkR7l, B.List_43N)),
+        t1 = A._setArrayType([new A.ResourceUse(_this.shadowMapResource, B.ResourceAccess_0)], type$.JSArray_ResourceUse);
+      if (_this.useSsao)
+        t1.push(new A.ResourceUse(_this.ssaoResource, B.ResourceAccess_0));
+      t1.push(new A.ResourceUse(_this.sceneColorResource, B.ResourceAccess_1));
+      return A._setArrayType([new A._ShadowedWorldPass(new A.PassDescriptor(_s13_, t1, true, true, false, true), program, _this.resolveMesh, _this.resolveMaterial, _this.resolveAlbedo, _this.resolveNormal, _this.resolveOrm, _this.resolveEmissive, _this.resolveLightmap, _this.resolveShadowMap, _this.resolveLightView, _this.resolveCasterLight, _this.resolveDirectSpotLights, _this.resolveSsaoBlurred, _this.sceneColorWidth, _this.sceneColorHeight, _this.shadowMapWidth, _this.shadowMapHeight)], type$.JSArray_RenderPass);
+    },
+    $isRenderFeature: 1
+  };
+  A._ShadowedWorldPass.prototype = {
+    execute$1(context) {
+      var t3, t4, t5, casterLight, t6, t7, lightPosition, lightDirection, spotColor, i, light, position, direction, color, t8, _i, _this = this, _null = null,
+        view = context.viewOf$1("sceneColor"),
+        encoder = context.encoder,
+        t1 = context.frameScene,
+        camera = t1.camera,
+        lightView = _this.resolveLightView.call$0(),
+        t2 = encoder.device;
+      A.WebGl2DeviceDraw_bindTargetImpl(t2, view.gpuObject);
+      A.WebGl2DeviceDraw_applyDrawStateImpl(t2, _this.descriptor.toDrawState$0());
+      A.WebGl2DeviceDraw_clearImpl(t2, B.ClearMask_1, 1, 0.04, 0.03, 0.03);
+      A.WebGl2DeviceDraw_useProgramImpl(t2, _this.program.handle);
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uAlbedo", B.UniformValue_UniformType_6_0);
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uNormalMap", B.UniformValue_UniformType_6_3);
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uOrmMap", B.UniformValue_UniformType_6_4);
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uEmissiveMap", B.UniformValue_UniformType_6_5);
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uLightmap", B.UniformValue_UniformType_6_6);
+      t3 = type$.GpuObject;
+      A.WebGl2DeviceDraw_bindTextureImpl(t2, 1, t3._as(_this.resolveShadowMap.call$0()));
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uShadowMap", B.UniformValue_UniformType_6_1);
+      t4 = camera.eye;
+      t5 = type$.JSArray_double;
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uCameraPosition", new A.UniformValue(B.UniformType_2, new Float32Array(A._ensureNativeList(A._setArrayType([t4.x, t4.y, t4.z], t5)))));
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uShadowMapTexelSize", new A.UniformValue(B.UniformType_1, new Float32Array(A._ensureNativeList(A._setArrayType([1 / _this.shadowMapWidth, 1 / _this.shadowMapHeight], t5)))));
+      A.WebGl2DeviceDraw_bindTextureImpl(t2, 2, t3._as(_this.resolveSsaoBlurred.call$0()));
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uSsao", B.UniformValue_UniformType_6_2);
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uVertexSnapGrid", new A.UniformValue(B.UniformType_0, 0));
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uSceneColorSize", new A.UniformValue(B.UniformType_1, new Float32Array(A._ensureNativeList(A._setArrayType([_this.sceneColorWidth, _this.sceneColorHeight], t5)))));
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uViewProjection", new A.UniformValue(B.UniformType_4, new Float32Array(A._ensureNativeList(camera.viewProjection.m))));
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uView", new A.UniformValue(B.UniformType_4, new Float32Array(A._ensureNativeList(camera.view.m))));
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uLightViewProjection", new A.UniformValue(B.UniformType_4, new Float32Array(A._ensureNativeList(lightView.viewProjection.m))));
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uFogColor", new A.UniformValue(B.UniformType_2, new Float32Array(A._ensureNativeList(A._setArrayType([0, 0, 0], t5)))));
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uFogStart", new A.UniformValue(B.UniformType_0, 0));
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uFogEnd", new A.UniformValue(B.UniformType_0, 1));
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uFogHeightFalloff", new A.UniformValue(B.UniformType_0, 0));
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uFogDensity", new A.UniformValue(B.UniformType_0, 0));
+      casterLight = _this.resolveCasterLight.call$0();
+      t3 = A._setArrayType([], type$.JSArray_SpotLight);
+      t4 = _this.resolveDirectSpotLights.call$0();
+      t4 = J.get$iterator$ax(t4 == null ? B.List_empty1 : t4);
+      t6 = casterLight == null;
+      while (t4.moveNext$0()) {
+        t7 = t4.get$current();
+        if (-1 !== (t6 ? _null : -1))
+          t3.push(t7);
+      }
+      lightPosition = t6 ? _null : B.Vec3_0_1_0;
+      if (lightPosition == null)
+        lightPosition = B.Vec3_0_1_0;
+      lightDirection = t6 ? _null : B.Vec3_0_m1_0;
+      if (lightDirection == null)
+        lightDirection = B.Vec3_0_m1_0;
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uLightPosition", new A.UniformValue(B.UniformType_2, new Float32Array(A._ensureNativeList(A._setArrayType([lightPosition.x, lightPosition.y, lightPosition.z], t5)))));
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uLightDirection", new A.UniformValue(B.UniformType_2, new Float32Array(A._ensureNativeList(A._setArrayType([lightDirection.x, lightDirection.y, lightDirection.z], t5)))));
+      spotColor = t6 ? _null : B.LinearColor_1_1_1;
+      if (spotColor == null)
+        spotColor = B.LinearColor_0_0_0;
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uLightColor", new A.UniformValue(B.UniformType_2, new Float32Array(A._ensureNativeList(A._setArrayType([spotColor.r, spotColor.g, spotColor.b], t5)))));
+      t4 = t6 ? _null : 1;
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uLightIntensity", new A.UniformValue(B.UniformType_0, t4 == null ? 0 : t4));
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uSpotEnabled", new A.UniformValue(B.UniformType_0, !t6 ? 1 : 0));
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uDirectionalDirection", new A.UniformValue(B.UniformType_2, new Float32Array(A._ensureNativeList(A._setArrayType([0, 1, 0], t5)))));
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uDirectionalColor", new A.UniformValue(B.UniformType_2, new Float32Array(A._ensureNativeList(A._setArrayType([0, 0, 0], t5)))));
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uDirectionalIntensity", new A.UniformValue(B.UniformType_0, 0));
+      for (i = 0; i < 4; ++i) {
+        t4 = "" + i;
+        A.WebGl2DeviceDraw_setUniformImpl(t2, "uPointPosition" + t4, new A.UniformValue(B.UniformType_2, new Float32Array(A._ensureNativeList(A._setArrayType([0, 0, 0], t5)))));
+        A.WebGl2DeviceDraw_setUniformImpl(t2, "uPointColor" + t4, new A.UniformValue(B.UniformType_2, new Float32Array(A._ensureNativeList(A._setArrayType([0, 0, 0], t5)))));
+        A.WebGl2DeviceDraw_setUniformImpl(t2, "uPointIntensity" + t4, new A.UniformValue(B.UniformType_0, 0));
+        A.WebGl2DeviceDraw_setUniformImpl(t2, "uPointRadius" + t4, new A.UniformValue(B.UniformType_0, 1));
+      }
+      for (i = 0; i < 3; ++i) {
+        t4 = t3.length;
+        if (i < t4) {
+          if (!(i < t4))
+            return A.ioore(t3, i);
+          light = t3[i];
+        } else
+          light = _null;
+        t4 = light == null;
+        position = t4 ? _null : B.Vec3_0_1_0;
+        if (position == null)
+          position = B.Vec3_0_0_0;
+        direction = t4 ? _null : B.Vec3_0_m1_0;
+        if (direction == null)
+          direction = B.Vec3_0_m1_0;
+        color = t4 ? _null : B.LinearColor_1_1_1;
+        if (color == null)
+          color = B.LinearColor_0_0_0;
+        t7 = "" + i;
+        A.WebGl2DeviceDraw_setUniformImpl(t2, "uDirectSpotPosition" + t7, new A.UniformValue(B.UniformType_2, new Float32Array(A._ensureNativeList(A._setArrayType([position.x, position.y, position.z], t5)))));
+        A.WebGl2DeviceDraw_setUniformImpl(t2, "uDirectSpotDirection" + t7, new A.UniformValue(B.UniformType_2, new Float32Array(A._ensureNativeList(A._setArrayType([direction.x, direction.y, direction.z], t5)))));
+        A.WebGl2DeviceDraw_setUniformImpl(t2, "uDirectSpotColor" + t7, new A.UniformValue(B.UniformType_2, new Float32Array(A._ensureNativeList(A._setArrayType([color.r, color.g, color.b], t5)))));
+        t8 = t4 ? _null : 1;
+        if (t8 == null)
+          t8 = 0;
+        A.WebGl2DeviceDraw_setUniformImpl(t2, "uDirectSpotIntensity" + t7, new A.UniformValue(B.UniformType_0, t8));
+        t8 = t4 ? _null : 1;
+        if (t8 == null)
+          t8 = 1;
+        A.WebGl2DeviceDraw_setUniformImpl(t2, "uDirectSpotRange" + t7, new A.UniformValue(B.UniformType_0, t8));
+        t8 = t4 ? _null : 0.3;
+        if (t8 == null)
+          t8 = 0.3;
+        A.WebGl2DeviceDraw_setUniformImpl(t2, "uDirectSpotInnerCos" + t7, new A.UniformValue(B.UniformType_0, Math.cos(t8)));
+        t8 = t4 ? _null : 0.5;
+        if (t8 == null)
+          t8 = 0.5;
+        A.WebGl2DeviceDraw_setUniformImpl(t2, "uDirectSpotOuterCos" + t7, new A.UniformValue(B.UniformType_0, Math.cos(t8)));
+        t4 = t4 ? 0 : 1;
+        A.WebGl2DeviceDraw_setUniformImpl(t2, "uDirectSpotEnabled" + t7, new A.UniformValue(B.UniformType_0, t4));
+      }
+      t3 = t6 ? _null : 1;
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uLightRange", new A.UniformValue(B.UniformType_0, t3 == null ? 1 : t3));
+      t3 = t6 ? _null : 0.3;
+      if (t3 == null)
+        t3 = 0.3;
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uLightInnerCos", new A.UniformValue(B.UniformType_0, Math.cos(t3)));
+      t3 = t6 ? _null : 0.5;
+      if (t3 == null)
+        t3 = 0.5;
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uLightOuterCos", new A.UniformValue(B.UniformType_0, Math.cos(t3)));
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uAmbientColor", new A.UniformValue(B.UniformType_2, new Float32Array(A._ensureNativeList(A._setArrayType([1, 1, 1], t5)))));
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uAmbientIntensity", new A.UniformValue(B.UniformType_0, 0));
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uRainWetness", new A.UniformValue(B.UniformType_0, 0));
+      for (t2 = t1.opaqueBatches, t3 = t2.length, _i = 0; _i < t2.length; t2.length === t3 || (0, A.throwConcurrentModificationError)(t2), ++_i)
+        _this._shadowed_world$_drawBatch$3(encoder, t2[_i], 0);
+      for (t1 = t1.blendedItemsBackToFront, t2 = t1.length, _i = 0; _i < t1.length; t1.length === t2 || (0, A.throwConcurrentModificationError)(t1), ++_i)
+        _this._shadowed_world$_drawBatch$3(encoder, t1[_i], 0);
+    },
+    _shadowed_world$_drawBatch$3(encoder, batch, affineWarpStrength) {
+      var t1, mesh, t2, representative, t3, _this = this;
+      if (type$.RetainedItemView._is(batch)) {
+        t1 = encoder.device;
+        A.WebGl2DeviceDraw_setUniformImpl(t1, "uUseInstances", B.UniformValue_UniformType_0_0);
+        _this._shadowed_world$_setModelUniforms$2(encoder, batch.get$descriptor().get$transform());
+        _this._setMaterialState$6(encoder, batch.get$descriptor().get$material(), batch.get$descriptor().get$drawMode(), batch.get$descriptor().get$blendMode(), affineWarpStrength, batch.get$descriptor().get$receivesShadow());
+        mesh = _this.resolveMesh.call$1(batch.get$descriptor().get$mesh());
+        A.WebGl2DeviceDraw_bindVertexArrayImpl(t1, mesh.vao);
+        t1 = mesh.isIndexed;
+        t2 = mesh.drawCount;
+        if (t1)
+          encoder.drawElements$3$count$index32$offsetBytes(t2, mesh.usesUint32Indices, 0);
+        else
+          encoder.drawArrays$2$count$first(t2, 0);
+      } else if (batch instanceof A.InstanceBatch) {
+        representative = batch.representative;
+        _this._shadowed_world$_setModelUniforms$2(encoder, representative.get$descriptor().get$transform());
+        A.setInstanceTransformUniforms(encoder, batch, true);
+        _this._setMaterialState$6(encoder, representative.get$descriptor().get$material(), representative.get$descriptor().get$drawMode(), representative.get$descriptor().get$blendMode(), affineWarpStrength, representative.get$descriptor().get$receivesShadow());
+        mesh = _this.resolveMesh.call$1(representative.get$descriptor().get$mesh());
+        A.WebGl2DeviceDraw_bindVertexArrayImpl(encoder.device, mesh.vao);
+        t1 = mesh.isIndexed;
+        t2 = mesh.drawCount;
+        t3 = batch.members.length;
+        if (t1)
+          encoder.drawElementsInstanced$4$count$index32$instanceCount$offsetBytes(t2, mesh.usesUint32Indices, t3, 0);
+        else
+          encoder.drawArraysInstanced$3$count$first$instanceCount(t2, 0, t3);
+      } else
+        throw A.wrapException(A.ArgumentError$("ShadowedWorldFeature: frameScene entries must be InstanceBatch or RetainedItemView, got " + J.get$runtimeType$(batch).toString$0(0), null));
+    },
+    _setMaterialState$6(encoder, handle, drawMode, blendMode, affineWarpStrength, itemReceivesShadow) {
+      var _this = this,
+        material = _this.resolveMaterial.call$1(handle),
+        t1 = type$.GpuObject,
+        t2 = encoder.device;
+      A.WebGl2DeviceDraw_bindTextureImpl(t2, 0, t1._as(_this.resolveAlbedo.call$1(material.get$albedoTexture())));
+      A.WebGl2DeviceDraw_bindTextureImpl(t2, 3, t1._as(_this.resolveNormal.call$1(material.get$normalTexture())));
+      A.WebGl2DeviceDraw_bindTextureImpl(t2, 4, t1._as(_this.resolveOrm.call$1(material.get$ormTexture())));
+      A.WebGl2DeviceDraw_bindTextureImpl(t2, 5, t1._as(_this.resolveEmissive.call$1(material.get$emissiveTexture())));
+      A.WebGl2DeviceDraw_bindTextureImpl(t2, 6, t1._as(_this.resolveLightmap.call$1(material.get$lightmapTexture())));
+      material.get$alphaMode();
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uAlphaCutoff", new A.UniformValue(B.UniformType_0, 0));
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uOpaqueCoverage", new A.UniformValue(B.UniformType_0, 1));
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uAffineWarpStrength", new A.UniformValue(B.UniformType_0, material.get$affineSampling() ? affineWarpStrength : 0));
+      t1 = type$.JSArray_double;
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uMaterialTint", new A.UniformValue(B.UniformType_2, new Float32Array(A._ensureNativeList(A._setArrayType([material.get$tintR(), material.get$tintG(), material.get$tintB()], t1)))));
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uEmissiveStrength", new A.UniformValue(B.UniformType_0, material.get$emissiveStrength()));
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uUvScaleOffset", new A.UniformValue(B.UniformType_3, new Float32Array(A._ensureNativeList(A._setArrayType([material.get$uvScaleU(), material.get$uvScaleV(), material.get$uvOffsetU(), material.get$uvOffsetV()], t1)))));
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uNormalStrength", new A.UniformValue(B.UniformType_0, material.get$normalStrength()));
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uRoughness", new A.UniformValue(B.UniformType_0, material.get$roughness()));
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uMetallic", new A.UniformValue(B.UniformType_0, material.get$metallic()));
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uClearcoatStrength", new A.UniformValue(B.UniformType_0, material.get$clearcoatStrength()));
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uClearcoatRoughness", new A.UniformValue(B.UniformType_0, material.get$clearcoatRoughness()));
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uOcclusionStrength", new A.UniformValue(B.UniformType_0, material.get$occlusionStrength()));
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uLightmapIntensity", new A.UniformValue(B.UniformType_0, material.get$lightmapIntensity()));
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uReceivesShadow", new A.UniformValue(B.UniformType_0, material.get$receivesShadow() && itemReceivesShadow ? 1 : 0));
+      A.WebGl2DeviceDraw_applyDrawStateImpl(t2, material.get$doubleSided() ? null.withCullEnable$1(false) : null);
+    },
+    _shadowed_world$_setModelUniforms$2(encoder, transform) {
+      var model = transform.toMat4$0(),
+        t1 = encoder.device;
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uModel", new A.UniformValue(B.UniformType_4, new Float32Array(A._ensureNativeList(model.get$m()))));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uNormalMatrix", new A.UniformValue(B.UniformType_4, new Float32Array(A._ensureNativeList(model.normalMatrix$0().get$m()))));
+    },
+    $isRenderPass: 1,
+    get$descriptor() {
+      return this.descriptor;
+    }
+  };
+  A.SsaoOcclusionFeature.prototype = {
+    get$id() {
+      return "ssaoOcclusion";
+    },
+    declare$2(graph, context) {
+      B.JSArray_methods.add$1(graph._render_graph$_passes, new A.PassDeclaration("ssaoOcclusion", B.GraphStage_3, A._setArrayType([new A.ResourceUse(this.ssaoRawResource, B.ResourceAccess_1)], type$.JSArray_ResourceUse), false));
+    },
+    createPasses$1(resources) {
+      var _this = this,
+        _s13_ = "ssaoOcclusion",
+        program = _this.programLibrary.publish$1(new A.ProgramSource(_s13_, _this.vertexSource, _this.fragmentSource, B.Map_empty, B.Map_eLegi, B.List_4ld)),
+        emptyVao = A.WebGl2DeviceTargets_createVertexArrayImpl(_this.device);
+      return A._setArrayType([new A._SsaoOcclusionPass(new A.PassDescriptor(_s13_, A._setArrayType([new A.ResourceUse(_this.ssaoRawResource, B.ResourceAccess_1)], type$.JSArray_ResourceUse), false, false, false, false), program, emptyVao, _this.resolveSceneDepth, _this.resolveCamera, 0.4)], type$.JSArray_RenderPass);
+    },
+    $isRenderFeature: 1
+  };
+  A._SsaoOcclusionPass.prototype = {
+    execute$1(context) {
+      var t1 = context.encoder.device;
+      A.WebGl2DeviceDraw_bindTargetImpl(t1, context.viewOf$1("ssaoRaw").gpuObject);
+      A.WebGl2DeviceDraw_applyDrawStateImpl(t1, this.descriptor.toDrawState$0());
+      A.WebGl2DeviceDraw_clearImpl(t1, B.ClearMask_0, 1, 1, 1, 1);
+      return;
+    },
+    $isRenderPass: 1,
+    get$descriptor() {
+      return this.descriptor;
+    }
+  };
+  A.SsaoBlurFeature.prototype = {
+    get$id() {
+      return "ssaoBlur";
+    },
+    declare$2(graph, context) {
+      B.JSArray_methods.add$1(graph._render_graph$_passes, new A.PassDeclaration("ssaoBlur", B.GraphStage_3, A._setArrayType([new A.ResourceUse(this.ssaoRawResource, B.ResourceAccess_0), new A.ResourceUse(this.ssaoBlurredResource, B.ResourceAccess_1)], type$.JSArray_ResourceUse), false));
+    },
+    createPasses$1(resources) {
+      var _this = this,
+        _s8_ = "ssaoBlur",
+        program = _this.programLibrary.publish$1(new A.ProgramSource(_s8_, _this.vertexSource, _this.fragmentSource, B.Map_empty, B.Map_9qjqz, B.List_uTexelSize_uNear_uFar)),
+        emptyVao = A.WebGl2DeviceTargets_createVertexArrayImpl(_this.device);
+      return A._setArrayType([new A._SsaoBlurPass(new A.PassDescriptor(_s8_, A._setArrayType([new A.ResourceUse(_this.ssaoRawResource, B.ResourceAccess_0), new A.ResourceUse(_this.ssaoBlurredResource, B.ResourceAccess_1)], type$.JSArray_ResourceUse), false, false, false, false), program, emptyVao, _this.resolveSsaoRaw, _this.resolveSceneDepth, _this.resolveCamera, _this.ssaoWidth, _this.ssaoHeight)], type$.JSArray_RenderPass);
+    },
+    $isRenderFeature: 1
+  };
+  A._SsaoBlurPass.prototype = {
+    execute$1(context) {
+      var t1 = context.encoder.device;
+      A.WebGl2DeviceDraw_bindTargetImpl(t1, context.viewOf$1("ssaoBlurred").gpuObject);
+      A.WebGl2DeviceDraw_applyDrawStateImpl(t1, this.descriptor.toDrawState$0());
+      A.WebGl2DeviceDraw_clearImpl(t1, B.ClearMask_0, 1, 1, 1, 1);
+      return;
+    },
+    $isRenderPass: 1,
+    get$descriptor() {
+      return this.descriptor;
+    }
+  };
+  A.VhsFeature.prototype = {
+    get$id() {
+      return "vhs";
+    },
+    declare$2(graph, context) {
+      var t1 = this.outputResource;
+      graph._declaredHistoryResources.add$1(0, t1.name);
+      B.JSArray_methods.add$1(graph._render_graph$_passes, new A.PassDeclaration("vhs", B.GraphStage_6, A._setArrayType([new A.ResourceUse(this.inputResource, B.ResourceAccess_0), new A.ResourceUse(t1, B.ResourceAccess_2), new A.ResourceUse(t1, B.ResourceAccess_1)], type$.JSArray_ResourceUse), false));
+    },
+    createPasses$1(resources) {
+      var _this = this,
+        program = _this.programLibrary.publish$1(new A.ProgramSource("vhs", _this.vertexSource, _this.fragmentSource, B.Map_empty, B.Map_ClpKC, B.List_F48)),
+        emptyVao = A.WebGl2DeviceTargets_createVertexArrayImpl(_this.device),
+        t1 = _this.inputResource,
+        t2 = _this.outputResource;
+      return A._setArrayType([new A._VhsPass(new A.PassDescriptor("vhs", A._setArrayType([new A.ResourceUse(t1, B.ResourceAccess_0), new A.ResourceUse(t2, B.ResourceAccess_2), new A.ResourceUse(t2, B.ResourceAccess_1)], type$.JSArray_ResourceUse), false, false, false, false), program, emptyVao, _this.resolveHistory, _this.resolveTime, t1, t2)], type$.JSArray_RenderPass);
+    },
+    $isRenderFeature: 1
+  };
+  A._VhsPass.prototype = {
+    execute$1(context) {
+      var _this = this,
+        sceneView = context.viewOf$1(_this.inputResource.name),
+        outputView = context.viewOf$1(_this.outputResource.name),
+        encoder = context.encoder,
+        t1 = encoder.device;
+      A.WebGl2DeviceDraw_bindTargetImpl(t1, outputView.gpuObject);
+      A.WebGl2DeviceDraw_applyDrawStateImpl(t1, _this.descriptor.toDrawState$0());
+      A.WebGl2DeviceDraw_useProgramImpl(t1, _this.program.handle);
+      A.WebGl2DeviceDraw_bindTextureImpl(t1, 0, sceneView.gpuObject);
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uScene", B.UniformValue_UniformType_6_0);
+      A.WebGl2DeviceDraw_bindTextureImpl(t1, 1, type$.GpuObject._as(_this.resolveHistory.call$0()));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uHistory", B.UniformValue_UniformType_6_1);
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uTime", new A.UniformValue(B.UniformType_0, _this.resolveTime.call$0()));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uChromaWeight", new A.UniformValue(B.UniformType_0, 0));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uTrackingWeight", new A.UniformValue(B.UniformType_0, 0));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uNoiseWeight", new A.UniformValue(B.UniformType_0, 0));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uHeadSwitchWeight", new A.UniformValue(B.UniformType_0, 0));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uDropoutWeight", new A.UniformValue(B.UniformType_0, 0));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uGhostWeight", new A.UniformValue(B.UniformType_0, 0));
+      A.WebGl2DeviceDraw_bindVertexArrayImpl(t1, _this.emptyVao);
+      encoder.drawArrays$2$count$first(3, 0);
+    },
+    $isRenderPass: 1,
+    get$descriptor() {
+      return this.descriptor;
+    }
+  };
+  A.ResolvedMesh.prototype = {};
+  A.WorldFeature.prototype = {
+    get$id() {
+      return "world";
+    },
+    declare$2(graph, context) {
+      B.JSArray_methods.add$1(graph._render_graph$_passes, new A.PassDeclaration("worldOpaqueTransparent", B.GraphStage_4, A._setArrayType([new A.ResourceUse(this.sceneColorResource, B.ResourceAccess_1)], type$.JSArray_ResourceUse), false));
+    },
+    createPasses$1(resources) {
+      var _this = this,
+        program = _this.programLibrary.publish$1(new A.ProgramSource("safeWorld", _this.vertexSource, _this.fragmentSource, B.Map_unJqY, B.Map_empty, B.List_0lp)),
+        t1 = _this.sceneColorResource;
+      return A._setArrayType([new A._WorldPass(new A.PassDescriptor("worldOpaqueTransparent", A._setArrayType([new A.ResourceUse(t1, B.ResourceAccess_1)], type$.JSArray_ResourceUse), true, true, false, true), program, _this.resolveMesh, t1.name)], type$.JSArray_RenderPass);
+    },
+    $isRenderFeature: 1
+  };
+  A._WorldPass.prototype = {
+    execute$1(context) {
+      var t3, _i, _this = this,
+        encoder = context.encoder,
+        t1 = context.frameScene,
+        t2 = encoder.device;
+      A.WebGl2DeviceDraw_bindTargetImpl(t2, context.viewOf$1(_this.sceneColorResourceName).gpuObject);
+      A.WebGl2DeviceDraw_applyDrawStateImpl(t2, _this.descriptor.toDrawState$0());
+      A.WebGl2DeviceDraw_clearImpl(t2, B.ClearMask_1, 1, 0.04, 0.03, 0.03);
+      A.WebGl2DeviceDraw_useProgramImpl(t2, _this.program.handle);
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uViewProjection", new A.UniformValue(B.UniformType_4, new Float32Array(A._ensureNativeList(t1.camera.viewProjection.m))));
+      t3 = type$.JSArray_double;
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uLightDir", new A.UniformValue(B.UniformType_2, new Float32Array(A._ensureNativeList(A._setArrayType([0, 1, 0], t3)))));
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uAmbientColor", new A.UniformValue(B.UniformType_2, new Float32Array(A._ensureNativeList(A._setArrayType([1, 1, 1], t3)))));
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uAmbientIntensity", new A.UniformValue(B.UniformType_0, 0));
+      for (t2 = t1.opaqueBatches, t3 = t2.length, _i = 0; _i < t2.length; t2.length === t3 || (0, A.throwConcurrentModificationError)(t2), ++_i)
+        _this._drawBatch$2(encoder, t2[_i]);
+      for (t1 = t1.blendedItemsBackToFront, t2 = t1.length, _i = 0; _i < t1.length; t1.length === t2 || (0, A.throwConcurrentModificationError)(t1), ++_i)
+        _this._drawBatch$2(encoder, t1[_i]);
+    },
+    _drawBatch$2(encoder, batch) {
+      var representative, mesh, t1, t2, t3, _this = this;
+      if (batch instanceof A.InstanceBatch) {
+        representative = batch.representative;
+        _this._setModelUniforms$2(encoder, representative.get$descriptor().get$transform());
+        A.setInstanceTransformUniforms(encoder, batch, true);
+        mesh = _this.resolveMesh.call$1(representative.get$descriptor().get$mesh());
+        A.WebGl2DeviceDraw_bindVertexArrayImpl(encoder.device, mesh.vao);
+        t1 = mesh.isIndexed;
+        t2 = mesh.drawCount;
+        t3 = batch.members.length;
+        if (t1)
+          encoder.drawElementsInstanced$4$count$index32$instanceCount$offsetBytes(t2, mesh.usesUint32Indices, t3, 0);
+        else
+          encoder.drawArraysInstanced$3$count$first$instanceCount(t2, 0, t3);
+      } else if (type$.RetainedItemView._is(batch)) {
+        t1 = encoder.device;
+        A.WebGl2DeviceDraw_setUniformImpl(t1, "uUseInstances", B.UniformValue_UniformType_0_0);
+        _this._setModelUniforms$2(encoder, batch.get$descriptor().get$transform());
+        mesh = _this.resolveMesh.call$1(batch.get$descriptor().get$mesh());
+        A.WebGl2DeviceDraw_bindVertexArrayImpl(t1, mesh.vao);
+        t1 = mesh.isIndexed;
+        t2 = mesh.drawCount;
+        if (t1)
+          encoder.drawElements$3$count$index32$offsetBytes(t2, mesh.usesUint32Indices, 0);
+        else
+          encoder.drawArrays$2$count$first(t2, 0);
+      } else
+        throw A.wrapException(A.ArgumentError$("WorldFeature: frameScene entries must be InstanceBatch or RetainedItemView, got " + J.get$runtimeType$(batch).toString$0(0), null));
+    },
+    _setModelUniforms$2(encoder, transform) {
+      var model = transform.toMat4$0(),
+        t1 = encoder.device;
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uModel", new A.UniformValue(B.UniformType_4, new Float32Array(A._ensureNativeList(model.get$m()))));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uNormalMatrix", new A.UniformValue(B.UniformType_4, new Float32Array(A._ensureNativeList(model.normalMatrix$0().get$m()))));
+    },
+    $isRenderPass: 1,
+    get$descriptor() {
+      return this.descriptor;
+    }
+  };
+  A.GpuBufferUsage.prototype = {
+    _enumToString$0() {
+      return "GpuBufferUsage." + this._name;
+    }
+  };
+  A.GpuBufferKind.prototype = {
+    _enumToString$0() {
+      return "GpuBufferKind." + this._name;
+    }
+  };
+  A.GpuTextureFilter.prototype = {
+    _enumToString$0() {
+      return "GpuTextureFilter." + this._name;
+    }
+  };
+  A.GpuTextureWrap.prototype = {
+    _enumToString$0() {
+      return "GpuTextureWrap." + this._name;
+    }
+  };
+  A.GpuBufferDescriptor.prototype = {};
+  A.GpuTextureDescriptor.prototype = {};
+  A.GpuTargetAttachment.prototype = {
+    _enumToString$0() {
+      return "GpuTargetAttachment." + this._name;
+    }
+  };
+  A.GpuTargetDescriptor.prototype = {};
+  A.GpuDeviceStatus.prototype = {
+    _enumToString$0() {
+      return "GpuDeviceStatus." + this._name;
+    }
+  };
+  A.ShaderCompileStage.prototype = {
+    _enumToString$0() {
+      return "ShaderCompileStage." + this._name;
+    }
+  };
+  A.ShaderCompileException.prototype = {
+    toString$0(_) {
+      return "ShaderCompileException(" + this.stage._name + ": " + this.message + ")";
+    }
+  };
+  A.UniformType.prototype = {
+    _enumToString$0() {
+      return "UniformType." + this._name;
+    }
+  };
+  A.UniformValue.prototype = {};
+  A.ClearMask.prototype = {
+    _enumToString$0() {
+      return "ClearMask." + this._name;
+    }
+  };
+  A.DeviceDrawCommandEncoder.prototype = {
+    drawArrays$2$count$first(count, first) {
+      var t1 = this.device;
+      if (t1._status !== B.GpuDeviceStatus_0)
+        A.throwExpression(A.StateError$(string$.WebGl2));
+      t1.gl.drawArrays(A._asInt(init.G.WebGL2RenderingContext.TRIANGLES), first, count);
+      this.telemetry._record$2(count, 1);
+    },
+    drawArraysInstanced$3$count$first$instanceCount(count, first, instanceCount) {
+      var t1 = this.device;
+      if (t1._status !== B.GpuDeviceStatus_0)
+        A.throwExpression(A.StateError$(string$.WebGl2));
+      t1.gl.drawArraysInstanced(A._asInt(init.G.WebGL2RenderingContext.TRIANGLES), first, count, instanceCount);
+      this.telemetry._record$2(count, instanceCount);
+    },
+    drawElements$3$count$index32$offsetBytes(count, index32, offsetBytes) {
+      var t2, t3,
+        t1 = this.device;
+      if (t1._status !== B.GpuDeviceStatus_0)
+        A.throwExpression(A.StateError$(string$.WebGl2));
+      t2 = init.G;
+      t3 = A._asInt(t2.WebGL2RenderingContext.TRIANGLES);
+      t2 = index32 ? A._asInt(t2.WebGL2RenderingContext.UNSIGNED_INT) : A._asInt(t2.WebGL2RenderingContext.UNSIGNED_SHORT);
+      t1.gl.drawElements(t3, count, t2, offsetBytes);
+      this.telemetry._record$2(count, 1);
+    },
+    drawElementsInstanced$4$count$index32$instanceCount$offsetBytes(count, index32, instanceCount, offsetBytes) {
+      var t2, t3,
+        t1 = this.device;
+      if (t1._status !== B.GpuDeviceStatus_0)
+        A.throwExpression(A.StateError$(string$.WebGl2));
+      t2 = init.G;
+      t3 = A._asInt(t2.WebGL2RenderingContext.TRIANGLES);
+      t2 = index32 ? A._asInt(t2.WebGL2RenderingContext.UNSIGNED_INT) : A._asInt(t2.WebGL2RenderingContext.UNSIGNED_SHORT);
+      A.callMethod(t1.gl, "drawElementsInstanced", [t3, count, t2, offsetBytes, instanceCount], type$.void);
+      this.telemetry._record$2(count, instanceCount);
+    },
+    $isDrawCommandEncoder: 1
+  };
+  A.PreparedGpuResourcePlan.prototype = {
+    objectFor$1(resource) {
+      var object = this.objects.$index(0, resource);
+      if (object == null)
+        throw A.wrapException(A.StateError$("resource is not in candidate: " + resource));
+      return object;
+    }
+  };
+  A.GpuResourcePlanAdapter.prototype = {
+    get$current() {
+      var value = this._resource_plan_adapter$_current;
+      if (value == null)
+        throw A.wrapException(A.StateError$("GPU resource adapter is not initialized"));
+      return value;
+    },
+    dispose$0() {
+      var old, _this = this;
+      if (_this._resource_plan_adapter$_disposed)
+        return;
+      old = _this._resource_plan_adapter$_current;
+      if (old != null)
+        _this._deleteObjects$1(old.objects);
+      _this._logical.dispose$0();
+      _this._resource_plan_adapter$_current = null;
+      _this._resource_plan_adapter$_disposed = true;
+    },
+    _createObjects$2(plan, configuration) {
+      var baseResources, resource, target, sceneVersions, resource0, version, target0, target1, t3, t4, t5, t6, t7, t8, sceneVersions0, _i, exception, fb, _this = this,
+        t1 = type$.String,
+        t2 = type$.GpuObject,
+        objects = A.LinkedHashMap_LinkedHashMap$_empty(t1, t2),
+        created = A._setArrayType([], type$.JSArray_GpuObject);
+      try {
+        t3 = plan.resources;
+        t4 = t3.$ti;
+        t5 = t4._eval$1("bool(1)");
+        t4 = t4._eval$1("WhereIterable<1>");
+        baseResources = new A.WhereIterable(t3, t5._as(new A.GpuResourcePlanAdapter__createObjects_closure()), t4);
+        for (t6 = baseResources, t7 = J.get$iterator$ax(t6.__internal$_iterable), t6 = new A.WhereIterator(t7, t6._f, t6.$ti._eval$1("WhereIterator<1>")), t8 = _this.device; t6.moveNext$0();) {
+          resource = t7.get$current();
+          target = A.WebGl2DeviceTargets_createTargetImpl(t8, _this._descriptor$2(resource, configuration));
+          J.add$1$ax(created, target);
+          J.$indexSet$ax(objects, resource, target);
+        }
+        sceneVersions0 = A.List_List$_of(new A.WhereIterable(t3, t5._as(new A.GpuResourcePlanAdapter__createObjects_closure0()), t4), t4._eval$1("Iterable.E"));
+        B.JSArray_methods.sort$0(sceneVersions0);
+        sceneVersions = sceneVersions0;
+        for (t3 = sceneVersions, t4 = t3.length, t5 = configuration.sampleCount === 1, _i = 0; _i < t3.length; t3.length === t4 || (0, A.throwConcurrentModificationError)(t3), ++_i) {
+          resource0 = t3[_i];
+          version = A.int_parse(J.substring$1$s(resource0, 11));
+          if (t5) {
+            t6 = J.$index$asx(objects, "sceneColor");
+            t6.toString;
+            J.$indexSet$ax(objects, resource0, t6);
+          } else {
+            t6 = version;
+            if (typeof t6 !== "number")
+              return t6.$ge();
+            if (t6 >= 2) {
+              t6 = J.$index$asx(objects, "sceneColor#1");
+              t6.toString;
+              J.$indexSet$ax(objects, resource0, t6);
+            } else {
+              target0 = A.WebGl2DeviceTargets_createTargetImpl(t8, _this._descriptor$2(resource0, configuration));
+              J.add$1$ax(created, target0);
+              J.$indexSet$ax(objects, resource0, target0);
+            }
+          }
+        }
+        t1 = A.ConstantMap_ConstantMap$from(objects, t1, t2);
+        return t1;
+      } catch (exception) {
+        for (t1 = created, t3 = A._arrayInstanceType(t1)._eval$1("ReversedListIterable<1>"), t1 = new A.ReversedListIterable(t1, t3), t1 = new A.ListIterator(t1, t1.get$length(0), t3._eval$1("ListIterator<ListIterable.E>")), t4 = _this.device, t5 = type$._WebGlFramebuffer, t3 = t3._eval$1("ListIterable.E"); t1.moveNext$0();) {
+          t6 = t1.__internal$_current;
+          target1 = t6 == null ? t3._as(t6) : t6;
+          fb = t5._as(t2._as(target1).handle);
+          A.WebGl2DeviceTargets__deleteFramebufferParts(t4, fb.fbo, fb.colorTex, fb.colorRb, fb.depthRb, fb.depthTex, fb.glowTex, fb.glowRb);
+        }
+        throw exception;
+      }
+    },
+    _descriptor$2(resource, configuration) {
+      var half, targetWidth, targetHeight, t1, sceneColorResource,
+        width = configuration.internalWidth,
+        height = configuration.internalHeight;
+      if (resource === "shadowMap")
+        return new A.GpuTargetDescriptor(512, 512, 1, B.GpuTargetAttachment_3, true);
+      if (resource === "sceneDepth")
+        return new A.GpuTargetDescriptor(width, height, 1, B.GpuTargetAttachment_3, true);
+      half = B.JSString_methods.startsWith$1(resource, "ssao") || B.JSString_methods.startsWith$1(resource, "bloomBlur") || B.JSString_methods.startsWith$1(resource, "dofBlur");
+      targetWidth = half ? (width + 1) / 2 | 0 : width;
+      targetHeight = half ? (height + 1) / 2 | 0 : height;
+      t1 = resource === "sceneColor";
+      sceneColorResource = t1 || B.JSString_methods.startsWith$1(resource, "sceneColor#");
+      t1 = t1 ? configuration.sampleCount : 1;
+      return new A.GpuTargetDescriptor(targetWidth, targetHeight, t1, sceneColorResource ? B.GpuTargetAttachment_1 : B.GpuTargetAttachment_0, sceneColorResource);
+    },
+    _deleteObjects$1(objects) {
+      var t2, t3, t4, t5, fb,
+        t1 = A.LinkedHashSet_LinkedHashSet$of(type$.Map_String_GpuObject._as(objects).get$values(), type$.GpuObject);
+      for (t1 = A._LinkedHashSetIterator$(t1, t1._collection$_modifications, A._instanceType(t1)._precomputed1), t2 = this.device, t3 = type$._WebGlFramebuffer, t4 = t1.$ti._precomputed1; t1.moveNext$0();) {
+        t5 = t1._collection$_current;
+        fb = t3._as((t5 == null ? t4._as(t5) : t5).handle);
+        A.WebGl2DeviceTargets__deleteFramebufferParts(t2, fb.fbo, fb.colorTex, fb.colorRb, fb.depthRb, fb.depthTex, fb.glowTex, fb.glowRb);
+      }
+    }
+  };
+  A.GpuResourcePlanAdapter__createObjects_closure.prototype = {
+    call$1(resource) {
+      return !B.JSString_methods.startsWith$1(A._asString(resource), "sceneColor#");
+    },
+    $signature: 6
+  };
+  A.GpuResourcePlanAdapter__createObjects_closure0.prototype = {
+    call$1(resource) {
+      return B.JSString_methods.startsWith$1(A._asString(resource), "sceneColor#");
+    },
+    $signature: 6
+  };
+  A.ResourceRegistry.prototype = {
+    descriptorOf$1(handle) {
+      var t1, slot;
+      this.$ti._precomputed1._as(handle);
+      if (handle.get$slot().$lt(0, 0) || handle.get$slot().$ge(0, 0))
+        A.throwExpression(A.HandleException$(B.HandleRejection_0, handle));
+      t1 = this._slots;
+      slot = B.JSArray_methods.$index(t1, handle.get$slot());
+      slot.get$generation();
+      handle.get$generation();
+      A.throwExpression(A.HandleException$(B.HandleRejection_1, handle));
+      slot.get$state();
+      slot.get$state();
+      t1 = B.JSArray_methods.$index(t1, handle.get$slot()).get$cpuDescriptor();
+      return t1;
+    },
+    release$1(handle) {
+      var t1, t2;
+      this.$ti._precomputed1._as(handle);
+      t1 = handle.slot;
+      if (t1 < 0 || t1 >= 0)
+        throw A.wrapException(A.HandleException$(B.HandleRejection_0, handle));
+      t2 = this._slots;
+      if (!(t1 >= 0 && t1 < 0))
+        return A.ioore(t2, t1);
+      t2[t1].get$generation();
+      t1 = A.HandleException$(B.HandleRejection_1, handle);
+      throw A.wrapException(t1);
+    },
+    liveDescriptors$0() {
+      return new A._SyncStarIterable(this.liveDescriptors$body$ResourceRegistry(), this.$ti._eval$1("_SyncStarIterable<+(1,2)>"));
+    },
+    liveDescriptors$body$ResourceRegistry() {
+      var $async$self = this;
+      return function() {
+        var $async$goto = 0, $async$handler = 2, $async$errorStack = [], t1, t2, i, slot, t3, t4;
+        return function $async$liveDescriptors$0($async$iterator, $async$errorCode, $async$result) {
+          if ($async$errorCode === 1) {
+            $async$errorStack.push($async$result);
+            $async$goto = $async$handler;
+          }
+          for (;;)
+            switch ($async$goto) {
+              case 0:
+                // Function start
+                t1 = $async$self._makeHandle, t2 = $async$self._slots, i = 0;
+              case 3:
+                // for condition
+                if (!false) {
+                  // goto after for
+                  $async$goto = 5;
+                  break;
+                }
+                if (!(i < 0)) {
+                  A.ioore(t2, i);
+                  // goto return
+                  $async$goto = 1;
+                  break;
+                }
+                slot = t2[i];
+                slot.get$state();
+                slot.get$state();
+                t3 = t1.call$3(i, slot.get$generation(), slot.get$debugLabel());
+                t4 = slot.get$cpuDescriptor();
+                $async$goto = 6;
+                return $async$iterator._async$_current = new A._Record_2(t3, t4), 1;
+              case 6:
+                // after yield
+              case 4:
+                // for update
+                ++i;
+                // goto for condition
+                $async$goto = 3;
+                break;
+              case 5:
+                // after for
+              case 1:
+                // return
+                return 0;
+              case 2:
+                // rethrow
+                return $async$iterator._datum = $async$errorStack.at(-1), 3;
+            }
+        };
+      };
+    }
+  };
+  A.BlendEquation.prototype = {
+    _enumToString$0() {
+      return "BlendEquation." + this._name;
+    }
+  };
+  A.BlendFactor.prototype = {
+    _enumToString$0() {
+      return "BlendFactor." + this._name;
+    }
+  };
+  A.CullFace.prototype = {
+    _enumToString$0() {
+      return "CullFace." + this._name;
+    }
+  };
+  A.DepthFunc.prototype = {
+    _enumToString$0() {
+      return "DepthFunc." + this._name;
+    }
+  };
+  A.DrawStateDescriptor.prototype = {
+    withCullEnable$1(value) {
+      var _this = this;
+      return A.DrawStateDescriptor$(_this.blendDst, _this.blendEnable, _this.blendEquation, _this.blendSrc, true, true, true, true, false, _this.cullFace, _this.depthFunc, _this.depthTest, _this.depthWrite, true, false, false);
+    }
+  };
+  A.StateField.prototype = {
+    _enumToString$0() {
+      return "StateField." + this._name;
+    }
+  };
+  A.WebGlStateCache.prototype = {
+    diff$1(next) {
+      var changed,
+        prev = this._applied;
+      if (prev == null)
+        return A.LinkedHashSet_LinkedHashSet$from(B.List_nqC, type$.StateField);
+      changed = A.LinkedHashSet_LinkedHashSet$_empty(type$.StateField);
+      if (prev.depthTest !== next.depthTest)
+        changed.add$1(0, B.StateField_0);
+      if (prev.depthFunc !== next.depthFunc)
+        changed.add$1(0, B.StateField_1);
+      if (prev.depthWrite !== next.depthWrite)
+        changed.add$1(0, B.StateField_2);
+      if (prev.blendEnable !== next.blendEnable)
+        changed.add$1(0, B.StateField_3);
+      if (prev.blendSrc !== next.blendSrc || prev.blendDst !== next.blendDst)
+        changed.add$1(0, B.StateField_4);
+      if (prev.blendEquation !== next.blendEquation)
+        changed.add$1(0, B.StateField_5);
+      if (prev.cullEnable !== next.cullEnable)
+        changed.add$1(0, B.StateField_6);
+      if (prev.cullFace !== next.cullFace)
+        changed.add$1(0, B.StateField_7);
+      return changed;
+    }
+  };
+  A._WebGpuObject.prototype = {$isGpuObject: 1};
+  A._WebGlTexture.prototype = {};
+  A._WebGlFramebuffer.prototype = {};
+  A._WebGlTimerQuery.prototype = {};
+  A.WebGl2Device.prototype = {
+    WebGl2Device$1(gl) {
+      var _this = this,
+        canvasTarget = A._asJSObject(_this.gl.canvas);
+      _this._lostListener = A._functionToJS1(new A.WebGl2Device_closure(_this));
+      _this._restoredListener = A._functionToJS1(new A.WebGl2Device_closure0(_this));
+      canvasTarget.addEventListener("webglcontextlost", _this._lostListener);
+      canvasTarget.addEventListener("webglcontextrestored", _this._restoredListener);
+    },
+    _paramInt$1(pname) {
+      var v = A.dartify(this.gl.getParameter(pname));
+      return typeof v == "number" ? B.JSNumber_methods.toInt$0(v) : 0;
+    },
+    _paramDouble$1(pname) {
+      var v = A.dartify(this.gl.getParameter(pname));
+      return typeof v == "number" ? v : 0 / 0;
+    },
+    $isGpuDevice: 1
+  };
+  A.WebGl2Device_closure.prototype = {
+    call$1(e) {
+      A._asJSObject(e).preventDefault();
+      this.$this._status = B.GpuDeviceStatus_1;
+    },
+    $signature: 11
+  };
+  A.WebGl2Device_closure0.prototype = {
+    call$1(e) {
+      this.$this._status = B.GpuDeviceStatus_0;
+    },
+    $signature: 11
+  };
+  A._WebGlTimerSupport.prototype = {
+    beginGpuTimer$0() {
+      var query, _this = this;
+      if (_this._status !== B.GpuDeviceStatus_0)
+        A.throwExpression(A.StateError$(string$.WebGl2));
+      query = _this._timerExtensionAvailable ? A._asJSObjectQ(_this.gl.createQuery()) : null;
+      if (query == null)
+        return null;
+      _this.gl.beginQuery(35007, query);
+      return new A._WebGpuObject(new A._WebGlTimerQuery(query));
+    },
+    _timerQuery$1(query) {
+      var object = query.handle;
+      if (!(object instanceof A._WebGlTimerQuery))
+        throw A.wrapException(A.ArgumentError$value(query, "query", "is not a GPU timer query"));
+      return object;
+    }
+  };
+  A._WebGl2Device_Object__WebGlTimerSupport.prototype = {};
+  A.WebGl2DeviceLease.prototype = {};
+  A.WebGl2RendererFactory.prototype = {
+    createLease$1(canvas) {
+      var context = A._asJSObjectQ(canvas.getContext("webgl2"));
+      if (!type$.JSObject._is(context))
+        return null;
+      return new A.WebGl2DeviceLease(A.WebGl2Device$(context));
+    }
+  };
+  A.main_resize.prototype = {
+    call$0() {
+      var error, exception,
+        t1 = this.canvas,
+        width = A._asInt(t1.clientWidth) > 0 ? A._asInt(t1.clientWidth) : A._asInt(t1.width),
+        height = A._asInt(t1.clientHeight) > 0 ? A._asInt(t1.clientHeight) : A._asInt(t1.height);
+      if (J.$eq$(width, A._asInt(t1.width)) && J.$eq$(height, A._asInt(t1.height)))
+        return;
+      t1.width = width;
+      t1.height = height;
+      try {
+        this.renderer._ensureReady$0();
+        new A.SurfaceMetrics(width, height, width, height).validate$0();
+        t1.setAttribute("data-renderer-surface", A.S(width) + "x" + A.S(height));
+      } catch (exception) {
+        error = A.unwrapException(exception);
+        t1.setAttribute("data-renderer-resize-error", A.S(error));
+      }
+    },
+    $signature: 0
+  };
+  A.main_closure.prototype = {
+    call$1(__wc0_formal) {
+      A._asJSObject(__wc0_formal);
+      return this.resize.call$0();
+    },
+    $signature: 53
+  };
+  A.main_closure0.prototype = {
+    call$1(__wc1_formal) {
+      var t1;
+      A._asJSObject(__wc1_formal);
+      t1 = this._box_0;
+      t1.contextRestoredPending = true;
+      ++t1.historyEpoch;
+    },
+    $signature: 54
+  };
+  A.main_tick.prototype = {
+    call$1(timeMs) {
+      var frame, error, t1, t2, exception, _this = this;
+      A._asNum(timeMs);
+      _this.resize.call$0();
+      t1 = _this.renderer;
+      if (t1._scene_renderer_impl$_state !== B.RendererState_3 || _this._box_0.contextRestoredPending)
+        try {
+          t2 = _this._box_0;
+          frame = new A.FrameInput(_this.camera, B.C_FrameEnvironment, B.C_PostProcessState, ++t2.frameIndex, timeMs / 1000);
+          t1.beginFrame$2(_this.world, frame);
+          t1.endFrame$0();
+          t2.contextRestoredPending = false;
+          _this.canvas.removeAttribute("data-renderer-frame-error");
+        } catch (exception) {
+          error = A.unwrapException(exception);
+          _this.canvas.setAttribute("data-renderer-frame-error", A.S(error));
+          if (t1._scene_renderer_impl$_state === B.RendererState_3)
+            ++_this._box_0.historyEpoch;
+        }
+      t2 = _this.canvas;
+      t2.setAttribute("data-renderer-state", t1._scene_renderer_impl$_state._name);
+      t2.setAttribute("data-renderer-frames", "" + _this._box_0.frameIndex);
+      A._asInt(A._asJSObject(init.G.window).requestAnimationFrame(A._functionToJS1(_this)));
+    },
+    $signature: 55
+  };
+  (function aliases() {
+    var _ = J.LegacyJavaScriptObject.prototype;
+    _.super$LegacyJavaScriptObject$toString = _.toString$0;
+  })();
+  (function installTearOffs() {
+    var _static_2 = hunkHelpers._static_2,
+      _static_1 = hunkHelpers._static_1,
+      _static_0 = hunkHelpers._static_0,
+      _instance_1_u = hunkHelpers._instance_1u;
+    _static_2(J, "_interceptors_JSArray__compareAny$closure", "JSArray__compareAny", 56);
+    _static_1(A, "async__AsyncRun__scheduleImmediateJsOverride$closure", "_AsyncRun__scheduleImmediateJsOverride", 4);
+    _static_1(A, "async__AsyncRun__scheduleImmediateWithSetImmediate$closure", "_AsyncRun__scheduleImmediateWithSetImmediate", 4);
+    _static_1(A, "async__AsyncRun__scheduleImmediateWithTimer$closure", "_AsyncRun__scheduleImmediateWithTimer", 4);
+    _static_0(A, "async___startMicrotaskLoop$closure", "_startMicrotaskLoop", 0);
+    _instance_1_u(A.MaterialStore.prototype, "get$resolveForPass", "resolveForPass$1", 12);
+    var _;
+    _instance_1_u(_ = A.TextureStore.prototype, "get$resolveAlbedo", "resolveAlbedo$1", 3);
+    _instance_1_u(_, "get$resolveNormal", "resolveNormal$1", 3);
+    _instance_1_u(_, "get$resolveOrm", "resolveOrm$1", 3);
+    _instance_1_u(_, "get$resolveEmissive", "resolveEmissive$1", 3);
+    _instance_1_u(_, "get$resolveLightmap", "resolveLightmap$1", 3);
+    _static_0(A, "frame_telemetry__MutablePassStats___new_tearOff$closure", "_MutablePassStats___new_tearOff", 58);
+    _static_0(A, "graph_pass_PassDeclaration__alwaysEnabled$closure", "PassDeclaration__alwaysEnabled", 39);
+  })();
+  (function inheritance() {
+    var _mixin = hunkHelpers.mixin,
+      _inherit = hunkHelpers.inherit,
+      _inheritMany = hunkHelpers.inheritMany;
+    _inherit(A.Object, null);
+    _inheritMany(A.Object, [A.JS_CONST, J.Interceptor, A.SafeToStringHook, J.ArrayIterator, A.Iterable, A.CastIterator, A.Error, A.ListBase, A.SentinelValue, A.ListIterator, A.MappedIterator, A.WhereIterator, A.FixedLengthListMixin, A.UnmodifiableListMixin, A._Record, A.MapView, A.ConstantMap, A._KeysOrValuesOrElementsIterator, A.SetBase, A.TypeErrorDecoder, A.NullThrownFromJavaScriptException, A.ExceptionAndStackTrace, A._StackTrace, A.Closure, A.MapBase, A.LinkedHashMapCell, A.LinkedHashMapKeyIterator, A.LinkedHashMapValueIterator, A.LinkedHashMapEntryIterator, A.Rti, A._FunctionParameters, A._Type, A._TimerImpl, A._AsyncAwaitCompleter, A._SyncStarIterator, A.AsyncError, A._Completer, A._FutureListener, A._Future, A._AsyncCallbackEntry, A._StreamIterator, A._Zone, A._HashMapKeyIterator, A._LinkedHashSetCell, A._LinkedHashSetIterator, A._MapBaseValueIterator, A._UnmodifiableMapMixin, A._UnmodifiableSetMixin, A.Codec, A.Converter, A._Utf8Decoder, A.DateTime, A._Enum, A.OutOfMemoryError, A.StackOverflowError, A._Exception, A.FormatException, A.MapEntry, A.Null, A._StringStackTrace, A.StringBuffer, A._Uri, A.UriData, A._SimpleUri, A.NullRejectionException, A.RenderCapabilities, A.QualityProfile, A.ConfigurationCoordinator, A.ConfigurationStateMachine, A.PostProcessState, A.CameraView, A.FrameEnvironment, A.FrameInput, A.ResourceHandle, A.HandleException, A.LinearColor, A.SpotLight, A.DefaultSceneRendererFactory, A.OwnedResourcePlan, A.PreparedResourceAssembly, A.ResourcePlanAssembler, A.SurfaceMetrics, A.RendererConfiguration, A.FramePassStats, A.FrameStats, A.MaterialStore, A.UploadedMesh, A.MeshStore, A.TextureStore, A.InstanceBatch, A.FeatureGraph, A.FeatureGraphResult, A.FrameQueue, A.FrameDrawTelemetry, A._MutablePassStats, A.PassDeclaration, A.GraphValidationFailure, A.ResourceRef, A.ResourceUse, A.CompiledProgram, A.ProgramLibrary, A.ProgramSource, A.RenderFeatureContext, A.PassDescriptor, A.RenderGraphBuilder, A.RenderGraph, A.RenderWorldImpl, A.ResourceLibraryImpl, A._FrameExecution, A._SafeGraphAssembly, A._PlanResources, A._FrameScene, A._SceneRendererImpl_Object__GpuTimingSupport, A._PendingGpuTiming, A._GpuTimingSupport, A.OpaqueSortKey, A.SortableItem, A.CullStats, A.CullResult, A.Plane, A.Frustum, A.Mat4, A.Vec3, A.BloomBlurFeature, A._BloomBlurPass, A.BloomCompositeFeature, A._BloomCompositePass, A.DepthPrepassFeature, A._DepthPrepassPass, A.DofBlurFeature, A._DofBlurPass, A.DofCompositeFeature, A._DofCompositePass, A.GradeFeature, A._GradePass, A.MsaaResolveFeature, A._MsaaResolvePass, A.BoundResourceView, A.BoundPassContext, A.PipelineResourceLayout, A.PresentFeature, A._PresentPass, A.Ps1QuantizeFeature, A._Ps1QuantizePass, A.ShadowLightView, A.ShadowFeature, A._ShadowCasterPass, A.ShadowedWorldFeature, A._ShadowedWorldPass, A.SsaoOcclusionFeature, A._SsaoOcclusionPass, A.SsaoBlurFeature, A._SsaoBlurPass, A.VhsFeature, A._VhsPass, A.ResolvedMesh, A.WorldFeature, A._WorldPass, A.GpuBufferDescriptor, A.GpuTextureDescriptor, A.GpuTargetDescriptor, A.ShaderCompileException, A.UniformValue, A.DeviceDrawCommandEncoder, A.PreparedGpuResourcePlan, A.GpuResourcePlanAdapter, A.ResourceRegistry, A.DrawStateDescriptor, A.WebGlStateCache, A._WebGpuObject, A._WebGlTexture, A._WebGlFramebuffer, A._WebGlTimerQuery, A._WebGl2Device_Object__WebGlTimerSupport, A._WebGlTimerSupport, A.WebGl2DeviceLease, A.WebGl2RendererFactory]);
+    _inheritMany(J.Interceptor, [J.JSBool, J.JSNull, J.JavaScriptObject, J.JavaScriptBigInt, J.JavaScriptSymbol, J.JSNumber, J.JSString]);
+    _inheritMany(J.JavaScriptObject, [J.LegacyJavaScriptObject, J.JSArray, A.NativeByteBuffer, A.NativeTypedData]);
+    _inheritMany(J.LegacyJavaScriptObject, [J.PlainJavaScriptObject, J.UnknownJavaScriptObject, J.JavaScriptFunction]);
+    _inherit(J.JSArraySafeToStringHook, A.SafeToStringHook);
+    _inherit(J.JSUnmodifiableArray, J.JSArray);
+    _inheritMany(J.JSNumber, [J.JSInt, J.JSNumNotInt]);
+    _inheritMany(A.Iterable, [A._CastIterableBase, A.EfficientLengthIterable, A.MappedIterable, A.WhereIterable, A._KeysOrValues, A._SyncStarIterable]);
+    _inherit(A.__CastListBase__CastIterableBase_ListMixin, A._CastIterableBase);
+    _inherit(A._CastListBase, A.__CastListBase__CastIterableBase_ListMixin);
+    _inherit(A.CastList, A._CastListBase);
+    _inheritMany(A.Error, [A.LateError, A.TypeError, A.JsNoSuchMethodError, A.UnknownJsTypeError, A.RuntimeError, A._Error, A.AssertionError, A.ArgumentError, A.UnsupportedError, A.UnimplementedError, A.StateError, A.ConcurrentModificationError]);
+    _inherit(A.UnmodifiableListBase, A.ListBase);
+    _inherit(A.CodeUnits, A.UnmodifiableListBase);
+    _inheritMany(A.EfficientLengthIterable, [A.ListIterable, A.LinkedHashMapKeysIterable, A.LinkedHashMapValuesIterable, A.LinkedHashMapEntriesIterable, A._HashMapKeyIterable, A._MapBaseValueIterable]);
+    _inheritMany(A.ListIterable, [A.SubListIterable, A.MappedListIterable, A.ReversedListIterable]);
+    _inherit(A.EfficientLengthMappedIterable, A.MappedIterable);
+    _inherit(A._Record2, A._Record);
+    _inheritMany(A._Record2, [A._Record_2, A._Record_2_influence_light]);
+    _inherit(A._UnmodifiableMapView_MapView__UnmodifiableMapMixin, A.MapView);
+    _inherit(A.UnmodifiableMapView, A._UnmodifiableMapView_MapView__UnmodifiableMapMixin);
+    _inherit(A.ConstantMapView, A.UnmodifiableMapView);
+    _inherit(A.ConstantStringMap, A.ConstantMap);
+    _inheritMany(A.SetBase, [A.ConstantSet, A._SetBase, A._UnmodifiableSetView_SetBase__UnmodifiableSetMixin]);
+    _inherit(A.ConstantStringSet, A.ConstantSet);
+    _inherit(A.NullError, A.TypeError);
+    _inheritMany(A.Closure, [A.Closure0Args, A.Closure2Args, A.TearOffClosure, A.initHooks_closure, A.initHooks_closure1, A._AsyncRun__initializeScheduleImmediate_internalCallback, A._AsyncRun__initializeScheduleImmediate_closure, A._awaitOnObject_closure, A._Future__propagateToListeners_handleWhenCompleteCallback_closure, A._HashMap_values_closure, A.MapBase_entries_closure, A.promiseToFuture_closure, A.promiseToFuture_closure0, A.dartify_convert, A.OwnedResourcePlan_validate_closure, A.MaterialStore__registry_closure, A.MeshStore_closure, A.TextureStore_closure, A.TextureStore_rehydrateAfterContextRestore_closure, A.FeatureGraph_build_closure, A.FeatureGraph_build__closure, A.FeatureGraph_build__closure0, A.PassDeclaration_reads_closure, A.PassDeclaration_writes_closure, A.RenderGraphBuilder_build_closure, A.RenderGraphBuilder__validate_closure, A.RenderGraphBuilder__checkResolves_closure, A.RenderGraphBuilder__checkFormatAndSizeMismatch_closure, A.RenderGraphBuilder__checkDependencyCycles_hasCycleFrom, A.RenderWorldImpl__instances_closure, A._extension_0__assembleSafeGraph_resolveMesh, A._extension_0__assembleSafeGraph_resolveResource, A.SceneRendererImpl_endFrame_closure, A.SceneRendererImpl_endFrame_closure0, A.sortOpaque_closure0, A.sortBlended_closure0, A.Frustum_Frustum$fromViewProjection_row, A.Mat4_isFinite_closure, A.buildShadowGraph_closure, A.GpuResourcePlanAdapter__createObjects_closure, A.GpuResourcePlanAdapter__createObjects_closure0, A.WebGl2Device_closure, A.WebGl2Device_closure0, A.main_closure, A.main_closure0, A.main_tick]);
+    _inheritMany(A.TearOffClosure, [A.StaticClosure, A.BoundClosure]);
+    _inheritMany(A.MapBase, [A.JsLinkedHashMap, A._HashMap]);
+    _inheritMany(A.Closure2Args, [A.initHooks_closure0, A._awaitOnObject_closure0, A._wrapJsFunctionForAsync_closure, A._Future__propagateToListeners_handleWhenCompleteCallback_closure0, A.LinkedHashMap_LinkedHashMap$from_closure, A.MapBase_mapToString_closure, A.Uri_splitQueryString_closure, A.Uri_parseIPv6Address_error, A.selectSpotLights_closure, A.MeshStore_liveGpuBytes_closure, A.TextureStore_liveGpuBytes_closure, A.FeatureGraph_build_closure0, A.SceneRendererImpl_endFrame_closure1, A.sortOpaque_closure, A.sortBlended_closure]);
+    _inheritMany(A.NativeTypedData, [A.NativeByteData, A.NativeTypedArray]);
+    _inheritMany(A.NativeTypedArray, [A._NativeTypedArrayOfDouble_NativeTypedArray_ListMixin, A._NativeTypedArrayOfInt_NativeTypedArray_ListMixin]);
+    _inherit(A._NativeTypedArrayOfDouble_NativeTypedArray_ListMixin_FixedLengthListMixin, A._NativeTypedArrayOfDouble_NativeTypedArray_ListMixin);
+    _inherit(A.NativeTypedArrayOfDouble, A._NativeTypedArrayOfDouble_NativeTypedArray_ListMixin_FixedLengthListMixin);
+    _inherit(A._NativeTypedArrayOfInt_NativeTypedArray_ListMixin_FixedLengthListMixin, A._NativeTypedArrayOfInt_NativeTypedArray_ListMixin);
+    _inherit(A.NativeTypedArrayOfInt, A._NativeTypedArrayOfInt_NativeTypedArray_ListMixin_FixedLengthListMixin);
+    _inheritMany(A.NativeTypedArrayOfDouble, [A.NativeFloat32List, A.NativeFloat64List]);
+    _inheritMany(A.NativeTypedArrayOfInt, [A.NativeInt16List, A.NativeInt32List, A.NativeInt8List, A.NativeUint16List, A.NativeUint32List, A.NativeUint8ClampedList, A.NativeUint8List]);
+    _inherit(A._TypeError, A._Error);
+    _inheritMany(A.Closure0Args, [A._AsyncRun__scheduleImmediateJsOverride_internalCallback, A._AsyncRun__scheduleImmediateWithSetImmediate_internalCallback, A._TimerImpl_internalCallback, A._Future__addListener_closure, A._Future__prependListeners_closure, A._Future__chainCoreFuture_closure, A._Future__asyncCompleteWithValue_closure, A._Future__asyncCompleteErrorObject_closure, A._Future__propagateToListeners_handleWhenCompleteCallback, A._Future__propagateToListeners_handleValueCallback, A._Future__propagateToListeners_handleError, A._RootZone_bindCallbackGuarded_closure, A._rootHandleError_closure, A._Utf8Decoder__decoder_closure, A._Utf8Decoder__decoderNonfatal_closure, A._extension_0__assembleSafeGraph_closure9, A._extension_0__assembleSafeGraph_closure2, A._extension_0__assembleSafeGraph_closure3, A._extension_0__assembleSafeGraph_closure8, A._extension_0__assembleSafeGraph_closure1, A._extension_0__assembleSafeGraph_closure11, A._extension_0__assembleSafeGraph_closure10, A._extension_0__assembleSafeGraph_closure7, A._extension_0__assembleSafeGraph_closure, A._extension_0__assembleSafeGraph_closure0, A._extension_0__assembleSafeGraph_closure4, A._extension_0__assembleSafeGraph_closure5, A._extension_0__assembleSafeGraph_closure6, A._extension_0__assembleSafeGraph_closure13, A._extension_0__assembleSafeGraph_closure12, A._extension_0__executeGraph_closure, A.buildShadowGraph_closure0, A.main_resize]);
+    _inherit(A._AsyncCompleter, A._Completer);
+    _inherit(A._RootZone, A._Zone);
+    _inherit(A._IdentityHashMap, A._HashMap);
+    _inherit(A._LinkedHashSet, A._SetBase);
+    _inherit(A.UnmodifiableSetView, A._UnmodifiableSetView_SetBase__UnmodifiableSetMixin);
+    _inheritMany(A.Codec, [A.Base64Codec, A.Encoding]);
+    _inheritMany(A.Converter, [A.Base64Encoder, A.Utf8Decoder]);
+    _inherit(A.Utf8Codec, A.Encoding);
+    _inheritMany(A.ArgumentError, [A.RangeError, A.IndexError]);
+    _inherit(A._DataUri, A._Uri);
+    _inheritMany(A._Enum, [A.QualityProfileKind, A.HandleRejection, A.VertexAttributeKind, A.ColorEncoding, A.DiagnosticLevel, A.RendererState, A.FrameQueueState, A.GraphValidationFailureKind, A.ResourceFormat, A.GraphStage, A.ResourceAccess, A.ShadowCasterLod, A.FrustumTest, A._BloomBlurAxis, A._DofBlurAxis, A.GpuBufferUsage, A.GpuBufferKind, A.GpuTextureFilter, A.GpuTextureWrap, A.GpuTargetAttachment, A.GpuDeviceStatus, A.ShaderCompileStage, A.UniformType, A.ClearMask, A.BlendEquation, A.BlendFactor, A.CullFace, A.DepthFunc, A.StateField]);
+    _inheritMany(A.ResourceHandle, [A.MeshHandle, A.TextureHandle, A.MaterialHandle, A.PipelineHandle, A.InstanceId]);
+    _inherit(A.SceneRendererImpl, A._SceneRendererImpl_Object__GpuTimingSupport);
+    _inherit(A.WebGl2Device, A._WebGl2Device_Object__WebGlTimerSupport);
+    _mixin(A.UnmodifiableListBase, A.UnmodifiableListMixin);
+    _mixin(A.__CastListBase__CastIterableBase_ListMixin, A.ListBase);
+    _mixin(A._NativeTypedArrayOfDouble_NativeTypedArray_ListMixin, A.ListBase);
+    _mixin(A._NativeTypedArrayOfDouble_NativeTypedArray_ListMixin_FixedLengthListMixin, A.FixedLengthListMixin);
+    _mixin(A._NativeTypedArrayOfInt_NativeTypedArray_ListMixin, A.ListBase);
+    _mixin(A._NativeTypedArrayOfInt_NativeTypedArray_ListMixin_FixedLengthListMixin, A.FixedLengthListMixin);
+    _mixin(A._UnmodifiableMapView_MapView__UnmodifiableMapMixin, A._UnmodifiableMapMixin);
+    _mixin(A._UnmodifiableSetView_SetBase__UnmodifiableSetMixin, A._UnmodifiableSetMixin);
+    _mixin(A._SceneRendererImpl_Object__GpuTimingSupport, A._GpuTimingSupport);
+    _mixin(A._WebGl2Device_Object__WebGlTimerSupport, A._WebGlTimerSupport);
+  })();
+  var init = {
+    G: typeof self != "undefined" ? self : globalThis,
+    typeUniverse: {eC: new Map(), tR: {}, eT: {}, tPV: {}, sEA: []},
+    mangledGlobalNames: {int: "int", double: "double", num: "num", String: "String", bool: "bool", Null: "Null", List: "List", Object: "Object", Map: "Map", JSObject: "JSObject"},
+    mangledNames: {},
+    types: ["~()", "GpuObject()", "bool(PassDeclaration)", "GpuObject(TextureHandle?)", "~(~())", "~(@)", "bool(String)", "bool(ResourceUse)", "Null(@)", "Null()", "@()", "Null(Object?)", "MaterialDefinition(MaterialHandle)", "@(@,String)", "Map<String,String>(Map<String,String>,String)", "0&(String,int?)", "Object?(Object?)", "int(+influence,light(double,SpotLight),+influence,light(double,SpotLight))", "Null(~())", "@(@)", "MaterialHandle(int,int,String?)", "MeshHandle(int,int,String?)", "int(int,+(MeshHandle,MeshData))", "Null(@,StackTrace)", "TextureHandle(int,int,String?)", "bool(Uint8List?)", "int(int,+(TextureHandle,_TextureRecord))", "String(PassDeclaration)", "int(RenderPass,RenderPass)", "Null(Object,StackTrace)", "~(int,@)", "bool(int)", "InstanceId(int,int,String?)", "ResolvedMesh(MeshHandle)", "GpuObject(String{fallback:String?})", "@(String)", "SpotLight?()", "List<SpotLight>()", "CameraView()", "bool()", "BoundResourceView()", "bool(MapEntry<String,FramePassStats>)", "FramePassStats(MapEntry<String,FramePassStats>)", "FramePassStats(FramePassStats,FramePassStats)", "int(SortableItem<OpaqueSortKey>,SortableItem<OpaqueSortKey>)", "RetainedItemView(SortableItem<OpaqueSortKey>)", "int(SortableItem<BlendedSortKey>,SortableItem<BlendedSortKey>)", "RetainedItemView(SortableItem<BlendedSortKey>)", "Plane(double,double,double,double)", "bool(double)", "~(ShadowLightView)", "ShadowLightView()", "~(@,@)", "~(JSObject)", "Null(JSObject)", "~(num)", "int(@,@)", "~(Object?,Object?)", "_MutablePassStats()", "double()"],
+    interceptorsByTag: null,
+    leafTags: null,
+    arrayRti: Symbol("$ti"),
+    rttc: {
+      "2;": (t1, t2) => o => o instanceof A._Record_2 && t1._is(o._0) && t2._is(o._1),
+      "2;influence,light": (t1, t2) => o => o instanceof A._Record_2_influence_light && t1._is(o._0) && t2._is(o._1)
+    }
+  };
+  A._Universe_addRules(init.typeUniverse, JSON.parse('{"PlainJavaScriptObject":"LegacyJavaScriptObject","UnknownJavaScriptObject":"LegacyJavaScriptObject","JavaScriptFunction":"LegacyJavaScriptObject","NativeArrayBuffer":"NativeByteBuffer","JSArray":{"List":["1"],"EfficientLengthIterable":["1"],"JSObject":[],"Iterable":["1"]},"JSBool":{"bool":[],"TrustedGetRuntimeType":[]},"JSNull":{"TrustedGetRuntimeType":[]},"JavaScriptObject":{"JSObject":[]},"LegacyJavaScriptObject":{"JSObject":[]},"JSArraySafeToStringHook":{"SafeToStringHook":[]},"JSUnmodifiableArray":{"JSArray":["1"],"List":["1"],"EfficientLengthIterable":["1"],"JSObject":[],"Iterable":["1"]},"ArrayIterator":{"Iterator":["1"]},"JSNumber":{"double":[],"num":[],"Comparable":["num"]},"JSInt":{"double":[],"int":[],"num":[],"Comparable":["num"],"TrustedGetRuntimeType":[]},"JSNumNotInt":{"double":[],"num":[],"Comparable":["num"],"TrustedGetRuntimeType":[]},"JSString":{"String":[],"Comparable":["String"],"Pattern":[],"TrustedGetRuntimeType":[]},"_CastIterableBase":{"Iterable":["2"]},"CastIterator":{"Iterator":["2"]},"_CastListBase":{"ListBase":["2"],"List":["2"],"_CastIterableBase":["1","2"],"EfficientLengthIterable":["2"],"Iterable":["2"]},"CastList":{"_CastListBase":["1","2"],"ListBase":["2"],"List":["2"],"_CastIterableBase":["1","2"],"EfficientLengthIterable":["2"],"Iterable":["2"],"ListBase.E":"2","Iterable.E":"2"},"LateError":{"Error":[]},"CodeUnits":{"ListBase":["int"],"UnmodifiableListMixin":["int"],"List":["int"],"EfficientLengthIterable":["int"],"Iterable":["int"],"ListBase.E":"int","UnmodifiableListMixin.E":"int"},"EfficientLengthIterable":{"Iterable":["1"]},"ListIterable":{"EfficientLengthIterable":["1"],"Iterable":["1"]},"SubListIterable":{"ListIterable":["1"],"EfficientLengthIterable":["1"],"Iterable":["1"],"Iterable.E":"1","ListIterable.E":"1"},"ListIterator":{"Iterator":["1"]},"MappedIterable":{"Iterable":["2"],"Iterable.E":"2"},"EfficientLengthMappedIterable":{"MappedIterable":["1","2"],"EfficientLengthIterable":["2"],"Iterable":["2"],"Iterable.E":"2"},"MappedIterator":{"Iterator":["2"]},"MappedListIterable":{"ListIterable":["2"],"EfficientLengthIterable":["2"],"Iterable":["2"],"Iterable.E":"2","ListIterable.E":"2"},"WhereIterable":{"Iterable":["1"],"Iterable.E":"1"},"WhereIterator":{"Iterator":["1"]},"UnmodifiableListBase":{"ListBase":["1"],"UnmodifiableListMixin":["1"],"List":["1"],"EfficientLengthIterable":["1"],"Iterable":["1"]},"ReversedListIterable":{"ListIterable":["1"],"EfficientLengthIterable":["1"],"Iterable":["1"],"Iterable.E":"1","ListIterable.E":"1"},"_Record_2":{"_Record2":[],"_Record":[]},"_Record_2_influence_light":{"_Record2":[],"_Record":[]},"ConstantMapView":{"UnmodifiableMapView":["1","2"],"_UnmodifiableMapView_MapView__UnmodifiableMapMixin":["1","2"],"MapView":["1","2"],"_UnmodifiableMapMixin":["1","2"],"Map":["1","2"]},"ConstantMap":{"Map":["1","2"]},"ConstantStringMap":{"ConstantMap":["1","2"],"Map":["1","2"]},"_KeysOrValues":{"Iterable":["1"],"Iterable.E":"1"},"_KeysOrValuesOrElementsIterator":{"Iterator":["1"]},"ConstantSet":{"SetBase":["1"],"Set":["1"],"EfficientLengthIterable":["1"],"Iterable":["1"]},"ConstantStringSet":{"ConstantSet":["1"],"SetBase":["1"],"Set":["1"],"EfficientLengthIterable":["1"],"Iterable":["1"]},"NullError":{"TypeError":[],"Error":[]},"JsNoSuchMethodError":{"Error":[]},"UnknownJsTypeError":{"Error":[]},"_StackTrace":{"StackTrace":[]},"Closure":{"Function":[]},"Closure0Args":{"Function":[]},"Closure2Args":{"Function":[]},"TearOffClosure":{"Function":[]},"StaticClosure":{"Function":[]},"BoundClosure":{"Function":[]},"RuntimeError":{"Error":[]},"JsLinkedHashMap":{"MapBase":["1","2"],"LinkedHashMap":["1","2"],"Map":["1","2"]},"LinkedHashMapKeysIterable":{"EfficientLengthIterable":["1"],"Iterable":["1"],"Iterable.E":"1"},"LinkedHashMapKeyIterator":{"Iterator":["1"]},"LinkedHashMapValuesIterable":{"EfficientLengthIterable":["1"],"Iterable":["1"],"Iterable.E":"1"},"LinkedHashMapValueIterator":{"Iterator":["1"]},"LinkedHashMapEntriesIterable":{"EfficientLengthIterable":["MapEntry<1,2>"],"Iterable":["MapEntry<1,2>"],"Iterable.E":"MapEntry<1,2>"},"LinkedHashMapEntryIterator":{"Iterator":["MapEntry<1,2>"]},"_Record2":{"_Record":[]},"NativeByteBuffer":{"JSObject":[],"TrustedGetRuntimeType":[]},"NativeTypedData":{"JSObject":[]},"NativeByteData":{"JSObject":[],"TrustedGetRuntimeType":[]},"NativeTypedArray":{"JavaScriptIndexingBehavior":["1"],"JSObject":[]},"NativeTypedArrayOfDouble":{"ListBase":["double"],"NativeTypedArray":["double"],"List":["double"],"JavaScriptIndexingBehavior":["double"],"EfficientLengthIterable":["double"],"JSObject":[],"Iterable":["double"],"FixedLengthListMixin":["double"]},"NativeTypedArrayOfInt":{"ListBase":["int"],"NativeTypedArray":["int"],"List":["int"],"JavaScriptIndexingBehavior":["int"],"EfficientLengthIterable":["int"],"JSObject":[],"Iterable":["int"],"FixedLengthListMixin":["int"]},"NativeFloat32List":{"Float32List":[],"ListBase":["double"],"NativeTypedArray":["double"],"List":["double"],"JavaScriptIndexingBehavior":["double"],"EfficientLengthIterable":["double"],"JSObject":[],"Iterable":["double"],"FixedLengthListMixin":["double"],"TrustedGetRuntimeType":[],"ListBase.E":"double"},"NativeFloat64List":{"ListBase":["double"],"NativeTypedArray":["double"],"List":["double"],"JavaScriptIndexingBehavior":["double"],"EfficientLengthIterable":["double"],"JSObject":[],"Iterable":["double"],"FixedLengthListMixin":["double"],"TrustedGetRuntimeType":[],"ListBase.E":"double"},"NativeInt16List":{"ListBase":["int"],"NativeTypedArray":["int"],"List":["int"],"JavaScriptIndexingBehavior":["int"],"EfficientLengthIterable":["int"],"JSObject":[],"Iterable":["int"],"FixedLengthListMixin":["int"],"TrustedGetRuntimeType":[],"ListBase.E":"int"},"NativeInt32List":{"ListBase":["int"],"NativeTypedArray":["int"],"List":["int"],"JavaScriptIndexingBehavior":["int"],"EfficientLengthIterable":["int"],"JSObject":[],"Iterable":["int"],"FixedLengthListMixin":["int"],"TrustedGetRuntimeType":[],"ListBase.E":"int"},"NativeInt8List":{"ListBase":["int"],"NativeTypedArray":["int"],"List":["int"],"JavaScriptIndexingBehavior":["int"],"EfficientLengthIterable":["int"],"JSObject":[],"Iterable":["int"],"FixedLengthListMixin":["int"],"TrustedGetRuntimeType":[],"ListBase.E":"int"},"NativeUint16List":{"ListBase":["int"],"NativeTypedArray":["int"],"List":["int"],"JavaScriptIndexingBehavior":["int"],"EfficientLengthIterable":["int"],"JSObject":[],"Iterable":["int"],"FixedLengthListMixin":["int"],"TrustedGetRuntimeType":[],"ListBase.E":"int"},"NativeUint32List":{"ListBase":["int"],"NativeTypedArray":["int"],"List":["int"],"JavaScriptIndexingBehavior":["int"],"EfficientLengthIterable":["int"],"JSObject":[],"Iterable":["int"],"FixedLengthListMixin":["int"],"TrustedGetRuntimeType":[],"ListBase.E":"int"},"NativeUint8ClampedList":{"ListBase":["int"],"NativeTypedArray":["int"],"List":["int"],"JavaScriptIndexingBehavior":["int"],"EfficientLengthIterable":["int"],"JSObject":[],"Iterable":["int"],"FixedLengthListMixin":["int"],"TrustedGetRuntimeType":[],"ListBase.E":"int"},"NativeUint8List":{"Uint8List":[],"ListBase":["int"],"NativeTypedArray":["int"],"List":["int"],"JavaScriptIndexingBehavior":["int"],"EfficientLengthIterable":["int"],"JSObject":[],"Iterable":["int"],"FixedLengthListMixin":["int"],"TrustedGetRuntimeType":[],"ListBase.E":"int"},"_Error":{"Error":[]},"_TypeError":{"TypeError":[],"Error":[]},"_SyncStarIterator":{"Iterator":["1"]},"_SyncStarIterable":{"Iterable":["1"],"Iterable.E":"1"},"AsyncError":{"Error":[]},"_AsyncCompleter":{"_Completer":["1"]},"_Future":{"Future":["1"]},"_Zone":{"Zone":[]},"_RootZone":{"_Zone":[],"Zone":[]},"_HashMap":{"MapBase":["1","2"],"Map":["1","2"]},"_IdentityHashMap":{"_HashMap":["1","2"],"MapBase":["1","2"],"Map":["1","2"]},"_HashMapKeyIterable":{"EfficientLengthIterable":["1"],"Iterable":["1"],"Iterable.E":"1"},"_HashMapKeyIterator":{"Iterator":["1"]},"_LinkedHashSet":{"SetBase":["1"],"LinkedHashSet":["1"],"Set":["1"],"EfficientLengthIterable":["1"],"Iterable":["1"]},"_LinkedHashSetIterator":{"Iterator":["1"]},"ListBase":{"List":["1"],"EfficientLengthIterable":["1"],"Iterable":["1"]},"MapBase":{"Map":["1","2"]},"_MapBaseValueIterable":{"EfficientLengthIterable":["2"],"Iterable":["2"],"Iterable.E":"2"},"_MapBaseValueIterator":{"Iterator":["2"]},"MapView":{"Map":["1","2"]},"UnmodifiableMapView":{"_UnmodifiableMapView_MapView__UnmodifiableMapMixin":["1","2"],"MapView":["1","2"],"_UnmodifiableMapMixin":["1","2"],"Map":["1","2"]},"SetBase":{"Set":["1"],"EfficientLengthIterable":["1"],"Iterable":["1"]},"_SetBase":{"SetBase":["1"],"Set":["1"],"EfficientLengthIterable":["1"],"Iterable":["1"]},"UnmodifiableSetView":{"SetBase":["1"],"_UnmodifiableSetMixin":["1"],"Set":["1"],"EfficientLengthIterable":["1"],"Iterable":["1"]},"Base64Codec":{"Codec":["List<int>","String"]},"Encoding":{"Codec":["String","List<int>"]},"Utf8Codec":{"Codec":["String","List<int>"]},"DateTime":{"Comparable":["DateTime"]},"double":{"num":[],"Comparable":["num"]},"int":{"num":[],"Comparable":["num"]},"List":{"EfficientLengthIterable":["1"],"Iterable":["1"]},"num":{"Comparable":["num"]},"Set":{"EfficientLengthIterable":["1"],"Iterable":["1"]},"String":{"Comparable":["String"],"Pattern":[]},"AssertionError":{"Error":[]},"TypeError":{"Error":[]},"ArgumentError":{"Error":[]},"RangeError":{"Error":[]},"IndexError":{"Error":[]},"UnsupportedError":{"Error":[]},"UnimplementedError":{"Error":[]},"StateError":{"Error":[]},"ConcurrentModificationError":{"Error":[]},"OutOfMemoryError":{"Error":[]},"StackOverflowError":{"Error":[]},"_StringStackTrace":{"StackTrace":[]},"StringBuffer":{"StringSink":[]},"_Uri":{"Uri":[]},"_SimpleUri":{"Uri":[]},"_DataUri":{"Uri":[]},"MeshHandle":{"ResourceHandle":[]},"TextureHandle":{"ResourceHandle":[]},"MaterialHandle":{"ResourceHandle":[]},"InstanceId":{"ResourceHandle":[]},"PipelineHandle":{"ResourceHandle":[]},"RenderWorldImpl":{"RenderWorld":[]},"_PlanResources":{"RenderPassResources":[]},"_FrameScene":{"FrameSceneData":[]},"OpaqueSortKey":{"Comparable":["OpaqueSortKey"]},"BlendedSortKey":{"Comparable":["BlendedSortKey"]},"BloomBlurFeature":{"RenderFeature":[]},"_BloomBlurPass":{"RenderPass":[]},"BloomCompositeFeature":{"RenderFeature":[]},"_BloomCompositePass":{"RenderPass":[]},"DepthPrepassFeature":{"RenderFeature":[]},"_DepthPrepassPass":{"RenderPass":[]},"DofBlurFeature":{"RenderFeature":[]},"_DofBlurPass":{"RenderPass":[]},"DofCompositeFeature":{"RenderFeature":[]},"_DofCompositePass":{"RenderPass":[]},"GradeFeature":{"RenderFeature":[]},"_GradePass":{"RenderPass":[]},"MsaaResolveFeature":{"RenderFeature":[]},"_MsaaResolvePass":{"RenderPass":[]},"BoundPassContext":{"RenderPassContext":[]},"PresentFeature":{"RenderFeature":[]},"_PresentPass":{"RenderPass":[]},"Ps1QuantizeFeature":{"RenderFeature":[]},"_Ps1QuantizePass":{"RenderPass":[]},"ShadowFeature":{"RenderFeature":[]},"_ShadowCasterPass":{"RenderPass":[]},"ShadowedWorldFeature":{"RenderFeature":[]},"_ShadowedWorldPass":{"RenderPass":[]},"SsaoOcclusionFeature":{"RenderFeature":[]},"_SsaoOcclusionPass":{"RenderPass":[]},"SsaoBlurFeature":{"RenderFeature":[]},"_SsaoBlurPass":{"RenderPass":[]},"VhsFeature":{"RenderFeature":[]},"_VhsPass":{"RenderPass":[]},"WorldFeature":{"RenderFeature":[]},"_WorldPass":{"RenderPass":[]},"DeviceDrawCommandEncoder":{"DrawCommandEncoder":[]},"_WebGpuObject":{"GpuObject":[]},"WebGl2Device":{"GpuDevice":[]},"Int8List":{"List":["int"],"EfficientLengthIterable":["int"],"Iterable":["int"]},"Uint8List":{"List":["int"],"EfficientLengthIterable":["int"],"Iterable":["int"]},"Uint8ClampedList":{"List":["int"],"EfficientLengthIterable":["int"],"Iterable":["int"]},"Int16List":{"List":["int"],"EfficientLengthIterable":["int"],"Iterable":["int"]},"Uint16List":{"List":["int"],"EfficientLengthIterable":["int"],"Iterable":["int"]},"Int32List":{"List":["int"],"EfficientLengthIterable":["int"],"Iterable":["int"]},"Uint32List":{"List":["int"],"EfficientLengthIterable":["int"],"Iterable":["int"]},"Float32List":{"List":["double"],"EfficientLengthIterable":["double"],"Iterable":["double"]},"Float64List":{"List":["double"],"EfficientLengthIterable":["double"],"Iterable":["double"]}}'));
+  A._Universe_addErasedTypes(init.typeUniverse, JSON.parse('{"UnmodifiableListBase":1,"__CastListBase__CastIterableBase_ListMixin":2,"NativeTypedArray":1,"_SetBase":1,"_UnmodifiableSetView_SetBase__UnmodifiableSetMixin":1,"Converter":2}'));
+  var string$ = {
+    x00_____: "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\u03f6\x00\u0404\u03f4 \u03f4\u03f6\u01f6\u01f6\u03f6\u03fc\u01f4\u03ff\u03ff\u0584\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u05d4\u01f4\x00\u01f4\x00\u0504\u05c4\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u0400\x00\u0400\u0200\u03f7\u0200\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u0200\u0200\u0200\u03f7\x00",
+    x23versio: "#version 300 es\nout vec2 vUv;\nvoid main(){\n  vec2 p=vec2(float((gl_VertexID<<1)&2),float(gl_VertexID&2));\n  vUv=p;\n  gl_Position=vec4(p*2.0-1.0,0.0,1.0);\n}\n",
+    x23versip: "#version 300 es\nprecision highp float;\nin vec2 vUv;\nuniform sampler2D uTex;\nuniform float uExposure;\nuniform float uVignette;\nuniform float uGrain;\nuniform float uRainIntensity;\nuniform float uRainWindowVisibility;\nuniform float uOutputEncoding;\nuniform float uToneMap;\nout vec4 oColor;\n\nfloat hash(vec2 p){\n  return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453123);\n}\n\nvec3 reinhardToneMap(vec3 color){\n  return color/(vec3(1.)+color);\n}\n\nvec3 linearToSrgb(vec3 color){\n  vec3 cutoff=step(vec3(.0031308),color);\n  vec3 low=color*12.92;\n  vec3 high=1.055*pow(max(color,vec3(0.)),vec3(1./2.4))-.055;\n  return mix(low,high,cutoff);\n}\n\nfloat rainStreak(vec2 uv){\n  // Stable diagonal streaks: no time or allocation dependency, and no work\n  // when uRainIntensity is zero. The small hash offset avoids a tiled comb.\n  vec2 cell=vec2(floor(uv.x*96.0),floor(uv.y*18.0));\n  float phase=fract(uv.x*96.0+uv.y*18.0+hash(cell));\n  float width=smoothstep(.08,.0,abs(phase-.5));\n  float sparse=step(.72,hash(cell+vec2(19.0,7.0)));\n  return width*sparse;\n}\n\nvoid main(){\n  vec4 source=texture(uTex,vUv);\n  // Exposure operates in scene-linear space; tone mapping prevents HDR\n  // highlights from clipping before the selected output transfer function.\n  vec3 color=max(source.rgb,vec3(0.))*max(uExposure,0.);\n  color=mix(color,reinhardToneMap(color),clamp(uToneMap,0.,1.));\n  float edge=distance(vUv,vec2(.5));\n  float vignette=smoothstep(.35,.78,edge);\n  color*=1.-clamp(uVignette,0.,1.)*vignette;\n  if(uOutputEncoding>.5) color=linearToSrgb(max(color,vec3(0.)));\n  float rain=clamp(uRainIntensity,0.,1.)*\n    clamp(uRainWindowVisibility,0.,1.);\n  color=mix(color,vec3(.56,.67,.76),rain*rainStreak(vUv)*.16);\n  // A stable screen-space grain keeps captures reproducible for a fixed\n  // viewport while still giving the dark gothic presentation a fine film\n  // texture. It is deliberately tiny and never changes alpha.\n  color+=((hash(gl_FragCoord.xy)-.5)*.06)*max(uGrain,0.);\n  oColor=vec4(clamp(color,0.,1.),source.a);\n}\n",
+    Error_: "Error handler must accept one Object or one Object and a StackTrace as arguments, and return a value of the returned future's type",
+    WebGl2: "WebGl2Device: operation attempted while context is not ready"
+  };
+  var type$ = (function rtii() {
+    var findType = A.findType;
+    return {
+      AsyncError: findType("AsyncError"),
+      BoundResourceView: findType("BoundResourceView"),
+      Comparable_dynamic: findType("Comparable<@>"),
+      CompiledProgram: findType("CompiledProgram"),
+      ConstantStringMap_String_int: findType("ConstantStringMap<String,int>"),
+      ConstantStringSet_String: findType("ConstantStringSet<String>"),
+      DateTime: findType("DateTime"),
+      EfficientLengthIterable_dynamic: findType("EfficientLengthIterable<@>"),
+      Error: findType("Error"),
+      Float32List: findType("Float32List"),
+      FramePassStats: findType("FramePassStats"),
+      Function: findType("Function"),
+      GpuObject: findType("GpuObject"),
+      Iterable_CompiledProgram: findType("Iterable<CompiledProgram>"),
+      Iterable_double: findType("Iterable<double>"),
+      Iterable_dynamic: findType("Iterable<@>"),
+      Iterable_int: findType("Iterable<int>"),
+      JSArray_GpuObject: findType("JSArray<GpuObject>"),
+      JSArray_GraphValidationFailure: findType("JSArray<GraphValidationFailure>"),
+      JSArray_InstanceBatch: findType("JSArray<InstanceBatch>"),
+      JSArray_PassDeclaration: findType("JSArray<PassDeclaration>"),
+      JSArray_Plane: findType("JSArray<Plane>"),
+      JSArray_Record_2_double_influence_and_SpotLight_light: findType("JSArray<+influence,light(double,SpotLight)>"),
+      JSArray_RenderFeature: findType("JSArray<RenderFeature>"),
+      JSArray_RenderPass: findType("JSArray<RenderPass>"),
+      JSArray_RenderWorldImpl: findType("JSArray<RenderWorldImpl>"),
+      JSArray_ResourceUse: findType("JSArray<ResourceUse>"),
+      JSArray_RetainedItemDescriptor: findType("JSArray<RetainedItemDescriptor>"),
+      JSArray_RetainedItemView: findType("JSArray<RetainedItemView>"),
+      JSArray_SortableItem_BlendedSortKey: findType("JSArray<SortableItem<BlendedSortKey>>"),
+      JSArray_SortableItem_OpaqueSortKey: findType("JSArray<SortableItem<OpaqueSortKey>>"),
+      JSArray_SpotLight: findType("JSArray<SpotLight>"),
+      JSArray_String: findType("JSArray<String>"),
+      JSArray__PendingGpuTiming: findType("JSArray<_PendingGpuTiming>"),
+      JSArray__Slot_MaterialDefinition: findType("JSArray<_Slot<MaterialDefinition>>"),
+      JSArray__Slot_MeshData: findType("JSArray<_Slot<MeshData>>"),
+      JSArray__Slot_RetainedItemDescriptor: findType("JSArray<_Slot<RetainedItemDescriptor>>"),
+      JSArray__Slot__TextureRecord: findType("JSArray<_Slot<_TextureRecord>>"),
+      JSArray_double: findType("JSArray<double>"),
+      JSArray_dynamic: findType("JSArray<@>"),
+      JSArray_int: findType("JSArray<int>"),
+      JSNull: findType("JSNull"),
+      JSObject: findType("JSObject"),
+      JavaScriptFunction: findType("JavaScriptFunction"),
+      JavaScriptIndexingBehavior_dynamic: findType("JavaScriptIndexingBehavior<@>"),
+      List_GraphValidationFailure: findType("List<GraphValidationFailure>"),
+      List_PassDeclaration: findType("List<PassDeclaration>"),
+      List_String: findType("List<String>"),
+      List_dynamic: findType("List<@>"),
+      List_int: findType("List<int>"),
+      MapEntry_String_FramePassStats: findType("MapEntry<String,FramePassStats>"),
+      Map_String_GpuObject: findType("Map<String,GpuObject>"),
+      Map_String_PassDeclaration: findType("Map<String,PassDeclaration>"),
+      Map_String_String: findType("Map<String,String>"),
+      MaterialHandle: findType("MaterialHandle"),
+      MeshHandle: findType("MeshHandle"),
+      Null: findType("Null"),
+      Object: findType("Object"),
+      OpaqueSortKey: findType("OpaqueSortKey"),
+      PassDeclaration: findType("PassDeclaration"),
+      Record: findType("Record"),
+      Record_0: findType("+()"),
+      Record_2_MeshHandle_and_MeshData: findType("+(MeshHandle,MeshData)"),
+      Record_2_TextureHandle_and__TextureRecord: findType("+(TextureHandle,_TextureRecord)"),
+      Record_2_double_influence_and_SpotLight_light: findType("+influence,light(double,SpotLight)"),
+      RenderPass: findType("RenderPass"),
+      ResourceRegistry_InstanceId_RetainedItemDescriptor: findType("ResourceRegistry<InstanceId,RetainedItemDescriptor>"),
+      ResourceRegistry_MaterialHandle_MaterialDefinition: findType("ResourceRegistry<MaterialHandle,MaterialDefinition>"),
+      ResourceRegistry_MeshHandle_MeshData: findType("ResourceRegistry<MeshHandle,MeshData>"),
+      ResourceRegistry_TextureHandle__TextureRecord: findType("ResourceRegistry<TextureHandle,_TextureRecord>"),
+      ResourceUse: findType("ResourceUse"),
+      RetainedItemView: findType("RetainedItemView"),
+      Set_String: findType("Set<String>"),
+      Set_int: findType("Set<int>"),
+      SortableItem_BlendedSortKey: findType("SortableItem<BlendedSortKey>"),
+      SortableItem_OpaqueSortKey: findType("SortableItem<OpaqueSortKey>"),
+      StackTrace: findType("StackTrace"),
+      StateField: findType("StateField"),
+      String: findType("String"),
+      TextureHandle: findType("TextureHandle"),
+      TrustedGetRuntimeType: findType("TrustedGetRuntimeType"),
+      TypeError: findType("TypeError"),
+      UnknownJavaScriptObject: findType("UnknownJavaScriptObject"),
+      UnmodifiableMapView_String_String: findType("UnmodifiableMapView<String,String>"),
+      UnmodifiableSetView_String: findType("UnmodifiableSetView<String>"),
+      UploadedMesh: findType("UploadedMesh"),
+      Uri: findType("Uri"),
+      _Future_dynamic: findType("_Future<@>"),
+      _Future_void: findType("_Future<~>"),
+      _IdentityHashMap_of_nullable_Object_and_nullable_Object: findType("_IdentityHashMap<Object?,Object?>"),
+      _MutablePassStats: findType("_MutablePassStats"),
+      _SyncStarIterable_RetainedItemView: findType("_SyncStarIterable<RetainedItemView>"),
+      _WebGlFramebuffer: findType("_WebGlFramebuffer"),
+      _WebGlTexture: findType("_WebGlTexture"),
+      bool: findType("bool"),
+      bool_Function_Object: findType("bool(Object)"),
+      double: findType("double"),
+      dynamic: findType("@"),
+      dynamic_Function: findType("@()"),
+      dynamic_Function_Object: findType("@(Object)"),
+      dynamic_Function_Object_StackTrace: findType("@(Object,StackTrace)"),
+      int: findType("int"),
+      nullable_Future_Null: findType("Future<Null>?"),
+      nullable_JSArray_nullable_Object: findType("JSArray<Object?>?"),
+      nullable_JSObject: findType("JSObject?"),
+      nullable_Object: findType("Object?"),
+      nullable_String: findType("String?"),
+      nullable__FutureListener_dynamic_dynamic: findType("_FutureListener<@,@>?"),
+      nullable__LinkedHashSetCell: findType("_LinkedHashSetCell?"),
+      nullable_bool: findType("bool?"),
+      nullable_double: findType("double?"),
+      nullable_int: findType("int?"),
+      nullable_num: findType("num?"),
+      num: findType("num"),
+      void: findType("~"),
+      void_Function: findType("~()")
+    };
+  })();
+  (function constants() {
+    var makeConstList = hunkHelpers.makeConstList;
+    B.Interceptor_methods = J.Interceptor.prototype;
+    B.JSArray_methods = J.JSArray.prototype;
+    B.JSInt_methods = J.JSInt.prototype;
+    B.JSNumber_methods = J.JSNumber.prototype;
+    B.JSString_methods = J.JSString.prototype;
+    B.JavaScriptFunction_methods = J.JavaScriptFunction.prototype;
+    B.JavaScriptObject_methods = J.JavaScriptObject.prototype;
+    B.NativeFloat32List_methods = A.NativeFloat32List.prototype;
+    B.NativeUint8List_methods = A.NativeUint8List.prototype;
+    B.PlainJavaScriptObject_methods = J.PlainJavaScriptObject.prototype;
+    B.UnknownJavaScriptObject_methods = J.UnknownJavaScriptObject.prototype;
+    B.BlendEquation_0 = new A.BlendEquation(0, "add");
+    B.BlendFactor_0 = new A.BlendFactor(0, "zero");
+    B.BlendFactor_1 = new A.BlendFactor(1, "one");
+    B.C_Base64Encoder = new A.Base64Encoder();
+    B.C_Base64Codec = new A.Base64Codec();
+    B.C_DefaultSceneRendererFactory = new A.DefaultSceneRendererFactory();
+    B.LinearColor_Rsl = new A.LinearColor(0.03, 0.03, 0.04);
+    B.LinearColor_0_0_0 = new A.LinearColor(0, 0, 0);
+    B.LinearColor_1_1_1 = new A.LinearColor(1, 1, 1);
+    B.List_empty = makeConstList([], A.findType("JSArray<PointLight>"));
+    B.List_empty1 = makeConstList([], type$.JSArray_SpotLight);
+    B.C_FrameEnvironment = new A.FrameEnvironment();
+    B.GpuTextureFilter_1 = new A.GpuTextureFilter(1, "linear");
+    B.GpuTextureWrap_0 = new A.GpuTextureWrap(0, "clampToEdge");
+    B.C_GpuTextureDescriptor = new A.GpuTextureDescriptor();
+    B.C_JS_CONST = function getTagFallback(o) {
   var s = Object.prototype.toString.call(o);
   return s.substring(8, s.length - 1);
-}
-B.aH=function() {
+};
+    B.C_JS_CONST0 = function() {
   var toStringFunction = Object.prototype.toString;
   function getTag(o) {
     var s = toStringFunction.call(o);
@@ -7460,8 +14944,8 @@ B.aH=function() {
     getUnknownTag: isBrowser ? getUnknownTagGenericBrowser : getUnknownTag,
     prototypeForTag: prototypeForTag,
     discriminator: discriminator };
-}
-B.aM=function(getTagFallback) {
+};
+    B.C_JS_CONST6 = function(getTagFallback) {
   return function(hooks) {
     if (typeof navigator != "object") return hooks;
     var userAgent = navigator.userAgent;
@@ -7475,12 +14959,12 @@ B.aM=function(getTagFallback) {
     }
     hooks.getTag = getTagFallback;
   };
-}
-B.aI=function(hooks) {
+};
+    B.C_JS_CONST1 = function(hooks) {
   if (typeof dartExperimentalFixupGetTag != "function") return hooks;
   hooks.getTag = dartExperimentalFixupGetTag(hooks.getTag);
-}
-B.aL=function(hooks) {
+};
+    B.C_JS_CONST5 = function(hooks) {
   if (typeof navigator != "object") return hooks;
   var userAgent = navigator.userAgent;
   if (typeof userAgent != "string") return hooks;
@@ -7498,8 +14982,8 @@ B.aL=function(hooks) {
     return quickMap[tag] || tag;
   }
   hooks.getTag = getTagFirefox;
-}
-B.aK=function(hooks) {
+};
+    B.C_JS_CONST4 = function(hooks) {
   if (typeof navigator != "object") return hooks;
   var userAgent = navigator.userAgent;
   if (typeof userAgent != "string") return hooks;
@@ -7529,8 +15013,8 @@ B.aK=function(hooks) {
   }
   hooks.getTag = getTagIE;
   hooks.prototypeForTag = prototypeForTagIE;
-}
-B.aJ=function(hooks) {
+};
+    B.C_JS_CONST2 = function(hooks) {
   var getTag = hooks.getTag;
   var prototypeForTag = hooks.prototypeForTag;
   function getTagFixed(o) {
@@ -7547,291 +15031,377 @@ B.aJ=function(hooks) {
   }
   hooks.getTag = getTagFixed;
   hooks.prototypeForTag = prototypeForTagFixed;
-}
-B.a2=function(hooks) { return hooks; }
+};
+    B.C_JS_CONST3 = function(hooks) { return hooks; }
+;
+    B.C_OutOfMemoryError = new A.OutOfMemoryError();
+    B.C_PostProcessState = new A.PostProcessState();
+    B.C_SentinelValue = new A.SentinelValue();
+    B.Vec3_0_1_0 = new A.Vec3(0, 1, 0);
+    B.Vec3_0_m1_0 = new A.Vec3(0, -1, 0);
+    B.C_SpotLight = new A.SpotLight();
+    B.C_Utf8Codec = new A.Utf8Codec();
+    B.C_WebGl2RendererFactory = new A.WebGl2RendererFactory();
+    B.C__RootZone = new A._RootZone();
+    B.C__StringStackTrace = new A._StringStackTrace();
+    B.ClearMask_0 = new A.ClearMask(0, "colorOnly");
+    B.ClearMask_1 = new A.ClearMask(1, "colorAndDepth");
+    B.ClearMask_2 = new A.ClearMask(2, "depthOnly");
+    B.ColorEncoding_1 = new A.ColorEncoding(1, "srgb");
+    B.CullFace_1 = new A.CullFace(1, "back");
+    B.DepthFunc_0 = new A.DepthFunc(0, "less");
+    B.FramePassStats_0_0_0 = new A.FramePassStats(0, 0, 0);
+    B.FrameQueueState_0 = new A.FrameQueueState(0, "idle");
+    B.FrameQueueState_1 = new A.FrameQueueState(1, "active");
+    B.FrameQueueState_2 = new A.FrameQueueState(2, "ended");
+    B.FrameQueueState_3 = new A.FrameQueueState(3, "aborted");
+    B.FrustumTest_0 = new A.FrustumTest(0, "outside");
+    B.FrustumTest_1 = new A.FrustumTest(1, "intersects");
+    B.FrustumTest_2 = new A.FrustumTest(2, "inside");
+    B.GpuBufferKind_0 = new A.GpuBufferKind(0, "vertex");
+    B.GpuBufferKind_1 = new A.GpuBufferKind(1, "indices");
+    B.GpuBufferUsage_0 = new A.GpuBufferUsage(0, "staticDraw");
+    B.GpuDeviceStatus_0 = new A.GpuDeviceStatus(0, "ready");
+    B.GpuDeviceStatus_1 = new A.GpuDeviceStatus(1, "lost");
+    B.GpuTargetAttachment_0 = new A.GpuTargetAttachment(0, "color");
+    B.GpuTargetAttachment_1 = new A.GpuTargetAttachment(1, "colorAndGlow");
+    B.GpuTargetAttachment_2 = new A.GpuTargetAttachment(2, "colorDepthGlow");
+    B.GpuTargetAttachment_3 = new A.GpuTargetAttachment(3, "depthOnly");
+    B.GraphStage_0 = new A.GraphStage(0, "beforeShadow");
+    B.GraphStage_2 = new A.GraphStage(2, "beforeDepth");
+    B.GraphStage_3 = new A.GraphStage(3, "afterDepth");
+    B.GraphStage_4 = new A.GraphStage(4, "beforeWorld");
+    B.GraphStage_5 = new A.GraphStage(5, "afterWorld");
+    B.GraphStage_6 = new A.GraphStage(6, "afterResolve");
+    B.GraphStage_9 = new A.GraphStage(9, "beforePresent");
+    B.GraphValidationFailureKind_0 = new A.GraphValidationFailureKind(0, "readBeforeWrite");
+    B.GraphValidationFailureKind_1 = new A.GraphValidationFailureKind(1, "duplicateWriter");
+    B.GraphValidationFailureKind_2 = new A.GraphValidationFailureKind(2, "sampledMultisampledAttachment");
+    B.GraphValidationFailureKind_3 = new A.GraphValidationFailureKind(3, "invalidResolve");
+    B.GraphValidationFailureKind_4 = new A.GraphValidationFailureKind(4, "formatOrSizeMismatch");
+    B.GraphValidationFailureKind_5 = new A.GraphValidationFailureKind(5, "unversionedReadWrite");
+    B.GraphValidationFailureKind_6 = new A.GraphValidationFailureKind(6, "invalidHistoryRead");
+    B.GraphValidationFailureKind_7 = new A.GraphValidationFailureKind(7, "dependencyCycle");
+    B.GraphValidationFailureKind_8 = new A.GraphValidationFailureKind(8, "missingCapability");
+    B.HandleRejection_0 = new A.HandleRejection(0, "wrongKind");
+    B.HandleRejection_1 = new A.HandleRejection(1, "staleGeneration");
+    B.HandleRejection_3 = new A.HandleRejection(3, "releasedResource");
+    B.List_0lp = makeConstList(["uViewProjection", "uModel", "uNormalMatrix", "uLightDir", "uAmbientColor", "uAmbientIntensity"], type$.JSArray_String);
+    B.List_43N = makeConstList(["uViewProjection", "uView", "uModel", "uNormalMatrix", "uLightViewProjection", "uLightPosition", "uLightDirection", "uLightColor", "uLightIntensity", "uLightRange", "uLightInnerCos", "uLightOuterCos", "uSpotEnabled", "uDirectionalDirection", "uDirectionalColor", "uDirectionalIntensity", "uPointPosition0", "uPointColor0", "uPointIntensity0", "uPointRadius0", "uPointPosition1", "uPointColor1", "uPointIntensity1", "uPointRadius1", "uPointPosition2", "uPointColor2", "uPointIntensity2", "uPointRadius2", "uPointPosition3", "uPointColor3", "uPointIntensity3", "uPointRadius3", "uDirectSpotPosition0", "uDirectSpotDirection0", "uDirectSpotColor0", "uDirectSpotIntensity0", "uDirectSpotRange0", "uDirectSpotInnerCos0", "uDirectSpotOuterCos0", "uDirectSpotEnabled0", "uDirectSpotPosition1", "uDirectSpotDirection1", "uDirectSpotColor1", "uDirectSpotIntensity1", "uDirectSpotRange1", "uDirectSpotInnerCos1", "uDirectSpotOuterCos1", "uDirectSpotEnabled1", "uDirectSpotPosition2", "uDirectSpotDirection2", "uDirectSpotColor2", "uDirectSpotIntensity2", "uDirectSpotRange2", "uDirectSpotInnerCos2", "uDirectSpotOuterCos2", "uDirectSpotEnabled2", "uAmbientColor", "uAmbientIntensity", "uShadowMapTexelSize", "uSceneColorSize", "uEmissiveStrength", "uUvScaleOffset", "uNormalStrength", "uRoughness", "uMetallic", "uOcclusionStrength", "uClearcoatStrength", "uClearcoatRoughness", "uLightmapIntensity", "uCameraPosition", "uVertexSnapGrid", "uAffineWarpStrength", "uAlphaCutoff", "uOpaqueCoverage", "uFogColor", "uFogStart", "uFogEnd", "uFogHeightFalloff", "uFogDensity", "uReceivesShadow", "uRainWetness"], type$.JSArray_String);
+    B.List_4ld = makeConstList(["uNear", "uFar", "uProjScaleX", "uProjScaleY", "uRadius", "uStrength"], type$.JSArray_String);
+    B.List_Es0 = makeConstList(["uQuantizationBits", "uDitherStrength"], type$.JSArray_String);
+    B.List_F48 = makeConstList(["uTime", "uChromaWeight", "uTrackingWeight", "uNoiseWeight", "uHeadSwitchWeight", "uDropoutWeight", "uGhostWeight"], type$.JSArray_String);
+    B.List_KZn = makeConstList(["uNear", "uFar", "uFocusDistance", "uFocusRange", "uStrength"], type$.JSArray_String);
+    B.List_NFc = makeConstList(["uViewProjection", "uModel", "uVertexSnapGrid", "uAffineWarpStrength", "uAlphaCutoff"], type$.JSArray_String);
+    B.List_bt2 = makeConstList(["uExposure", "uVignette", "uGrain", "uRainIntensity", "uRainWindowVisibility", "uOutputEncoding", "uToneMap"], type$.JSArray_String);
+    B.List_empty0 = makeConstList([], type$.JSArray_RenderPass);
+    B.StateField_0 = new A.StateField(0, "depthTest");
+    B.StateField_1 = new A.StateField(1, "depthFunc");
+    B.StateField_2 = new A.StateField(2, "depthWrite");
+    B.StateField_3 = new A.StateField(3, "blendEnable");
+    B.StateField_4 = new A.StateField(4, "blendFunc");
+    B.StateField_5 = new A.StateField(5, "blendEquation");
+    B.StateField_6 = new A.StateField(6, "cullEnable");
+    B.StateField_7 = new A.StateField(7, "cullFace");
+    B.StateField_8 = new A.StateField(8, "frontFace");
+    B.StateField_9 = new A.StateField(9, "stencilEnable");
+    B.StateField_10 = new A.StateField(10, "colorMask");
+    B.StateField_11 = new A.StateField(11, "scissorEnable");
+    B.List_nqC = makeConstList([B.StateField_0, B.StateField_1, B.StateField_2, B.StateField_3, B.StateField_4, B.StateField_5, B.StateField_6, B.StateField_7, B.StateField_8, B.StateField_9, B.StateField_10, B.StateField_11], A.findType("JSArray<StateField>"));
+    B.List_u6B = makeConstList(["uLightViewProjection", "uModel", "uAlphaCutoff"], type$.JSArray_String);
+    B.List_uBloomStrength = makeConstList(["uBloomStrength"], type$.JSArray_String);
+    B.List_uLutSize_uStrength = makeConstList(["uLutSize", "uStrength"], type$.JSArray_String);
+    B.List_uTexelSize_uNear_uFar = makeConstList(["uTexelSize", "uNear", "uFar"], type$.JSArray_String);
+    B.List_uTexelStep = makeConstList(["uTexelStep"], type$.JSArray_String);
+    B.Object_uAlbedo_0 = {uAlbedo: 0};
+    B.Map_6Y6km = new A.ConstantStringMap(B.Object_uAlbedo_0, [0], type$.ConstantStringMap_String_int);
+    B.Object_uSsaoRaw_0_uSceneDepth_1 = {uSsaoRaw: 0, uSceneDepth: 1};
+    B.Map_9qjqz = new A.ConstantStringMap(B.Object_uSsaoRaw_0_uSceneDepth_1, [0, 1], type$.ConstantStringMap_String_int);
+    B.Object_uScene_0_uHistory_1 = {uScene: 0, uHistory: 1};
+    B.Map_ClpKC = new A.ConstantStringMap(B.Object_uScene_0_uHistory_1, [0, 1], type$.ConstantStringMap_String_int);
+    B.Object_aPosition_0_aUvMat_1 = {aPosition: 0, aUvMat: 1};
+    B.Map_JgyPq = new A.ConstantStringMap(B.Object_aPosition_0_aUvMat_1, [0, 4], type$.ConstantStringMap_String_int);
+    B.Object_uScene_0_uLut_1 = {uScene: 0, uLut: 1};
+    B.Map_LjSTj = new A.ConstantStringMap(B.Object_uScene_0_uLut_1, [0, 1], type$.ConstantStringMap_String_int);
+    B.Object_uSource_0 = {uSource: 0};
+    B.Map_Nhox7 = new A.ConstantStringMap(B.Object_uSource_0, [0], type$.ConstantStringMap_String_int);
+    B.Object_rOo = {uAlbedo: 0, uShadowMap: 1, uSsao: 2, uNormalMap: 3, uOrmMap: 4, uEmissiveMap: 5, uLightmap: 6};
+    B.Map_RkR7l = new A.ConstantStringMap(B.Object_rOo, [0, 1, 2, 3, 4, 5, 6], type$.ConstantStringMap_String_int);
+    B.Object_Rxe = {uSharp: 0, uBlurred: 1, uSceneDepth: 2};
+    B.Map_Vt6q7 = new A.ConstantStringMap(B.Object_Rxe, [0, 1, 2], type$.ConstantStringMap_String_int);
+    B.Object_uBloom_0 = {uBloom: 0};
+    B.Map_eEHw8 = new A.ConstantStringMap(B.Object_uBloom_0, [0], type$.ConstantStringMap_String_int);
+    B.Object_uSceneDepth_0 = {uSceneDepth: 0};
+    B.Map_eLegi = new A.ConstantStringMap(B.Object_uSceneDepth_0, [0], type$.ConstantStringMap_String_int);
+    B.Object_uScene_0 = {uScene: 0};
+    B.Map_eWjtK = new A.ConstantStringMap(B.Object_uScene_0, [0], type$.ConstantStringMap_String_int);
+    B.Object_empty = {};
+    B.Map_empty0 = new A.ConstantStringMap(B.Object_empty, [], A.findType("ConstantStringMap<String,String>"));
+    B.Map_empty = new A.ConstantStringMap(B.Object_empty, [], type$.ConstantStringMap_String_int);
+    B.Object_Deh = {aPosition: 0, aNormal: 1, aColor: 2, aAlpha: 3, aUvMat: 4, aTangent: 5, aUv1: 6};
+    B.Map_jaYU8 = new A.ConstantStringMap(B.Object_Deh, [0, 1, 2, 3, 4, 5, 6], type$.ConstantStringMap_String_int);
+    B.Object_ohC = {aPosition: 0, aNormal: 1, aColor: 2, aAlpha: 3};
+    B.Map_unJqY = new A.ConstantStringMap(B.Object_ohC, [0, 1, 2, 3], type$.ConstantStringMap_String_int);
+    B.Object_uTex_0 = {uTex: 0};
+    B.Map_xTGca = new A.ConstantStringMap(B.Object_uTex_0, [0], type$.ConstantStringMap_String_int);
+    B.PipelineHandle_0_1_null = new A.PipelineHandle(0, 1, null);
+    B.QualityProfileKind_0 = new A.QualityProfileKind(0, "safe");
+    B.QualityProfileKind_2 = new A.QualityProfileKind(2, "high");
+    B.Set_empty = new A.ConstantStringSet(B.Object_empty, 0, type$.ConstantStringSet_String);
+    B.QualityProfile_QualityProfileKind_0_Set_empty = new A.QualityProfile(B.QualityProfileKind_0, B.Set_empty);
+    B.QualityProfileKind_1 = new A.QualityProfileKind(1, "standard");
+    B.Object_shadows_0 = {shadows: 0};
+    B.Set_zc2Dw = new A.ConstantStringSet(B.Object_shadows_0, 1, type$.ConstantStringSet_String);
+    B.QualityProfile_QualityProfileKind_1_Set_zc2Dw = new A.QualityProfile(B.QualityProfileKind_1, B.Set_zc2Dw);
+    B.Object_Kbg = {shadows: 0, ssao: 1, bloom: 2, dof: 3, grade: 4};
+    B.Set_Ma1c8 = new A.ConstantStringSet(B.Object_Kbg, 5, type$.ConstantStringSet_String);
+    B.QualityProfile_QualityProfileKind_2_Set_Ma1c8 = new A.QualityProfile(B.QualityProfileKind_2, B.Set_Ma1c8);
+    B.QualityProfileKind_4 = new A.QualityProfileKind(4, "shipping");
+    B.Object_QyB = {shadows: 0, ssao: 1, bloom: 2, dof: 3, grade: 4, ps1: 5, vhs: 6};
+    B.Set_R3bKe = new A.ConstantStringSet(B.Object_QyB, 7, type$.ConstantStringSet_String);
+    B.QualityProfile_QualityProfileKind_4_Set_R3bKe = new A.QualityProfile(B.QualityProfileKind_4, B.Set_R3bKe);
+    B.DiagnosticLevel_1 = new A.DiagnosticLevel(1, "errorsOnly");
+    B.RendererConfiguration_7v0 = new A.RendererConfiguration(B.QualityProfile_QualityProfileKind_0_Set_empty, 384, 216, 1, 0);
+    B.RendererState_0 = new A.RendererState(0, "constructed");
+    B.RendererState_1 = new A.RendererState(1, "initializing");
+    B.RendererState_2 = new A.RendererState(2, "ready");
+    B.RendererState_3 = new A.RendererState(3, "contextLost");
+    B.ResourceAccess_0 = new A.ResourceAccess(0, "read");
+    B.ResourceAccess_1 = new A.ResourceAccess(1, "write");
+    B.ResourceAccess_2 = new A.ResourceAccess(2, "historyRead");
+    B.ResourceFormat_0 = new A.ResourceFormat(0, "rgba8");
+    B.ResourceRef_570 = new A.ResourceRef("dofBlurH", B.ResourceFormat_0, 192, 108, 1, 0);
+    B.ResourceRef_5700 = new A.ResourceRef("dofBlurV", B.ResourceFormat_0, 192, 108, 1, 0);
+    B.ResourceRef_9Ho = new A.ResourceRef("dofOutput", B.ResourceFormat_0, 384, 216, 1, 0);
+    B.ResourceFormat_2 = new A.ResourceFormat(2, "depth24");
+    B.ResourceRef_Bey = new A.ResourceRef("shadowMap", B.ResourceFormat_2, 512, 512, 1, 0);
+    B.ResourceRef_PIK = new A.ResourceRef("ssaoRaw", B.ResourceFormat_0, 192, 108, 1, 0);
+    B.ResourceRef_Rap = new A.ResourceRef("ssaoBlurred", B.ResourceFormat_0, 192, 108, 1, 0);
+    B.ResourceRef_SSV = new A.ResourceRef("gradeOutput", B.ResourceFormat_0, 384, 216, 1, 0);
+    B.ResourceRef_Yiz = new A.ResourceRef("vhsOutput", B.ResourceFormat_0, 384, 216, 1, 0);
+    B.ResourceRef_ZYz = new A.ResourceRef("sceneDepth", B.ResourceFormat_2, 384, 216, 1, 0);
+    B.ResourceRef_bI5 = new A.ResourceRef("bloomBlurH", B.ResourceFormat_0, 192, 108, 1, 0);
+    B.ResourceRef_bI50 = new A.ResourceRef("bloomBlurV", B.ResourceFormat_0, 192, 108, 1, 0);
+    B.ResourceRef_qfj = new A.ResourceRef("present", B.ResourceFormat_0, 384, 216, 1, 0);
+    B.ResourceRef_rRS = new A.ResourceRef("sceneColor", B.ResourceFormat_0, 384, 216, 1, 0);
+    B.ResourceRef_tcv = new A.ResourceRef("ps1Output", B.ResourceFormat_0, 384, 216, 1, 0);
+    B.Object_4zr = {shadows: 0, ssao: 1, bloom: 2, dof: 3, grade: 4, ps1: 5, vhs: 6, msaa: 7, "material-array": 8};
+    B.Set_wtCB7 = new A.ConstantStringSet(B.Object_4zr, 9, type$.ConstantStringSet_String);
+    B.ShaderCompileStage_2 = new A.ShaderCompileStage(2, "link");
+    B.ShaderCompileException_MjR = new A.ShaderCompileException(B.ShaderCompileStage_2, "gl.createProgram() returned null");
+    B.ShaderCompileStage_0 = new A.ShaderCompileStage(0, "vertex");
+    B.ShaderCompileStage_1 = new A.ShaderCompileStage(1, "fragment");
+    B.ShaderCompileStage_3 = new A.ShaderCompileStage(3, "validation");
+    B.ShadowCasterLod_0 = new A.ShadowCasterLod(0, "full");
+    B.ShadowCasterLod_2 = new A.ShadowCasterLod(2, "culled");
+    B.Type_ByteBuffer_rqD = A.typeLiteral("ByteBuffer");
+    B.Type_ByteData_9dB = A.typeLiteral("ByteData");
+    B.Type_Float32List_9Kz = A.typeLiteral("Float32List");
+    B.Type_Float64List_9Kz = A.typeLiteral("Float64List");
+    B.Type_Int16List_s5h = A.typeLiteral("Int16List");
+    B.Type_Int32List_O8Z = A.typeLiteral("Int32List");
+    B.Type_Int8List_rFV = A.typeLiteral("Int8List");
+    B.Type_JSObject_ttY = A.typeLiteral("JSObject");
+    B.Type_Object_A4p = A.typeLiteral("Object");
+    B.Type_Uint16List_kmP = A.typeLiteral("Uint16List");
+    B.Type_Uint32List_kmP = A.typeLiteral("Uint32List");
+    B.Type_Uint8ClampedList_04U = A.typeLiteral("Uint8ClampedList");
+    B.Type_Uint8List_8Eb = A.typeLiteral("Uint8List");
+    B.UniformType_0 = new A.UniformType(0, "float1");
+    B.UniformType_1 = new A.UniformType(1, "float2");
+    B.UniformType_2 = new A.UniformType(2, "float3");
+    B.UniformType_3 = new A.UniformType(3, "float4");
+    B.UniformType_4 = new A.UniformType(4, "mat4");
+    B.UniformType_5 = new A.UniformType(5, "mat4Array");
+    B.UniformValue_UniformType_0_0 = new A.UniformValue(B.UniformType_0, 0);
+    B.UniformValue_UniformType_0_1 = new A.UniformValue(B.UniformType_0, 1);
+    B.UniformType_6 = new A.UniformType(6, "sampler");
+    B.UniformValue_UniformType_6_0 = new A.UniformValue(B.UniformType_6, 0);
+    B.UniformValue_UniformType_6_1 = new A.UniformValue(B.UniformType_6, 1);
+    B.UniformValue_UniformType_6_2 = new A.UniformValue(B.UniformType_6, 2);
+    B.UniformValue_UniformType_6_3 = new A.UniformValue(B.UniformType_6, 3);
+    B.UniformValue_UniformType_6_4 = new A.UniformValue(B.UniformType_6, 4);
+    B.UniformValue_UniformType_6_5 = new A.UniformValue(B.UniformType_6, 5);
+    B.UniformValue_UniformType_6_6 = new A.UniformValue(B.UniformType_6, 6);
+    B.Utf8Decoder_false = new A.Utf8Decoder(false);
+    B.Vec3_0_0_0 = new A.Vec3(0, 0, 0);
+    B.Vec3_0_0_1 = new A.Vec3(0, 0, 1);
+    B.Vec3_1_0_0 = new A.Vec3(1, 0, 0);
+    B.VertexAttributeKind_0 = new A.VertexAttributeKind(0, "position");
+    B.VertexAttributeKind_1 = new A.VertexAttributeKind(1, "normal");
+    B.VertexAttributeKind_2 = new A.VertexAttributeKind(2, "color");
+    B.VertexAttributeKind_3 = new A.VertexAttributeKind(3, "emissive");
+    B.VertexAttributeKind_4 = new A.VertexAttributeKind(4, "alpha");
+    B.VertexAttributeKind_5 = new A.VertexAttributeKind(5, "uv0");
+    B.VertexAttributeKind_6 = new A.VertexAttributeKind(6, "tangent4");
+    B.VertexAttributeKind_7 = new A.VertexAttributeKind(7, "uv1");
+    B.VertexAttributeKind_8 = new A.VertexAttributeKind(8, "legacyMaterialEffect");
+    B._BloomBlurAxis_0 = new A._BloomBlurAxis(0, "horizontal");
+    B._BloomBlurAxis_1 = new A._BloomBlurAxis(1, "vertical");
+    B._DofBlurAxis_0 = new A._DofBlurAxis(0, "horizontal");
+    B._DofBlurAxis_1 = new A._DofBlurAxis(1, "vertical");
+  })();
+  (function staticFields() {
+    $._JS_INTEROP_INTERCEPTOR_TAG = null;
+    $._toStringVisiting = A._setArrayType([], A.findType("JSArray<Object>"));
+    $.Primitives__identityHashCodeProperty = null;
+    $.BoundClosure__receiverFieldNameCache = null;
+    $.BoundClosure__interceptorFieldNameCache = null;
+    $.getTagFunction = null;
+    $.alternateTagFunction = null;
+    $.prototypeForTagFunction = null;
+    $.dispatchRecordsForInstanceTags = null;
+    $.interceptorsForUncacheableTags = null;
+    $.initNativeDispatchFlag = null;
+    $._Record__computedFieldKeys = A._setArrayType([], A.findType("JSArray<List<Object>?>"));
+    $._nextCallback = null;
+    $._lastCallback = null;
+    $._lastPriorityCallback = null;
+    $._isInCallbackLoop = false;
+    $.Zone__current = B.C__RootZone;
+    $.Uri__cachedBaseString = "";
+    $.Uri__cachedBaseUri = null;
+  })();
+  (function lazyInitializers() {
+    var _lazyFinal = hunkHelpers.lazyFinal;
+    _lazyFinal($, "DART_CLOSURE_PROPERTY_NAME", "$get$DART_CLOSURE_PROPERTY_NAME", () => A.getIsolateAffinityTag("_$dart_dartClosure"));
+    _lazyFinal($, "DART_CLOSURE_DART_JSINTEROP_PROPERTY_NAME", "$get$DART_CLOSURE_DART_JSINTEROP_PROPERTY_NAME", () => A.getIsolateAffinityTag("_$dart_dartClosure_dartJSInterop"));
+    _lazyFinal($, "_safeToStringHooks", "$get$_safeToStringHooks", () => A._setArrayType([new J.JSArraySafeToStringHook()], A.findType("JSArray<SafeToStringHook>")));
+    _lazyFinal($, "TypeErrorDecoder_noSuchMethodPattern", "$get$TypeErrorDecoder_noSuchMethodPattern", () => A.TypeErrorDecoder_extractPattern(A.TypeErrorDecoder_provokeCallErrorOn({
+      toString: function() {
+        return "$receiver$";
+      }
+    })));
+    _lazyFinal($, "TypeErrorDecoder_notClosurePattern", "$get$TypeErrorDecoder_notClosurePattern", () => A.TypeErrorDecoder_extractPattern(A.TypeErrorDecoder_provokeCallErrorOn({$method$: null,
+      toString: function() {
+        return "$receiver$";
+      }
+    })));
+    _lazyFinal($, "TypeErrorDecoder_nullCallPattern", "$get$TypeErrorDecoder_nullCallPattern", () => A.TypeErrorDecoder_extractPattern(A.TypeErrorDecoder_provokeCallErrorOn(null)));
+    _lazyFinal($, "TypeErrorDecoder_nullLiteralCallPattern", "$get$TypeErrorDecoder_nullLiteralCallPattern", () => A.TypeErrorDecoder_extractPattern(function() {
+      var $argumentsExpr$ = "$arguments$";
+      try {
+        null.$method$($argumentsExpr$);
+      } catch (e) {
+        return e.message;
+      }
+    }()));
+    _lazyFinal($, "TypeErrorDecoder_undefinedCallPattern", "$get$TypeErrorDecoder_undefinedCallPattern", () => A.TypeErrorDecoder_extractPattern(A.TypeErrorDecoder_provokeCallErrorOn(void 0)));
+    _lazyFinal($, "TypeErrorDecoder_undefinedLiteralCallPattern", "$get$TypeErrorDecoder_undefinedLiteralCallPattern", () => A.TypeErrorDecoder_extractPattern(function() {
+      var $argumentsExpr$ = "$arguments$";
+      try {
+        (void 0).$method$($argumentsExpr$);
+      } catch (e) {
+        return e.message;
+      }
+    }()));
+    _lazyFinal($, "TypeErrorDecoder_nullPropertyPattern", "$get$TypeErrorDecoder_nullPropertyPattern", () => A.TypeErrorDecoder_extractPattern(A.TypeErrorDecoder_provokePropertyErrorOn(null)));
+    _lazyFinal($, "TypeErrorDecoder_nullLiteralPropertyPattern", "$get$TypeErrorDecoder_nullLiteralPropertyPattern", () => A.TypeErrorDecoder_extractPattern(function() {
+      try {
+        null.$method$;
+      } catch (e) {
+        return e.message;
+      }
+    }()));
+    _lazyFinal($, "TypeErrorDecoder_undefinedPropertyPattern", "$get$TypeErrorDecoder_undefinedPropertyPattern", () => A.TypeErrorDecoder_extractPattern(A.TypeErrorDecoder_provokePropertyErrorOn(void 0)));
+    _lazyFinal($, "TypeErrorDecoder_undefinedLiteralPropertyPattern", "$get$TypeErrorDecoder_undefinedLiteralPropertyPattern", () => A.TypeErrorDecoder_extractPattern(function() {
+      try {
+        (void 0).$method$;
+      } catch (e) {
+        return e.message;
+      }
+    }()));
+    _lazyFinal($, "_AsyncRun__scheduleImmediateClosure", "$get$_AsyncRun__scheduleImmediateClosure", () => A._AsyncRun__initializeScheduleImmediate());
+    _lazyFinal($, "_Utf8Decoder__reusableBuffer", "$get$_Utf8Decoder__reusableBuffer", () => A.NativeUint8List_NativeUint8List(4096));
+    _lazyFinal($, "_Utf8Decoder__decoder", "$get$_Utf8Decoder__decoder", () => new A._Utf8Decoder__decoder_closure().call$0());
+    _lazyFinal($, "_Utf8Decoder__decoderNonfatal", "$get$_Utf8Decoder__decoderNonfatal", () => new A._Utf8Decoder__decoderNonfatal_closure().call$0());
+    _lazyFinal($, "_Base64Decoder__inverseAlphabet", "$get$_Base64Decoder__inverseAlphabet", () => new Int8Array(A._ensureNativeList(A._setArrayType([-2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1, -2, -2, -2, -2, -2, 62, -2, 62, -2, 63, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, -2, -2, -2, -1, -2, -2, -2, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, -2, -2, -2, -2, 63, -2, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, -2, -2, -2, -2, -2], type$.JSArray_int))));
+    _lazyFinal($, "_hashSeed", "$get$_hashSeed", () => A.objectHashCode(B.Type_Object_A4p));
+    _lazyFinal($, "BloomResources_sceneColorPostBloom", "$get$BloomResources_sceneColorPostBloom", () => B.ResourceRef_rRS.nextVersion$0());
+    _lazyFinal($, "FallbackPixels_whiteAlbedo", "$get$FallbackPixels_whiteAlbedo", () => A.NativeUint8List_NativeUint8List$fromList(A._setArrayType([255, 255, 255, 255], type$.JSArray_int)));
+    _lazyFinal($, "FallbackPixels_flatNormal", "$get$FallbackPixels_flatNormal", () => A.NativeUint8List_NativeUint8List$fromList(A._setArrayType([128, 128, 255, 255], type$.JSArray_int)));
+    _lazyFinal($, "FallbackPixels_blackEmissive", "$get$FallbackPixels_blackEmissive", () => A.NativeUint8List_NativeUint8List$fromList(A._setArrayType([0, 0, 0, 255], type$.JSArray_int)));
+    _lazyFinal($, "FallbackPixels_identityOrm", "$get$FallbackPixels_identityOrm", () => A.NativeUint8List_NativeUint8List$fromList(A._setArrayType([255, 255, 0, 255], type$.JSArray_int)));
+    _lazyFinal($, "FallbackPixels_neutralLightmap", "$get$FallbackPixels_neutralLightmap", () => A.NativeUint8List_NativeUint8List$fromList(A._setArrayType([255, 255, 255, 255], type$.JSArray_int)));
+  })();
+  (function nativeSupport() {
+    !function() {
+      var intern = function(s) {
+        var o = {};
+        o[s] = 1;
+        return Object.keys(hunkHelpers.convertToFastObject(o))[0];
+      };
+      init.getIsolateTag = function(name) {
+        return intern("___dart_" + name + init.isolateTag);
+      };
+      var tableProperty = "___dart_isolate_tags_";
+      var usedProperties = Object[tableProperty] || (Object[tableProperty] = Object.create(null));
+      var rootProperty = "_ZxYxX";
+      for (var i = 0;; i++) {
+        var property = intern(rootProperty + "_" + i + "_");
+        if (!(property in usedProperties)) {
+          usedProperties[property] = 1;
+          init.isolateTag = property;
+          break;
+        }
+      }
+      init.dispatchPropertyName = init.getIsolateTag("dispatch_record");
+    }();
+    hunkHelpers.setOrUpdateInterceptorsByTag({ArrayBuffer: A.NativeByteBuffer, SharedArrayBuffer: A.NativeByteBuffer, ArrayBufferView: A.NativeTypedData, DataView: A.NativeByteData, Float32Array: A.NativeFloat32List, Float64Array: A.NativeFloat64List, Int16Array: A.NativeInt16List, Int32Array: A.NativeInt32List, Int8Array: A.NativeInt8List, Uint16Array: A.NativeUint16List, Uint32Array: A.NativeUint32List, Uint8ClampedArray: A.NativeUint8ClampedList, CanvasPixelArray: A.NativeUint8ClampedList, Uint8Array: A.NativeUint8List});
+    hunkHelpers.setOrUpdateLeafTags({ArrayBuffer: true, SharedArrayBuffer: true, ArrayBufferView: false, DataView: true, Float32Array: true, Float64Array: true, Int16Array: true, Int32Array: true, Int8Array: true, Uint16Array: true, Uint32Array: true, Uint8ClampedArray: true, CanvasPixelArray: true, Uint8Array: false});
+    A.NativeTypedArray.$nativeSuperclassTag = "ArrayBufferView";
+    A._NativeTypedArrayOfDouble_NativeTypedArray_ListMixin.$nativeSuperclassTag = "ArrayBufferView";
+    A._NativeTypedArrayOfDouble_NativeTypedArray_ListMixin_FixedLengthListMixin.$nativeSuperclassTag = "ArrayBufferView";
+    A.NativeTypedArrayOfDouble.$nativeSuperclassTag = "ArrayBufferView";
+    A._NativeTypedArrayOfInt_NativeTypedArray_ListMixin.$nativeSuperclassTag = "ArrayBufferView";
+    A._NativeTypedArrayOfInt_NativeTypedArray_ListMixin_FixedLengthListMixin.$nativeSuperclassTag = "ArrayBufferView";
+    A.NativeTypedArrayOfInt.$nativeSuperclassTag = "ArrayBufferView";
+  })();
+  Function.prototype.call$2 = function(a, b) {
+    return this(a, b);
+  };
+  Function.prototype.call$0 = function() {
+    return this();
+  };
+  Function.prototype.call$1 = function(a) {
+    return this(a);
+  };
+  Function.prototype.call$3 = function(a, b, c) {
+    return this(a, b, c);
+  };
+  Function.prototype.call$4 = function(a, b, c, d) {
+    return this(a, b, c, d);
+  };
+  convertAllToFastObject(holders);
+  convertToFastObject($);
+  (function(callback) {
+    if (typeof document === "undefined") {
+      callback(null);
+      return;
+    }
+    if (typeof document.currentScript != "undefined") {
+      callback(document.currentScript);
+      return;
+    }
+    var scripts = document.scripts;
+    function onLoad(event) {
+      for (var i = 0; i < scripts.length; ++i) {
+        scripts[i].removeEventListener("load", onLoad, false);
+      }
+      callback(event.target);
+    }
+    for (var i = 0; i < scripts.length; ++i) {
+      scripts[i].addEventListener("load", onLoad, false);
+    }
+  })(function(currentScript) {
+    init.currentScript = currentScript;
+    var callMain = A.main;
+    if (typeof dartMainRunner === "function") {
+      dartMainRunner(callMain, []);
+    } else {
+      callMain([]);
+    }
+  });
+})();
 
-B.aN=new A.ea()
-B.a3=new A.h9()
-B.h=new A.hr()
-B.p=new A.ao(0,1,0)
-B.u=new A.ao(0,-1,0)
-B.aO=new A.ae()
-B.a4=new A.eE()
-B.aP=new A.hD()
-B.n=new A.f3()
-B.v=new A.fb()
-B.a5=new A.cj(0,"colorOnly")
-B.a6=new A.cj(1,"colorAndDepth")
-B.B=new A.cj(2,"depthOnly")
-B.C=new A.fm(1,"srgb")
-B.aQ=new A.fp(1,"back")
-B.aR=new A.ft(0,"less")
-B.aS=new A.L(0,0,0)
-B.aT=new A.bL(0,"idle")
-B.w=new A.bL(1,"active")
-B.aU=new A.bL(2,"ended")
-B.aV=new A.bL(3,"aborted")
-B.a7=new A.cr(0,"outside")
-B.aW=new A.cr(1,"intersects")
-B.aX=new A.cr(2,"inside")
-B.aY=new A.dS(0,"vertex")
-B.aZ=new A.dS(1,"indices")
-B.b_=new A.fJ(0,"staticDraw")
-B.e=new A.dT(0,"ready")
-B.x=new A.dT(1,"lost")
-B.b0=new A.bM(0,"color")
-B.a8=new A.bM(1,"colorAndGlow")
-B.b1=new A.bM(2,"colorDepthGlow")
-B.D=new A.bM(3,"depthOnly")
-B.b2=new A.aP(0,"beforeShadow")
-B.b3=new A.aP(2,"beforeDepth")
-B.ab=new A.aP(3,"afterDepth")
-B.ac=new A.aP(4,"beforeWorld")
-B.b4=new A.aP(5,"afterWorld")
-B.q=new A.aP(6,"afterResolve")
-B.b5=new A.aP(9,"beforePresent")
-B.ad=new A.ar(0,"readBeforeWrite")
-B.b6=new A.ar(1,"duplicateWriter")
-B.b7=new A.ar(2,"sampledMultisampledAttachment")
-B.E=new A.ar(3,"invalidResolve")
-B.b8=new A.ar(4,"formatOrSizeMismatch")
-B.b9=new A.ar(5,"unversionedReadWrite")
-B.ba=new A.ar(6,"invalidHistoryRead")
-B.bb=new A.ar(7,"dependencyCycle")
-B.bc=new A.ar(8,"missingCapability")
-B.ae=new A.ct(0,"wrongKind")
-B.af=new A.ct(1,"staleGeneration")
-B.F=new A.ct(3,"releasedResource")
-B.bh=s(["uViewProjection","uModel","uNormalMatrix","uLightDir","uAmbientColor","uAmbientIntensity"],t.s)
-B.bi=s(["uViewProjection","uView","uModel","uNormalMatrix","uLightViewProjection","uLightPosition","uLightDirection","uLightColor","uLightIntensity","uLightRange","uLightInnerCos","uLightOuterCos","uSpotEnabled","uDirectionalDirection","uDirectionalColor","uDirectionalIntensity","uPointPosition0","uPointColor0","uPointIntensity0","uPointRadius0","uPointPosition1","uPointColor1","uPointIntensity1","uPointRadius1","uPointPosition2","uPointColor2","uPointIntensity2","uPointRadius2","uPointPosition3","uPointColor3","uPointIntensity3","uPointRadius3","uDirectSpotPosition0","uDirectSpotDirection0","uDirectSpotColor0","uDirectSpotIntensity0","uDirectSpotRange0","uDirectSpotInnerCos0","uDirectSpotOuterCos0","uDirectSpotEnabled0","uDirectSpotPosition1","uDirectSpotDirection1","uDirectSpotColor1","uDirectSpotIntensity1","uDirectSpotRange1","uDirectSpotInnerCos1","uDirectSpotOuterCos1","uDirectSpotEnabled1","uDirectSpotPosition2","uDirectSpotDirection2","uDirectSpotColor2","uDirectSpotIntensity2","uDirectSpotRange2","uDirectSpotInnerCos2","uDirectSpotOuterCos2","uDirectSpotEnabled2","uAmbientColor","uAmbientIntensity","uShadowMapTexelSize","uSceneColorSize","uEmissiveStrength","uUvScaleOffset","uNormalStrength","uRoughness","uMetallic","uOcclusionStrength","uClearcoatStrength","uClearcoatRoughness","uLightmapIntensity","uCameraPosition","uVertexSnapGrid","uAffineWarpStrength","uAlphaCutoff","uOpaqueCoverage","uFogColor","uFogStart","uFogEnd","uFogHeightFalloff","uFogDensity","uReceivesShadow","uRainWetness"],t.s)
-B.bj=s(["uNear","uFar","uProjScaleX","uProjScaleY","uRadius","uStrength"],t.s)
-B.bk=s(["uQuantizationBits","uDitherStrength"],t.s)
-B.bl=s(["uTime","uChromaWeight","uTrackingWeight","uNoiseWeight","uHeadSwitchWeight","uDropoutWeight","uGhostWeight"],t.s)
-B.bm=s(["uNear","uFar","uFocusDistance","uFocusRange","uStrength"],t.s)
-B.bn=s(["uViewProjection","uModel","uVertexSnapGrid","uAffineWarpStrength","uAlphaCutoff"],t.s)
-B.bo=s(["uExposure","uVignette","uGrain","uRainIntensity","uRainWindowVisibility","uOutputEncoding","uToneMap"],t.s)
-B.bq=s([],t.u)
-B.Q=new A.a4(0,"depthTest")
-B.R=new A.a4(1,"depthFunc")
-B.S=new A.a4(2,"depthWrite")
-B.T=new A.a4(3,"blendEnable")
-B.U=new A.a4(4,"blendFunc")
-B.V=new A.a4(5,"blendEquation")
-B.W=new A.a4(6,"cullEnable")
-B.X=new A.a4(7,"cullFace")
-B.av=new A.a4(8,"frontFace")
-B.cq=new A.a4(9,"stencilEnable")
-B.at=new A.a4(10,"colorMask")
-B.au=new A.a4(11,"scissorEnable")
-B.br=s([B.Q,B.R,B.S,B.T,B.U,B.V,B.W,B.X,B.av,B.cq,B.at,B.au],A.ca("t<a4>"))
-B.bs=s(["uLightViewProjection","uModel","uAlphaCutoff"],t.s)
-B.bt=s(["uBloomStrength"],t.s)
-B.bu=s(["uLutSize","uStrength"],t.s)
-B.bv=s(["uTexelSize","uNear","uFar"],t.s)
-B.ah=s(["uTexelStep"],t.s)
-B.bR={uAlbedo:0}
-B.ai=new A.K(B.bR,[0],t.I)
-B.bY={uSsaoRaw:0,uSceneDepth:1}
-B.bw=new A.K(B.bY,[0,1],t.I)
-B.bV={uScene:0,uHistory:1}
-B.bx=new A.K(B.bV,[0,1],t.I)
-B.bN={aPosition:0,aUvMat:1}
-B.aj=new A.K(B.bN,[0,4],t.I)
-B.bW={uScene:0,uLut:1}
-B.by=new A.K(B.bW,[0,1],t.I)
-B.bX={uSource:0}
-B.ak=new A.K(B.bX,[0],t.I)
-B.bP={uAlbedo:0,uShadowMap:1,uSsao:2,uNormalMap:3,uOrmMap:4,uEmissiveMap:5,uLightmap:6}
-B.bz=new A.K(B.bP,[0,1,2,3,4,5,6],t.I)
-B.bM={uSharp:0,uBlurred:1,uSceneDepth:2}
-B.bA=new A.K(B.bM,[0,1,2],t.I)
-B.bS={uBloom:0}
-B.bB=new A.K(B.bS,[0],t.I)
-B.bT={uSceneDepth:0}
-B.bC=new A.K(B.bT,[0],t.I)
-B.bU={uScene:0}
-B.bD=new A.K(B.bU,[0],t.I)
-B.K={}
-B.bE=new A.K(B.K,[],A.ca("K<m,m>"))
-B.m=new A.K(B.K,[],t.I)
-B.bJ={aPosition:0,aNormal:1,aColor:2,aAlpha:3,aUvMat:4,aTangent:5,aUv1:6}
-B.bF=new A.K(B.bJ,[0,1,2,3,4,5,6],t.I)
-B.bO={aPosition:0,aNormal:1,aColor:2,aAlpha:3}
-B.bG=new A.K(B.bO,[0,1,2,3],t.I)
-B.bZ={uTex:0}
-B.bH=new A.K(B.bZ,[0],t.I)
-B.c_=new A.eb(0,1,null)
-B.L=new A.bV(0,"safe")
-B.an=new A.bV(2,"high")
-B.P=new A.aM(B.K,0,t.Q)
-B.y=new A.bU(B.L,B.P)
-B.c0=new A.bV(1,"standard")
-B.bQ={shadows:0}
-B.cm=new A.aM(B.bQ,1,t.Q)
-B.c2=new A.bU(B.c0,B.cm)
-B.bK={shadows:0,ssao:1,bloom:2,dof:3,grade:4}
-B.cj=new A.aM(B.bK,5,t.Q)
-B.c3=new A.bU(B.an,B.cj)
-B.c1=new A.bV(4,"shipping")
-B.bL={shadows:0,ssao:1,bloom:2,dof:3,grade:4,ps1:5,vhs:6}
-B.ck=new A.aM(B.bL,7,t.Q)
-B.d_=new A.bU(B.c1,B.ck)
-B.cZ=new A.fu(1,"errorsOnly")
-B.c4=new A.ej(B.y,384,216,1,0)
-B.M=new A.bW(0,"constructed")
-B.c5=new A.bW(1,"initializing")
-B.N=new A.bW(2,"ready")
-B.z=new A.bW(3,"contextLost")
-B.d=new A.cR(0,"read")
-B.f=new A.cR(1,"write")
-B.o=new A.cR(2,"historyRead")
-B.k=new A.ek(0,"rgba8")
-B.c6=new A.M("dofBlurH",B.k,192,108,1,0)
-B.c7=new A.M("dofBlurV",B.k,192,108,1,0)
-B.c8=new A.M("dofOutput",B.k,384,216,1,0)
-B.ao=new A.ek(2,"depth24")
-B.c9=new A.M("shadowMap",B.ao,512,512,1,0)
-B.ca=new A.M("ssaoRaw",B.k,192,108,1,0)
-B.cb=new A.M("ssaoBlurred",B.k,192,108,1,0)
-B.cc=new A.M("gradeOutput",B.k,384,216,1,0)
-B.cd=new A.M("vhsOutput",B.k,384,216,1,0)
-B.ce=new A.M("sceneDepth",B.ao,384,216,1,0)
-B.cf=new A.M("bloomBlurH",B.k,192,108,1,0)
-B.cg=new A.M("bloomBlurV",B.k,192,108,1,0)
-B.ch=new A.M("present",B.k,384,216,1,0)
-B.O=new A.M("sceneColor",B.k,384,216,1,0)
-B.ci=new A.M("ps1Output",B.k,384,216,1,0)
-B.bI={shadows:0,ssao:1,bloom:2,dof:3,grade:4,ps1:5,vhs:6,msaa:7,"material-array":8}
-B.cl=new A.aM(B.bI,9,t.Q)
-B.ar=new A.bX(2,"link")
-B.cn=new A.cU(B.ar,"gl.createProgram() returned null")
-B.ap=new A.bX(0,"vertex")
-B.aq=new A.bX(1,"fragment")
-B.as=new A.bX(3,"validation")
-B.co=new A.eo(0,"full")
-B.cp=new A.eo(2,"culled")
-B.cr=A.aq("oB")
-B.cs=A.aq("oC")
-B.ct=A.aq("fB")
-B.cu=A.aq("lL")
-B.cv=A.aq("lP")
-B.cw=A.aq("lQ")
-B.cx=A.aq("lR")
-B.cy=A.aq("E")
-B.cz=A.aq("v")
-B.cA=A.aq("ml")
-B.cB=A.aq("mm")
-B.cC=A.aq("mn")
-B.cD=A.aq("ey")
-B.c=new A.b0(0,"float1")
-B.aw=new A.b0(1,"float2")
-B.j=new A.b0(2,"float3")
-B.cE=new A.b0(3,"float4")
-B.l=new A.b0(4,"mat4")
-B.ax=new A.b0(5,"mat4Array")
-B.Y=new A.f(B.c,0)
-B.ay=new A.f(B.c,1)
-B.r=new A.b0(6,"sampler")
-B.t=new A.f(B.r,0)
-B.A=new A.f(B.r,1)
-B.az=new A.f(B.r,2)
-B.cF=new A.f(B.r,3)
-B.cG=new A.f(B.r,4)
-B.cH=new A.f(B.r,5)
-B.cI=new A.f(B.r,6)
-B.cJ=new A.hA(!1)
-B.a_=new A.ao(0,0,0)
-B.cK=new A.ao(0,0,1)
-B.cL=new A.ao(1,0,0)
-B.cM=new A.aw(0,"position")
-B.cN=new A.aw(1,"normal")
-B.cO=new A.aw(2,"color")
-B.cP=new A.aw(3,"emissive")
-B.cQ=new A.aw(4,"alpha")
-B.cR=new A.aw(5,"uv0")
-B.cS=new A.aw(6,"tangent4")
-B.cT=new A.aw(7,"uv1")
-B.cU=new A.aw(8,"legacyMaterialEffect")
-B.aA=new A.eL(0,"horizontal")
-B.cV=new A.eL(1,"vertical")
-B.aB=new A.eR(0,"horizontal")
-B.cW=new A.eR(1,"vertical")})();(function staticFields(){$.hY=null
-$.ak=A.d([],A.ca("t<v>"))
-$.k3=null
-$.jN=null
-$.jM=null
-$.l8=null
-$.l3=null
-$.lb=null
-$.iE=null
-$.iJ=null
-$.jz=null
-$.hZ=A.d([],A.ca("t<u<v>?>"))
-$.c5=null
-$.dt=null
-$.du=null
-$.jr=!1
-$.I=B.n
-$.kg=""
-$.kh=null})();(function lazyInitializers(){var s=hunkHelpers.lazyFinal
-s($,"oE","lg",()=>A.l6("_$dart_dartClosure"))
-s($,"oD","jC",()=>A.l6("_$dart_dartClosure_dartJSInterop"))
-s($,"p3","lv",()=>A.d([new J.dX()],A.ca("t<cT>")))
-s($,"oO","lh",()=>A.b_(A.hw({
-toString:function(){return"$receiver$"}})))
-s($,"oP","li",()=>A.b_(A.hw({$method$:null,
-toString:function(){return"$receiver$"}})))
-s($,"oQ","lj",()=>A.b_(A.hw(null)))
-s($,"oR","lk",()=>A.b_(function(){var $argumentsExpr$="$arguments$"
-try{null.$method$($argumentsExpr$)}catch(r){return r.message}}()))
-s($,"oU","ln",()=>A.b_(A.hw(void 0)))
-s($,"oV","lo",()=>A.b_(function(){var $argumentsExpr$="$arguments$"
-try{(void 0).$method$($argumentsExpr$)}catch(r){return r.message}}()))
-s($,"oT","lm",()=>A.b_(A.kd(null)))
-s($,"oS","ll",()=>A.b_(function(){try{null.$method$}catch(r){return r.message}}()))
-s($,"oX","lq",()=>A.b_(A.kd(void 0)))
-s($,"oW","lp",()=>A.b_(function(){try{(void 0).$method$}catch(r){return r.message}}()))
-s($,"oY","jI",()=>A.mD())
-s($,"p1","lu",()=>A.m1(4096))
-s($,"p_","ls",()=>new A.i8().$0())
-s($,"p0","lt",()=>new A.i7().$0())
-s($,"oZ","lr",()=>new Int8Array(A.x(A.d([-2,-2,-2,-2,-2,-2,-2,-2,-2,-2,-2,-2,-2,-2,-2,-2,-2,-2,-2,-2,-2,-2,-2,-2,-2,-2,-2,-2,-2,-2,-2,-2,-2,-2,-2,-2,-2,-1,-2,-2,-2,-2,-2,62,-2,62,-2,63,52,53,54,55,56,57,58,59,60,61,-2,-2,-2,-1,-2,-2,-2,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,-2,-2,-2,-2,63,-2,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,-2,-2,-2,-2,-2],t.t))))
-s($,"p2","dw",()=>A.iP(B.cz))
-s($,"oA","lf",()=>B.O.cf())
-s($,"oJ","jH",()=>A.e9(A.d([255,255,255,255],t.t)))
-s($,"oG","jE",()=>A.e9(A.d([128,128,255,255],t.t)))
-s($,"oF","jD",()=>A.e9(A.d([0,0,0,255],t.t)))
-s($,"oH","jF",()=>A.e9(A.d([255,255,0,255],t.t)))
-s($,"oI","jG",()=>A.e9(A.d([255,255,255,255],t.t)))})();(function nativeSupport(){!function(){var s=function(a){var m={}
-m[a]=1
-return Object.keys(hunkHelpers.convertToFastObject(m))[0]}
-v.getIsolateTag=function(a){return s("___dart_"+a+v.isolateTag)}
-var r="___dart_isolate_tags_"
-var q=Object[r]||(Object[r]=Object.create(null))
-var p="_ZxYxX"
-for(var o=0;;o++){var n=s(p+"_"+o+"_")
-if(!(n in q)){q[n]=1
-v.isolateTag=n
-break}}v.dispatchPropertyName=v.getIsolateTag("dispatch_record")}()
-hunkHelpers.setOrUpdateInterceptorsByTag({ArrayBuffer:A.bS,SharedArrayBuffer:A.bS,ArrayBufferView:A.cI,DataView:A.e2,Float32Array:A.cF,Float64Array:A.e3,Int16Array:A.e4,Int32Array:A.e5,Int8Array:A.e6,Uint16Array:A.e7,Uint32Array:A.e8,Uint8ClampedArray:A.cJ,CanvasPixelArray:A.cJ,Uint8Array:A.cK})
-hunkHelpers.setOrUpdateLeafTags({ArrayBuffer:true,SharedArrayBuffer:true,ArrayBufferView:false,DataView:true,Float32Array:true,Float64Array:true,Int16Array:true,Int32Array:true,Int8Array:true,Uint16Array:true,Uint32Array:true,Uint8ClampedArray:true,CanvasPixelArray:true,Uint8Array:false})
-A.Y.$nativeSuperclassTag="ArrayBufferView"
-A.d5.$nativeSuperclassTag="ArrayBufferView"
-A.d6.$nativeSuperclassTag="ArrayBufferView"
-A.cG.$nativeSuperclassTag="ArrayBufferView"
-A.d7.$nativeSuperclassTag="ArrayBufferView"
-A.d8.$nativeSuperclassTag="ArrayBufferView"
-A.cH.$nativeSuperclassTag="ArrayBufferView"})()
-Function.prototype.$2=function(a,b){return this(a,b)}
-Function.prototype.$0=function(){return this()}
-Function.prototype.$1=function(a){return this(a)}
-Function.prototype.$3=function(a,b,c){return this(a,b,c)}
-Function.prototype.$4=function(a,b,c,d){return this(a,b,c,d)}
-convertAllToFastObject(w)
-convertToFastObject($);(function(a){if(typeof document==="undefined"){a(null)
-return}if(typeof document.currentScript!="undefined"){a(document.currentScript)
-return}var s=document.scripts
-function onLoad(b){for(var q=0;q<s.length;++q){s[q].removeEventListener("load",onLoad,false)}a(b.target)}for(var r=0;r<s.length;++r){s[r].addEventListener("load",onLoad,false)}})(function(a){v.currentScript=a
-var s=A.fj
-if(typeof dartMainRunner==="function"){dartMainRunner(s,[])}else{s([])}})})()
 //# sourceMappingURL=main.dart.js.map

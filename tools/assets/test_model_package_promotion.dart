@@ -80,6 +80,35 @@ void main() {
     ),
     'source payload leak is diagnosed',
   );
+  for (final sourcePath in ['source.obj', 'materials.mtl']) {
+    final sourceLeak = gate.evaluate(
+      manifest: approved,
+      payloads: {...emitted.payloads, sourcePath: Uint8List(0)},
+    );
+    require(
+      sourceLeak.diagnostics.any(
+        (diagnostic) => diagnostic.code == 'MODEL_PACKAGE_SOURCE_LEAK',
+      ),
+      '$sourcePath source payload leak is diagnosed',
+    );
+  }
+  final missing = gate.evaluate(manifest: approved, payloads: const {});
+  require(
+    missing.diagnostics.any(
+      (diagnostic) => diagnostic.code == 'MODEL_PACKAGE_PAYLOAD_MISSING',
+    ),
+    'missing declared payload is diagnosed',
+  );
+  final extra = gate.evaluate(
+    manifest: approved,
+    payloads: {...emitted.payloads, 'unlisted.qmesh': Uint8List(0)},
+  );
+  require(
+    extra.diagnostics.any(
+      (diagnostic) => diagnostic.code == 'MODEL_PACKAGE_PAYLOAD_UNDECLARED',
+    ),
+    'undeclared payload is diagnosed',
+  );
 
   final changed = Uint8List.fromList(emitted.payloads['primitive-000.qmesh']!);
   changed[0] = 9;

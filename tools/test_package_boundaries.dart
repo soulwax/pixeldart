@@ -8,6 +8,7 @@ void main() {
     'tools/test_plib10_schema_compatibility.dart',
     'tools/test_plib10_versioning.dart',
     'tools/test_plib01_facade_surface.dart',
+    'tools/test_plib01_clean_downstream.dart',
     'tools/test_plib00_package_audit.dart',
     'tools/test_plib04_boundary.dart',
     'tools/test_plib05_vocabulary.dart',

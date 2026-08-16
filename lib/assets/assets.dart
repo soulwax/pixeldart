@@ -18,6 +18,8 @@ export 'importers/gltf_validator.dart';
 export 'importers/obj_importer.dart';
 export 'packages/model_package.dart';
 export 'packages/model_package_emitter.dart';
+export 'packages/obj_model_package_emitter.dart';
+export 'packages/gltf_model_package_emitter.dart';
 export 'packages/model_package_loader.dart';
 export 'packages/model_package_cache_handoff.dart';
 export 'packages/model_package_promotion.dart';

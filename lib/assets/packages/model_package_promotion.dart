@@ -32,6 +32,7 @@ final class ModelPackagePromotionGate {
   }) {
     final diagnostics = <AssetImportDiagnostic>[
       ...validateModelPackageManifest(manifest),
+      ...validateModelPackagePayloads(manifest, payloads),
     ];
     void error(String code, String message) {
       diagnostics.add(
@@ -56,17 +57,6 @@ final class ModelPackagePromotionGate {
         'MODEL_PACKAGE_INSPECTION_ONLY',
         'inspection-only package cannot enter runtime',
       );
-    }
-    for (final path in payloads.keys) {
-      final lower = path.toLowerCase();
-      if (lower.endsWith('.fbx') ||
-          lower.endsWith('.glb') ||
-          lower.endsWith('.gltf')) {
-        error(
-          'MODEL_PACKAGE_SOURCE_LEAK',
-          'runtime payload contains source/intermediate: $path',
-        );
-      }
     }
     final hash = ModelPackageEmitter.computePackageHash(manifest, payloads);
     if (hash != manifest.packageHash) {

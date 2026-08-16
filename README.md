@@ -22,9 +22,10 @@ Pixeldart is independently usable. A host does not need *The Quarantine*, its
 rooms, story, save format, DOM, audio, or input system. Import
 `package:pixeldart/pixeldart.dart` for the stable renderer-facing facade and
 submit retained scene resources plus immutable frame facts. Import
-`package:pixeldart/pixeldart_advanced.dart` only when the host deliberately
-owns backend policy such as capability negotiation, residency, or pass
-planning.
+`package:pixeldart/pixeldart_advanced.dart` when the host deliberately owns
+backend policy such as capability negotiation, residency, or pass planning.
+Browser hosts additionally bind the WebGL2 adapter at their platform edge;
+that adapter is intentionally not loaded by VM-only hosts.
 
 The stable facade contains contracts, handles, math, model packages, and
 diagnostics. It does not expose game types or require browser globals. WebGL
@@ -36,6 +37,13 @@ The game is one downstream host and its integration evidence is separate from
 the renderer's own package tests. Pixeldart must never infer story or room
 meaning from asset names, and the game must never parse renderer package
 internals in browser gameplay code.
+
+To verify the installation boundary, run `dart run
+tools/test_plib01_clean_downstream.dart`. The check creates a temporary neutral
+Dart package, resolves Pixeldart by path, and analyzes a host that imports only
+the stable facade. The lifecycle fixture is separate:
+`dart run tools/test_plib03_downstream_host.dart` exercises a generic scene,
+resize, context loss/restore, and disposal against a deterministic fake device.
 
 The full pipeline is fifteen passes, pinned in order by a test.
 
@@ -420,24 +428,20 @@ node ../tools/browser/pixeldart_instance_smoke.cjs
 
 ### Using the game integration
 
-The parent game uses Pixeldart as its no-query default. During the transition,
-`?renderer=pixeldart` is the canonical explicit spelling and `?renderer=next` is
-retained as a diagnosed compatibility alias. `?renderer=auto` selects Pixeldart
-when WebGL2 is available and safely falls back to legacy otherwise. The canvas
-exposes the selected backend, executable profile, fallback reason, build
-provenance, and frame budget through `data-renderer-*` attributes for smoke tests
-and diagnostics.
+The parent game uses Pixeldart as its only renderer. `?renderer=pixeldart` is
+the canonical explicit spelling; stale renderer aliases are rejected. If WebGL2
+is unavailable, the canvas reports `renderer-unavailable` with Pixeldart as the
+requested backend rather than manufacturing a second renderer. The canvas
+exposes the selected backend, executable profile, failure reason, build
+provenance, and frame budget through `data-renderer-*` attributes.
 
 The parent game keeps the stable renderer diagnostics fields at the top level
 and publishes selection facts under a nested `selection` object. Its keys are
-`kind`, `explicit`, `automatic`, `fallback`, `rejected`, and `aliasUsed`, with
-optional `fallbackReason`, `rejectionReason`, and `aliasReason` strings. A
-canonical request reports `kind: "pixeldart"`; a `next` request reports the
-same canonical kind plus `aliasUsed: true` and migration guidance. Unsupported
-queries remain an observable legacy fallback with `rejected: true`, rather than
-being treated as accepted renderer choices. Bootstrap runtime downgrades must
-preserve this nested object while changing only the effective backend/fallback
-fields.
+`kind`, `explicit`, `automatic`, `rejected`, and `aliasUsed`, with optional
+`rejectionReason` and `aliasReason` strings. A canonical request reports
+`kind: "pixeldart"`; stale requests are rejected rather than treated as
+accepted renderer choices. Runtime capability failures are published as an
+unavailable Pixeldart state.
 
 For example, from the parent repository:
 
@@ -461,7 +465,7 @@ checked in and CI rejects stale output.
 Application code should depend on the public barrel:
 
 ```dart
-import 'package:pixeldart/rendering/rendering.dart';
+import 'package:pixeldart/pixeldart_advanced.dart';
 import 'package:pixeldart/rendering/webgl/webgl2_device.dart';
 
 final device = WebGl2Device(webGl2Context);
@@ -572,7 +576,7 @@ graph, swaps it between frames, and disposes the old graph only after the
 candidate is ready. Identical configurations are no-ops. The WebGL capability
 adapter exposes both the raw negotiated capability profile and the executable
 safe/minimal/clean runtime profile; unsupported optional configurations must
-downgrade to the safe graph before an application considers legacy fallback.
+downgrade to the safe graph. There is no legacy renderer fallback.
 PS1/VHS history ping-pong, live target/canvas resizing, and hardware acceptance
 remain separate TODO items.
 

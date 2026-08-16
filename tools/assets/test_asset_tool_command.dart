@@ -54,7 +54,7 @@ void main() {
               animationPolicy: 'reject-skinned-input',
             )
             .join(' ') ==
-        'export room.fbx room.glb',
+        'export room.fbx room.glb -f glb2',
     'assimp arguments are deterministic',
   );
   check(
