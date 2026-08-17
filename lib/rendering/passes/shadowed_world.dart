@@ -141,6 +141,19 @@ final class ShadowedWorldProgramSource {
       'uRainWetness',
       'uSurfaceSnowCoverage',
       'uSurfaceDissolution',
+      'uThermalSourceCount',
+      'uThermalSourcePosition0',
+      'uThermalSourceRadius0',
+      'uThermalSourceDissolution0',
+      'uThermalSourcePosition1',
+      'uThermalSourceRadius1',
+      'uThermalSourceDissolution1',
+      'uThermalSourcePosition2',
+      'uThermalSourceRadius2',
+      'uThermalSourceDissolution2',
+      'uThermalSourcePosition3',
+      'uThermalSourceRadius3',
+      'uThermalSourceDissolution3',
     ],
   );
 }
@@ -574,6 +587,29 @@ final class _ShadowedWorldPass implements RenderPass {
       'uSurfaceDissolution',
       UniformValue.float1(post.surfaceDissolution),
     );
+    final thermalSources = environment.thermalSources.take(4).toList();
+    encoder.setUniform(
+      'uThermalSourceCount',
+      UniformValue.float1(thermalSources.length.toDouble()),
+    );
+    for (var i = 0; i < 4; i++) {
+      final source = i < thermalSources.length ? thermalSources[i] : null;
+      final position = source?.position ?? Vec3.zero;
+      encoder.setUniform(
+        'uThermalSourcePosition$i',
+        UniformValue.float3(
+          Float32List.fromList([position.x, position.y, position.z]),
+        ),
+      );
+      encoder.setUniform(
+        'uThermalSourceRadius$i',
+        UniformValue.float1(source?.radiusMeters ?? 1),
+      );
+      encoder.setUniform(
+        'uThermalSourceDissolution$i',
+        UniformValue.float1(source?.dissolution01 ?? 0),
+      );
+    }
 
     for (final batch in context.frameScene.opaqueBatches) {
       _drawBatch(encoder, batch, post.affineWarpStrength);

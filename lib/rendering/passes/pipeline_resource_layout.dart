@@ -8,6 +8,7 @@ import 'safe_graph_resources.dart';
 import 'shadow_resources.dart';
 import 'ssao_resources.dart';
 import 'vhs_resources.dart';
+import 'volumetric_light_resources.dart';
 
 /// Configuration-scoped identities for the optional pipeline.
 ///
@@ -33,6 +34,8 @@ final class PipelineResourceLayout {
   final ResourceRef bloomBlurH;
   final ResourceRef bloomBlurV;
   final ResourceRef sceneColorPostBloom;
+  final ResourceRef sceneColorPostVolumetric;
+  final ResourceRef volumetricLight;
   final ResourceRef dofBlurH;
   final ResourceRef dofBlurV;
   final ResourceRef dofOutput;
@@ -45,6 +48,7 @@ final class PipelineResourceLayout {
     required this.internalHeight,
     required this.shadowMapSize,
     this.sampleCount = 1,
+    bool volumetric = false,
   }) : halfWidth = (internalWidth + 1) ~/ 2,
        halfHeight = (internalHeight + 1) ~/ 2,
        sceneColor = _sized(
@@ -57,6 +61,17 @@ final class PipelineResourceLayout {
          SafeGraphResources.sceneColor.nextVersion(),
          internalWidth,
          internalHeight,
+       ),
+       sceneColorPostVolumetric = _sized(
+         VolumetricLightResources.sceneColorPostVolumetric,
+         internalWidth,
+         internalHeight,
+         version: sampleCount > 1 ? 2 : 1,
+       ),
+       volumetricLight = _sized(
+         VolumetricLightResources.volumetricLight,
+         (internalWidth + 1) ~/ 2,
+         (internalHeight + 1) ~/ 2,
        ),
        presentTarget = _sized(
          SafeGraphResources.presentTarget,
@@ -97,7 +112,7 @@ final class PipelineResourceLayout {
          BloomResources.sceneColorPostBloom,
          internalWidth,
          internalHeight,
-         version: sampleCount > 1 ? 2 : 1,
+         version: (sampleCount > 1 ? 1 : 0) + (volumetric ? 1 : 0) + 1,
        ),
        dofBlurH = _sized(
          DofResources.dofBlurH,

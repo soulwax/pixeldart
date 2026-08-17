@@ -20,6 +20,7 @@ import 'shadow.dart';
 import 'shadowed_world.dart';
 import 'ssao.dart';
 import 'vhs.dart';
+import 'volumetric_light.dart';
 import 'world.dart';
 import 'pipeline_resource_layout.dart';
 import 'msaa_resolve.dart';
@@ -81,11 +82,13 @@ FeatureGraph buildShadowGraph(
   final hasGrade = profile.installs(PipelineFeatures.grade);
   final hasPs1 = profile.installs(PipelineFeatures.ps1);
   final hasVhs = profile.installs(PipelineFeatures.vhs);
+  final hasVolumetric = profile.installs(PipelineFeatures.volumetric);
   final layout = PipelineResourceLayout(
     internalWidth: sceneColorWidth,
     internalHeight: sceneColorHeight,
     shadowMapSize: shadowMapSize,
     sampleCount: sampleCount,
+    volumetric: hasVolumetric,
   );
   final msaaResolve = sampleCount > 1
       ? MsaaResolveFeature(
@@ -175,15 +178,32 @@ FeatureGraph buildShadowGraph(
     ssaoResource: layout.ssaoBlurred,
     sceneColorResource: layout.sceneColor,
   );
+  final volumetric = hasVolumetric
+      ? VolumetricLightFeature(
+          programLibrary: programLibrary,
+          vertexSource: presentVertSrc,
+          fragmentSource: volumetricLightFragSrc,
+          compositeFragmentSource: volumetricCompositeFragSrc,
+          device: device,
+          resolveSceneDepth: resolveSceneDepth,
+          resolveCamera: resolveCamera,
+          sceneDepthResource: layout.sceneDepth,
+          volumetricLightResource: layout.volumetricLight,
+          sceneColorResource: sampleCount > 1
+              ? layout.sceneColorResolved
+              : layout.sceneColor,
+          sceneColorOutputResource: layout.sceneColorPostVolumetric,
+        )
+      : null;
   // §8.7's bloom pipeline — runs after the MSAA resolve (bootstrap-level,
   // same reasoning as the resolve/present split every prior packet has
   // used), reading the resolved sceneColor's glow attachment rather than
   // the multisampled one, since bindGlowTexture refuses a multisampled
   // target exactly like bindTexture already does for color.
   final postFeatures = <RenderFeature>[];
-  var postResource = sampleCount > 1
-      ? layout.sceneColorResolved
-      : layout.sceneColor;
+  var postResource = hasVolumetric
+      ? layout.sceneColorPostVolumetric
+      : (sampleCount > 1 ? layout.sceneColorResolved : layout.sceneColor);
   if (hasBloom) {
     postFeatures.addAll([
       BloomBlurFeature.horizontal(
@@ -333,9 +353,10 @@ FeatureGraph buildShadowGraph(
     depthPrepass,
     if (hasSsao) ssaoOcclusion,
     if (hasSsao) ssaoBlur,
-    shadow,
-    shadowedWorld,
-    if (msaaResolve != null) msaaResolve,
+      shadow,
+      shadowedWorld,
+      if (msaaResolve != null) msaaResolve,
+      if (volumetric != null) volumetric,
     ...postFeatures,
     present,
   ]);
@@ -365,6 +386,7 @@ final class PipelineResourcePlan {
       internalHeight: internalHeight,
       shadowMapSize: shadowMapSize,
       sampleCount: sampleCount,
+      volumetric: profile.installs(PipelineFeatures.volumetric),
     );
     final resources = <ResourceRef>{
       layout.sceneColor,
@@ -373,6 +395,12 @@ final class PipelineResourcePlan {
     };
     if (profile.installs(PipelineFeatures.shadows)) {
       resources.addAll([layout.shadowMap, layout.sceneDepth]);
+    }
+    if (profile.installs(PipelineFeatures.volumetric)) {
+      resources.addAll([
+        layout.volumetricLight,
+        layout.sceneColorPostVolumetric,
+      ]);
     }
     if (profile.installs(PipelineFeatures.ssao)) {
       resources.addAll([layout.ssaoRaw, layout.ssaoBlurred]);

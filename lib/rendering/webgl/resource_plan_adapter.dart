@@ -202,7 +202,8 @@ final class GpuResourcePlanAdapter {
     final half =
         resource.startsWith('ssao') ||
         resource.startsWith('bloomBlur') ||
-        resource.startsWith('dofBlur');
+        resource.startsWith('dofBlur') ||
+        resource.startsWith('volumetricLight');
     final targetWidth = half ? _halfExtent(width) : width;
     final targetHeight = half ? _halfExtent(height) : height;
     final sceneColorResource =

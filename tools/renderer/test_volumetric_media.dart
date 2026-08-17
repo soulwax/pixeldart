@@ -134,6 +134,62 @@ void main() {
     'empty source field must not fabricate a shaft',
   );
 
+  final selected = selectVolumetricSources(
+    referencePosition: Vec3.zero,
+    limit: 2,
+    sources: const [
+      VolumetricSource(
+        id: 'z-lamp',
+        position: Vec3(0, 0, 2),
+        color: Vec3(1, 1, 1),
+        luminousIntensity: 2,
+      ),
+      VolumetricSource(
+        id: 'a-lightning',
+        position: Vec3(0, 0, 3),
+        color: Vec3(1, 1, 1),
+        luminousIntensity: 10,
+      ),
+      VolumetricSource(
+        id: 'out-of-range',
+        position: Vec3(0, 0, 300),
+        color: Vec3(1, 1, 1),
+        luminousIntensity: 1000,
+      ),
+    ],
+  );
+  _require(
+    selected.length == 2 && selected.first.id == 'a-lightning',
+    'volumetric source selection must rank bounded influence, not submission order',
+  );
+  _require(
+    VolumetricLightProgramSource.sourceUniforms.contains('uSourcePosition0') &&
+        VolumetricLightProgramSource.sourceUniforms.contains(
+          'uSourceCutoffDistance3',
+        ),
+    'volumetric pass must expose bounded source uniform slots',
+  );
+  _throws(
+    () => selectVolumetricSources(
+      referencePosition: Vec3.zero,
+      sources: const [
+        VolumetricSource(
+          id: 'duplicate',
+          position: Vec3.zero,
+          color: Vec3(1, 1, 1),
+          luminousIntensity: 1,
+        ),
+        VolumetricSource(
+          id: 'duplicate',
+          position: Vec3.unitY,
+          color: Vec3(1, 1, 1),
+          luminousIntensity: 1,
+        ),
+      ],
+    ),
+    'duplicate volumetric source ids must be rejected',
+  );
+
   _throws(
     () => VolumetricMediaEngine.evaluatePointInScattering(
       rayOrigin: Vec3.zero,

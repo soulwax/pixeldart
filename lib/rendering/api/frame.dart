@@ -1,6 +1,8 @@
 import '../math/frustum.dart';
 import '../math/mat4.dart';
 import '../math/vec.dart';
+import '../atmosphere/volumetric_media.dart';
+import '../atmosphere/thermal_field.dart';
 import 'effects.dart';
 import 'lights.dart';
 
@@ -67,6 +69,11 @@ final class FrameEnvironment {
   final DirectionalLight? directionalLight;
   final List<PointLight> pointLights;
   final List<SpotLight> spotLights;
+  /// Host-resolved practical or transient sources for participating media.
+  /// The volumetric pass applies its own deterministic capability limit.
+  final List<VolumetricSource> volumetricSources;
+  /// Bounded warm-object fields used for spatial material thaw/dissolution.
+  final List<ThermalSource> thermalSources;
 
   const FrameEnvironment({
     this.clearColor = LinearColor.black,
@@ -80,6 +87,8 @@ final class FrameEnvironment {
     this.directionalLight,
     this.pointLights = const [],
     this.spotLights = const [],
+    this.volumetricSources = const [],
+    this.thermalSources = const [],
   });
 
   void validate() {
@@ -102,6 +111,26 @@ final class FrameEnvironment {
     }
     for (final light in spotLights) {
       light.validate();
+    }
+    final sourceIds = <String>{};
+    for (final source in volumetricSources) {
+      source.validate();
+      if (!sourceIds.add(source.id)) {
+        throw ArgumentError(
+          'FrameEnvironment.volumetricSources contains duplicate id: '
+          '${source.id}',
+        );
+      }
+    }
+    final thermalIds = <String>{};
+    for (final source in thermalSources) {
+      source.validate();
+      if (!thermalIds.add(source.id)) {
+        throw ArgumentError(
+          'FrameEnvironment.thermalSources contains duplicate id: '
+          '${source.id}',
+        );
+      }
     }
   }
 }

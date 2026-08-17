@@ -51,3 +51,5 @@ export 'math/transform.dart';
 export 'math/vec.dart';
 export 'optics/reflection.dart';
 export 'atmosphere/volumetric_media.dart';
+export 'atmosphere/thermal_field.dart';
+export 'atmosphere/solar_cycle.dart';

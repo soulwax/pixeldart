@@ -94,6 +94,19 @@ uniform float uReceivesShadow;
 uniform float uRainWetness;
 uniform float uSurfaceSnowCoverage;
 uniform float uSurfaceDissolution;
+uniform float uThermalSourceCount;
+uniform vec3 uThermalSourcePosition0;
+uniform float uThermalSourceRadius0;
+uniform float uThermalSourceDissolution0;
+uniform vec3 uThermalSourcePosition1;
+uniform float uThermalSourceRadius1;
+uniform float uThermalSourceDissolution1;
+uniform vec3 uThermalSourcePosition2;
+uniform float uThermalSourceRadius2;
+uniform float uThermalSourceDissolution2;
+uniform vec3 uThermalSourcePosition3;
+uniform float uThermalSourceRadius3;
+uniform float uThermalSourceDissolution3;
 layout(location=0)out vec4 oColor;
 layout(location=1)out vec4 oGlow;
 
@@ -340,6 +353,29 @@ void main(){
   // being metadata-only fields.
   float metal=clamp(uMetallic*orm.b,0.0,1.0);
   float rough=clamp(uRoughness*orm.g,0.0,1.0);
+  // Weather changes the material before direct and environment response.
+  // Thawing therefore affects the same specular lobe the viewer sees,
+  // instead of changing only diffuse color after the highlight is computed.
+  float wetDepth=1.0-smoothstep(2.0,18.0,max(vViewDepth,0.0));
+  float wetness=clamp(uRainWetness,0.0,1.0)*wetDepth;
+  baseColor=mix(baseColor,baseColor*vec3(0.84,0.90,0.98),wetness*0.22);
+  float upward=clamp(n.y*0.5+0.5,0.0,1.0);
+  float thermalDissolution=clamp(uSurfaceDissolution,0.0,1.0);
+  if(uThermalSourceCount>0.5) thermalDissolution=max(thermalDissolution,
+    uThermalSourceDissolution0*exp(-distance(vWorldPos,uThermalSourcePosition0)/max(uThermalSourceRadius0,0.01)));
+  if(uThermalSourceCount>1.5) thermalDissolution=max(thermalDissolution,
+    uThermalSourceDissolution1*exp(-distance(vWorldPos,uThermalSourcePosition1)/max(uThermalSourceRadius1,0.01)));
+  if(uThermalSourceCount>2.5) thermalDissolution=max(thermalDissolution,
+    uThermalSourceDissolution2*exp(-distance(vWorldPos,uThermalSourcePosition2)/max(uThermalSourceRadius2,0.01)));
+  if(uThermalSourceCount>3.5) thermalDissolution=max(thermalDissolution,
+    uThermalSourceDissolution3*exp(-distance(vWorldPos,uThermalSourcePosition3)/max(uThermalSourceRadius3,0.01)));
+  thermalDissolution=clamp(thermalDissolution,0.0,1.0);
+  float snowCoverage=clamp(uSurfaceSnowCoverage,0.0,1.0)*
+    smoothstep(0.18,0.82,upward)*(1.0-thermalDissolution*0.72);
+  baseColor=mix(baseColor,vec3(0.78,0.86,0.95),snowCoverage*0.82);
+  float dissolution=thermalDissolution;
+  baseColor=mix(baseColor,baseColor*vec3(0.82,0.86,0.90),dissolution*0.16);
+  rough=mix(rough,max(0.06,rough*0.58),dissolution*0.72);
   // Avoid singular highlights while retaining a visibly sharp porcelain
   // response at the authored low end of the roughness range.
   float specRough=max(0.045,sqrt(rough*rough+normalVariance*0.18));
@@ -366,26 +402,6 @@ void main(){
   specular+=specularContribution(n,viewDir,
     normalize(uLightPosition-vWorldPos),uLightColor,uLightIntensity,
     lightAttenuation(vWorldPos)*uSpotEnabled*shadow,baseColor,specRough,metal);
-  // Rain response stays in the world pass so it follows geometry depth rather
-  // than painting streaks over the whole screen. Near surfaces receive a
-  // restrained cool darkening and a broad wet highlight; distant surfaces
-  // fade back to their authored material before the fog composite.
-  float wetDepth=1.0-smoothstep(2.0,18.0,max(vViewDepth,0.0));
-  float wetness=clamp(uRainWetness,0.0,1.0)*wetDepth;
-  baseColor=mix(baseColor,baseColor*vec3(0.84,0.90,0.98),wetness*0.22);
-  // Snow is a host-resolved surface state, not a post-process decal. It
-  // favours upward-facing material, recedes under melt/dissolution, and is
-  // evaluated before lighting so its response remains depth-correct.
-  float upward=clamp(n.y*0.5+0.5,0.0,1.0);
-  float snowCoverage=clamp(uSurfaceSnowCoverage,0.0,1.0)*
-    smoothstep(0.18,0.82,upward)*(1.0-clamp(uSurfaceDissolution,0.0,1.0)*0.72);
-  baseColor=mix(baseColor,vec3(0.78,0.86,0.95),snowCoverage*0.82);
-  // Warmth changes the material gradually: a dissolved surface is darker,
-  // less rough and more moisture-responsive, but never becomes transparent
-  // or disappears in one frame.
-  float dissolution=clamp(uSurfaceDissolution,0.0,1.0);
-  baseColor=mix(baseColor,baseColor*vec3(0.82,0.86,0.90),dissolution*0.16);
-  rough=mix(rough,max(0.06,rough*0.58),dissolution*0.72);
   // Keep reflected energy available to the specular lobe. The previous
   // diffuse-first clamp clipped bright ceramic response before tone mapping,
   // producing the broad plastic patches visible in low-roughness samples.

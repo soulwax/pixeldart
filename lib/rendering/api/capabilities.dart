@@ -73,6 +73,7 @@ final class PipelineFeatures {
   static const String vhs = 'vhs';
   static const String msaa = 'msaa';
   static const String materialArray = 'material-array';
+  static const String volumetric = 'volumetric';
 
   static const Set<String> all = {
     shadows,
@@ -84,6 +85,7 @@ final class PipelineFeatures {
     vhs,
     msaa,
     materialArray,
+    volumetric,
   };
 }
 
@@ -174,7 +176,8 @@ final class QualityProfile {
   );
 
   /// Every effect group except PS1's own quantize/dither and VHS — the
-  /// "clean" look §21/§8.9 describes as the non-PS1-profiled default.
+  /// established clean look. Participating media is exposed separately by
+  /// [cinematic] so hosts can opt into its extra ray-march cost.
   static const QualityProfile clean = QualityProfile(QualityProfileKind.high, {
     PipelineFeatures.shadows,
     PipelineFeatures.ssao,
@@ -183,9 +186,24 @@ final class QualityProfile {
     PipelineFeatures.grade,
   });
 
-  /// Every effect group installed — today's full pipeline, what
-  /// `buildShadowGraph` has always built and `test_shadow_graph.dart`
-  /// pins the exact 15-pass order of.
+  /// Clean cinematic lighting plus the bounded, depth-aware participating
+  /// media path. Kept separate from [clean] so hosts can opt into the extra
+  /// ray-march cost without changing the established runtime default.
+  static const QualityProfile cinematic = QualityProfile(
+    QualityProfileKind.high,
+    {
+      PipelineFeatures.shadows,
+      PipelineFeatures.ssao,
+      PipelineFeatures.bloom,
+      PipelineFeatures.dof,
+      PipelineFeatures.grade,
+      PipelineFeatures.volumetric,
+    },
+  );
+
+  /// The established stylized pipeline — every post effect, but without the
+  /// optional cinematic media feature. `test_shadow_graph.dart` pins its
+  /// exact 15-pass order.
   static const QualityProfile ps1Full =
       QualityProfile(QualityProfileKind.shipping, {
         PipelineFeatures.shadows,

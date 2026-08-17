@@ -29,14 +29,23 @@ final class OwnedResourcePlan {
     if (profile.installs(PipelineFeatures.shadows)) {
       resources.addAll({'shadowMap', 'sceneDepth'});
     }
+    if (profile.installs(PipelineFeatures.volumetric)) {
+      resources.add('volumetricLight');
+      resources.add(
+        'sceneColor#${configuration.sampleCount > 1 ? 2 : 1}',
+      );
+    }
     if (profile.installs(PipelineFeatures.ssao)) {
       resources.addAll({'ssaoRaw', 'ssaoBlurred'});
     }
     if (profile.installs(PipelineFeatures.bloom)) {
+      final bloomVersion = configuration.sampleCount > 1
+          ? (profile.installs(PipelineFeatures.volumetric) ? 3 : 2)
+          : (profile.installs(PipelineFeatures.volumetric) ? 2 : 1);
       resources.addAll({
         'bloomBlurH',
         'bloomBlurV',
-        'sceneColor#${configuration.sampleCount > 1 ? 2 : 1}',
+        'sceneColor#$bloomVersion',
       });
     }
     if (configuration.sampleCount > 1) resources.add('sceneColor#1');

@@ -30,11 +30,56 @@ final class VolumetricSource {
         !referenceDistance.isFinite ||
         !cutoffDistance.isFinite ||
         luminousIntensity < 0 ||
+        color.x < 0 ||
+        color.y < 0 ||
+        color.z < 0 ||
         referenceDistance <= 0 ||
         cutoffDistance <= 0) {
       throw ArgumentError('invalid volumetric source $id');
     }
   }
+}
+
+/// Selects the strongest bounded volumetric sources for a capability-limited
+/// shader. Ranking is independent of submission order and ties use the
+/// authored id, so lightning/practical transitions remain deterministic.
+List<VolumetricSource> selectVolumetricSources({
+  required Iterable<VolumetricSource> sources,
+  required Vec3 referencePosition,
+  int limit = 4,
+}) {
+  if (!referencePosition.isFinite || limit < 0) {
+    throw ArgumentError('invalid volumetric source selection inputs');
+  }
+  final seenIds = <String>{};
+  final ranked = <({VolumetricSource source, double influence})>[];
+  for (final source in sources) {
+    source.validate();
+    if (!seenIds.add(source.id)) {
+      throw ArgumentError('duplicate volumetric source id: ${source.id}');
+    }
+    final distance = (source.position - referencePosition).length;
+    final cutoff = VolumetricMediaEngine.evaluateInverseSquareAttenuation(
+      distance: distance,
+      referenceDistance: source.referenceDistance,
+      cutoffDistance: source.cutoffDistance,
+    );
+    final peakColor = math.max(
+      source.color.x,
+      math.max(source.color.y, source.color.z),
+    );
+    ranked.add((
+      source: source,
+      influence: source.luminousIntensity * peakColor * cutoff,
+    ));
+  }
+  ranked.sort((a, b) {
+    final byInfluence = b.influence.compareTo(a.influence);
+    return byInfluence == 0
+        ? a.source.id.compareTo(b.source.id)
+        : byInfluence;
+  });
+  return [for (final entry in ranked.take(limit)) entry.source];
 }
 
 final class VolumetricSourceFieldSample {

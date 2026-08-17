@@ -34,6 +34,26 @@ void main() {
       throw StateError('shadowed-world shader lost analytic fog term: $term');
     }
   }
+  for (final term in [
+    'uniform float uThermalSourceCount;',
+    'distance(vWorldPos,uThermalSourcePosition0)',
+    'thermalDissolution=max(thermalDissolution,',
+  ]) {
+    if (!shadowedWorldFragSrc.contains(term)) {
+      throw StateError('shadowed-world shader lost spatial thermal term: $term');
+    }
+  }
+  final appearanceIndex = shadowedWorldFragSrc.indexOf(
+    'float thermalDissolution=clamp(uSurfaceDissolution,0.0,1.0);',
+  );
+  final specularIndex = shadowedWorldFragSrc.indexOf(
+    'float specRough=max(0.045,sqrt(rough*rough+normalVariance*0.18));',
+  );
+  if (appearanceIndex < 0 || specularIndex < 0 || appearanceIndex > specularIndex) {
+    throw StateError(
+      'weather appearance must resolve before the specular roughness lobe',
+    );
+  }
   const presentTerms = <String>[
     'uniform float uExposure;',
     'uniform float uVignette;',

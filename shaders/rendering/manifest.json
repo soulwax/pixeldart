@@ -21,5 +21,7 @@
     "grade/grade_lut.frag": "gradeLutFragSrc",
     "ps1/ps1_quantize.frag": "ps1QuantizeFragSrc",
     "vhs/vhs.frag": "vhsFragSrc"
+    ,"volumetric/volumetric_light.frag": "volumetricLightFragSrc"
+    ,"volumetric/volumetric_composite.frag": "volumetricCompositeFragSrc"
   }
 }
