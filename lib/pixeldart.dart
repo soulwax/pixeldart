@@ -20,6 +20,7 @@ export 'rendering/particles/atmospheric_particles.dart';
 export 'rendering/atmosphere/volumetric_media.dart';
 export 'rendering/atmosphere/thermal_field.dart';
 export 'rendering/optics/reflection.dart';
+export 'rendering/optics/environment_response.dart';
 export 'rendering/atmosphere/solar_cycle.dart';
 export 'rendering/assets/model_definition.dart';
 export 'rendering/assets/model_binding.dart';

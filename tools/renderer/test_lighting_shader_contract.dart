@@ -11,6 +11,10 @@ void main() {
     'uAmbientLightScale',
     'uDirectLightScale',
     'uSpecularScale',
+    'uReflectionColor',
+    'uReflectionIntensity',
+    'uReflectionConfidence',
+    'reflectionWeight=clamp(',
   ];
   for (final term in shadowTerms) {
     if (!shadowedWorldFragSrc.contains(term)) {

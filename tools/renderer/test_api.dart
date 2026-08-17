@@ -172,15 +172,16 @@ void _frameValidation() {
       env.roughnessScale != 1.0 ||
       env.metallicScale != 1.0 ||
       env.specularScale != 1.0 ||
-      env.shadowBias != 0.003) {
+      env.shadowBias != 0.003 ||
+      env.reflectionIntensity != 0.0 ||
+      env.reflectionConfidence != 0.0) {
     throw StateError('FrameEnvironment optimized control defaults drifted');
   }
+  _expectThrows(() => const FrameEnvironment(directLightScale: 3.1).validate());
   _expectThrows(
-    () => const FrameEnvironment(directLightScale: 3.1).validate(),
+    () => const FrameEnvironment(reflectionConfidence: 1.1).validate(),
   );
-  _expectThrows(
-    () => const FrameEnvironment(shadowBias: 0.011).validate(),
-  );
+  _expectThrows(() => const FrameEnvironment(shadowBias: 0.011).validate());
 
   _expectThrows(
     () => const DirectionalLight(

@@ -74,6 +74,7 @@ final class FrameEnvironment {
   /// or clear air into these values without making the renderer own weather.
   final LinearColor volumetricAlbedo;
   final double volumetricHeightFalloff;
+
   /// Additional near-field particulate density for dust, steam, or fine
   /// airborne debris. Zero is an exact no-dust path.
   final double volumetricDustDensity;
@@ -88,6 +89,7 @@ final class FrameEnvironment {
   /// Shadow-filter footprint in shadow-map texels. Zero is a hard comparison;
   /// larger values widen the deterministic PCF kernel for broad cloud light.
   final double shadowFilterRadius;
+
   /// Global lighting multipliers resolved by the host. These are frame facts
   /// so a host can expose them as live controls without rebuilding the graph.
   final double ambientLightScale;
@@ -103,6 +105,12 @@ final class FrameEnvironment {
 
   /// Receiver-plane shadow bias in normalized light-space depth units.
   final double shadowBias;
+
+  /// Bounded environment reflection fallback for glossy and wet surfaces.
+  /// Confidence distinguishes a real probe/history hit from this fallback.
+  final LinearColor reflectionColor;
+  final double reflectionIntensity;
+  final double reflectionConfidence;
   final LinearColor ambientColor;
   final double ambientIntensity;
   final DirectionalLight? directionalLight;
@@ -138,6 +146,9 @@ final class FrameEnvironment {
     this.metallicScale = 1.0,
     this.specularScale = 1.0,
     this.shadowBias = 0.003,
+    this.reflectionColor = LinearColor.black,
+    this.reflectionIntensity = 0.0,
+    this.reflectionConfidence = 0.0,
     this.ambientColor = LinearColor.white,
     this.ambientIntensity = 0,
     this.directionalLight,
@@ -151,7 +162,8 @@ final class FrameEnvironment {
     if (!clearColor.isFinite ||
         !fogColor.isFinite ||
         !ambientColor.isFinite ||
-        !volumetricAlbedo.isFinite) {
+        !volumetricAlbedo.isFinite ||
+        !reflectionColor.isFinite) {
       throw ArgumentError('FrameEnvironment colors must be finite');
     }
     if (!fogStart.isFinite || !fogEnd.isFinite || fogEnd < fogStart) {
@@ -220,7 +232,13 @@ final class FrameEnvironment {
         !specularScale.isFinite ||
         shadowBias < 0 ||
         shadowBias > 0.01 ||
-        !shadowBias.isFinite) {
+        !shadowBias.isFinite ||
+        reflectionIntensity < 0 ||
+        reflectionIntensity > 4 ||
+        !reflectionIntensity.isFinite ||
+        reflectionConfidence < 0 ||
+        reflectionConfidence > 1 ||
+        !reflectionConfidence.isFinite) {
       throw ArgumentError('invalid volumetric medium controls');
     }
     final thermalIds = <String>{};

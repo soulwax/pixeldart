@@ -50,6 +50,7 @@ export 'math/quat.dart';
 export 'math/transform.dart';
 export 'math/vec.dart';
 export 'optics/reflection.dart';
+export 'optics/environment_response.dart';
 export 'atmosphere/volumetric_media.dart';
 export 'atmosphere/thermal_field.dart';
 export 'atmosphere/solar_cycle.dart';

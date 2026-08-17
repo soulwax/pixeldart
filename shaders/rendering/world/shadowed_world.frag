@@ -71,6 +71,9 @@ uniform vec3 uAmbientColor;
 uniform float uAmbientIntensity;
 uniform float uAmbientLightScale;
 uniform float uDirectLightScale;
+uniform vec3 uReflectionColor;
+uniform float uReflectionIntensity;
+uniform float uReflectionConfidence;
 uniform vec2 uShadowMapTexelSize;
 uniform float uShadowFilterRadius;
 uniform float uShadowBias;
@@ -440,6 +443,18 @@ void main(){
     uDirectLightScale*uSpecularScale;
   lit+=uDirectionalColor*coat;
   lit+=direct*(wetness*(0.035+0.075*(1.0-rough)));
+  // Environment fallback reflections are deliberately bounded and weighted
+  // by wetness/grazing angle. A real probe/history hit can raise confidence;
+  // the current host fallback remains visible but never masquerades as SSR.
+  float reflectionNdotV=max(dot(n,viewDir),0.0);
+  float reflectionFresnel=0.04+0.96*pow(1.0-reflectionNdotV,5.0);
+  float reflectionSurface=clamp(wetness+0.18*dissolution,0.0,1.0);
+  float reflectionConfidence=0.20+0.80*clamp(uReflectionConfidence,0.0,1.0);
+  float reflectionWeight=clamp(
+    uReflectionIntensity*reflectionSurface*reflectionFresnel*
+      (1.0-0.72*rough)*reflectionConfidence,
+    0.0,1.0);
+  lit+=uReflectionColor*reflectionWeight;
   vec3 emissive=texture(uEmissiveMap,uv).rgb*uMaterialTint*uEmissiveStrength;
   lit+=emissive;
   if(uLightmapIntensity>0.0){

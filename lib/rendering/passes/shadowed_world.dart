@@ -121,6 +121,9 @@ final class ShadowedWorldProgramSource {
       'uShadowMapTexelSize',
       'uShadowFilterRadius',
       'uShadowBias',
+      'uReflectionColor',
+      'uReflectionIntensity',
+      'uReflectionConfidence',
       'uSceneColorSize',
       'uEmissiveStrength',
       'uUvScaleOffset',
@@ -597,6 +600,24 @@ final class _ShadowedWorldPass implements RenderPass {
       UniformValue.float1(environment.directLightScale),
     );
     encoder.setUniform(
+      'uReflectionColor',
+      UniformValue.float3(
+        Float32List.fromList([
+          environment.reflectionColor.r,
+          environment.reflectionColor.g,
+          environment.reflectionColor.b,
+        ]),
+      ),
+    );
+    encoder.setUniform(
+      'uReflectionIntensity',
+      UniformValue.float1(environment.reflectionIntensity),
+    );
+    encoder.setUniform(
+      'uReflectionConfidence',
+      UniformValue.float1(environment.reflectionConfidence),
+    );
+    encoder.setUniform(
       'uRainWetness',
       UniformValue.float1(post.surfaceWetness),
     );
@@ -802,7 +823,9 @@ final class _ShadowedWorldPass implements RenderPass {
     );
     encoder.setUniform(
       'uNormalStrength',
-      UniformValue.float1(material.normalStrength * environment.normalStrengthScale),
+      UniformValue.float1(
+        material.normalStrength * environment.normalStrengthScale,
+      ),
     );
     encoder.setUniform(
       'uRoughness',
