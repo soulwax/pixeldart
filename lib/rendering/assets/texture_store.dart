@@ -178,6 +178,15 @@ final class TextureStore {
     return _resolve(handle, _fallbackAlbedo);
   }
 
+  /// Reports whether every declared layer has source pixels. A declared
+  /// handle is intentionally not considered resident merely because its
+  /// fallback texture can be resolved; presentation features use this to
+  /// preserve their authored fallback while an async image is loading.
+  bool isResident(TextureHandle handle) {
+    final record = _registry.descriptorOf(handle);
+    return record.layerPixels.every((pixels) => pixels != null);
+  }
+
   GpuObject _resolve(TextureHandle handle, GpuObject fallback) {
     _registry.descriptorOf(handle);
     return _texturesBySlot[handle.slot] ?? fallback;

@@ -19,12 +19,14 @@ final class BoundResourceView implements ResourceView {
 final class BoundPassContext implements RenderPassContext {
   final Map<String, BoundResourceView> views;
   final DrawCommandEncoder encoder;
+  final GpuObject? skyboxTexture;
   @override
   final FrameSceneData frameScene;
 
   const BoundPassContext({
     required this.views,
     required this.encoder,
+    required this.skyboxTexture,
     required this.frameScene,
   });
 

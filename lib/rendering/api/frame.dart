@@ -4,6 +4,7 @@ import '../math/vec.dart';
 import '../atmosphere/volumetric_media.dart';
 import '../atmosphere/thermal_field.dart';
 import 'effects.dart';
+import 'handles.dart';
 import 'lights.dart';
 
 /// Authoritative per-frame camera snapshot. Built by the caller's adapter
@@ -25,6 +26,9 @@ final class CameraView {
   /// camera ray authored by the host. It is derived once from [projection]
   /// and cached for the lifetime of this immutable camera snapshot.
   late final Mat4 inverseProjection = projection.inverse();
+
+  /// Inverse view used to reconstruct world rays for presentation effects.
+  late final Mat4 inverseView = view.inverse();
 
   CameraView({
     required this.view,
@@ -56,6 +60,53 @@ final class CameraView {
     }
     if (!view.isFinite || !projection.isFinite || !viewProjection.isFinite) {
       throw ArgumentError('CameraView matrices must be finite');
+    }
+  }
+}
+
+/// Game-owned skybox declaration consumed by the renderer's presentation
+/// pass. The game chooses the asset identity and atmospheric colors; Pixeldart
+/// owns how the declaration becomes pixels.
+final class SkyboxDeclaration {
+  final String assetId;
+  final TextureHandle? texture;
+  final LinearColor horizon;
+  final LinearColor zenith;
+  final LinearColor ground;
+  final double horizonGlow;
+  final double starDensity;
+  final double rotationRadians;
+  final double exposure;
+  final bool textureIsSrgb;
+
+  const SkyboxDeclaration({
+    required this.assetId,
+    this.texture,
+    required this.horizon,
+    required this.zenith,
+    required this.ground,
+    this.horizonGlow = 0.08,
+    this.starDensity = 0.0025,
+    this.rotationRadians = 0,
+    this.exposure = 1,
+    this.textureIsSrgb = true,
+  });
+
+  void validate() {
+    if (assetId.trim().isEmpty ||
+        !horizon.isFinite ||
+        !zenith.isFinite ||
+        !ground.isFinite ||
+        !horizonGlow.isFinite ||
+        horizonGlow < 0 ||
+        horizonGlow > 1 ||
+        !starDensity.isFinite ||
+        starDensity < 0 ||
+        starDensity > 0.1 ||
+        !rotationRadians.isFinite ||
+        !exposure.isFinite ||
+        exposure <= 0) {
+      throw ArgumentError('SkyboxDeclaration contains invalid values');
     }
   }
 }
@@ -123,6 +174,7 @@ final class FrameEnvironment {
 
   /// Bounded warm-object fields used for spatial material thaw/dissolution.
   final List<ThermalSource> thermalSources;
+  final SkyboxDeclaration? skybox;
 
   const FrameEnvironment({
     this.clearColor = LinearColor.black,
@@ -156,6 +208,7 @@ final class FrameEnvironment {
     this.spotLights = const [],
     this.volumetricSources = const [],
     this.thermalSources = const [],
+    this.skybox,
   });
 
   void validate() {
@@ -166,6 +219,7 @@ final class FrameEnvironment {
         !reflectionColor.isFinite) {
       throw ArgumentError('FrameEnvironment colors must be finite');
     }
+    skybox?.validate();
     if (!fogStart.isFinite || !fogEnd.isFinite || fogEnd < fogStart) {
       throw ArgumentError(
         'FrameEnvironment requires fogEnd >= fogStart, got $fogStart/$fogEnd',

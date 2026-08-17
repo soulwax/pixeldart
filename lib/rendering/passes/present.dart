@@ -1,6 +1,9 @@
 import 'dart:math' as math;
+import 'dart:typed_data';
 
 import '../api/effects.dart';
+import '../api/frame.dart';
+import '../api/lights.dart';
 import '../api/settings.dart';
 import '../core/graph_pass.dart';
 import '../core/graph_resource.dart';
@@ -61,13 +64,27 @@ final class PresentProgramSource {
     vertexSource: vertexSource,
     fragmentSource: fragmentSource,
     attributeLocations: const {},
-    samplerUnits: const {'uTex': 0},
+    samplerUnits: const {'uTex': 0, 'uSkyTexture': 1},
     requiredUniforms: const [
       'uExposure',
       'uVignette',
       'uGrain',
       'uOutputEncoding',
       'uToneMap',
+      'uClearColor',
+      'uSkyHorizon',
+      'uSkyZenith',
+      'uSkyGround',
+      'uSkyEnabled',
+      'uSkyHorizonGlow',
+      'uSkyStarDensity',
+      'uSkyTexture',
+      'uSkyTextureEnabled',
+      'uSkyRotation',
+      'uSkyExposure',
+      'uSkyTextureSrgb',
+      'uInverseProjection',
+      'uInverseView',
     ],
   );
 }
@@ -199,7 +216,15 @@ final class _PresentPass implements RenderPass {
     encoder.useProgram(program.handle);
     encoder.bindVertexArray(emptyVao);
     encoder.bindTexture(0, source.gpuObject);
+    final skyboxTexture = context is BoundPassContext
+        ? context.skyboxTexture
+        : null;
+    if (skyboxTexture != null) {
+      encoder.bindTexture(1, skyboxTexture);
+    }
     final post = context.frameScene.post as PostProcessState;
+    final environment = context.frameScene.environment as FrameEnvironment;
+    final camera = context.frameScene.camera as CameraView;
     encoder.setUniform('uExposure', UniformValue.float1(post.exposure));
     encoder.setUniform('uVignette', UniformValue.float1(post.vignette));
     encoder.setUniform('uGrain', UniformValue.float1(post.grain));
@@ -211,6 +236,73 @@ final class _PresentPass implements RenderPass {
       'uToneMap',
       const UniformValue.float1(PresentOutputPolicy.toneMapUniform),
     );
+    final clear = environment.clearColor;
+    final skybox = environment.skybox;
+    final horizon = skybox?.horizon ?? environment.ambientColor;
+    final zenith = LinearColor(
+      skybox?.zenith.r ?? (clear.r * 0.72 + horizon.r * 0.28),
+      skybox?.zenith.g ?? (clear.g * 0.72 + horizon.g * 0.28),
+      skybox?.zenith.b ?? (clear.b * 0.72 + horizon.b * 0.28),
+    );
+    final ground = LinearColor(
+      skybox?.ground.r ?? clear.r * 0.90,
+      skybox?.ground.g ?? clear.g * 0.90,
+      skybox?.ground.b ?? clear.b * 0.90,
+    );
+    encoder
+      ..setUniform(
+        'uClearColor',
+        UniformValue.float3(Float32List.fromList([clear.r, clear.g, clear.b])),
+      )
+      ..setUniform(
+        'uSkyHorizon',
+        UniformValue.float3(
+          Float32List.fromList([horizon.r, horizon.g, horizon.b]),
+        ),
+      )
+      ..setUniform(
+        'uSkyZenith',
+        UniformValue.float3(
+          Float32List.fromList([zenith.r, zenith.g, zenith.b]),
+        ),
+      )
+      ..setUniform(
+        'uSkyGround',
+        UniformValue.float3(
+          Float32List.fromList([ground.r, ground.g, ground.b]),
+        ),
+      )
+      ..setUniform('uSkyEnabled', UniformValue.float1(skybox == null ? 0 : 1))
+      ..setUniform(
+        'uSkyHorizonGlow',
+        UniformValue.float1(skybox?.horizonGlow ?? 0),
+      )
+      ..setUniform(
+        'uSkyStarDensity',
+        UniformValue.float1(skybox?.starDensity ?? 0),
+      )
+      ..setUniform('uSkyTexture', const UniformValue.sampler(1))
+      ..setUniform(
+        'uSkyTextureEnabled',
+        UniformValue.float1(skybox != null && skyboxTexture != null ? 1 : 0),
+      )
+      ..setUniform(
+        'uSkyRotation',
+        UniformValue.float1(skybox?.rotationRadians ?? 0),
+      )
+      ..setUniform('uSkyExposure', UniformValue.float1(skybox?.exposure ?? 1))
+      ..setUniform(
+        'uSkyTextureSrgb',
+        UniformValue.float1(skybox?.textureIsSrgb == true ? 1 : 0),
+      )
+      ..setUniform(
+        'uInverseProjection',
+        UniformValue.mat4(Float32List.fromList(camera.inverseProjection.m)),
+      )
+      ..setUniform(
+        'uInverseView',
+        UniformValue.mat4(Float32List.fromList(camera.inverseView.m)),
+      );
     encoder.drawArrays(first: 0, count: 3);
   }
 }

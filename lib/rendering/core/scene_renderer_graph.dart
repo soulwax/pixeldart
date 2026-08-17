@@ -288,7 +288,19 @@ extension on SceneRendererImpl {
         views.putIfAbsent(resource.name, () => view);
       }
       pass.execute(
-        BoundPassContext(views: views, encoder: encoder, frameScene: scene),
+        BoundPassContext(
+          views: views,
+          encoder: encoder,
+          frameScene: scene,
+          skyboxTexture: () {
+            final declaration = frame.environment.skybox;
+            final handle = declaration?.texture;
+            if (handle == null || !_resources!.textures.isResident(handle)) {
+              return null;
+            }
+            return _resources!.textures.resolve(handle);
+          }(),
+        ),
       );
     }
     return _FrameExecution(
