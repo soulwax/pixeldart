@@ -95,6 +95,8 @@ final class WorldProgramSource {
       'uLightDir',
       'uAmbientColor',
       'uAmbientIntensity',
+      'uAmbientLightScale',
+      'uDirectLightScale',
     ],
   );
 }
@@ -214,6 +216,14 @@ final class _WorldPass implements RenderPass {
     encoder.setUniform(
       'uAmbientIntensity',
       UniformValue.float1(environment.ambientIntensity),
+    );
+    encoder.setUniform(
+      'uAmbientLightScale',
+      UniformValue.float1(environment.ambientLightScale),
+    );
+    encoder.setUniform(
+      'uDirectLightScale',
+      UniformValue.float1(environment.directLightScale),
     );
 
     for (final batch in context.frameScene.opaqueBatches) {

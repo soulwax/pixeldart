@@ -108,6 +108,12 @@ final class SolarLightingState {
   final double sunsetHours;
   final bool hasRiseAndSet;
   final double sunElevationRadians;
+  /// Geometric twilight amount across astronomical dawn/dusk, independent of
+  /// the discrete [phase] label. This remains continuous for interpolation.
+  final double twilightFactor01;
+  /// Smooth visibility of the solar disc around the apparent horizon. This is
+  /// not a binary sunrise switch; it includes a bounded refraction transition.
+  final double horizonVisibility01;
   final double sunAzimuthRadians;
   final Vec3 sunDirection;
   final Vec3 solarTransmittance;
@@ -127,6 +133,8 @@ final class SolarLightingState {
     required this.sunsetHours,
     required this.hasRiseAndSet,
     required this.sunElevationRadians,
+    required this.twilightFactor01,
+    required this.horizonVisibility01,
     required this.sunAzimuthRadians,
     required this.sunDirection,
     required this.solarTransmittance,
@@ -151,6 +159,8 @@ final class SolarLightingState {
         !sunriseHours.isFinite ||
         !sunsetHours.isFinite ||
         !sunElevationRadians.isFinite ||
+        !twilightFactor01.isFinite ||
+        !horizonVisibility01.isFinite ||
         !sunAzimuthRadians.isFinite ||
         !directionalIntensity.isFinite ||
         !ambientIntensity.isFinite ||
@@ -170,7 +180,11 @@ final class SolarLightingState {
         fogDensity < 0 ||
         fogHeightFalloff < 0 ||
         cloudTransmittance < 0 ||
-        cloudTransmittance > 1) {
+        cloudTransmittance > 1 ||
+        twilightFactor01 < 0 ||
+        twilightFactor01 > 1 ||
+        horizonVisibility01 < 0 ||
+        horizonVisibility01 > 1) {
       throw StateError('solar lighting state is out of bounds');
     }
     directionalLight.validate();
@@ -241,7 +255,20 @@ final class SolarCycleEngine {
     final cloudOpticalDepth =
         input.cloudCover01 * (2.2 + input.precipitation01 * 2.0);
     final cloudTransmittance = math.exp(-cloudOpticalDepth).clamp(0.0, 1.0);
-    final solarHeight = math.max(0.0, math.sin(elevation));
+    final twilightFactor = _smoothstep(
+      -18 * math.pi / 180,
+      6 * math.pi / 180,
+      elevation,
+    );
+    final horizonVisibility = _smoothstep(
+      _apparentHorizonRadians,
+      2 * math.pi / 180,
+      elevation,
+    );
+    final solarHeight = math.max(
+      0.0,
+      math.sin(elevation) + horizonVisibility * 0.018,
+    );
     final transmissionLuminance =
         transmittance.x * 0.2126 +
         transmittance.y * 0.7152 +
@@ -252,14 +279,16 @@ final class SolarCycleEngine {
         cloudTransmittance;
     final skyFactor = (solarHeight * transmissionLuminance).clamp(0.0, 1.0);
     final ambient = 0.055 +
-        0.42 * skyFactor * (0.55 + 0.45 * (1.0 - input.cloudCover01));
+        0.42 * skyFactor * (0.55 + 0.45 * (1.0 - input.cloudCover01)) +
+        twilightFactor * (0.028 + 0.018 * (1.0 - input.cloudCover01));
     final fogDensity = input.baseFogDensity *
         (1.0 + input.relativeHumidity01 * 1.6 + input.precipitation01 * 4.0 +
             input.cloudCover01 * 0.8);
     final fog = LinearColor(
       0.035 + transmittance.x * 0.18 + input.cloudCover01 * 0.10,
       0.045 + transmittance.y * 0.20 + input.cloudCover01 * 0.12,
-      0.070 + transmittance.z * 0.24 + input.cloudCover01 * 0.16,
+      0.070 + transmittance.z * 0.24 + input.cloudCover01 * 0.16 +
+          twilightFactor * 0.018,
     );
     final state = SolarLightingState(
       phase: phase,
@@ -270,6 +299,8 @@ final class SolarCycleEngine {
       sunElevationRadians: elevation,
       sunAzimuthRadians: azimuth,
       sunDirection: sunDirection,
+      twilightFactor01: twilightFactor,
+      horizonVisibility01: horizonVisibility,
       solarTransmittance: transmittance,
       cloudTransmittance: cloudTransmittance,
       sunColor: LinearColor(
@@ -331,6 +362,12 @@ final class SolarCycleEngine {
   }
 
   static double _normalizeHour(double hour) => ((hour % 24) + 24) % 24;
+
+  static double _smoothstep(double edge0, double edge1, double value) {
+    if (edge1 <= edge0) return value < edge0 ? 0.0 : 1.0;
+    final t = ((value - edge0) / (edge1 - edge0)).clamp(0.0, 1.0);
+    return t * t * (3.0 - 2.0 * t);
+  }
 
   static double _signedHourDelta(double hour, double reference) {
     var delta = hour - reference;

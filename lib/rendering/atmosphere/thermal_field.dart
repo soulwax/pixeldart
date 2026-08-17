@@ -56,7 +56,11 @@ final class ThermalFieldEngine {
         throw ArgumentError('thermal source ids must be unique');
       }
       final distance = (position - source.position).length;
-      final falloff = math.exp(-distance / source.radiusMeters);
+      // Steady spherical conduction produces a 1/r temperature field. Clamp
+      // at the authored source radius so the near field remains bounded and
+      // agrees with the shadowed-world fragment path.
+      final falloff =
+          source.radiusMeters / math.max(distance, source.radiusMeters);
       local = math.max(local, source.dissolution01 * falloff);
     }
     return local.clamp(0.0, 1.0).toDouble();

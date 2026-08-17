@@ -18,6 +18,10 @@ void main() {
     lingeringMemory01: 0.1,
   );
   _require(near > far && far > 0, 'thermal falloff must be smooth and linger');
+  _require(
+    (far - 0.225).abs() < 1e-9,
+    'thermal field must follow bounded inverse-distance conduction',
+  );
   _throws(
     () => ThermalFieldEngine.dissolutionAt(
       position: Vec3.zero,

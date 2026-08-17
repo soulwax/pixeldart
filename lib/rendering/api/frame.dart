@@ -21,6 +21,11 @@ final class CameraView {
   final double far;
   final double aspect;
 
+  /// Inverse projection used by screen-space passes to reconstruct the exact
+  /// camera ray authored by the host. It is derived once from [projection]
+  /// and cached for the lifetime of this immutable camera snapshot.
+  late final Mat4 inverseProjection = projection.inverse();
+
   CameraView({
     required this.view,
     required this.projection,
@@ -64,14 +69,50 @@ final class FrameEnvironment {
   final double fogEnd;
   final double? fogHeightFalloff;
   final double? fogDensity;
+
+  /// Neutral participating-medium controls. Hosts can map rain, mist, smoke,
+  /// or clear air into these values without making the renderer own weather.
+  final LinearColor volumetricAlbedo;
+  final double volumetricHeightFalloff;
+  /// Additional near-field particulate density for dust, steam, or fine
+  /// airborne debris. Zero is an exact no-dust path.
+  final double volumetricDustDensity;
+  final double volumetricAnisotropy;
+  final double volumetricJitter;
+  final double volumetricIntensity;
+
+  /// Bounded raymarch sample count. Profiles and developer settings may lower
+  /// it for a cheaper preview or raise it for clean shafts and long fog paths.
+  final int volumetricSampleCount;
+
+  /// Shadow-filter footprint in shadow-map texels. Zero is a hard comparison;
+  /// larger values widen the deterministic PCF kernel for broad cloud light.
+  final double shadowFilterRadius;
+  /// Global lighting multipliers resolved by the host. These are frame facts
+  /// so a host can expose them as live controls without rebuilding the graph.
+  final double ambientLightScale;
+  final double directLightScale;
+
+  /// Global material response multipliers for the high/shadowed world path.
+  /// Authored material descriptors remain unchanged while the lab can inspect
+  /// the renderer's BRDF response interactively.
+  final double normalStrengthScale;
+  final double roughnessScale;
+  final double metallicScale;
+  final double specularScale;
+
+  /// Receiver-plane shadow bias in normalized light-space depth units.
+  final double shadowBias;
   final LinearColor ambientColor;
   final double ambientIntensity;
   final DirectionalLight? directionalLight;
   final List<PointLight> pointLights;
   final List<SpotLight> spotLights;
+
   /// Host-resolved practical or transient sources for participating media.
   /// The volumetric pass applies its own deterministic capability limit.
   final List<VolumetricSource> volumetricSources;
+
   /// Bounded warm-object fields used for spatial material thaw/dissolution.
   final List<ThermalSource> thermalSources;
 
@@ -82,6 +123,21 @@ final class FrameEnvironment {
     this.fogEnd = 1,
     this.fogHeightFalloff,
     this.fogDensity,
+    this.volumetricAlbedo = LinearColor.white,
+    this.volumetricHeightFalloff = 0.02,
+    this.volumetricDustDensity = 0.0,
+    this.volumetricAnisotropy = 0.70,
+    this.volumetricJitter = 0.35,
+    this.volumetricIntensity = 1.0,
+    this.volumetricSampleCount = 12,
+    this.shadowFilterRadius = 1.0,
+    this.ambientLightScale = 1.0,
+    this.directLightScale = 1.0,
+    this.normalStrengthScale = 1.0,
+    this.roughnessScale = 1.0,
+    this.metallicScale = 1.0,
+    this.specularScale = 1.0,
+    this.shadowBias = 0.003,
     this.ambientColor = LinearColor.white,
     this.ambientIntensity = 0,
     this.directionalLight,
@@ -92,7 +148,10 @@ final class FrameEnvironment {
   });
 
   void validate() {
-    if (!clearColor.isFinite || !fogColor.isFinite || !ambientColor.isFinite) {
+    if (!clearColor.isFinite ||
+        !fogColor.isFinite ||
+        !ambientColor.isFinite ||
+        !volumetricAlbedo.isFinite) {
       throw ArgumentError('FrameEnvironment colors must be finite');
     }
     if (!fogStart.isFinite || !fogEnd.isFinite || fogEnd < fogStart) {
@@ -121,6 +180,48 @@ final class FrameEnvironment {
           '${source.id}',
         );
       }
+    }
+    if (volumetricHeightFalloff < 0 ||
+        !volumetricHeightFalloff.isFinite ||
+        volumetricDustDensity < 0 ||
+        volumetricDustDensity > 0.5 ||
+        !volumetricDustDensity.isFinite ||
+        volumetricAnisotropy <= -0.999 ||
+        volumetricAnisotropy >= 0.999 ||
+        !volumetricAnisotropy.isFinite ||
+        volumetricJitter < 0 ||
+        volumetricJitter > 0.5 ||
+        !volumetricJitter.isFinite ||
+        volumetricIntensity < 0 ||
+        volumetricIntensity > 8 ||
+        !volumetricIntensity.isFinite ||
+        volumetricSampleCount < 4 ||
+        volumetricSampleCount > 24 ||
+        shadowFilterRadius < 0 ||
+        shadowFilterRadius > 3 ||
+        !shadowFilterRadius.isFinite ||
+        ambientLightScale < 0 ||
+        ambientLightScale > 3 ||
+        !ambientLightScale.isFinite ||
+        directLightScale < 0 ||
+        directLightScale > 3 ||
+        !directLightScale.isFinite ||
+        normalStrengthScale < 0 ||
+        normalStrengthScale > 2 ||
+        !normalStrengthScale.isFinite ||
+        roughnessScale < 0 ||
+        roughnessScale > 2 ||
+        !roughnessScale.isFinite ||
+        metallicScale < 0 ||
+        metallicScale > 2 ||
+        !metallicScale.isFinite ||
+        specularScale < 0 ||
+        specularScale > 3 ||
+        !specularScale.isFinite ||
+        shadowBias < 0 ||
+        shadowBias > 0.01 ||
+        !shadowBias.isFinite) {
+      throw ArgumentError('invalid volumetric medium controls');
     }
     final thermalIds = <String>{};
     for (final source in thermalSources) {

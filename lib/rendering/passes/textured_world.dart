@@ -48,6 +48,8 @@ final class TexturedWorldProgramSource {
       'uLightDir',
       'uAmbientColor',
       'uAmbientIntensity',
+      'uAmbientLightScale',
+      'uDirectLightScale',
     ],
   );
 }
@@ -174,6 +176,14 @@ final class _TexturedWorldPass implements RenderPass {
     encoder.setUniform(
       'uAmbientIntensity',
       UniformValue.float1(environment.ambientIntensity),
+    );
+    encoder.setUniform(
+      'uAmbientLightScale',
+      UniformValue.float1(environment.ambientLightScale),
+    );
+    encoder.setUniform(
+      'uDirectLightScale',
+      UniformValue.float1(environment.directLightScale),
     );
 
     for (final batch in context.frameScene.opaqueBatches) {

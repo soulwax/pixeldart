@@ -214,6 +214,65 @@ final class Mat4 {
     return Mat4._(r);
   }
 
+  /// General inverse for camera and clip-space transforms. The renderer keeps
+  /// this operation on the matrix type so a pass can reconstruct a world ray
+  /// from the exact projection supplied by its host instead of guessing a
+  /// field of view or aspect ratio. Singular matrices fail loudly; returning
+  /// identity here would turn invalid camera data into plausible lighting.
+  Mat4 inverse() {
+    final augmented = List<Float64List>.generate(
+      4,
+      (row) => Float64List.fromList([
+        m[row],
+        m[4 + row],
+        m[8 + row],
+        m[12 + row],
+        row == 0 ? 1 : 0,
+        row == 1 ? 1 : 0,
+        row == 2 ? 1 : 0,
+        row == 3 ? 1 : 0,
+      ]),
+    );
+    for (var column = 0; column < 4; column++) {
+      var pivot = column;
+      var pivotMagnitude = augmented[pivot][column].abs();
+      for (var row = column + 1; row < 4; row++) {
+        final magnitude = augmented[row][column].abs();
+        if (magnitude > pivotMagnitude) {
+          pivot = row;
+          pivotMagnitude = magnitude;
+        }
+      }
+      if (!pivotMagnitude.isFinite || pivotMagnitude < 1e-12) {
+        throw StateError('Mat4.inverse: singular matrix');
+      }
+      if (pivot != column) {
+        final swapped = augmented[column];
+        augmented[column] = augmented[pivot];
+        augmented[pivot] = swapped;
+      }
+      final divisor = augmented[column][column];
+      for (var i = 0; i < 8; i++) {
+        augmented[column][i] /= divisor;
+      }
+      for (var row = 0; row < 4; row++) {
+        if (row == column) continue;
+        final factor = augmented[row][column];
+        if (factor == 0) continue;
+        for (var i = 0; i < 8; i++) {
+          augmented[row][i] -= factor * augmented[column][i];
+        }
+      }
+    }
+    final result = Float32List(16);
+    for (var row = 0; row < 4; row++) {
+      for (var column = 0; column < 4; column++) {
+        result[column * 4 + row] = augmented[row][4 + column];
+      }
+    }
+    return Mat4._(result);
+  }
+
   bool get isFinite => m.every((v) => v.isFinite);
 
   @override

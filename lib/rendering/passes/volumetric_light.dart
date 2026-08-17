@@ -51,6 +51,14 @@ final class VolumetricLightProgramSource {
       'uFogDensity',
       'uAnisotropy',
       'uViewProjection',
+      'uView',
+      'uInverseProjection',
+      'uVolumetricAlbedo',
+      'uVolumetricHeightFalloff',
+      'uVolumetricDustDensity',
+      'uVolumetricJitter',
+      'uVolumetricIntensity',
+      'uVolumetricSampleCount',
     ],
   );
 }
@@ -93,7 +101,10 @@ final class VolumetricLightFeature implements RenderFeature {
     required this.resolveSceneDepth,
     required this.resolveCamera,
     this.sceneDepthResource = const ResourceRef(
-      name: 'sceneDepth', format: ResourceFormat.depth24, width: 384, height: 216,
+      name: 'sceneDepth',
+      format: ResourceFormat.depth24,
+      width: 384,
+      height: 216,
     ),
     this.sceneColorResource,
     this.sceneColorOutputResource,
@@ -163,7 +174,9 @@ final class VolumetricLightFeature implements RenderFeature {
     final compositeSource = compositeFragmentSource;
     final sceneColor = sceneColorResource;
     final sceneColorOutput = sceneColorOutputResource;
-    if (compositeSource != null && sceneColor != null && sceneColorOutput != null) {
+    if (compositeSource != null &&
+        sceneColor != null &&
+        sceneColorOutput != null) {
       final compositeProgram = programLibrary.publish(
         VolumetricCompositeProgramSource.build(
           vertexSource: vertexSource,
@@ -247,6 +260,14 @@ final class _VolumetricLightPass implements RenderPass {
       UniformValue.mat4(Float32List.fromList(cam.viewProjection.m)),
     );
     encoder.setUniform(
+      'uView',
+      UniformValue.mat4(Float32List.fromList(cam.view.m)),
+    );
+    encoder.setUniform(
+      'uInverseProjection',
+      UniformValue.mat4(Float32List.fromList(cam.inverseProjection.m)),
+    );
+    encoder.setUniform(
       'uShaftIntensity',
       UniformValue.float1(
         directional == null ? 0.0 : directional.intensity * 0.15,
@@ -256,8 +277,46 @@ final class _VolumetricLightPass implements RenderPass {
       'uFogDensity',
       UniformValue.float1(environment.fogDensity ?? 0.0),
     );
-    encoder.setUniform('uAnisotropy', const UniformValue.float1(0.70));
-    final lightDirection = directional?.direction.normalized ?? Vec3.unitY;
+    encoder.setUniform(
+      'uAnisotropy',
+      UniformValue.float1(environment.volumetricAnisotropy),
+    );
+    encoder.setUniform(
+      'uVolumetricAlbedo',
+      UniformValue.float3(
+        Float32List.fromList([
+          environment.volumetricAlbedo.r,
+          environment.volumetricAlbedo.g,
+          environment.volumetricAlbedo.b,
+        ]),
+      ),
+    );
+    encoder.setUniform(
+      'uVolumetricHeightFalloff',
+      UniformValue.float1(environment.volumetricHeightFalloff),
+    );
+    encoder.setUniform(
+      'uVolumetricDustDensity',
+      UniformValue.float1(environment.volumetricDustDensity),
+    );
+    encoder.setUniform(
+      'uVolumetricJitter',
+      UniformValue.float1(environment.volumetricJitter),
+    );
+    encoder.setUniform(
+      'uVolumetricIntensity',
+      UniformValue.float1(environment.volumetricIntensity),
+    );
+    encoder.setUniform(
+      'uVolumetricSampleCount',
+      UniformValue.float1(environment.volumetricSampleCount.toDouble()),
+    );
+    // The shader reconstructs its ray in camera space from the inverse
+    // projection. Transform the authored world-space light direction through
+    // the same camera snapshot before evaluating its phase function.
+    final lightDirection = directional == null
+        ? Vec3.unitY
+        : cam.view.transformDir(directional.direction.normalized).normalized;
     final lightColor = directional?.color ?? LinearColor.black;
     encoder.setUniform(
       'uLightDir',
@@ -336,8 +395,8 @@ final class _VolumetricCompositePass implements RenderPass {
   @override
   void execute(RenderPassContext context) {
     final output = context.viewOfResource(outputResource) as BoundResourceView;
-    final source = context.viewOfResource(volumetricLightResource)
-        as BoundResourceView;
+    final source =
+        context.viewOfResource(volumetricLightResource) as BoundResourceView;
     final encoder = context.commandEncoder as DrawCommandEncoder;
     encoder.bindTarget(output.gpuObject);
     // The scene-color target normally carries a second emissive attachment;

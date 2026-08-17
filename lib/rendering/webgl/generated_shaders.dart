@@ -36,11 +36,14 @@ in vec3 vNormal;
 uniform vec3 uLightDir;
 uniform vec3 uAmbientColor;
 uniform float uAmbientIntensity;
+uniform float uAmbientLightScale;
+uniform float uDirectLightScale;
 out vec4 oColor;
 void main(){
   vec3 n=normalize(vNormal);
   float ndotl=max(dot(n,normalize(uLightDir)),0.0);
-  vec3 lit=vColor.rgb*clamp(uAmbientColor*uAmbientIntensity+vec3(ndotl),0.0,1.0);
+  vec3 lit=vColor.rgb*clamp(uAmbientColor*uAmbientIntensity*uAmbientLightScale+
+    vec3(ndotl)*uDirectLightScale,0.0,1.0);
   oColor=vec4(lit,vColor.a);
 }
 ''';
@@ -82,12 +85,15 @@ uniform sampler2D uAlbedo;
 uniform vec3 uLightDir;
 uniform vec3 uAmbientColor;
 uniform float uAmbientIntensity;
+uniform float uAmbientLightScale;
+uniform float uDirectLightScale;
 out vec4 oColor;
 void main(){
   vec3 n=normalize(vNormal);
   float ndotl=max(dot(n,normalize(uLightDir)),0.0);
   vec4 tex=texture(uAlbedo,vUv);
-  vec3 lit=vColor.rgb*tex.rgb*clamp(uAmbientColor*uAmbientIntensity+vec3(ndotl),0.0,1.0);
+  vec3 lit=vColor.rgb*tex.rgb*clamp(uAmbientColor*uAmbientIntensity*uAmbientLightScale+
+    vec3(ndotl)*uDirectLightScale,0.0,1.0);
   oColor=vec4(lit,vColor.a*tex.a);
 }
 ''';
@@ -280,7 +286,11 @@ uniform float uDirectSpotOuterCos2;
 uniform float uDirectSpotEnabled2;
 uniform vec3 uAmbientColor;
 uniform float uAmbientIntensity;
+uniform float uAmbientLightScale;
+uniform float uDirectLightScale;
 uniform vec2 uShadowMapTexelSize;
+uniform float uShadowFilterRadius;
+uniform float uShadowBias;
 uniform vec3 uMaterialTint;
 uniform vec4 uUvScaleOffset;
 uniform sampler2D uSsao;
@@ -289,6 +299,7 @@ uniform float uEmissiveStrength;
 uniform float uNormalStrength;
 uniform float uRoughness;
 uniform float uMetallic;
+uniform float uSpecularScale;
 uniform float uOcclusionStrength;
 uniform float uClearcoatStrength;
 uniform float uClearcoatRoughness;
@@ -453,10 +464,10 @@ float shadowFactor(float ndotl){
   }
   // Receiver-plane style slope bias keeps grazing surfaces from acne while
   // avoiding the detached-shadow look of a large constant offset.
-  float bias=max(.003*(1.-ndotl),.0008);
+  float bias=max(uShadowBias*(1.-ndotl),uShadowBias*0.2666667);
   // Fixed low-discrepancy offsets avoid the directional shimmer of a regular
   // square lattice while remaining deterministic and free of per-frame noise.
-  vec2 t=uShadowMapTexelSize;
+  vec2 t=uShadowMapTexelSize*clamp(uShadowFilterRadius,0.,3.);
   float sum=0.;
   sum+=sampleShadow(projCoord+vec3(vec2(-.942,-.399)*t,0.),bias);
   sum+=sampleShadow(projCoord+vec3(vec2(.945,-.768)*t,0.),bias);
@@ -552,11 +563,12 @@ void main(){
   float shadow=uReceivesShadow>0.5?shadowFactor(spotNdotL):1.;
   float attenuation=lightAttenuation(vWorldPos);
   direct+=uLightColor*uLightIntensity*spotNdotL*shadow*attenuation*uSpotEnabled;
+  direct*=uDirectLightScale;
   // §8.5: "modulates ambient only" — SSAO must never darken the direct
   // (N.L * shadow * attenuation) term, only the ambient fill, or it would
   // double up with real shadowing and read as an incorrect global darkening
   // rather than contact occlusion specifically.
-  vec3 ambient=uAmbientColor*uAmbientIntensity*ao;
+  vec3 ambient=uAmbientColor*uAmbientIntensity*uAmbientLightScale*ao;
   vec3 baseColor=vColor.rgb*tex.rgb*uMaterialTint;
   // Metallic surfaces contribute less diffuse energy; roughness keeps a
   // small, stable broadening factor until the surface-v2 camera/specular
@@ -572,14 +584,22 @@ void main(){
   baseColor=mix(baseColor,baseColor*vec3(0.84,0.90,0.98),wetness*0.22);
   float upward=clamp(n.y*0.5+0.5,0.0,1.0);
   float thermalDissolution=clamp(uSurfaceDissolution,0.0,1.0);
+  // A steady spherical conductive field decays approximately as 1/r. The
+  // host keeps the slow latent material memory in uSurfaceDissolution; this
+  // local term therefore models the spatial heat field without making warm
+  // surfaces snap back or disappear at an arbitrary exponential radius.
   if(uThermalSourceCount>0.5) thermalDissolution=max(thermalDissolution,
-    uThermalSourceDissolution0*exp(-distance(vWorldPos,uThermalSourcePosition0)/max(uThermalSourceRadius0,0.01)));
+    uThermalSourceDissolution0*clamp(uThermalSourceRadius0/
+      max(distance(vWorldPos,uThermalSourcePosition0),uThermalSourceRadius0),0.,1.));
   if(uThermalSourceCount>1.5) thermalDissolution=max(thermalDissolution,
-    uThermalSourceDissolution1*exp(-distance(vWorldPos,uThermalSourcePosition1)/max(uThermalSourceRadius1,0.01)));
+    uThermalSourceDissolution1*clamp(uThermalSourceRadius1/
+      max(distance(vWorldPos,uThermalSourcePosition1),uThermalSourceRadius1),0.,1.));
   if(uThermalSourceCount>2.5) thermalDissolution=max(thermalDissolution,
-    uThermalSourceDissolution2*exp(-distance(vWorldPos,uThermalSourcePosition2)/max(uThermalSourceRadius2,0.01)));
+    uThermalSourceDissolution2*clamp(uThermalSourceRadius2/
+      max(distance(vWorldPos,uThermalSourcePosition2),uThermalSourceRadius2),0.,1.));
   if(uThermalSourceCount>3.5) thermalDissolution=max(thermalDissolution,
-    uThermalSourceDissolution3*exp(-distance(vWorldPos,uThermalSourcePosition3)/max(uThermalSourceRadius3,0.01)));
+    uThermalSourceDissolution3*clamp(uThermalSourceRadius3/
+      max(distance(vWorldPos,uThermalSourcePosition3),uThermalSourceRadius3),0.,1.));
   thermalDissolution=clamp(thermalDissolution,0.0,1.0);
   float snowCoverage=clamp(uSurfaceSnowCoverage,0.0,1.0)*
     smoothstep(0.18,0.82,upward)*(1.0-thermalDissolution*0.72);
@@ -613,6 +633,7 @@ void main(){
   specular+=specularContribution(n,viewDir,
     normalize(uLightPosition-vWorldPos),uLightColor,uLightIntensity,
     lightAttenuation(vWorldPos)*uSpotEnabled*shadow,baseColor,specRough,metal);
+  specular*=uDirectLightScale*uSpecularScale;
   // Keep reflected energy available to the specular lobe. The previous
   // diffuse-first clamp clipped bright ceramic response before tone mapping,
   // producing the broad plastic patches visible in low-roughness samples.
@@ -632,7 +653,8 @@ void main(){
   float coatPower=mix(128.0,8.0,clamp(uClearcoatRoughness,0.0,1.0));
   float coatFresnel=0.04+0.96*pow(1.0-coatNdotV,5.0);
   float coat=clamp(uClearcoatStrength,0.0,1.0)*coatFresnel*
-    pow(coatNdotH,coatPower)*coatNdotL*uDirectionalIntensity;
+    pow(coatNdotH,coatPower)*coatNdotL*uDirectionalIntensity*
+    uDirectLightScale*uSpecularScale;
   lit+=uDirectionalColor*coat;
   lit+=direct*(wetness*(0.035+0.075*(1.0-rough)));
   vec3 emissive=texture(uEmissiveMap,uv).rgb*uMaterialTint*uEmissiveStrength;
@@ -1254,6 +1276,14 @@ uniform vec3 uLightColor;
 uniform float uShaftIntensity;
 uniform float uFogDensity;
 uniform float uAnisotropy;
+uniform mat4 uView;
+uniform mat4 uInverseProjection;
+uniform vec3 uVolumetricAlbedo;
+uniform float uVolumetricHeightFalloff;
+uniform float uVolumetricDustDensity;
+uniform float uVolumetricJitter;
+uniform float uVolumetricIntensity;
+uniform float uVolumetricSampleCount;
 uniform float uVolumetricSourceCount;
 
 uniform vec3 uSourcePosition0;
@@ -1294,63 +1324,100 @@ vec3 sourceContribution(
   float intensity,
   float referenceDistance,
   float cutoffDistance,
-  vec3 viewRay
+  vec3 viewRay,
+  float rayLength
 ) {
   vec4 clip = uViewProjection * vec4(position, 1.0);
   if (clip.w <= 0.0) return vec3(0.0);
-  vec2 sourceUv = clip.xy / clip.w * 0.5 + 0.5;
-  float screenDistance = distance(vUv, sourceUv);
-  float radius = max(referenceDistance / max(clip.w, 1.0), 0.002);
-  float disc = 1.0 - smoothstep(radius * 0.35, radius, screenDistance);
-  float depthFade = 1.0 - smoothstep(cutoffDistance * 0.65, cutoffDistance, clip.w);
+  vec3 sourceView = (uView * vec4(position, 1.0)).xyz;
+  float sourceDistance = length(sourceView);
+  float tClosest = clamp(dot(sourceView, viewRay), 0.0, rayLength);
+  vec3 sampleToSource = sourceView - viewRay * tClosest;
+  float distanceToSource = max(length(sampleToSource), 1e-3);
+  float cutoff = 1.0 - smoothstep(
+    cutoffDistance * 0.65, cutoffDistance, sourceDistance);
   float inverseSquare = intensity * referenceDistance * referenceDistance /
-      max(clip.w * clip.w, referenceDistance * referenceDistance);
-  float phase = phaseHenyeyGreenstein(dot(normalize(-uLightDir), viewRay), uAnisotropy);
-  return color * (disc * depthFade * inverseSquare * phase);
+      max(distanceToSource * distanceToSource,
+          referenceDistance * referenceDistance);
+  // The incoming direction is source -> sample and the outgoing direction is
+  // sample -> camera. This is the same phase convention as the directional
+  // medium path, but now evaluated against the located source.
+  float phase = phaseHenyeyGreenstein(
+    dot(normalize(sampleToSource), viewRay), uAnisotropy);
+  // Located practicals and lightning must also acquire visible body in a
+  // dust-filled room. Use the same broad haze plus particulate density as the
+  // directional march; otherwise a clear-air fog toggle would accidentally
+  // erase dust-lit source rays while the directional shafts still showed it.
+  float mediumDensity = max(uFogDensity + uVolumetricDustDensity, 0.0);
+  float mediumWeight = 1.0 - exp(-max(
+    mediumDensity * min(rayLength, cutoffDistance), 0.0));
+  float pathWeight = clamp(
+    rayLength / max(sourceDistance, referenceDistance), 0.0, 1.0);
+  return color * inverseSquare * phase * cutoff * mediumWeight * pathWeight *
+    uVolumetricIntensity * 0.35;
 }
 
 void main() {
   float depth = texture(uSceneDepth, vUv).r;
-  float rayLength = min(linearDepth(depth), uFar);
-  vec3 viewRay = normalize(vec3(vUv * 2.0 - 1.0, 1.0));
+  vec4 viewPoint = uInverseProjection * vec4(vUv * 2.0 - 1.0, -1.0, 1.0);
+  viewPoint /= max(abs(viewPoint.w), 1e-5);
+  vec3 viewRay = normalize(viewPoint.xyz);
+  // linearDepth is camera-space Z; convert it to distance along the actual
+  // reconstructed ray so wide and tall projections integrate equally.
+  float cameraDepth = linearDepth(depth);
+  float rayLength = min(cameraDepth / max(-viewRay.z, 1e-3), uFar);
   float density = max(uFogDensity, 0.0);
 
   // A fixed, bounded integral keeps the pass deterministic and makes its
   // cost predictable on weak adapters. The depth buffer stops integration at
   // the first opaque surface, so shafts do not leak through geometry.
-  const int sampleCount = 12;
+  const int maxSampleCount = 24;
+  int sampleCount = int(clamp(uVolumetricSampleCount, 4.0, 24.0));
   vec3 scatter = vec3(0.0);
   float transmittance = 1.0;
   float stepLength = rayLength / float(sampleCount);
-  for (int i = 0; i < sampleCount; i++) {
-    float distanceAlongRay = (float(i) + 0.5) * stepLength;
-    float heightWeight = exp(-max(distanceAlongRay * 0.02, 0.0));
-    float opticalDepth = density * stepLength * heightWeight;
+  float jitterSeed = fract(sin(dot(vUv, vec2(127.1, 311.7))) * 43758.5453);
+  float jitter = (jitterSeed - 0.5) * clamp(uVolumetricJitter, 0.0, 0.5);
+  for (int i = 0; i < maxSampleCount; i++) {
+    if (i >= sampleCount) break;
+    float distanceAlongRay = clamp(
+      (float(i) + 0.5 + jitter) * stepLength, 0.0, rayLength);
+    float heightWeight = exp(-max(distanceAlongRay * uVolumetricHeightFalloff, 0.0));
+    // Dust is a separate, host-resolved particulate phase. It is denser near
+    // the occupied room volume than the broad atmospheric haze, so shafts gain
+    // visible body without turning the far horizon opaque. At zero density the
+    // extra term is exactly zero and the established fog path is unchanged.
+    float dustWeight = exp(-max(distanceAlongRay *
+      uVolumetricHeightFalloff * 0.45, 0.0));
+    float opticalDensity = density +
+      max(uVolumetricDustDensity, 0.0) * dustWeight;
+    float opticalDepth = opticalDensity * stepLength * heightWeight;
     float sampleTransmittance = exp(-opticalDepth);
     float phase = phaseHenyeyGreenstein(dot(normalize(-uLightDir), viewRay), uAnisotropy);
-    scatter += transmittance * (uLightColor * uShaftIntensity * phase) * opticalDepth;
+    scatter += transmittance * (uLightColor * uVolumetricAlbedo *
+      uShaftIntensity * uVolumetricIntensity * phase) * opticalDepth;
     transmittance *= sampleTransmittance;
   }
 
   if (uVolumetricSourceCount > 0.5) {
     scatter += sourceContribution(
       uSourcePosition0, uSourceColor0, uSourceIntensity0,
-      uSourceReferenceDistance0, uSourceCutoffDistance0, viewRay);
+      uSourceReferenceDistance0, uSourceCutoffDistance0, viewRay, rayLength);
   }
   if (uVolumetricSourceCount > 1.5) {
     scatter += sourceContribution(
       uSourcePosition1, uSourceColor1, uSourceIntensity1,
-      uSourceReferenceDistance1, uSourceCutoffDistance1, viewRay);
+      uSourceReferenceDistance1, uSourceCutoffDistance1, viewRay, rayLength);
   }
   if (uVolumetricSourceCount > 2.5) {
     scatter += sourceContribution(
       uSourcePosition2, uSourceColor2, uSourceIntensity2,
-      uSourceReferenceDistance2, uSourceCutoffDistance2, viewRay);
+      uSourceReferenceDistance2, uSourceCutoffDistance2, viewRay, rayLength);
   }
   if (uVolumetricSourceCount > 3.5) {
     scatter += sourceContribution(
       uSourcePosition3, uSourceColor3, uSourceIntensity3,
-      uSourceReferenceDistance3, uSourceCutoffDistance3, viewRay);
+      uSourceReferenceDistance3, uSourceCutoffDistance3, viewRay, rayLength);
   }
 
   // Fade the final sample at the far plane and keep the additive output

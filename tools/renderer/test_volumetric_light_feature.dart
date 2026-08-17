@@ -25,7 +25,18 @@ void main() {
   for (final token in [
     'linearDepth',
     'phaseHenyeyGreenstein',
-    'sampleCount = 12',
+    'maxSampleCount = 24',
+    'uView',
+    'uInverseProjection',
+    'sourceView',
+    'mediumWeight',
+    'mediumDensity = max(uFogDensity + uVolumetricDustDensity, 0.0)',
+    'uVolumetricSampleCount',
+    'uVolumetricIntensity',
+    'jitterSeed',
+    'uVolumetricHeightFalloff',
+    'uVolumetricDustDensity',
+    'dustWeight',
     'uSourcePosition3',
     'uSceneDepth',
   ]) {
@@ -43,8 +54,7 @@ void main() {
     volumetric: true,
   );
   _require(
-    layout.volumetricLight.width == 321 &&
-        layout.volumetricLight.height == 181,
+    layout.volumetricLight.width == 321 && layout.volumetricLight.height == 181,
     'volumetric target must follow the configured half-resolution extent',
   );
   _require(
@@ -58,22 +68,47 @@ void main() {
     cinematic.installs(PipelineFeatures.volumetric),
     'cinematic profile must install the volumetric feature',
   );
-  final resources = PipelineResourcePlan.forProfile(
-    cinematic,
-    sampleCount: 4,
-  );
+  final resources = PipelineResourcePlan.forProfile(cinematic, sampleCount: 4);
   _require(
-    resources.resources.any((resource) =>
-            resource.name == layout.volumetricLight.name) &&
-        resources.resources.any((resource) =>
-            resource.name == layout.sceneColorPostVolumetric.name &&
-            resource.version == layout.sceneColorPostVolumetric.version) &&
-        resources.resources.any((resource) =>
-            resource.name == layout.sceneColorPostBloom.name &&
-            resource.version == layout.sceneColorPostBloom.version),
+    resources.resources.any(
+          (resource) => resource.name == layout.volumetricLight.name,
+        ) &&
+        resources.resources.any(
+          (resource) =>
+              resource.name == layout.sceneColorPostVolumetric.name &&
+              resource.version == layout.sceneColorPostVolumetric.version,
+        ) &&
+        resources.resources.any(
+          (resource) =>
+              resource.name == layout.sceneColorPostBloom.name &&
+              resource.version == layout.sceneColorPostBloom.version,
+        ),
     'cinematic resource plan must own the volumetric and chained targets',
   );
   _graphAcceptsCinematicProfile();
+  final camera = CameraView(
+    view: Mat4.identity(),
+    projection: Mat4.perspective(
+      fovYRadians: 1.0,
+      aspect: 16 / 9,
+      near: 0.1,
+      far: 100,
+    ),
+    viewProjection: Mat4.identity(),
+    eye: Vec3.zero,
+    forward: const Vec3(0, 0, -1),
+    near: 0.1,
+    far: 100,
+    aspect: 16 / 9,
+  );
+  final roundTrip = camera.projection * camera.inverseProjection;
+  _require(
+    (roundTrip.m[0] - 1).abs() < 1e-4 &&
+        (roundTrip.m[5] - 1).abs() < 1e-4 &&
+        (roundTrip.m[10] - 1).abs() < 1e-4 &&
+        (roundTrip.m[15] - 1).abs() < 1e-4,
+    'camera inverse projection must reconstruct identity',
+  );
   print('Volumetric light feature fixtures passed.');
 }
 
@@ -132,7 +167,10 @@ void _graphAcceptsCinematicProfile() {
     hasValidPreviousFrame: true,
     resources: _Resources(),
   );
-  _require(result.isValid, 'cinematic graph must validate: ${result.graph.failures}');
+  _require(
+    result.isValid,
+    'cinematic graph must validate: ${result.graph.failures}',
+  );
   final ids = result.passes.map((pass) => pass.descriptor.id).toList();
   _require(
     ids.contains('volumetricLight') && ids.contains('volumetricComposite'),

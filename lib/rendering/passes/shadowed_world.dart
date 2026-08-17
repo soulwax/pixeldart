@@ -116,13 +116,18 @@ final class ShadowedWorldProgramSource {
       'uDirectSpotEnabled2',
       'uAmbientColor',
       'uAmbientIntensity',
+      'uAmbientLightScale',
+      'uDirectLightScale',
       'uShadowMapTexelSize',
+      'uShadowFilterRadius',
+      'uShadowBias',
       'uSceneColorSize',
       'uEmissiveStrength',
       'uUvScaleOffset',
       'uNormalStrength',
       'uRoughness',
       'uMetallic',
+      'uSpecularScale',
       'uOcclusionStrength',
       'uClearcoatStrength',
       'uClearcoatRoughness',
@@ -352,6 +357,14 @@ final class _ShadowedWorldPass implements RenderPass {
         Float32List.fromList([1.0 / shadowMapWidth, 1.0 / shadowMapHeight]),
       ),
     );
+    encoder.setUniform(
+      'uShadowFilterRadius',
+      UniformValue.float1(environment.shadowFilterRadius),
+    );
+    encoder.setUniform(
+      'uShadowBias',
+      UniformValue.float1(environment.shadowBias),
+    );
     encoder.bindTexture(2, resolveSsaoBlurred());
     encoder.setUniform('uSsao', const UniformValue.sampler(2));
     // Material-v2 slots use neutral store fallbacks when no resolver is
@@ -576,6 +589,14 @@ final class _ShadowedWorldPass implements RenderPass {
       UniformValue.float1(environment.ambientIntensity),
     );
     encoder.setUniform(
+      'uAmbientLightScale',
+      UniformValue.float1(environment.ambientLightScale),
+    );
+    encoder.setUniform(
+      'uDirectLightScale',
+      UniformValue.float1(environment.directLightScale),
+    );
+    encoder.setUniform(
       'uRainWetness',
       UniformValue.float1(post.surfaceWetness),
     );
@@ -612,10 +633,10 @@ final class _ShadowedWorldPass implements RenderPass {
     }
 
     for (final batch in context.frameScene.opaqueBatches) {
-      _drawBatch(encoder, batch, post.affineWarpStrength);
+      _drawBatch(encoder, batch, post.affineWarpStrength, environment);
     }
     for (final item in context.frameScene.blendedItemsBackToFront) {
-      _drawBatch(encoder, item, post.affineWarpStrength);
+      _drawBatch(encoder, item, post.affineWarpStrength, environment);
     }
   }
 
@@ -623,6 +644,7 @@ final class _ShadowedWorldPass implements RenderPass {
     DrawCommandEncoder encoder,
     Object batch,
     double affineWarpStrength,
+    FrameEnvironment environment,
   ) {
     if (batch is RetainedItemView) {
       disableInstanceTransformUniforms(encoder);
@@ -634,6 +656,7 @@ final class _ShadowedWorldPass implements RenderPass {
         batch.descriptor.blendMode,
         affineWarpStrength,
         batch.descriptor.receivesShadow,
+        environment,
       );
       final mesh = resolveMesh(batch.descriptor.mesh);
       encoder.bindVertexArray(mesh.vao);
@@ -657,6 +680,7 @@ final class _ShadowedWorldPass implements RenderPass {
         representative.descriptor.blendMode,
         affineWarpStrength,
         representative.descriptor.receivesShadow,
+        environment,
       );
       final mesh = resolveMesh(representative.descriptor.mesh);
       encoder.bindVertexArray(mesh.vao);
@@ -698,6 +722,7 @@ final class _ShadowedWorldPass implements RenderPass {
     BlendMode blendMode,
     double affineWarpStrength,
     bool itemReceivesShadow,
+    FrameEnvironment environment,
   ) {
     final material = resolveMaterial(handle);
     encoder.bindTexture(0, resolveAlbedo(material.albedoTexture));
@@ -777,10 +802,20 @@ final class _ShadowedWorldPass implements RenderPass {
     );
     encoder.setUniform(
       'uNormalStrength',
-      UniformValue.float1(material.normalStrength),
+      UniformValue.float1(material.normalStrength * environment.normalStrengthScale),
     );
-    encoder.setUniform('uRoughness', UniformValue.float1(material.roughness));
-    encoder.setUniform('uMetallic', UniformValue.float1(material.metallic));
+    encoder.setUniform(
+      'uRoughness',
+      UniformValue.float1(material.roughness * environment.roughnessScale),
+    );
+    encoder.setUniform(
+      'uMetallic',
+      UniformValue.float1(material.metallic * environment.metallicScale),
+    );
+    encoder.setUniform(
+      'uSpecularScale',
+      UniformValue.float1(environment.specularScale),
+    );
     encoder.setUniform(
       'uClearcoatStrength',
       UniformValue.float1(material.clearcoatStrength),

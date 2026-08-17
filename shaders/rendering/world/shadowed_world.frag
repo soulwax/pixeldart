@@ -69,7 +69,11 @@ uniform float uDirectSpotOuterCos2;
 uniform float uDirectSpotEnabled2;
 uniform vec3 uAmbientColor;
 uniform float uAmbientIntensity;
+uniform float uAmbientLightScale;
+uniform float uDirectLightScale;
 uniform vec2 uShadowMapTexelSize;
+uniform float uShadowFilterRadius;
+uniform float uShadowBias;
 uniform vec3 uMaterialTint;
 uniform vec4 uUvScaleOffset;
 uniform sampler2D uSsao;
@@ -78,6 +82,7 @@ uniform float uEmissiveStrength;
 uniform float uNormalStrength;
 uniform float uRoughness;
 uniform float uMetallic;
+uniform float uSpecularScale;
 uniform float uOcclusionStrength;
 uniform float uClearcoatStrength;
 uniform float uClearcoatRoughness;
@@ -242,10 +247,10 @@ float shadowFactor(float ndotl){
   }
   // Receiver-plane style slope bias keeps grazing surfaces from acne while
   // avoiding the detached-shadow look of a large constant offset.
-  float bias=max(.003*(1.-ndotl),.0008);
+  float bias=max(uShadowBias*(1.-ndotl),uShadowBias*0.2666667);
   // Fixed low-discrepancy offsets avoid the directional shimmer of a regular
   // square lattice while remaining deterministic and free of per-frame noise.
-  vec2 t=uShadowMapTexelSize;
+  vec2 t=uShadowMapTexelSize*clamp(uShadowFilterRadius,0.,3.);
   float sum=0.;
   sum+=sampleShadow(projCoord+vec3(vec2(-.942,-.399)*t,0.),bias);
   sum+=sampleShadow(projCoord+vec3(vec2(.945,-.768)*t,0.),bias);
@@ -341,11 +346,12 @@ void main(){
   float shadow=uReceivesShadow>0.5?shadowFactor(spotNdotL):1.;
   float attenuation=lightAttenuation(vWorldPos);
   direct+=uLightColor*uLightIntensity*spotNdotL*shadow*attenuation*uSpotEnabled;
+  direct*=uDirectLightScale;
   // §8.5: "modulates ambient only" — SSAO must never darken the direct
   // (N.L * shadow * attenuation) term, only the ambient fill, or it would
   // double up with real shadowing and read as an incorrect global darkening
   // rather than contact occlusion specifically.
-  vec3 ambient=uAmbientColor*uAmbientIntensity*ao;
+  vec3 ambient=uAmbientColor*uAmbientIntensity*uAmbientLightScale*ao;
   vec3 baseColor=vColor.rgb*tex.rgb*uMaterialTint;
   // Metallic surfaces contribute less diffuse energy; roughness keeps a
   // small, stable broadening factor until the surface-v2 camera/specular
@@ -361,14 +367,22 @@ void main(){
   baseColor=mix(baseColor,baseColor*vec3(0.84,0.90,0.98),wetness*0.22);
   float upward=clamp(n.y*0.5+0.5,0.0,1.0);
   float thermalDissolution=clamp(uSurfaceDissolution,0.0,1.0);
+  // A steady spherical conductive field decays approximately as 1/r. The
+  // host keeps the slow latent material memory in uSurfaceDissolution; this
+  // local term therefore models the spatial heat field without making warm
+  // surfaces snap back or disappear at an arbitrary exponential radius.
   if(uThermalSourceCount>0.5) thermalDissolution=max(thermalDissolution,
-    uThermalSourceDissolution0*exp(-distance(vWorldPos,uThermalSourcePosition0)/max(uThermalSourceRadius0,0.01)));
+    uThermalSourceDissolution0*clamp(uThermalSourceRadius0/
+      max(distance(vWorldPos,uThermalSourcePosition0),uThermalSourceRadius0),0.,1.));
   if(uThermalSourceCount>1.5) thermalDissolution=max(thermalDissolution,
-    uThermalSourceDissolution1*exp(-distance(vWorldPos,uThermalSourcePosition1)/max(uThermalSourceRadius1,0.01)));
+    uThermalSourceDissolution1*clamp(uThermalSourceRadius1/
+      max(distance(vWorldPos,uThermalSourcePosition1),uThermalSourceRadius1),0.,1.));
   if(uThermalSourceCount>2.5) thermalDissolution=max(thermalDissolution,
-    uThermalSourceDissolution2*exp(-distance(vWorldPos,uThermalSourcePosition2)/max(uThermalSourceRadius2,0.01)));
+    uThermalSourceDissolution2*clamp(uThermalSourceRadius2/
+      max(distance(vWorldPos,uThermalSourcePosition2),uThermalSourceRadius2),0.,1.));
   if(uThermalSourceCount>3.5) thermalDissolution=max(thermalDissolution,
-    uThermalSourceDissolution3*exp(-distance(vWorldPos,uThermalSourcePosition3)/max(uThermalSourceRadius3,0.01)));
+    uThermalSourceDissolution3*clamp(uThermalSourceRadius3/
+      max(distance(vWorldPos,uThermalSourcePosition3),uThermalSourceRadius3),0.,1.));
   thermalDissolution=clamp(thermalDissolution,0.0,1.0);
   float snowCoverage=clamp(uSurfaceSnowCoverage,0.0,1.0)*
     smoothstep(0.18,0.82,upward)*(1.0-thermalDissolution*0.72);
@@ -402,6 +416,7 @@ void main(){
   specular+=specularContribution(n,viewDir,
     normalize(uLightPosition-vWorldPos),uLightColor,uLightIntensity,
     lightAttenuation(vWorldPos)*uSpotEnabled*shadow,baseColor,specRough,metal);
+  specular*=uDirectLightScale*uSpecularScale;
   // Keep reflected energy available to the specular lobe. The previous
   // diffuse-first clamp clipped bright ceramic response before tone mapping,
   // producing the broad plastic patches visible in low-roughness samples.
@@ -421,7 +436,8 @@ void main(){
   float coatPower=mix(128.0,8.0,clamp(uClearcoatRoughness,0.0,1.0));
   float coatFresnel=0.04+0.96*pow(1.0-coatNdotV,5.0);
   float coat=clamp(uClearcoatStrength,0.0,1.0)*coatFresnel*
-    pow(coatNdotH,coatPower)*coatNdotL*uDirectionalIntensity;
+    pow(coatNdotH,coatPower)*coatNdotL*uDirectionalIntensity*
+    uDirectLightScale*uSpecularScale;
   lit+=uDirectionalColor*coat;
   lit+=direct*(wetness*(0.035+0.075*(1.0-rough)));
   vec3 emissive=texture(uEmissiveMap,uv).rgb*uMaterialTint*uEmissiveStrength;

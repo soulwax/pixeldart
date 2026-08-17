@@ -18,7 +18,9 @@ void main() {
   _require(
     clearAtNoon.phase == SolarPhase.solarNoon &&
         clearAtNoon.sunElevationRadians > 0 &&
-        clearAtNoon.directionalIntensity > 0,
+        clearAtNoon.directionalIntensity > 0 &&
+        clearAtNoon.twilightFactor01 > 0 &&
+        clearAtNoon.horizonVisibility01 > 0,
     'solar noon must produce an above-horizon direct source',
   );
 
@@ -44,6 +46,13 @@ void main() {
   _require(
     dawn.sunDirection.y < 0 && dusk.sunDirection.y < 0,
     'twilight sun direction must retain its below-horizon elevation',
+  );
+  _require(
+    dawn.twilightFactor01 > 0 &&
+        dusk.twilightFactor01 > 0 &&
+        dawn.horizonVisibility01 < 1 &&
+        dusk.horizonVisibility01 < 1,
+    'dawn and dusk must expose continuous twilight and horizon visibility',
   );
 
   final clear = SolarCycleEngine.evaluate(
@@ -111,6 +120,27 @@ void main() {
       'sunrise intensity must change continuously between frames',
     );
     previous = next;
+  }
+  var previousTwilight = SolarCycleEngine.evaluate(
+    const SolarCycleInput(
+      timeHours: 4.5,
+      latitudeRadians: 52 * math.pi / 180,
+      solarDeclinationRadians: 0,
+    ),
+  );
+  for (var i = 1; i <= 30; i++) {
+    final next = SolarCycleEngine.evaluate(
+      SolarCycleInput(
+        timeHours: 4.5 + i * 0.05,
+        latitudeRadians: 52 * math.pi / 180,
+        solarDeclinationRadians: 0,
+      ),
+    );
+    _require(
+      (next.twilightFactor01 - previousTwilight.twilightFactor01).abs() < 0.08,
+      'twilight factor must change continuously between frames',
+    );
+    previousTwilight = next;
   }
   print('Solar cycle fixtures passed.');
 }

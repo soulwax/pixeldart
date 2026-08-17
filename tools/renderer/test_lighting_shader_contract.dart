@@ -6,6 +6,11 @@ void main() {
     'pointContribution(n,vWorldPos,uPointPosition0',
     'directSpotContribution(n,vWorldPos,uDirectSpotPosition0',
     'uLightColor*uLightIntensity*spotNdotL*shadow',
+    'uShadowMapTexelSize*clamp(uShadowFilterRadius,0.,3.)',
+    'uShadowBias*(1.-ndotl)',
+    'uAmbientLightScale',
+    'uDirectLightScale',
+    'uSpecularScale',
   ];
   for (final term in shadowTerms) {
     if (!shadowedWorldFragSrc.contains(term)) {
@@ -40,7 +45,9 @@ void main() {
     'thermalDissolution=max(thermalDissolution,',
   ]) {
     if (!shadowedWorldFragSrc.contains(term)) {
-      throw StateError('shadowed-world shader lost spatial thermal term: $term');
+      throw StateError(
+        'shadowed-world shader lost spatial thermal term: $term',
+      );
     }
   }
   final appearanceIndex = shadowedWorldFragSrc.indexOf(
@@ -49,7 +56,9 @@ void main() {
   final specularIndex = shadowedWorldFragSrc.indexOf(
     'float specRough=max(0.045,sqrt(rough*rough+normalVariance*0.18));',
   );
-  if (appearanceIndex < 0 || specularIndex < 0 || appearanceIndex > specularIndex) {
+  if (appearanceIndex < 0 ||
+      specularIndex < 0 ||
+      appearanceIndex > specularIndex) {
     throw StateError(
       'weather appearance must resolve before the specular roughness lobe',
     );
