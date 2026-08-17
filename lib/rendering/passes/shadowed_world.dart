@@ -139,6 +139,8 @@ final class ShadowedWorldProgramSource {
       'uFogDensity',
       'uReceivesShadow',
       'uRainWetness',
+      'uSurfaceSnowCoverage',
+      'uSurfaceDissolution',
     ],
   );
 }
@@ -563,6 +565,14 @@ final class _ShadowedWorldPass implements RenderPass {
     encoder.setUniform(
       'uRainWetness',
       UniformValue.float1(post.surfaceWetness),
+    );
+    encoder.setUniform(
+      'uSurfaceSnowCoverage',
+      UniformValue.float1(post.surfaceSnowCoverage),
+    );
+    encoder.setUniform(
+      'uSurfaceDissolution',
+      UniformValue.float1(post.surfaceDissolution),
     );
 
     for (final batch in context.frameScene.opaqueBatches) {

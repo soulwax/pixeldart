@@ -120,6 +120,22 @@ void main() {
   final initialSpeed = dragField.sampleVelocityAtAge(0).y;
   final midSpeed = dragField.sampleVelocityAtAge(0.25).y;
   final lateSpeed = dragField.sampleVelocityAtAge(1).y;
+  final kinematics = dragField.sampleKinematics(_withTime(frame, 0.25), 0);
+  _require(
+    kinematics.age >= 0 && kinematics.age < dragField.lifetimeSeconds,
+    'particle kinematics age did not remain inside its lifetime',
+  );
+  _require(
+    kinematics.position != kinematics.spawnPosition &&
+        kinematics.velocity.y ==
+            dragField.sampleVelocityAtAge(kinematics.age).y,
+    'particle kinematics did not expose integrated position and velocity',
+  );
+  _require(
+    dragField.sampleTransform(_withTime(frame, 0.25), 0).translation ==
+        kinematics.position,
+    'transform and kinematics paths disagree on world position',
+  );
   _require(initialSpeed == -2, 'drag field did not retain initial velocity');
   _require(
     midSpeed < initialSpeed && midSpeed > -8.8,
@@ -219,6 +235,16 @@ void main() {
           !item.castsShadow,
     ),
     'particle draw contract was not retained',
+  );
+  final filteredEncoder = _RecordingEncoder();
+  final filtered = field.submitFiltered(
+    filteredEncoder,
+    frame,
+    (kinematics) => kinematics.position.y > 2.5,
+  );
+  _require(
+    filtered == filteredEncoder.items.length && filtered < submitted,
+    'host particle filter did not remove crossed particles',
   );
   _throws(
     () => const AtmosphericParticleField(

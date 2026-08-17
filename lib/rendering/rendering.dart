@@ -49,4 +49,5 @@ export 'math/mat4.dart';
 export 'math/quat.dart';
 export 'math/transform.dart';
 export 'math/vec.dart';
+export 'optics/reflection.dart';
 export 'atmosphere/volumetric_media.dart';

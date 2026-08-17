@@ -1,6 +1,6 @@
 name: pixeldart
 description: A retained-scene 3D renderer for the browser in pure Dart on WebGL2 — validated render graph, typed GPU resources, and a PS1/VHS-era post stack. No Flutter, no engine dependency.
-version: 0.1.0
+version: 0.1.1
 repository: https://github.com/soulwax/pixeldart
 publish_to: none
 

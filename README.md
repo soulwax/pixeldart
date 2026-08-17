@@ -221,16 +221,17 @@ Gallery index: [all features](.github/screenshots/00-all-features-on.jpg) ·
 | --- | --- |
 | World | Indexed meshes with Uint16/Uint32 element buffers, per-pass draw state, depth test, backface culling, per-draw material tint, double-sided override, texture sampling with mipmaps, alpha-masked cutout (`discard` in world, depth-prepass, *and* shadow-caster paths) |
 | Materials | Material-v2 UV scale/offset, albedo/normal/ORM/emissive/lightmap slots, derivative or authored TBN normal mapping, linear ORM channels, emissive MRT glow, alpha modes, neutral fallback maps, and validated sampler policy |
-| Lighting | Directional + ambient, four point slots, a selected shadow caster plus three direct spot slots with distance/cone falloff, shadow mapping with 2×2 PCF and slope-scaled bias |
+| Lighting | Directional + ambient, four point slots, a selected shadow caster plus three direct spot slots with distance/cone falloff, shadow mapping with 2×2 PCF and slope-scaled bias; volumetric shafts consume the frame's resolved directional light and fog density rather than a hidden global light |
 | Depth | Single-sample depth prepass shared by SSAO/DOF, linearized depth debug view |
 | AO | Half-resolution 8-sample SSAO reconstructing position from depth and normals from derivatives, depth-aware bilateral blur, modulates ambient only |
 | Emissive | Real MRT (`COLOR_ATTACHMENT1`), driven by material emissive texture × strength — never inferred from final luma — surviving explicit MSAA resolve |
 | Output | Explicit MSAA resolve, scene-linear exposure/Reinhard tone map, selectable linear/sRGB output encoding, and configuration-scoped resource extents |
-| Post | Bloom (separable gaussian, additive composite), DOF (circle-of-confusion vs. focus distance/range), 3D-LUT color grade, fog (distance + optional height/density, never applied to emissive), and depth-weighted near-surface wetness driven by `PostProcessState.surfaceWetness`; precipitation is physical world geometry, never a full-screen rain overlay |
-| Media | Public bounded participating-media helpers: exact exponential height-fog optical depth/transmittance and validated point-light in-scattering with Henyey–Greenstein anisotropy |
+| Post | Bloom (separable gaussian, additive composite), DOF (circle-of-confusion vs. focus distance/range), 3D-LUT color grade, analytic exponential height-fog optical depth plus distance control (never applied to emissive), depth-weighted near-surface wetness, and host-resolved upward snow coverage plus lingering material dissolution driven by `PostProcessState`; precipitation is physical world geometry, never a full-screen rain overlay |
+| Media | Public bounded participating-media helpers: exact exponential height-fog optical depth/transmittance, ray-box local media, validated point-light in-scattering, aggregate practical/lightning source fields, and source-aware inverse-square transient radiance; hosts own source lifetimes and weather semantics |
+| Reflections | Deterministic glossy/wet reflection weighting with Schlick Fresnel, roughness LOD, medium transmission, and explicit screen-space-hit versus probe-fallback state; the resolver never fabricates a hit or scene probe |
 | PS1 | Vertex snapping in NDC before the perspective divide, affine UV warp (solved without `noperspective`, gated per material × per frame), color quantization to N bits with Bayer 4×4 ordered dithering |
 | VHS | Final recording stage with six independent weights — chroma bleed, tracking jitter, YIQ tape noise, head-switch tear, dropout streaks, frame ghosting via the graph's history/ping-pong mechanism |
-| Transients | Frame-local particle submission (gravity/drag-aware, velocity-aligned rain, alpha motes, additive light shafts) through a persistent grow-only encoder, sorted back-to-front |
+| Transients | Frame-local particle submission (gravity/drag-aware, velocity-aligned rain, alpha motes, additive light shafts) through a persistent grow-only encoder, sorted back-to-front; deterministic per-particle kinematics are available to hosts for collision/impact decisions |
 | Accessibility | `reducedMotion` halves VHS motion weights and disables ghosting before any uniform reaches a shader |
 
 Everything above is implemented in the standalone demo. The checked-in

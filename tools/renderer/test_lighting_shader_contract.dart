@@ -24,6 +24,16 @@ void main() {
       );
     }
   }
+  const mediumTerms = <String>[
+    'float heightFogOpticalDepth(vec3 rayStart,vec3 rayEnd)',
+    'float opticalDepth=heightFogOpticalDepth(uCameraPosition,vWorldPos);',
+    'float mediumFactor=1.-exp(-opticalDepth);',
+  ];
+  for (final term in mediumTerms) {
+    if (!shadowedWorldFragSrc.contains(term)) {
+      throw StateError('shadowed-world shader lost analytic fog term: $term');
+    }
+  }
   const presentTerms = <String>[
     'uniform float uExposure;',
     'uniform float uVignette;',

@@ -56,6 +56,84 @@ void main() {
   );
   _require(scatter.isFinite && scatter >= 0, 'scattering must be finite');
 
+  final bounded = VolumetricMediaEngine.evaluateBoundedHeightFogOpticalDepth(
+    rayOrigin: const Vec3(0, 1, -5),
+    rayDirection: const Vec3(0, 0, 1),
+    maxDistance: 20,
+    volumeMin: const Vec3(-2, 0, 0),
+    volumeMax: const Vec3(2, 3, 4),
+    baseDensity: 0.02,
+    heightFalloff: 0.5,
+  );
+  _require(bounded > 0, 'bounded medium should contribute only inside volume');
+  final miss = VolumetricMediaEngine.evaluateBoundedHeightFogOpticalDepth(
+    rayOrigin: const Vec3(5, 1, -5),
+    rayDirection: const Vec3(0, 0, 1),
+    maxDistance: 20,
+    volumeMin: const Vec3(-2, 0, 0),
+    volumeMax: const Vec3(2, 3, 4),
+  );
+  _require(miss == 0, 'bounded medium miss must be transparent');
+  final nearSource = VolumetricMediaEngine.evaluateTransientSourceRadiance(
+    sourcePosition: Vec3.zero,
+    samplePosition: const Vec3(0, 0, 2),
+    sourceColor: const Vec3(1, 0.8, 0.6),
+    luminousIntensity: 4,
+    mediumTransmittance: 0.5,
+  );
+  final farSource = VolumetricMediaEngine.evaluateTransientSourceRadiance(
+    sourcePosition: Vec3.zero,
+    samplePosition: const Vec3(0, 0, 4),
+    sourceColor: const Vec3(1, 0.8, 0.6),
+    luminousIntensity: 4,
+    mediumTransmittance: 0.5,
+  );
+  _require(
+    nearSource.x > farSource.x,
+    'source radiance must fall with distance',
+  );
+  _require(
+    VolumetricMediaEngine.evaluateInverseSquareAttenuation(distance: 200) == 0,
+    'source cutoff must bound distant transient light',
+  );
+  final sourceField = VolumetricMediaEngine.evaluateSourceField(
+    rayOrigin: Vec3.zero,
+    rayDirection: const Vec3(0, 0, 1),
+    rayLength: 12,
+    scatteringCoeff: 0.2,
+    sources: const [
+      VolumetricSource(
+        id: 'mantle',
+        position: Vec3(0, 2, 3),
+        color: Vec3(1, 0.7, 0.4),
+        luminousIntensity: 3,
+      ),
+      VolumetricSource(
+        id: 'far-lightning',
+        position: Vec3(20, 20, 200),
+        color: Vec3(0.5, 0.7, 1),
+        luminousIntensity: 100,
+      ),
+    ],
+  );
+  _require(
+    sourceField.contributingSourceCount == 1 &&
+        sourceField.luminance > 0 &&
+        sourceField.dominantDirection.length > 0,
+    'source field did not retain bounded practical contribution',
+  );
+  final emptyField = VolumetricMediaEngine.evaluateSourceField(
+    rayOrigin: Vec3.zero,
+    rayDirection: const Vec3(0, 0, 1),
+    rayLength: 12,
+    scatteringCoeff: 0.2,
+    sources: const [],
+  );
+  _require(
+    emptyField.luminance == 0 && emptyField.dominantDirection == Vec3.zero,
+    'empty source field must not fabricate a shaft',
+  );
+
   _throws(
     () => VolumetricMediaEngine.evaluatePointInScattering(
       rayOrigin: Vec3.zero,

@@ -5,10 +5,18 @@ import 'package:pixeldart/rendering/webgl/generated_shaders.dart';
 void main() {
   const dry = PostProcessState();
   dry.validate();
-  const wet = PostProcessState(rainIntensity: 0.73, surfaceWetness: 0.61);
+  const wet = PostProcessState(
+    rainIntensity: 0.73,
+    surfaceWetness: 0.61,
+    surfaceSnowCoverage: 0.42,
+    surfaceDissolution: 0.28,
+  );
   wet.validate();
   if (wet.surfaceWetness != 0.61) {
     throw StateError('surface wetness did not retain its value');
+  }
+  if (wet.surfaceSnowCoverage != 0.42 || wet.surfaceDissolution != 0.28) {
+    throw StateError('surface appearance values did not retain their values');
   }
   const closed = PostProcessState(
     rainIntensity: 0.73,
@@ -59,6 +67,14 @@ void main() {
   if (!rejected) {
     throw StateError('rain window visibility above one was accepted');
   }
+  rejected = false;
+  try {
+    const PostProcessState(surfaceSnowCoverage: 1.01).validate();
+  } catch (error) {
+    if (error is! ArgumentError) rethrow;
+    rejected = true;
+  }
+  if (!rejected) throw StateError('snow coverage above one was accepted');
   final requiredUniforms = PresentProgramSource.build(
     vertexSource: presentVertSrc,
     fragmentSource: presentFragSrc,

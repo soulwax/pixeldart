@@ -2,7 +2,59 @@ import 'dart:math' as math;
 
 import '../math/vec.dart';
 
-/// Participating volumetric media, height fog, and in-scattering models in PixelDart.
+/// A host-resolved local source for volumetric media. This is deliberately
+/// separate from renderer light handles so a host can submit practicals,
+/// lightning, or emissive volumes without giving Pixeldart scene ownership.
+final class VolumetricSource {
+  final String id;
+  final Vec3 position;
+  final Vec3 color;
+  final double luminousIntensity;
+  final double referenceDistance;
+  final double cutoffDistance;
+
+  const VolumetricSource({
+    required this.id,
+    required this.position,
+    required this.color,
+    required this.luminousIntensity,
+    this.referenceDistance = 1.0,
+    this.cutoffDistance = 100.0,
+  });
+
+  void validate() {
+    if (id.isEmpty ||
+        !position.isFinite ||
+        !color.isFinite ||
+        !luminousIntensity.isFinite ||
+        !referenceDistance.isFinite ||
+        !cutoffDistance.isFinite ||
+        luminousIntensity < 0 ||
+        referenceDistance <= 0 ||
+        cutoffDistance <= 0) {
+      throw ArgumentError('invalid volumetric source $id');
+    }
+  }
+}
+
+final class VolumetricSourceFieldSample {
+  final Vec3 radiance;
+  final Vec3 dominantDirection;
+  final int contributingSourceCount;
+
+  const VolumetricSourceFieldSample({
+    required this.radiance,
+    required this.dominantDirection,
+    required this.contributingSourceCount,
+  });
+
+  double get luminance =>
+      radiance.x * 0.2126 + radiance.y * 0.7152 + radiance.z * 0.0722;
+}
+
+/// Participating volumetric media, height fog, and in-scattering models in
+/// Pixeldart. The host supplies bounded medium/source facts; this library
+/// evaluates deterministic transport terms without owning weather state.
 final class VolumetricMediaEngine {
   static const double _epsilon = 1e-8;
 
@@ -143,6 +195,202 @@ final class VolumetricMediaEngine {
       );
     }
     return opticalDepth;
+  }
+
+  /// Integrates the same exponential medium only inside a bounded world
+  /// volume. The host supplies the volume bounds for steam, a cold room, or a
+  /// shaft of dusty light; rays that miss the volume contribute no density.
+  static double evaluateBoundedHeightFogOpticalDepth({
+    required Vec3 rayOrigin,
+    required Vec3 rayDirection,
+    required double maxDistance,
+    required Vec3 volumeMin,
+    required Vec3 volumeMax,
+    double baseDensity = 0.008,
+    double heightFalloff = 1.5,
+  }) {
+    _requireFinite('rayOrigin', rayOrigin);
+    _requireFinite('rayDirection', rayDirection);
+    _requireFinite('volumeMin', volumeMin);
+    _requireFinite('volumeMax', volumeMax);
+    _requireFiniteScalar('maxDistance', maxDistance);
+    if (rayDirection.lengthSquared < _epsilon) {
+      throw ArgumentError('rayDirection must be nonzero');
+    }
+    if (maxDistance < 0 ||
+        volumeMin.x > volumeMax.x ||
+        volumeMin.y > volumeMax.y ||
+        volumeMin.z > volumeMax.z) {
+      throw ArgumentError('invalid bounded medium inputs');
+    }
+    if (maxDistance == 0) return 0;
+    final direction = rayDirection.normalized;
+    var enter = 0.0;
+    var exit = maxDistance;
+    for (final axis in [
+      (rayOrigin.x, direction.x, volumeMin.x, volumeMax.x),
+      (rayOrigin.y, direction.y, volumeMin.y, volumeMax.y),
+      (rayOrigin.z, direction.z, volumeMin.z, volumeMax.z),
+    ]) {
+      final origin = axis.$1;
+      final component = axis.$2;
+      final min = axis.$3;
+      final max = axis.$4;
+      if (component.abs() < _epsilon) {
+        if (origin < min || origin > max) return 0;
+        continue;
+      }
+      var near = (min - origin) / component;
+      var far = (max - origin) / component;
+      if (near > far) {
+        final swap = near;
+        near = far;
+        far = swap;
+      }
+      enter = math.max(enter, near);
+      exit = math.min(exit, far);
+      if (exit <= enter) return 0;
+    }
+    final start = rayOrigin + direction * enter;
+    final end = rayOrigin + direction * exit;
+    return evaluateHeightFogOpticalDepth(
+      startY: start.y,
+      endY: end.y,
+      distance: exit - enter,
+      baseDensity: baseDensity,
+      heightFalloff: heightFalloff,
+    );
+  }
+
+  /// Bounded inverse-square source attenuation for lightning and practicals.
+  /// A finite cutoff prevents distant sources from consuming unbounded light
+  /// while preserving the physically correct near-field falloff.
+  static double evaluateInverseSquareAttenuation({
+    required double distance,
+    double referenceDistance = 1.0,
+    double cutoffDistance = 100.0,
+  }) {
+    for (final (name, value) in [
+      ('distance', distance),
+      ('referenceDistance', referenceDistance),
+      ('cutoffDistance', cutoffDistance),
+    ]) {
+      _requireFiniteScalar(name, value);
+    }
+    if (distance < 0 || referenceDistance <= 0 || cutoffDistance <= 0) {
+      throw ArgumentError('invalid inverse-square attenuation inputs');
+    }
+    if (distance >= cutoffDistance) return 0;
+    final inverseSquare =
+        (referenceDistance * referenceDistance) /
+        math.max(referenceDistance * referenceDistance, distance * distance);
+    final cutoff = 1 - math.pow(distance / cutoffDistance, 4).toDouble();
+    return (inverseSquare * cutoff).clamp(0.0, 1.0).toDouble();
+  }
+
+  /// Resolves source radiance after inverse-square falloff and medium loss.
+  /// This is intentionally source-aware; it does not synthesize a global
+  /// white flash when a host has no source position.
+  static Vec3 evaluateTransientSourceRadiance({
+    required Vec3 sourcePosition,
+    required Vec3 samplePosition,
+    required Vec3 sourceColor,
+    required double luminousIntensity,
+    double mediumTransmittance = 1.0,
+    double referenceDistance = 1.0,
+    double cutoffDistance = 100.0,
+  }) {
+    _requireFinite('sourcePosition', sourcePosition);
+    _requireFinite('samplePosition', samplePosition);
+    _requireFinite('sourceColor', sourceColor);
+    _requireFiniteScalar('luminousIntensity', luminousIntensity);
+    _requireFiniteScalar('mediumTransmittance', mediumTransmittance);
+    if (luminousIntensity < 0 ||
+        mediumTransmittance < 0 ||
+        mediumTransmittance > 1) {
+      throw ArgumentError('invalid transient source radiance inputs');
+    }
+    final offset = samplePosition - sourcePosition;
+    final distance = offset.length;
+    final factor =
+        luminousIntensity *
+        evaluateInverseSquareAttenuation(
+          distance: distance,
+          referenceDistance: referenceDistance,
+          cutoffDistance: cutoffDistance,
+        ) *
+        mediumTransmittance;
+    return sourceColor * factor;
+  }
+
+  /// Aggregates bounded in-scattering from resolved practical or transient
+  /// sources along one camera ray. Sources past their cutoff contribute zero;
+  /// empty input returns zero radiance and a zero direction rather than a
+  /// fabricated white shaft.
+  static VolumetricSourceFieldSample evaluateSourceField({
+    required Vec3 rayOrigin,
+    required Vec3 rayDirection,
+    required double rayLength,
+    required Iterable<VolumetricSource> sources,
+    required double scatteringCoeff,
+    double anisotropy = 0.70,
+    double mediumTransmittance = 1.0,
+  }) {
+    _requireFinite('rayOrigin', rayOrigin);
+    _requireFinite('rayDirection', rayDirection);
+    _requireFiniteScalar('rayLength', rayLength);
+    _requireFiniteScalar('scatteringCoeff', scatteringCoeff);
+    _requireFiniteScalar('anisotropy', anisotropy);
+    _requireFiniteScalar('mediumTransmittance', mediumTransmittance);
+    if (rayDirection.lengthSquared < _epsilon ||
+        rayLength < 0 ||
+        scatteringCoeff < 0 ||
+        mediumTransmittance < 0 ||
+        mediumTransmittance > 1 ||
+        anisotropy <= -0.999 ||
+        anisotropy >= 0.999) {
+      throw ArgumentError('invalid volumetric source-field inputs');
+    }
+    var radiance = Vec3.zero;
+    var weightedDirection = Vec3.zero;
+    var count = 0;
+    for (final source in sources) {
+      source.validate();
+      final sourceDistance = (source.position - rayOrigin).length;
+      final sourceCutoff = evaluateInverseSquareAttenuation(
+        distance: sourceDistance,
+        referenceDistance: source.referenceDistance,
+        cutoffDistance: source.cutoffDistance,
+      );
+      if (sourceCutoff <= 0) continue;
+      final scalar =
+          evaluatePointInScattering(
+            rayOrigin: rayOrigin,
+            rayDirection: rayDirection,
+            rayLength: rayLength,
+            lightPos: source.position,
+            lightIntensity: source.luminousIntensity,
+            scatteringCoeff: scatteringCoeff,
+            anisotropy: anisotropy,
+          ) *
+          mediumTransmittance *
+          sourceCutoff;
+      if (scalar <= 0) continue;
+      final contribution = source.color * scalar;
+      radiance += contribution;
+      final offset = source.position - rayOrigin;
+      final distance = math.max(_epsilon, offset.length);
+      weightedDirection += offset * (scalar / distance);
+      count++;
+    }
+    final direction = weightedDirection.lengthSquared < _epsilon
+        ? Vec3.zero
+        : weightedDirection.normalized;
+    return VolumetricSourceFieldSample(
+      radiance: radiance,
+      dominantDirection: direction,
+      contributingSourceCount: count,
+    );
   }
 
   static void _requireFinite(String name, Vec3 value) {

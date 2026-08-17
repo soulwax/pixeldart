@@ -67,6 +67,35 @@ final class AtmosphericParticleFrameStats {
   }
 }
 
+/// Deterministic physical state for one atmospheric particle at a frame.
+///
+/// [spawnPosition] is the world-space birth point and [position] is the
+/// analytically integrated current point. Hosts can compare those facts with
+/// their own collision/impact surfaces without making the renderer own rooms,
+/// gameplay, or collision state.
+final class AtmosphericParticleKinematics {
+  final double age;
+  final Vec3 spawnPosition;
+  final Vec3 position;
+  final Vec3 velocity;
+
+  const AtmosphericParticleKinematics({
+    required this.age,
+    required this.spawnPosition,
+    required this.position,
+    required this.velocity,
+  });
+
+  void validate() {
+    if (!age.isFinite || age < 0.0) {
+      throw ArgumentError('atmospheric particle age must be finite and >= 0');
+    }
+    if (!spawnPosition.isFinite || !position.isFinite || !velocity.isFinite) {
+      throw ArgumentError('atmospheric particle kinematics must be finite');
+    }
+  }
+}
+
 /// Deterministic, CPU-simulated atmospheric particles emitted through a
 /// frame-local [RenderEncoder].
 ///
@@ -194,6 +223,26 @@ final class AtmosphericParticleField {
   /// Samples one particle transform without submitting it. Useful for host
   /// diagnostics and deterministic tests without a GPU.
   Transform sampleTransform(FrameInput frame, int particleIndex) {
+    final kinematics = sampleKinematics(frame, particleIndex);
+    final rotation = alignToVelocity
+        ? _rotationForVelocity(kinematics.velocity)
+        : Quat.identity;
+    return Transform(
+      translation: kinematics.position,
+      rotation: rotation,
+      scale: particleScale,
+    );
+  }
+
+  /// Samples the complete deterministic physical state for one particle.
+  ///
+  /// This is intentionally a read-only bridge for host-owned impact logic:
+  /// the renderer supplies position and velocity, while the host decides
+  /// whether a surface was hit and what gameplay/audio/settling event follows.
+  AtmosphericParticleKinematics sampleKinematics(
+    FrameInput frame,
+    int particleIndex,
+  ) {
     validate();
     if (particleIndex < 0 || particleIndex >= particleCount) {
       throw RangeError.range(
@@ -219,14 +268,14 @@ final class AtmosphericParticleField {
           (_unit(particleIndex, 3) * 2 - 1) * halfExtents.z,
         );
     final distance = _displacementAtAge(age);
-    final rotation = alignToVelocity
-        ? _rotationForVelocity(_velocityAtAge(age))
-        : Quat.identity;
-    return Transform(
-      translation: spawn + distance,
-      rotation: rotation,
-      scale: particleScale,
+    final kinematics = AtmosphericParticleKinematics(
+      age: age,
+      spawnPosition: spawn,
+      position: spawn + distance,
+      velocity: _velocityAtAge(age),
     );
+    kinematics.validate();
+    return kinematics;
   }
 
   /// Returns the analytic velocity at an arbitrary particle age. With a
@@ -246,17 +295,32 @@ final class AtmosphericParticleField {
   /// normal render graph's responsibility, so particle behaviour does not
   /// fork from the rest of the world pass.
   int submit(RenderEncoder encoder, FrameInput frame) {
+    return submitFiltered(encoder, frame, (_) => true);
+  }
+
+  /// Submits only particles accepted by a host-owned predicate. The
+  /// predicate receives deterministic kinematics so hosts can remove a
+  /// particle after a collision or inside a warm-clearance volume without
+  /// making Pixeldart own collision, rooms, or weather semantics.
+  int submitFiltered(
+    RenderEncoder encoder,
+    FrameInput frame,
+    bool Function(AtmosphericParticleKinematics) include,
+  ) {
     validate();
+    var submitted = 0;
     for (
       var particleIndex = 0;
       particleIndex < particleCount;
       particleIndex += 1
     ) {
+      final kinematics = sampleKinematics(frame, particleIndex);
+      if (!include(kinematics)) continue;
       encoder.submit(
         RetainedItemDescriptor(
           mesh: mesh,
           material: material,
-          transform: sampleTransform(frame, particleIndex),
+          transform: _transformForKinematics(kinematics),
           drawMode: drawMode,
           blendMode: blendMode,
           castsShadow: castsShadow,
@@ -265,8 +329,20 @@ final class AtmosphericParticleField {
           instanceFamilyKey: instanceFamilyKey,
         ),
       );
+      submitted += 1;
     }
-    return particleCount;
+    return submitted;
+  }
+
+  Transform _transformForKinematics(AtmosphericParticleKinematics kinematics) {
+    final rotation = alignToVelocity
+        ? _rotationForVelocity(kinematics.velocity)
+        : Quat.identity;
+    return Transform(
+      translation: kinematics.position,
+      rotation: rotation,
+      scale: particleScale,
+    );
   }
 
   /// Reports the conservative frustum result for the current field. The

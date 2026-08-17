@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import '../api/frame.dart';
+import '../api/lights.dart';
 import '../core/graph_pass.dart';
 import '../core/graph_resource.dart';
 import '../core/program_library.dart';
@@ -9,6 +10,7 @@ import '../core/render_feature.dart';
 import '../core/render_graph.dart';
 import '../webgl/device_api.dart';
 import '../webgl/draw_encoder.dart';
+import '../math/vec.dart';
 import 'pass_context_impl.dart';
 import 'volumetric_light_resources.dart';
 
@@ -124,6 +126,8 @@ final class _VolumetricLightPass implements RenderPass {
     final view = context.viewOf(destResourceName) as BoundResourceView;
     final encoder = context.commandEncoder as DrawCommandEncoder;
     final cam = resolveCamera();
+    final environment = context.frameScene.environment as FrameEnvironment;
+    final directional = environment.directionalLight;
 
     encoder.bindTarget(view.gpuObject);
     encoder.applyDrawState(descriptor.toDrawState());
@@ -134,11 +138,35 @@ final class _VolumetricLightPass implements RenderPass {
     encoder.setUniform('uSceneDepth', const UniformValue.sampler(0));
     encoder.setUniform('uNear', UniformValue.float1(cam.near));
     encoder.setUniform('uFar', UniformValue.float1(cam.far));
-    encoder.setUniform('uShaftIntensity', const UniformValue.float1(0.15));
-    encoder.setUniform('uFogDensity', const UniformValue.float1(0.008));
+    encoder.setUniform(
+      'uShaftIntensity',
+      UniformValue.float1(
+        directional == null ? 0.0 : directional.intensity * 0.15,
+      ),
+    );
+    encoder.setUniform(
+      'uFogDensity',
+      UniformValue.float1(environment.fogDensity ?? 0.0),
+    );
     encoder.setUniform('uAnisotropy', const UniformValue.float1(0.70));
-    encoder.setUniform('uLightDir', UniformValue.float3(Float32List.fromList([0.0, 0.866, 0.5])));
-    encoder.setUniform('uLightColor', UniformValue.float3(Float32List.fromList([1.0, 0.95, 0.85])));
+    final lightDirection = directional?.direction.normalized ?? Vec3.unitY;
+    final lightColor = directional?.color ?? LinearColor.black;
+    encoder.setUniform(
+      'uLightDir',
+      UniformValue.float3(
+        Float32List.fromList([
+          lightDirection.x,
+          lightDirection.y,
+          lightDirection.z,
+        ]),
+      ),
+    );
+    encoder.setUniform(
+      'uLightColor',
+      UniformValue.float3(
+        Float32List.fromList([lightColor.r, lightColor.g, lightColor.b]),
+      ),
+    );
 
     encoder.bindVertexArray(emptyVao);
     encoder.drawArrays(first: 0, count: 3);

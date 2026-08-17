@@ -1,7 +1,9 @@
-/// Post-processing feature weights, not game states (§5.2). The caller's
+/// Frame presentation and appearance weights, not game states (§5.2).
 /// A host frame adapter maps simulation time, interaction data, panel state,
-/// `RuptureState`, URL profile, and accessibility preferences into these
-/// values; no switch on a game-side step type belongs in `lib/rendering/**`.
+/// URL profile, and accessibility preferences into these values. Weather and
+/// material facts are resolved by the host; Pixeldart validates and applies
+/// them consistently across the world and presentation passes. No switch on
+/// a game-side step type belongs in `lib/rendering/**`.
 final class PostProcessState {
   final double exposure;
   final double bloomStrength;
@@ -18,6 +20,12 @@ final class PostProcessState {
   /// Material wetness response in [0, 1], independent of screen-space
   /// precipitation.
   final double surfaceWetness;
+
+  /// Host-resolved snow coverage and slow material dissolution. These are
+  /// appearance facts only; accumulation, heat and phase changes remain
+  /// simulation-owned by the caller.
+  final double surfaceSnowCoverage;
+  final double surfaceDissolution;
 
   /// Aperture visibility for physical precipitation in [0, 1]. A closed room
   /// can suppress exterior particle submission without inventing an interior
@@ -47,6 +55,8 @@ final class PostProcessState {
     this.grain = 0,
     this.rainIntensity = 0,
     this.surfaceWetness = 0,
+    this.surfaceSnowCoverage = 0,
+    this.surfaceDissolution = 0,
     this.rainWindowVisibility = 1,
     this.ditherStrength = 0,
     this.colorGradeStrength = 0,
@@ -86,6 +96,18 @@ final class PostProcessState {
         '$surfaceWetness',
       );
     }
+    if (surfaceSnowCoverage > 1) {
+      throw ArgumentError(
+        'PostProcessState.surfaceSnowCoverage must be in [0, 1]: '
+        '$surfaceSnowCoverage',
+      );
+    }
+    if (surfaceDissolution > 1) {
+      throw ArgumentError(
+        'PostProcessState.surfaceDissolution must be in [0, 1]: '
+        '$surfaceDissolution',
+      );
+    }
     if (rainWindowVisibility > 1) {
       throw ArgumentError(
         'PostProcessState.rainWindowVisibility must be in [0, 1]: '
@@ -103,6 +125,8 @@ final class PostProcessState {
     'grain': grain,
     'rainIntensity': rainIntensity,
     'surfaceWetness': surfaceWetness,
+    'surfaceSnowCoverage': surfaceSnowCoverage,
+    'surfaceDissolution': surfaceDissolution,
     'rainWindowVisibility': rainWindowVisibility,
     'ditherStrength': ditherStrength,
     'colorGradeStrength': colorGradeStrength,

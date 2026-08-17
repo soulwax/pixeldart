@@ -92,6 +92,8 @@ uniform float uFogHeightFalloff;
 uniform float uFogDensity;
 uniform float uReceivesShadow;
 uniform float uRainWetness;
+uniform float uSurfaceSnowCoverage;
+uniform float uSurfaceDissolution;
 layout(location=0)out vec4 oColor;
 layout(location=1)out vec4 oGlow;
 
@@ -190,26 +192,33 @@ float sampleShadow(vec3 projCoord,float bias){
   return projCoord.z-bias>shadowDepth?0.:1.;
 }
 
-// §8.5's fog: "distance plus restrained height/damp modulation" — the base
-// term is a smoothstepped distance ramp (uFogStart..uFogEnd), not a plain
-// linear one: a linear ramp's density right at uFogStart is already
-// visibly nonzero, which reads as a hard onset band across a large
-// continuous surface like the ground plane. smoothstep's derivative is
-// zero at both ends, so density stays low just past uFogStart and eases
-// in gradually instead. Height falloff and density are each optional in
-// FrameEnvironment (nullable there, 0.0 here) and each written so 0.0 is
-// an exact no-op, rather than needing a separate enabled flag per term:
-//   - height: exp(-0*y) == 1, an identity multiply, when no falloff is set;
-//   - density: 1-exp(-0*depth) == 0, so max(distance, 0) leaves the plain
-//     distance term untouched when no density is set. Density can only
-//     ever push fog stronger than the base distance ramp, never weaker —
-//     "restrained" in the sense that it augments, never overrides.
+// §8.5's fog keeps the smooth distance ramp for authored horizon control, but
+// the participating-medium term is an analytic optical depth along the actual
+// camera-to-surface segment. For rho(y)=density*exp(-falloff*max(y,0)), the
+// integral has a stable constant-height limit and therefore does not shimmer
+// when a surface is nearly level with the camera. Zero density remains an
+// exact no-op; the host can still use the distance ramp independently.
+float heightFogOpticalDepth(vec3 rayStart,vec3 rayEnd){
+  float segmentLength=length(rayEnd-rayStart);
+  if(segmentLength<=0.0001||uFogDensity<=0.)return 0.;
+  float falloff=max(uFogHeightFalloff,0.);
+  float h0=max(rayStart.y,0.);
+  float h1=max(rayEnd.y,0.);
+  float integral;
+  if(falloff<=0.||abs(h1-h0)<=0.0001){
+    integral=segmentLength*exp(-falloff*h0);
+  }else{
+    float denominator=falloff*(h1-h0);
+    integral=segmentLength*(exp(-falloff*h0)-exp(-falloff*h1))/denominator;
+  }
+  return max(uFogDensity*integral,0.);
+}
+
 float fogFactor(float viewDepth,float worldY){
   float distFactor=smoothstep(uFogStart,uFogEnd,viewDepth);
-  float densityFactor=1.-exp(-uFogDensity*viewDepth);
-  float factor=max(distFactor,densityFactor);
-  float heightFactor=exp(-uFogHeightFalloff*max(worldY,0.));
-  return clamp(factor*heightFactor,0.,1.);
+  float opticalDepth=heightFogOpticalDepth(uCameraPosition,vWorldPos);
+  float mediumFactor=1.-exp(-opticalDepth);
+  return clamp(max(distFactor,mediumFactor),0.,1.);
 }
 
 float shadowFactor(float ndotl){
@@ -364,6 +373,19 @@ void main(){
   float wetDepth=1.0-smoothstep(2.0,18.0,max(vViewDepth,0.0));
   float wetness=clamp(uRainWetness,0.0,1.0)*wetDepth;
   baseColor=mix(baseColor,baseColor*vec3(0.84,0.90,0.98),wetness*0.22);
+  // Snow is a host-resolved surface state, not a post-process decal. It
+  // favours upward-facing material, recedes under melt/dissolution, and is
+  // evaluated before lighting so its response remains depth-correct.
+  float upward=clamp(n.y*0.5+0.5,0.0,1.0);
+  float snowCoverage=clamp(uSurfaceSnowCoverage,0.0,1.0)*
+    smoothstep(0.18,0.82,upward)*(1.0-clamp(uSurfaceDissolution,0.0,1.0)*0.72);
+  baseColor=mix(baseColor,vec3(0.78,0.86,0.95),snowCoverage*0.82);
+  // Warmth changes the material gradually: a dissolved surface is darker,
+  // less rough and more moisture-responsive, but never becomes transparent
+  // or disappears in one frame.
+  float dissolution=clamp(uSurfaceDissolution,0.0,1.0);
+  baseColor=mix(baseColor,baseColor*vec3(0.82,0.86,0.90),dissolution*0.16);
+  rough=mix(rough,max(0.06,rough*0.58),dissolution*0.72);
   // Keep reflected energy available to the specular lobe. The previous
   // diffuse-first clamp clipped bright ceramic response before tone mapping,
   // producing the broad plastic patches visible in low-roughness samples.
