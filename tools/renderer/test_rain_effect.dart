@@ -18,10 +18,12 @@ void main() {
   if (closed.rainWindowVisibility != 0.12) {
     throw StateError('rain window visibility did not retain its value');
   }
-  if (presentFragSrc.contains('rainStreak') == false ||
-      !presentFragSrc.contains('uRainIntensity') ||
-      !presentFragSrc.contains('clamp(uRainIntensity,0.,1.)')) {
-    throw StateError('present shader does not expose deterministic rain');
+  if (presentFragSrc.contains('rainStreak') ||
+      presentFragSrc.contains('uRainIntensity') ||
+      presentFragSrc.contains('uRainWindowVisibility')) {
+    throw StateError(
+      'present shader still contains a screen-space precipitation path',
+    );
   }
   var rejected = false;
   try {
@@ -57,18 +59,13 @@ void main() {
   if (!rejected) {
     throw StateError('rain window visibility above one was accepted');
   }
-  if (!PresentProgramSource.build(
+  final requiredUniforms = PresentProgramSource.build(
     vertexSource: presentVertSrc,
     fragmentSource: presentFragSrc,
-  ).requiredUniforms.contains('uRainIntensity')) {
-    throw StateError('present program omitted the rain uniform');
-  }
-  if (!PresentProgramSource.build(
-        vertexSource: presentVertSrc,
-        fragmentSource: presentFragSrc,
-      ).requiredUniforms.contains('uRainWindowVisibility') ||
-      !presentFragSrc.contains('clamp(uRainWindowVisibility,0.,1.)')) {
-    throw StateError('present program omitted the aperture rain uniform');
+  ).requiredUniforms;
+  if (requiredUniforms.contains('uRainIntensity') ||
+      requiredUniforms.contains('uRainWindowVisibility')) {
+    throw StateError('present program still requires precipitation uniforms');
   }
   print('Renderer rain effect contract fixture passed.');
 }

@@ -28,20 +28,27 @@ void main() {
     'uniform float uExposure;',
     'uniform float uVignette;',
     'uniform float uGrain;',
-    'uniform float uRainIntensity;',
-    'uniform float uRainWindowVisibility;',
     'uniform float uOutputEncoding;',
     'uniform float uToneMap;',
     'vec3 reinhardToneMap(vec3 color)',
     'vec3 linearToSrgb(vec3 color)',
     'if(uOutputEncoding>.5) color=linearToSrgb',
     'color*=1.-clamp(uVignette,0.,1.)*vignette;',
-    'color=mix(color,vec3(.56,.67,.76),rain*rainStreak(vUv)*.16);',
-    'clamp(uRainWindowVisibility,0.,1.)',
   ];
   for (final term in presentTerms) {
     if (!presentFragSrc.contains(term)) {
       throw StateError('present shader lost composite term: $term');
+    }
+  }
+  for (final forbidden in [
+    'rainStreak',
+    'uRainIntensity',
+    'uRainWindowVisibility',
+  ]) {
+    if (presentFragSrc.contains(forbidden)) {
+      throw StateError(
+        'present shader must not paint screen-space precipitation: $forbidden',
+      );
     }
   }
   print('Renderer lighting/composite shader-contract fixtures passed.');

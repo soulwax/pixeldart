@@ -10,18 +10,18 @@ final class PostProcessState {
   final double vignette;
   final double grain;
 
-  /// Deterministic screen-space precipitation amount in [0, 1].
-  /// Zero is a true no-op; callers map weather facts into this presentation
-  /// value without teaching the renderer about game states.
+  /// Host-provided precipitation amount in [0, 1]. The present pass never
+  /// paints precipitation over the image; hosts use this value when mapping
+  /// weather facts into physical particle submission and related policies.
   final double rainIntensity;
 
   /// Material wetness response in [0, 1], independent of screen-space
   /// precipitation.
   final double surfaceWetness;
 
-  /// Aperture visibility for screen-space precipitation in [0, 1]. A closed
-  /// room can retain a faint exterior glint without receiving a full-screen
-  /// interior rain layer. This is presentation data, not a portal rule.
+  /// Aperture visibility for physical precipitation in [0, 1]. A closed room
+  /// can suppress exterior particle submission without inventing an interior
+  /// screen overlay. This is presentation data, not a portal rule.
   final double rainWindowVisibility;
   final double ditherStrength;
   final double colorGradeStrength;

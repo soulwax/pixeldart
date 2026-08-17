@@ -77,6 +77,33 @@ final class ModelPackageSceneBinding {
     _remove(oldItems, oldMeshes, oldHandoff);
   }
 
+  /// Updates visibility for every retained part without rebuilding meshes or
+  /// touching the package cache. Hosts use this when room/PVS state changes.
+  void setVisibilityMask(int mask) {
+    _ensureUsable();
+    if (_handoff == null) {
+      throw StateError('model package is not attached');
+    }
+    for (final item in _items) {
+      final current = world.itemView(item).descriptor;
+      world.updateItem(
+        item,
+        RetainedItemDescriptor(
+          mesh: current.mesh,
+          material: current.material,
+          transform: current.transform,
+          visibilityMask: mask,
+          drawMode: current.drawMode,
+          blendMode: current.blendMode,
+          castsShadow: current.castsShadow,
+          receivesShadow: current.receivesShadow,
+          sortTiebreaker: current.sortTiebreaker,
+          instanceFamilyKey: current.instanceFamilyKey,
+        ),
+      );
+    }
+  }
+
   void dispose() {
     if (_disposed) return;
     _disposed = true;

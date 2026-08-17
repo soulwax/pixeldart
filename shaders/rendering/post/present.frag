@@ -5,8 +5,6 @@ uniform sampler2D uTex;
 uniform float uExposure;
 uniform float uVignette;
 uniform float uGrain;
-uniform float uRainIntensity;
-uniform float uRainWindowVisibility;
 uniform float uOutputEncoding;
 uniform float uToneMap;
 out vec4 oColor;
@@ -26,16 +24,6 @@ vec3 linearToSrgb(vec3 color){
   return mix(low,high,cutoff);
 }
 
-float rainStreak(vec2 uv){
-  // Stable diagonal streaks: no time or allocation dependency, and no work
-  // when uRainIntensity is zero. The small hash offset avoids a tiled comb.
-  vec2 cell=vec2(floor(uv.x*96.0),floor(uv.y*18.0));
-  float phase=fract(uv.x*96.0+uv.y*18.0+hash(cell));
-  float width=smoothstep(.08,.0,abs(phase-.5));
-  float sparse=step(.72,hash(cell+vec2(19.0,7.0)));
-  return width*sparse;
-}
-
 void main(){
   vec4 source=texture(uTex,vUv);
   // Exposure operates in scene-linear space; tone mapping prevents HDR
@@ -46,9 +34,8 @@ void main(){
   float vignette=smoothstep(.35,.78,edge);
   color*=1.-clamp(uVignette,0.,1.)*vignette;
   if(uOutputEncoding>.5) color=linearToSrgb(max(color,vec3(0.)));
-  float rain=clamp(uRainIntensity,0.,1.)*
-    clamp(uRainWindowVisibility,0.,1.);
-  color=mix(color,vec3(.56,.67,.76),rain*rainStreak(vUv)*.16);
+  // Atmospheric precipitation is submitted as depth-tested world geometry;
+  // the present pass must never paint weather over unrelated surfaces.
   // A stable screen-space grain keeps captures reproducible for a fixed
   // viewport while still giving the dark gothic presentation a fine film
   // texture. It is deliberately tiny and never changes alpha.

@@ -226,10 +226,11 @@ Gallery index: [all features](.github/screenshots/00-all-features-on.jpg) ·
 | AO | Half-resolution 8-sample SSAO reconstructing position from depth and normals from derivatives, depth-aware bilateral blur, modulates ambient only |
 | Emissive | Real MRT (`COLOR_ATTACHMENT1`), driven by material emissive texture × strength — never inferred from final luma — surviving explicit MSAA resolve |
 | Output | Explicit MSAA resolve, scene-linear exposure/Reinhard tone map, selectable linear/sRGB output encoding, and configuration-scoped resource extents |
-| Post | Bloom (separable gaussian, additive composite), DOF (circle-of-confusion vs. focus distance/range), 3D-LUT color grade, fog (distance + optional height/density, never applied to emissive), deterministic screen-space rain streaks with aperture weighting, and depth-weighted near-surface wetness driven by `PostProcessState.rainIntensity` |
+| Post | Bloom (separable gaussian, additive composite), DOF (circle-of-confusion vs. focus distance/range), 3D-LUT color grade, fog (distance + optional height/density, never applied to emissive), and depth-weighted near-surface wetness driven by `PostProcessState.surfaceWetness`; precipitation is physical world geometry, never a full-screen rain overlay |
+| Media | Public bounded participating-media helpers: exact exponential height-fog optical depth/transmittance and validated point-light in-scattering with Henyey–Greenstein anisotropy |
 | PS1 | Vertex snapping in NDC before the perspective divide, affine UV warp (solved without `noperspective`, gated per material × per frame), color quantization to N bits with Bayer 4×4 ordered dithering |
 | VHS | Final recording stage with six independent weights — chroma bleed, tracking jitter, YIQ tape noise, head-switch tear, dropout streaks, frame ghosting via the graph's history/ping-pong mechanism |
-| Transients | Frame-local particle submission (alpha motes, additive light shafts) through a persistent grow-only encoder, sorted back-to-front |
+| Transients | Frame-local particle submission (gravity/drag-aware, velocity-aligned rain, alpha motes, additive light shafts) through a persistent grow-only encoder, sorted back-to-front |
 | Accessibility | `reducedMotion` halves VHS motion weights and disables ghosting before any uniform reaches a shader |
 
 Everything above is implemented in the standalone demo. The checked-in

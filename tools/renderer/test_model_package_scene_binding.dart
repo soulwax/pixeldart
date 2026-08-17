@@ -91,6 +91,13 @@ Future<void> main() async {
         world.items.single.descriptor.transform.translation.x == 4,
     'placement transform and visibility reach the retained descriptor',
   );
+  binding.setVisibilityMask(0);
+  require(
+    world.items.single.descriptor.visibilityMask == 0 &&
+        world.items.single.descriptor.transform.translation.x == 4,
+    'visibility updates preserve the retained placement',
+  );
+  binding.setVisibilityMask(4);
   binding.switchLod('LOD1');
   require(
     binding.activeLod == 'LOD1' && world.items.length == 1,
@@ -199,7 +206,10 @@ Future<void> main() async {
   renderer.endFrame();
   require(recovery.itemCount == 1, 'context restore lost retained model item');
   recovery.dispose();
-  require(world.items.isEmpty && cache.cachedCount == 0, 'context recovery leaked model ownership');
+  require(
+    world.items.isEmpty && cache.cachedCount == 0,
+    'context recovery leaked model ownership',
+  );
   renderer.dispose();
   print('RF-06 model package scene binding tests passed.');
 }
