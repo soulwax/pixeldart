@@ -268,6 +268,7 @@ extension on SceneRendererImpl {
       blendedItemsBackToFront: sortBlended(blended),
       camera: frame.camera,
       environment: frame.environment,
+      timeSeconds: frame.timeSeconds,
       post: frame.post,
     );
     final encoder = DeviceDrawCommandEncoder(device, telemetry: telemetry);
@@ -341,6 +342,8 @@ final class _FrameScene implements FrameSceneData {
   @override
   final Object environment;
   @override
+  final double timeSeconds;
+  @override
   final Object post;
 
   const _FrameScene({
@@ -348,6 +351,7 @@ final class _FrameScene implements FrameSceneData {
     required this.blendedItemsBackToFront,
     required this.camera,
     required this.environment,
+    required this.timeSeconds,
     required this.post,
   });
 }

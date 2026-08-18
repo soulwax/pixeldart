@@ -26,7 +26,7 @@ final class BoundPassContext implements RenderPassContext {
   const BoundPassContext({
     required this.views,
     required this.encoder,
-    required this.skyboxTexture,
+    this.skyboxTexture,
     required this.frameScene,
   });
 

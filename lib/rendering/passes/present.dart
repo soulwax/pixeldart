@@ -85,6 +85,20 @@ final class PresentProgramSource {
       'uSkyTextureSrgb',
       'uInverseProjection',
       'uInverseView',
+      'uCameraPosition',
+      'uCloudCoverage',
+      'uCloudDensity',
+      'uCloudBaseHeight',
+      'uCloudThickness',
+      'uCloudScale',
+      'uCloudWind',
+      'uCloudPhase',
+      'uCloudDetail',
+      'uCloudSilverLining',
+      'uCloudSampleCount',
+      'uCloudLightDirection',
+      'uCloudLightColor',
+      'uCloudLightIntensity',
     ],
   );
 }
@@ -302,6 +316,75 @@ final class _PresentPass implements RenderPass {
       ..setUniform(
         'uInverseView',
         UniformValue.mat4(Float32List.fromList(camera.inverseView.m)),
+      )
+      ..setUniform(
+        'uCameraPosition',
+        UniformValue.float3(
+          Float32List.fromList([camera.eye.x, camera.eye.y, camera.eye.z]),
+        ),
+      )
+      ..setUniform(
+        'uCloudCoverage',
+        UniformValue.float1(skybox?.cloudCoverage ?? 0),
+      )
+      ..setUniform(
+        'uCloudDensity',
+        UniformValue.float1(skybox?.cloudDensity ?? 0),
+      )
+      ..setUniform(
+        'uCloudBaseHeight',
+        UniformValue.float1(skybox?.cloudBaseHeight ?? 650),
+      )
+      ..setUniform(
+        'uCloudThickness',
+        UniformValue.float1(skybox?.cloudThickness ?? 350),
+      )
+      ..setUniform('uCloudScale', UniformValue.float1(skybox?.cloudScale ?? 0))
+      ..setUniform(
+        'uCloudWind',
+        UniformValue.float2(
+          Float32List.fromList([
+            skybox?.cloudWindX ?? 0,
+            skybox?.cloudWindZ ?? 0,
+          ]),
+        ),
+      )
+      ..setUniform('uCloudPhase', UniformValue.float1(skybox?.cloudPhase ?? 0))
+      ..setUniform(
+        'uCloudDetail',
+        UniformValue.float1(skybox?.cloudDetail ?? 0),
+      )
+      ..setUniform(
+        'uCloudSilverLining',
+        UniformValue.float1(skybox?.cloudSilverLining ?? 0),
+      )
+      ..setUniform(
+        'uCloudSampleCount',
+        UniformValue.float1((skybox?.cloudSampleCount ?? 4).toDouble()),
+      )
+      ..setUniform(
+        'uCloudLightDirection',
+        UniformValue.float3(
+          Float32List.fromList([
+            environment.directionalLight?.direction.x ?? 0,
+            environment.directionalLight?.direction.y ?? 1,
+            environment.directionalLight?.direction.z ?? 0,
+          ]),
+        ),
+      )
+      ..setUniform(
+        'uCloudLightColor',
+        UniformValue.float3(
+          Float32List.fromList([
+            environment.directionalLight?.color.r ?? 1,
+            environment.directionalLight?.color.g ?? 1,
+            environment.directionalLight?.color.b ?? 1,
+          ]),
+        ),
+      )
+      ..setUniform(
+        'uCloudLightIntensity',
+        UniformValue.float1(environment.directionalLight?.intensity ?? 0),
       );
     encoder.drawArrays(first: 0, count: 3);
   }

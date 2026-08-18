@@ -317,6 +317,8 @@ final class _EmptyFrameScene implements FrameSceneData {
   Object get environment => const Object();
   @override
   Object get post => const Object();
+  @override
+  double get timeSeconds => 0;
 }
 
 final class _ScopedContext implements RenderPassContext {

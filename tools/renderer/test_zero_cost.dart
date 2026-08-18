@@ -78,6 +78,8 @@ final class _FakeFrameScene implements FrameSceneData {
   Object get environment => const FrameEnvironment();
   @override
   Object get post => postState;
+  @override
+  double get timeSeconds => 0;
 }
 
 final class _AlwaysAvailableResources implements RenderPassResources {

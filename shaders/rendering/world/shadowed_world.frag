@@ -396,6 +396,11 @@ void main(){
   // Avoid singular highlights while retaining a visibly sharp porcelain
   // response at the authored low end of the roughness range.
   float specRough=max(0.045,sqrt(rough*rough+normalVariance*0.18));
+  // A continuous water film forms a second dielectric lobe. It smooths the
+  // authored surface only as coverage rises, so damp cloth stays diffuse
+  // while puddled stone gains a tight grazing reflection.
+  float waterCoverage=smoothstep(0.20,0.88,wetness)*(1.0-0.35*rough);
+  specRough=mix(specRough,max(0.035,specRough*0.18),waterCoverage);
   vec3 viewDir=normalize(uCameraPosition-vWorldPos);
   vec3 specular=vec3(0.0);
   specular+=specularContribution(n,viewDir,normalize(uDirectionalDirection),
@@ -438,7 +443,8 @@ void main(){
   float coatNdotL=max(dot(n,coatLight),0.);
   float coatPower=mix(128.0,8.0,clamp(uClearcoatRoughness,0.0,1.0));
   float coatFresnel=0.04+0.96*pow(1.0-coatNdotV,5.0);
-  float coat=clamp(uClearcoatStrength,0.0,1.0)*coatFresnel*
+  float coatStrength=max(clamp(uClearcoatStrength,0.0,1.0),waterCoverage*0.82);
+  float coat=coatStrength*coatFresnel*
     pow(coatNdotH,coatPower)*coatNdotL*uDirectionalIntensity*
     uDirectLightScale*uSpecularScale;
   lit+=uDirectionalColor*coat;

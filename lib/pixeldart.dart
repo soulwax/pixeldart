@@ -17,6 +17,7 @@ export 'rendering/api/scene.dart';
 export 'rendering/api/settings.dart';
 export 'rendering/api/stats.dart';
 export 'rendering/particles/atmospheric_particles.dart';
+export 'rendering/particles/flow_particles.dart';
 export 'rendering/atmosphere/volumetric_media.dart';
 export 'rendering/atmosphere/thermal_field.dart';
 export 'rendering/optics/reflection.dart';

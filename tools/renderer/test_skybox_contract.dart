@@ -13,6 +13,9 @@ void main() {
     rotationRadians: 0.45,
     exposure: 1.1,
     textureIsSrgb: true,
+    cloudCoverage: 0.8,
+    cloudDensity: 0.7,
+    cloudSampleCount: 16,
   );
   declaration.validate();
 
@@ -29,6 +32,32 @@ void main() {
     // Expected: an image-backed sky must not silently erase its exposure.
   }
 
+  try {
+    const SkyboxDeclaration(
+      assetId: 'invalid-clouds',
+      horizon: LinearColor.black,
+      zenith: LinearColor.white,
+      ground: LinearColor.black,
+      cloudCoverage: 1.1,
+    ).validate();
+    fail('cloud coverage above one was accepted');
+  } on ArgumentError {
+    // Expected: cloud coverage is a bounded medium input.
+  }
+
+  try {
+    const SkyboxDeclaration(
+      assetId: 'invalid-wind',
+      horizon: LinearColor.black,
+      zenith: LinearColor.white,
+      ground: LinearColor.black,
+      cloudWindX: 1001,
+    ).validate();
+    fail('unbounded cloud wind was accepted');
+  } on ArgumentError {
+    // Expected: cloud advection is bounded before reaching the shader.
+  }
+
   final source = PresentProgramSource.build(
     vertexSource: 'vertex',
     fragmentSource: 'fragment',
@@ -41,6 +70,20 @@ void main() {
     'uSkyTextureSrgb',
     'uInverseProjection',
     'uInverseView',
+    'uCameraPosition',
+    'uCloudCoverage',
+    'uCloudDensity',
+    'uCloudBaseHeight',
+    'uCloudThickness',
+    'uCloudScale',
+    'uCloudWind',
+    'uCloudPhase',
+    'uCloudDetail',
+    'uCloudSilverLining',
+    'uCloudSampleCount',
+    'uCloudLightDirection',
+    'uCloudLightColor',
+    'uCloudLightIntensity',
   ]) {
     if (!source.requiredUniforms.contains(uniform)) {
       fail('presentation contract omits $uniform');

@@ -79,6 +79,21 @@ final class SkyboxDeclaration {
   final double exposure;
   final bool textureIsSrgb;
 
+  /// Bounded procedural cloud shell controls. The host supplies coverage,
+  /// density, altitude, wind, and phase; Pixeldart owns the ray-marched sky
+  /// presentation and can reduce samples without changing scene geometry.
+  final double cloudCoverage;
+  final double cloudDensity;
+  final double cloudBaseHeight;
+  final double cloudThickness;
+  final double cloudScale;
+  final double cloudWindX;
+  final double cloudWindZ;
+  final double cloudPhase;
+  final double cloudDetail;
+  final double cloudSilverLining;
+  final int cloudSampleCount;
+
   const SkyboxDeclaration({
     required this.assetId,
     this.texture,
@@ -90,6 +105,17 @@ final class SkyboxDeclaration {
     this.rotationRadians = 0,
     this.exposure = 1,
     this.textureIsSrgb = true,
+    this.cloudCoverage = 0,
+    this.cloudDensity = 0,
+    this.cloudBaseHeight = 650,
+    this.cloudThickness = 350,
+    this.cloudScale = 0.0012,
+    this.cloudWindX = 0,
+    this.cloudWindZ = 0,
+    this.cloudPhase = 0,
+    this.cloudDetail = 0.55,
+    this.cloudSilverLining = 0.25,
+    this.cloudSampleCount = 12,
   });
 
   void validate() {
@@ -105,7 +131,35 @@ final class SkyboxDeclaration {
         starDensity > 0.1 ||
         !rotationRadians.isFinite ||
         !exposure.isFinite ||
-        exposure <= 0) {
+        exposure <= 0 ||
+        cloudCoverage < 0 ||
+        cloudCoverage > 1 ||
+        !cloudCoverage.isFinite ||
+        cloudDensity < 0 ||
+        cloudDensity > 1 ||
+        !cloudDensity.isFinite ||
+        cloudBaseHeight <= 0 ||
+        cloudBaseHeight > 100000 ||
+        !cloudBaseHeight.isFinite ||
+        cloudThickness <= 0 ||
+        cloudThickness > 100000 ||
+        !cloudThickness.isFinite ||
+        cloudScale <= 0 ||
+        cloudScale > 1 ||
+        !cloudScale.isFinite ||
+        !cloudWindX.isFinite ||
+        !cloudWindZ.isFinite ||
+        cloudWindX.abs() > 1000 ||
+        cloudWindZ.abs() > 1000 ||
+        !cloudPhase.isFinite ||
+        cloudDetail < 0 ||
+        cloudDetail > 1 ||
+        !cloudDetail.isFinite ||
+        cloudSilverLining < 0 ||
+        cloudSilverLining > 1 ||
+        !cloudSilverLining.isFinite ||
+        cloudSampleCount < 4 ||
+        cloudSampleCount > 24) {
       throw ArgumentError('SkyboxDeclaration contains invalid values');
     }
   }

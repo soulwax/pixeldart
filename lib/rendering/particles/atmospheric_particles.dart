@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import '../api/capabilities.dart';
 import '../api/frame.dart';
 import '../api/handles.dart';
 import '../api/scene.dart';
@@ -25,6 +26,30 @@ final class AtmosphericParticleBudget {
     required this.requestedCount,
     required this.maximumCount,
   });
+
+  /// Resolves the renderer-owned atmospheric cap for an effective quality
+  /// profile. The host still chooses the requested count; Pixeldart only
+  /// supplies the bounded profile policy and reports whether it capped it.
+  factory AtmosphericParticleBudget.forProfile({
+    required QualityProfile profile,
+    required int requestedCount,
+  }) {
+    profile.validate();
+    final maximumCount = switch (profile.kind) {
+      QualityProfileKind.safe => 0,
+      QualityProfileKind.standard => 32,
+      QualityProfileKind.high => 96,
+      QualityProfileKind.deterministicReference => 64,
+      QualityProfileKind.shipping => 128,
+      QualityProfileKind.legacyComparison => 32,
+    };
+    final budget = AtmosphericParticleBudget(
+      requestedCount: requestedCount,
+      maximumCount: maximumCount,
+    );
+    budget.validate();
+    return budget;
+  }
 
   void validate() {
     if (requestedCount < 0 || maximumCount < 0) {
@@ -63,6 +88,46 @@ final class AtmosphericParticleFrameStats {
         'atmospheric visibility counts do not reconcile: '
         '$candidateCount != $visibleCount + $culledCount',
       );
+    }
+  }
+}
+
+/// One renderer-owned atmospheric observation for diagnostics and developer
+/// tooling. It reports field facts only; the host remains the authority for
+/// weather meaning, impacts, and room exposure.
+final class AtmosphericParticleDiagnostics {
+  final int requestedCount;
+  final int effectiveCount;
+  final bool budgetCapped;
+  final int candidateCount;
+  final int frustumVisibleCount;
+  final int frustumCulledCount;
+  final double averageSpeedMps;
+
+  const AtmosphericParticleDiagnostics({
+    required this.requestedCount,
+    required this.effectiveCount,
+    required this.budgetCapped,
+    required this.candidateCount,
+    required this.frustumVisibleCount,
+    required this.frustumCulledCount,
+    required this.averageSpeedMps,
+  });
+
+  void validate() {
+    if (requestedCount < 0 ||
+        effectiveCount < 0 ||
+        effectiveCount > requestedCount ||
+        candidateCount != effectiveCount ||
+        frustumVisibleCount < 0 ||
+        frustumCulledCount < 0 ||
+        frustumVisibleCount + frustumCulledCount != candidateCount ||
+        !averageSpeedMps.isFinite ||
+        averageSpeedMps < 0) {
+      throw StateError('atmospheric diagnostics do not reconcile');
+    }
+    if (budgetCapped != (effectiveCount != requestedCount)) {
+      throw StateError('atmospheric budget cap state does not reconcile');
     }
   }
 }
@@ -375,6 +440,40 @@ final class AtmosphericParticleField {
     );
     stats.validate();
     return stats;
+  }
+
+  /// Resolves one internally consistent diagnostic snapshot. The caller must
+  /// construct the field with the budget's effective count; rejecting a
+  /// mismatch prevents the lab from reporting an unapplied cap as rendered
+  /// geometry.
+  AtmosphericParticleDiagnostics diagnostics(
+    FrameInput frame, {
+    required AtmosphericParticleBudget budget,
+  }) {
+    validate();
+    budget.validate();
+    if (particleCount != budget.effectiveCount) {
+      throw StateError(
+        'atmospheric field count $particleCount does not match '
+        'budget effective count ${budget.effectiveCount}',
+      );
+    }
+    final visibility = frameStats(frame);
+    var speedTotal = 0.0;
+    for (var index = 0; index < particleCount; index++) {
+      speedTotal += sampleKinematics(frame, index).velocity.length;
+    }
+    final result = AtmosphericParticleDiagnostics(
+      requestedCount: budget.requestedCount,
+      effectiveCount: budget.effectiveCount,
+      budgetCapped: budget.wasCapped,
+      candidateCount: particleCount,
+      frustumVisibleCount: visibility.visibleCount,
+      frustumCulledCount: visibility.culledCount,
+      averageSpeedMps: particleCount == 0 ? 0 : speedTotal / particleCount,
+    );
+    result.validate();
+    return result;
   }
 
   Vec3 _velocityAtAge(double age) {

@@ -90,6 +90,8 @@ final class _FakeFrameScene implements FrameSceneData {
   Object get environment => _fakeEnvironment;
   @override
   Object get post => const PostProcessState();
+  @override
+  double get timeSeconds => 0;
 }
 
 FeatureGraphResult _buildAndValidate(FakeGpuDevice device) {

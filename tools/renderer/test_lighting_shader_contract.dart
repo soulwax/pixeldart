@@ -25,6 +25,8 @@ void main() {
     'uniform float uRainWetness;',
     'smoothstep(2.0,18.0,max(vViewDepth,0.0))',
     'wetness*(0.035+0.075*(1.0-rough))',
+    'float waterCoverage=smoothstep(0.20,0.88,wetness)',
+    'float coatStrength=max(clamp(uClearcoatStrength,0.0,1.0),waterCoverage*0.82)',
   ];
   for (final term in wetnessTerms) {
     if (!shadowedWorldFragSrc.contains(term)) {
@@ -77,6 +79,10 @@ void main() {
     'vec3 linearToSrgb(vec3 color)',
     'if(uOutputEncoding>.5) color=linearToSrgb',
     'color*=1.-clamp(uVignette,0.,1.)*vignette;',
+    'uniform float uCloudCoverage;',
+    'float cloudDensityAt(vec3 position)',
+    'vec4 volumetricClouds(vec3 worldDirection)',
+    'source.rgb=source.rgb* (1.0-clouds.a)+clouds.rgb;',
   ];
   for (final term in presentTerms) {
     if (!presentFragSrc.contains(term)) {

@@ -53,6 +53,20 @@ the stable facade. The lifecycle fixture is separate:
 `dart run tools/test_plib03_downstream_host.dart` exercises a generic scene,
 resize, context loss/restore, and disposal against a deterministic fake device.
 
+Atmospheric fields expose renderer-only diagnostics through the same stable
+facade. Resolve a profile budget with
+`AtmosphericParticleBudget.forProfile`, construct the field with its effective
+count, then call `field.diagnostics(frame, budget: budget)`. The returned
+snapshot reconciles requested/effective counts, cap state, frustum visibility,
+and average particle speed. A mismatched host count is rejected; Pixeldart
+does not infer weather, room exposure, or impact meaning.
+
+`FlowPath`/`FlowParticleField` is the complementary world-space stream
+contract. A host can submit deterministic paths for roof runoff, drains, leaks,
+or other phenomena without teaching Pixeldart what the path means. The game
+uses this for capacity-limited rain flow; the renderer supplies only the
+resource, blend, culling, and lifecycle behaviour.
+
 The cinematic pipeline is seventeen passes, including volumetric integration
 and composite; the established stylized `ps1Full` profile remains a pinned
 15-pass variant without media.
@@ -243,7 +257,8 @@ Gallery index: [all features](.github/screenshots/00-all-features-on.jpg) ·
 | Reflections | Deterministic glossy/wet reflection weighting with Schlick Fresnel, roughness LOD, medium transmission, and explicit screen-space-hit versus probe-fallback state; the resolver never fabricates a hit or scene probe |
 | PS1 | Vertex snapping in NDC before the perspective divide, affine UV warp (solved without `noperspective`, gated per material × per frame), color quantization to N bits with Bayer 4×4 ordered dithering |
 | VHS | Final recording stage with six independent weights — chroma bleed, tracking jitter, YIQ tape noise, head-switch tear, dropout streaks, frame ghosting via the graph's history/ping-pong mechanism |
-| Transients | Frame-local particle submission (gravity/drag-aware, velocity-aligned rain, alpha motes, additive light shafts) through a persistent grow-only encoder, sorted back-to-front; deterministic per-particle kinematics are available to hosts for collision/impact decisions |
+| Transients | Frame-local particle submission (gravity/drag-aware, velocity-aligned rain, alpha motes, additive light shafts, world-space flow paths) through a persistent grow-only encoder, sorted back-to-front; deterministic per-particle kinematics are available to hosts for collision/impact decisions |
+| Wet/fire response | Host-owned roof runoff and drain paths remain generic `FlowPath` data; wet coverage drives a bounded water clearcoat/grazing reflection, while independent atmospheric fields can render hot flame, pale vapour, and dark soot without renderer-owned combustion semantics. The host can vary smoke lifetimes with moisture, oxygen starvation, and wind so plumes linger or disperse physically |
 | Accessibility | `reducedMotion` halves VHS motion weights and disables ghosting before any uniform reaches a shader |
 
 Everything above is implemented in the standalone demo. The checked-in

@@ -1,6 +1,27 @@
 import 'package:pixeldart/rendering/rendering.dart';
 
 void main() {
+  for (final (profile, maximum) in const [
+    (QualityProfile.safe, 0),
+    (QualityProfile.minimal, 32),
+    (QualityProfile.clean, 96),
+    (QualityProfile(QualityProfileKind.deterministicReference, {}), 64),
+    (QualityProfile.cinematic, 96),
+    (QualityProfile.ps1Full, 128),
+    (QualityProfile(QualityProfileKind.legacyComparison, {}), 32),
+  ]) {
+    final profileBudget = AtmosphericParticleBudget.forProfile(
+      profile: profile,
+      requestedCount: 200,
+    );
+    _require(
+      profileBudget.maximumCount == maximum &&
+          profileBudget.effectiveCount == maximum &&
+          profileBudget.wasCapped,
+      'profile atmospheric budget did not resolve for ${profile.kind.name}',
+    );
+  }
+
   const budget = AtmosphericParticleBudget(
     requestedCount: 32,
     maximumCount: 12,
@@ -40,6 +61,31 @@ void main() {
     seed: 42,
     particleScale: 0.5,
     instanceFamilyKey: 77,
+  );
+  final fieldDiagnostics = field.diagnostics(
+    frame,
+    budget: const AtmosphericParticleBudget(
+      requestedCount: 3,
+      maximumCount: 12,
+    ),
+  );
+  _require(
+    fieldDiagnostics.requestedCount == 3 &&
+        fieldDiagnostics.effectiveCount == 3 &&
+        !fieldDiagnostics.budgetCapped &&
+        fieldDiagnostics.candidateCount == 3 &&
+        fieldDiagnostics.averageSpeedMps.isFinite,
+    'atmospheric diagnostic snapshot did not reconcile',
+  );
+  _throws(
+    () => field.diagnostics(
+      frame,
+      budget: const AtmosphericParticleBudget(
+        requestedCount: 32,
+        maximumCount: 2,
+      ),
+    ),
+    'atmospheric diagnostics accepted an unapplied budget',
   );
 
   final first = field.sampleTransform(frame, 0);

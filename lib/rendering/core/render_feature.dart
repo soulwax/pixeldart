@@ -115,6 +115,9 @@ abstract interface class FrameSceneData {
   Object get camera;
   Object get environment;
 
+  /// Monotonic frame time for deterministic renderer animation uniforms.
+  double get timeSeconds;
+
   /// The frame's `PostProcessState` weights (§5.2) — `dynamic`-typed here
   /// for the same reason [camera]/[environment] are: avoiding a
   /// `lib/rendering/core` -> `lib/rendering/api` dependency edge. RV-09's

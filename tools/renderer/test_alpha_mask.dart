@@ -126,6 +126,8 @@ final class _FakeFrameScene implements FrameSceneData {
   Object get environment => lighting;
   @override
   Object get post => postState;
+  @override
+  double get timeSeconds => 0;
 }
 
 final class _FakeItemView implements RetainedItemView {

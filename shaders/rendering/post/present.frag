@@ -21,6 +21,20 @@ uniform float uSkyExposure;
 uniform float uSkyTextureSrgb;
 uniform mat4 uInverseProjection;
 uniform mat4 uInverseView;
+uniform vec3 uCameraPosition;
+uniform float uCloudCoverage;
+uniform float uCloudDensity;
+uniform float uCloudBaseHeight;
+uniform float uCloudThickness;
+uniform float uCloudScale;
+uniform vec2 uCloudWind;
+uniform float uCloudPhase;
+uniform float uCloudDetail;
+uniform float uCloudSilverLining;
+uniform float uCloudSampleCount;
+uniform vec3 uCloudLightDirection;
+uniform vec3 uCloudLightColor;
+uniform float uCloudLightIntensity;
 out vec4 oColor;
 
 float hash(vec2 p){
@@ -55,17 +69,109 @@ vec3 skyBackground(vec2 uv){
   return max(color,vec3(0.0));
 }
 
+float hash3(vec3 p){
+  return fract(sin(dot(p,vec3(127.1,311.7,74.7)))*43758.5453123);
+}
+
+float valueNoise(vec3 p){
+  vec3 i=floor(p);
+  vec3 f=fract(p);
+  f=f*f*(3.0-2.0*f);
+  float n000=hash3(i+vec3(0,0,0));
+  float n100=hash3(i+vec3(1,0,0));
+  float n010=hash3(i+vec3(0,1,0));
+  float n110=hash3(i+vec3(1,1,0));
+  float n001=hash3(i+vec3(0,0,1));
+  float n101=hash3(i+vec3(1,0,1));
+  float n011=hash3(i+vec3(0,1,1));
+  float n111=hash3(i+vec3(1,1,1));
+  float x00=mix(n000,n100,f.x);
+  float x10=mix(n010,n110,f.x);
+  float x01=mix(n001,n101,f.x);
+  float x11=mix(n011,n111,f.x);
+  return mix(mix(x00,x10,f.y),mix(x01,x11,f.y),f.z);
+}
+
+float cloudNoise(vec3 p){
+  float value=0.0;
+  float amplitude=0.5;
+  for(int octave=0;octave<4;octave++){
+    value+=valueNoise(p)*amplitude;
+    p=p*2.03+vec3(17.3,11.7,7.1);
+    amplitude*=0.5;
+  }
+  return value;
+}
+
+float cloudDensityAt(vec3 position){
+  float height01=clamp(
+    (position.y-uCloudBaseHeight)/max(uCloudThickness,0.001),
+    0.0,1.0
+  );
+  float vertical=smoothstep(0.0,0.12,height01)*
+    (1.0-smoothstep(0.72,1.0,height01));
+  vec3 q=position*max(uCloudScale,0.00001)+
+    vec3(uCloudWind.x*uCloudPhase,0.0,uCloudWind.y*uCloudPhase);
+  float macro=cloudNoise(q*0.82);
+  float detail=cloudNoise(q*2.7+vec3(23.0,5.0,41.0));
+  float shape=mix(macro,macro*0.68+detail*0.32,clamp(uCloudDetail,0.,1.));
+  float threshold=1.0-clamp(uCloudCoverage,0.,1.);
+  float body=smoothstep(threshold,threshold+0.26,shape);
+  return body*vertical*clamp(uCloudDensity,0.,1.);
+}
+
+vec4 volumetricClouds(vec3 worldDirection){
+  if(uCloudCoverage<=0.0001 || uCloudDensity<=0.0001 || worldDirection.y<=0.001){
+    return vec4(0.0);
+  }
+  float directionY=max(worldDirection.y,0.001);
+  float startT=(uCloudBaseHeight-uCameraPosition.y)/directionY;
+  float endT=(uCloudBaseHeight+uCloudThickness-uCameraPosition.y)/directionY;
+  startT=max(startT,0.0);
+  endT=max(endT,0.0);
+  if(endT<=startT) return vec4(0.0);
+  int sampleCount=int(clamp(uCloudSampleCount,4.,24.));
+  float stepLength=(endT-startT)/float(sampleCount);
+  float jitter=(hash(gl_FragCoord.xy+vec2(uCloudPhase*0.013))-0.5)*stepLength;
+  vec3 sunDirection=normalize(-uCloudLightDirection);
+  float transmittance=1.0;
+  vec3 inScatter=vec3(0.0);
+  for(int i=0;i<24;i++){
+    if(i>=sampleCount) break;
+    float t=startT+(float(i)+0.5)*stepLength+jitter;
+    vec3 position=uCameraPosition+worldDirection*t;
+    float density=cloudDensityAt(position);
+    float opticalDepth=density*stepLength*0.0035;
+    float segmentAlpha=1.0-exp(-opticalDepth);
+    float towardLight=cloudDensityAt(position+sunDirection*90.0);
+    float lightTransmittance=exp(-towardLight*0.025);
+    float phase=0.72+0.28*pow(max(dot(-worldDirection,sunDirection),0.0),2.0);
+    vec3 ambient=uSkyHorizon*0.32;
+    vec3 direct=uCloudLightColor*
+      (0.14+0.86*clamp(uCloudLightIntensity,0.,1.5))*phase;
+    float edge=pow(1.0-clamp(density,0.,1.),3.0)*uCloudSilverLining*0.22;
+    vec3 sampleLight=(ambient+direct)*lightTransmittance+vec3(edge);
+    inScatter+=transmittance*segmentAlpha*sampleLight;
+    transmittance*=1.0-segmentAlpha;
+    if(transmittance<0.01) break;
+  }
+  return vec4(inScatter,1.0-transmittance);
+}
+
 vec3 srgbToLinear(vec3 color){
   vec3 low=color/12.92;
   vec3 high=pow((color+0.055)/1.055,vec3(2.4));
   return mix(low,high,step(vec3(0.04045),color));
 }
 
-vec3 equirectangularSky(vec2 uv){
+vec3 worldDirectionForUv(vec2 uv){
   vec2 ndc=uv*2.0-1.0;
   vec4 viewPoint=uInverseProjection*vec4(ndc,1.0,1.0);
-  vec3 viewDirection=normalize(viewPoint.xyz/viewPoint.w);
-  vec3 worldDirection=normalize((uInverseView*vec4(viewDirection,0.0)).xyz);
+  return normalize(viewPoint.xyz/viewPoint.w);
+}
+
+vec3 equirectangularSky(vec2 uv){
+  vec3 worldDirection=normalize((uInverseView*vec4(worldDirectionForUv(uv),0.0)).xyz);
   float longitude=atan(worldDirection.z,worldDirection.x)+uSkyRotation;
   float latitude=asin(clamp(worldDirection.y,-1.0,1.0));
   vec2 sampleUv=vec2(
@@ -82,9 +188,13 @@ void main(){
   // The world pass clears untouched pixels to uClearColor. Replace only that
   // exact background, so the sky is always active without covering geometry.
   if(uSkyEnabled>0.5 && distance(source.rgb,uClearColor)<0.004){
+    vec3 viewDirection=worldDirectionForUv(vUv);
+    vec3 worldDirection=normalize((uInverseView*vec4(viewDirection,0.0)).xyz);
     source.rgb=uSkyTextureEnabled>0.5
       ? equirectangularSky(vUv)
       : skyBackground(vUv);
+    vec4 clouds=volumetricClouds(worldDirection);
+    source.rgb=source.rgb* (1.0-clouds.a)+clouds.rgb;
   }
   // Exposure operates in scene-linear space; tone mapping prevents HDR
   // highlights from clipping before the selected output transfer function.
