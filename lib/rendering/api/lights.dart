@@ -160,3 +160,37 @@ List<SpotLight> selectSpotLights({
   });
   return [for (final entry in ranked.take(limit)) entry.light];
 }
+
+/// The light and shadow budget the shipping pipeline actually honours.
+///
+/// These are not aspirational limits. Each is a direct count of what
+/// `shaders/rendering/world/shadowed_world.frag` declares and what
+/// `passes/pipeline_resource_layout.dart` allocates. Hosts should size their
+/// own light tables and quality profiles against these constants rather than
+/// against numbers chosen independently — the mismatch between an advertised
+/// budget and this one is what RENDERER plan packet R-A5 existed to close.
+///
+/// When a packet widens the runtime (R-B2 replaces the single shadow map with
+/// an atlas), change the constant here in the same commit as the runtime, and
+/// every host that reads it follows.
+abstract final class RuntimeLightBudget {
+  /// Directional lights (sun/moon). Contributes N·L and a specular lobe.
+  static const int directionalLights = 1;
+
+  /// Point lights: `uPointPosition0..3` in the shadowed world shader.
+  static const int pointLights = 4;
+
+  /// Unshadowed spot lights: `uDirectSpot*0..2`, ranked by [selectSpotLights].
+  static const int unshadowedSpotLights = 3;
+
+  /// Shadowed spot lights: `spotLights.first` only.
+  static const int shadowedSpotLights = 1;
+
+  /// Non-directional lights the world shader can evaluate in one pass.
+  static const int dynamicLights =
+      pointLights + unshadowedSpotLights + shadowedSpotLights;
+
+  /// Shadow maps in the whole pipeline. There is exactly one `shadowMap`
+  /// resource; the directional light does not cast at all.
+  static const int shadowMaps = shadowedSpotLights;
+}
