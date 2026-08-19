@@ -24,6 +24,76 @@ host-provided practical or lightning sources by influence. The low-resolution
 result is additively composited only after the MSAA resolve, so shafts respect
 occluders without changing the safe profile or claiming unsupported features.
 
+## Quickstart — a host in thirty lines
+
+```dart
+import 'package:pixeldart/pixeldart.dart';
+import 'package:pixeldart/pixeldart_advanced.dart';
+import 'package:pixeldart/rendering/webgl/webgl2_renderer_factory.dart';
+
+final renderer = const WebGl2RendererFactory().create(canvas)!;
+
+// The backing store follows the device pixel ratio; you do not compute it.
+final surface = SurfaceMetrics.forCanvas(
+  cssWidth: canvas.clientWidth,
+  cssHeight: canvas.clientHeight,
+  devicePixelRatio: window.devicePixelRatio.toDouble(),
+);
+
+// Tries the requested profile, descends to safe, and tells you what happened.
+final boot = await bootstrapRenderer(
+  renderer: renderer,
+  surface: surface,
+  ladder: defaultProfileLadder(QualityProfile.clean),
+  configurationFor: (profile) => RendererConfiguration(
+    profile: profile,
+    internalWidth: 1280,
+    internalHeight: 720,
+  ),
+);
+if (boot.didFallBack) print(boot.fallbackReason);
+
+final world = renderer.createWorld();
+final frames = FrameSequencer();
+
+// Per frame: the camera derives its own matrices, the sequencer owns the
+// frame index, history epoch, and noise seed.
+renderer.beginFrame(world, frames.next(
+  camera: CameraView.look(
+    eye: Vec3(0, 1.6, 4),
+    forward: Vec3(0, 0, -1),
+    fovYRadians: 1.0,
+    aspect: surface.pixelWidth / surface.pixelHeight,
+    near: 0.1,
+    far: 100,
+  ),
+  environment: const FrameEnvironment(clearColor: LinearColor(0.03, 0.03, 0.04)),
+  post: PostProcessState.off,
+  timeSeconds: elapsed,
+));
+renderer.endFrame();
+
+// After anything that rebuilds the graph, so temporal effects stop
+// reprojecting against history that no longer describes the scene:
+frames.invalidateHistory('surface resized');
+```
+
+`web/minimal/` is this program complete and runnable, and is the file to copy
+from. Four things there are deliberately *not* hand-written, because every host
+that hand-wrote them got at least one wrong:
+
+| Instead of | Use | What it prevents |
+| --- | --- | --- |
+| `try { initialize(high) } catch { initialize(safe) }` | `bootstrapRenderer` | a silent downgrade nobody reports to the player |
+| `pixelWidth: cssWidth` | `SurfaceMetrics.forCanvas` | rendering at 1x on every HiDPI display |
+| `viewProjection: projection * view` | `CameraView.look` / `.lookAt` | culling and shading disagreeing about where the camera is |
+| `frameIndex++`, `historyEpoch` by hand | `FrameSequencer` | stale temporal history after a resize |
+
+The raw constructors remain available for hosts that genuinely own an unusual
+projection or an external camera rig. `CameraView.validate()` now rejects a
+`viewProjection` that is not `projection * view`, so the raw path is checked
+rather than merely available.
+
 ## Use Pixeldart as a library
 
 Pixeldart is independently usable. A host does not need *The Quarantine*, its

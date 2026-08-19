@@ -4,6 +4,8 @@ export 'api/configuration_coordinator.dart';
 export 'api/configuration_transition.dart';
 export 'api/effects.dart';
 export 'api/frame.dart';
+export 'api/frame_sequencer.dart';
+export 'api/host_bootstrap.dart';
 export 'api/handles.dart';
 export 'api/lights.dart';
 export 'api/materials.dart';

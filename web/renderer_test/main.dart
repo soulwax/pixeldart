@@ -644,12 +644,20 @@ final class _StaticFrameScene implements FrameSceneData {
   final FrameEnvironment environmentOverride;
   final PostProcessState postOverride;
   final List<Object> blendedItems;
+
+  /// The harness's animation clock, which is also what drives the bobbing
+  /// cube and the orbiting light, so renderer-side time uniforms stay in step
+  /// with the transforms this scene submits. Frozen fixtures pass 0.
+  @override
+  final double timeSeconds;
+
   const _StaticFrameScene(
     this.items,
     this.cameraOverride,
     this.environmentOverride, [
     this.postOverride = PostProcessState.off,
     this.blendedItems = const [],
+    this.timeSeconds = 0.0,
   ]);
   @override
   Iterable<Object> get opaqueBatches => items;
@@ -1019,7 +1027,10 @@ void _boot() {
     canvas
       ..setAttribute('data-showcase', 'model')
       ..setAttribute('data-showcase-model-key', showcaseBinding.definition.key)
-      ..setAttribute('data-showcase-model-parts', '${showcaseBinding.parts.length}')
+      ..setAttribute(
+        'data-showcase-model-parts',
+        '${showcaseBinding.parts.length}',
+      )
       ..setAttribute('data-showcase-model-binding', 'retained');
     _setStatus(
       'isolated model showcase: ${showcaseBinding.definition.key} — '
@@ -1737,6 +1748,7 @@ void _boot() {
               vhsGhostWeight: vhsActive ? 0.04 : 0.0,
             ),
       r09InstanceFixture || r09ShadowFixture ? const <Object>[] : blendedItems,
+      t,
     );
     final frameTelemetry = FrameDrawTelemetry();
     final encoder = DeviceDrawCommandEncoder(device, telemetry: frameTelemetry);

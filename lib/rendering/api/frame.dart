@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import '../math/frustum.dart';
 import '../math/mat4.dart';
 import '../math/vec.dart';
@@ -41,6 +43,131 @@ final class CameraView {
     required this.aspect,
   });
 
+  /// Builds a camera from a world-space eye and look direction.
+  ///
+  /// Prefer this over the raw constructor. Every derived field —
+  /// [view], [projection], [viewProjection], [aspect] — is computed here from
+  /// the one set of inputs a host actually has, so the snapshot cannot
+  /// disagree with itself. The raw constructor is retained for hosts that own
+  /// an unusual projection (oblique frustum, reversed-Z, an external camera
+  /// rig) and must supply matrices directly.
+  ///
+  /// `up` defaults to +Y and must not be parallel to the look direction.
+  factory CameraView.look({
+    required Vec3 eye,
+    required Vec3 forward,
+    required double fovYRadians,
+    required double aspect,
+    required double near,
+    required double far,
+    Vec3 up = const Vec3(0, 1, 0),
+  }) {
+    if (!forward.isFinite || forward.lengthSquared < 1e-12) {
+      throw ArgumentError(
+        'CameraView.look requires a finite, nonzero forward: $forward',
+      );
+    }
+    if (!fovYRadians.isFinite || fovYRadians <= 0 || fovYRadians >= math.pi) {
+      throw ArgumentError(
+        'CameraView.look requires 0 < fovYRadians < pi: $fovYRadians',
+      );
+    }
+    final direction = forward.normalized;
+    if (up.cross(direction).lengthSquared < 1e-12) {
+      throw ArgumentError(
+        'CameraView.look requires up ($up) not parallel to forward ($forward)',
+      );
+    }
+    final view = Mat4.lookAt(eye: eye, forward: direction, up: up);
+    final projection = Mat4.perspective(
+      fovYRadians: fovYRadians,
+      aspect: aspect,
+      near: near,
+      far: far,
+    );
+    return CameraView(
+      view: view,
+      projection: projection,
+      viewProjection: projection * view,
+      eye: eye,
+      forward: direction,
+      near: near,
+      far: far,
+      aspect: aspect,
+    )..validate();
+  }
+
+  /// Builds a camera that looks from [eye] at [target].
+  ///
+  /// The same guarantees as [CameraView.look]; this is the form to reach for
+  /// when the host tracks a look-at point rather than a direction.
+  factory CameraView.lookAt({
+    required Vec3 eye,
+    required Vec3 target,
+    required double fovYRadians,
+    required double aspect,
+    required double near,
+    required double far,
+    Vec3 up = const Vec3(0, 1, 0),
+  }) {
+    final forward = target - eye;
+    if (forward.lengthSquared < 1e-12) {
+      throw ArgumentError(
+        'CameraView.lookAt requires target ($target) distinct from eye ($eye)',
+      );
+    }
+    return CameraView.look(
+      eye: eye,
+      forward: forward,
+      fovYRadians: fovYRadians,
+      aspect: aspect,
+      near: near,
+      far: far,
+      up: up,
+    );
+  }
+
+  /// Builds a camera from matrices a host already owns, deriving the rest.
+  ///
+  /// [viewProjection] is computed, and [eye] and [forward] are recovered from
+  /// the inverse of [view], so a host that has matrices but no separate camera
+  /// state cannot introduce a mismatch between them. [aspect] is read from the
+  /// projection unless given explicitly.
+  factory CameraView.fromMatrices({
+    required Mat4 view,
+    required Mat4 projection,
+    required double near,
+    required double far,
+    double? aspect,
+  }) {
+    if (!view.isFinite || !projection.isFinite) {
+      throw ArgumentError('CameraView.fromMatrices requires finite matrices');
+    }
+    final inverseView = view.inverse();
+    final eye = inverseView.transformPoint(Vec3.zero);
+    // The camera looks down -Z in view space; column 2 of the inverse view is
+    // the world-space +Z basis, so forward is its negation.
+    final forward = Vec3(
+      -inverseView.at(2, 0),
+      -inverseView.at(2, 1),
+      -inverseView.at(2, 2),
+    );
+    // Perspective projections store `f / aspect` at [0][0] and `f` at [1][1].
+    final m00 = projection.at(0, 0);
+    final m11 = projection.at(1, 1);
+    final derivedAspect = aspect ?? (m00 == 0 ? 0.0 : m11 / m00);
+    return CameraView(
+      view: view,
+      projection: projection,
+      viewProjection: projection * view,
+      eye: eye,
+      forward: forward,
+      near: near,
+      far: far,
+      aspect: derivedAspect,
+    )..validate();
+  }
+
   Frustum buildFrustum() => Frustum.fromViewProjection(viewProjection);
 
   void validate() {
@@ -60,6 +187,35 @@ final class CameraView {
     }
     if (!view.isFinite || !projection.isFinite || !viewProjection.isFinite) {
       throw ArgumentError('CameraView matrices must be finite');
+    }
+    // A camera whose viewProjection is not projection * view is the one
+    // inconsistency this snapshot cannot survive: `buildFrustum` culls against
+    // viewProjection while the world shader transforms against it too, so a
+    // mismatch silently culls visible geometry or draws culled geometry at the
+    // wrong place. Finiteness alone never caught it. The factories above make
+    // it unreachable; this catches hosts using the raw constructor.
+    final expected = projection * view;
+    var worstDelta = 0.0;
+    var worstIndex = -1;
+    for (var i = 0; i < 16; i++) {
+      final delta = (viewProjection.m[i] - expected.m[i]).abs();
+      // Float32 storage plus a matrix product accumulates error proportional
+      // to element magnitude, so the tolerance scales with it.
+      final scale = 1 + expected.m[i].abs();
+      if (delta / scale > worstDelta) {
+        worstDelta = delta / scale;
+        worstIndex = i;
+      }
+    }
+    if (worstDelta > 1e-4) {
+      throw ArgumentError(
+        'CameraView.viewProjection must equal projection * view. Worst '
+        'relative mismatch ${worstDelta.toStringAsExponential(2)} at '
+        'column ${worstIndex ~/ 4} row ${worstIndex % 4} '
+        '(got ${viewProjection.m[worstIndex]}, '
+        'expected ${expected.m[worstIndex]}). '
+        'Prefer CameraView.look/lookAt/fromMatrices, which derive it.',
+      );
     }
   }
 }

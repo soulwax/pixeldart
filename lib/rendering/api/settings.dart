@@ -20,6 +20,96 @@ final class SurfaceMetrics {
     this.visible = true,
   });
 
+  /// Builds metrics from a CSS-pixel size and a device pixel ratio.
+  ///
+  /// The backing-store size is derived rather than supplied, which is the
+  /// point: the four-field constructor invites `pixelWidth: cssWidth`, and
+  /// that renders at 1x on every HiDPI display while reporting success. Pass
+  /// the canvas's CSS size and `window.devicePixelRatio` and the backing store
+  /// follows automatically.
+  ///
+  /// [maxDevicePixelRatio] caps the backing store on very high-density
+  /// displays, where a literal 3x buffer costs 9x the fill for little visible
+  /// gain. The cap applies to allocation only; the reported
+  /// [devicePixelRatio] is the capped value actually used, so a host reading
+  /// it back sees what was allocated.
+  factory SurfaceMetrics.forCanvas({
+    required int cssWidth,
+    required int cssHeight,
+    double devicePixelRatio = 1,
+    double maxDevicePixelRatio = 2,
+    bool visible = true,
+  }) {
+    if (!devicePixelRatio.isFinite || devicePixelRatio <= 0) {
+      throw ArgumentError(
+        'SurfaceMetrics.forCanvas devicePixelRatio must be finite and > 0: '
+        '$devicePixelRatio',
+      );
+    }
+    if (!maxDevicePixelRatio.isFinite || maxDevicePixelRatio <= 0) {
+      throw ArgumentError(
+        'SurfaceMetrics.forCanvas maxDevicePixelRatio must be finite and > 0: '
+        '$maxDevicePixelRatio',
+      );
+    }
+    final ratio = devicePixelRatio > maxDevicePixelRatio
+        ? maxDevicePixelRatio
+        : devicePixelRatio;
+    return SurfaceMetrics(
+      cssWidth: cssWidth,
+      cssHeight: cssHeight,
+      pixelWidth: (cssWidth * ratio).round(),
+      pixelHeight: (cssHeight * ratio).round(),
+      devicePixelRatio: ratio,
+      visible: visible,
+    )..validate();
+  }
+
+  /// A 1:1 surface where CSS pixels and backing-store pixels coincide.
+  ///
+  /// The right choice for offscreen rendering, tests, and capture harnesses
+  /// that have a pixel budget and no display to match.
+  factory SurfaceMetrics.pixels({
+    required int width,
+    required int height,
+    bool visible = true,
+  }) => SurfaceMetrics(
+    cssWidth: width,
+    cssHeight: height,
+    pixelWidth: width,
+    pixelHeight: height,
+    visible: visible,
+  )..validate();
+
+  /// This surface at a new CSS size, keeping the ratio and visibility.
+  ///
+  /// The shape a resize handler wants: one call, no chance of updating the CSS
+  /// size and forgetting the backing store.
+  SurfaceMetrics resized({required int cssWidth, required int cssHeight}) =>
+      SurfaceMetrics.forCanvas(
+        cssWidth: cssWidth,
+        cssHeight: cssHeight,
+        devicePixelRatio: devicePixelRatio,
+        maxDevicePixelRatio: devicePixelRatio,
+        visible: visible,
+      );
+
+  /// This surface with a new visibility, for hosts pausing on tab blur.
+  SurfaceMetrics withVisibility(bool nextVisible) => SurfaceMetrics(
+    cssWidth: cssWidth,
+    cssHeight: cssHeight,
+    pixelWidth: pixelWidth,
+    pixelHeight: pixelHeight,
+    devicePixelRatio: devicePixelRatio,
+    visible: nextVisible,
+  );
+
+  @override
+  String toString() =>
+      'SurfaceMetrics(css ${cssWidth}x$cssHeight, '
+      'pixels ${pixelWidth}x$pixelHeight, dpr $devicePixelRatio, '
+      'visible: $visible)';
+
   bool get isZeroSized => pixelWidth <= 0 || pixelHeight <= 0;
 
   void validate() {

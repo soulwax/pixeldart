@@ -285,6 +285,11 @@
         throw A.wrapException(A.RangeError$range($length, 0, 4294967295, "length", null));
       return J.JSArray_JSArray$markFixed(new Array($length), $E);
     },
+    JSArray_JSArray$growable($length, $E) {
+      if ($length < 0)
+        throw A.wrapException(A.ArgumentError$("Length must be a non-negative integer: " + $length, null));
+      return A._setArrayType(new Array($length), $E._eval$1("JSArray<0>"));
+    },
     JSArray_JSArray$allocateGrowable($length, $E) {
       if ($length < 0)
         throw A.wrapException(A.ArgumentError$("Length must be a non-negative integer: " + $length, null));
@@ -841,6 +846,9 @@
     },
     argumentErrorValue(object) {
       return new A.ArgumentError(true, object, null, null);
+    },
+    checkNum(value) {
+      return value;
     },
     wrapException(ex) {
       return A.initializeExceptionWrapper(ex, new Error());
@@ -1493,6 +1501,10 @@
       this._0 = t0;
       this._1 = t1;
     },
+    _Record_2_influence_source: function _Record_2_influence_source(t0, t1) {
+      this._0 = t0;
+      this._1 = t1;
+    },
     ConstantMapView: function ConstantMapView(t0, t1) {
       this._collection$_map = t0;
       this.$ti = t1;
@@ -1636,6 +1648,9 @@
     },
     _ensureNativeList(list) {
       return list;
+    },
+    NativeInt8List__create1(arg) {
+      return new Int8Array(arg);
     },
     NativeUint8List_NativeUint8List($length) {
       return new Uint8Array($length);
@@ -3926,9 +3941,9 @@
     },
     List_List$filled($length, fill, growable, $E) {
       var i,
-        result = J.JSArray_JSArray$fixed($length, $E);
+        result = growable ? J.JSArray_JSArray$growable($length, $E) : J.JSArray_JSArray$fixed($length, $E);
       if ($length !== 0 && fill != null)
-        for (i = 0; i < $length; ++i)
+        for (i = 0; i < result.length; ++i)
           result[i] = fill;
       return result;
     },
@@ -5464,7 +5479,7 @@
       this.installedFeatures = t1;
     },
     ConfigurationCoordinator: function ConfigurationCoordinator(t0, t1) {
-      this._configuration_coordinator$_configuration = t0;
+      this._configuration = t0;
       this._configuration_coordinator$_resources = t1;
     },
     ConfigurationStateMachine: function ConfigurationStateMachine() {
@@ -5483,16 +5498,21 @@
       _.near = t5;
       _.far = t6;
       _.aspect = t7;
+      _.__CameraView_inverseView_FI = _.__CameraView_inverseProjection_FI = $;
     },
     FrameEnvironment: function FrameEnvironment() {
     },
-    FrameInput: function FrameInput(t0, t1, t2, t3, t4) {
+    FrameInput: function FrameInput(t0, t1, t2, t3, t4, t5) {
       var _ = this;
       _.camera = t0;
       _.environment = t1;
       _.post = t2;
-      _.frameIndex = t3;
-      _.timeSeconds = t4;
+      _.visibilityMask = t3;
+      _.frameIndex = t4;
+      _.timeSeconds = t5;
+    },
+    FrameSequencer: function FrameSequencer() {
+      this._historyEpoch = this._frameIndex = 0;
     },
     HandleException$(reason, handle) {
       return new A.HandleException(reason, handle);
@@ -5532,6 +5552,132 @@
       this.reason = t0;
       this.handle = t1;
     },
+    bootstrapRenderer(configurationFor, ladder, renderer, surface) {
+      return A.bootstrapRenderer$body(configurationFor, ladder, renderer, surface);
+    },
+    bootstrapRenderer$body(configurationFor, ladder, renderer, surface) {
+      var $async$goto = 0,
+        $async$completer = A._makeAsyncAwaitCompleter(type$.BootstrapResult),
+        $async$returnValue, $async$handler = 2, $async$errorStack = [], attempts, rung, profile, configuration, error, t2, t3, t4, result, exception, t1, $async$exception;
+      var $async$bootstrapRenderer = A._wrapJsFunctionForAsync(function($async$errorCode, $async$result) {
+        if ($async$errorCode === 1) {
+          $async$errorStack.push($async$result);
+          $async$goto = $async$handler;
+        }
+        for (;;)
+          switch ($async$goto) {
+            case 0:
+              // Function start
+              t1 = ladder.length;
+              if (t1 === 0)
+                throw A.wrapException(A.ArgumentError$("bootstrapRenderer requires a non-empty profile ladder", null));
+              surface.validate$0();
+              attempts = A._setArrayType([], type$.JSArray_ProfileAttempt);
+              rung = 0;
+              t2 = t1 - 1;
+              t3 = type$.ProfileAttempt;
+            case 3:
+              // for condition
+              // trivial condition
+              t4 = rung;
+              if (typeof t4 !== "number") {
+                $async$returnValue = t4.$lt();
+                // goto return
+                $async$goto = 1;
+                break;
+              }
+              if (!(t4 < t1)) {
+                // goto after for
+                $async$goto = 4;
+                break;
+              }
+              profile = B.JSArray_methods.$index(ladder, rung);
+              configuration = configurationFor.call$1(profile);
+              if (configuration.profile !== profile)
+                throw A.wrapException(A.ArgumentError$("configurationFor(" + profile.kind._name + ") returned a configuration for " + configuration.profile.kind._name + ". The mapping must be total and faithful, or the renderer runs a graph the host did not choose.", null));
+              $async$handler = 6;
+              $async$goto = 9;
+              return A._asyncAwait(renderer.initialize$2(configuration, surface), $async$bootstrapRenderer);
+            case 9:
+              // returning from await.
+              J.add$1$ax(attempts, new A.ProfileAttempt(profile, null));
+              result = A.List_List$from(attempts, false, t3);
+              result.$flags = 3;
+              t4 = new A.BootstrapResult(result);
+              $async$returnValue = t4;
+              // goto return
+              $async$goto = 1;
+              break;
+              $async$handler = 2;
+              // goto after finally
+              $async$goto = 8;
+              break;
+            case 6:
+              // catch
+              $async$handler = 5;
+              $async$exception = $async$errorStack.pop();
+              error = A.unwrapException($async$exception);
+              J.add$1$ax(attempts, new A.ProfileAttempt(profile, error));
+              if (J.$eq$(rung, t2))
+                throw $async$exception;
+              // goto after finally
+              $async$goto = 8;
+              break;
+            case 5:
+              // uncaught
+              // goto rethrow
+              $async$goto = 2;
+              break;
+            case 8:
+              // after finally
+              t4 = rung;
+              if (typeof t4 !== "number") {
+                $async$returnValue = t4.$add();
+                // goto return
+                $async$goto = 1;
+                break;
+              }
+              rung = t4 + 1;
+              // goto for condition
+              $async$goto = 3;
+              break;
+            case 4:
+              // after for
+              throw A.wrapException(A.StateError$("bootstrapRenderer exhausted its ladder without a result"));
+            case 1:
+              // return
+              return A._asyncReturn($async$returnValue, $async$completer);
+            case 2:
+              // rethrow
+              return A._asyncRethrow($async$errorStack.at(-1), $async$completer);
+          }
+      });
+      return A._asyncStartSync($async$bootstrapRenderer, $async$completer);
+    },
+    defaultProfileLadder(requested) {
+      var t1, t2,
+        startIndex = B.JSArray_methods.indexWhere$1(B.List_jSM, new A.defaultProfileLadder_closure(requested));
+      if (startIndex >= 0)
+        return A.List_List$unmodifiable(B.JSArray_methods.sublist$1(B.List_jSM, startIndex), type$.QualityProfile);
+      t1 = type$.QualityProfile;
+      t2 = A.LinkedHashSet_LinkedHashSet$_literal([requested], t1);
+      t2.addAll$1(0, B.List_jSM);
+      return A.List_List$unmodifiable(t2, t1);
+    },
+    ProfileAttempt: function ProfileAttempt(t0, t1) {
+      this.profile = t0;
+      this.error = t1;
+    },
+    BootstrapResult: function BootstrapResult(t0) {
+      this.attempts = t0;
+    },
+    BootstrapResult_fallbackReason_closure: function BootstrapResult_fallbackReason_closure() {
+    },
+    BootstrapResult_fallbackReason_closure0: function BootstrapResult_fallbackReason_closure0() {
+    },
+    defaultProfileLadder_closure: function defaultProfileLadder_closure(t0) {
+      this.requested = t0;
+    },
     selectSpotLights(lights, limit, referencePosition, shadowCaster) {
       var t1, t2, t3, _i, light, entry,
         ranked = A._setArrayType([], type$.JSArray_Record_2_double_influence_and_SpotLight_light);
@@ -5563,16 +5709,26 @@
     DefaultSceneRendererFactory: function DefaultSceneRendererFactory() {
     },
     OwnedResourcePlan_OwnedResourcePlan$forConfiguration(configuration) {
-      var hasHistory,
+      var bloomVersion, hasHistory,
+        _s10_ = "volumetric",
         t1 = type$.String,
         resources = A.LinkedHashSet_LinkedHashSet$_literal(["sceneColor", "present"], t1),
         t2 = configuration.profile.installedFeatures;
       if (t2.contains$1(0, "shadows"))
         resources.addAll$1(0, A.LinkedHashSet_LinkedHashSet$_literal(["shadowMap", "sceneDepth"], t1));
+      if (t2.contains$1(0, _s10_)) {
+        resources.add$1(0, "volumetricLight");
+        resources.add$1(0, "sceneColor#" + (configuration.sampleCount > 1 ? 2 : 1));
+      }
       if (t2.contains$1(0, "ssao"))
         resources.addAll$1(0, A.LinkedHashSet_LinkedHashSet$_literal(["ssaoRaw", "ssaoBlurred"], t1));
-      if (t2.contains$1(0, "bloom"))
-        resources.addAll$1(0, A.LinkedHashSet_LinkedHashSet$_literal(["bloomBlurH", "bloomBlurV", "sceneColor#" + (configuration.sampleCount > 1 ? 2 : 1)], t1));
+      if (t2.contains$1(0, "bloom")) {
+        if (configuration.sampleCount > 1)
+          bloomVersion = t2.contains$1(0, _s10_) ? 3 : 2;
+        else
+          bloomVersion = t2.contains$1(0, _s10_) ? 2 : 1;
+        resources.addAll$1(0, A.LinkedHashSet_LinkedHashSet$_literal(["bloomBlurH", "bloomBlurV", "sceneColor#" + bloomVersion], t1));
+      }
       if (configuration.sampleCount > 1)
         resources.add$1(0, "sceneColor#1");
       if (t2.contains$1(0, "dof"))
@@ -5600,18 +5756,27 @@
       this._generation = 0;
       this._disposed = false;
     },
-    SurfaceMetrics: function SurfaceMetrics(t0, t1, t2, t3) {
+    SurfaceMetrics_SurfaceMetrics$forCanvas(cssHeight, cssWidth, devicePixelRatio, maxDevicePixelRatio, visible) {
+      var ratio, t1;
+      if (!isFinite(devicePixelRatio) || devicePixelRatio <= 0)
+        throw A.wrapException(A.ArgumentError$("SurfaceMetrics.forCanvas devicePixelRatio must be finite and > 0: " + A.S(devicePixelRatio), null));
+      if (!isFinite(maxDevicePixelRatio) || maxDevicePixelRatio <= 0)
+        throw A.wrapException(A.ArgumentError$("SurfaceMetrics.forCanvas maxDevicePixelRatio must be finite and > 0: " + A.S(maxDevicePixelRatio), null));
+      ratio = devicePixelRatio > maxDevicePixelRatio ? maxDevicePixelRatio : devicePixelRatio;
+      t1 = new A.SurfaceMetrics(cssWidth, cssHeight, B.JSNumber_methods.round$0(cssWidth * ratio), B.JSNumber_methods.round$0(cssHeight * ratio), ratio, true);
+      t1.validate$0();
+      return t1;
+    },
+    SurfaceMetrics: function SurfaceMetrics(t0, t1, t2, t3, t4, t5) {
       var _ = this;
       _.cssWidth = t0;
       _.cssHeight = t1;
       _.pixelWidth = t2;
       _.pixelHeight = t3;
+      _.devicePixelRatio = t4;
+      _.visible = t5;
     },
     ColorEncoding: function ColorEncoding(t0, t1) {
-      this.index = t0;
-      this._name = t1;
-    },
-    DiagnosticLevel: function DiagnosticLevel(t0, t1) {
       this.index = t0;
       this._name = t1;
     },
@@ -5740,6 +5905,58 @@
     TextureStore_rehydrateAfterContextRestore_closure: function TextureStore_rehydrateAfterContextRestore_closure() {
     },
     TextureStore_liveGpuBytes_closure: function TextureStore_liveGpuBytes_closure() {
+    },
+    selectVolumetricSources(limit, referencePosition, sources) {
+      var seenIds, ranked, _i, source, distance, cutoff, t2, t3, peakColor, entry,
+        t1 = referencePosition.get$isFinite(0);
+      if (!t1)
+        throw A.wrapException(A.ArgumentError$("invalid volumetric source selection inputs", null));
+      seenIds = A.LinkedHashSet_LinkedHashSet$_empty(type$.String);
+      ranked = A._setArrayType([], type$.JSArray_Record_2_double_influence_and_VolumetricSource_source);
+      for (_i = 0; false; ++_i) {
+        source = sources[_i];
+        source.validate$0();
+        if (!seenIds.add$1(0, source.get$id()))
+          throw A.wrapException(A.ArgumentError$("duplicate volumetric source id: " + A.S(source.get$id()), null));
+        distance = source.get$position().$sub(0, referencePosition).length;
+        t1 = source.get$referenceDistance();
+        cutoff = A.VolumetricMediaEngine_evaluateInverseSquareAttenuation(source.get$cutoffDistance(), distance, t1);
+        t1 = source.get$color().get$x();
+        t2 = source.get$color().get$y();
+        t3 = source.get$color().get$z();
+        t3 = Math.max(A.checkNum(t2), A.checkNum(t3));
+        peakColor = Math.max(A.checkNum(t1), t3);
+        B.JSArray_methods.add$1(ranked, new A._Record_2_influence_source(source.get$luminousIntensity().$mul(0, peakColor).$mul(0, cutoff), source));
+      }
+      B.JSArray_methods.sort$1(ranked, new A.selectVolumetricSources_closure());
+      t1 = A._setArrayType([], type$.JSArray_VolumetricSource);
+      for (t2 = A.SubListIterable$(ranked, 0, A.checkNotNullable(limit, "count", type$.int), type$.Record_2_double_influence_and_VolumetricSource_source), t3 = t2.$ti, t2 = new A.ListIterator(t2, t2.get$length(0), t3._eval$1("ListIterator<ListIterable.E>")), t3 = t3._eval$1("ListIterable.E"); t2.moveNext$0();) {
+        entry = t2.__internal$_current;
+        t1.push((entry == null ? t3._as(entry) : entry)._1);
+      }
+      return t1;
+    },
+    VolumetricMediaEngine_evaluateInverseSquareAttenuation(cutoffDistance, distance, referenceDistance) {
+      var t1, _i, t2, value, t3, inverseSquare;
+      for (t1 = [new A._Record_2("distance", distance), new A._Record_2("referenceDistance", referenceDistance), new A._Record_2("cutoffDistance", cutoffDistance)], _i = 0; _i < 3; ++_i) {
+        t2 = t1[_i];
+        value = t2._1;
+        if (!isFinite(value))
+          A.throwExpression(A.ArgumentError$(t2._0 + " must be finite: " + A.S(value), null));
+      }
+      if (distance.$lt(0, 0) || referenceDistance.$le(0, 0) || cutoffDistance.$le(0, 0))
+        throw A.wrapException(A.ArgumentError$("invalid inverse-square attenuation inputs", null));
+      if (distance.$ge(0, cutoffDistance))
+        return 0;
+      t1 = referenceDistance.$mul(0, referenceDistance);
+      t2 = referenceDistance.$mul(0, referenceDistance);
+      t3 = distance.$mul(0, distance);
+      inverseSquare = t1.$div(0, Math.max(A.checkNum(t2), A.checkNum(t3)));
+      t3 = distance.$div(0, cutoffDistance);
+      A.checkNum(t3);
+      return inverseSquare.$mul(0, 1 - Math.pow(t3, 4)).clamp$2(0, 0, 1).toDouble$0(0);
+    },
+    selectVolumetricSources_closure: function selectVolumetricSources_closure() {
     },
     batchOpaque(sortedOpaqueItems) {
       var t1, t2, _i, item, familyKey, key, existingIndex, t3, t4,
@@ -5922,7 +6139,7 @@
       var t2,
         t1 = _this._programs;
       t1.toString;
-      t2 = _this._configuration;
+      t2 = _this._scene_renderer_impl$_configuration;
       t2.toString;
       _this._graph = A._extension_0__assembleSafeGraph(_this, t1, t2, _this._gpuResources.get$current().logical.plan.resources).result;
     },
@@ -5947,7 +6164,7 @@
         t2 = t7 > 1;
         t3 = t2 ? resolvedSceneColor : sceneColor;
         resolve = t2 ? new A.MsaaResolveFeature(t4, sceneColor, resolvedSceneColor) : null;
-        t1 = A._setArrayType([new A.WorldFeature(programs, "#version 300 es\nlayout(location=0) in vec3 aPosition;\nlayout(location=1) in vec3 aNormal;\nlayout(location=2) in vec4 aColor;\nlayout(location=3) in float aAlpha;\nlayout(location=4) in vec3 aUvMat;\nuniform mat4 uViewProjection;\nuniform mat4 uModel;\nuniform mat4 uNormalMatrix;\nuniform mat4 uInstanceModels[16];\nuniform mat4 uInstanceNormalMatrices[16];\nuniform float uUseInstances;\nout vec4 vColor;\nout vec3 vNormal;\nvoid main(){\n  mat4 model=uModel;\n  mat4 normalMatrix=uNormalMatrix;\n  if(uUseInstances>0.5){model=uInstanceModels[gl_InstanceID];normalMatrix=uInstanceNormalMatrices[gl_InstanceID];}\n  vColor=vec4(aColor.rgb,aAlpha);\n  vNormal=mat3(normalMatrix)*aNormal;\n  gl_Position=uViewProjection*model*vec4(aPosition,1.0);\n}\n", "#version 300 es\nprecision highp float;\nin vec4 vColor;\nin vec3 vNormal;\nuniform vec3 uLightDir;\nuniform vec3 uAmbientColor;\nuniform float uAmbientIntensity;\nout vec4 oColor;\nvoid main(){\n  vec3 n=normalize(vNormal);\n  float ndotl=max(dot(n,normalize(uLightDir)),0.0);\n  vec3 lit=vColor.rgb*clamp(uAmbientColor*uAmbientIntensity+vec3(ndotl),0.0,1.0);\n  oColor=vec4(lit,vColor.a);\n}\n", t1, sceneColor)], type$.JSArray_RenderFeature);
+        t1 = A._setArrayType([new A.WorldFeature(programs, "#version 300 es\nlayout(location=0) in vec3 aPosition;\nlayout(location=1) in vec3 aNormal;\nlayout(location=2) in vec4 aColor;\nlayout(location=3) in float aAlpha;\nlayout(location=4) in vec3 aUvMat;\nuniform mat4 uViewProjection;\nuniform mat4 uModel;\nuniform mat4 uNormalMatrix;\nuniform mat4 uInstanceModels[16];\nuniform mat4 uInstanceNormalMatrices[16];\nuniform float uUseInstances;\nout vec4 vColor;\nout vec3 vNormal;\nvoid main(){\n  mat4 model=uModel;\n  mat4 normalMatrix=uNormalMatrix;\n  if(uUseInstances>0.5){model=uInstanceModels[gl_InstanceID];normalMatrix=uInstanceNormalMatrices[gl_InstanceID];}\n  vColor=vec4(aColor.rgb,aAlpha);\n  vNormal=mat3(normalMatrix)*aNormal;\n  gl_Position=uViewProjection*model*vec4(aPosition,1.0);\n}\n", "#version 300 es\nprecision highp float;\nin vec4 vColor;\nin vec3 vNormal;\nuniform vec3 uLightDir;\nuniform vec3 uAmbientColor;\nuniform float uAmbientIntensity;\nuniform float uAmbientLightScale;\nuniform float uDirectLightScale;\nout vec4 oColor;\nvoid main(){\n  vec3 n=normalize(vNormal);\n  float ndotl=max(dot(n,normalize(uLightDir)),0.0);\n  vec3 lit=vColor.rgb*clamp(uAmbientColor*uAmbientIntensity*uAmbientLightScale+\n    vec3(ndotl)*uDirectLightScale,0.0,1.0);\n  oColor=vec4(lit,vColor.a);\n}\n", t1, sceneColor)], type$.JSArray_RenderFeature);
         if (resolve != null)
           t1.push(resolve);
         t1.push(new A.PresentFeature(programs, string$.x23versio, string$.x23versip, t4, t3, B.ColorEncoding_1));
@@ -5972,7 +6189,7 @@
         _this._resources._meshes._registry.descriptorOf$1(descriptor.get$mesh()).get$localBounds().transformed$1(descriptor.get$transform().toMat4$0());
       }
       t2 = frame.camera;
-      cull = A.cullItems(A.Frustum_Frustum$fromViewProjection(t2.viewProjection), t1, -1);
+      cull = A.cullItems(A.Frustum_Frustum$fromViewProjection(t2.viewProjection), t1, frame.visibilityMask);
       for (t3 = t1.length, candidateTriangles = 0, _i = 0; _i < t1.length; t1.length === t3 || (0, A.throwConcurrentModificationError)(t1), ++_i) {
         t4 = t1[_i].get$descriptor().get$mesh();
         t5 = _this._resources._meshes;
@@ -6034,7 +6251,7 @@
           views.$indexSet(0, t10 + "#" + t9, view);
           views.putIfAbsent$2(t10, new A._extension_0__executeGraph_closure(view));
         }
-        pass.execute$1(new A.BoundPassContext(views, encoder, scene));
+        pass.execute$1(new A.BoundPassContext(views, encoder, new A._extension_0__executeGraph_closure0(frame, _this).call$0(), scene));
       }
       return new A._FrameExecution(telemetry, cull, t5);
     },
@@ -6109,6 +6326,10 @@
     _extension_0__executeGraph_closure: function _extension_0__executeGraph_closure(t0) {
       this.view = t0;
     },
+    _extension_0__executeGraph_closure0: function _extension_0__executeGraph_closure0(t0, t1) {
+      this.frame = t0;
+      this._this = t1;
+    },
     _SafeGraphAssembly: function _SafeGraphAssembly(t0, t1) {
       this.featureGraph = t0;
       this.result = t1;
@@ -6130,7 +6351,7 @@
       _._frames = t2;
       _._worlds = t3;
       _._scene_renderer_impl$_state = t4;
-      _._activeWorld = _._activeFrame = _._configuration = _._graph = _._programs = _._gpuResources = _._resources = _._capabilities = null;
+      _._activeWorld = _._activeFrame = _._scene_renderer_impl$_configuration = _._graph = _._programs = _._gpuResources = _._resources = _._capabilities = null;
       _._GpuTimingSupport__pendingGpuTimings = t5;
       _._GpuTimingSupport__activeGpuTimer = t6;
     },
@@ -6243,6 +6464,29 @@
       t1[10] = (far + near) * nf;
       t1[11] = -1;
       t1[14] = 2 * far * near * nf;
+      return new A.Mat4(t1);
+    },
+    Mat4_Mat4$lookAt(eye, $forward, up) {
+      var f = $forward.get$normalized(),
+        r = up.cross$1(f).get$normalized(),
+        u = f.cross$1(r),
+        t1 = new Float32Array(16);
+      t1[0] = r.x;
+      t1[1] = u.x;
+      t1[2] = -f.x;
+      t1[3] = 0;
+      t1[4] = r.y;
+      t1[5] = u.y;
+      t1[6] = -f.y;
+      t1[7] = 0;
+      t1[8] = r.z;
+      t1[9] = u.z;
+      t1[10] = -f.z;
+      t1[11] = 0;
+      t1[12] = -r.dot$1(eye);
+      t1[13] = -u.dot$1(eye);
+      t1[14] = f.dot$1(eye);
+      t1[15] = 1;
       return new A.Mat4(t1);
     },
     Mat4: function Mat4(t0) {
@@ -6412,17 +6656,19 @@
     BoundResourceView: function BoundResourceView(t0) {
       this.gpuObject = t0;
     },
-    BoundPassContext: function BoundPassContext(t0, t1, t2) {
-      this.views = t0;
-      this.encoder = t1;
-      this.frameScene = t2;
+    BoundPassContext: function BoundPassContext(t0, t1, t2, t3) {
+      var _ = this;
+      _.views = t0;
+      _.encoder = t1;
+      _.skyboxTexture = t2;
+      _.frameScene = t3;
     },
     PipelineResourceLayout__sized(base, width, height, samples, version) {
       var t1 = samples == null ? base.samples : samples,
         t2 = version == null ? base.version : version;
       return new A.ResourceRef(base.name, base.format, width, height, t1, t2);
     },
-    PipelineResourceLayout: function PipelineResourceLayout(t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16) {
+    PipelineResourceLayout: function PipelineResourceLayout(t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18) {
       var _ = this;
       _.halfWidth = t0;
       _.halfHeight = t1;
@@ -6435,12 +6681,14 @@
       _.bloomBlurH = t8;
       _.bloomBlurV = t9;
       _.sceneColorPostBloom = t10;
-      _.dofBlurH = t11;
-      _.dofBlurV = t12;
-      _.dofOutput = t13;
-      _.gradeOutput = t14;
-      _.ps1Output = t15;
-      _.vhsOutput = t16;
+      _.sceneColorPostVolumetric = t11;
+      _.volumetricLight = t12;
+      _.dofBlurH = t13;
+      _.dofBlurV = t14;
+      _.dofOutput = t15;
+      _.gradeOutput = t16;
+      _.ps1Output = t17;
+      _.vhsOutput = t18;
     },
     PresentFeature: function PresentFeature(t0, t1, t2, t3, t4, t5) {
       var _ = this;
@@ -6477,28 +6725,8 @@
       _.outputResource = t4;
     },
     ShadowLightView_ShadowLightView$fromSpotLight(light) {
-      var t1 = Math.abs(0) < 0.99 ? B.Vec3_1_0_0 : B.Vec3_0_1_0,
-        f = B.Vec3_0_m1_0.get$normalized(),
-        r = t1.cross$1(f).get$normalized(),
-        u = f.cross$1(r);
-      t1 = new Float32Array(16);
-      t1[0] = r.x;
-      t1[1] = u.x;
-      t1[2] = -f.x;
-      t1[3] = 0;
-      t1[4] = r.y;
-      t1[5] = u.y;
-      t1[6] = -f.y;
-      t1[7] = 0;
-      t1[8] = r.z;
-      t1[9] = u.z;
-      t1[10] = -f.z;
-      t1[11] = 0;
-      t1[12] = -r.dot$1(B.Vec3_0_1_0);
-      t1[13] = -u.dot$1(B.Vec3_0_1_0);
-      t1[14] = f.dot$1(B.Vec3_0_1_0);
-      t1[15] = 1;
-      return new A.ShadowLightView(A.Mat4_Mat4$perspective(1, 1, B.JSInt_methods.clamp$2(1, 0.1, 3), 0.05).$mul(0, new A.Mat4(t1)));
+      var view = A.Mat4_Mat4$lookAt(B.Vec3_0_1_0, B.Vec3_0_m1_0, Math.abs(0) < 0.99 ? B.Vec3_1_0_0 : B.Vec3_0_1_0);
+      return new A.ShadowLightView(A.Mat4_Mat4$perspective(1, 1, B.JSInt_methods.clamp$2(1, 0.1, 3), 0.05).$mul(0, view));
     },
     ShadowLightView: function ShadowLightView(t0) {
       this.viewProjection = t0;
@@ -6530,7 +6758,7 @@
       _.onLightViewComputed = t8;
     },
     buildShadowGraph(programLibrary, device, outputEncoding, profile, resolveAlbedo, resolveBloomBlurH, resolveBloomBlurV, resolveCamera, resolveCasterLight, resolveDirectSpotLights, resolveDofBlurH, resolveDofBlurV, resolveEmissive, resolveGradeLut, resolveLightmap, resolveMaterial, resolveMesh, resolveNormal, resolveOrm, resolveResolvedSceneColor, resolveSceneDepth, resolveShadowMap, resolveSsaoBlurred, resolveSsaoRaw, resolveTime, resolveVhsHistory, sampleCount, sceneColorHeight, sceneColorWidth, shadowMapSize) {
-      var hasSsao, hasBloom, hasDof, hasGrade, hasPs1, hasVhs, t3, postResource, postResource0, t4, t5, t6, t7, t8, t9, t10, t11, postResource1, t12, postResource2, postResource3, postResource4, postResource5, msaaResolve, fallbackLightView, t13, postFeatures, _null = null,
+      var hasSsao, hasBloom, hasDof, hasGrade, hasPs1, hasVhs, hasVolumetric, t3, t4, t5, t6, postResource, t7, t8, t9, t10, t11, t12, t13, t14, t15, postResource0, postResource1, postResource2, postResource3, postResource4, msaaResolve, fallbackLightView, t16, volumetric, postFeatures, _null = null,
         _s156_ = string$.x23versio,
         _s462_ = "#version 300 es\nprecision highp float;\nin vec2 vUv;\nuniform sampler2D uSource;\nuniform vec2 uTexelStep;\nout vec4 oColor;\n\nconst float WEIGHTS[5]=float[5](0.227027,0.1945946,0.1216216,0.054054,0.016216);\n\nvoid main(){\n  vec3 sum=texture(uSource,vUv).rgb*WEIGHTS[0];\n  for(int i=1;i<5;i++){\n    vec2 offset=uTexelStep*float(i);\n    sum+=texture(uSource,vUv+offset).rgb*WEIGHTS[i];\n    sum+=texture(uSource,vUv-offset).rgb*WEIGHTS[i];\n  }\n  oColor=vec4(sum,1.0);\n}\n",
         _s10_ = "bloomBlurH",
@@ -6547,64 +6775,76 @@
       hasGrade = t2.contains$1(0, "grade");
       hasPs1 = t2.contains$1(0, "ps1");
       hasVhs = t2.contains$1(0, "vhs");
+      hasVolumetric = t2.contains$1(0, "volumetric");
       t2 = (sceneColorWidth + 1) / 2 | 0;
       t3 = (sceneColorHeight + 1) / 2 | 0;
-      postResource = A.PipelineResourceLayout__sized(B.ResourceRef_rRS, sceneColorWidth, sceneColorHeight, sampleCount, _null);
-      postResource0 = A.PipelineResourceLayout__sized(B.ResourceRef_rRS.nextVersion$0(), sceneColorWidth, sceneColorHeight, _null, _null);
+      t4 = A.PipelineResourceLayout__sized(B.ResourceRef_rRS, sceneColorWidth, sceneColorHeight, sampleCount, _null);
+      t5 = A.PipelineResourceLayout__sized(B.ResourceRef_rRS.nextVersion$0(), sceneColorWidth, sceneColorHeight, _null, _null);
+      t6 = sampleCount > 1;
+      postResource = A.PipelineResourceLayout__sized(B.ResourceRef_OV9, sceneColorWidth, sceneColorHeight, _null, t6 ? 2 : 1);
+      t7 = A.PipelineResourceLayout__sized(B.ResourceRef_EZ2, t2, t3, _null, _null);
       A.PipelineResourceLayout__sized(B.ResourceRef_qfj, sceneColorWidth, sceneColorHeight, _null, _null);
-      t4 = A.PipelineResourceLayout__sized(B.ResourceRef_ZYz, sceneColorWidth, sceneColorHeight, _null, _null);
-      t5 = A.PipelineResourceLayout__sized(B.ResourceRef_Bey, shadowMapSize, shadowMapSize, _null, _null);
-      t6 = A.PipelineResourceLayout__sized(B.ResourceRef_PIK, t2, t3, _null, _null);
-      t7 = A.PipelineResourceLayout__sized(B.ResourceRef_Rap, t2, t3, _null, _null);
-      t8 = A.PipelineResourceLayout__sized(B.ResourceRef_bI5, t2, t3, _null, _null);
-      t9 = A.PipelineResourceLayout__sized(B.ResourceRef_bI50, t2, t3, _null, _null);
-      t10 = $.$get$BloomResources_sceneColorPostBloom();
-      t11 = sampleCount > 1;
-      postResource1 = A.PipelineResourceLayout__sized(t10, sceneColorWidth, sceneColorHeight, _null, t11 ? 2 : 1);
-      t10 = A.PipelineResourceLayout__sized(B.ResourceRef_570, t2, t3, _null, _null);
-      t12 = A.PipelineResourceLayout__sized(B.ResourceRef_5700, t2, t3, _null, _null);
-      postResource2 = A.PipelineResourceLayout__sized(B.ResourceRef_9Ho, sceneColorWidth, sceneColorHeight, _null, _null);
-      postResource3 = A.PipelineResourceLayout__sized(B.ResourceRef_SSV, sceneColorWidth, sceneColorHeight, _null, _null);
-      postResource4 = A.PipelineResourceLayout__sized(B.ResourceRef_tcv, sceneColorWidth, sceneColorHeight, _null, _null);
-      postResource5 = A.PipelineResourceLayout__sized(B.ResourceRef_Yiz, sceneColorWidth, sceneColorHeight, _null, _null);
-      msaaResolve = t11 ? new A.MsaaResolveFeature(device, postResource, postResource0) : _null;
+      t8 = A.PipelineResourceLayout__sized(B.ResourceRef_ZYz, sceneColorWidth, sceneColorHeight, _null, _null);
+      t9 = A.PipelineResourceLayout__sized(B.ResourceRef_Bey, shadowMapSize, shadowMapSize, _null, _null);
+      t10 = A.PipelineResourceLayout__sized(B.ResourceRef_PIK, t2, t3, _null, _null);
+      t11 = A.PipelineResourceLayout__sized(B.ResourceRef_Rap, t2, t3, _null, _null);
+      t12 = A.PipelineResourceLayout__sized(B.ResourceRef_bI5, t2, t3, _null, _null);
+      t13 = A.PipelineResourceLayout__sized(B.ResourceRef_bI50, t2, t3, _null, _null);
+      t14 = $.$get$BloomResources_sceneColorPostBloom();
+      t15 = t6 ? 1 : 0;
+      postResource0 = A.PipelineResourceLayout__sized(t14, sceneColorWidth, sceneColorHeight, _null, t15 + (hasVolumetric ? 1 : 0) + 1);
+      t14 = A.PipelineResourceLayout__sized(B.ResourceRef_570, t2, t3, _null, _null);
+      t15 = A.PipelineResourceLayout__sized(B.ResourceRef_5700, t2, t3, _null, _null);
+      postResource1 = A.PipelineResourceLayout__sized(B.ResourceRef_9Ho, sceneColorWidth, sceneColorHeight, _null, _null);
+      postResource2 = A.PipelineResourceLayout__sized(B.ResourceRef_SSV, sceneColorWidth, sceneColorHeight, _null, _null);
+      postResource3 = A.PipelineResourceLayout__sized(B.ResourceRef_tcv, sceneColorWidth, sceneColorHeight, _null, _null);
+      postResource4 = A.PipelineResourceLayout__sized(B.ResourceRef_Yiz, sceneColorWidth, sceneColorHeight, _null, _null);
+      msaaResolve = t6 ? new A.MsaaResolveFeature(device, t4, t5) : _null;
       t1.lastLightView = null;
       fallbackLightView = A.ShadowLightView_ShadowLightView$fromSpotLight(B.C_SpotLight);
-      t13 = type$.JSArray_RenderFeature;
-      postFeatures = A._setArrayType([], t13);
-      postResource0 = t11 ? postResource0 : postResource;
+      if (hasVolumetric) {
+        t16 = t6 ? t5 : t4;
+        volumetric = new A.VolumetricLightFeature(programLibrary, _s156_, "#version 300 es\nprecision highp float;\n\nin vec2 vUv;\nlayout(location = 0) out vec4 oColor;\n\nuniform sampler2D uSceneDepth;\nuniform float uNear;\nuniform float uFar;\nuniform mat4 uViewProjection;\nuniform vec3 uLightDir;\nuniform vec3 uLightColor;\nuniform float uShaftIntensity;\nuniform float uFogDensity;\nuniform float uAnisotropy;\nuniform mat4 uView;\nuniform mat4 uInverseProjection;\nuniform vec3 uVolumetricAlbedo;\nuniform float uVolumetricHeightFalloff;\nuniform float uVolumetricDustDensity;\nuniform float uVolumetricJitter;\nuniform float uVolumetricIntensity;\nuniform float uVolumetricSampleCount;\nuniform float uVolumetricSourceCount;\n\nuniform vec3 uSourcePosition0;\nuniform vec3 uSourceColor0;\nuniform float uSourceIntensity0;\nuniform float uSourceReferenceDistance0;\nuniform float uSourceCutoffDistance0;\nuniform vec3 uSourcePosition1;\nuniform vec3 uSourceColor1;\nuniform float uSourceIntensity1;\nuniform float uSourceReferenceDistance1;\nuniform float uSourceCutoffDistance1;\nuniform vec3 uSourcePosition2;\nuniform vec3 uSourceColor2;\nuniform float uSourceIntensity2;\nuniform float uSourceReferenceDistance2;\nuniform float uSourceCutoffDistance2;\nuniform vec3 uSourcePosition3;\nuniform vec3 uSourceColor3;\nuniform float uSourceIntensity3;\nuniform float uSourceReferenceDistance3;\nuniform float uSourceCutoffDistance3;\n\nfloat linearDepth(float depth) {\n  float z = depth * 2.0 - 1.0;\n  return (2.0 * uNear * uFar) / max(uFar + uNear - z * (uFar - uNear), 1e-4);\n}\n\nfloat phaseHenyeyGreenstein(float cosTheta, float anisotropy) {\n  float g = clamp(anisotropy, -0.85, 0.85);\n  float denominator = 1.0 + g * g - 2.0 * g * cosTheta;\n  return (1.0 - g * g) / (12.5663706 * pow(max(denominator, 1e-3), 1.5));\n}\n\nvec3 sourceContribution(\n  vec3 position,\n  vec3 color,\n  float intensity,\n  float referenceDistance,\n  float cutoffDistance,\n  vec3 viewRay,\n  float rayLength\n) {\n  vec4 clip = uViewProjection * vec4(position, 1.0);\n  if (clip.w <= 0.0) return vec3(0.0);\n  vec3 sourceView = (uView * vec4(position, 1.0)).xyz;\n  float sourceDistance = length(sourceView);\n  float tClosest = clamp(dot(sourceView, viewRay), 0.0, rayLength);\n  vec3 sampleToSource = sourceView - viewRay * tClosest;\n  float distanceToSource = max(length(sampleToSource), 1e-3);\n  float cutoff = 1.0 - smoothstep(\n    cutoffDistance * 0.65, cutoffDistance, sourceDistance);\n  float inverseSquare = intensity * referenceDistance * referenceDistance /\n      max(distanceToSource * distanceToSource,\n          referenceDistance * referenceDistance);\n  // The incoming direction is source -> sample and the outgoing direction is\n  // sample -> camera. This is the same phase convention as the directional\n  // medium path, but now evaluated against the located source.\n  float phase = phaseHenyeyGreenstein(\n    dot(normalize(sampleToSource), viewRay), uAnisotropy);\n  // Located practicals and lightning must also acquire visible body in a\n  // dust-filled room. Use the same broad haze plus particulate density as the\n  // directional march; otherwise a clear-air fog toggle would accidentally\n  // erase dust-lit source rays while the directional shafts still showed it.\n  float mediumDensity = max(uFogDensity + uVolumetricDustDensity, 0.0);\n  float mediumWeight = 1.0 - exp(-max(\n    mediumDensity * min(rayLength, cutoffDistance), 0.0));\n  float pathWeight = clamp(\n    rayLength / max(sourceDistance, referenceDistance), 0.0, 1.0);\n  return color * inverseSquare * phase * cutoff * mediumWeight * pathWeight *\n    uVolumetricIntensity * 0.35;\n}\n\nvoid main() {\n  float depth = texture(uSceneDepth, vUv).r;\n  vec4 viewPoint = uInverseProjection * vec4(vUv * 2.0 - 1.0, -1.0, 1.0);\n  viewPoint /= max(abs(viewPoint.w), 1e-5);\n  vec3 viewRay = normalize(viewPoint.xyz);\n  // linearDepth is camera-space Z; convert it to distance along the actual\n  // reconstructed ray so wide and tall projections integrate equally.\n  float cameraDepth = linearDepth(depth);\n  float rayLength = min(cameraDepth / max(-viewRay.z, 1e-3), uFar);\n  float density = max(uFogDensity, 0.0);\n\n  // A fixed, bounded integral keeps the pass deterministic and makes its\n  // cost predictable on weak adapters. The depth buffer stops integration at\n  // the first opaque surface, so shafts do not leak through geometry.\n  const int maxSampleCount = 24;\n  int sampleCount = int(clamp(uVolumetricSampleCount, 4.0, 24.0));\n  vec3 scatter = vec3(0.0);\n  float transmittance = 1.0;\n  float stepLength = rayLength / float(sampleCount);\n  float jitterSeed = fract(sin(dot(vUv, vec2(127.1, 311.7))) * 43758.5453);\n  float jitter = (jitterSeed - 0.5) * clamp(uVolumetricJitter, 0.0, 0.5);\n  for (int i = 0; i < maxSampleCount; i++) {\n    if (i >= sampleCount) break;\n    float distanceAlongRay = clamp(\n      (float(i) + 0.5 + jitter) * stepLength, 0.0, rayLength);\n    float heightWeight = exp(-max(distanceAlongRay * uVolumetricHeightFalloff, 0.0));\n    // Dust is a separate, host-resolved particulate phase. It is denser near\n    // the occupied room volume than the broad atmospheric haze, so shafts gain\n    // visible body without turning the far horizon opaque. At zero density the\n    // extra term is exactly zero and the established fog path is unchanged.\n    float dustWeight = exp(-max(distanceAlongRay *\n      uVolumetricHeightFalloff * 0.45, 0.0));\n    float opticalDensity = density +\n      max(uVolumetricDustDensity, 0.0) * dustWeight;\n    float opticalDepth = opticalDensity * stepLength * heightWeight;\n    float sampleTransmittance = exp(-opticalDepth);\n    float phase = phaseHenyeyGreenstein(dot(normalize(-uLightDir), viewRay), uAnisotropy);\n    scatter += transmittance * (uLightColor * uVolumetricAlbedo *\n      uShaftIntensity * uVolumetricIntensity * phase) * opticalDepth;\n    transmittance *= sampleTransmittance;\n  }\n\n  if (uVolumetricSourceCount > 0.5) {\n    scatter += sourceContribution(\n      uSourcePosition0, uSourceColor0, uSourceIntensity0,\n      uSourceReferenceDistance0, uSourceCutoffDistance0, viewRay, rayLength);\n  }\n  if (uVolumetricSourceCount > 1.5) {\n    scatter += sourceContribution(\n      uSourcePosition1, uSourceColor1, uSourceIntensity1,\n      uSourceReferenceDistance1, uSourceCutoffDistance1, viewRay, rayLength);\n  }\n  if (uVolumetricSourceCount > 2.5) {\n    scatter += sourceContribution(\n      uSourcePosition2, uSourceColor2, uSourceIntensity2,\n      uSourceReferenceDistance2, uSourceCutoffDistance2, viewRay, rayLength);\n  }\n  if (uVolumetricSourceCount > 3.5) {\n    scatter += sourceContribution(\n      uSourcePosition3, uSourceColor3, uSourceIntensity3,\n      uSourceReferenceDistance3, uSourceCutoffDistance3, viewRay, rayLength);\n  }\n\n  // Fade the final sample at the far plane and keep the additive output\n  // bounded so a storm flash cannot blow out the entire frame.\n  float farFade = 1.0 - smoothstep(uFar * 0.75, uFar, rayLength);\n  oColor = vec4(min(scatter * farFade, vec3(8.0)), 1.0);\n}\n", "#version 300 es\nprecision highp float;\n\nin vec2 vUv;\nlayout(location = 0) out vec4 oColor;\nuniform sampler2D uVolumetric;\nuniform float uVolumetricStrength;\n\nvoid main() {\n  vec3 light = texture(uVolumetric, vUv).rgb;\n  oColor = vec4(light * max(uVolumetricStrength, 0.0), 1.0);\n}\n", device, resolveSceneDepth, resolveCamera, t7, t8, t16, postResource, A._setArrayType([], type$.JSArray_GpuObject));
+      } else
+        volumetric = _null;
+      t7 = type$.JSArray_RenderFeature;
+      postFeatures = A._setArrayType([], t7);
+      if (!hasVolumetric)
+        postResource = t6 ? t5 : t4;
       if (hasBloom) {
-        B.JSArray_methods.addAll$1(postFeatures, A._setArrayType([new A.BloomBlurFeature(programLibrary, _s156_, _s462_, device, _s10_, _s10_, B._BloomBlurAxis_0, true, postResource0, t8, resolveResolvedSceneColor, t2, t3), new A.BloomBlurFeature(programLibrary, _s156_, _s462_, device, _s10_0, _s10_0, B._BloomBlurAxis_1, false, t8, t9, resolveBloomBlurH, t2, t3), new A.BloomCompositeFeature(programLibrary, _s156_, "#version 300 es\nprecision highp float;\nin vec2 vUv;\nuniform sampler2D uBloom;\nuniform float uBloomStrength;\nout vec4 oColor;\n\nvoid main(){\n  oColor=vec4(texture(uBloom,vUv).rgb*uBloomStrength,1.0);\n}\n", device, resolveBloomBlurV, t9, postResource0, postResource1)], t13));
-        postResource0 = postResource1;
+        B.JSArray_methods.addAll$1(postFeatures, A._setArrayType([new A.BloomBlurFeature(programLibrary, _s156_, _s462_, device, _s10_, _s10_, B._BloomBlurAxis_0, true, postResource, t12, resolveResolvedSceneColor, t2, t3), new A.BloomBlurFeature(programLibrary, _s156_, _s462_, device, _s10_0, _s10_0, B._BloomBlurAxis_1, false, t12, t13, resolveBloomBlurH, t2, t3), new A.BloomCompositeFeature(programLibrary, _s156_, "#version 300 es\nprecision highp float;\nin vec2 vUv;\nuniform sampler2D uBloom;\nuniform float uBloomStrength;\nout vec4 oColor;\n\nvoid main(){\n  oColor=vec4(texture(uBloom,vUv).rgb*uBloomStrength,1.0);\n}\n", device, resolveBloomBlurV, t13, postResource, postResource0)], t7));
+        postResource = postResource0;
       }
       if (hasDof) {
-        B.JSArray_methods.addAll$1(postFeatures, A._setArrayType([new A.DofBlurFeature(programLibrary, _s156_, _s462_, device, _s8_, _s8_, B._DofBlurAxis_0, postResource0, t10, resolveResolvedSceneColor, t2, t3), new A.DofBlurFeature(programLibrary, _s156_, _s462_, device, _s8_0, _s8_0, B._DofBlurAxis_1, t10, t12, resolveDofBlurH, t2, t3), new A.DofCompositeFeature(programLibrary, _s156_, "#version 300 es\nprecision highp float;\nin vec2 vUv;\nuniform sampler2D uSharp;\nuniform sampler2D uBlurred;\nuniform sampler2D uSceneDepth;\nuniform float uNear;\nuniform float uFar;\nuniform float uFocusDistance;\nuniform float uFocusRange;\nuniform float uStrength;\nout vec4 oColor;\n\nfloat linearDepth(float raw){\n  float ndc=raw*2.0-1.0;\n  return (2.0*uNear*uFar)/(uFar+uNear-ndc*(uFar-uNear));\n}\n\n// Circle-of-confusion is a simple linear ramp from the focus distance\n// outward (front and back treated the same \u2014 no separate near/far falloff\n// curve), clamped to [0,1] and scaled by uStrength so\n// PostProcessState.depthOfFieldStrength == 0 is a true no-op (coc == 0\n// everywhere, oColor == the sharp source exactly).\nvoid main(){\n  float depth=linearDepth(texture(uSceneDepth,vUv).r);\n  float coc=clamp(abs(depth-uFocusDistance)/max(uFocusRange,0.0001),0.0,1.0)*uStrength;\n  vec3 sharp=texture(uSharp,vUv).rgb;\n  vec3 blurred=texture(uBlurred,vUv).rgb;\n  oColor=vec4(mix(sharp,blurred,coc),1.0);\n}\n", device, resolveResolvedSceneColor, resolveDofBlurV, resolveSceneDepth, resolveCamera, postResource0, t4, t12, postResource2)], t13));
-        postResource0 = postResource2;
+        B.JSArray_methods.addAll$1(postFeatures, A._setArrayType([new A.DofBlurFeature(programLibrary, _s156_, _s462_, device, _s8_, _s8_, B._DofBlurAxis_0, postResource, t14, resolveResolvedSceneColor, t2, t3), new A.DofBlurFeature(programLibrary, _s156_, _s462_, device, _s8_0, _s8_0, B._DofBlurAxis_1, t14, t15, resolveDofBlurH, t2, t3), new A.DofCompositeFeature(programLibrary, _s156_, "#version 300 es\nprecision highp float;\nin vec2 vUv;\nuniform sampler2D uSharp;\nuniform sampler2D uBlurred;\nuniform sampler2D uSceneDepth;\nuniform float uNear;\nuniform float uFar;\nuniform float uFocusDistance;\nuniform float uFocusRange;\nuniform float uStrength;\nout vec4 oColor;\n\nfloat linearDepth(float raw){\n  float ndc=raw*2.0-1.0;\n  return (2.0*uNear*uFar)/(uFar+uNear-ndc*(uFar-uNear));\n}\n\n// Circle-of-confusion is a simple linear ramp from the focus distance\n// outward (front and back treated the same \u2014 no separate near/far falloff\n// curve), clamped to [0,1] and scaled by uStrength so\n// PostProcessState.depthOfFieldStrength == 0 is a true no-op (coc == 0\n// everywhere, oColor == the sharp source exactly).\nvoid main(){\n  float depth=linearDepth(texture(uSceneDepth,vUv).r);\n  float coc=clamp(abs(depth-uFocusDistance)/max(uFocusRange,0.0001),0.0,1.0)*uStrength;\n  vec3 sharp=texture(uSharp,vUv).rgb;\n  vec3 blurred=texture(uBlurred,vUv).rgb;\n  oColor=vec4(mix(sharp,blurred,coc),1.0);\n}\n", device, resolveResolvedSceneColor, resolveDofBlurV, resolveSceneDepth, resolveCamera, postResource, t8, t15, postResource1)], t7));
+        postResource = postResource1;
       }
       if (hasGrade) {
-        B.JSArray_methods.add$1(postFeatures, new A.GradeFeature(programLibrary, _s156_, "#version 300 es\nprecision highp float;\nin vec2 vUv;\nuniform sampler2D uScene;\nuniform sampler2D uLut;\nuniform float uLutSize;\nuniform float uStrength;\nout vec4 oColor;\n\n// \xa75.3's \"identity LUT\" baseline resource and this shader's actual grade LUT\n// are both just textures in this same unwrapped-3D-LUT layout (width =\n// size*size, height = size, blue index selects a size*size horizontal\n// slice) \u2014 there is nothing identity-specific about the sampling path\n// itself, only about what a given LUT texture's texels happen to encode.\nvec3 sampleLut(vec3 color){\n  float size=uLutSize;\n  float maxIndex=size-1.0;\n  vec3 scaled=clamp(color,0.0,1.0)*maxIndex;\n  float bLow=floor(scaled.b);\n  float bHigh=min(bLow+1.0,maxIndex);\n  float bFrac=scaled.b-bLow;\n  vec2 texel=vec2(1.0/(size*size),1.0/size);\n  vec2 rg=vec2(scaled.r+0.5,scaled.g+0.5);\n  vec2 uvLow=vec2((bLow*size+rg.x)*texel.x,rg.y*texel.y);\n  vec2 uvHigh=vec2((bHigh*size+rg.x)*texel.x,rg.y*texel.y);\n  vec3 colorLow=texture(uLut,uvLow).rgb;\n  vec3 colorHigh=texture(uLut,uvHigh).rgb;\n  return mix(colorLow,colorHigh,bFrac);\n}\n\nvoid main(){\n  vec3 scene=texture(uScene,vUv).rgb;\n  vec3 graded=sampleLut(scene);\n  oColor=vec4(mix(scene,graded,uStrength),1.0);\n}\n", device, resolveGradeLut, postResource0, postResource3));
-        postResource0 = postResource3;
+        B.JSArray_methods.add$1(postFeatures, new A.GradeFeature(programLibrary, _s156_, "#version 300 es\nprecision highp float;\nin vec2 vUv;\nuniform sampler2D uScene;\nuniform sampler2D uLut;\nuniform float uLutSize;\nuniform float uStrength;\nout vec4 oColor;\n\n// \xa75.3's \"identity LUT\" baseline resource and this shader's actual grade LUT\n// are both just textures in this same unwrapped-3D-LUT layout (width =\n// size*size, height = size, blue index selects a size*size horizontal\n// slice) \u2014 there is nothing identity-specific about the sampling path\n// itself, only about what a given LUT texture's texels happen to encode.\nvec3 sampleLut(vec3 color){\n  float size=uLutSize;\n  float maxIndex=size-1.0;\n  vec3 scaled=clamp(color,0.0,1.0)*maxIndex;\n  float bLow=floor(scaled.b);\n  float bHigh=min(bLow+1.0,maxIndex);\n  float bFrac=scaled.b-bLow;\n  vec2 texel=vec2(1.0/(size*size),1.0/size);\n  vec2 rg=vec2(scaled.r+0.5,scaled.g+0.5);\n  vec2 uvLow=vec2((bLow*size+rg.x)*texel.x,rg.y*texel.y);\n  vec2 uvHigh=vec2((bHigh*size+rg.x)*texel.x,rg.y*texel.y);\n  vec3 colorLow=texture(uLut,uvLow).rgb;\n  vec3 colorHigh=texture(uLut,uvHigh).rgb;\n  return mix(colorLow,colorHigh,bFrac);\n}\n\nvoid main(){\n  vec3 scene=texture(uScene,vUv).rgb;\n  vec3 graded=sampleLut(scene);\n  oColor=vec4(mix(scene,graded,uStrength),1.0);\n}\n", device, resolveGradeLut, postResource, postResource2));
+        postResource = postResource2;
       }
       if (hasPs1) {
-        B.JSArray_methods.add$1(postFeatures, new A.Ps1QuantizeFeature(programLibrary, _s156_, "#version 300 es\nprecision highp float;\nin vec2 vUv;\nuniform sampler2D uScene;\nuniform float uQuantizationBits;\nuniform float uDitherStrength;\nout vec4 oColor;\n\nconst float BAYER4X4[16]=float[16](\n  0.0,8.0,2.0,10.0,\n  12.0,4.0,14.0,6.0,\n  3.0,11.0,1.0,9.0,\n  15.0,7.0,13.0,5.0\n);\n\nfloat bayerValue(vec2 fragCoord){\n  int x=int(mod(fragCoord.x,4.0));\n  int y=int(mod(fragCoord.y,4.0));\n  return BAYER4X4[y*4+x]/16.0;\n}\n\n// \xa76.2's \"quantization/dither is an explicit composite after LUT grade\":\n// an ordered (Bayer 4x4) dither offset, scaled to one quantization step, is\n// added before rounding to uQuantizationBits levels per channel \u2014 this is\n// what breaks a hard quantization boundary into a dithered gradient instead\n// of a flat color band. uQuantizationBits==8 (RGBA8's own native precision)\n// with uDitherStrength==0 round-trips the source exactly: no dither offset\n// is added, and floor(x*255+0.5)/255 returns an already-8-bit value\n// unchanged.\nvoid main(){\n  vec3 scene=texture(uScene,vUv).rgb;\n  float levels=pow(2.0,uQuantizationBits)-1.0;\n  float dither=(bayerValue(gl_FragCoord.xy)-0.5)*uDitherStrength/levels;\n  vec3 dithered=clamp(scene+dither,0.0,1.0);\n  vec3 quantized=floor(dithered*levels+0.5)/levels;\n  oColor=vec4(quantized,1.0);\n}\n", device, postResource0, postResource4));
-        postResource0 = postResource4;
+        B.JSArray_methods.add$1(postFeatures, new A.Ps1QuantizeFeature(programLibrary, _s156_, "#version 300 es\nprecision highp float;\nin vec2 vUv;\nuniform sampler2D uScene;\nuniform float uQuantizationBits;\nuniform float uDitherStrength;\nout vec4 oColor;\n\nconst float BAYER4X4[16]=float[16](\n  0.0,8.0,2.0,10.0,\n  12.0,4.0,14.0,6.0,\n  3.0,11.0,1.0,9.0,\n  15.0,7.0,13.0,5.0\n);\n\nfloat bayerValue(vec2 fragCoord){\n  int x=int(mod(fragCoord.x,4.0));\n  int y=int(mod(fragCoord.y,4.0));\n  return BAYER4X4[y*4+x]/16.0;\n}\n\n// \xa76.2's \"quantization/dither is an explicit composite after LUT grade\":\n// an ordered (Bayer 4x4) dither offset, scaled to one quantization step, is\n// added before rounding to uQuantizationBits levels per channel \u2014 this is\n// what breaks a hard quantization boundary into a dithered gradient instead\n// of a flat color band. uQuantizationBits==8 (RGBA8's own native precision)\n// with uDitherStrength==0 round-trips the source exactly: no dither offset\n// is added, and floor(x*255+0.5)/255 returns an already-8-bit value\n// unchanged.\nvoid main(){\n  vec3 scene=texture(uScene,vUv).rgb;\n  float levels=pow(2.0,uQuantizationBits)-1.0;\n  float dither=(bayerValue(gl_FragCoord.xy)-0.5)*uDitherStrength/levels;\n  vec3 dithered=clamp(scene+dither,0.0,1.0);\n  vec3 quantized=floor(dithered*levels+0.5)/levels;\n  oColor=vec4(quantized,1.0);\n}\n", device, postResource, postResource3));
+        postResource = postResource3;
       }
       if (hasVhs) {
-        B.JSArray_methods.add$1(postFeatures, new A.VhsFeature(programLibrary, _s156_, '#version 300 es\nprecision highp float;\nin vec2 vUv;\nuniform sampler2D uScene;\nuniform sampler2D uHistory;\nuniform float uTime;\nuniform float uChromaWeight;\nuniform float uTrackingWeight;\nuniform float uNoiseWeight;\nuniform float uHeadSwitchWeight;\nuniform float uDropoutWeight;\nuniform float uGhostWeight;\nout vec4 oColor;\n\nfloat hash(vec2 p){\n  return fract(sin(dot(p,vec2(12.9898,78.233)))*43758.5453);\n}\n\n// \xa78.10: "sample the jittered/tracking UV before YIQ/chroma work so later\n// sampling does not overwrite earlier effects" \u2014 tracking jitter is\n// computed and applied to the UV exactly once, up front; every later\n// effect either operates on the resulting single sample or samples a\n// further offset FROM that same jittered UV, never re-reading uScene at\n// the original vUv.\nvoid main(){\n  float scanline=vUv.y;\n\n  // Tracking: a per-scanline horizontal jitter, re-rolled roughly 8 times\n  // a second (not per-frame) so it reads as tape wobble rather than\n  // high-frequency noise. Comfort clamp: 0.02 UV (a few source texels at\n  // this bootstrap\'s 384-wide internal resolution) is the max displacement\n  // regardless of weight \u2014 a weight of 1.0 must read as "visibly glitchy,"\n  // never as "the image is unreadable."\n  float trackingNoise=hash(vec2(floor(scanline*216.0),floor(uTime*8.0)))-0.5;\n  float jitter=trackingNoise*0.02*uTrackingWeight;\n  vec2 uv=vec2(clamp(vUv.x+jitter,0.0,1.0),vUv.y);\n  vec3 raw=texture(uScene,uv).rgb;\n\n  // Chroma bleed: convert to YIQ, sample a second, further-offset UV for\n  // the chroma (I/Q) channels only \u2014 luma (what reads as "sharp" to the\n  // eye) stays exactly where tracking already put it; only color smears.\n  vec2 chromaUv=vec2(clamp(uv.x+0.01*uChromaWeight,0.0,1.0),uv.y);\n  vec3 rawChroma=texture(uScene,chromaUv).rgb;\n  float y=dot(raw,vec3(0.299,0.587,0.114));\n  float i=dot(rawChroma,vec3(0.596,-0.274,-0.322));\n  float q=dot(rawChroma,vec3(0.211,-0.523,0.312));\n  vec3 yiqColor=vec3(\n    y+0.956*i+0.621*q,\n    y-0.272*i-0.647*q,\n    y-1.106*i+1.703*q\n  );\n  vec3 color=mix(raw,yiqColor,uChromaWeight);\n\n  // Static/snow: modeled in YIQ (luma + chroma), the same conversion\n  // chroma bleed already uses above, not independent RGB \u2014 real analog\n  // colour noise comes from the chroma subcarrier, so its hues are\n  // correlated/limited rather than arbitrary per-channel static. Noise\n  // cells are quantized coarser along x than y, giving each speckle a\n  // short horizontal dash instead of an isolated dot \u2014 a "vague line\n  // shape," matching how scanline-based static actually streaks. A\n  // sparser, stronger sparkle layer and a rare single-sample micro-\n  // distortion (an actual tiny position offset, not just colour) are both\n  // gated by a high-threshold mask so only occasional pixels carry the\n  // effect \u2014 small magnitude on top of that sparsity, for a sprinkle, not\n  // a wash.\n  vec2 noiseCell=vec2(floor(gl_FragCoord.x/3.0),gl_FragCoord.y)+uTime*60.0;\n  float noiseY=(hash(noiseCell)-0.5)*0.05;\n  float noiseI=(hash(noiseCell+vec2(17.0,3.0))-0.5)*0.14;\n  float noiseQ=(hash(noiseCell+vec2(53.0,29.0))-0.5)*0.14;\n  vec3 noiseYiq=vec3(\n    noiseY+0.956*noiseI+0.621*noiseQ,\n    noiseY-0.272*noiseI-0.647*noiseQ,\n    noiseY-1.106*noiseI+1.703*noiseQ\n  );\n  color+=noiseYiq*uNoiseWeight;\n  float sparkleMask=step(0.995,hash(noiseCell+vec2(97.0,3.0)));\n  float sparkleI=(hash(noiseCell+5.0)-0.5)*2.0;\n  float sparkleQ=(hash(noiseCell+9.0)-0.5)*2.0;\n  vec3 sparkleYiq=0.5+0.5*vec3(\n    0.956*sparkleI+0.621*sparkleQ,\n    -0.272*sparkleI-0.647*sparkleQ,\n    -1.106*sparkleI+1.703*sparkleQ\n  );\n  color+=sparkleYiq*sparkleMask*0.3*uNoiseWeight;\n  float distortMask=step(0.997,hash(noiseCell+vec2(43.0,61.0)));\n  vec2 distortOffset=\n    vec2(hash(noiseCell+1.0)-0.5,hash(noiseCell+2.0)-0.5)*0.01;\n  vec3 distortColor=texture(uScene,clamp(uv+distortOffset,0.0,1.0)).rgb;\n  color=mix(color,distortColor,distortMask*0.5*uNoiseWeight);\n\n  // Head-switch band: a thin strip near the bottom of frame (where a real\n  // VCR\'s playback head crosses the tape edge) gets a stronger tear,\n  // fading smoothly over the band\'s height rather than a hard cutoff.\n  float headSwitchBand=smoothstep(0.06,0.0,abs(scanline-0.98));\n  float headSwitchJitter=(hash(vec2(uTime*30.0,scanline))-0.5)*0.06;\n  vec2 headSwitchUv=vec2(\n    clamp(uv.x+headSwitchJitter*uHeadSwitchWeight*headSwitchBand,0.0,1.0),\n    uv.y\n  );\n  vec3 headSwitchColor=texture(uScene,headSwitchUv).rgb;\n  color=mix(color,headSwitchColor,uHeadSwitchWeight*headSwitchBand);\n\n  // Dropout: sparse, per-scanline streaks mimicking analog tape dropout.\n  // Real dropout is neither a flat full-width bar nor a fixed brightness \u2014\n  // a per-x noise mask (smoothstepped, not a hard cutoff) makes each\n  // streak\'s width and edges vary along its length, and a per-streak\n  // random intensity keeps consecutive dropouts from looking identical. A\n  // slow ~6Hz reroll (not per-frame) and a high activation threshold keep\n  // this an occasional glitch rather than a strobe \u2014 subtle enough not to\n  // distract during continuous play, even at uDropoutWeight\'s full value.\n  float dropoutCell=floor(uTime*6.0);\n  float dropoutRoll=hash(vec2(floor(scanline*216.0),dropoutCell));\n  float dropoutActive=step(0.994,dropoutRoll);\n  float dropoutIntensity=hash(vec2(dropoutCell,17.0))*0.5+0.4;\n  float dropoutMask=hash(\n    vec2(floor(uv.x*48.0),floor(scanline*216.0)+dropoutCell*3.0)\n  );\n  float dropoutStripe=\n    dropoutActive*uDropoutWeight*smoothstep(0.3,0.9,dropoutMask);\n  color=mix(color,vec3(dropoutIntensity),dropoutStripe*0.8);\n\n  // Ghosting: blends in last frame\'s own VHS *output* (uHistory, never\n  // uScene), horizontally offset, for a trailing double-image echo \u2014\n  // reading the previous frame\'s already-composited result is what makes\n  // this a genuine feedback trail rather than a static double-exposure.\n  vec2 ghostUv=vec2(clamp(uv.x-0.015,0.0,1.0),uv.y);\n  vec3 ghostColor=texture(uHistory,ghostUv).rgb;\n  color=mix(color,ghostColor,uGhostWeight*0.5);\n\n  oColor=vec4(clamp(color,0.0,1.0),1.0);\n}\n', device, resolveVhsHistory, resolveTime, postResource0, postResource5));
-        postResource0 = postResource5;
+        B.JSArray_methods.add$1(postFeatures, new A.VhsFeature(programLibrary, _s156_, '#version 300 es\nprecision highp float;\nin vec2 vUv;\nuniform sampler2D uScene;\nuniform sampler2D uHistory;\nuniform float uTime;\nuniform float uChromaWeight;\nuniform float uTrackingWeight;\nuniform float uNoiseWeight;\nuniform float uHeadSwitchWeight;\nuniform float uDropoutWeight;\nuniform float uGhostWeight;\nout vec4 oColor;\n\nfloat hash(vec2 p){\n  return fract(sin(dot(p,vec2(12.9898,78.233)))*43758.5453);\n}\n\n// \xa78.10: "sample the jittered/tracking UV before YIQ/chroma work so later\n// sampling does not overwrite earlier effects" \u2014 tracking jitter is\n// computed and applied to the UV exactly once, up front; every later\n// effect either operates on the resulting single sample or samples a\n// further offset FROM that same jittered UV, never re-reading uScene at\n// the original vUv.\nvoid main(){\n  float scanline=vUv.y;\n\n  // Tracking: a per-scanline horizontal jitter, re-rolled roughly 8 times\n  // a second (not per-frame) so it reads as tape wobble rather than\n  // high-frequency noise. Comfort clamp: 0.02 UV (a few source texels at\n  // this bootstrap\'s 384-wide internal resolution) is the max displacement\n  // regardless of weight \u2014 a weight of 1.0 must read as "visibly glitchy,"\n  // never as "the image is unreadable."\n  float trackingNoise=hash(vec2(floor(scanline*216.0),floor(uTime*8.0)))-0.5;\n  float jitter=trackingNoise*0.02*uTrackingWeight;\n  vec2 uv=vec2(clamp(vUv.x+jitter,0.0,1.0),vUv.y);\n  vec3 raw=texture(uScene,uv).rgb;\n\n  // Chroma bleed: convert to YIQ, sample a second, further-offset UV for\n  // the chroma (I/Q) channels only \u2014 luma (what reads as "sharp" to the\n  // eye) stays exactly where tracking already put it; only color smears.\n  vec2 chromaUv=vec2(clamp(uv.x+0.01*uChromaWeight,0.0,1.0),uv.y);\n  vec3 rawChroma=texture(uScene,chromaUv).rgb;\n  float y=dot(raw,vec3(0.299,0.587,0.114));\n  float i=dot(rawChroma,vec3(0.596,-0.274,-0.322));\n  float q=dot(rawChroma,vec3(0.211,-0.523,0.312));\n  vec3 yiqColor=vec3(\n    y+0.956*i+0.621*q,\n    y-0.272*i-0.647*q,\n    y-1.106*i+1.703*q\n  );\n  vec3 color=mix(raw,yiqColor,uChromaWeight);\n\n  // Static/snow: modeled in YIQ (luma + chroma), the same conversion\n  // chroma bleed already uses above, not independent RGB \u2014 real analog\n  // colour noise comes from the chroma subcarrier, so its hues are\n  // correlated/limited rather than arbitrary per-channel static. Noise\n  // cells are quantized coarser along x than y, giving each speckle a\n  // short horizontal dash instead of an isolated dot \u2014 a "vague line\n  // shape," matching how scanline-based static actually streaks. A\n  // sparser, stronger sparkle layer and a rare single-sample micro-\n  // distortion (an actual tiny position offset, not just colour) are both\n  // gated by a high-threshold mask so only occasional pixels carry the\n  // effect \u2014 small magnitude on top of that sparsity, for a sprinkle, not\n  // a wash.\n  vec2 noiseCell=vec2(floor(gl_FragCoord.x/3.0),gl_FragCoord.y)+uTime*60.0;\n  float noiseY=(hash(noiseCell)-0.5)*0.05;\n  float noiseI=(hash(noiseCell+vec2(17.0,3.0))-0.5)*0.14;\n  float noiseQ=(hash(noiseCell+vec2(53.0,29.0))-0.5)*0.14;\n  vec3 noiseYiq=vec3(\n    noiseY+0.956*noiseI+0.621*noiseQ,\n    noiseY-0.272*noiseI-0.647*noiseQ,\n    noiseY-1.106*noiseI+1.703*noiseQ\n  );\n  color+=noiseYiq*uNoiseWeight;\n  float sparkleMask=step(0.995,hash(noiseCell+vec2(97.0,3.0)));\n  float sparkleI=(hash(noiseCell+5.0)-0.5)*2.0;\n  float sparkleQ=(hash(noiseCell+9.0)-0.5)*2.0;\n  vec3 sparkleYiq=0.5+0.5*vec3(\n    0.956*sparkleI+0.621*sparkleQ,\n    -0.272*sparkleI-0.647*sparkleQ,\n    -1.106*sparkleI+1.703*sparkleQ\n  );\n  color+=sparkleYiq*sparkleMask*0.3*uNoiseWeight;\n  float distortMask=step(0.997,hash(noiseCell+vec2(43.0,61.0)));\n  vec2 distortOffset=\n    vec2(hash(noiseCell+1.0)-0.5,hash(noiseCell+2.0)-0.5)*0.01;\n  vec3 distortColor=texture(uScene,clamp(uv+distortOffset,0.0,1.0)).rgb;\n  color=mix(color,distortColor,distortMask*0.5*uNoiseWeight);\n\n  // Head-switch band: a thin strip near the bottom of frame (where a real\n  // VCR\'s playback head crosses the tape edge) gets a stronger tear,\n  // fading smoothly over the band\'s height rather than a hard cutoff.\n  float headSwitchBand=smoothstep(0.06,0.0,abs(scanline-0.98));\n  float headSwitchJitter=(hash(vec2(uTime*30.0,scanline))-0.5)*0.06;\n  vec2 headSwitchUv=vec2(\n    clamp(uv.x+headSwitchJitter*uHeadSwitchWeight*headSwitchBand,0.0,1.0),\n    uv.y\n  );\n  vec3 headSwitchColor=texture(uScene,headSwitchUv).rgb;\n  color=mix(color,headSwitchColor,uHeadSwitchWeight*headSwitchBand);\n\n  // Dropout: sparse, per-scanline streaks mimicking analog tape dropout.\n  // Real dropout is neither a flat full-width bar nor a fixed brightness \u2014\n  // a per-x noise mask (smoothstepped, not a hard cutoff) makes each\n  // streak\'s width and edges vary along its length, and a per-streak\n  // random intensity keeps consecutive dropouts from looking identical. A\n  // slow ~6Hz reroll (not per-frame) and a high activation threshold keep\n  // this an occasional glitch rather than a strobe \u2014 subtle enough not to\n  // distract during continuous play, even at uDropoutWeight\'s full value.\n  float dropoutCell=floor(uTime*6.0);\n  float dropoutRoll=hash(vec2(floor(scanline*216.0),dropoutCell));\n  float dropoutActive=step(0.994,dropoutRoll);\n  float dropoutIntensity=hash(vec2(dropoutCell,17.0))*0.5+0.4;\n  float dropoutMask=hash(\n    vec2(floor(uv.x*48.0),floor(scanline*216.0)+dropoutCell*3.0)\n  );\n  float dropoutStripe=\n    dropoutActive*uDropoutWeight*smoothstep(0.3,0.9,dropoutMask);\n  color=mix(color,vec3(dropoutIntensity),dropoutStripe*0.8);\n\n  // Ghosting: blends in last frame\'s own VHS *output* (uHistory, never\n  // uScene), horizontally offset, for a trailing double-image echo \u2014\n  // reading the previous frame\'s already-composited result is what makes\n  // this a genuine feedback trail rather than a static double-exposure.\n  vec2 ghostUv=vec2(clamp(uv.x-0.015,0.0,1.0),uv.y);\n  vec3 ghostColor=texture(uHistory,ghostUv).rgb;\n  color=mix(color,ghostColor,uGhostWeight*0.5);\n\n  oColor=vec4(clamp(color,0.0,1.0),1.0);\n}\n', device, resolveVhsHistory, resolveTime, postResource, postResource4));
+        postResource = postResource4;
       }
-      t4 = A._setArrayType([new A.DepthPrepassFeature(programLibrary, "#version 300 es\nlayout(location=0) in vec3 aPosition;\nlayout(location=4) in vec3 aUvMat;\nuniform mat4 uViewProjection;\nuniform mat4 uModel;\nuniform mat4 uInstanceModels[16];\nuniform float uUseInstances;\nuniform float uVertexSnapGrid;\nuniform float uAffineWarpStrength;\nout highp vec2 vUv;\nout highp float vUvW;\n// This prepass must land geometry on exactly the same pixels shadowedWorld\n// will, because its depth is what SSAO occludes against and what\n// shadowedWorld then samples back at its *own* gl_FragCoord. Snapping there\n// and not here would mean the AO texel a fragment reads was computed for a\n// slightly different surface than the one being shaded, and the error grows\n// with the grid. The snap math below is deliberately identical to\n// shadowed_world.vert's, including uVertexSnapGrid==0 skipping the branch.\n// The same reasoning now covers UVs: an alpha-masked surface's holes must\n// land on the same pixels in both passes, and affine sampling moves where a\n// given texel lands, so the w-premultiply below is the same expression\n// shadowed_world.vert uses and is driven from the same per-material weight.\nvoid main(){\n  mat4 model=uModel;\n  if(uUseInstances>0.5){model=uInstanceModels[gl_InstanceID];}\n  vec4 clip=uViewProjection*model*vec4(aPosition,1.0);\n  if(uVertexSnapGrid>0.0){\n    vec2 ndc=clip.xy/clip.w;\n    ndc=floor(ndc/uVertexSnapGrid+0.5)*uVertexSnapGrid;\n    clip.xy=ndc*clip.w;\n  }\n  gl_Position=clip;\n  float affineW=mix(1.0,clip.w,uAffineWarpStrength);\n  vUv=aUvMat.xy*affineW;\n  vUvW=affineW;\n}\n", "#version 300 es\nprecision highp float;\nin highp vec2 vUv;\nin highp float vUvW;\nuniform sampler2D uAlbedo;\nuniform float uAlphaCutoff;\nuniform float uAffineWarpStrength;\n// \xa76.2: \"includes opaque + alpha-masked depth.\" A masked surface's holes\n// must not write depth, or SSAO occludes against geometry the world pass\n// discarded and DOF's CoC defocuses against a surface nothing shaded. The\n// compare is bit-identical to shadowed_world.frag's \u2014 same uv recovery,\n// same threshold, same direction \u2014 because any divergence reintroduces\n// exactly the class of bug the vertex-snap parity fix (bug 17) closed.\n// Everything is inside the uAlphaCutoff>0. branch, so an unmasked draw\n// costs no texture fetch at all here, only the interpolation the varyings\n// were already going to do.\nvoid main(){\n  if(uAlphaCutoff>0.){\n    vec2 uv=uAffineWarpStrength>0.?vUv/vUvW:vUv;\n    if(texture(uAlbedo,uv).a<uAlphaCutoff)discard;\n  }\n}\n", resolveMesh, resolveMaterial, resolveAlbedo, t4)], t13);
+      t5 = A._setArrayType([new A.DepthPrepassFeature(programLibrary, "#version 300 es\nlayout(location=0) in vec3 aPosition;\nlayout(location=4) in vec3 aUvMat;\nuniform mat4 uViewProjection;\nuniform mat4 uModel;\nuniform mat4 uInstanceModels[16];\nuniform float uUseInstances;\nuniform float uVertexSnapGrid;\nuniform float uAffineWarpStrength;\nout highp vec2 vUv;\nout highp float vUvW;\n// This prepass must land geometry on exactly the same pixels shadowedWorld\n// will, because its depth is what SSAO occludes against and what\n// shadowedWorld then samples back at its *own* gl_FragCoord. Snapping there\n// and not here would mean the AO texel a fragment reads was computed for a\n// slightly different surface than the one being shaded, and the error grows\n// with the grid. The snap math below is deliberately identical to\n// shadowed_world.vert's, including uVertexSnapGrid==0 skipping the branch.\n// The same reasoning now covers UVs: an alpha-masked surface's holes must\n// land on the same pixels in both passes, and affine sampling moves where a\n// given texel lands, so the w-premultiply below is the same expression\n// shadowed_world.vert uses and is driven from the same per-material weight.\nvoid main(){\n  mat4 model=uModel;\n  if(uUseInstances>0.5){model=uInstanceModels[gl_InstanceID];}\n  vec4 clip=uViewProjection*model*vec4(aPosition,1.0);\n  if(uVertexSnapGrid>0.0){\n    vec2 ndc=clip.xy/clip.w;\n    ndc=floor(ndc/uVertexSnapGrid+0.5)*uVertexSnapGrid;\n    clip.xy=ndc*clip.w;\n  }\n  gl_Position=clip;\n  float affineW=mix(1.0,clip.w,uAffineWarpStrength);\n  vUv=aUvMat.xy*affineW;\n  vUvW=affineW;\n}\n", "#version 300 es\nprecision highp float;\nin highp vec2 vUv;\nin highp float vUvW;\nuniform sampler2D uAlbedo;\nuniform float uAlphaCutoff;\nuniform float uAffineWarpStrength;\n// \xa76.2: \"includes opaque + alpha-masked depth.\" A masked surface's holes\n// must not write depth, or SSAO occludes against geometry the world pass\n// discarded and DOF's CoC defocuses against a surface nothing shaded. The\n// compare is bit-identical to shadowed_world.frag's \u2014 same uv recovery,\n// same threshold, same direction \u2014 because any divergence reintroduces\n// exactly the class of bug the vertex-snap parity fix (bug 17) closed.\n// Everything is inside the uAlphaCutoff>0. branch, so an unmasked draw\n// costs no texture fetch at all here, only the interpolation the varyings\n// were already going to do.\nvoid main(){\n  if(uAlphaCutoff>0.){\n    vec2 uv=uAffineWarpStrength>0.?vUv/vUvW:vUv;\n    if(texture(uAlbedo,uv).a<uAlphaCutoff)discard;\n  }\n}\n", resolveMesh, resolveMaterial, resolveAlbedo, t8)], t7);
       if (hasSsao)
-        t4.push(new A.SsaoOcclusionFeature(programLibrary, _s156_, "#version 300 es\nprecision highp float;\nin vec2 vUv;\nuniform sampler2D uSceneDepth;\nuniform float uNear;\nuniform float uFar;\nuniform float uProjScaleX;\nuniform float uProjScaleY;\nuniform float uRadius;\nuniform float uStrength;\nout vec4 oColor;\n\nconst int KERNEL_SIZE=8;\nconst vec3 KERNEL[8]=vec3[8](\n  vec3( 0.35, 0.23, 0.45),\n  vec3(-0.28, 0.41, 0.32),\n  vec3( 0.18,-0.36, 0.55),\n  vec3(-0.42,-0.19, 0.28),\n  vec3( 0.51, 0.08, 0.18),\n  vec3(-0.11, 0.53, 0.16),\n  vec3( 0.07,-0.48, 0.38),\n  vec3(-0.33,-0.31, 0.48)\n);\n\nfloat linearDepth(float raw){\n  float ndc=raw*2.0-1.0;\n  return (2.0*uNear*uFar)/(uFar+uNear-ndc*(uFar-uNear));\n}\n\nvec3 viewPosAt(vec2 uv){\n  float viewZ=-linearDepth(texture(uSceneDepth,uv).r);\n  vec2 ndc=uv*2.0-1.0;\n  float viewX=ndc.x*(-viewZ)/uProjScaleX;\n  float viewY=ndc.y*(-viewZ)/uProjScaleY;\n  return vec3(viewX,viewY,viewZ);\n}\n\n// Pinned per-pixel kernel rotation \u2014 a deterministic hash of screen\n// position, not per-frame randomness, matching \xa78.5's \"rotates a small\n// kernel from pinned blue noise\" without the extra machinery of an actual\n// noise texture: the rotation angle is stable across frames for a given\n// pixel, which is what \"pinned\" requires (temporal stability), while still\n// varying spatially enough to break up banding between neighboring samples.\nfloat pinnedRotation(vec2 fragCoord){\n  return fract(sin(dot(fragCoord,vec2(12.9898,78.233)))*43758.5453)*6.2831853;\n}\n\nvoid main(){\n  vec3 originView=viewPosAt(vUv);\n  // Screen-space derivatives reconstruct a per-fragment normal from\n  // neighboring depth samples alone \u2014 no G-buffer normal attachment exists\n  // (deferred; see depth_prepass.dart's doc comment), which is sufficient\n  // for a chunky/stylized AO term rather than a precision-critical one.\n  vec3 normalView=normalize(cross(dFdx(originView),dFdy(originView)));\n\n  // Rotates each kernel sample's tangent-plane (x,y) offset in place, before\n  // it's transformed into view space by tbn below \u2014 this is what actually\n  // varies the kernel per pixel; rotating the already-reprojected screen UV\n  // afterward would rotate around the wrong origin and misalign every\n  // sample from the surface it's meant to test.\n  float angle=pinnedRotation(gl_FragCoord.xy);\n  float ca=cos(angle);\n  float sa=sin(angle);\n  mat2 rot=mat2(ca,sa,-sa,ca);\n\n  vec3 up=abs(normalView.z)<0.99?vec3(0.0,0.0,1.0):vec3(1.0,0.0,0.0);\n  vec3 tangent=normalize(cross(up,normalView));\n  vec3 bitangent=cross(normalView,tangent);\n  mat3 tbn=mat3(tangent,bitangent,normalView);\n\n  float occlusion=0.0;\n  for(int i=0;i<KERNEL_SIZE;i++){\n    vec3 kernelSample=KERNEL[i];\n    kernelSample.xy=rot*kernelSample.xy;\n    vec3 samplePos=originView+tbn*kernelSample*uRadius;\n    // Project the sample's view-space position back to screen UV using the\n    // same scale factors used to reconstruct it, inverted.\n    vec2 sampleUv=vec2(\n      samplePos.x*uProjScaleX/(-samplePos.z),\n      samplePos.y*uProjScaleY/(-samplePos.z)\n    );\n    // NDC [-1,1] -> UV [0,1] requires the constant 0.5, not vUv (the\n    // *current* fragment's own UV) \u2014 adding vUv here was a real bug: it\n    // conflated \"this sample's own absolute reprojected screen position\"\n    // with \"an offset relative to the current fragment,\" producing an\n    // error of (vUv-0.5) per axis that grows with distance from screen\n    // center. That's exactly what produced a huge, blobby, non-local dark\n    // region instead of contact occlusion \u2014 every sample tested a wildly\n    // wrong depth location except right at screen center, where the error\n    // happened to be near zero.\n    sampleUv=sampleUv*0.5+0.5;\n    if(sampleUv.x<0.0||sampleUv.x>1.0||sampleUv.y<0.0||sampleUv.y>1.0){\n      continue;\n    }\n    vec3 occluderView=viewPosAt(sampleUv);\n    float rangeCheck=smoothstep(0.0,1.0,uRadius/max(abs(originView.z-occluderView.z),0.0001));\n    occlusion+=(occluderView.z>=samplePos.z+0.02?1.0:0.0)*rangeCheck;\n  }\n  float ao=1.0-clamp((occlusion/float(KERNEL_SIZE))*uStrength,0.0,1.0);\n  oColor=vec4(vec3(ao),1.0);\n}\n", device, resolveSceneDepth, resolveCamera, t6));
+        t5.push(new A.SsaoOcclusionFeature(programLibrary, _s156_, "#version 300 es\nprecision highp float;\nin vec2 vUv;\nuniform sampler2D uSceneDepth;\nuniform float uNear;\nuniform float uFar;\nuniform float uProjScaleX;\nuniform float uProjScaleY;\nuniform float uRadius;\nuniform float uStrength;\nout vec4 oColor;\n\nconst int KERNEL_SIZE=8;\nconst vec3 KERNEL[8]=vec3[8](\n  vec3( 0.35, 0.23, 0.45),\n  vec3(-0.28, 0.41, 0.32),\n  vec3( 0.18,-0.36, 0.55),\n  vec3(-0.42,-0.19, 0.28),\n  vec3( 0.51, 0.08, 0.18),\n  vec3(-0.11, 0.53, 0.16),\n  vec3( 0.07,-0.48, 0.38),\n  vec3(-0.33,-0.31, 0.48)\n);\n\nfloat linearDepth(float raw){\n  float ndc=raw*2.0-1.0;\n  return (2.0*uNear*uFar)/(uFar+uNear-ndc*(uFar-uNear));\n}\n\nvec3 viewPosAt(vec2 uv){\n  float viewZ=-linearDepth(texture(uSceneDepth,uv).r);\n  vec2 ndc=uv*2.0-1.0;\n  float viewX=ndc.x*(-viewZ)/uProjScaleX;\n  float viewY=ndc.y*(-viewZ)/uProjScaleY;\n  return vec3(viewX,viewY,viewZ);\n}\n\n// Pinned per-pixel kernel rotation \u2014 a deterministic hash of screen\n// position, not per-frame randomness, matching \xa78.5's \"rotates a small\n// kernel from pinned blue noise\" without the extra machinery of an actual\n// noise texture: the rotation angle is stable across frames for a given\n// pixel, which is what \"pinned\" requires (temporal stability), while still\n// varying spatially enough to break up banding between neighboring samples.\nfloat pinnedRotation(vec2 fragCoord){\n  return fract(sin(dot(fragCoord,vec2(12.9898,78.233)))*43758.5453)*6.2831853;\n}\n\nvoid main(){\n  vec3 originView=viewPosAt(vUv);\n  // Screen-space derivatives reconstruct a per-fragment normal from\n  // neighboring depth samples alone \u2014 no G-buffer normal attachment exists\n  // (deferred; see depth_prepass.dart's doc comment), which is sufficient\n  // for a chunky/stylized AO term rather than a precision-critical one.\n  vec3 normalView=normalize(cross(dFdx(originView),dFdy(originView)));\n\n  // Rotates each kernel sample's tangent-plane (x,y) offset in place, before\n  // it's transformed into view space by tbn below \u2014 this is what actually\n  // varies the kernel per pixel; rotating the already-reprojected screen UV\n  // afterward would rotate around the wrong origin and misalign every\n  // sample from the surface it's meant to test.\n  float angle=pinnedRotation(gl_FragCoord.xy);\n  float ca=cos(angle);\n  float sa=sin(angle);\n  mat2 rot=mat2(ca,sa,-sa,ca);\n\n  vec3 up=abs(normalView.z)<0.99?vec3(0.0,0.0,1.0):vec3(1.0,0.0,0.0);\n  vec3 tangent=normalize(cross(up,normalView));\n  vec3 bitangent=cross(normalView,tangent);\n  mat3 tbn=mat3(tangent,bitangent,normalView);\n\n  float occlusion=0.0;\n  for(int i=0;i<KERNEL_SIZE;i++){\n    vec3 kernelSample=KERNEL[i];\n    kernelSample.xy=rot*kernelSample.xy;\n    vec3 samplePos=originView+tbn*kernelSample*uRadius;\n    // Project the sample's view-space position back to screen UV using the\n    // same scale factors used to reconstruct it, inverted.\n    vec2 sampleUv=vec2(\n      samplePos.x*uProjScaleX/(-samplePos.z),\n      samplePos.y*uProjScaleY/(-samplePos.z)\n    );\n    // NDC [-1,1] -> UV [0,1] requires the constant 0.5, not vUv (the\n    // *current* fragment's own UV) \u2014 adding vUv here was a real bug: it\n    // conflated \"this sample's own absolute reprojected screen position\"\n    // with \"an offset relative to the current fragment,\" producing an\n    // error of (vUv-0.5) per axis that grows with distance from screen\n    // center. That's exactly what produced a huge, blobby, non-local dark\n    // region instead of contact occlusion \u2014 every sample tested a wildly\n    // wrong depth location except right at screen center, where the error\n    // happened to be near zero.\n    sampleUv=sampleUv*0.5+0.5;\n    if(sampleUv.x<0.0||sampleUv.x>1.0||sampleUv.y<0.0||sampleUv.y>1.0){\n      continue;\n    }\n    vec3 occluderView=viewPosAt(sampleUv);\n    float rangeCheck=smoothstep(0.0,1.0,uRadius/max(abs(originView.z-occluderView.z),0.0001));\n    occlusion+=(occluderView.z>=samplePos.z+0.02?1.0:0.0)*rangeCheck;\n  }\n  float ao=1.0-clamp((occlusion/float(KERNEL_SIZE))*uStrength,0.0,1.0);\n  oColor=vec4(vec3(ao),1.0);\n}\n", device, resolveSceneDepth, resolveCamera, t10));
       if (hasSsao)
-        t4.push(new A.SsaoBlurFeature(programLibrary, _s156_, '#version 300 es\nprecision highp float;\nin vec2 vUv;\nuniform sampler2D uSsaoRaw;\nuniform sampler2D uSceneDepth;\nuniform vec2 uTexelSize;\nuniform float uNear;\nuniform float uFar;\nout vec4 oColor;\n\nfloat linearDepth(float raw){\n  float ndc=raw*2.0-1.0;\n  return (2.0*uNear*uFar)/(uFar+uNear-ndc*(uFar-uNear));\n}\n\n// \xa78.5: "uses a depth-aware bilateral blur rather than smearing across\n// silhouettes" \u2014 a plain box blur would bleed occlusion from a near object\n// onto a far background behind it (or vice versa) whenever they share\n// screen-space pixels near a silhouette edge; weighting each tap by how\n// close its depth is to the center tap\'s depth is what keeps the blur\n// confined to one surface at a time.\nvoid main(){\n  float centerDepth=linearDepth(texture(uSceneDepth,vUv).r);\n  float sum=0.0;\n  float weightSum=0.0;\n  for(int y=-2;y<=2;y++){\n    for(int x=-2;x<=2;x++){\n      vec2 offset=vec2(float(x),float(y))*uTexelSize;\n      vec2 sampleUv=vUv+offset;\n      float sampleDepth=linearDepth(texture(uSceneDepth,sampleUv).r);\n      float depthWeight=1.0/(1.0+abs(sampleDepth-centerDepth)*4.0);\n      sum+=texture(uSsaoRaw,sampleUv).r*depthWeight;\n      weightSum+=depthWeight;\n    }\n  }\n  float blurred=sum/max(weightSum,0.0001);\n  oColor=vec4(vec3(blurred),1.0);\n}\n', device, resolveSsaoRaw, resolveSceneDepth, resolveCamera, t2, t3, t6, t7));
-      t4.push(new A.ShadowFeature(programLibrary, "#version 300 es\nlayout(location=0) in vec3 aPosition;\nlayout(location=4) in vec3 aUvMat;\nuniform mat4 uLightViewProjection;\nuniform mat4 uModel;\nuniform mat4 uInstanceModels[16];\nuniform float uUseInstances;\nout highp vec2 vUv;\n// No affine premultiply here, unlike depth_prepass.vert. Affine sampling is\n// an artifact of *this camera's* screen-space rasterization; the shadow map\n// rasterizes the same triangle from the light, where the equivalent warp\n// would be a different, unrelated distortion. A masked surface therefore\n// cuts its shadow from the perspective-correct UVs \u2014 the geometrically\n// right holes \u2014 while the camera passes cut theirs from whatever the PS1\n// profile asked for. That divergence is deliberate: the two rasterizations\n// have no shared screen space to agree in.\nvoid main(){\n  mat4 model=uModel;\n  if(uUseInstances>0.5){model=uInstanceModels[gl_InstanceID];}\n  vUv=aUvMat.xy;\n  gl_Position=uLightViewProjection*model*vec4(aPosition,1.0);\n}\n", '#version 300 es\nprecision highp float;\nin highp vec2 vUv;\nuniform sampler2D uAlbedo;\nuniform float uAlphaCutoff;\n// \xa76.2: "alpha-masked geometry participates in shadow, prepass, and opaque\n// depth-writing routes." Without this discard a lattice, a leaf or a grille\n// casts the solid shadow of its bounding quad \u2014 the single most obvious way\n// a masked material reads as fake. uAlphaCutoff==0 skips the fetch, so\n// every opaque caster costs exactly what it did before this existed.\nvoid main(){\n  if(uAlphaCutoff>0.&&texture(uAlbedo,vUv).a<uAlphaCutoff)discard;\n}\n', resolveMesh, resolveMaterial, resolveAlbedo, resolveCasterLight, _null, _null, new A.buildShadowGraph_closure(t1), t5));
-      t4.push(new A.ShadowedWorldFeature(programLibrary, "#version 300 es\nlayout(location=0) in vec3 aPosition;\nlayout(location=1) in vec3 aNormal;\nlayout(location=2) in vec4 aColor;\nlayout(location=3) in float aAlpha;\nlayout(location=4) in vec3 aUvMat;\nlayout(location=5) in vec4 aTangent;\nlayout(location=6) in vec2 aUv1;\nuniform mat4 uViewProjection;\nuniform mat4 uView;\nuniform mat4 uModel;\nuniform mat4 uNormalMatrix;\nuniform mat4 uInstanceModels[16];\nuniform mat4 uInstanceNormalMatrices[16];\nuniform float uUseInstances;\nuniform mat4 uLightViewProjection;\nuniform float uVertexSnapGrid;\nuniform float uAffineWarpStrength;\nout vec4 vColor;\nout vec3 vNormal;\nout highp vec2 vUv;\nout highp float vUvW;\nout highp vec2 vUv1;\nout vec4 vLightSpacePos;\nout vec3 vWorldPos;\nout vec4 vTangent;\nout float vViewDepth;\nvoid main(){\n  mat4 model=uModel;\n  mat4 normalMatrix=uNormalMatrix;\n  if(uUseInstances>0.5){model=uInstanceModels[gl_InstanceID];normalMatrix=uInstanceNormalMatrices[gl_InstanceID];}\n  vColor=vec4(aColor.rgb,aAlpha);\n  vNormal=mat3(normalMatrix)*aNormal;\n  vec4 worldPos=model*vec4(aPosition,1.0);\n  vWorldPos=worldPos.xyz;\n  vTangent=vec4(mat3(normalMatrix)*aTangent.xyz,aTangent.w);\n  vLightSpacePos=uLightViewProjection*worldPos;\n  // RV-09 rung 5's fog: the same \"linear view depth\" convention SSAO/DOF\n  // already reconstruct from a depth texture, computed directly here\n  // instead \u2014 this pass rasterizes the actual geometry, so there is a true\n  // view-space Z per-vertex already, with no texture round-trip needed.\n  vViewDepth=-(uView*worldPos).z;\n  vec4 clip=uViewProjection*worldPos;\n  // RV-09 rung 3's PS1 profile: snaps clip-space xy to a fixed grid before\n  // the perspective divide, emulating the fixed-point vertex transform\n  // precision loss that gives PS1 geometry its characteristic wobble as it\n  // moves. uVertexSnapGrid==0 skips the branch entirely, so the default/\n  // safe path is bit-for-bit unchanged from before this rung.\n  if(uVertexSnapGrid>0.0){\n    vec2 ndc=clip.xy/clip.w;\n    ndc=floor(ndc/uVertexSnapGrid+0.5)*uVertexSnapGrid;\n    clip.xy=ndc*clip.w;\n  }\n  gl_Position=clip;\n  // Affine UV, the PS1 rung's deferred half. GLSL ES 300 has no\n  // `noperspective` qualifier, so the divide the rasterizer already performs\n  // is cancelled instead of disabled: hardware hands the fragment\n  // interp(v/w)/interp(1/w), so premultiplying a varying by w makes that\n  // expression collapse to interp(v) \u2014 screen-space linear, which *is*\n  // affine. Both varyings are scaled by the same factor so the fragment's\n  // vUv/vUvW recovers exactly that, and the intermediate blend between the\n  // two regimes stays continuous rather than popping at any strength.\n  // uAffineWarpStrength==0 gives affineW==1.0 exactly, leaving vUv equal to\n  // aUvMat.xy bit-for-bit; the fragment then skips the divide entirely on\n  // the same uniform, so the perspective-correct path is untouched rather\n  // than merely round-tripped. Snapping above only rewrites clip.xy, never\n  // clip.w, so the two PS1 halves are independent.\n  float affineW=mix(1.0,clip.w,uAffineWarpStrength);\n  vUv=aUvMat.xy*affineW;\n  vUvW=affineW;\n  vUv1=aUv1;\n}\n", "#version 300 es\nprecision highp float;\nin vec4 vColor;\nin vec3 vNormal;\nin highp vec2 vUv;\nin highp float vUvW;\nin highp vec2 vUv1;\nin vec4 vLightSpacePos;\nin vec3 vWorldPos;\nin vec4 vTangent;\nin float vViewDepth;\nuniform sampler2D uAlbedo;\nuniform sampler2D uNormalMap;\nuniform sampler2D uOrmMap;\nuniform sampler2D uEmissiveMap;\nuniform sampler2D uLightmap;\nuniform sampler2D uShadowMap;\nuniform vec3 uCameraPosition;\nuniform vec3 uLightPosition;\nuniform vec3 uLightDirection;\nuniform vec3 uLightColor;\nuniform float uLightIntensity;\nuniform float uLightRange;\nuniform float uLightInnerCos;\nuniform float uLightOuterCos;\nuniform float uSpotEnabled;\nuniform vec3 uDirectionalDirection;\nuniform vec3 uDirectionalColor;\nuniform float uDirectionalIntensity;\nuniform vec3 uPointPosition0;\nuniform vec3 uPointColor0;\nuniform float uPointIntensity0;\nuniform float uPointRadius0;\nuniform vec3 uPointPosition1;\nuniform vec3 uPointColor1;\nuniform float uPointIntensity1;\nuniform float uPointRadius1;\nuniform vec3 uPointPosition2;\nuniform vec3 uPointColor2;\nuniform float uPointIntensity2;\nuniform float uPointRadius2;\nuniform vec3 uPointPosition3;\nuniform vec3 uPointColor3;\nuniform float uPointIntensity3;\nuniform float uPointRadius3;\nuniform vec3 uDirectSpotPosition0;\nuniform vec3 uDirectSpotDirection0;\nuniform vec3 uDirectSpotColor0;\nuniform float uDirectSpotIntensity0;\nuniform float uDirectSpotRange0;\nuniform float uDirectSpotInnerCos0;\nuniform float uDirectSpotOuterCos0;\nuniform float uDirectSpotEnabled0;\nuniform vec3 uDirectSpotPosition1;\nuniform vec3 uDirectSpotDirection1;\nuniform vec3 uDirectSpotColor1;\nuniform float uDirectSpotIntensity1;\nuniform float uDirectSpotRange1;\nuniform float uDirectSpotInnerCos1;\nuniform float uDirectSpotOuterCos1;\nuniform float uDirectSpotEnabled1;\nuniform vec3 uDirectSpotPosition2;\nuniform vec3 uDirectSpotDirection2;\nuniform vec3 uDirectSpotColor2;\nuniform float uDirectSpotIntensity2;\nuniform float uDirectSpotRange2;\nuniform float uDirectSpotInnerCos2;\nuniform float uDirectSpotOuterCos2;\nuniform float uDirectSpotEnabled2;\nuniform vec3 uAmbientColor;\nuniform float uAmbientIntensity;\nuniform vec2 uShadowMapTexelSize;\nuniform vec3 uMaterialTint;\nuniform vec4 uUvScaleOffset;\nuniform sampler2D uSsao;\nuniform vec2 uSceneColorSize;\nuniform float uEmissiveStrength;\nuniform float uNormalStrength;\nuniform float uRoughness;\nuniform float uMetallic;\nuniform float uOcclusionStrength;\nuniform float uClearcoatStrength;\nuniform float uClearcoatRoughness;\nuniform float uLightmapIntensity;\nuniform float uAffineWarpStrength;\nuniform float uAlphaCutoff;\nuniform float uOpaqueCoverage;\nuniform vec3 uFogColor;\nuniform float uFogStart;\nuniform float uFogEnd;\nuniform float uFogHeightFalloff;\nuniform float uFogDensity;\nuniform float uReceivesShadow;\nuniform float uRainWetness;\nlayout(location=0)out vec4 oColor;\nlayout(location=1)out vec4 oGlow;\n\n// Distance falloff (smooth to zero at uLightRange, matching SpotLight.range\n// rather than an unbounded inverse-square that never reaches zero) times\n// cone-edge falloff (smoothstep between the outer and inner cone angles,\n  // SpotLight.outerConeRadians/innerConeRadians \u2014 both fields existed on the\n  // API already but nothing read them before this, so the light previously\n  // had a hard-edged, non-attenuating cone that read as flat/harsh instead of\n// a graduated pool of light).\nfloat rangeAttenuation(float dist,float range){\n  float normalized=clamp(dist/max(range,.001),0.,1.);\n  // Smooth quartic cutoff avoids a visible ring at the authored range while\n  // retaining an inverse-square response inside the light's influence.\n  float cutoff=1.-normalized*normalized*normalized*normalized;\n  float inverseSquare=1./(1.+(dist*dist)/max(range*range,.001));\n  return cutoff*cutoff*inverseSquare;\n}\n\nfloat lightAttenuation(vec3 worldPos){\n  vec3 toFrag=worldPos-uLightPosition;\n  float dist=length(toFrag);\n  float cosAngle=dot(normalize(toFrag),normalize(uLightDirection));\n  float coneFalloff=smoothstep(uLightOuterCos,uLightInnerCos,cosAngle);\n  return rangeAttenuation(dist,uLightRange)*coneFalloff;\n}\n\nfloat pointAttenuation(vec3 worldPos,vec3 lightPosition,float lightRadius){\n  float dist=length(lightPosition-worldPos);\n  return rangeAttenuation(dist,lightRadius);\n}\n\nvec3 pointContribution(vec3 normal,vec3 worldPos,vec3 lightPosition,\n  vec3 lightColor,float lightIntensity,float lightRadius){\n  vec3 toLight=lightPosition-worldPos;\n  float ndotl=max(dot(normal,normalize(toLight)),0.);\n  return lightColor*lightIntensity*ndotl*\n    pointAttenuation(worldPos,lightPosition,lightRadius);\n}\n\nvec3 directSpotContribution(vec3 normal,vec3 worldPos,vec3 lightPosition,\n  vec3 lightDirection,vec3 lightColor,float lightIntensity,float lightRange,\n  float innerCos,float outerCos,float enabled){\n  vec3 toLight=lightPosition-worldPos;\n  float ndotl=max(dot(normal,normalize(toLight)),0.);\n  vec3 toFrag=worldPos-lightPosition;\n  float cosAngle=dot(normalize(toFrag),normalize(lightDirection));\n  float coneFalloff=smoothstep(outerCos,innerCos,cosAngle);\n  float distanceFalloff=rangeAttenuation(length(toFrag),lightRange);\n  return lightColor*lightIntensity*ndotl*coneFalloff*\n    distanceFalloff*enabled;\n}\n\n// Compact Cook-Torrance response for the clean/high path. The bounded\n// per-light evaluation makes roughness and metallic maps visibly useful\n// without introducing a deferred light buffer.\nfloat distributionGgx(float ndoth,float roughness){\n  float a=roughness*roughness;\n  float a2=a*a;\n  float denom=ndoth*ndoth*(a2-1.0)+1.0;\n  return a2/(3.14159265*denom*denom);\n}\n\nfloat geometrySchlick(float ndotv,float roughness){\n  float k=(roughness+1.0)*(roughness+1.0)/8.0;\n  return ndotv/(ndotv*(1.0-k)+k);\n}\n\nfloat geometrySmith(float ndotv,float ndotl,float roughness){\n  return geometrySchlick(ndotv,roughness)*geometrySchlick(ndotl,roughness);\n}\n\nvec3 fresnelSchlick(float cosTheta,vec3 f0){\n  return f0+(1.0-f0)*pow(1.0-clamp(cosTheta,0.0,1.0),5.0);\n}\n\nvec3 specularContribution(vec3 normal,vec3 viewDir,vec3 lightDir,\n  vec3 lightColor,float lightIntensity,float attenuation,vec3 baseColor,\n  float roughness,float metallic){\n  vec3 halfDir=normalize(viewDir+lightDir);\n  float ndotv=max(dot(normal,viewDir),0.0);\n  float ndotl=max(dot(normal,lightDir),0.0);\n  float ndoth=max(dot(normal,halfDir),0.0);\n  float hdotv=max(dot(halfDir,viewDir),0.0);\n  vec3 f0=mix(vec3(0.04),baseColor,metallic);\n  vec3 fresnel=fresnelSchlick(hdotv,f0);\n  float distribution=distributionGgx(ndoth,roughness);\n  float geometry=geometrySmith(ndotv,ndotl,roughness);\n  vec3 numerator=distribution*geometry*fresnel;\n  float denominator=max(4.0*ndotv*ndotl,0.001);\n  return numerator/denominator*lightColor*lightIntensity*attenuation*ndotl;\n}\n\nfloat sampleShadow(vec3 projCoord,float bias){\n  float shadowDepth=texture(uShadowMap,projCoord.xy).r;\n  return projCoord.z-bias>shadowDepth?0.:1.;\n}\n\n// \xa78.5's fog: \"distance plus restrained height/damp modulation\" \u2014 the base\n// term is a smoothstepped distance ramp (uFogStart..uFogEnd), not a plain\n// linear one: a linear ramp's density right at uFogStart is already\n// visibly nonzero, which reads as a hard onset band across a large\n// continuous surface like the ground plane. smoothstep's derivative is\n// zero at both ends, so density stays low just past uFogStart and eases\n// in gradually instead. Height falloff and density are each optional in\n// FrameEnvironment (nullable there, 0.0 here) and each written so 0.0 is\n// an exact no-op, rather than needing a separate enabled flag per term:\n//   - height: exp(-0*y) == 1, an identity multiply, when no falloff is set;\n//   - density: 1-exp(-0*depth) == 0, so max(distance, 0) leaves the plain\n//     distance term untouched when no density is set. Density can only\n//     ever push fog stronger than the base distance ramp, never weaker \u2014\n//     \"restrained\" in the sense that it augments, never overrides.\nfloat fogFactor(float viewDepth,float worldY){\n  float distFactor=smoothstep(uFogStart,uFogEnd,viewDepth);\n  float densityFactor=1.-exp(-uFogDensity*viewDepth);\n  float factor=max(distFactor,densityFactor);\n  float heightFactor=exp(-uFogHeightFalloff*max(worldY,0.));\n  return clamp(factor*heightFactor,0.,1.);\n}\n\nfloat shadowFactor(float ndotl){\n  vec3 projCoord=vLightSpacePos.xyz/vLightSpacePos.w;\n  projCoord=projCoord*.5+.5;\n  if(projCoord.x<0.||projCoord.x>1.||projCoord.y<0.||projCoord.y>1.||projCoord.z>1.){\n    return 1.;\n  }\n  // Receiver-plane style slope bias keeps grazing surfaces from acne while\n  // avoiding the detached-shadow look of a large constant offset.\n  float bias=max(.003*(1.-ndotl),.0008);\n  // Fixed low-discrepancy offsets avoid the directional shimmer of a regular\n  // square lattice while remaining deterministic and free of per-frame noise.\n  vec2 t=uShadowMapTexelSize;\n  float sum=0.;\n  sum+=sampleShadow(projCoord+vec3(vec2(-.942,-.399)*t,0.),bias);\n  sum+=sampleShadow(projCoord+vec3(vec2(.945,-.768)*t,0.),bias);\n  sum+=sampleShadow(projCoord+vec3(vec2(-.094,.886)*t,0.),bias);\n  sum+=sampleShadow(projCoord+vec3(vec2(.344,.294)*t,0.),bias);\n  sum+=sampleShadow(projCoord+vec3(vec2(-.716,.642)*t,0.),bias);\n  sum+=sampleShadow(projCoord+vec3(vec2(.688,-.089)*t,0.),bias);\n  sum+=sampleShadow(projCoord+vec3(vec2(-.287,-.885)*t,0.),bias);\n  sum+=sampleShadow(projCoord+vec3(vec2(.052,.008)*t,0.),bias);\n  sum+=sampleShadow(projCoord+vec3(vec2(.831,.486)*t,0.),bias);\n  return sum/9.;\n}\n\nvoid main(){\n  // The divide that undoes the rasterizer's own perspective correction (see\n  // shadowed_world.vert). Branched on the uniform rather than always\n  // dividing, so a zero-strength draw samples the untouched vUv and is\n  // bit-identical to the pre-affine path \u2014 the divisor is 1.0 there, but\n  // only after an interpolate/divide round-trip that need not return\n  // exactly 1.0. The branch is uniform across the whole draw, so it costs\n  // no divergence.\n  vec2 uv=uAffineWarpStrength>0.?vUv/vUvW:vUv;\n  uv=uv*uUvScaleOffset.xy+uUvScaleOffset.zw;\n  vec4 tex=texture(uAlbedo,uv);\n  // \xa76.2's alpha-masked route. Deliberately the first thing after the\n  // fetch it depends on, and ahead of all the lighting below: a discarded\n  // fragment must not pay for four shadow-map taps and two normalizes it\n  // will never use. uAlphaCutoff==0 is the pass's \"this material has no\n  // cutout\" sentinel (MaterialDefinition.validate forbids a real zero), so\n  // opaque and blended draws take a path containing no alpha compare at\n  // all rather than one comparing against an unreachable threshold. The\n  // same test, against the same uv, runs in depth_prepass.frag and\n  // shadow_caster.frag \u2014 three passes must agree on which fragments exist\n  // or SSAO, DOF and shadowing all occlude against holes this pass shaded\n  // through.\n  if(uAlphaCutoff>0.&&tex.a<uAlphaCutoff)discard;\n  vec3 n=normalize(vNormal);\n  // Surface-v2 supplies a tangent4 with OpenGL's +/-1 handedness in W.\n  // Compatibility14 meshes leave the attribute at its default zero and use\n  // the derivative frame below, so old content and authored tangents share\n  // one shader contract.\n  if(uNormalStrength>0.0){\n    vec3 dp1=dFdx(vWorldPos),dp2=dFdy(vWorldPos);\n    vec2 duv1=dFdx(uv),duv2=dFdy(uv);\n    vec3 derivativeT=normalize(dp1*duv2.y-dp2*duv1.y);\n    vec3 derivativeB=normalize(-dp1*duv2.x+dp2*duv1.x);\n    vec3 authoredT=normalize(vTangent.xyz-n*dot(n,vTangent.xyz));\n    bool hasAuthoredT=dot(vTangent.xyz,vTangent.xyz)>0.25;\n    vec3 t=hasAuthoredT?authoredT:derivativeT;\n    vec3 b=hasAuthoredT?normalize(cross(n,t)*vTangent.w):derivativeB;\n    vec3 map=texture(uNormalMap,uv).xyz*2.0-1.0;\n    map.xy*=uNormalStrength;\n    n=normalize(mat3(t,b,n)*normalize(map));\n  }\n  vec3 orm=texture(uOrmMap,uv).rgb;\n  float normalVariance=0.0;\n  if(uNormalStrength>0.0){\n    // Toksvig-style widening suppresses sub-pixel normal sparkle when a high\n    // resolution map is minified. It preserves authored relief at distance\n    // while converting unresolved detail into a stable roughness increase.\n    vec3 normalSample=texture(uNormalMap,uv).xyz*2.0-1.0;\n    vec3 normalDx=dFdx(normalSample);\n    vec3 normalDy=dFdy(normalSample);\n    normalVariance=dot(normalDx,normalDx)+dot(normalDy,normalDy);\n  }\n  float ao=texture(uSsao,gl_FragCoord.xy/uSceneColorSize).r;\n  ao*=mix(1.0,orm.r,clamp(uOcclusionStrength,0.0,1.0));\n  vec3 direct=vec3(0.);\n  float directionalNdotL=max(dot(n,normalize(uDirectionalDirection)),0.);\n  direct+=uDirectionalColor*uDirectionalIntensity*directionalNdotL;\n  direct+=pointContribution(n,vWorldPos,uPointPosition0,uPointColor0,\n    uPointIntensity0,uPointRadius0);\n  direct+=pointContribution(n,vWorldPos,uPointPosition1,uPointColor1,\n    uPointIntensity1,uPointRadius1);\n  direct+=pointContribution(n,vWorldPos,uPointPosition2,uPointColor2,\n    uPointIntensity2,uPointRadius2);\n  direct+=pointContribution(n,vWorldPos,uPointPosition3,uPointColor3,\n    uPointIntensity3,uPointRadius3);\n  direct+=directSpotContribution(n,vWorldPos,uDirectSpotPosition0,\n    uDirectSpotDirection0,uDirectSpotColor0,uDirectSpotIntensity0,\n    uDirectSpotRange0,uDirectSpotInnerCos0,uDirectSpotOuterCos0,\n    uDirectSpotEnabled0);\n  direct+=directSpotContribution(n,vWorldPos,uDirectSpotPosition1,\n    uDirectSpotDirection1,uDirectSpotColor1,uDirectSpotIntensity1,\n    uDirectSpotRange1,uDirectSpotInnerCos1,uDirectSpotOuterCos1,\n    uDirectSpotEnabled1);\n  direct+=directSpotContribution(n,vWorldPos,uDirectSpotPosition2,\n    uDirectSpotDirection2,uDirectSpotColor2,uDirectSpotIntensity2,\n    uDirectSpotRange2,uDirectSpotInnerCos2,uDirectSpotOuterCos2,\n    uDirectSpotEnabled2);\n  vec3 toSpot=normalize(uLightPosition-vWorldPos);\n  float spotNdotL=max(dot(n,toSpot),0.);\n  float shadow=uReceivesShadow>0.5?shadowFactor(spotNdotL):1.;\n  float attenuation=lightAttenuation(vWorldPos);\n  direct+=uLightColor*uLightIntensity*spotNdotL*shadow*attenuation*uSpotEnabled;\n  // \xa78.5: \"modulates ambient only\" \u2014 SSAO must never darken the direct\n  // (N.L * shadow * attenuation) term, only the ambient fill, or it would\n  // double up with real shadowing and read as an incorrect global darkening\n  // rather than contact occlusion specifically.\n  vec3 ambient=uAmbientColor*uAmbientIntensity*ao;\n  vec3 baseColor=vColor.rgb*tex.rgb*uMaterialTint;\n  // Metallic surfaces contribute less diffuse energy; roughness keeps a\n  // small, stable broadening factor until the surface-v2 camera/specular\n  // block lands. Both channels therefore affect the live output rather than\n  // being metadata-only fields.\n  float metal=clamp(uMetallic*orm.b,0.0,1.0);\n  float rough=clamp(uRoughness*orm.g,0.0,1.0);\n  // Avoid singular highlights while retaining a visibly sharp porcelain\n  // response at the authored low end of the roughness range.\n  float specRough=max(0.045,sqrt(rough*rough+normalVariance*0.18));\n  vec3 viewDir=normalize(uCameraPosition-vWorldPos);\n  vec3 specular=vec3(0.0);\n  specular+=specularContribution(n,viewDir,normalize(uDirectionalDirection),\n    uDirectionalColor,uDirectionalIntensity,1.0,baseColor,specRough,metal);\n  specular+=specularContribution(n,viewDir,\n    normalize(uPointPosition0-vWorldPos),uPointColor0,uPointIntensity0,\n    pointAttenuation(vWorldPos,uPointPosition0,uPointRadius0),baseColor,\n    specRough,metal);\n  specular+=specularContribution(n,viewDir,\n    normalize(uPointPosition1-vWorldPos),uPointColor1,uPointIntensity1,\n    pointAttenuation(vWorldPos,uPointPosition1,uPointRadius1),baseColor,\n    specRough,metal);\n  specular+=specularContribution(n,viewDir,\n    normalize(uPointPosition2-vWorldPos),uPointColor2,uPointIntensity2,\n    pointAttenuation(vWorldPos,uPointPosition2,uPointRadius2),baseColor,\n    specRough,metal);\n  specular+=specularContribution(n,viewDir,\n    normalize(uPointPosition3-vWorldPos),uPointColor3,uPointIntensity3,\n    pointAttenuation(vWorldPos,uPointPosition3,uPointRadius3),baseColor,\n    specRough,metal);\n  specular+=specularContribution(n,viewDir,\n    normalize(uLightPosition-vWorldPos),uLightColor,uLightIntensity,\n    lightAttenuation(vWorldPos)*uSpotEnabled*shadow,baseColor,specRough,metal);\n  // Rain response stays in the world pass so it follows geometry depth rather\n  // than painting streaks over the whole screen. Near surfaces receive a\n  // restrained cool darkening and a broad wet highlight; distant surfaces\n  // fade back to their authored material before the fog composite.\n  float wetDepth=1.0-smoothstep(2.0,18.0,max(vViewDepth,0.0));\n  float wetness=clamp(uRainWetness,0.0,1.0)*wetDepth;\n  baseColor=mix(baseColor,baseColor*vec3(0.84,0.90,0.98),wetness*0.22);\n  // Keep reflected energy available to the specular lobe. The previous\n  // diffuse-first clamp clipped bright ceramic response before tone mapping,\n  // producing the broad plastic patches visible in low-roughness samples.\n  // This split is bounded by the material metalness and lets the final\n  // composite perform the intentional HDR compression once.\n  vec3 diffuseEnergy=baseColor*(1.0-metal)*\n    (ambient+direct*(1.0-0.25*rough));\n  vec3 lit=diffuseEnergy+specular;\n  // A restrained dielectric clearcoat is intentionally separate from the\n  // base roughness/metalness response. It gives porcelain a broad, stable\n  // grazing highlight without turning the surface into a mirror.\n  vec3 coatLight=normalize(uDirectionalDirection);\n  vec3 coatHalf=normalize(viewDir+coatLight);\n  float coatNdotV=max(dot(n,viewDir),0.);\n  float coatNdotH=max(dot(n,coatHalf),0.);\n  float coatNdotL=max(dot(n,coatLight),0.);\n  float coatPower=mix(128.0,8.0,clamp(uClearcoatRoughness,0.0,1.0));\n  float coatFresnel=0.04+0.96*pow(1.0-coatNdotV,5.0);\n  float coat=clamp(uClearcoatStrength,0.0,1.0)*coatFresnel*\n    pow(coatNdotH,coatPower)*coatNdotL*uDirectionalIntensity;\n  lit+=uDirectionalColor*coat;\n  lit+=direct*(wetness*(0.035+0.075*(1.0-rough)));\n  vec3 emissive=texture(uEmissiveMap,uv).rgb*uMaterialTint*uEmissiveStrength;\n  lit+=emissive;\n  if(uLightmapIntensity>0.0){\n    lit+=baseColor*texture(uLightmap,vUv1).rgb*uLightmapIntensity;\n  }\n  // Fog blends the surface's own lit color toward uFogColor only \u2014 never\n  // oGlow below, which stays a declared emissive quantity independent of\n  // how much atmosphere sits between the surface and the camera, matching\n  // \xa78.7's \"does not infer glow from final luma\" scoping: fog is a\n  // property of oColor's reflected/lit light, not of emission.\n  float fog=fogFactor(vViewDepth,vWorldPos.y);\n  vec3 foggedLit=mix(lit,uFogColor,fog);\n  // Bug 18: vColor.a*tex.a is the correct alpha for a blended draw and the\n  // wrong one for everything else. present.frag copies this channel\n  // straight through to a canvas created with the default alpha:true, so an\n  // opaque or masked surface that emitted a texel's own alpha would show\n  // the *page* through solid geometry. Coverage, not transparency, is what\n  // an opaque or masked fragment writes: whatever survived the discard\n  // above is fully covering, and an opaque draw always was. uOpaqueCoverage\n  // is exactly 0 or 1, so the mix is exact in both directions and the\n  // blended path keeps its pre-existing expression bit-for-bit.\n  float outAlpha=mix(vColor.a*tex.a,1.,uOpaqueCoverage);\n  oColor=vec4(foggedLit,outAlpha);\n  // \xa78.7: bloom reads this declared attachment directly, never inferring\n  // glow from oColor's final luma \u2014 a bright-but-non-emissive lit surface\n  // (e.g. the checkerboard floor under strong light) must never bloom, only\n  // a material with real emissiveStrength does, independent of how the\n  // surface happens to be lit this frame.\n  oGlow=vec4(emissive,1.);\n}\n", resolveMesh, resolveMaterial, resolveAlbedo, resolveNormal, resolveOrm, resolveEmissive, resolveLightmap, resolveShadowMap, new A.buildShadowGraph_closure0(t1, fallbackLightView), resolveCasterLight, resolveDirectSpotLights, resolveSsaoBlurred, hasSsao, sceneColorWidth, sceneColorHeight, shadowMapSize, shadowMapSize, t5, t7, postResource));
+        t5.push(new A.SsaoBlurFeature(programLibrary, _s156_, '#version 300 es\nprecision highp float;\nin vec2 vUv;\nuniform sampler2D uSsaoRaw;\nuniform sampler2D uSceneDepth;\nuniform vec2 uTexelSize;\nuniform float uNear;\nuniform float uFar;\nout vec4 oColor;\n\nfloat linearDepth(float raw){\n  float ndc=raw*2.0-1.0;\n  return (2.0*uNear*uFar)/(uFar+uNear-ndc*(uFar-uNear));\n}\n\n// \xa78.5: "uses a depth-aware bilateral blur rather than smearing across\n// silhouettes" \u2014 a plain box blur would bleed occlusion from a near object\n// onto a far background behind it (or vice versa) whenever they share\n// screen-space pixels near a silhouette edge; weighting each tap by how\n// close its depth is to the center tap\'s depth is what keeps the blur\n// confined to one surface at a time.\nvoid main(){\n  float centerDepth=linearDepth(texture(uSceneDepth,vUv).r);\n  float sum=0.0;\n  float weightSum=0.0;\n  for(int y=-2;y<=2;y++){\n    for(int x=-2;x<=2;x++){\n      vec2 offset=vec2(float(x),float(y))*uTexelSize;\n      vec2 sampleUv=vUv+offset;\n      float sampleDepth=linearDepth(texture(uSceneDepth,sampleUv).r);\n      float depthWeight=1.0/(1.0+abs(sampleDepth-centerDepth)*4.0);\n      sum+=texture(uSsaoRaw,sampleUv).r*depthWeight;\n      weightSum+=depthWeight;\n    }\n  }\n  float blurred=sum/max(weightSum,0.0001);\n  oColor=vec4(vec3(blurred),1.0);\n}\n', device, resolveSsaoRaw, resolveSceneDepth, resolveCamera, t2, t3, t10, t11));
+      t5.push(new A.ShadowFeature(programLibrary, "#version 300 es\nlayout(location=0) in vec3 aPosition;\nlayout(location=4) in vec3 aUvMat;\nuniform mat4 uLightViewProjection;\nuniform mat4 uModel;\nuniform mat4 uInstanceModels[16];\nuniform float uUseInstances;\nout highp vec2 vUv;\n// No affine premultiply here, unlike depth_prepass.vert. Affine sampling is\n// an artifact of *this camera's* screen-space rasterization; the shadow map\n// rasterizes the same triangle from the light, where the equivalent warp\n// would be a different, unrelated distortion. A masked surface therefore\n// cuts its shadow from the perspective-correct UVs \u2014 the geometrically\n// right holes \u2014 while the camera passes cut theirs from whatever the PS1\n// profile asked for. That divergence is deliberate: the two rasterizations\n// have no shared screen space to agree in.\nvoid main(){\n  mat4 model=uModel;\n  if(uUseInstances>0.5){model=uInstanceModels[gl_InstanceID];}\n  vUv=aUvMat.xy;\n  gl_Position=uLightViewProjection*model*vec4(aPosition,1.0);\n}\n", '#version 300 es\nprecision highp float;\nin highp vec2 vUv;\nuniform sampler2D uAlbedo;\nuniform float uAlphaCutoff;\n// \xa76.2: "alpha-masked geometry participates in shadow, prepass, and opaque\n// depth-writing routes." Without this discard a lattice, a leaf or a grille\n// casts the solid shadow of its bounding quad \u2014 the single most obvious way\n// a masked material reads as fake. uAlphaCutoff==0 skips the fetch, so\n// every opaque caster costs exactly what it did before this existed.\nvoid main(){\n  if(uAlphaCutoff>0.&&texture(uAlbedo,vUv).a<uAlphaCutoff)discard;\n}\n', resolveMesh, resolveMaterial, resolveAlbedo, resolveCasterLight, _null, _null, new A.buildShadowGraph_closure(t1), t9));
+      t5.push(new A.ShadowedWorldFeature(programLibrary, "#version 300 es\nlayout(location=0) in vec3 aPosition;\nlayout(location=1) in vec3 aNormal;\nlayout(location=2) in vec4 aColor;\nlayout(location=3) in float aAlpha;\nlayout(location=4) in vec3 aUvMat;\nlayout(location=5) in vec4 aTangent;\nlayout(location=6) in vec2 aUv1;\nuniform mat4 uViewProjection;\nuniform mat4 uView;\nuniform mat4 uModel;\nuniform mat4 uNormalMatrix;\nuniform mat4 uInstanceModels[16];\nuniform mat4 uInstanceNormalMatrices[16];\nuniform float uUseInstances;\nuniform mat4 uLightViewProjection;\nuniform float uVertexSnapGrid;\nuniform float uAffineWarpStrength;\nout vec4 vColor;\nout vec3 vNormal;\nout highp vec2 vUv;\nout highp float vUvW;\nout highp vec2 vUv1;\nout vec4 vLightSpacePos;\nout vec3 vWorldPos;\nout vec4 vTangent;\nout float vViewDepth;\nvoid main(){\n  mat4 model=uModel;\n  mat4 normalMatrix=uNormalMatrix;\n  if(uUseInstances>0.5){model=uInstanceModels[gl_InstanceID];normalMatrix=uInstanceNormalMatrices[gl_InstanceID];}\n  vColor=vec4(aColor.rgb,aAlpha);\n  vNormal=mat3(normalMatrix)*aNormal;\n  vec4 worldPos=model*vec4(aPosition,1.0);\n  vWorldPos=worldPos.xyz;\n  vTangent=vec4(mat3(normalMatrix)*aTangent.xyz,aTangent.w);\n  vLightSpacePos=uLightViewProjection*worldPos;\n  // RV-09 rung 5's fog: the same \"linear view depth\" convention SSAO/DOF\n  // already reconstruct from a depth texture, computed directly here\n  // instead \u2014 this pass rasterizes the actual geometry, so there is a true\n  // view-space Z per-vertex already, with no texture round-trip needed.\n  vViewDepth=-(uView*worldPos).z;\n  vec4 clip=uViewProjection*worldPos;\n  // RV-09 rung 3's PS1 profile: snaps clip-space xy to a fixed grid before\n  // the perspective divide, emulating the fixed-point vertex transform\n  // precision loss that gives PS1 geometry its characteristic wobble as it\n  // moves. uVertexSnapGrid==0 skips the branch entirely, so the default/\n  // safe path is bit-for-bit unchanged from before this rung.\n  if(uVertexSnapGrid>0.0){\n    vec2 ndc=clip.xy/clip.w;\n    ndc=floor(ndc/uVertexSnapGrid+0.5)*uVertexSnapGrid;\n    clip.xy=ndc*clip.w;\n  }\n  gl_Position=clip;\n  // Affine UV, the PS1 rung's deferred half. GLSL ES 300 has no\n  // `noperspective` qualifier, so the divide the rasterizer already performs\n  // is cancelled instead of disabled: hardware hands the fragment\n  // interp(v/w)/interp(1/w), so premultiplying a varying by w makes that\n  // expression collapse to interp(v) \u2014 screen-space linear, which *is*\n  // affine. Both varyings are scaled by the same factor so the fragment's\n  // vUv/vUvW recovers exactly that, and the intermediate blend between the\n  // two regimes stays continuous rather than popping at any strength.\n  // uAffineWarpStrength==0 gives affineW==1.0 exactly, leaving vUv equal to\n  // aUvMat.xy bit-for-bit; the fragment then skips the divide entirely on\n  // the same uniform, so the perspective-correct path is untouched rather\n  // than merely round-tripped. Snapping above only rewrites clip.xy, never\n  // clip.w, so the two PS1 halves are independent.\n  float affineW=mix(1.0,clip.w,uAffineWarpStrength);\n  vUv=aUvMat.xy*affineW;\n  vUvW=affineW;\n  vUv1=aUv1;\n}\n", "#version 300 es\nprecision highp float;\nin vec4 vColor;\nin vec3 vNormal;\nin highp vec2 vUv;\nin highp float vUvW;\nin highp vec2 vUv1;\nin vec4 vLightSpacePos;\nin vec3 vWorldPos;\nin vec4 vTangent;\nin float vViewDepth;\nuniform sampler2D uAlbedo;\nuniform sampler2D uNormalMap;\nuniform sampler2D uOrmMap;\nuniform sampler2D uEmissiveMap;\nuniform sampler2D uLightmap;\nuniform sampler2D uShadowMap;\nuniform vec3 uCameraPosition;\nuniform vec3 uLightPosition;\nuniform vec3 uLightDirection;\nuniform vec3 uLightColor;\nuniform float uLightIntensity;\nuniform float uLightRange;\nuniform float uLightInnerCos;\nuniform float uLightOuterCos;\nuniform float uSpotEnabled;\nuniform vec3 uDirectionalDirection;\nuniform vec3 uDirectionalColor;\nuniform float uDirectionalIntensity;\nuniform vec3 uPointPosition0;\nuniform vec3 uPointColor0;\nuniform float uPointIntensity0;\nuniform float uPointRadius0;\nuniform vec3 uPointPosition1;\nuniform vec3 uPointColor1;\nuniform float uPointIntensity1;\nuniform float uPointRadius1;\nuniform vec3 uPointPosition2;\nuniform vec3 uPointColor2;\nuniform float uPointIntensity2;\nuniform float uPointRadius2;\nuniform vec3 uPointPosition3;\nuniform vec3 uPointColor3;\nuniform float uPointIntensity3;\nuniform float uPointRadius3;\nuniform vec3 uDirectSpotPosition0;\nuniform vec3 uDirectSpotDirection0;\nuniform vec3 uDirectSpotColor0;\nuniform float uDirectSpotIntensity0;\nuniform float uDirectSpotRange0;\nuniform float uDirectSpotInnerCos0;\nuniform float uDirectSpotOuterCos0;\nuniform float uDirectSpotEnabled0;\nuniform vec3 uDirectSpotPosition1;\nuniform vec3 uDirectSpotDirection1;\nuniform vec3 uDirectSpotColor1;\nuniform float uDirectSpotIntensity1;\nuniform float uDirectSpotRange1;\nuniform float uDirectSpotInnerCos1;\nuniform float uDirectSpotOuterCos1;\nuniform float uDirectSpotEnabled1;\nuniform vec3 uDirectSpotPosition2;\nuniform vec3 uDirectSpotDirection2;\nuniform vec3 uDirectSpotColor2;\nuniform float uDirectSpotIntensity2;\nuniform float uDirectSpotRange2;\nuniform float uDirectSpotInnerCos2;\nuniform float uDirectSpotOuterCos2;\nuniform float uDirectSpotEnabled2;\nuniform vec3 uAmbientColor;\nuniform float uAmbientIntensity;\nuniform float uAmbientLightScale;\nuniform float uDirectLightScale;\nuniform vec3 uReflectionColor;\nuniform float uReflectionIntensity;\nuniform float uReflectionConfidence;\nuniform vec2 uShadowMapTexelSize;\nuniform float uShadowFilterRadius;\nuniform float uShadowBias;\nuniform vec3 uMaterialTint;\nuniform vec4 uUvScaleOffset;\nuniform sampler2D uSsao;\nuniform vec2 uSceneColorSize;\nuniform float uEmissiveStrength;\nuniform float uNormalStrength;\nuniform float uRoughness;\nuniform float uMetallic;\nuniform float uSpecularScale;\nuniform float uOcclusionStrength;\nuniform float uClearcoatStrength;\nuniform float uClearcoatRoughness;\nuniform float uLightmapIntensity;\nuniform float uAffineWarpStrength;\nuniform float uAlphaCutoff;\nuniform float uOpaqueCoverage;\nuniform vec3 uFogColor;\nuniform float uFogStart;\nuniform float uFogEnd;\nuniform float uFogHeightFalloff;\nuniform float uFogDensity;\nuniform float uReceivesShadow;\nuniform float uRainWetness;\nuniform float uSurfaceSnowCoverage;\nuniform float uSurfaceDissolution;\nuniform float uThermalSourceCount;\nuniform vec3 uThermalSourcePosition0;\nuniform float uThermalSourceRadius0;\nuniform float uThermalSourceDissolution0;\nuniform vec3 uThermalSourcePosition1;\nuniform float uThermalSourceRadius1;\nuniform float uThermalSourceDissolution1;\nuniform vec3 uThermalSourcePosition2;\nuniform float uThermalSourceRadius2;\nuniform float uThermalSourceDissolution2;\nuniform vec3 uThermalSourcePosition3;\nuniform float uThermalSourceRadius3;\nuniform float uThermalSourceDissolution3;\nlayout(location=0)out vec4 oColor;\nlayout(location=1)out vec4 oGlow;\n\n// Distance falloff (smooth to zero at uLightRange, matching SpotLight.range\n// rather than an unbounded inverse-square that never reaches zero) times\n// cone-edge falloff (smoothstep between the outer and inner cone angles,\n  // SpotLight.outerConeRadians/innerConeRadians \u2014 both fields existed on the\n  // API already but nothing read them before this, so the light previously\n  // had a hard-edged, non-attenuating cone that read as flat/harsh instead of\n// a graduated pool of light).\nfloat rangeAttenuation(float dist,float range){\n  float normalized=clamp(dist/max(range,.001),0.,1.);\n  // Smooth quartic cutoff avoids a visible ring at the authored range while\n  // retaining an inverse-square response inside the light's influence.\n  float cutoff=1.-normalized*normalized*normalized*normalized;\n  float inverseSquare=1./(1.+(dist*dist)/max(range*range,.001));\n  return cutoff*cutoff*inverseSquare;\n}\n\nfloat lightAttenuation(vec3 worldPos){\n  vec3 toFrag=worldPos-uLightPosition;\n  float dist=length(toFrag);\n  float cosAngle=dot(normalize(toFrag),normalize(uLightDirection));\n  float coneFalloff=smoothstep(uLightOuterCos,uLightInnerCos,cosAngle);\n  return rangeAttenuation(dist,uLightRange)*coneFalloff;\n}\n\nfloat pointAttenuation(vec3 worldPos,vec3 lightPosition,float lightRadius){\n  float dist=length(lightPosition-worldPos);\n  return rangeAttenuation(dist,lightRadius);\n}\n\nvec3 pointContribution(vec3 normal,vec3 worldPos,vec3 lightPosition,\n  vec3 lightColor,float lightIntensity,float lightRadius){\n  vec3 toLight=lightPosition-worldPos;\n  float ndotl=max(dot(normal,normalize(toLight)),0.);\n  return lightColor*lightIntensity*ndotl*\n    pointAttenuation(worldPos,lightPosition,lightRadius);\n}\n\nvec3 directSpotContribution(vec3 normal,vec3 worldPos,vec3 lightPosition,\n  vec3 lightDirection,vec3 lightColor,float lightIntensity,float lightRange,\n  float innerCos,float outerCos,float enabled){\n  vec3 toLight=lightPosition-worldPos;\n  float ndotl=max(dot(normal,normalize(toLight)),0.);\n  vec3 toFrag=worldPos-lightPosition;\n  float cosAngle=dot(normalize(toFrag),normalize(lightDirection));\n  float coneFalloff=smoothstep(outerCos,innerCos,cosAngle);\n  float distanceFalloff=rangeAttenuation(length(toFrag),lightRange);\n  return lightColor*lightIntensity*ndotl*coneFalloff*\n    distanceFalloff*enabled;\n}\n\n// Compact Cook-Torrance response for the clean/high path. The bounded\n// per-light evaluation makes roughness and metallic maps visibly useful\n// without introducing a deferred light buffer.\nfloat distributionGgx(float ndoth,float roughness){\n  float a=roughness*roughness;\n  float a2=a*a;\n  float denom=ndoth*ndoth*(a2-1.0)+1.0;\n  return a2/(3.14159265*denom*denom);\n}\n\nfloat geometrySchlick(float ndotv,float roughness){\n  float k=(roughness+1.0)*(roughness+1.0)/8.0;\n  return ndotv/(ndotv*(1.0-k)+k);\n}\n\nfloat geometrySmith(float ndotv,float ndotl,float roughness){\n  return geometrySchlick(ndotv,roughness)*geometrySchlick(ndotl,roughness);\n}\n\nvec3 fresnelSchlick(float cosTheta,vec3 f0){\n  return f0+(1.0-f0)*pow(1.0-clamp(cosTheta,0.0,1.0),5.0);\n}\n\nvec3 specularContribution(vec3 normal,vec3 viewDir,vec3 lightDir,\n  vec3 lightColor,float lightIntensity,float attenuation,vec3 baseColor,\n  float roughness,float metallic){\n  vec3 halfDir=normalize(viewDir+lightDir);\n  float ndotv=max(dot(normal,viewDir),0.0);\n  float ndotl=max(dot(normal,lightDir),0.0);\n  float ndoth=max(dot(normal,halfDir),0.0);\n  float hdotv=max(dot(halfDir,viewDir),0.0);\n  vec3 f0=mix(vec3(0.04),baseColor,metallic);\n  vec3 fresnel=fresnelSchlick(hdotv,f0);\n  float distribution=distributionGgx(ndoth,roughness);\n  float geometry=geometrySmith(ndotv,ndotl,roughness);\n  vec3 numerator=distribution*geometry*fresnel;\n  float denominator=max(4.0*ndotv*ndotl,0.001);\n  return numerator/denominator*lightColor*lightIntensity*attenuation*ndotl;\n}\n\nfloat sampleShadow(vec3 projCoord,float bias){\n  float shadowDepth=texture(uShadowMap,projCoord.xy).r;\n  return projCoord.z-bias>shadowDepth?0.:1.;\n}\n\n// \xa78.5's fog keeps the smooth distance ramp for authored horizon control, but\n// the participating-medium term is an analytic optical depth along the actual\n// camera-to-surface segment. For rho(y)=density*exp(-falloff*max(y,0)), the\n// integral has a stable constant-height limit and therefore does not shimmer\n// when a surface is nearly level with the camera. Zero density remains an\n// exact no-op; the host can still use the distance ramp independently.\nfloat heightFogOpticalDepth(vec3 rayStart,vec3 rayEnd){\n  float segmentLength=length(rayEnd-rayStart);\n  if(segmentLength<=0.0001||uFogDensity<=0.)return 0.;\n  float falloff=max(uFogHeightFalloff,0.);\n  float h0=max(rayStart.y,0.);\n  float h1=max(rayEnd.y,0.);\n  float integral;\n  if(falloff<=0.||abs(h1-h0)<=0.0001){\n    integral=segmentLength*exp(-falloff*h0);\n  }else{\n    float denominator=falloff*(h1-h0);\n    integral=segmentLength*(exp(-falloff*h0)-exp(-falloff*h1))/denominator;\n  }\n  return max(uFogDensity*integral,0.);\n}\n\nfloat fogFactor(float viewDepth,float worldY){\n  float distFactor=smoothstep(uFogStart,uFogEnd,viewDepth);\n  float opticalDepth=heightFogOpticalDepth(uCameraPosition,vWorldPos);\n  float mediumFactor=1.-exp(-opticalDepth);\n  return clamp(max(distFactor,mediumFactor),0.,1.);\n}\n\nfloat shadowFactor(float ndotl){\n  vec3 projCoord=vLightSpacePos.xyz/vLightSpacePos.w;\n  projCoord=projCoord*.5+.5;\n  if(projCoord.x<0.||projCoord.x>1.||projCoord.y<0.||projCoord.y>1.||projCoord.z>1.){\n    return 1.;\n  }\n  // Receiver-plane style slope bias keeps grazing surfaces from acne while\n  // avoiding the detached-shadow look of a large constant offset.\n  float bias=max(uShadowBias*(1.-ndotl),uShadowBias*0.2666667);\n  // Fixed low-discrepancy offsets avoid the directional shimmer of a regular\n  // square lattice while remaining deterministic and free of per-frame noise.\n  vec2 t=uShadowMapTexelSize*clamp(uShadowFilterRadius,0.,3.);\n  float sum=0.;\n  sum+=sampleShadow(projCoord+vec3(vec2(-.942,-.399)*t,0.),bias);\n  sum+=sampleShadow(projCoord+vec3(vec2(.945,-.768)*t,0.),bias);\n  sum+=sampleShadow(projCoord+vec3(vec2(-.094,.886)*t,0.),bias);\n  sum+=sampleShadow(projCoord+vec3(vec2(.344,.294)*t,0.),bias);\n  sum+=sampleShadow(projCoord+vec3(vec2(-.716,.642)*t,0.),bias);\n  sum+=sampleShadow(projCoord+vec3(vec2(.688,-.089)*t,0.),bias);\n  sum+=sampleShadow(projCoord+vec3(vec2(-.287,-.885)*t,0.),bias);\n  sum+=sampleShadow(projCoord+vec3(vec2(.052,.008)*t,0.),bias);\n  sum+=sampleShadow(projCoord+vec3(vec2(.831,.486)*t,0.),bias);\n  return sum/9.;\n}\n\nvoid main(){\n  // The divide that undoes the rasterizer's own perspective correction (see\n  // shadowed_world.vert). Branched on the uniform rather than always\n  // dividing, so a zero-strength draw samples the untouched vUv and is\n  // bit-identical to the pre-affine path \u2014 the divisor is 1.0 there, but\n  // only after an interpolate/divide round-trip that need not return\n  // exactly 1.0. The branch is uniform across the whole draw, so it costs\n  // no divergence.\n  vec2 uv=uAffineWarpStrength>0.?vUv/vUvW:vUv;\n  uv=uv*uUvScaleOffset.xy+uUvScaleOffset.zw;\n  vec4 tex=texture(uAlbedo,uv);\n  // \xa76.2's alpha-masked route. Deliberately the first thing after the\n  // fetch it depends on, and ahead of all the lighting below: a discarded\n  // fragment must not pay for four shadow-map taps and two normalizes it\n  // will never use. uAlphaCutoff==0 is the pass's \"this material has no\n  // cutout\" sentinel (MaterialDefinition.validate forbids a real zero), so\n  // opaque and blended draws take a path containing no alpha compare at\n  // all rather than one comparing against an unreachable threshold. The\n  // same test, against the same uv, runs in depth_prepass.frag and\n  // shadow_caster.frag \u2014 three passes must agree on which fragments exist\n  // or SSAO, DOF and shadowing all occlude against holes this pass shaded\n  // through.\n  if(uAlphaCutoff>0.&&tex.a<uAlphaCutoff)discard;\n  vec3 n=normalize(vNormal);\n  // Surface-v2 supplies a tangent4 with OpenGL's +/-1 handedness in W.\n  // Compatibility14 meshes leave the attribute at its default zero and use\n  // the derivative frame below, so old content and authored tangents share\n  // one shader contract.\n  if(uNormalStrength>0.0){\n    vec3 dp1=dFdx(vWorldPos),dp2=dFdy(vWorldPos);\n    vec2 duv1=dFdx(uv),duv2=dFdy(uv);\n    vec3 derivativeT=normalize(dp1*duv2.y-dp2*duv1.y);\n    vec3 derivativeB=normalize(-dp1*duv2.x+dp2*duv1.x);\n    vec3 authoredT=normalize(vTangent.xyz-n*dot(n,vTangent.xyz));\n    bool hasAuthoredT=dot(vTangent.xyz,vTangent.xyz)>0.25;\n    vec3 t=hasAuthoredT?authoredT:derivativeT;\n    vec3 b=hasAuthoredT?normalize(cross(n,t)*vTangent.w):derivativeB;\n    vec3 map=texture(uNormalMap,uv).xyz*2.0-1.0;\n    map.xy*=uNormalStrength;\n    n=normalize(mat3(t,b,n)*normalize(map));\n  }\n  vec3 orm=texture(uOrmMap,uv).rgb;\n  float normalVariance=0.0;\n  if(uNormalStrength>0.0){\n    // Toksvig-style widening suppresses sub-pixel normal sparkle when a high\n    // resolution map is minified. It preserves authored relief at distance\n    // while converting unresolved detail into a stable roughness increase.\n    vec3 normalSample=texture(uNormalMap,uv).xyz*2.0-1.0;\n    vec3 normalDx=dFdx(normalSample);\n    vec3 normalDy=dFdy(normalSample);\n    normalVariance=dot(normalDx,normalDx)+dot(normalDy,normalDy);\n  }\n  float ao=texture(uSsao,gl_FragCoord.xy/uSceneColorSize).r;\n  ao*=mix(1.0,orm.r,clamp(uOcclusionStrength,0.0,1.0));\n  vec3 direct=vec3(0.);\n  float directionalNdotL=max(dot(n,normalize(uDirectionalDirection)),0.);\n  direct+=uDirectionalColor*uDirectionalIntensity*directionalNdotL;\n  direct+=pointContribution(n,vWorldPos,uPointPosition0,uPointColor0,\n    uPointIntensity0,uPointRadius0);\n  direct+=pointContribution(n,vWorldPos,uPointPosition1,uPointColor1,\n    uPointIntensity1,uPointRadius1);\n  direct+=pointContribution(n,vWorldPos,uPointPosition2,uPointColor2,\n    uPointIntensity2,uPointRadius2);\n  direct+=pointContribution(n,vWorldPos,uPointPosition3,uPointColor3,\n    uPointIntensity3,uPointRadius3);\n  direct+=directSpotContribution(n,vWorldPos,uDirectSpotPosition0,\n    uDirectSpotDirection0,uDirectSpotColor0,uDirectSpotIntensity0,\n    uDirectSpotRange0,uDirectSpotInnerCos0,uDirectSpotOuterCos0,\n    uDirectSpotEnabled0);\n  direct+=directSpotContribution(n,vWorldPos,uDirectSpotPosition1,\n    uDirectSpotDirection1,uDirectSpotColor1,uDirectSpotIntensity1,\n    uDirectSpotRange1,uDirectSpotInnerCos1,uDirectSpotOuterCos1,\n    uDirectSpotEnabled1);\n  direct+=directSpotContribution(n,vWorldPos,uDirectSpotPosition2,\n    uDirectSpotDirection2,uDirectSpotColor2,uDirectSpotIntensity2,\n    uDirectSpotRange2,uDirectSpotInnerCos2,uDirectSpotOuterCos2,\n    uDirectSpotEnabled2);\n  vec3 toSpot=normalize(uLightPosition-vWorldPos);\n  float spotNdotL=max(dot(n,toSpot),0.);\n  float shadow=uReceivesShadow>0.5?shadowFactor(spotNdotL):1.;\n  float attenuation=lightAttenuation(vWorldPos);\n  direct+=uLightColor*uLightIntensity*spotNdotL*shadow*attenuation*uSpotEnabled;\n  direct*=uDirectLightScale;\n  // \xa78.5: \"modulates ambient only\" \u2014 SSAO must never darken the direct\n  // (N.L * shadow * attenuation) term, only the ambient fill, or it would\n  // double up with real shadowing and read as an incorrect global darkening\n  // rather than contact occlusion specifically.\n  vec3 ambient=uAmbientColor*uAmbientIntensity*uAmbientLightScale*ao;\n  vec3 baseColor=vColor.rgb*tex.rgb*uMaterialTint;\n  // Metallic surfaces contribute less diffuse energy; roughness keeps a\n  // small, stable broadening factor until the surface-v2 camera/specular\n  // block lands. Both channels therefore affect the live output rather than\n  // being metadata-only fields.\n  float metal=clamp(uMetallic*orm.b,0.0,1.0);\n  float rough=clamp(uRoughness*orm.g,0.0,1.0);\n  // Weather changes the material before direct and environment response.\n  // Thawing therefore affects the same specular lobe the viewer sees,\n  // instead of changing only diffuse color after the highlight is computed.\n  float wetDepth=1.0-smoothstep(2.0,18.0,max(vViewDepth,0.0));\n  float wetness=clamp(uRainWetness,0.0,1.0)*wetDepth;\n  baseColor=mix(baseColor,baseColor*vec3(0.84,0.90,0.98),wetness*0.22);\n  float upward=clamp(n.y*0.5+0.5,0.0,1.0);\n  float thermalDissolution=clamp(uSurfaceDissolution,0.0,1.0);\n  // A steady spherical conductive field decays approximately as 1/r. The\n  // host keeps the slow latent material memory in uSurfaceDissolution; this\n  // local term therefore models the spatial heat field without making warm\n  // surfaces snap back or disappear at an arbitrary exponential radius.\n  if(uThermalSourceCount>0.5) thermalDissolution=max(thermalDissolution,\n    uThermalSourceDissolution0*clamp(uThermalSourceRadius0/\n      max(distance(vWorldPos,uThermalSourcePosition0),uThermalSourceRadius0),0.,1.));\n  if(uThermalSourceCount>1.5) thermalDissolution=max(thermalDissolution,\n    uThermalSourceDissolution1*clamp(uThermalSourceRadius1/\n      max(distance(vWorldPos,uThermalSourcePosition1),uThermalSourceRadius1),0.,1.));\n  if(uThermalSourceCount>2.5) thermalDissolution=max(thermalDissolution,\n    uThermalSourceDissolution2*clamp(uThermalSourceRadius2/\n      max(distance(vWorldPos,uThermalSourcePosition2),uThermalSourceRadius2),0.,1.));\n  if(uThermalSourceCount>3.5) thermalDissolution=max(thermalDissolution,\n    uThermalSourceDissolution3*clamp(uThermalSourceRadius3/\n      max(distance(vWorldPos,uThermalSourcePosition3),uThermalSourceRadius3),0.,1.));\n  thermalDissolution=clamp(thermalDissolution,0.0,1.0);\n  float snowCoverage=clamp(uSurfaceSnowCoverage,0.0,1.0)*\n    smoothstep(0.18,0.82,upward)*(1.0-thermalDissolution*0.72);\n  baseColor=mix(baseColor,vec3(0.78,0.86,0.95),snowCoverage*0.82);\n  float dissolution=thermalDissolution;\n  baseColor=mix(baseColor,baseColor*vec3(0.82,0.86,0.90),dissolution*0.16);\n  rough=mix(rough,max(0.06,rough*0.58),dissolution*0.72);\n  // Avoid singular highlights while retaining a visibly sharp porcelain\n  // response at the authored low end of the roughness range.\n  float specRough=max(0.045,sqrt(rough*rough+normalVariance*0.18));\n  // A continuous water film forms a second dielectric lobe. It smooths the\n  // authored surface only as coverage rises, so damp cloth stays diffuse\n  // while puddled stone gains a tight grazing reflection.\n  float waterCoverage=smoothstep(0.20,0.88,wetness)*(1.0-0.35*rough);\n  specRough=mix(specRough,max(0.035,specRough*0.18),waterCoverage);\n  vec3 viewDir=normalize(uCameraPosition-vWorldPos);\n  vec3 specular=vec3(0.0);\n  specular+=specularContribution(n,viewDir,normalize(uDirectionalDirection),\n    uDirectionalColor,uDirectionalIntensity,1.0,baseColor,specRough,metal);\n  specular+=specularContribution(n,viewDir,\n    normalize(uPointPosition0-vWorldPos),uPointColor0,uPointIntensity0,\n    pointAttenuation(vWorldPos,uPointPosition0,uPointRadius0),baseColor,\n    specRough,metal);\n  specular+=specularContribution(n,viewDir,\n    normalize(uPointPosition1-vWorldPos),uPointColor1,uPointIntensity1,\n    pointAttenuation(vWorldPos,uPointPosition1,uPointRadius1),baseColor,\n    specRough,metal);\n  specular+=specularContribution(n,viewDir,\n    normalize(uPointPosition2-vWorldPos),uPointColor2,uPointIntensity2,\n    pointAttenuation(vWorldPos,uPointPosition2,uPointRadius2),baseColor,\n    specRough,metal);\n  specular+=specularContribution(n,viewDir,\n    normalize(uPointPosition3-vWorldPos),uPointColor3,uPointIntensity3,\n    pointAttenuation(vWorldPos,uPointPosition3,uPointRadius3),baseColor,\n    specRough,metal);\n  specular+=specularContribution(n,viewDir,\n    normalize(uLightPosition-vWorldPos),uLightColor,uLightIntensity,\n    lightAttenuation(vWorldPos)*uSpotEnabled*shadow,baseColor,specRough,metal);\n  specular*=uDirectLightScale*uSpecularScale;\n  // Keep reflected energy available to the specular lobe. The previous\n  // diffuse-first clamp clipped bright ceramic response before tone mapping,\n  // producing the broad plastic patches visible in low-roughness samples.\n  // This split is bounded by the material metalness and lets the final\n  // composite perform the intentional HDR compression once.\n  vec3 diffuseEnergy=baseColor*(1.0-metal)*\n    (ambient+direct*(1.0-0.25*rough));\n  vec3 lit=diffuseEnergy+specular;\n  // A restrained dielectric clearcoat is intentionally separate from the\n  // base roughness/metalness response. It gives porcelain a broad, stable\n  // grazing highlight without turning the surface into a mirror.\n  vec3 coatLight=normalize(uDirectionalDirection);\n  vec3 coatHalf=normalize(viewDir+coatLight);\n  float coatNdotV=max(dot(n,viewDir),0.);\n  float coatNdotH=max(dot(n,coatHalf),0.);\n  float coatNdotL=max(dot(n,coatLight),0.);\n  float coatPower=mix(128.0,8.0,clamp(uClearcoatRoughness,0.0,1.0));\n  float coatFresnel=0.04+0.96*pow(1.0-coatNdotV,5.0);\n  float coatStrength=max(clamp(uClearcoatStrength,0.0,1.0),waterCoverage*0.82);\n  float coat=coatStrength*coatFresnel*\n    pow(coatNdotH,coatPower)*coatNdotL*uDirectionalIntensity*\n    uDirectLightScale*uSpecularScale;\n  lit+=uDirectionalColor*coat;\n  lit+=direct*(wetness*(0.035+0.075*(1.0-rough)));\n  // Environment fallback reflections are deliberately bounded and weighted\n  // by wetness/grazing angle. A real probe/history hit can raise confidence;\n  // the current host fallback remains visible but never masquerades as SSR.\n  float reflectionNdotV=max(dot(n,viewDir),0.0);\n  float reflectionFresnel=0.04+0.96*pow(1.0-reflectionNdotV,5.0);\n  float reflectionSurface=clamp(wetness+0.18*dissolution,0.0,1.0);\n  float reflectionConfidence=0.20+0.80*clamp(uReflectionConfidence,0.0,1.0);\n  float reflectionWeight=clamp(\n    uReflectionIntensity*reflectionSurface*reflectionFresnel*\n      (1.0-0.72*rough)*reflectionConfidence,\n    0.0,1.0);\n  lit+=uReflectionColor*reflectionWeight;\n  vec3 emissive=texture(uEmissiveMap,uv).rgb*uMaterialTint*uEmissiveStrength;\n  lit+=emissive;\n  if(uLightmapIntensity>0.0){\n    lit+=baseColor*texture(uLightmap,vUv1).rgb*uLightmapIntensity;\n  }\n  // Fog blends the surface's own lit color toward uFogColor only \u2014 never\n  // oGlow below, which stays a declared emissive quantity independent of\n  // how much atmosphere sits between the surface and the camera, matching\n  // \xa78.7's \"does not infer glow from final luma\" scoping: fog is a\n  // property of oColor's reflected/lit light, not of emission.\n  float fog=fogFactor(vViewDepth,vWorldPos.y);\n  vec3 foggedLit=mix(lit,uFogColor,fog);\n  // Bug 18: vColor.a*tex.a is the correct alpha for a blended draw and the\n  // wrong one for everything else. present.frag copies this channel\n  // straight through to a canvas created with the default alpha:true, so an\n  // opaque or masked surface that emitted a texel's own alpha would show\n  // the *page* through solid geometry. Coverage, not transparency, is what\n  // an opaque or masked fragment writes: whatever survived the discard\n  // above is fully covering, and an opaque draw always was. uOpaqueCoverage\n  // is exactly 0 or 1, so the mix is exact in both directions and the\n  // blended path keeps its pre-existing expression bit-for-bit.\n  float outAlpha=mix(vColor.a*tex.a,1.,uOpaqueCoverage);\n  oColor=vec4(foggedLit,outAlpha);\n  // \xa78.7: bloom reads this declared attachment directly, never inferring\n  // glow from oColor's final luma \u2014 a bright-but-non-emissive lit surface\n  // (e.g. the checkerboard floor under strong light) must never bloom, only\n  // a material with real emissiveStrength does, independent of how the\n  // surface happens to be lit this frame.\n  oGlow=vec4(emissive,1.);\n}\n", resolveMesh, resolveMaterial, resolveAlbedo, resolveNormal, resolveOrm, resolveEmissive, resolveLightmap, resolveShadowMap, new A.buildShadowGraph_closure0(t1, fallbackLightView), resolveCasterLight, resolveDirectSpotLights, resolveSsaoBlurred, hasSsao, sceneColorWidth, sceneColorHeight, shadowMapSize, shadowMapSize, t9, t11, t4));
       if (msaaResolve != null)
-        t4.push(msaaResolve);
-      B.JSArray_methods.addAll$1(t4, postFeatures);
-      t4.push(new A.PresentFeature(programLibrary, _s156_, string$.x23versip, device, postResource0, outputEncoding));
-      return new A.FeatureGraph(t4);
+        t5.push(msaaResolve);
+      if (volumetric != null)
+        t5.push(volumetric);
+      B.JSArray_methods.addAll$1(t5, postFeatures);
+      t5.push(new A.PresentFeature(programLibrary, _s156_, string$.x23versip, device, postResource, outputEncoding));
+      return new A.FeatureGraph(t5);
     },
     buildShadowGraph_closure: function buildShadowGraph_closure(t0) {
       this._box_0 = t0;
@@ -6724,6 +6964,38 @@
       _.resolveTime = t4;
       _.inputResource = t5;
       _.outputResource = t6;
+    },
+    VolumetricLightFeature: function VolumetricLightFeature(t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11) {
+      var _ = this;
+      _.programLibrary = t0;
+      _.vertexSource = t1;
+      _.fragmentSource = t2;
+      _.compositeFragmentSource = t3;
+      _.device = t4;
+      _.resolveSceneDepth = t5;
+      _.resolveCamera = t6;
+      _.volumetricLightResource = t7;
+      _.sceneDepthResource = t8;
+      _.sceneColorResource = t9;
+      _.sceneColorOutputResource = t10;
+      _._emptyVaos = t11;
+    },
+    _VolumetricLightPass: function _VolumetricLightPass(t0, t1, t2, t3, t4, t5) {
+      var _ = this;
+      _.descriptor = t0;
+      _.program = t1;
+      _.emptyVao = t2;
+      _.destResourceName = t3;
+      _.resolveSceneDepth = t4;
+      _.resolveCamera = t5;
+    },
+    _VolumetricCompositePass: function _VolumetricCompositePass(t0, t1, t2, t3, t4) {
+      var _ = this;
+      _.descriptor = t0;
+      _.program = t1;
+      _.emptyVao = t2;
+      _.volumetricLightResource = t3;
+      _.outputResource = t4;
     },
     ResolvedMesh: function ResolvedMesh(t0, t1, t2, t3) {
       var _ = this;
@@ -6911,6 +7183,22 @@
       t1 = _this.gl;
       t1.bindFramebuffer(A._asInt(init.G.WebGL2RenderingContext.FRAMEBUFFER), fb.fbo);
       t1.viewport(0, 0, fb.width, fb.height);
+    },
+    WebGl2DeviceDraw_setColorAttachmentCountImpl(_this, count) {
+      var t1;
+      if (_this._status !== B.GpuDeviceStatus_0)
+        A.throwExpression(A.StateError$(string$.WebGl2));
+      switch (count) {
+        case 1:
+          _this.gl.drawBuffers(A._setArrayType([A._asInt(init.G.WebGL2RenderingContext.COLOR_ATTACHMENT0)], type$.JSArray_double));
+          break;
+        case 2:
+          t1 = init.G;
+          _this.gl.drawBuffers(A._setArrayType([A._asInt(t1.WebGL2RenderingContext.COLOR_ATTACHMENT0), A._asInt(t1.WebGL2RenderingContext.COLOR_ATTACHMENT1)], type$.JSArray_double));
+          break;
+        default:
+          throw A.wrapException(A.ArgumentError$("WebGl2Device.setColorAttachmentCount: count must be 1 or 2, got " + count, null));
+      }
     },
     WebGl2DeviceDraw__glDepthFunc(_this, fn) {
       var t1;
@@ -7550,12 +7838,10 @@
     main$body() {
       var $async$goto = 0,
         $async$completer = A._makeAsyncAwaitCompleter(type$.void),
-        $async$returnValue, $async$handler = 2, $async$errorStack = [], renderer, profile, configuration, surface, profileFallbackReason, error, lease, requestedProfile, t2, t3, exception, world, projection, camera, _box_0, t1, canvas, $async$exception;
+        $async$returnValue, lease, renderer, requestedProfile, t2, t3, t4, surface, boot, world, $frames, _box_0, t1, canvas;
       var $async$main = A._wrapJsFunctionForAsync(function($async$errorCode, $async$result) {
-        if ($async$errorCode === 1) {
-          $async$errorStack.push($async$result);
-          $async$goto = $async$handler;
-        }
+        if ($async$errorCode === 1)
+          return A._asyncRethrow($async$result, $async$completer);
         for (;;)
           switch ($async$goto) {
             case 0:
@@ -7568,8 +7854,6 @@
                 $async$goto = 1;
                 break;
               }
-              canvas.width = A._asInt(canvas.clientWidth);
-              canvas.height = A._asInt(canvas.clientHeight);
               lease = B.C_WebGl2RendererFactory.createLease$1(canvas);
               renderer = lease == null ? null : new A.SceneRendererImpl(lease.device, new A.ConfigurationCoordinator(new A.ConfigurationStateMachine(), new A.ResourcePlanAssembler()), new A.FrameQueue(A._setArrayType([], type$.JSArray_RetainedItemDescriptor), B.FrameQueueState_0), A._setArrayType([], type$.JSArray_RenderWorldImpl), B.RendererState_0, A._setArrayType([], type$.JSArray__PendingGpuTiming), null);
               if (renderer == null) {
@@ -7596,106 +7880,75 @@
                 t2 = B.QualityProfile_QualityProfileKind_0_Set_empty;
                 break $label0$0;
               }
-              profile = t2;
-              if (profile.kind === B.QualityProfileKind_0)
-                t2 = 1;
-              else
-                t2 = profile.kind === B.QualityProfileKind_2 ? 2 : 1;
-              t3 = profile === B.QualityProfile_QualityProfileKind_0_Set_empty ? 0 : 1;
-              configuration = new A.RendererConfiguration(profile, 384, 216, t2, t3);
-              surface = new A.SurfaceMetrics(A._asInt(canvas.width), A._asInt(canvas.height), A._asInt(canvas.width), A._asInt(canvas.height));
-              profileFallbackReason = null;
-              $async$handler = 4;
-              $async$goto = 7;
-              return A._asyncAwait(renderer.initialize$2(configuration, surface), $async$main);
-            case 7:
-              // returning from await.
-              $async$handler = 2;
-              // goto after finally
-              $async$goto = 6;
-              break;
-            case 4:
-              // catch
-              $async$handler = 3;
-              $async$exception = $async$errorStack.pop();
-              error = A.unwrapException($async$exception);
-              if (profile === B.QualityProfile_QualityProfileKind_0_Set_empty)
-                throw $async$exception;
-              profileFallbackReason = profile.kind._name + " profile failed: " + A.S(error);
-              $async$goto = 8;
-              return A._asyncAwait(renderer.initialize$2(B.RendererConfiguration_7v0, surface), $async$main);
-            case 8:
-              // returning from await.
-              // goto after finally
-              $async$goto = 6;
-              break;
+              t3 = A._asInt(canvas.clientWidth) > 0 ? A._asInt(canvas.clientWidth) : A._asInt(canvas.width);
+              t4 = A._asInt(canvas.clientHeight) > 0 ? A._asInt(canvas.clientHeight) : A._asInt(canvas.height);
+              surface = _box_0.surface = A.SurfaceMetrics_SurfaceMetrics$forCanvas(t4, t3, A._asNum(A._asJSObject(t1.window).devicePixelRatio), 2, true);
+              canvas.width = surface.pixelWidth;
+              canvas.height = surface.pixelHeight;
+              $async$goto = 3;
+              return A._asyncAwait(A.bootstrapRenderer(new A.main_closure(), A.defaultProfileLadder(t2), renderer, surface), $async$main);
             case 3:
-              // uncaught
-              // goto rethrow
-              $async$goto = 2;
-              break;
-            case 6:
-              // after finally
-              t2 = renderer;
-              t2._ensureReady$0();
-              world = A.RenderWorldImpl$(t2._resources._meshes._registry);
-              B.JSArray_methods.add$1(t2._worlds, world);
-              projection = A.Mat4_Mat4$perspective(A._asInt(canvas.width) / A._asInt(canvas.height), 100, 1, 0.1);
-              t2 = new Float32Array(16);
-              t2[0] = 1;
-              t2[5] = 1;
-              t2[10] = 1;
-              t2[15] = 1;
-              camera = new A.CameraView(new A.Mat4(t2), projection, projection, B.Vec3_0_0_0, B.Vec3_0_0_1, 0.1, 100, A._asInt(canvas.width) / A._asInt(canvas.height));
-              renderer.beginFrame$2(world, new A.FrameInput(camera, B.C_FrameEnvironment, B.C_PostProcessState, 0, 0));
+              // returning from await.
+              boot = $async$result;
+              renderer._ensureReady$0();
+              world = A.RenderWorldImpl$(renderer._resources._meshes._registry);
+              B.JSArray_methods.add$1(renderer._worlds, world);
+              $frames = new A.FrameSequencer();
+              t2 = new A.main_cameraFor();
+              t3 = new A.main_publishState(_box_0, canvas, renderer, requestedProfile, boot, $frames);
+              renderer.beginFrame$2(world, $frames.next$4$camera$environment$post$timeSeconds(t2.call$1(surface), B.C_FrameEnvironment, B.C_PostProcessState, 0));
               renderer.endFrame$0();
-              canvas.setAttribute("data-renderer-state", renderer._scene_renderer_impl$_state._name);
               canvas.setAttribute("data-renderer-first-frame", "true");
-              canvas.setAttribute("data-renderer-backend", "pixeldart");
-              canvas.setAttribute("data-renderer-requested-profile", requestedProfile);
-              t2 = renderer._configuration;
-              canvas.setAttribute("data-renderer-effective-profile", (t2 == null ? A.throwExpression(A.StateError$("renderer is not initialized")) : t2).profile.kind._name);
-              t2 = profileFallbackReason;
-              if (t2 == null)
-                t2 = "false";
-              canvas.setAttribute("data-renderer-profile-fallback", t2);
-              canvas.setAttribute("data-renderer-frames", "1");
-              canvas.setAttribute("data-renderer-surface", "" + A._asInt(canvas.width) + "x" + A._asInt(canvas.height));
-              _box_0.frameIndex = 1;
-              _box_0.historyEpoch = 0;
+              t3.call$0();
               _box_0.contextRestoredPending = false;
-              t2 = new A.main_resize(canvas, renderer);
-              A._asJSObject(t1.window).addEventListener("resize", A._functionToJS1(new A.main_closure(t2)));
-              canvas.addEventListener("webglcontextrestored", A._functionToJS1(new A.main_closure0(_box_0)));
-              A._asInt(A._asJSObject(t1.window).requestAnimationFrame(A._functionToJS1(new A.main_tick(_box_0, t2, renderer, camera, world, canvas))));
+              t4 = new A.main_resize(_box_0, canvas, renderer, $frames);
+              A._asJSObject(t1.window).addEventListener("resize", A._functionToJS1(new A.main_closure0(t4)));
+              canvas.addEventListener("webglcontextrestored", A._functionToJS1(new A.main_closure1(_box_0, $frames)));
+              A._asInt(A._asJSObject(t1.window).requestAnimationFrame(A._functionToJS1(new A.main_tick(_box_0, t4, renderer, world, $frames, t2, canvas, t3))));
             case 1:
               // return
               return A._asyncReturn($async$returnValue, $async$completer);
-            case 2:
-              // rethrow
-              return A._asyncRethrow($async$errorStack.at(-1), $async$completer);
           }
       });
       return A._asyncStartSync($async$main, $async$completer);
     },
-    main_resize: function main_resize(t0, t1) {
-      this.canvas = t0;
-      this.renderer = t1;
+    main_closure: function main_closure() {
     },
-    main_closure: function main_closure(t0) {
-      this.resize = t0;
+    main_cameraFor: function main_cameraFor() {
+    },
+    main_publishState: function main_publishState(t0, t1, t2, t3, t4, t5) {
+      var _ = this;
+      _._box_0 = t0;
+      _.canvas = t1;
+      _.renderer = t2;
+      _.requestedProfile = t3;
+      _.boot = t4;
+      _.frames = t5;
+    },
+    main_resize: function main_resize(t0, t1, t2, t3) {
+      var _ = this;
+      _._box_0 = t0;
+      _.canvas = t1;
+      _.renderer = t2;
+      _.frames = t3;
     },
     main_closure0: function main_closure0(t0) {
-      this._box_0 = t0;
+      this.resize = t0;
     },
-    main_tick: function main_tick(t0, t1, t2, t3, t4, t5) {
+    main_closure1: function main_closure1(t0, t1) {
+      this._box_0 = t0;
+      this.frames = t1;
+    },
+    main_tick: function main_tick(t0, t1, t2, t3, t4, t5, t6, t7) {
       var _ = this;
       _._box_0 = t0;
       _.resize = t1;
       _.renderer = t2;
-      _.camera = t3;
-      _.world = t4;
-      _.canvas = t5;
+      _.world = t3;
+      _.frames = t4;
+      _.cameraFor = t5;
+      _.canvas = t6;
+      _.publishState = t7;
     },
     unmangleGlobalNameIfPreservedAnyways($name) {
       return init.mangledGlobalNames[$name];
@@ -7872,6 +8125,15 @@
       if (!(index >= 0 && index < receiver.length))
         return A.ioore(receiver, index);
       return receiver[index];
+    },
+    sublist$1(receiver, start) {
+      var end;
+      if (start < 0 || start > receiver.length)
+        throw A.wrapException(A.RangeError$range(start, 0, receiver.length, "start", null));
+      end = receiver.length;
+      if (start === end)
+        return A._setArrayType([], A._arrayInstanceType(receiver));
+      return A._setArrayType(receiver.slice(start, end), A._arrayInstanceType(receiver));
     },
     get$last(receiver) {
       var t1 = receiver.length;
@@ -8079,6 +8341,14 @@
       }
       throw A.wrapException(A.UnsupportedError$("" + receiver + ".toInt()"));
     },
+    round$0(receiver) {
+      if (receiver > 0) {
+        if (receiver !== 1 / 0)
+          return Math.round(receiver);
+      } else if (receiver > -1 / 0)
+        return 0 - Math.round(0 - receiver);
+      throw A.wrapException(A.UnsupportedError$("" + receiver + ".round()"));
+    },
     clamp$2(receiver, lowerLimit, upperLimit) {
       if (this.compareTo$1(lowerLimit, upperLimit) > 0)
         throw A.wrapException(A.argumentErrorValue(lowerLimit));
@@ -8087,6 +8357,15 @@
       if (this.compareTo$1(receiver, upperLimit) > 0)
         return upperLimit;
       return receiver;
+    },
+    toStringAsExponential$1(receiver, fractionDigits) {
+      var result;
+      if (fractionDigits > 20)
+        throw A.wrapException(A.RangeError$range(fractionDigits, 0, 20, "fractionDigits", null));
+      result = receiver.toExponential(fractionDigits);
+      if (receiver === 0 && this.get$isNegative(receiver))
+        return "-" + result;
+      return result;
     },
     toString$0(receiver) {
       if (receiver === 0 && 1 / receiver < 0)
@@ -8373,16 +8652,19 @@
         end = endOrLength;
       $length = end - start;
       if ($length <= 0) {
-        t1 = J.JSArray_JSArray$fixed(0, _this.$ti._precomputed1);
-        return t1;
+        t1 = _this.$ti._precomputed1;
+        return growable ? J.JSArray_JSArray$growable(0, t1) : J.JSArray_JSArray$fixed(0, t1);
       }
-      result = A.List_List$filled($length, t2.elementAt$1(t1, start), false, _this.$ti._precomputed1);
+      result = A.List_List$filled($length, t2.elementAt$1(t1, start), growable, _this.$ti._precomputed1);
       for (i = 1; i < $length; ++i) {
         B.JSArray_methods.$indexSet(result, i, t2.elementAt$1(t1, start + i));
         if (t2.get$length(t1) < end)
           throw A.wrapException(A.ConcurrentModificationError$(_this));
       }
       return result;
+    },
+    toList$0(_) {
+      return this.toList$1$growable(0, true);
     }
   };
   A.ListIterator.prototype = {
@@ -8487,6 +8769,7 @@
   A.__CastListBase__CastIterableBase_ListMixin.prototype = {};
   A._Record_2.prototype = {$recipe: "+(1,2)", $shape: 1};
   A._Record_2_influence_light.prototype = {$recipe: "+influence,light(1,2)", $shape: 2};
+  A._Record_2_influence_source.prototype = {$recipe: "+influence,source(1,2)", $shape: 3};
   A.ConstantMapView.prototype = {};
   A.ConstantMap.prototype = {
     toString$0(_) {
@@ -9096,7 +9379,7 @@
     call$1(o) {
       return this.getTag(o);
     },
-    $signature: 19
+    $signature: 22
   };
   A.initHooks_closure0.prototype = {
     call$2(o, tag) {
@@ -9108,7 +9391,7 @@
     call$1(tag) {
       return this.prototypeForTag(A._asString(tag));
     },
-    $signature: 35
+    $signature: 57
   };
   A._Record.prototype = {
     get$runtimeType(_) {
@@ -9279,7 +9562,8 @@
     get$runtimeType(receiver) {
       return B.Type_Float64List_9Kz;
     },
-    $isTrustedGetRuntimeType: 1
+    $isTrustedGetRuntimeType: 1,
+    $isFloat64List: 1
   };
   A.NativeInt16List.prototype = {
     get$runtimeType(receiver) {
@@ -9399,7 +9683,7 @@
       t2 = this.span;
       t1.firstChild ? t1.removeChild(t2) : t1.appendChild(t2);
     },
-    $signature: 18
+    $signature: 21
   };
   A._AsyncRun__scheduleImmediateJsOverride_internalCallback.prototype = {
     call$0() {
@@ -9462,13 +9746,13 @@
     call$2(error, stackTrace) {
       this.bodyFunction.call$2(1, new A.ExceptionAndStackTrace(error, type$.StackTrace._as(stackTrace)));
     },
-    $signature: 23
+    $signature: 26
   };
   A._wrapJsFunctionForAsync_closure.prototype = {
     call$2(errorCode, result) {
       this.$protected(A._asInt(errorCode), result);
     },
-    $signature: 30
+    $signature: 34
   };
   A._SyncStarIterator.prototype = {
     get$current() {
@@ -9859,7 +10143,7 @@
       type$.StackTrace._as(s);
       this.joinedResult._completeErrorObject$1(new A.AsyncError(e, s));
     },
-    $signature: 29
+    $signature: 39
   };
   A._Future__propagateToListeners_handleValueCallback.prototype = {
     call$0() {
@@ -10373,7 +10657,7 @@
     call$2(k, v) {
       this.result.$indexSet(0, this.K._as(k), this.V._as(v));
     },
-    $signature: 52
+    $signature: 33
   };
   A.ListBase.prototype = {
     get$iterator(receiver) {
@@ -10464,7 +10748,7 @@
       t2 = A.S(v);
       t1._contents += t2;
     },
-    $signature: 57
+    $signature: 64
   };
   A._MapBaseValueIterable.prototype = {
     get$length(_) {
@@ -10535,8 +10819,7 @@
     },
     addAll$1(_, elements) {
       var t1;
-      A._instanceType(this)._eval$1("Iterable<1>")._as(elements);
-      for (t1 = elements.get$iterator(elements); t1.moveNext$0();)
+      for (t1 = J.get$iterator$ax(A._instanceType(this)._eval$1("Iterable<1>")._as(elements)); t1.moveNext$0();)
         this.add$1(0, t1.get$current());
     },
     difference$1(other) {
@@ -11168,6 +11451,27 @@
         value = combine.call$2(value, t1.get$current());
       return value;
     },
+    join$1(_, separator) {
+      var first, t1,
+        iterator = this.get$iterator(this);
+      if (!iterator.moveNext$0())
+        return "";
+      first = J.toString$0$(iterator.get$current());
+      if (!iterator.moveNext$0())
+        return first;
+      if (separator.length === 0) {
+        t1 = first;
+        do
+          t1 += J.toString$0$(iterator.get$current());
+        while (iterator.moveNext$0());
+      } else {
+        t1 = first;
+        do
+          t1 = t1 + separator + J.toString$0$(iterator.get$current());
+        while (iterator.moveNext$0());
+      }
+      return t1.charCodeAt(0) == 0 ? t1 : t1;
+    },
     get$length(_) {
       var count,
         it = this.get$iterator(this);
@@ -11597,7 +11901,7 @@
   A.PostProcessState.prototype = {
     validate$0() {
       var t1, t2, key, value;
-      for (t1 = A.LinkedHashMap_LinkedHashMap$_literal(["exposure", 1, "bloomStrength", 0, "ssaoStrength", 0, "depthOfFieldStrength", 0, "vignette", 0, "grain", 0, "rainIntensity", 0, "surfaceWetness", 0, "rainWindowVisibility", 1, "ditherStrength", 0, "colorGradeStrength", 0, "affineWarpStrength", 0, "vertexSnapGrid", 0, "vhsChromaWeight", 0, "vhsTrackingWeight", 0, "vhsNoiseWeight", 0, "vhsHeadSwitchWeight", 0, "vhsDropoutWeight", 0, "vhsGhostWeight", 0], type$.String, type$.double), t1 = new A.LinkedHashMapEntriesIterable(t1, A._instanceType(t1)._eval$1("LinkedHashMapEntriesIterable<1,2>")).get$iterator(0); t1.moveNext$0();) {
+      for (t1 = A.LinkedHashMap_LinkedHashMap$_literal(["exposure", 1, "bloomStrength", 0, "ssaoStrength", 0, "depthOfFieldStrength", 0, "vignette", 0, "grain", 0, "rainIntensity", 0, "surfaceWetness", 0, "surfaceSnowCoverage", 0, "surfaceDissolution", 0, "rainWindowVisibility", 1, "ditherStrength", 0, "colorGradeStrength", 0, "affineWarpStrength", 0, "vertexSnapGrid", 0, "vhsChromaWeight", 0, "vhsTrackingWeight", 0, "vhsNoiseWeight", 0, "vhsHeadSwitchWeight", 0, "vhsDropoutWeight", 0, "vhsGhostWeight", 0], type$.String, type$.double), t1 = new A.LinkedHashMapEntriesIterable(t1, A._instanceType(t1)._eval$1("LinkedHashMapEntriesIterable<1,2>")).get$iterator(0); t1.moveNext$0();) {
         t2 = t1.__js_helper$_current;
         key = t2.key;
         value = t2.value;
@@ -11606,11 +11910,63 @@
       }
     }
   };
-  A.CameraView.prototype = {};
+  A.CameraView.prototype = {
+    get$inverseProjection() {
+      var result, _this = this,
+        value = _this.__CameraView_inverseProjection_FI;
+      if (value === $) {
+        result = _this.projection.inverse$0();
+        _this.__CameraView_inverseProjection_FI !== $ && A.throwLateFieldADI("inverseProjection");
+        _this.__CameraView_inverseProjection_FI = result;
+        value = result;
+      }
+      return value;
+    },
+    validate$0() {
+      var t2, worstDelta, worstIndex, i, t3, t4, worstDelta0, t5, _this = this, _null = null,
+        t1 = _this.eye;
+      if (!t1.get$isFinite(0))
+        throw A.wrapException(A.ArgumentError$("CameraView.eye must be finite: " + t1.toString$0(0), _null));
+      t1 = _this.forward;
+      if (!t1.get$isFinite(0) || t1.get$lengthSquared() < 1e-12)
+        throw A.wrapException(A.ArgumentError$("CameraView.forward must be finite and nonzero: " + t1.toString$0(0), _null));
+      t1 = _this.near;
+      if (isFinite(t1)) {
+        t2 = _this.far;
+        t2 = !isFinite(t2) || t1 <= 0 || t2 <= t1;
+      } else
+        t2 = true;
+      if (t2)
+        throw A.wrapException(A.ArgumentError$("CameraView requires 0 < near < far, got " + A.S(t1) + "/" + _this.far, _null));
+      t1 = _this.aspect;
+      if (!isFinite(t1) || t1 <= 0)
+        throw A.wrapException(A.ArgumentError$("CameraView.aspect must be finite and > 0: " + A.S(t1), _null));
+      t1 = _this.view;
+      if (!t1.get$isFinite(0) || !_this.projection.get$isFinite(0) || !_this.viewProjection.get$isFinite(0))
+        throw A.wrapException(A.ArgumentError$("CameraView matrices must be finite", _null));
+      for (t2 = _this.viewProjection.m, t1 = _this.projection.$mul(0, t1).m, worstDelta = 0, worstIndex = -1, i = 0; i < 16; ++i) {
+        t3 = t2[i];
+        t4 = t1[i];
+        worstDelta0 = Math.abs(t3 - t4) / (1 + Math.abs(t4));
+        if (worstDelta0 > worstDelta) {
+          worstIndex = i;
+          worstDelta = worstDelta0;
+        }
+      }
+      if (worstDelta > 0.0001) {
+        t3 = B.JSNumber_methods.toStringAsExponential$1(worstDelta, 2);
+        t4 = B.JSInt_methods._tdivFast$1(worstIndex, 4);
+        t5 = B.JSInt_methods.$mod(worstIndex, 4);
+        if (!(worstIndex >= 0 && worstIndex < 16))
+          return A.ioore(t2, worstIndex);
+        throw A.wrapException(A.ArgumentError$("CameraView.viewProjection must equal projection * view. Worst relative mismatch " + t3 + " at column " + t4 + " row " + t5 + " (got " + A.S(t2[worstIndex]) + ", expected " + A.S(t1[worstIndex]) + "). Prefer CameraView.look/lookAt/fromMatrices, which derive it.", _null));
+      }
+    }
+  };
   A.FrameEnvironment.prototype = {
     validate$0() {
-      var t1, t2, _i, _null = null;
-      if (!B.LinearColor_Rsl.get$isFinite(0) || !B.LinearColor_0_0_0.get$isFinite(0) || !B.LinearColor_1_1_1.get$isFinite(0))
+      var t1, t2, _i, sourceIds, source, t3, thermalIds, _null = null;
+      if (!B.LinearColor_Rsl.get$isFinite(0) || !B.LinearColor_0_0_0.get$isFinite(0) || !B.LinearColor_1_1_1.get$isFinite(0) || !B.LinearColor_1_1_1.get$isFinite(0) || !B.LinearColor_0_0_0.get$isFinite(0))
         throw A.wrapException(A.ArgumentError$("FrameEnvironment colors must be finite", _null));
       t1 = isFinite(0);
       if (t1)
@@ -11629,9 +11985,50 @@
         if (!t2)
           A.throwExpression(A.ArgumentError$("SpotLight.direction must be finite and nonzero: " + B.Vec3_0_m1_0.toString$0(0), _null));
       }
+      t2 = type$.String;
+      sourceIds = A.LinkedHashSet_LinkedHashSet$_empty(t2);
+      for (_i = 0; false; ++_i) {
+        source = B.List_empty0[_i];
+        source.validate$0();
+        if (!sourceIds.add$1(0, source.get$id()))
+          throw A.wrapException(A.ArgumentError$("FrameEnvironment.volumetricSources contains duplicate id: " + A.S(source.get$id()), _null));
+      }
+      t3 = true;
+      if (isFinite(0.02))
+        if (isFinite(0.7))
+          if (isFinite(0.35))
+            if (t1)
+              t1 = !isFinite(0.003);
+            else
+              t1 = t3;
+          else
+            t1 = t3;
+        else
+          t1 = t3;
+      else
+        t1 = t3;
+      if (t1)
+        throw A.wrapException(A.ArgumentError$("invalid volumetric medium controls", _null));
+      thermalIds = A.LinkedHashSet_LinkedHashSet$_empty(t2);
+      for (_i = 0; false; ++_i) {
+        source = B.List_empty1[_i];
+        source.validate$0();
+        if (!thermalIds.add$1(0, source.get$id()))
+          throw A.wrapException(A.ArgumentError$("FrameEnvironment.thermalSources contains duplicate id: " + A.S(source.get$id()), _null));
+      }
     }
   };
   A.FrameInput.prototype = {};
+  A.FrameSequencer.prototype = {
+    invalidateHistory$1(reason) {
+      ++this._historyEpoch;
+    },
+    next$4$camera$environment$post$timeSeconds(camera, environment, post, timeSeconds) {
+      var t1 = this._frameIndex;
+      this._frameIndex = t1 + 1;
+      return new A.FrameInput(camera, environment, post, -1, t1, timeSeconds);
+    }
+  };
   A.ResourceHandle.prototype = {
     $eq(_, other) {
       if (other == null)
@@ -11687,6 +12084,42 @@
       return "HandleException(" + this.reason._name + ", " + this.handle.toString$0(0) + ")";
     }
   };
+  A.ProfileAttempt.prototype = {
+    toString$0(_) {
+      var t1 = this.error,
+        t2 = this.profile.kind;
+      return t1 == null ? t2._name + ": ok" : t2._name + ": " + A.S(t1);
+    }
+  };
+  A.BootstrapResult.prototype = {
+    get$fallbackReason() {
+      var t2,
+        t1 = this.attempts;
+      if (t1.length <= 1)
+        return null;
+      t2 = A._arrayInstanceType(t1);
+      return new A.MappedIterable(new A.WhereIterable(t1, t2._eval$1("bool(1)")._as(new A.BootstrapResult_fallbackReason_closure()), t2._eval$1("WhereIterable<1>")), t2._eval$1("String(1)")._as(new A.BootstrapResult_fallbackReason_closure0()), t2._eval$1("MappedIterable<1,String>")).join$1(0, "; ");
+    }
+  };
+  A.BootstrapResult_fallbackReason_closure.prototype = {
+    call$1(a) {
+      return type$.ProfileAttempt._as(a).error != null;
+    },
+    $signature: 17
+  };
+  A.BootstrapResult_fallbackReason_closure0.prototype = {
+    call$1(a) {
+      type$.ProfileAttempt._as(a);
+      return a.profile.kind._name + " failed: " + A.S(a.error);
+    },
+    $signature: 18
+  };
+  A.defaultProfileLadder_closure.prototype = {
+    call$1(p) {
+      return type$.QualityProfile._as(p) === this.requested;
+    },
+    $signature: 19
+  };
   A.LinearColor.prototype = {
     get$isFinite(_) {
       return isFinite(this.r) && isFinite(this.g) && isFinite(this.b);
@@ -11712,7 +12145,7 @@
       byInfluence = B.JSNumber_methods.compareTo$1(t1._as(b)._0, a._0);
       return byInfluence === 0 ? 0 : byInfluence;
     },
-    $signature: 17
+    $signature: 20
   };
   A.VertexAttributeKind.prototype = {
     _enumToString$0() {
@@ -11758,24 +12191,24 @@
     }
   };
   A.SurfaceMetrics.prototype = {
-    validate$0() {
+    toString$0(_) {
       var _this = this;
+      return "SurfaceMetrics(css " + _this.cssWidth + "x" + _this.cssHeight + ", pixels " + _this.pixelWidth + "x" + _this.pixelHeight + ", dpr " + A.S(_this.devicePixelRatio) + ", visible: true)";
+    },
+    validate$0() {
+      var t1, _this = this;
       if (_this.cssWidth < 0 || _this.cssHeight < 0)
         throw A.wrapException(A.ArgumentError$("SurfaceMetrics css size must be >= 0", null));
       if (_this.pixelWidth < 0 || _this.pixelHeight < 0)
         throw A.wrapException(A.ArgumentError$("SurfaceMetrics pixel size must be >= 0", null));
-      if (!isFinite(1))
-        throw A.wrapException(A.ArgumentError$("SurfaceMetrics.devicePixelRatio must be finite and > 0: 1", null));
+      t1 = _this.devicePixelRatio;
+      if (!isFinite(t1) || t1 <= 0)
+        throw A.wrapException(A.ArgumentError$("SurfaceMetrics.devicePixelRatio must be finite and > 0: " + A.S(t1), null));
     }
   };
   A.ColorEncoding.prototype = {
     _enumToString$0() {
       return "ColorEncoding." + this._name;
-    }
-  };
-  A.DiagnosticLevel.prototype = {
-    _enumToString$0() {
-      return "DiagnosticLevel." + this._name;
     }
   };
   A.RendererConfiguration.prototype = {
@@ -11784,7 +12217,7 @@
         _s17_ = "installedFeatures",
         t1 = _this.profile,
         t2 = t1.installedFeatures,
-        unknown = t2.difference$1(B.Set_wtCB7);
+        unknown = t2.difference$1(B.Set_PGzT9);
       if (unknown._collection$_length !== 0)
         A.throwExpression(A.ArgumentError$value(unknown, _s17_, "contains unknown pipeline features"));
       if (t1.kind === B.QualityProfileKind_0 && t2.get$isNotEmpty(t2))
@@ -11818,7 +12251,7 @@
     call$3(slot, generation, label) {
       return new A.MaterialHandle(A._asInt(slot), A._asInt(generation), A._asStringQ(label));
     },
-    $signature: 20
+    $signature: 23
   };
   A.UploadedMesh.prototype = {};
   A.MeshStore.prototype = {
@@ -11884,7 +12317,7 @@
     call$3(slot, generation, label) {
       return new A.MeshHandle(A._asInt(slot), A._asInt(generation), A._asStringQ(label));
     },
-    $signature: 21
+    $signature: 24
   };
   A.MeshStore_liveGpuBytes_closure.prototype = {
     call$2(total, entry) {
@@ -11896,7 +12329,7 @@
       t1 = A.MeshStore__indexByteLength(t1.get$indices());
       return t2 + t1;
     },
-    $signature: 22
+    $signature: 25
   };
   A.TextureStore.prototype = {
     _createFallback$1(pixels) {
@@ -11989,13 +12422,13 @@
     call$3(slot, generation, label) {
       return new A.TextureHandle(A._asInt(slot), A._asInt(generation), A._asStringQ(label));
     },
-    $signature: 24
+    $signature: 27
   };
   A.TextureStore_rehydrateAfterContextRestore_closure.prototype = {
     call$1(pixels) {
       return false;
     },
-    $signature: 25
+    $signature: 28
   };
   A.TextureStore_liveGpuBytes_closure.prototype = {
     call$2(total, entry) {
@@ -12004,7 +12437,17 @@
       descriptor = type$.Record_2_TextureHandle_and__TextureRecord._as(entry)._1.get$descriptor();
       return B.JSInt_methods.$add(total, descriptor.get$width().$mul(0, descriptor.get$height()).$mul(0, descriptor.get$layers()).$mul(0, 4));
     },
-    $signature: 26
+    $signature: 29
+  };
+  A.selectVolumetricSources_closure.prototype = {
+    call$2(a, b) {
+      var byInfluence,
+        t1 = type$.Record_2_double_influence_and_VolumetricSource_source;
+      t1._as(a);
+      byInfluence = J.compareTo$1$ns(t1._as(b)._0, a._0);
+      return byInfluence;
+    },
+    $signature: 30
   };
   A.InstanceBatch.prototype = {
     get$instanceCount() {
@@ -12013,21 +12456,21 @@
   };
   A.FeatureGraph.prototype = {
     build$4$availableCapabilities$featureContext$hasValidPreviousFrame$resources(availableCapabilities, featureContext, hasValidPreviousFrame, resources) {
-      var builder, t1, t2, _i, graph, t3, declaredIds, passes, feature, _i0, pass;
+      var builder, t1, t2, _i, graph, t3, declaredIds, passes, feature, t4, _i0, pass;
       type$.Set_String._as(availableCapabilities);
       builder = new A.RenderGraphBuilder(A._setArrayType([], type$.JSArray_PassDeclaration), A.LinkedHashSet_LinkedHashSet$_empty(type$.String));
       for (t1 = this._installedFeatures, t2 = t1.length, _i = 0; _i < t1.length; t1.length === t2 || (0, A.throwConcurrentModificationError)(t1), ++_i)
         t1[_i].declare$2(builder, featureContext);
       graph = builder.build$2$availableCapabilities$hasValidPreviousFrame(availableCapabilities, false);
       if (graph.failures.length !== 0)
-        return new A.FeatureGraphResult(graph, B.List_empty0);
+        return new A.FeatureGraphResult(graph, B.List_empty2);
       t2 = graph.orderedPasses;
       t3 = A._arrayInstanceType(t2);
       declaredIds = new A.MappedListIterable(t2, t3._eval$1("String(1)")._as(new A.FeatureGraph_build_closure()), t3._eval$1("MappedListIterable<1,String>")).toSet$0(0);
       passes = A._setArrayType([], type$.JSArray_RenderPass);
       for (t2 = t1.length, _i = 0; _i < t1.length; t1.length === t2 || (0, A.throwConcurrentModificationError)(t1), ++_i) {
         feature = t1[_i];
-        for (t3 = feature.createPasses$1(resources), _i0 = 0; _i0 < 1; ++_i0) {
+        for (t3 = feature.createPasses$1(resources), t4 = t3.length, _i0 = 0; _i0 < t3.length; t3.length === t4 || (0, A.throwConcurrentModificationError)(t3), ++_i0) {
           pass = t3[_i0];
           if (!declaredIds.contains$1(0, pass.get$descriptor().id))
             throw A.wrapException(A.StateError$('RenderFeature "' + feature.get$id() + '" created a pass "' + pass.get$descriptor().id + '" that it never declared into the graph'));
@@ -12042,7 +12485,7 @@
     call$1(p) {
       return type$.PassDeclaration._as(p).id;
     },
-    $signature: 27
+    $signature: 31
   };
   A.FeatureGraph_build_closure0.prototype = {
     call$2(a, b) {
@@ -12052,7 +12495,7 @@
       t1 = this.graph.orderedPasses;
       return B.JSInt_methods.compareTo$1(B.JSArray_methods.indexWhere$1(t1, new A.FeatureGraph_build__closure(a)), B.JSArray_methods.indexWhere$1(t1, new A.FeatureGraph_build__closure0(b)));
     },
-    $signature: 28
+    $signature: 32
   };
   A.FeatureGraph_build__closure.prototype = {
     call$1(p) {
@@ -12521,7 +12964,7 @@
       B.JSArray_methods.$indexSet(t2, node, true);
       return false;
     },
-    $signature: 31
+    $signature: 35
   };
   A.RenderGraph.prototype = {};
   A.RenderWorldImpl.prototype = {
@@ -12582,7 +13025,7 @@
     call$3(slot, generation, label) {
       return new A.InstanceId(A._asInt(slot), A._asInt(generation), A._asStringQ(label));
     },
-    $signature: 32
+    $signature: 36
   };
   A.ResourceLibraryImpl.prototype = {
     dispose$0() {
@@ -12645,7 +13088,7 @@
         t2 = t1 ? mesh.indexCount : mesh.vertexCount;
       return new A.ResolvedMesh(mesh.vao, t1, t2, mesh.usesUint32Indices);
     },
-    $signature: 33
+    $signature: 37
   };
   A._extension_0__assembleSafeGraph_resolveResource.prototype = {
     call$2$fallback($name, fallback) {
@@ -12659,7 +13102,7 @@
     call$1($name) {
       return this.call$2$fallback($name, null);
     },
-    $signature: 34
+    $signature: 38
   };
   A._extension_0__assembleSafeGraph_closure9.prototype = {
     call$0() {
@@ -12671,16 +13114,16 @@
     call$0() {
       return null;
     },
-    $signature: 36
+    $signature: 40
   };
   A._extension_0__assembleSafeGraph_closure3.prototype = {
     call$0() {
       var frame = this._this._activeFrame;
       if (frame == null)
-        return B.List_empty1;
-      return A.selectSpotLights(B.List_empty1, 3, frame.camera.eye, null);
+        return B.List_empty3;
+      return A.selectSpotLights(B.List_empty3, 3, frame.camera.eye, null);
     },
-    $signature: 37
+    $signature: 41
   };
   A._extension_0__assembleSafeGraph_closure8.prototype = {
     call$0() {
@@ -12692,7 +13135,7 @@
     call$0() {
       return this._this._activeFrame.camera;
     },
-    $signature: 38
+    $signature: 42
   };
   A._extension_0__assembleSafeGraph_closure11.prototype = {
     call$0() {
@@ -12755,13 +13198,19 @@
     call$0() {
       return this._this._activeFrame.timeSeconds;
     },
-    $signature: 59
+    $signature: 43
   };
   A._extension_0__executeGraph_closure.prototype = {
     call$0() {
       return this.view;
     },
-    $signature: 40
+    $signature: 66
+  };
+  A._extension_0__executeGraph_closure0.prototype = {
+    call$0() {
+      return null;
+    },
+    $signature: 45
   };
   A._SafeGraphAssembly.prototype = {};
   A._PlanResources.prototype = {$isRenderPassResources: 1};
@@ -12798,7 +13247,7 @@
         _this._capabilities = new A.RenderCapabilities(t4);
         t2 = _this._configurations;
         plan = A.OwnedResourcePlan_OwnedResourcePlan$forConfiguration(configuration);
-        t3 = t2._configuration_coordinator$_configuration;
+        t3 = t2._configuration;
         if (t3._configuration_transition$_current != null)
           A.throwExpression(A.StateError$("configuration state is already initialized"));
         configuration.validate$0();
@@ -12816,7 +13265,7 @@
         t3._resource_plan_adapter$_current = new A.PreparedGpuResourcePlan(new A.PreparedResourceAssembly(plan), objects);
         _this._gpuResources = t3;
         _this._programs = new A.ProgramLibrary(t1, A.LinkedHashMap_LinkedHashMap$_empty(type$.String, type$.CompiledProgram));
-        _this._configuration = configuration;
+        _this._scene_renderer_impl$_configuration = configuration;
         A._extension_0__buildSafeGraph(_this);
         _this._scene_renderer_impl$_state = B.RendererState_2;
       } catch (exception) {
@@ -12841,39 +13290,20 @@
       return t1;
     },
     beginFrame$2(world, frame) {
-      var encoder, t1, t2, t3, encoder0, exception, _this = this, _null = null;
+      var encoder, t1, encoder0, exception, _this = this;
       _this._recoverIfNeeded$0();
       _this._ensureReady$0();
       t1 = B.JSArray_methods.contains$1(_this._worlds, world);
       if (!t1)
-        throw A.wrapException(A.ArgumentError$("world was not created by this renderer", _null));
+        throw A.wrapException(A.ArgumentError$("world was not created by this renderer", null));
       if (_this._activeFrame != null)
         throw A.wrapException(A.StateError$("renderer.beginFrame called twice without end/abort"));
-      t1 = frame.camera;
-      t2 = t1.eye;
-      if (!t2.get$isFinite(0))
-        A.throwExpression(A.ArgumentError$("CameraView.eye must be finite: " + t2.toString$0(0), _null));
-      t2 = t1.forward;
-      if (!t2.get$isFinite(0) || t2.get$lengthSquared() < 1e-12)
-        A.throwExpression(A.ArgumentError$("CameraView.forward must be finite and nonzero: " + t2.toString$0(0), _null));
-      t2 = t1.near;
-      if (isFinite(t2)) {
-        t3 = t1.far;
-        t3 = !isFinite(t3) || t2 <= 0 || t3 <= t2;
-      } else
-        t3 = true;
-      if (t3)
-        A.throwExpression(A.ArgumentError$("CameraView requires 0 < near < far, got " + A.S(t2) + "/" + t1.far, _null));
-      t2 = t1.aspect;
-      if (!isFinite(t2) || t2 <= 0)
-        A.throwExpression(A.ArgumentError$("CameraView.aspect must be finite and > 0: " + A.S(t2), _null));
-      if (!t1.view.get$isFinite(0) || !t1.projection.get$isFinite(0) || !t1.viewProjection.get$isFinite(0))
-        A.throwExpression(A.ArgumentError$("CameraView matrices must be finite", _null));
+      frame.camera.validate$0();
       frame.environment.validate$0();
       frame.post.validate$0();
       t1 = frame.timeSeconds;
       if (!isFinite(t1))
-        A.throwExpression(A.ArgumentError$("FrameInput.timeSeconds must be finite: " + A.S(t1), _null));
+        A.throwExpression(A.ArgumentError$("FrameInput.timeSeconds must be finite: " + A.S(t1), null));
       _this._activeFrame = frame;
       _this._activeWorld = world;
       encoder0 = _this._frames;
@@ -12950,7 +13380,7 @@
       t1._textures.rehydrateAfterContextRestore$0();
       t1 = _this._gpuResources;
       t1.toString;
-      t2 = _this._configuration;
+      t2 = _this._scene_renderer_impl$_configuration;
       t2.toString;
       if (t1._resource_plan_adapter$_disposed)
         A.throwExpression(A.StateError$("GPU resource adapter is disposed"));
@@ -12974,19 +13404,20 @@
         _this._scene_renderer_impl$_state = B.RendererState_3;
         throw A.wrapException(A.StateError$("renderer context lost"));
       }
-    }
+    },
+    $isSceneRenderer: 1
   };
   A.SceneRendererImpl_endFrame_closure.prototype = {
     call$1(entry) {
       return B.JSString_methods.contains$1(type$.MapEntry_String_FramePassStats._as(entry).key.toLowerCase(), "world");
     },
-    $signature: 41
+    $signature: 46
   };
   A.SceneRendererImpl_endFrame_closure0.prototype = {
     call$1(entry) {
       return type$.MapEntry_String_FramePassStats._as(entry).value;
     },
-    $signature: 42
+    $signature: 47
   };
   A.SceneRendererImpl_endFrame_closure1.prototype = {
     call$2(total, pass) {
@@ -12995,7 +13426,7 @@
       t1._as(pass);
       return new A.FramePassStats(total.drawCalls + pass.drawCalls, total.trianglesSubmitted + pass.trianglesSubmitted, total.instancesSubmitted + pass.instancesSubmitted);
     },
-    $signature: 43
+    $signature: 48
   };
   A._PendingGpuTiming.prototype = {};
   A._GpuTimingSupport.prototype = {
@@ -13067,26 +13498,26 @@
       var t1 = type$.SortableItem_OpaqueSortKey;
       return t1._as(a).key.compareTo$1(0, t1._as(b).key);
     },
-    $signature: 44
+    $signature: 49
   };
   A.sortOpaque_closure0.prototype = {
     call$1(e) {
       return type$.SortableItem_OpaqueSortKey._as(e).view;
     },
-    $signature: 45
+    $signature: 50
   };
   A.sortBlended_closure.prototype = {
     call$2(a, b) {
       var t1 = type$.SortableItem_BlendedSortKey;
       return t1._as(a).key.compareTo$1(0, t1._as(b).key);
     },
-    $signature: 46
+    $signature: 51
   };
   A.sortBlended_closure0.prototype = {
     call$1(e) {
       return type$.SortableItem_BlendedSortKey._as(e).view;
     },
-    $signature: 47
+    $signature: 52
   };
   A.CullStats.prototype = {};
   A.CullResult.prototype = {};
@@ -13136,7 +13567,7 @@
       }
       return t1;
     },
-    $signature: 48
+    $signature: 53
   };
   A.Mat4.prototype = {
     $mul(_, other) {
@@ -13161,6 +13592,90 @@
         }
       return new A.Mat4(result);
     },
+    inverse$0() {
+      var t1, t2, row, t3, t4, t5, t6, t7, t8, t9, column, pivotMagnitude, row0, pivot, magnitude, divisor, i, factor, result,
+        augmented = J.JSArray_JSArray$allocateGrowable(4, type$.Float64List);
+      for (t1 = type$.JSArray_double, t2 = this.m, row = 0; row < 4; ++row) {
+        t3 = t2[row];
+        t4 = t2[4 + row];
+        t5 = t2[8 + row];
+        t6 = t2[12 + row];
+        t7 = row === 0 ? 1 : 0;
+        t8 = row === 1 ? 1 : 0;
+        t9 = row === 2 ? 1 : 0;
+        augmented[row] = new Float64Array(A._ensureNativeList(A._setArrayType([t3, t4, t5, t6, t7, t8, t9, row === 3 ? 1 : 0], t1)));
+      }
+      for (column = 0; column < 4; column = row) {
+        t1 = augmented[column];
+        if (!(column < t1.length))
+          return A.ioore(t1, column);
+        pivotMagnitude = Math.abs(t1[column]);
+        for (row = column + 1, row0 = row, pivot = column; row0 < 4; ++row0) {
+          t2 = augmented[row0];
+          if (!(column < t2.length))
+            return A.ioore(t2, column);
+          magnitude = Math.abs(t2[column]);
+          if (magnitude > pivotMagnitude) {
+            pivotMagnitude = magnitude;
+            pivot = row0;
+          }
+        }
+        if (!isFinite(pivotMagnitude) || pivotMagnitude < 1e-12)
+          throw A.wrapException(A.StateError$("Mat4.inverse: singular matrix"));
+        if (pivot !== column) {
+          if (!(pivot >= 0 && pivot < 4))
+            return A.ioore(augmented, pivot);
+          augmented[column] = augmented[pivot];
+          augmented[pivot] = t1;
+        }
+        t1 = augmented[column];
+        if (!(column < t1.length))
+          return A.ioore(t1, column);
+        divisor = t1[column];
+        for (i = 0; i < 8; ++i) {
+          if (!(i < t1.length))
+            return A.ioore(t1, i);
+          t2 = t1[i];
+          t1.$flags & 2 && A.throwUnsupportedOperation(t1);
+          t1[i] = t2 / divisor;
+        }
+        for (row0 = 0; row0 < 4; ++row0) {
+          if (row0 === column)
+            continue;
+          t1 = augmented[row0];
+          if (!(column < t1.length))
+            return A.ioore(t1, column);
+          factor = t1[column];
+          if (factor === 0)
+            continue;
+          for (i = 0; i < 8; ++i) {
+            if (!(i < t1.length))
+              return A.ioore(t1, i);
+            t2 = t1[i];
+            t3 = augmented[column];
+            if (!(i < t3.length))
+              return A.ioore(t3, i);
+            t3 = t3[i];
+            t1.$flags & 2 && A.throwUnsupportedOperation(t1);
+            t1[i] = t2 - factor * t3;
+          }
+        }
+      }
+      result = new Float32Array(16);
+      for (row = 0; row < 4; ++row)
+        for (column = 0; column < 4; ++column) {
+          t1 = column * 4 + row;
+          t2 = augmented[row];
+          t3 = 4 + column;
+          if (!(t3 < t2.length))
+            return A.ioore(t2, t3);
+          t3 = t2[t3];
+          if (!(t1 < 16))
+            return A.ioore(result, t1);
+          result[t1] = t3;
+        }
+      return new A.Mat4(result);
+    },
     get$isFinite(_) {
       return B.NativeFloat32List_methods.every$1(this.m, new A.Mat4_isFinite_closure());
     },
@@ -13172,7 +13687,7 @@
     call$1(v) {
       return isFinite(A._asDouble(v));
     },
-    $signature: 49
+    $signature: 54
   };
   A.Vec3.prototype = {
     dot$1(o) {
@@ -13562,7 +14077,7 @@
     },
     createPasses$1(resources) {
       var _this = this,
-        program = _this.programLibrary.publish$1(new A.ProgramSource("present", _this.vertexSource, _this.fragmentSource, B.Map_empty, B.Map_xTGca, B.List_bt2)),
+        program = _this.programLibrary.publish$1(new A.ProgramSource("present", _this.vertexSource, _this.fragmentSource, B.Map_empty, B.Map_chmai, B.List_khX)),
         emptyVao = A.WebGl2DeviceTargets_createVertexArrayImpl(_this.device),
         t1 = _this.sceneColorResource;
       return A._setArrayType([new A._PresentPass(new A.PassDescriptor("present", A._setArrayType([new A.ResourceUse(t1, B.ResourceAccess_0)], type$.JSArray_ResourceUse), false, false, false, false), program, emptyVao, t1, _this.outputEncoding)], type$.JSArray_RenderPass);
@@ -13571,7 +14086,7 @@
   };
   A._PresentPass.prototype = {
     execute$1(context) {
-      var _this = this,
+      var skyboxTexture, camera, t2, value, result, t3, _this = this,
         source = context.viewOfResource$1(_this.sceneColorResource),
         encoder = context.encoder,
         t1 = encoder.device;
@@ -13580,13 +14095,52 @@
       A.WebGl2DeviceDraw_useProgramImpl(t1, _this.program.handle);
       A.WebGl2DeviceDraw_bindVertexArrayImpl(t1, _this.emptyVao);
       A.WebGl2DeviceDraw_bindTextureImpl(t1, 0, source.gpuObject);
+      skyboxTexture = context.skyboxTexture;
+      if (skyboxTexture != null)
+        A.WebGl2DeviceDraw_bindTextureImpl(t1, 1, skyboxTexture);
+      camera = context.frameScene.camera;
       A.WebGl2DeviceDraw_setUniformImpl(t1, "uExposure", new A.UniformValue(B.UniformType_0, 1));
       A.WebGl2DeviceDraw_setUniformImpl(t1, "uVignette", new A.UniformValue(B.UniformType_0, 0));
       A.WebGl2DeviceDraw_setUniformImpl(t1, "uGrain", new A.UniformValue(B.UniformType_0, 0));
-      A.WebGl2DeviceDraw_setUniformImpl(t1, "uRainIntensity", new A.UniformValue(B.UniformType_0, 0));
-      A.WebGl2DeviceDraw_setUniformImpl(t1, "uRainWindowVisibility", new A.UniformValue(B.UniformType_0, 1));
       A.WebGl2DeviceDraw_setUniformImpl(t1, "uOutputEncoding", new A.UniformValue(B.UniformType_0, _this.outputEncoding === B.ColorEncoding_1 ? 1 : 0));
       A.WebGl2DeviceDraw_setUniformImpl(t1, "uToneMap", B.UniformValue_UniformType_0_1);
+      t2 = type$.JSArray_double;
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uClearColor", new A.UniformValue(B.UniformType_2, new Float32Array(A._ensureNativeList(A._setArrayType([0.03, 0.03, 0.04], t2)))));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uSkyHorizon", new A.UniformValue(B.UniformType_2, new Float32Array(A._ensureNativeList(A._setArrayType([1, 1, 1], t2)))));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uSkyZenith", new A.UniformValue(B.UniformType_2, new Float32Array(A._ensureNativeList(A._setArrayType([0.30160000000000003, 0.30160000000000003, 0.3088], t2)))));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uSkyGround", new A.UniformValue(B.UniformType_2, new Float32Array(A._ensureNativeList(A._setArrayType([0.027, 0.027, 0.036000000000000004], t2)))));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uSkyEnabled", new A.UniformValue(B.UniformType_0, 0));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uSkyHorizonGlow", new A.UniformValue(B.UniformType_0, 0));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uSkyStarDensity", new A.UniformValue(B.UniformType_0, 0));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uSkyTexture", B.UniformValue_UniformType_6_1);
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uSkyTextureEnabled", new A.UniformValue(B.UniformType_0, 0));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uSkyRotation", new A.UniformValue(B.UniformType_0, 0));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uSkyExposure", new A.UniformValue(B.UniformType_0, 1));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uSkyTextureSrgb", new A.UniformValue(B.UniformType_0, 0));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uInverseProjection", new A.UniformValue(B.UniformType_4, new Float32Array(A._ensureNativeList(camera.get$inverseProjection().m))));
+      value = camera.__CameraView_inverseView_FI;
+      if (value === $) {
+        result = camera.view.inverse$0();
+        camera.__CameraView_inverseView_FI !== $ && A.throwLateFieldADI("inverseView");
+        camera.__CameraView_inverseView_FI = result;
+        value = result;
+      }
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uInverseView", new A.UniformValue(B.UniformType_4, new Float32Array(A._ensureNativeList(value.m))));
+      t3 = camera.eye;
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uCameraPosition", new A.UniformValue(B.UniformType_2, new Float32Array(A._ensureNativeList(A._setArrayType([t3.x, t3.y, t3.z], t2)))));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uCloudCoverage", new A.UniformValue(B.UniformType_0, 0));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uCloudDensity", new A.UniformValue(B.UniformType_0, 0));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uCloudBaseHeight", new A.UniformValue(B.UniformType_0, 650));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uCloudThickness", new A.UniformValue(B.UniformType_0, 350));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uCloudScale", new A.UniformValue(B.UniformType_0, 0));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uCloudWind", new A.UniformValue(B.UniformType_1, new Float32Array(A._ensureNativeList(A._setArrayType([0, 0], t2)))));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uCloudPhase", new A.UniformValue(B.UniformType_0, 0));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uCloudDetail", new A.UniformValue(B.UniformType_0, 0));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uCloudSilverLining", new A.UniformValue(B.UniformType_0, 0));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uCloudSampleCount", new A.UniformValue(B.UniformType_0, 4));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uCloudLightDirection", new A.UniformValue(B.UniformType_2, new Float32Array(A._ensureNativeList(A._setArrayType([0, 1, 0], t2)))));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uCloudLightColor", new A.UniformValue(B.UniformType_2, new Float32Array(A._ensureNativeList(A._setArrayType([1, 1, 1], t2)))));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uCloudLightIntensity", new A.UniformValue(B.UniformType_0, 0));
       encoder.drawArrays$2$count$first(3, 0);
     },
     $isRenderPass: 1,
@@ -13740,14 +14294,14 @@
     call$1(view) {
       return this._box_0.lastLightView = view;
     },
-    $signature: 50
+    $signature: 55
   };
   A.buildShadowGraph_closure0.prototype = {
     call$0() {
       var t1 = this._box_0.lastLightView;
       return t1 == null ? this.fallbackLightView : t1;
     },
-    $signature: 51
+    $signature: 56
   };
   A.ShadowedWorldFeature.prototype = {
     get$id() {
@@ -13764,7 +14318,7 @@
     createPasses$1(resources) {
       var _this = this,
         _s13_ = "shadowedWorld",
-        program = _this.programLibrary.publish$1(new A.ProgramSource(_s13_, _this.vertexSource, _this.fragmentSource, B.Map_jaYU8, B.Map_RkR7l, B.List_43N)),
+        program = _this.programLibrary.publish$1(new A.ProgramSource(_s13_, _this.vertexSource, _this.fragmentSource, B.Map_jaYU8, B.Map_RkR7l, B.List_EHm)),
         t1 = A._setArrayType([new A.ResourceUse(_this.shadowMapResource, B.ResourceAccess_0)], type$.JSArray_ResourceUse);
       if (_this.useSsao)
         t1.push(new A.ResourceUse(_this.ssaoResource, B.ResourceAccess_0));
@@ -13775,11 +14329,12 @@
   };
   A._ShadowedWorldPass.prototype = {
     execute$1(context) {
-      var t3, t4, t5, casterLight, t6, t7, lightPosition, lightDirection, spotColor, i, light, position, direction, color, t8, _i, _this = this, _null = null,
+      var t3, t4, t5, casterLight, t6, t7, lightPosition, lightDirection, spotColor, i, light, position, direction, color, t8, thermalSources, _i, _this = this, _null = null,
         view = context.viewOf$1("sceneColor"),
         encoder = context.encoder,
         t1 = context.frameScene,
         camera = t1.camera,
+        environment = t1.environment,
         lightView = _this.resolveLightView.call$0(),
         t2 = encoder.device;
       A.WebGl2DeviceDraw_bindTargetImpl(t2, view.gpuObject);
@@ -13798,6 +14353,8 @@
       t5 = type$.JSArray_double;
       A.WebGl2DeviceDraw_setUniformImpl(t2, "uCameraPosition", new A.UniformValue(B.UniformType_2, new Float32Array(A._ensureNativeList(A._setArrayType([t4.x, t4.y, t4.z], t5)))));
       A.WebGl2DeviceDraw_setUniformImpl(t2, "uShadowMapTexelSize", new A.UniformValue(B.UniformType_1, new Float32Array(A._ensureNativeList(A._setArrayType([1 / _this.shadowMapWidth, 1 / _this.shadowMapHeight], t5)))));
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uShadowFilterRadius", new A.UniformValue(B.UniformType_0, 1));
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uShadowBias", new A.UniformValue(B.UniformType_0, 0.003));
       A.WebGl2DeviceDraw_bindTextureImpl(t2, 2, t3._as(_this.resolveSsaoBlurred.call$0()));
       A.WebGl2DeviceDraw_setUniformImpl(t2, "uSsao", B.UniformValue_UniformType_6_2);
       A.WebGl2DeviceDraw_setUniformImpl(t2, "uVertexSnapGrid", new A.UniformValue(B.UniformType_0, 0));
@@ -13813,7 +14370,7 @@
       casterLight = _this.resolveCasterLight.call$0();
       t3 = A._setArrayType([], type$.JSArray_SpotLight);
       t4 = _this.resolveDirectSpotLights.call$0();
-      t4 = J.get$iterator$ax(t4 == null ? B.List_empty1 : t4);
+      t4 = J.get$iterator$ax(t4 == null ? B.List_empty3 : t4);
       t6 = casterLight == null;
       while (t4.moveNext$0()) {
         t7 = t4.get$current();
@@ -13898,19 +14455,38 @@
       A.WebGl2DeviceDraw_setUniformImpl(t2, "uLightOuterCos", new A.UniformValue(B.UniformType_0, Math.cos(t3)));
       A.WebGl2DeviceDraw_setUniformImpl(t2, "uAmbientColor", new A.UniformValue(B.UniformType_2, new Float32Array(A._ensureNativeList(A._setArrayType([1, 1, 1], t5)))));
       A.WebGl2DeviceDraw_setUniformImpl(t2, "uAmbientIntensity", new A.UniformValue(B.UniformType_0, 0));
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uAmbientLightScale", new A.UniformValue(B.UniformType_0, 1));
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uDirectLightScale", new A.UniformValue(B.UniformType_0, 1));
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uReflectionColor", new A.UniformValue(B.UniformType_2, new Float32Array(A._ensureNativeList(A._setArrayType([0, 0, 0], t5)))));
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uReflectionIntensity", new A.UniformValue(B.UniformType_0, 0));
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uReflectionConfidence", new A.UniformValue(B.UniformType_0, 0));
       A.WebGl2DeviceDraw_setUniformImpl(t2, "uRainWetness", new A.UniformValue(B.UniformType_0, 0));
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uSurfaceSnowCoverage", new A.UniformValue(B.UniformType_0, 0));
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uSurfaceDissolution", new A.UniformValue(B.UniformType_0, 0));
+      thermalSources = A.SubListIterable$(B.List_empty1, 0, A.checkNotNullable(4, "count", type$.int), type$.ThermalSource).toList$0(0);
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uThermalSourceCount", new A.UniformValue(B.UniformType_0, thermalSources.length));
+      for (i = 0; i < 4; ++i) {
+        t3 = thermalSources.length;
+        if (i < t3)
+          if (!(i < t3))
+            return A.ioore(thermalSources, i);
+        t3 = "" + i;
+        A.WebGl2DeviceDraw_setUniformImpl(t2, "uThermalSourcePosition" + t3, new A.UniformValue(B.UniformType_2, new Float32Array(A._ensureNativeList(A._setArrayType([0, 0, 0], t5)))));
+        A.WebGl2DeviceDraw_setUniformImpl(t2, "uThermalSourceRadius" + t3, new A.UniformValue(B.UniformType_0, 1));
+        A.WebGl2DeviceDraw_setUniformImpl(t2, "uThermalSourceDissolution" + t3, new A.UniformValue(B.UniformType_0, 0));
+      }
       for (t2 = t1.opaqueBatches, t3 = t2.length, _i = 0; _i < t2.length; t2.length === t3 || (0, A.throwConcurrentModificationError)(t2), ++_i)
-        _this._shadowed_world$_drawBatch$3(encoder, t2[_i], 0);
+        _this._shadowed_world$_drawBatch$4(encoder, t2[_i], 0, environment);
       for (t1 = t1.blendedItemsBackToFront, t2 = t1.length, _i = 0; _i < t1.length; t1.length === t2 || (0, A.throwConcurrentModificationError)(t1), ++_i)
-        _this._shadowed_world$_drawBatch$3(encoder, t1[_i], 0);
+        _this._shadowed_world$_drawBatch$4(encoder, t1[_i], 0, environment);
     },
-    _shadowed_world$_drawBatch$3(encoder, batch, affineWarpStrength) {
+    _shadowed_world$_drawBatch$4(encoder, batch, affineWarpStrength, environment) {
       var t1, mesh, t2, representative, t3, _this = this;
       if (type$.RetainedItemView._is(batch)) {
         t1 = encoder.device;
         A.WebGl2DeviceDraw_setUniformImpl(t1, "uUseInstances", B.UniformValue_UniformType_0_0);
         _this._shadowed_world$_setModelUniforms$2(encoder, batch.get$descriptor().get$transform());
-        _this._setMaterialState$6(encoder, batch.get$descriptor().get$material(), batch.get$descriptor().get$drawMode(), batch.get$descriptor().get$blendMode(), affineWarpStrength, batch.get$descriptor().get$receivesShadow());
+        _this._setMaterialState$7(encoder, batch.get$descriptor().get$material(), batch.get$descriptor().get$drawMode(), batch.get$descriptor().get$blendMode(), affineWarpStrength, batch.get$descriptor().get$receivesShadow(), environment);
         mesh = _this.resolveMesh.call$1(batch.get$descriptor().get$mesh());
         A.WebGl2DeviceDraw_bindVertexArrayImpl(t1, mesh.vao);
         t1 = mesh.isIndexed;
@@ -13923,7 +14499,7 @@
         representative = batch.representative;
         _this._shadowed_world$_setModelUniforms$2(encoder, representative.get$descriptor().get$transform());
         A.setInstanceTransformUniforms(encoder, batch, true);
-        _this._setMaterialState$6(encoder, representative.get$descriptor().get$material(), representative.get$descriptor().get$drawMode(), representative.get$descriptor().get$blendMode(), affineWarpStrength, representative.get$descriptor().get$receivesShadow());
+        _this._setMaterialState$7(encoder, representative.get$descriptor().get$material(), representative.get$descriptor().get$drawMode(), representative.get$descriptor().get$blendMode(), affineWarpStrength, representative.get$descriptor().get$receivesShadow(), environment);
         mesh = _this.resolveMesh.call$1(representative.get$descriptor().get$mesh());
         A.WebGl2DeviceDraw_bindVertexArrayImpl(encoder.device, mesh.vao);
         t1 = mesh.isIndexed;
@@ -13936,7 +14512,7 @@
       } else
         throw A.wrapException(A.ArgumentError$("ShadowedWorldFeature: frameScene entries must be InstanceBatch or RetainedItemView, got " + J.get$runtimeType$(batch).toString$0(0), null));
     },
-    _setMaterialState$6(encoder, handle, drawMode, blendMode, affineWarpStrength, itemReceivesShadow) {
+    _setMaterialState$7(encoder, handle, drawMode, blendMode, affineWarpStrength, itemReceivesShadow, environment) {
       var _this = this,
         material = _this.resolveMaterial.call$1(handle),
         t1 = type$.GpuObject,
@@ -13954,9 +14530,10 @@
       A.WebGl2DeviceDraw_setUniformImpl(t2, "uMaterialTint", new A.UniformValue(B.UniformType_2, new Float32Array(A._ensureNativeList(A._setArrayType([material.get$tintR(), material.get$tintG(), material.get$tintB()], t1)))));
       A.WebGl2DeviceDraw_setUniformImpl(t2, "uEmissiveStrength", new A.UniformValue(B.UniformType_0, material.get$emissiveStrength()));
       A.WebGl2DeviceDraw_setUniformImpl(t2, "uUvScaleOffset", new A.UniformValue(B.UniformType_3, new Float32Array(A._ensureNativeList(A._setArrayType([material.get$uvScaleU(), material.get$uvScaleV(), material.get$uvOffsetU(), material.get$uvOffsetV()], t1)))));
-      A.WebGl2DeviceDraw_setUniformImpl(t2, "uNormalStrength", new A.UniformValue(B.UniformType_0, material.get$normalStrength()));
-      A.WebGl2DeviceDraw_setUniformImpl(t2, "uRoughness", new A.UniformValue(B.UniformType_0, material.get$roughness()));
-      A.WebGl2DeviceDraw_setUniformImpl(t2, "uMetallic", new A.UniformValue(B.UniformType_0, material.get$metallic()));
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uNormalStrength", new A.UniformValue(B.UniformType_0, material.get$normalStrength().$mul(0, 1)));
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uRoughness", new A.UniformValue(B.UniformType_0, material.get$roughness().$mul(0, 1)));
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uMetallic", new A.UniformValue(B.UniformType_0, material.get$metallic().$mul(0, 1)));
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uSpecularScale", new A.UniformValue(B.UniformType_0, 1));
       A.WebGl2DeviceDraw_setUniformImpl(t2, "uClearcoatStrength", new A.UniformValue(B.UniformType_0, material.get$clearcoatStrength()));
       A.WebGl2DeviceDraw_setUniformImpl(t2, "uClearcoatRoughness", new A.UniformValue(B.UniformType_0, material.get$clearcoatRoughness()));
       A.WebGl2DeviceDraw_setUniformImpl(t2, "uOcclusionStrength", new A.UniformValue(B.UniformType_0, material.get$occlusionStrength()));
@@ -14081,6 +14658,115 @@
       return this.descriptor;
     }
   };
+  A.VolumetricLightFeature.prototype = {
+    get$id() {
+      return "volumetricLight";
+    },
+    declare$2(graph, context) {
+      var _this = this,
+        t1 = _this.volumetricLightResource,
+        t2 = type$.JSArray_ResourceUse,
+        t3 = graph._render_graph$_passes;
+      B.JSArray_methods.add$1(t3, new A.PassDeclaration("volumetricLight", B.GraphStage_3, A._setArrayType([new A.ResourceUse(_this.sceneDepthResource, B.ResourceAccess_0), new A.ResourceUse(t1, B.ResourceAccess_1)], t2), false));
+      B.JSArray_methods.add$1(t3, new A.PassDeclaration("volumetricComposite", B.GraphStage_6, A._setArrayType([new A.ResourceUse(t1, B.ResourceAccess_0), new A.ResourceUse(_this.sceneColorResource, B.ResourceAccess_0), new A.ResourceUse(_this.sceneColorOutputResource, B.ResourceAccess_1)], t2), false));
+    },
+    createPasses$1(resources) {
+      var t5, t6, passes, sceneColorOutput, compositeProgram, compositeVao, _this = this,
+        _s15_ = "volumetricLight",
+        _s19_ = "volumetricComposite",
+        t1 = _this.programLibrary,
+        t2 = _this.vertexSource,
+        program = t1.publish$1(new A.ProgramSource(_s15_, t2, _this.fragmentSource, B.Map_empty, B.Map_eLegi, B.List_Is9)),
+        t3 = _this.device,
+        emptyVao = A.WebGl2DeviceTargets_createVertexArrayImpl(t3),
+        t4 = _this._emptyVaos;
+      B.JSArray_methods.add$1(t4, emptyVao);
+      t5 = _this.volumetricLightResource;
+      t6 = type$.JSArray_ResourceUse;
+      passes = A._setArrayType([new A._VolumetricLightPass(new A.PassDescriptor(_s15_, A._setArrayType([new A.ResourceUse(_this.sceneDepthResource, B.ResourceAccess_0), new A.ResourceUse(t5, B.ResourceAccess_1)], t6), false, false, false, false), program, emptyVao, t5.name, _this.resolveSceneDepth, _this.resolveCamera)], type$.JSArray_RenderPass);
+      sceneColorOutput = _this.sceneColorOutputResource;
+      compositeProgram = t1.publish$1(new A.ProgramSource(_s19_, t2, _this.compositeFragmentSource, B.Map_empty, B.Map_pEjDQ, B.List_uVolumetricStrength));
+      compositeVao = A.WebGl2DeviceTargets_createVertexArrayImpl(t3);
+      B.JSArray_methods.add$1(t4, compositeVao);
+      B.JSArray_methods.add$1(passes, new A._VolumetricCompositePass(new A.PassDescriptor(_s19_, A._setArrayType([new A.ResourceUse(t5, B.ResourceAccess_0), new A.ResourceUse(_this.sceneColorResource, B.ResourceAccess_0), new A.ResourceUse(sceneColorOutput, B.ResourceAccess_1)], t6), false, false, true, false), compositeProgram, compositeVao, t5, sceneColorOutput));
+      return passes;
+    },
+    $isRenderFeature: 1
+  };
+  A._VolumetricLightPass.prototype = {
+    execute$1(context) {
+      var t2, sources, i, t3, _this = this,
+        view = context.viewOf$1(_this.destResourceName),
+        encoder = context.encoder,
+        cam = _this.resolveCamera.call$0(),
+        t1 = encoder.device;
+      A.WebGl2DeviceDraw_bindTargetImpl(t1, view.gpuObject);
+      A.WebGl2DeviceDraw_applyDrawStateImpl(t1, _this.descriptor.toDrawState$0());
+      A.WebGl2DeviceDraw_clearImpl(t1, B.ClearMask_0, 1, 0, 0, 0);
+      A.WebGl2DeviceDraw_useProgramImpl(t1, _this.program.handle);
+      A.WebGl2DeviceDraw_bindTextureImpl(t1, 0, type$.GpuObject._as(_this.resolveSceneDepth.call$0()));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uSceneDepth", B.UniformValue_UniformType_6_0);
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uNear", new A.UniformValue(B.UniformType_0, cam.near));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uFar", new A.UniformValue(B.UniformType_0, cam.far));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uViewProjection", new A.UniformValue(B.UniformType_4, new Float32Array(A._ensureNativeList(cam.viewProjection.m))));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uView", new A.UniformValue(B.UniformType_4, new Float32Array(A._ensureNativeList(cam.view.m))));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uInverseProjection", new A.UniformValue(B.UniformType_4, new Float32Array(A._ensureNativeList(cam.get$inverseProjection().m))));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uShaftIntensity", new A.UniformValue(B.UniformType_0, 0));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uFogDensity", new A.UniformValue(B.UniformType_0, 0));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uAnisotropy", new A.UniformValue(B.UniformType_0, 0.7));
+      t2 = type$.JSArray_double;
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uVolumetricAlbedo", new A.UniformValue(B.UniformType_2, new Float32Array(A._ensureNativeList(A._setArrayType([1, 1, 1], t2)))));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uVolumetricHeightFalloff", new A.UniformValue(B.UniformType_0, 0.02));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uVolumetricDustDensity", new A.UniformValue(B.UniformType_0, 0));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uVolumetricJitter", new A.UniformValue(B.UniformType_0, 0.35));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uVolumetricIntensity", new A.UniformValue(B.UniformType_0, 1));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uVolumetricSampleCount", new A.UniformValue(B.UniformType_0, 12));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uLightDir", new A.UniformValue(B.UniformType_2, new Float32Array(A._ensureNativeList(A._setArrayType([0, 1, 0], t2)))));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uLightColor", new A.UniformValue(B.UniformType_2, new Float32Array(A._ensureNativeList(A._setArrayType([0, 0, 0], t2)))));
+      sources = A.selectVolumetricSources(4, cam.eye, B.List_empty0);
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uVolumetricSourceCount", new A.UniformValue(B.UniformType_0, sources.length));
+      for (i = 0; i < 4; ++i) {
+        t3 = sources.length;
+        if (i < t3)
+          if (!(i < t3))
+            return A.ioore(sources, i);
+        t3 = "" + i;
+        A.WebGl2DeviceDraw_setUniformImpl(t1, "uSourcePosition" + t3, new A.UniformValue(B.UniformType_2, new Float32Array(A._ensureNativeList(A._setArrayType([0, 0, 0], t2)))));
+        A.WebGl2DeviceDraw_setUniformImpl(t1, "uSourceColor" + t3, new A.UniformValue(B.UniformType_2, new Float32Array(A._ensureNativeList(A._setArrayType([0, 0, 0], t2)))));
+        A.WebGl2DeviceDraw_setUniformImpl(t1, "uSourceIntensity" + t3, new A.UniformValue(B.UniformType_0, 0));
+        A.WebGl2DeviceDraw_setUniformImpl(t1, "uSourceReferenceDistance" + t3, new A.UniformValue(B.UniformType_0, 1));
+        A.WebGl2DeviceDraw_setUniformImpl(t1, "uSourceCutoffDistance" + t3, new A.UniformValue(B.UniformType_0, 1));
+      }
+      A.WebGl2DeviceDraw_bindVertexArrayImpl(t1, _this.emptyVao);
+      encoder.drawArrays$2$count$first(3, 0);
+    },
+    $isRenderPass: 1,
+    get$descriptor() {
+      return this.descriptor;
+    }
+  };
+  A._VolumetricCompositePass.prototype = {
+    execute$1(context) {
+      var _this = this,
+        output = context.viewOfResource$1(_this.outputResource),
+        source = context.viewOfResource$1(_this.volumetricLightResource),
+        encoder = context.encoder,
+        t1 = encoder.device;
+      A.WebGl2DeviceDraw_bindTargetImpl(t1, output.gpuObject);
+      A.WebGl2DeviceDraw_setColorAttachmentCountImpl(t1, 1);
+      A.WebGl2DeviceDraw_applyDrawStateImpl(t1, B.DrawStateDescriptor_1Ob);
+      A.WebGl2DeviceDraw_useProgramImpl(t1, _this.program.handle);
+      A.WebGl2DeviceDraw_bindTextureImpl(t1, 0, source.gpuObject);
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uVolumetric", B.UniformValue_UniformType_6_0);
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uVolumetricStrength", B.UniformValue_UniformType_0_1);
+      A.WebGl2DeviceDraw_bindVertexArrayImpl(t1, _this.emptyVao);
+      encoder.drawArrays$2$count$first(3, 0);
+    },
+    $isRenderPass: 1,
+    get$descriptor() {
+      return this.descriptor;
+    }
+  };
   A.ResolvedMesh.prototype = {};
   A.WorldFeature.prototype = {
     get$id() {
@@ -14091,7 +14777,7 @@
     },
     createPasses$1(resources) {
       var _this = this,
-        program = _this.programLibrary.publish$1(new A.ProgramSource("safeWorld", _this.vertexSource, _this.fragmentSource, B.Map_unJqY, B.Map_empty, B.List_0lp)),
+        program = _this.programLibrary.publish$1(new A.ProgramSource("safeWorld", _this.vertexSource, _this.fragmentSource, B.Map_unJqY, B.Map_empty, B.List_byt)),
         t1 = _this.sceneColorResource;
       return A._setArrayType([new A._WorldPass(new A.PassDescriptor("worldOpaqueTransparent", A._setArrayType([new A.ResourceUse(t1, B.ResourceAccess_1)], type$.JSArray_ResourceUse), true, true, false, true), program, _this.resolveMesh, t1.name)], type$.JSArray_RenderPass);
     },
@@ -14112,6 +14798,8 @@
       A.WebGl2DeviceDraw_setUniformImpl(t2, "uLightDir", new A.UniformValue(B.UniformType_2, new Float32Array(A._ensureNativeList(A._setArrayType([0, 1, 0], t3)))));
       A.WebGl2DeviceDraw_setUniformImpl(t2, "uAmbientColor", new A.UniformValue(B.UniformType_2, new Float32Array(A._ensureNativeList(A._setArrayType([1, 1, 1], t3)))));
       A.WebGl2DeviceDraw_setUniformImpl(t2, "uAmbientIntensity", new A.UniformValue(B.UniformType_0, 0));
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uAmbientLightScale", new A.UniformValue(B.UniformType_0, 1));
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uDirectLightScale", new A.UniformValue(B.UniformType_0, 1));
       for (t2 = t1.opaqueBatches, t3 = t2.length, _i = 0; _i < t2.length; t2.length === t3 || (0, A.throwConcurrentModificationError)(t2), ++_i)
         _this._drawBatch$2(encoder, t2[_i]);
       for (t1 = t1.blendedItemsBackToFront, t2 = t1.length, _i = 0; _i < t1.length; t1.length === t2 || (0, A.throwConcurrentModificationError)(t1), ++_i)
@@ -14340,7 +15028,7 @@
         return new A.GpuTargetDescriptor(512, 512, 1, B.GpuTargetAttachment_3, true);
       if (resource === "sceneDepth")
         return new A.GpuTargetDescriptor(width, height, 1, B.GpuTargetAttachment_3, true);
-      half = B.JSString_methods.startsWith$1(resource, "ssao") || B.JSString_methods.startsWith$1(resource, "bloomBlur") || B.JSString_methods.startsWith$1(resource, "dofBlur");
+      half = B.JSString_methods.startsWith$1(resource, "ssao") || B.JSString_methods.startsWith$1(resource, "bloomBlur") || B.JSString_methods.startsWith$1(resource, "dofBlur") || B.JSString_methods.startsWith$1(resource, "volumetricLight");
       targetWidth = half ? (width + 1) / 2 | 0 : width;
       targetHeight = half ? (height + 1) / 2 | 0 : height;
       t1 = resource === "sceneColor";
@@ -14578,20 +15266,75 @@
       return new A.WebGl2DeviceLease(A.WebGl2Device$(context));
     }
   };
+  A.main_closure.prototype = {
+    call$1(profile) {
+      var t1 = profile.kind === B.QualityProfileKind_2 ? 2 : 1;
+      return new A.RendererConfiguration(profile, 384, 216, t1, profile === B.QualityProfile_QualityProfileKind_0_Set_empty ? 0 : 1);
+    },
+    $signature: 58
+  };
+  A.main_cameraFor.prototype = {
+    call$1(metrics) {
+      var direction, view, projection,
+        t1 = metrics.pixelWidth / metrics.pixelHeight;
+      if (!B.Vec3_0_0_1.get$isFinite(0) || B.Vec3_0_0_1.get$lengthSquared() < 1e-12)
+        A.throwExpression(A.ArgumentError$("CameraView.look requires a finite, nonzero forward: " + B.Vec3_0_0_1.toString$0(0), null));
+      if (!isFinite(1))
+        A.throwExpression(A.ArgumentError$("CameraView.look requires 0 < fovYRadians < pi: 1", null));
+      direction = B.Vec3_0_0_1.get$normalized();
+      if (B.Vec3_0_1_0.cross$1(direction).get$lengthSquared() < 1e-12)
+        A.throwExpression(A.ArgumentError$("CameraView.look requires up (" + B.Vec3_0_1_0.toString$0(0) + ") not parallel to forward (" + B.Vec3_0_0_1.toString$0(0) + ")", null));
+      view = A.Mat4_Mat4$lookAt(B.Vec3_0_0_0, direction, B.Vec3_0_1_0);
+      projection = A.Mat4_Mat4$perspective(t1, 100, 1, 0.1);
+      t1 = new A.CameraView(view, projection, projection.$mul(0, view), B.Vec3_0_0_0, direction, 0.1, 100, t1);
+      t1.validate$0();
+      return t1;
+    },
+    $signature: 59
+  };
+  A.main_publishState.prototype = {
+    call$0() {
+      var _this = this,
+        t1 = _this.canvas,
+        t2 = _this.renderer;
+      t1.setAttribute("data-renderer-state", t2._scene_renderer_impl$_state._name);
+      t1.setAttribute("data-renderer-backend", "pixeldart");
+      t1.setAttribute("data-renderer-requested-profile", _this.requestedProfile);
+      t2 = t2._scene_renderer_impl$_configuration;
+      t1.setAttribute("data-renderer-effective-profile", (t2 == null ? A.throwExpression(A.StateError$("renderer is not initialized")) : t2).profile.kind._name);
+      t2 = _this.boot.get$fallbackReason();
+      if (t2 == null)
+        t2 = "false";
+      t1.setAttribute("data-renderer-profile-fallback", t2);
+      t2 = _this.frames;
+      t1.setAttribute("data-renderer-frames", "" + t2._frameIndex);
+      t1.setAttribute("data-renderer-history-epoch", "" + t2._historyEpoch);
+      t2 = _this._box_0.surface;
+      t1.setAttribute("data-renderer-surface", "" + t2.pixelWidth + "x" + t2.pixelHeight);
+    },
+    $signature: 0
+  };
   A.main_resize.prototype = {
     call$0() {
-      var error, exception,
-        t1 = this.canvas,
-        width = A._asInt(t1.clientWidth) > 0 ? A._asInt(t1.clientWidth) : A._asInt(t1.width),
-        height = A._asInt(t1.clientHeight) > 0 ? A._asInt(t1.clientHeight) : A._asInt(t1.height);
-      if (J.$eq$(width, A._asInt(t1.width)) && J.$eq$(height, A._asInt(t1.height)))
+      var error, surface, exception, _this = this,
+        t1 = _this.canvas,
+        cssWidth = A._asInt(t1.clientWidth) > 0 ? A._asInt(t1.clientWidth) : A._asInt(t1.width),
+        cssHeight = A._asInt(t1.clientHeight) > 0 ? A._asInt(t1.clientHeight) : A._asInt(t1.height),
+        t2 = _this._box_0,
+        t3 = t2.surface;
+      if (cssWidth === t3.cssWidth && cssHeight === t3.cssHeight)
         return;
-      t1.width = width;
-      t1.height = height;
+      t3 = t3.devicePixelRatio;
+      surface = A.SurfaceMetrics_SurfaceMetrics$forCanvas(cssHeight, cssWidth, t3, t3, true);
+      t2.surface = surface;
+      t1.width = surface.pixelWidth;
+      t1.height = t2.surface.pixelHeight;
       try {
-        this.renderer._ensureReady$0();
-        new A.SurfaceMetrics(width, height, width, height).validate$0();
-        t1.setAttribute("data-renderer-surface", A.S(width) + "x" + A.S(height));
+        t2 = t2.surface;
+        _this.renderer._ensureReady$0();
+        t2.validate$0();
+        _this.frames.invalidateHistory$1("surface resized");
+        t1.removeAttribute("data-renderer-resize-error");
       } catch (exception) {
         error = A.unwrapException(exception);
         t1.setAttribute("data-renderer-resize-error", A.S(error));
@@ -14599,34 +15342,31 @@
     },
     $signature: 0
   };
-  A.main_closure.prototype = {
+  A.main_closure0.prototype = {
     call$1(__wc0_formal) {
       A._asJSObject(__wc0_formal);
       return this.resize.call$0();
     },
-    $signature: 53
+    $signature: 60
   };
-  A.main_closure0.prototype = {
+  A.main_closure1.prototype = {
     call$1(__wc1_formal) {
-      var t1;
       A._asJSObject(__wc1_formal);
-      t1 = this._box_0;
-      t1.contextRestoredPending = true;
-      ++t1.historyEpoch;
+      this._box_0.contextRestoredPending = true;
+      this.frames.invalidateHistory$1("gl context restored");
     },
-    $signature: 54
+    $signature: 61
   };
   A.main_tick.prototype = {
     call$1(timeMs) {
-      var frame, error, t1, t2, exception, _this = this;
+      var error, t1, t2, exception, _this = this;
       A._asNum(timeMs);
       _this.resize.call$0();
       t1 = _this.renderer;
       if (t1._scene_renderer_impl$_state !== B.RendererState_3 || _this._box_0.contextRestoredPending)
         try {
           t2 = _this._box_0;
-          frame = new A.FrameInput(_this.camera, B.C_FrameEnvironment, B.C_PostProcessState, ++t2.frameIndex, timeMs / 1000);
-          t1.beginFrame$2(_this.world, frame);
+          t1.beginFrame$2(_this.world, _this.frames.next$4$camera$environment$post$timeSeconds(_this.cameraFor.call$1(t2.surface), B.C_FrameEnvironment, B.C_PostProcessState, timeMs / 1000));
           t1.endFrame$0();
           t2.contextRestoredPending = false;
           _this.canvas.removeAttribute("data-renderer-frame-error");
@@ -14634,14 +15374,12 @@
           error = A.unwrapException(exception);
           _this.canvas.setAttribute("data-renderer-frame-error", A.S(error));
           if (t1._scene_renderer_impl$_state === B.RendererState_3)
-            ++_this._box_0.historyEpoch;
+            _this.frames.invalidateHistory$1("gl context lost");
         }
-      t2 = _this.canvas;
-      t2.setAttribute("data-renderer-state", t1._scene_renderer_impl$_state._name);
-      t2.setAttribute("data-renderer-frames", "" + _this._box_0.frameIndex);
+      _this.publishState.call$0();
       A._asInt(A._asJSObject(init.G.window).requestAnimationFrame(A._functionToJS1(_this)));
     },
-    $signature: 55
+    $signature: 62
   };
   (function aliases() {
     var _ = J.LegacyJavaScriptObject.prototype;
@@ -14652,7 +15390,7 @@
       _static_1 = hunkHelpers._static_1,
       _static_0 = hunkHelpers._static_0,
       _instance_1_u = hunkHelpers._instance_1u;
-    _static_2(J, "_interceptors_JSArray__compareAny$closure", "JSArray__compareAny", 56);
+    _static_2(J, "_interceptors_JSArray__compareAny$closure", "JSArray__compareAny", 63);
     _static_1(A, "async__AsyncRun__scheduleImmediateJsOverride$closure", "_AsyncRun__scheduleImmediateJsOverride", 4);
     _static_1(A, "async__AsyncRun__scheduleImmediateWithSetImmediate$closure", "_AsyncRun__scheduleImmediateWithSetImmediate", 4);
     _static_1(A, "async__AsyncRun__scheduleImmediateWithTimer$closure", "_AsyncRun__scheduleImmediateWithTimer", 4);
@@ -14664,15 +15402,15 @@
     _instance_1_u(_, "get$resolveOrm", "resolveOrm$1", 3);
     _instance_1_u(_, "get$resolveEmissive", "resolveEmissive$1", 3);
     _instance_1_u(_, "get$resolveLightmap", "resolveLightmap$1", 3);
-    _static_0(A, "frame_telemetry__MutablePassStats___new_tearOff$closure", "_MutablePassStats___new_tearOff", 58);
-    _static_0(A, "graph_pass_PassDeclaration__alwaysEnabled$closure", "PassDeclaration__alwaysEnabled", 39);
+    _static_0(A, "frame_telemetry__MutablePassStats___new_tearOff$closure", "_MutablePassStats___new_tearOff", 65);
+    _static_0(A, "graph_pass_PassDeclaration__alwaysEnabled$closure", "PassDeclaration__alwaysEnabled", 44);
   })();
   (function inheritance() {
     var _mixin = hunkHelpers.mixin,
       _inherit = hunkHelpers.inherit,
       _inheritMany = hunkHelpers.inheritMany;
     _inherit(A.Object, null);
-    _inheritMany(A.Object, [A.JS_CONST, J.Interceptor, A.SafeToStringHook, J.ArrayIterator, A.Iterable, A.CastIterator, A.Error, A.ListBase, A.SentinelValue, A.ListIterator, A.MappedIterator, A.WhereIterator, A.FixedLengthListMixin, A.UnmodifiableListMixin, A._Record, A.MapView, A.ConstantMap, A._KeysOrValuesOrElementsIterator, A.SetBase, A.TypeErrorDecoder, A.NullThrownFromJavaScriptException, A.ExceptionAndStackTrace, A._StackTrace, A.Closure, A.MapBase, A.LinkedHashMapCell, A.LinkedHashMapKeyIterator, A.LinkedHashMapValueIterator, A.LinkedHashMapEntryIterator, A.Rti, A._FunctionParameters, A._Type, A._TimerImpl, A._AsyncAwaitCompleter, A._SyncStarIterator, A.AsyncError, A._Completer, A._FutureListener, A._Future, A._AsyncCallbackEntry, A._StreamIterator, A._Zone, A._HashMapKeyIterator, A._LinkedHashSetCell, A._LinkedHashSetIterator, A._MapBaseValueIterator, A._UnmodifiableMapMixin, A._UnmodifiableSetMixin, A.Codec, A.Converter, A._Utf8Decoder, A.DateTime, A._Enum, A.OutOfMemoryError, A.StackOverflowError, A._Exception, A.FormatException, A.MapEntry, A.Null, A._StringStackTrace, A.StringBuffer, A._Uri, A.UriData, A._SimpleUri, A.NullRejectionException, A.RenderCapabilities, A.QualityProfile, A.ConfigurationCoordinator, A.ConfigurationStateMachine, A.PostProcessState, A.CameraView, A.FrameEnvironment, A.FrameInput, A.ResourceHandle, A.HandleException, A.LinearColor, A.SpotLight, A.DefaultSceneRendererFactory, A.OwnedResourcePlan, A.PreparedResourceAssembly, A.ResourcePlanAssembler, A.SurfaceMetrics, A.RendererConfiguration, A.FramePassStats, A.FrameStats, A.MaterialStore, A.UploadedMesh, A.MeshStore, A.TextureStore, A.InstanceBatch, A.FeatureGraph, A.FeatureGraphResult, A.FrameQueue, A.FrameDrawTelemetry, A._MutablePassStats, A.PassDeclaration, A.GraphValidationFailure, A.ResourceRef, A.ResourceUse, A.CompiledProgram, A.ProgramLibrary, A.ProgramSource, A.RenderFeatureContext, A.PassDescriptor, A.RenderGraphBuilder, A.RenderGraph, A.RenderWorldImpl, A.ResourceLibraryImpl, A._FrameExecution, A._SafeGraphAssembly, A._PlanResources, A._FrameScene, A._SceneRendererImpl_Object__GpuTimingSupport, A._PendingGpuTiming, A._GpuTimingSupport, A.OpaqueSortKey, A.SortableItem, A.CullStats, A.CullResult, A.Plane, A.Frustum, A.Mat4, A.Vec3, A.BloomBlurFeature, A._BloomBlurPass, A.BloomCompositeFeature, A._BloomCompositePass, A.DepthPrepassFeature, A._DepthPrepassPass, A.DofBlurFeature, A._DofBlurPass, A.DofCompositeFeature, A._DofCompositePass, A.GradeFeature, A._GradePass, A.MsaaResolveFeature, A._MsaaResolvePass, A.BoundResourceView, A.BoundPassContext, A.PipelineResourceLayout, A.PresentFeature, A._PresentPass, A.Ps1QuantizeFeature, A._Ps1QuantizePass, A.ShadowLightView, A.ShadowFeature, A._ShadowCasterPass, A.ShadowedWorldFeature, A._ShadowedWorldPass, A.SsaoOcclusionFeature, A._SsaoOcclusionPass, A.SsaoBlurFeature, A._SsaoBlurPass, A.VhsFeature, A._VhsPass, A.ResolvedMesh, A.WorldFeature, A._WorldPass, A.GpuBufferDescriptor, A.GpuTextureDescriptor, A.GpuTargetDescriptor, A.ShaderCompileException, A.UniformValue, A.DeviceDrawCommandEncoder, A.PreparedGpuResourcePlan, A.GpuResourcePlanAdapter, A.ResourceRegistry, A.DrawStateDescriptor, A.WebGlStateCache, A._WebGpuObject, A._WebGlTexture, A._WebGlFramebuffer, A._WebGlTimerQuery, A._WebGl2Device_Object__WebGlTimerSupport, A._WebGlTimerSupport, A.WebGl2DeviceLease, A.WebGl2RendererFactory]);
+    _inheritMany(A.Object, [A.JS_CONST, J.Interceptor, A.SafeToStringHook, J.ArrayIterator, A.Iterable, A.CastIterator, A.Error, A.ListBase, A.SentinelValue, A.ListIterator, A.MappedIterator, A.WhereIterator, A.FixedLengthListMixin, A.UnmodifiableListMixin, A._Record, A.MapView, A.ConstantMap, A._KeysOrValuesOrElementsIterator, A.SetBase, A.TypeErrorDecoder, A.NullThrownFromJavaScriptException, A.ExceptionAndStackTrace, A._StackTrace, A.Closure, A.MapBase, A.LinkedHashMapCell, A.LinkedHashMapKeyIterator, A.LinkedHashMapValueIterator, A.LinkedHashMapEntryIterator, A.Rti, A._FunctionParameters, A._Type, A._TimerImpl, A._AsyncAwaitCompleter, A._SyncStarIterator, A.AsyncError, A._Completer, A._FutureListener, A._Future, A._AsyncCallbackEntry, A._StreamIterator, A._Zone, A._HashMapKeyIterator, A._LinkedHashSetCell, A._LinkedHashSetIterator, A._MapBaseValueIterator, A._UnmodifiableMapMixin, A._UnmodifiableSetMixin, A.Codec, A.Converter, A._Utf8Decoder, A.DateTime, A._Enum, A.OutOfMemoryError, A.StackOverflowError, A._Exception, A.FormatException, A.MapEntry, A.Null, A._StringStackTrace, A.StringBuffer, A._Uri, A.UriData, A._SimpleUri, A.NullRejectionException, A.RenderCapabilities, A.QualityProfile, A.ConfigurationCoordinator, A.ConfigurationStateMachine, A.PostProcessState, A.CameraView, A.FrameEnvironment, A.FrameInput, A.FrameSequencer, A.ResourceHandle, A.HandleException, A.ProfileAttempt, A.BootstrapResult, A.LinearColor, A.SpotLight, A.DefaultSceneRendererFactory, A.OwnedResourcePlan, A.PreparedResourceAssembly, A.ResourcePlanAssembler, A.SurfaceMetrics, A.RendererConfiguration, A.FramePassStats, A.FrameStats, A.MaterialStore, A.UploadedMesh, A.MeshStore, A.TextureStore, A.InstanceBatch, A.FeatureGraph, A.FeatureGraphResult, A.FrameQueue, A.FrameDrawTelemetry, A._MutablePassStats, A.PassDeclaration, A.GraphValidationFailure, A.ResourceRef, A.ResourceUse, A.CompiledProgram, A.ProgramLibrary, A.ProgramSource, A.RenderFeatureContext, A.PassDescriptor, A.RenderGraphBuilder, A.RenderGraph, A.RenderWorldImpl, A.ResourceLibraryImpl, A._FrameExecution, A._SafeGraphAssembly, A._PlanResources, A._FrameScene, A._SceneRendererImpl_Object__GpuTimingSupport, A._PendingGpuTiming, A._GpuTimingSupport, A.OpaqueSortKey, A.SortableItem, A.CullStats, A.CullResult, A.Plane, A.Frustum, A.Mat4, A.Vec3, A.BloomBlurFeature, A._BloomBlurPass, A.BloomCompositeFeature, A._BloomCompositePass, A.DepthPrepassFeature, A._DepthPrepassPass, A.DofBlurFeature, A._DofBlurPass, A.DofCompositeFeature, A._DofCompositePass, A.GradeFeature, A._GradePass, A.MsaaResolveFeature, A._MsaaResolvePass, A.BoundResourceView, A.BoundPassContext, A.PipelineResourceLayout, A.PresentFeature, A._PresentPass, A.Ps1QuantizeFeature, A._Ps1QuantizePass, A.ShadowLightView, A.ShadowFeature, A._ShadowCasterPass, A.ShadowedWorldFeature, A._ShadowedWorldPass, A.SsaoOcclusionFeature, A._SsaoOcclusionPass, A.SsaoBlurFeature, A._SsaoBlurPass, A.VhsFeature, A._VhsPass, A.VolumetricLightFeature, A._VolumetricLightPass, A._VolumetricCompositePass, A.ResolvedMesh, A.WorldFeature, A._WorldPass, A.GpuBufferDescriptor, A.GpuTextureDescriptor, A.GpuTargetDescriptor, A.ShaderCompileException, A.UniformValue, A.DeviceDrawCommandEncoder, A.PreparedGpuResourcePlan, A.GpuResourcePlanAdapter, A.ResourceRegistry, A.DrawStateDescriptor, A.WebGlStateCache, A._WebGpuObject, A._WebGlTexture, A._WebGlFramebuffer, A._WebGlTimerQuery, A._WebGl2Device_Object__WebGlTimerSupport, A._WebGlTimerSupport, A.WebGl2DeviceLease, A.WebGl2RendererFactory]);
     _inheritMany(J.Interceptor, [J.JSBool, J.JSNull, J.JavaScriptObject, J.JavaScriptBigInt, J.JavaScriptSymbol, J.JSNumber, J.JSString]);
     _inheritMany(J.JavaScriptObject, [J.LegacyJavaScriptObject, J.JSArray, A.NativeByteBuffer, A.NativeTypedData]);
     _inheritMany(J.LegacyJavaScriptObject, [J.PlainJavaScriptObject, J.UnknownJavaScriptObject, J.JavaScriptFunction]);
@@ -14690,7 +15428,7 @@
     _inheritMany(A.ListIterable, [A.SubListIterable, A.MappedListIterable, A.ReversedListIterable]);
     _inherit(A.EfficientLengthMappedIterable, A.MappedIterable);
     _inherit(A._Record2, A._Record);
-    _inheritMany(A._Record2, [A._Record_2, A._Record_2_influence_light]);
+    _inheritMany(A._Record2, [A._Record_2, A._Record_2_influence_light, A._Record_2_influence_source]);
     _inherit(A._UnmodifiableMapView_MapView__UnmodifiableMapMixin, A.MapView);
     _inherit(A.UnmodifiableMapView, A._UnmodifiableMapView_MapView__UnmodifiableMapMixin);
     _inherit(A.ConstantMapView, A.UnmodifiableMapView);
@@ -14698,10 +15436,10 @@
     _inheritMany(A.SetBase, [A.ConstantSet, A._SetBase, A._UnmodifiableSetView_SetBase__UnmodifiableSetMixin]);
     _inherit(A.ConstantStringSet, A.ConstantSet);
     _inherit(A.NullError, A.TypeError);
-    _inheritMany(A.Closure, [A.Closure0Args, A.Closure2Args, A.TearOffClosure, A.initHooks_closure, A.initHooks_closure1, A._AsyncRun__initializeScheduleImmediate_internalCallback, A._AsyncRun__initializeScheduleImmediate_closure, A._awaitOnObject_closure, A._Future__propagateToListeners_handleWhenCompleteCallback_closure, A._HashMap_values_closure, A.MapBase_entries_closure, A.promiseToFuture_closure, A.promiseToFuture_closure0, A.dartify_convert, A.OwnedResourcePlan_validate_closure, A.MaterialStore__registry_closure, A.MeshStore_closure, A.TextureStore_closure, A.TextureStore_rehydrateAfterContextRestore_closure, A.FeatureGraph_build_closure, A.FeatureGraph_build__closure, A.FeatureGraph_build__closure0, A.PassDeclaration_reads_closure, A.PassDeclaration_writes_closure, A.RenderGraphBuilder_build_closure, A.RenderGraphBuilder__validate_closure, A.RenderGraphBuilder__checkResolves_closure, A.RenderGraphBuilder__checkFormatAndSizeMismatch_closure, A.RenderGraphBuilder__checkDependencyCycles_hasCycleFrom, A.RenderWorldImpl__instances_closure, A._extension_0__assembleSafeGraph_resolveMesh, A._extension_0__assembleSafeGraph_resolveResource, A.SceneRendererImpl_endFrame_closure, A.SceneRendererImpl_endFrame_closure0, A.sortOpaque_closure0, A.sortBlended_closure0, A.Frustum_Frustum$fromViewProjection_row, A.Mat4_isFinite_closure, A.buildShadowGraph_closure, A.GpuResourcePlanAdapter__createObjects_closure, A.GpuResourcePlanAdapter__createObjects_closure0, A.WebGl2Device_closure, A.WebGl2Device_closure0, A.main_closure, A.main_closure0, A.main_tick]);
+    _inheritMany(A.Closure, [A.Closure0Args, A.Closure2Args, A.TearOffClosure, A.initHooks_closure, A.initHooks_closure1, A._AsyncRun__initializeScheduleImmediate_internalCallback, A._AsyncRun__initializeScheduleImmediate_closure, A._awaitOnObject_closure, A._Future__propagateToListeners_handleWhenCompleteCallback_closure, A._HashMap_values_closure, A.MapBase_entries_closure, A.promiseToFuture_closure, A.promiseToFuture_closure0, A.dartify_convert, A.BootstrapResult_fallbackReason_closure, A.BootstrapResult_fallbackReason_closure0, A.defaultProfileLadder_closure, A.OwnedResourcePlan_validate_closure, A.MaterialStore__registry_closure, A.MeshStore_closure, A.TextureStore_closure, A.TextureStore_rehydrateAfterContextRestore_closure, A.FeatureGraph_build_closure, A.FeatureGraph_build__closure, A.FeatureGraph_build__closure0, A.PassDeclaration_reads_closure, A.PassDeclaration_writes_closure, A.RenderGraphBuilder_build_closure, A.RenderGraphBuilder__validate_closure, A.RenderGraphBuilder__checkResolves_closure, A.RenderGraphBuilder__checkFormatAndSizeMismatch_closure, A.RenderGraphBuilder__checkDependencyCycles_hasCycleFrom, A.RenderWorldImpl__instances_closure, A._extension_0__assembleSafeGraph_resolveMesh, A._extension_0__assembleSafeGraph_resolveResource, A.SceneRendererImpl_endFrame_closure, A.SceneRendererImpl_endFrame_closure0, A.sortOpaque_closure0, A.sortBlended_closure0, A.Frustum_Frustum$fromViewProjection_row, A.Mat4_isFinite_closure, A.buildShadowGraph_closure, A.GpuResourcePlanAdapter__createObjects_closure, A.GpuResourcePlanAdapter__createObjects_closure0, A.WebGl2Device_closure, A.WebGl2Device_closure0, A.main_closure, A.main_cameraFor, A.main_closure0, A.main_closure1, A.main_tick]);
     _inheritMany(A.TearOffClosure, [A.StaticClosure, A.BoundClosure]);
     _inheritMany(A.MapBase, [A.JsLinkedHashMap, A._HashMap]);
-    _inheritMany(A.Closure2Args, [A.initHooks_closure0, A._awaitOnObject_closure0, A._wrapJsFunctionForAsync_closure, A._Future__propagateToListeners_handleWhenCompleteCallback_closure0, A.LinkedHashMap_LinkedHashMap$from_closure, A.MapBase_mapToString_closure, A.Uri_splitQueryString_closure, A.Uri_parseIPv6Address_error, A.selectSpotLights_closure, A.MeshStore_liveGpuBytes_closure, A.TextureStore_liveGpuBytes_closure, A.FeatureGraph_build_closure0, A.SceneRendererImpl_endFrame_closure1, A.sortOpaque_closure, A.sortBlended_closure]);
+    _inheritMany(A.Closure2Args, [A.initHooks_closure0, A._awaitOnObject_closure0, A._wrapJsFunctionForAsync_closure, A._Future__propagateToListeners_handleWhenCompleteCallback_closure0, A.LinkedHashMap_LinkedHashMap$from_closure, A.MapBase_mapToString_closure, A.Uri_splitQueryString_closure, A.Uri_parseIPv6Address_error, A.selectSpotLights_closure, A.MeshStore_liveGpuBytes_closure, A.TextureStore_liveGpuBytes_closure, A.selectVolumetricSources_closure, A.FeatureGraph_build_closure0, A.SceneRendererImpl_endFrame_closure1, A.sortOpaque_closure, A.sortBlended_closure]);
     _inheritMany(A.NativeTypedData, [A.NativeByteData, A.NativeTypedArray]);
     _inheritMany(A.NativeTypedArray, [A._NativeTypedArrayOfDouble_NativeTypedArray_ListMixin, A._NativeTypedArrayOfInt_NativeTypedArray_ListMixin]);
     _inherit(A._NativeTypedArrayOfDouble_NativeTypedArray_ListMixin_FixedLengthListMixin, A._NativeTypedArrayOfDouble_NativeTypedArray_ListMixin);
@@ -14711,7 +15449,7 @@
     _inheritMany(A.NativeTypedArrayOfDouble, [A.NativeFloat32List, A.NativeFloat64List]);
     _inheritMany(A.NativeTypedArrayOfInt, [A.NativeInt16List, A.NativeInt32List, A.NativeInt8List, A.NativeUint16List, A.NativeUint32List, A.NativeUint8ClampedList, A.NativeUint8List]);
     _inherit(A._TypeError, A._Error);
-    _inheritMany(A.Closure0Args, [A._AsyncRun__scheduleImmediateJsOverride_internalCallback, A._AsyncRun__scheduleImmediateWithSetImmediate_internalCallback, A._TimerImpl_internalCallback, A._Future__addListener_closure, A._Future__prependListeners_closure, A._Future__chainCoreFuture_closure, A._Future__asyncCompleteWithValue_closure, A._Future__asyncCompleteErrorObject_closure, A._Future__propagateToListeners_handleWhenCompleteCallback, A._Future__propagateToListeners_handleValueCallback, A._Future__propagateToListeners_handleError, A._RootZone_bindCallbackGuarded_closure, A._rootHandleError_closure, A._Utf8Decoder__decoder_closure, A._Utf8Decoder__decoderNonfatal_closure, A._extension_0__assembleSafeGraph_closure9, A._extension_0__assembleSafeGraph_closure2, A._extension_0__assembleSafeGraph_closure3, A._extension_0__assembleSafeGraph_closure8, A._extension_0__assembleSafeGraph_closure1, A._extension_0__assembleSafeGraph_closure11, A._extension_0__assembleSafeGraph_closure10, A._extension_0__assembleSafeGraph_closure7, A._extension_0__assembleSafeGraph_closure, A._extension_0__assembleSafeGraph_closure0, A._extension_0__assembleSafeGraph_closure4, A._extension_0__assembleSafeGraph_closure5, A._extension_0__assembleSafeGraph_closure6, A._extension_0__assembleSafeGraph_closure13, A._extension_0__assembleSafeGraph_closure12, A._extension_0__executeGraph_closure, A.buildShadowGraph_closure0, A.main_resize]);
+    _inheritMany(A.Closure0Args, [A._AsyncRun__scheduleImmediateJsOverride_internalCallback, A._AsyncRun__scheduleImmediateWithSetImmediate_internalCallback, A._TimerImpl_internalCallback, A._Future__addListener_closure, A._Future__prependListeners_closure, A._Future__chainCoreFuture_closure, A._Future__asyncCompleteWithValue_closure, A._Future__asyncCompleteErrorObject_closure, A._Future__propagateToListeners_handleWhenCompleteCallback, A._Future__propagateToListeners_handleValueCallback, A._Future__propagateToListeners_handleError, A._RootZone_bindCallbackGuarded_closure, A._rootHandleError_closure, A._Utf8Decoder__decoder_closure, A._Utf8Decoder__decoderNonfatal_closure, A._extension_0__assembleSafeGraph_closure9, A._extension_0__assembleSafeGraph_closure2, A._extension_0__assembleSafeGraph_closure3, A._extension_0__assembleSafeGraph_closure8, A._extension_0__assembleSafeGraph_closure1, A._extension_0__assembleSafeGraph_closure11, A._extension_0__assembleSafeGraph_closure10, A._extension_0__assembleSafeGraph_closure7, A._extension_0__assembleSafeGraph_closure, A._extension_0__assembleSafeGraph_closure0, A._extension_0__assembleSafeGraph_closure4, A._extension_0__assembleSafeGraph_closure5, A._extension_0__assembleSafeGraph_closure6, A._extension_0__assembleSafeGraph_closure13, A._extension_0__assembleSafeGraph_closure12, A._extension_0__executeGraph_closure, A._extension_0__executeGraph_closure0, A.buildShadowGraph_closure0, A.main_publishState, A.main_resize]);
     _inherit(A._AsyncCompleter, A._Completer);
     _inherit(A._RootZone, A._Zone);
     _inherit(A._IdentityHashMap, A._HashMap);
@@ -14722,7 +15460,7 @@
     _inherit(A.Utf8Codec, A.Encoding);
     _inheritMany(A.ArgumentError, [A.RangeError, A.IndexError]);
     _inherit(A._DataUri, A._Uri);
-    _inheritMany(A._Enum, [A.QualityProfileKind, A.HandleRejection, A.VertexAttributeKind, A.ColorEncoding, A.DiagnosticLevel, A.RendererState, A.FrameQueueState, A.GraphValidationFailureKind, A.ResourceFormat, A.GraphStage, A.ResourceAccess, A.ShadowCasterLod, A.FrustumTest, A._BloomBlurAxis, A._DofBlurAxis, A.GpuBufferUsage, A.GpuBufferKind, A.GpuTextureFilter, A.GpuTextureWrap, A.GpuTargetAttachment, A.GpuDeviceStatus, A.ShaderCompileStage, A.UniformType, A.ClearMask, A.BlendEquation, A.BlendFactor, A.CullFace, A.DepthFunc, A.StateField]);
+    _inheritMany(A._Enum, [A.QualityProfileKind, A.HandleRejection, A.VertexAttributeKind, A.ColorEncoding, A.RendererState, A.FrameQueueState, A.GraphValidationFailureKind, A.ResourceFormat, A.GraphStage, A.ResourceAccess, A.ShadowCasterLod, A.FrustumTest, A._BloomBlurAxis, A._DofBlurAxis, A.GpuBufferUsage, A.GpuBufferKind, A.GpuTextureFilter, A.GpuTextureWrap, A.GpuTargetAttachment, A.GpuDeviceStatus, A.ShaderCompileStage, A.UniformType, A.ClearMask, A.BlendEquation, A.BlendFactor, A.CullFace, A.DepthFunc, A.StateField]);
     _inheritMany(A.ResourceHandle, [A.MeshHandle, A.TextureHandle, A.MaterialHandle, A.PipelineHandle, A.InstanceId]);
     _inherit(A.SceneRendererImpl, A._SceneRendererImpl_Object__GpuTimingSupport);
     _inherit(A.WebGl2Device, A._WebGl2Device_Object__WebGlTimerSupport);
@@ -14742,21 +15480,22 @@
     typeUniverse: {eC: new Map(), tR: {}, eT: {}, tPV: {}, sEA: []},
     mangledGlobalNames: {int: "int", double: "double", num: "num", String: "String", bool: "bool", Null: "Null", List: "List", Object: "Object", Map: "Map", JSObject: "JSObject"},
     mangledNames: {},
-    types: ["~()", "GpuObject()", "bool(PassDeclaration)", "GpuObject(TextureHandle?)", "~(~())", "~(@)", "bool(String)", "bool(ResourceUse)", "Null(@)", "Null()", "@()", "Null(Object?)", "MaterialDefinition(MaterialHandle)", "@(@,String)", "Map<String,String>(Map<String,String>,String)", "0&(String,int?)", "Object?(Object?)", "int(+influence,light(double,SpotLight),+influence,light(double,SpotLight))", "Null(~())", "@(@)", "MaterialHandle(int,int,String?)", "MeshHandle(int,int,String?)", "int(int,+(MeshHandle,MeshData))", "Null(@,StackTrace)", "TextureHandle(int,int,String?)", "bool(Uint8List?)", "int(int,+(TextureHandle,_TextureRecord))", "String(PassDeclaration)", "int(RenderPass,RenderPass)", "Null(Object,StackTrace)", "~(int,@)", "bool(int)", "InstanceId(int,int,String?)", "ResolvedMesh(MeshHandle)", "GpuObject(String{fallback:String?})", "@(String)", "SpotLight?()", "List<SpotLight>()", "CameraView()", "bool()", "BoundResourceView()", "bool(MapEntry<String,FramePassStats>)", "FramePassStats(MapEntry<String,FramePassStats>)", "FramePassStats(FramePassStats,FramePassStats)", "int(SortableItem<OpaqueSortKey>,SortableItem<OpaqueSortKey>)", "RetainedItemView(SortableItem<OpaqueSortKey>)", "int(SortableItem<BlendedSortKey>,SortableItem<BlendedSortKey>)", "RetainedItemView(SortableItem<BlendedSortKey>)", "Plane(double,double,double,double)", "bool(double)", "~(ShadowLightView)", "ShadowLightView()", "~(@,@)", "~(JSObject)", "Null(JSObject)", "~(num)", "int(@,@)", "~(Object?,Object?)", "_MutablePassStats()", "double()"],
+    types: ["~()", "GpuObject()", "bool(PassDeclaration)", "GpuObject(TextureHandle?)", "~(~())", "~(@)", "bool(String)", "bool(ResourceUse)", "Null(@)", "Null()", "@()", "Null(Object?)", "MaterialDefinition(MaterialHandle)", "@(@,String)", "Map<String,String>(Map<String,String>,String)", "0&(String,int?)", "Object?(Object?)", "bool(ProfileAttempt)", "String(ProfileAttempt)", "bool(QualityProfile)", "int(+influence,light(double,SpotLight),+influence,light(double,SpotLight))", "Null(~())", "@(@)", "MaterialHandle(int,int,String?)", "MeshHandle(int,int,String?)", "int(int,+(MeshHandle,MeshData))", "Null(@,StackTrace)", "TextureHandle(int,int,String?)", "bool(Uint8List?)", "int(int,+(TextureHandle,_TextureRecord))", "int(+influence,source(double,VolumetricSource),+influence,source(double,VolumetricSource))", "String(PassDeclaration)", "int(RenderPass,RenderPass)", "~(@,@)", "~(int,@)", "bool(int)", "InstanceId(int,int,String?)", "ResolvedMesh(MeshHandle)", "GpuObject(String{fallback:String?})", "Null(Object,StackTrace)", "SpotLight?()", "List<SpotLight>()", "CameraView()", "double()", "bool()", "GpuObject?()", "bool(MapEntry<String,FramePassStats>)", "FramePassStats(MapEntry<String,FramePassStats>)", "FramePassStats(FramePassStats,FramePassStats)", "int(SortableItem<OpaqueSortKey>,SortableItem<OpaqueSortKey>)", "RetainedItemView(SortableItem<OpaqueSortKey>)", "int(SortableItem<BlendedSortKey>,SortableItem<BlendedSortKey>)", "RetainedItemView(SortableItem<BlendedSortKey>)", "Plane(double,double,double,double)", "bool(double)", "~(ShadowLightView)", "ShadowLightView()", "@(String)", "RendererConfiguration(QualityProfile)", "CameraView(SurfaceMetrics)", "~(JSObject)", "Null(JSObject)", "~(num)", "int(@,@)", "~(Object?,Object?)", "_MutablePassStats()", "BoundResourceView()"],
     interceptorsByTag: null,
     leafTags: null,
     arrayRti: Symbol("$ti"),
     rttc: {
       "2;": (t1, t2) => o => o instanceof A._Record_2 && t1._is(o._0) && t2._is(o._1),
-      "2;influence,light": (t1, t2) => o => o instanceof A._Record_2_influence_light && t1._is(o._0) && t2._is(o._1)
+      "2;influence,light": (t1, t2) => o => o instanceof A._Record_2_influence_light && t1._is(o._0) && t2._is(o._1),
+      "2;influence,source": (t1, t2) => o => o instanceof A._Record_2_influence_source && t1._is(o._0) && t2._is(o._1)
     }
   };
-  A._Universe_addRules(init.typeUniverse, JSON.parse('{"PlainJavaScriptObject":"LegacyJavaScriptObject","UnknownJavaScriptObject":"LegacyJavaScriptObject","JavaScriptFunction":"LegacyJavaScriptObject","NativeArrayBuffer":"NativeByteBuffer","JSArray":{"List":["1"],"EfficientLengthIterable":["1"],"JSObject":[],"Iterable":["1"]},"JSBool":{"bool":[],"TrustedGetRuntimeType":[]},"JSNull":{"TrustedGetRuntimeType":[]},"JavaScriptObject":{"JSObject":[]},"LegacyJavaScriptObject":{"JSObject":[]},"JSArraySafeToStringHook":{"SafeToStringHook":[]},"JSUnmodifiableArray":{"JSArray":["1"],"List":["1"],"EfficientLengthIterable":["1"],"JSObject":[],"Iterable":["1"]},"ArrayIterator":{"Iterator":["1"]},"JSNumber":{"double":[],"num":[],"Comparable":["num"]},"JSInt":{"double":[],"int":[],"num":[],"Comparable":["num"],"TrustedGetRuntimeType":[]},"JSNumNotInt":{"double":[],"num":[],"Comparable":["num"],"TrustedGetRuntimeType":[]},"JSString":{"String":[],"Comparable":["String"],"Pattern":[],"TrustedGetRuntimeType":[]},"_CastIterableBase":{"Iterable":["2"]},"CastIterator":{"Iterator":["2"]},"_CastListBase":{"ListBase":["2"],"List":["2"],"_CastIterableBase":["1","2"],"EfficientLengthIterable":["2"],"Iterable":["2"]},"CastList":{"_CastListBase":["1","2"],"ListBase":["2"],"List":["2"],"_CastIterableBase":["1","2"],"EfficientLengthIterable":["2"],"Iterable":["2"],"ListBase.E":"2","Iterable.E":"2"},"LateError":{"Error":[]},"CodeUnits":{"ListBase":["int"],"UnmodifiableListMixin":["int"],"List":["int"],"EfficientLengthIterable":["int"],"Iterable":["int"],"ListBase.E":"int","UnmodifiableListMixin.E":"int"},"EfficientLengthIterable":{"Iterable":["1"]},"ListIterable":{"EfficientLengthIterable":["1"],"Iterable":["1"]},"SubListIterable":{"ListIterable":["1"],"EfficientLengthIterable":["1"],"Iterable":["1"],"Iterable.E":"1","ListIterable.E":"1"},"ListIterator":{"Iterator":["1"]},"MappedIterable":{"Iterable":["2"],"Iterable.E":"2"},"EfficientLengthMappedIterable":{"MappedIterable":["1","2"],"EfficientLengthIterable":["2"],"Iterable":["2"],"Iterable.E":"2"},"MappedIterator":{"Iterator":["2"]},"MappedListIterable":{"ListIterable":["2"],"EfficientLengthIterable":["2"],"Iterable":["2"],"Iterable.E":"2","ListIterable.E":"2"},"WhereIterable":{"Iterable":["1"],"Iterable.E":"1"},"WhereIterator":{"Iterator":["1"]},"UnmodifiableListBase":{"ListBase":["1"],"UnmodifiableListMixin":["1"],"List":["1"],"EfficientLengthIterable":["1"],"Iterable":["1"]},"ReversedListIterable":{"ListIterable":["1"],"EfficientLengthIterable":["1"],"Iterable":["1"],"Iterable.E":"1","ListIterable.E":"1"},"_Record_2":{"_Record2":[],"_Record":[]},"_Record_2_influence_light":{"_Record2":[],"_Record":[]},"ConstantMapView":{"UnmodifiableMapView":["1","2"],"_UnmodifiableMapView_MapView__UnmodifiableMapMixin":["1","2"],"MapView":["1","2"],"_UnmodifiableMapMixin":["1","2"],"Map":["1","2"]},"ConstantMap":{"Map":["1","2"]},"ConstantStringMap":{"ConstantMap":["1","2"],"Map":["1","2"]},"_KeysOrValues":{"Iterable":["1"],"Iterable.E":"1"},"_KeysOrValuesOrElementsIterator":{"Iterator":["1"]},"ConstantSet":{"SetBase":["1"],"Set":["1"],"EfficientLengthIterable":["1"],"Iterable":["1"]},"ConstantStringSet":{"ConstantSet":["1"],"SetBase":["1"],"Set":["1"],"EfficientLengthIterable":["1"],"Iterable":["1"]},"NullError":{"TypeError":[],"Error":[]},"JsNoSuchMethodError":{"Error":[]},"UnknownJsTypeError":{"Error":[]},"_StackTrace":{"StackTrace":[]},"Closure":{"Function":[]},"Closure0Args":{"Function":[]},"Closure2Args":{"Function":[]},"TearOffClosure":{"Function":[]},"StaticClosure":{"Function":[]},"BoundClosure":{"Function":[]},"RuntimeError":{"Error":[]},"JsLinkedHashMap":{"MapBase":["1","2"],"LinkedHashMap":["1","2"],"Map":["1","2"]},"LinkedHashMapKeysIterable":{"EfficientLengthIterable":["1"],"Iterable":["1"],"Iterable.E":"1"},"LinkedHashMapKeyIterator":{"Iterator":["1"]},"LinkedHashMapValuesIterable":{"EfficientLengthIterable":["1"],"Iterable":["1"],"Iterable.E":"1"},"LinkedHashMapValueIterator":{"Iterator":["1"]},"LinkedHashMapEntriesIterable":{"EfficientLengthIterable":["MapEntry<1,2>"],"Iterable":["MapEntry<1,2>"],"Iterable.E":"MapEntry<1,2>"},"LinkedHashMapEntryIterator":{"Iterator":["MapEntry<1,2>"]},"_Record2":{"_Record":[]},"NativeByteBuffer":{"JSObject":[],"TrustedGetRuntimeType":[]},"NativeTypedData":{"JSObject":[]},"NativeByteData":{"JSObject":[],"TrustedGetRuntimeType":[]},"NativeTypedArray":{"JavaScriptIndexingBehavior":["1"],"JSObject":[]},"NativeTypedArrayOfDouble":{"ListBase":["double"],"NativeTypedArray":["double"],"List":["double"],"JavaScriptIndexingBehavior":["double"],"EfficientLengthIterable":["double"],"JSObject":[],"Iterable":["double"],"FixedLengthListMixin":["double"]},"NativeTypedArrayOfInt":{"ListBase":["int"],"NativeTypedArray":["int"],"List":["int"],"JavaScriptIndexingBehavior":["int"],"EfficientLengthIterable":["int"],"JSObject":[],"Iterable":["int"],"FixedLengthListMixin":["int"]},"NativeFloat32List":{"Float32List":[],"ListBase":["double"],"NativeTypedArray":["double"],"List":["double"],"JavaScriptIndexingBehavior":["double"],"EfficientLengthIterable":["double"],"JSObject":[],"Iterable":["double"],"FixedLengthListMixin":["double"],"TrustedGetRuntimeType":[],"ListBase.E":"double"},"NativeFloat64List":{"ListBase":["double"],"NativeTypedArray":["double"],"List":["double"],"JavaScriptIndexingBehavior":["double"],"EfficientLengthIterable":["double"],"JSObject":[],"Iterable":["double"],"FixedLengthListMixin":["double"],"TrustedGetRuntimeType":[],"ListBase.E":"double"},"NativeInt16List":{"ListBase":["int"],"NativeTypedArray":["int"],"List":["int"],"JavaScriptIndexingBehavior":["int"],"EfficientLengthIterable":["int"],"JSObject":[],"Iterable":["int"],"FixedLengthListMixin":["int"],"TrustedGetRuntimeType":[],"ListBase.E":"int"},"NativeInt32List":{"ListBase":["int"],"NativeTypedArray":["int"],"List":["int"],"JavaScriptIndexingBehavior":["int"],"EfficientLengthIterable":["int"],"JSObject":[],"Iterable":["int"],"FixedLengthListMixin":["int"],"TrustedGetRuntimeType":[],"ListBase.E":"int"},"NativeInt8List":{"ListBase":["int"],"NativeTypedArray":["int"],"List":["int"],"JavaScriptIndexingBehavior":["int"],"EfficientLengthIterable":["int"],"JSObject":[],"Iterable":["int"],"FixedLengthListMixin":["int"],"TrustedGetRuntimeType":[],"ListBase.E":"int"},"NativeUint16List":{"ListBase":["int"],"NativeTypedArray":["int"],"List":["int"],"JavaScriptIndexingBehavior":["int"],"EfficientLengthIterable":["int"],"JSObject":[],"Iterable":["int"],"FixedLengthListMixin":["int"],"TrustedGetRuntimeType":[],"ListBase.E":"int"},"NativeUint32List":{"ListBase":["int"],"NativeTypedArray":["int"],"List":["int"],"JavaScriptIndexingBehavior":["int"],"EfficientLengthIterable":["int"],"JSObject":[],"Iterable":["int"],"FixedLengthListMixin":["int"],"TrustedGetRuntimeType":[],"ListBase.E":"int"},"NativeUint8ClampedList":{"ListBase":["int"],"NativeTypedArray":["int"],"List":["int"],"JavaScriptIndexingBehavior":["int"],"EfficientLengthIterable":["int"],"JSObject":[],"Iterable":["int"],"FixedLengthListMixin":["int"],"TrustedGetRuntimeType":[],"ListBase.E":"int"},"NativeUint8List":{"Uint8List":[],"ListBase":["int"],"NativeTypedArray":["int"],"List":["int"],"JavaScriptIndexingBehavior":["int"],"EfficientLengthIterable":["int"],"JSObject":[],"Iterable":["int"],"FixedLengthListMixin":["int"],"TrustedGetRuntimeType":[],"ListBase.E":"int"},"_Error":{"Error":[]},"_TypeError":{"TypeError":[],"Error":[]},"_SyncStarIterator":{"Iterator":["1"]},"_SyncStarIterable":{"Iterable":["1"],"Iterable.E":"1"},"AsyncError":{"Error":[]},"_AsyncCompleter":{"_Completer":["1"]},"_Future":{"Future":["1"]},"_Zone":{"Zone":[]},"_RootZone":{"_Zone":[],"Zone":[]},"_HashMap":{"MapBase":["1","2"],"Map":["1","2"]},"_IdentityHashMap":{"_HashMap":["1","2"],"MapBase":["1","2"],"Map":["1","2"]},"_HashMapKeyIterable":{"EfficientLengthIterable":["1"],"Iterable":["1"],"Iterable.E":"1"},"_HashMapKeyIterator":{"Iterator":["1"]},"_LinkedHashSet":{"SetBase":["1"],"LinkedHashSet":["1"],"Set":["1"],"EfficientLengthIterable":["1"],"Iterable":["1"]},"_LinkedHashSetIterator":{"Iterator":["1"]},"ListBase":{"List":["1"],"EfficientLengthIterable":["1"],"Iterable":["1"]},"MapBase":{"Map":["1","2"]},"_MapBaseValueIterable":{"EfficientLengthIterable":["2"],"Iterable":["2"],"Iterable.E":"2"},"_MapBaseValueIterator":{"Iterator":["2"]},"MapView":{"Map":["1","2"]},"UnmodifiableMapView":{"_UnmodifiableMapView_MapView__UnmodifiableMapMixin":["1","2"],"MapView":["1","2"],"_UnmodifiableMapMixin":["1","2"],"Map":["1","2"]},"SetBase":{"Set":["1"],"EfficientLengthIterable":["1"],"Iterable":["1"]},"_SetBase":{"SetBase":["1"],"Set":["1"],"EfficientLengthIterable":["1"],"Iterable":["1"]},"UnmodifiableSetView":{"SetBase":["1"],"_UnmodifiableSetMixin":["1"],"Set":["1"],"EfficientLengthIterable":["1"],"Iterable":["1"]},"Base64Codec":{"Codec":["List<int>","String"]},"Encoding":{"Codec":["String","List<int>"]},"Utf8Codec":{"Codec":["String","List<int>"]},"DateTime":{"Comparable":["DateTime"]},"double":{"num":[],"Comparable":["num"]},"int":{"num":[],"Comparable":["num"]},"List":{"EfficientLengthIterable":["1"],"Iterable":["1"]},"num":{"Comparable":["num"]},"Set":{"EfficientLengthIterable":["1"],"Iterable":["1"]},"String":{"Comparable":["String"],"Pattern":[]},"AssertionError":{"Error":[]},"TypeError":{"Error":[]},"ArgumentError":{"Error":[]},"RangeError":{"Error":[]},"IndexError":{"Error":[]},"UnsupportedError":{"Error":[]},"UnimplementedError":{"Error":[]},"StateError":{"Error":[]},"ConcurrentModificationError":{"Error":[]},"OutOfMemoryError":{"Error":[]},"StackOverflowError":{"Error":[]},"_StringStackTrace":{"StackTrace":[]},"StringBuffer":{"StringSink":[]},"_Uri":{"Uri":[]},"_SimpleUri":{"Uri":[]},"_DataUri":{"Uri":[]},"MeshHandle":{"ResourceHandle":[]},"TextureHandle":{"ResourceHandle":[]},"MaterialHandle":{"ResourceHandle":[]},"InstanceId":{"ResourceHandle":[]},"PipelineHandle":{"ResourceHandle":[]},"RenderWorldImpl":{"RenderWorld":[]},"_PlanResources":{"RenderPassResources":[]},"_FrameScene":{"FrameSceneData":[]},"OpaqueSortKey":{"Comparable":["OpaqueSortKey"]},"BlendedSortKey":{"Comparable":["BlendedSortKey"]},"BloomBlurFeature":{"RenderFeature":[]},"_BloomBlurPass":{"RenderPass":[]},"BloomCompositeFeature":{"RenderFeature":[]},"_BloomCompositePass":{"RenderPass":[]},"DepthPrepassFeature":{"RenderFeature":[]},"_DepthPrepassPass":{"RenderPass":[]},"DofBlurFeature":{"RenderFeature":[]},"_DofBlurPass":{"RenderPass":[]},"DofCompositeFeature":{"RenderFeature":[]},"_DofCompositePass":{"RenderPass":[]},"GradeFeature":{"RenderFeature":[]},"_GradePass":{"RenderPass":[]},"MsaaResolveFeature":{"RenderFeature":[]},"_MsaaResolvePass":{"RenderPass":[]},"BoundPassContext":{"RenderPassContext":[]},"PresentFeature":{"RenderFeature":[]},"_PresentPass":{"RenderPass":[]},"Ps1QuantizeFeature":{"RenderFeature":[]},"_Ps1QuantizePass":{"RenderPass":[]},"ShadowFeature":{"RenderFeature":[]},"_ShadowCasterPass":{"RenderPass":[]},"ShadowedWorldFeature":{"RenderFeature":[]},"_ShadowedWorldPass":{"RenderPass":[]},"SsaoOcclusionFeature":{"RenderFeature":[]},"_SsaoOcclusionPass":{"RenderPass":[]},"SsaoBlurFeature":{"RenderFeature":[]},"_SsaoBlurPass":{"RenderPass":[]},"VhsFeature":{"RenderFeature":[]},"_VhsPass":{"RenderPass":[]},"WorldFeature":{"RenderFeature":[]},"_WorldPass":{"RenderPass":[]},"DeviceDrawCommandEncoder":{"DrawCommandEncoder":[]},"_WebGpuObject":{"GpuObject":[]},"WebGl2Device":{"GpuDevice":[]},"Int8List":{"List":["int"],"EfficientLengthIterable":["int"],"Iterable":["int"]},"Uint8List":{"List":["int"],"EfficientLengthIterable":["int"],"Iterable":["int"]},"Uint8ClampedList":{"List":["int"],"EfficientLengthIterable":["int"],"Iterable":["int"]},"Int16List":{"List":["int"],"EfficientLengthIterable":["int"],"Iterable":["int"]},"Uint16List":{"List":["int"],"EfficientLengthIterable":["int"],"Iterable":["int"]},"Int32List":{"List":["int"],"EfficientLengthIterable":["int"],"Iterable":["int"]},"Uint32List":{"List":["int"],"EfficientLengthIterable":["int"],"Iterable":["int"]},"Float32List":{"List":["double"],"EfficientLengthIterable":["double"],"Iterable":["double"]},"Float64List":{"List":["double"],"EfficientLengthIterable":["double"],"Iterable":["double"]}}'));
+  A._Universe_addRules(init.typeUniverse, JSON.parse('{"PlainJavaScriptObject":"LegacyJavaScriptObject","UnknownJavaScriptObject":"LegacyJavaScriptObject","JavaScriptFunction":"LegacyJavaScriptObject","NativeArrayBuffer":"NativeByteBuffer","JSArray":{"List":["1"],"EfficientLengthIterable":["1"],"JSObject":[],"Iterable":["1"]},"JSBool":{"bool":[],"TrustedGetRuntimeType":[]},"JSNull":{"TrustedGetRuntimeType":[]},"JavaScriptObject":{"JSObject":[]},"LegacyJavaScriptObject":{"JSObject":[]},"JSArraySafeToStringHook":{"SafeToStringHook":[]},"JSUnmodifiableArray":{"JSArray":["1"],"List":["1"],"EfficientLengthIterable":["1"],"JSObject":[],"Iterable":["1"]},"ArrayIterator":{"Iterator":["1"]},"JSNumber":{"double":[],"num":[],"Comparable":["num"]},"JSInt":{"double":[],"int":[],"num":[],"Comparable":["num"],"TrustedGetRuntimeType":[]},"JSNumNotInt":{"double":[],"num":[],"Comparable":["num"],"TrustedGetRuntimeType":[]},"JSString":{"String":[],"Comparable":["String"],"Pattern":[],"TrustedGetRuntimeType":[]},"_CastIterableBase":{"Iterable":["2"]},"CastIterator":{"Iterator":["2"]},"_CastListBase":{"ListBase":["2"],"List":["2"],"_CastIterableBase":["1","2"],"EfficientLengthIterable":["2"],"Iterable":["2"]},"CastList":{"_CastListBase":["1","2"],"ListBase":["2"],"List":["2"],"_CastIterableBase":["1","2"],"EfficientLengthIterable":["2"],"Iterable":["2"],"ListBase.E":"2","Iterable.E":"2"},"LateError":{"Error":[]},"CodeUnits":{"ListBase":["int"],"UnmodifiableListMixin":["int"],"List":["int"],"EfficientLengthIterable":["int"],"Iterable":["int"],"ListBase.E":"int","UnmodifiableListMixin.E":"int"},"EfficientLengthIterable":{"Iterable":["1"]},"ListIterable":{"EfficientLengthIterable":["1"],"Iterable":["1"]},"SubListIterable":{"ListIterable":["1"],"EfficientLengthIterable":["1"],"Iterable":["1"],"Iterable.E":"1","ListIterable.E":"1"},"ListIterator":{"Iterator":["1"]},"MappedIterable":{"Iterable":["2"],"Iterable.E":"2"},"EfficientLengthMappedIterable":{"MappedIterable":["1","2"],"EfficientLengthIterable":["2"],"Iterable":["2"],"Iterable.E":"2"},"MappedIterator":{"Iterator":["2"]},"MappedListIterable":{"ListIterable":["2"],"EfficientLengthIterable":["2"],"Iterable":["2"],"Iterable.E":"2","ListIterable.E":"2"},"WhereIterable":{"Iterable":["1"],"Iterable.E":"1"},"WhereIterator":{"Iterator":["1"]},"UnmodifiableListBase":{"ListBase":["1"],"UnmodifiableListMixin":["1"],"List":["1"],"EfficientLengthIterable":["1"],"Iterable":["1"]},"ReversedListIterable":{"ListIterable":["1"],"EfficientLengthIterable":["1"],"Iterable":["1"],"Iterable.E":"1","ListIterable.E":"1"},"_Record_2":{"_Record2":[],"_Record":[]},"_Record_2_influence_light":{"_Record2":[],"_Record":[]},"_Record_2_influence_source":{"_Record2":[],"_Record":[]},"ConstantMapView":{"UnmodifiableMapView":["1","2"],"_UnmodifiableMapView_MapView__UnmodifiableMapMixin":["1","2"],"MapView":["1","2"],"_UnmodifiableMapMixin":["1","2"],"Map":["1","2"]},"ConstantMap":{"Map":["1","2"]},"ConstantStringMap":{"ConstantMap":["1","2"],"Map":["1","2"]},"_KeysOrValues":{"Iterable":["1"],"Iterable.E":"1"},"_KeysOrValuesOrElementsIterator":{"Iterator":["1"]},"ConstantSet":{"SetBase":["1"],"Set":["1"],"EfficientLengthIterable":["1"],"Iterable":["1"]},"ConstantStringSet":{"ConstantSet":["1"],"SetBase":["1"],"Set":["1"],"EfficientLengthIterable":["1"],"Iterable":["1"]},"NullError":{"TypeError":[],"Error":[]},"JsNoSuchMethodError":{"Error":[]},"UnknownJsTypeError":{"Error":[]},"_StackTrace":{"StackTrace":[]},"Closure":{"Function":[]},"Closure0Args":{"Function":[]},"Closure2Args":{"Function":[]},"TearOffClosure":{"Function":[]},"StaticClosure":{"Function":[]},"BoundClosure":{"Function":[]},"RuntimeError":{"Error":[]},"JsLinkedHashMap":{"MapBase":["1","2"],"LinkedHashMap":["1","2"],"Map":["1","2"]},"LinkedHashMapKeysIterable":{"EfficientLengthIterable":["1"],"Iterable":["1"],"Iterable.E":"1"},"LinkedHashMapKeyIterator":{"Iterator":["1"]},"LinkedHashMapValuesIterable":{"EfficientLengthIterable":["1"],"Iterable":["1"],"Iterable.E":"1"},"LinkedHashMapValueIterator":{"Iterator":["1"]},"LinkedHashMapEntriesIterable":{"EfficientLengthIterable":["MapEntry<1,2>"],"Iterable":["MapEntry<1,2>"],"Iterable.E":"MapEntry<1,2>"},"LinkedHashMapEntryIterator":{"Iterator":["MapEntry<1,2>"]},"_Record2":{"_Record":[]},"NativeByteBuffer":{"JSObject":[],"TrustedGetRuntimeType":[]},"NativeTypedData":{"JSObject":[]},"NativeByteData":{"JSObject":[],"TrustedGetRuntimeType":[]},"NativeTypedArray":{"JavaScriptIndexingBehavior":["1"],"JSObject":[]},"NativeTypedArrayOfDouble":{"ListBase":["double"],"NativeTypedArray":["double"],"List":["double"],"JavaScriptIndexingBehavior":["double"],"EfficientLengthIterable":["double"],"JSObject":[],"Iterable":["double"],"FixedLengthListMixin":["double"]},"NativeTypedArrayOfInt":{"ListBase":["int"],"NativeTypedArray":["int"],"List":["int"],"JavaScriptIndexingBehavior":["int"],"EfficientLengthIterable":["int"],"JSObject":[],"Iterable":["int"],"FixedLengthListMixin":["int"]},"NativeFloat32List":{"Float32List":[],"ListBase":["double"],"NativeTypedArray":["double"],"List":["double"],"JavaScriptIndexingBehavior":["double"],"EfficientLengthIterable":["double"],"JSObject":[],"Iterable":["double"],"FixedLengthListMixin":["double"],"TrustedGetRuntimeType":[],"ListBase.E":"double"},"NativeFloat64List":{"Float64List":[],"ListBase":["double"],"NativeTypedArray":["double"],"List":["double"],"JavaScriptIndexingBehavior":["double"],"EfficientLengthIterable":["double"],"JSObject":[],"Iterable":["double"],"FixedLengthListMixin":["double"],"TrustedGetRuntimeType":[],"ListBase.E":"double"},"NativeInt16List":{"ListBase":["int"],"NativeTypedArray":["int"],"List":["int"],"JavaScriptIndexingBehavior":["int"],"EfficientLengthIterable":["int"],"JSObject":[],"Iterable":["int"],"FixedLengthListMixin":["int"],"TrustedGetRuntimeType":[],"ListBase.E":"int"},"NativeInt32List":{"ListBase":["int"],"NativeTypedArray":["int"],"List":["int"],"JavaScriptIndexingBehavior":["int"],"EfficientLengthIterable":["int"],"JSObject":[],"Iterable":["int"],"FixedLengthListMixin":["int"],"TrustedGetRuntimeType":[],"ListBase.E":"int"},"NativeInt8List":{"ListBase":["int"],"NativeTypedArray":["int"],"List":["int"],"JavaScriptIndexingBehavior":["int"],"EfficientLengthIterable":["int"],"JSObject":[],"Iterable":["int"],"FixedLengthListMixin":["int"],"TrustedGetRuntimeType":[],"ListBase.E":"int"},"NativeUint16List":{"ListBase":["int"],"NativeTypedArray":["int"],"List":["int"],"JavaScriptIndexingBehavior":["int"],"EfficientLengthIterable":["int"],"JSObject":[],"Iterable":["int"],"FixedLengthListMixin":["int"],"TrustedGetRuntimeType":[],"ListBase.E":"int"},"NativeUint32List":{"ListBase":["int"],"NativeTypedArray":["int"],"List":["int"],"JavaScriptIndexingBehavior":["int"],"EfficientLengthIterable":["int"],"JSObject":[],"Iterable":["int"],"FixedLengthListMixin":["int"],"TrustedGetRuntimeType":[],"ListBase.E":"int"},"NativeUint8ClampedList":{"ListBase":["int"],"NativeTypedArray":["int"],"List":["int"],"JavaScriptIndexingBehavior":["int"],"EfficientLengthIterable":["int"],"JSObject":[],"Iterable":["int"],"FixedLengthListMixin":["int"],"TrustedGetRuntimeType":[],"ListBase.E":"int"},"NativeUint8List":{"Uint8List":[],"ListBase":["int"],"NativeTypedArray":["int"],"List":["int"],"JavaScriptIndexingBehavior":["int"],"EfficientLengthIterable":["int"],"JSObject":[],"Iterable":["int"],"FixedLengthListMixin":["int"],"TrustedGetRuntimeType":[],"ListBase.E":"int"},"_Error":{"Error":[]},"_TypeError":{"TypeError":[],"Error":[]},"_SyncStarIterator":{"Iterator":["1"]},"_SyncStarIterable":{"Iterable":["1"],"Iterable.E":"1"},"AsyncError":{"Error":[]},"_AsyncCompleter":{"_Completer":["1"]},"_Future":{"Future":["1"]},"_Zone":{"Zone":[]},"_RootZone":{"_Zone":[],"Zone":[]},"_HashMap":{"MapBase":["1","2"],"Map":["1","2"]},"_IdentityHashMap":{"_HashMap":["1","2"],"MapBase":["1","2"],"Map":["1","2"]},"_HashMapKeyIterable":{"EfficientLengthIterable":["1"],"Iterable":["1"],"Iterable.E":"1"},"_HashMapKeyIterator":{"Iterator":["1"]},"_LinkedHashSet":{"SetBase":["1"],"LinkedHashSet":["1"],"Set":["1"],"EfficientLengthIterable":["1"],"Iterable":["1"]},"_LinkedHashSetIterator":{"Iterator":["1"]},"ListBase":{"List":["1"],"EfficientLengthIterable":["1"],"Iterable":["1"]},"MapBase":{"Map":["1","2"]},"_MapBaseValueIterable":{"EfficientLengthIterable":["2"],"Iterable":["2"],"Iterable.E":"2"},"_MapBaseValueIterator":{"Iterator":["2"]},"MapView":{"Map":["1","2"]},"UnmodifiableMapView":{"_UnmodifiableMapView_MapView__UnmodifiableMapMixin":["1","2"],"MapView":["1","2"],"_UnmodifiableMapMixin":["1","2"],"Map":["1","2"]},"SetBase":{"Set":["1"],"EfficientLengthIterable":["1"],"Iterable":["1"]},"_SetBase":{"SetBase":["1"],"Set":["1"],"EfficientLengthIterable":["1"],"Iterable":["1"]},"UnmodifiableSetView":{"SetBase":["1"],"_UnmodifiableSetMixin":["1"],"Set":["1"],"EfficientLengthIterable":["1"],"Iterable":["1"]},"Base64Codec":{"Codec":["List<int>","String"]},"Encoding":{"Codec":["String","List<int>"]},"Utf8Codec":{"Codec":["String","List<int>"]},"DateTime":{"Comparable":["DateTime"]},"double":{"num":[],"Comparable":["num"]},"int":{"num":[],"Comparable":["num"]},"List":{"EfficientLengthIterable":["1"],"Iterable":["1"]},"num":{"Comparable":["num"]},"Set":{"EfficientLengthIterable":["1"],"Iterable":["1"]},"String":{"Comparable":["String"],"Pattern":[]},"AssertionError":{"Error":[]},"TypeError":{"Error":[]},"ArgumentError":{"Error":[]},"RangeError":{"Error":[]},"IndexError":{"Error":[]},"UnsupportedError":{"Error":[]},"UnimplementedError":{"Error":[]},"StateError":{"Error":[]},"ConcurrentModificationError":{"Error":[]},"OutOfMemoryError":{"Error":[]},"StackOverflowError":{"Error":[]},"_StringStackTrace":{"StackTrace":[]},"StringBuffer":{"StringSink":[]},"_Uri":{"Uri":[]},"_SimpleUri":{"Uri":[]},"_DataUri":{"Uri":[]},"MeshHandle":{"ResourceHandle":[]},"TextureHandle":{"ResourceHandle":[]},"MaterialHandle":{"ResourceHandle":[]},"InstanceId":{"ResourceHandle":[]},"PipelineHandle":{"ResourceHandle":[]},"RenderWorldImpl":{"RenderWorld":[]},"_PlanResources":{"RenderPassResources":[]},"_FrameScene":{"FrameSceneData":[]},"SceneRendererImpl":{"SceneRenderer":[]},"OpaqueSortKey":{"Comparable":["OpaqueSortKey"]},"BlendedSortKey":{"Comparable":["BlendedSortKey"]},"BloomBlurFeature":{"RenderFeature":[]},"_BloomBlurPass":{"RenderPass":[]},"BloomCompositeFeature":{"RenderFeature":[]},"_BloomCompositePass":{"RenderPass":[]},"DepthPrepassFeature":{"RenderFeature":[]},"_DepthPrepassPass":{"RenderPass":[]},"DofBlurFeature":{"RenderFeature":[]},"_DofBlurPass":{"RenderPass":[]},"DofCompositeFeature":{"RenderFeature":[]},"_DofCompositePass":{"RenderPass":[]},"GradeFeature":{"RenderFeature":[]},"_GradePass":{"RenderPass":[]},"MsaaResolveFeature":{"RenderFeature":[]},"_MsaaResolvePass":{"RenderPass":[]},"BoundPassContext":{"RenderPassContext":[]},"PresentFeature":{"RenderFeature":[]},"_PresentPass":{"RenderPass":[]},"Ps1QuantizeFeature":{"RenderFeature":[]},"_Ps1QuantizePass":{"RenderPass":[]},"ShadowFeature":{"RenderFeature":[]},"_ShadowCasterPass":{"RenderPass":[]},"ShadowedWorldFeature":{"RenderFeature":[]},"_ShadowedWorldPass":{"RenderPass":[]},"SsaoOcclusionFeature":{"RenderFeature":[]},"_SsaoOcclusionPass":{"RenderPass":[]},"SsaoBlurFeature":{"RenderFeature":[]},"_SsaoBlurPass":{"RenderPass":[]},"VhsFeature":{"RenderFeature":[]},"_VhsPass":{"RenderPass":[]},"VolumetricLightFeature":{"RenderFeature":[]},"_VolumetricLightPass":{"RenderPass":[]},"_VolumetricCompositePass":{"RenderPass":[]},"WorldFeature":{"RenderFeature":[]},"_WorldPass":{"RenderPass":[]},"DeviceDrawCommandEncoder":{"DrawCommandEncoder":[]},"_WebGpuObject":{"GpuObject":[]},"WebGl2Device":{"GpuDevice":[]},"Int8List":{"List":["int"],"EfficientLengthIterable":["int"],"Iterable":["int"]},"Uint8List":{"List":["int"],"EfficientLengthIterable":["int"],"Iterable":["int"]},"Uint8ClampedList":{"List":["int"],"EfficientLengthIterable":["int"],"Iterable":["int"]},"Int16List":{"List":["int"],"EfficientLengthIterable":["int"],"Iterable":["int"]},"Uint16List":{"List":["int"],"EfficientLengthIterable":["int"],"Iterable":["int"]},"Int32List":{"List":["int"],"EfficientLengthIterable":["int"],"Iterable":["int"]},"Uint32List":{"List":["int"],"EfficientLengthIterable":["int"],"Iterable":["int"]},"Float32List":{"List":["double"],"EfficientLengthIterable":["double"],"Iterable":["double"]},"Float64List":{"List":["double"],"EfficientLengthIterable":["double"],"Iterable":["double"]}}'));
   A._Universe_addErasedTypes(init.typeUniverse, JSON.parse('{"UnmodifiableListBase":1,"__CastListBase__CastIterableBase_ListMixin":2,"NativeTypedArray":1,"_SetBase":1,"_UnmodifiableSetView_SetBase__UnmodifiableSetMixin":1,"Converter":2}'));
   var string$ = {
     x00_____: "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\u03f6\x00\u0404\u03f4 \u03f4\u03f6\u01f6\u01f6\u03f6\u03fc\u01f4\u03ff\u03ff\u0584\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u05d4\u01f4\x00\u01f4\x00\u0504\u05c4\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u0400\x00\u0400\u0200\u03f7\u0200\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u0200\u0200\u0200\u03f7\x00",
     x23versio: "#version 300 es\nout vec2 vUv;\nvoid main(){\n  vec2 p=vec2(float((gl_VertexID<<1)&2),float(gl_VertexID&2));\n  vUv=p;\n  gl_Position=vec4(p*2.0-1.0,0.0,1.0);\n}\n",
-    x23versip: "#version 300 es\nprecision highp float;\nin vec2 vUv;\nuniform sampler2D uTex;\nuniform float uExposure;\nuniform float uVignette;\nuniform float uGrain;\nuniform float uRainIntensity;\nuniform float uRainWindowVisibility;\nuniform float uOutputEncoding;\nuniform float uToneMap;\nout vec4 oColor;\n\nfloat hash(vec2 p){\n  return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453123);\n}\n\nvec3 reinhardToneMap(vec3 color){\n  return color/(vec3(1.)+color);\n}\n\nvec3 linearToSrgb(vec3 color){\n  vec3 cutoff=step(vec3(.0031308),color);\n  vec3 low=color*12.92;\n  vec3 high=1.055*pow(max(color,vec3(0.)),vec3(1./2.4))-.055;\n  return mix(low,high,cutoff);\n}\n\nfloat rainStreak(vec2 uv){\n  // Stable diagonal streaks: no time or allocation dependency, and no work\n  // when uRainIntensity is zero. The small hash offset avoids a tiled comb.\n  vec2 cell=vec2(floor(uv.x*96.0),floor(uv.y*18.0));\n  float phase=fract(uv.x*96.0+uv.y*18.0+hash(cell));\n  float width=smoothstep(.08,.0,abs(phase-.5));\n  float sparse=step(.72,hash(cell+vec2(19.0,7.0)));\n  return width*sparse;\n}\n\nvoid main(){\n  vec4 source=texture(uTex,vUv);\n  // Exposure operates in scene-linear space; tone mapping prevents HDR\n  // highlights from clipping before the selected output transfer function.\n  vec3 color=max(source.rgb,vec3(0.))*max(uExposure,0.);\n  color=mix(color,reinhardToneMap(color),clamp(uToneMap,0.,1.));\n  float edge=distance(vUv,vec2(.5));\n  float vignette=smoothstep(.35,.78,edge);\n  color*=1.-clamp(uVignette,0.,1.)*vignette;\n  if(uOutputEncoding>.5) color=linearToSrgb(max(color,vec3(0.)));\n  float rain=clamp(uRainIntensity,0.,1.)*\n    clamp(uRainWindowVisibility,0.,1.);\n  color=mix(color,vec3(.56,.67,.76),rain*rainStreak(vUv)*.16);\n  // A stable screen-space grain keeps captures reproducible for a fixed\n  // viewport while still giving the dark gothic presentation a fine film\n  // texture. It is deliberately tiny and never changes alpha.\n  color+=((hash(gl_FragCoord.xy)-.5)*.06)*max(uGrain,0.);\n  oColor=vec4(clamp(color,0.,1.),source.a);\n}\n",
+    x23versip: "#version 300 es\nprecision highp float;\nin vec2 vUv;\nuniform sampler2D uTex;\nuniform float uExposure;\nuniform float uVignette;\nuniform float uGrain;\nuniform float uOutputEncoding;\nuniform float uToneMap;\nuniform vec3 uClearColor;\nuniform vec3 uSkyHorizon;\nuniform vec3 uSkyZenith;\nuniform vec3 uSkyGround;\nuniform float uSkyEnabled;\nuniform float uSkyHorizonGlow;\nuniform float uSkyStarDensity;\nuniform sampler2D uSkyTexture;\nuniform float uSkyTextureEnabled;\nuniform float uSkyRotation;\nuniform float uSkyExposure;\nuniform float uSkyTextureSrgb;\nuniform mat4 uInverseProjection;\nuniform mat4 uInverseView;\nuniform vec3 uCameraPosition;\nuniform float uCloudCoverage;\nuniform float uCloudDensity;\nuniform float uCloudBaseHeight;\nuniform float uCloudThickness;\nuniform float uCloudScale;\nuniform vec2 uCloudWind;\nuniform float uCloudPhase;\nuniform float uCloudDetail;\nuniform float uCloudSilverLining;\nuniform float uCloudSampleCount;\nuniform vec3 uCloudLightDirection;\nuniform vec3 uCloudLightColor;\nuniform float uCloudLightIntensity;\nout vec4 oColor;\n\nfloat hash(vec2 p){\n  return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453123);\n}\n\nvec3 reinhardToneMap(vec3 color){\n  return color/(vec3(1.)+color);\n}\n\nvec3 linearToSrgb(vec3 color){\n  vec3 cutoff=step(vec3(.0031308),color);\n  vec3 low=color*12.92;\n  vec3 high=1.055*pow(max(color,vec3(0.)),vec3(1./2.4))-.055;\n  return mix(low,high,cutoff);\n}\n\nvec3 skyBackground(vec2 uv){\n  // A deliberately cheap, high-quality fallback sky: three atmospheric bands\n  // provide depth at every camera angle, while the tiny deterministic star\n  // field and horizon glow keep the clear background from reading as a flat\n  // color. It is an environment layer, not a game/weather simulation.\n  float lower=smoothstep(0.0,0.48,uv.y);\n  float upper=smoothstep(0.42,1.0,uv.y);\n  vec3 color=mix(uSkyGround,uSkyHorizon,lower);\n  color=mix(color,uSkyZenith,upper);\n  float horizonGlow=exp(-pow((uv.y-0.48)*7.0,2.0));\n  color+=uSkyHorizon*horizonGlow*clamp(uSkyHorizonGlow,0.,1.);\n  float starMask=smoothstep(0.62,0.92,uv.y);\n  float stars=step(1.0-clamp(uSkyStarDensity,0.,.1),hash(floor(uv*vec2(180.0,100.0))))*starMask;\n  color+=vec3(0.16,0.19,0.24)*stars;\n  return max(color,vec3(0.0));\n}\n\nfloat hash3(vec3 p){\n  return fract(sin(dot(p,vec3(127.1,311.7,74.7)))*43758.5453123);\n}\n\nfloat valueNoise(vec3 p){\n  vec3 i=floor(p);\n  vec3 f=fract(p);\n  f=f*f*(3.0-2.0*f);\n  float n000=hash3(i+vec3(0,0,0));\n  float n100=hash3(i+vec3(1,0,0));\n  float n010=hash3(i+vec3(0,1,0));\n  float n110=hash3(i+vec3(1,1,0));\n  float n001=hash3(i+vec3(0,0,1));\n  float n101=hash3(i+vec3(1,0,1));\n  float n011=hash3(i+vec3(0,1,1));\n  float n111=hash3(i+vec3(1,1,1));\n  float x00=mix(n000,n100,f.x);\n  float x10=mix(n010,n110,f.x);\n  float x01=mix(n001,n101,f.x);\n  float x11=mix(n011,n111,f.x);\n  return mix(mix(x00,x10,f.y),mix(x01,x11,f.y),f.z);\n}\n\nfloat cloudNoise(vec3 p){\n  float value=0.0;\n  float amplitude=0.5;\n  for(int octave=0;octave<4;octave++){\n    value+=valueNoise(p)*amplitude;\n    p=p*2.03+vec3(17.3,11.7,7.1);\n    amplitude*=0.5;\n  }\n  return value;\n}\n\nfloat cloudDensityAt(vec3 position){\n  float height01=clamp(\n    (position.y-uCloudBaseHeight)/max(uCloudThickness,0.001),\n    0.0,1.0\n  );\n  float vertical=smoothstep(0.0,0.12,height01)*\n    (1.0-smoothstep(0.72,1.0,height01));\n  vec3 q=position*max(uCloudScale,0.00001)+\n    vec3(uCloudWind.x*uCloudPhase,0.0,uCloudWind.y*uCloudPhase);\n  float macro=cloudNoise(q*0.82);\n  float detail=cloudNoise(q*2.7+vec3(23.0,5.0,41.0));\n  float shape=mix(macro,macro*0.68+detail*0.32,clamp(uCloudDetail,0.,1.));\n  float threshold=1.0-clamp(uCloudCoverage,0.,1.);\n  float body=smoothstep(threshold,threshold+0.26,shape);\n  return body*vertical*clamp(uCloudDensity,0.,1.);\n}\n\nvec4 volumetricClouds(vec3 worldDirection){\n  if(uCloudCoverage<=0.0001 || uCloudDensity<=0.0001 || worldDirection.y<=0.001){\n    return vec4(0.0);\n  }\n  float directionY=max(worldDirection.y,0.001);\n  float startT=(uCloudBaseHeight-uCameraPosition.y)/directionY;\n  float endT=(uCloudBaseHeight+uCloudThickness-uCameraPosition.y)/directionY;\n  startT=max(startT,0.0);\n  endT=max(endT,0.0);\n  if(endT<=startT) return vec4(0.0);\n  int sampleCount=int(clamp(uCloudSampleCount,4.,24.));\n  float stepLength=(endT-startT)/float(sampleCount);\n  float jitter=(hash(gl_FragCoord.xy+vec2(uCloudPhase*0.013))-0.5)*stepLength;\n  vec3 sunDirection=normalize(-uCloudLightDirection);\n  float transmittance=1.0;\n  vec3 inScatter=vec3(0.0);\n  for(int i=0;i<24;i++){\n    if(i>=sampleCount) break;\n    float t=startT+(float(i)+0.5)*stepLength+jitter;\n    vec3 position=uCameraPosition+worldDirection*t;\n    float density=cloudDensityAt(position);\n    float opticalDepth=density*stepLength*0.0035;\n    float segmentAlpha=1.0-exp(-opticalDepth);\n    float towardLight=cloudDensityAt(position+sunDirection*90.0);\n    float lightTransmittance=exp(-towardLight*0.025);\n    float phase=0.72+0.28*pow(max(dot(-worldDirection,sunDirection),0.0),2.0);\n    vec3 ambient=uSkyHorizon*0.32;\n    vec3 direct=uCloudLightColor*\n      (0.14+0.86*clamp(uCloudLightIntensity,0.,1.5))*phase;\n    float edge=pow(1.0-clamp(density,0.,1.),3.0)*uCloudSilverLining*0.22;\n    vec3 sampleLight=(ambient+direct)*lightTransmittance+vec3(edge);\n    inScatter+=transmittance*segmentAlpha*sampleLight;\n    transmittance*=1.0-segmentAlpha;\n    if(transmittance<0.01) break;\n  }\n  return vec4(inScatter,1.0-transmittance);\n}\n\nvec3 srgbToLinear(vec3 color){\n  vec3 low=color/12.92;\n  vec3 high=pow((color+0.055)/1.055,vec3(2.4));\n  return mix(low,high,step(vec3(0.04045),color));\n}\n\nvec3 worldDirectionForUv(vec2 uv){\n  vec2 ndc=uv*2.0-1.0;\n  vec4 viewPoint=uInverseProjection*vec4(ndc,1.0,1.0);\n  return normalize(viewPoint.xyz/viewPoint.w);\n}\n\nvec3 equirectangularSky(vec2 uv){\n  vec3 worldDirection=normalize((uInverseView*vec4(worldDirectionForUv(uv),0.0)).xyz);\n  float longitude=atan(worldDirection.z,worldDirection.x)+uSkyRotation;\n  float latitude=asin(clamp(worldDirection.y,-1.0,1.0));\n  vec2 sampleUv=vec2(\n    fract(longitude/(2.0*3.14159265359)+0.5),\n    0.5-latitude/3.14159265359\n  );\n  vec3 encoded=max(texture(uSkyTexture,sampleUv).rgb,vec3(0.0));\n  vec3 linear=mix(encoded,srgbToLinear(encoded),clamp(uSkyTextureSrgb,0.,1.));\n  return linear*max(uSkyExposure,0.0);\n}\n\nvoid main(){\n  vec4 source=texture(uTex,vUv);\n  // The world pass clears untouched pixels to uClearColor. Replace only that\n  // exact background, so the sky is always active without covering geometry.\n  if(uSkyEnabled>0.5 && distance(source.rgb,uClearColor)<0.004){\n    vec3 viewDirection=worldDirectionForUv(vUv);\n    vec3 worldDirection=normalize((uInverseView*vec4(viewDirection,0.0)).xyz);\n    source.rgb=uSkyTextureEnabled>0.5\n      ? equirectangularSky(vUv)\n      : skyBackground(vUv);\n    vec4 clouds=volumetricClouds(worldDirection);\n    source.rgb=source.rgb* (1.0-clouds.a)+clouds.rgb;\n  }\n  // Exposure operates in scene-linear space; tone mapping prevents HDR\n  // highlights from clipping before the selected output transfer function.\n  vec3 color=max(source.rgb,vec3(0.))*max(uExposure,0.);\n  color=mix(color,reinhardToneMap(color),clamp(uToneMap,0.,1.));\n  float edge=distance(vUv,vec2(.5));\n  float vignette=smoothstep(.35,.78,edge);\n  color*=1.-clamp(uVignette,0.,1.)*vignette;\n  if(uOutputEncoding>.5) color=linearToSrgb(max(color,vec3(0.)));\n  // Atmospheric precipitation is submitted as depth-tested world geometry;\n  // the present pass must never paint weather over unrelated surfaces.\n  // A stable screen-space grain keeps captures reproducible for a fixed\n  // viewport while still giving the dark gothic presentation a fine film\n  // texture. It is deliberately tiny and never changes alpha.\n  color+=((hash(gl_FragCoord.xy)-.5)*.06)*max(uGrain,0.);\n  oColor=vec4(clamp(color,0.,1.),source.a);\n}\n",
     Error_: "Error handler must accept one Object or one Object and a StackTrace as arguments, and return a value of the returned future's type",
     WebGl2: "WebGl2Device: operation attempted while context is not ready"
   };
@@ -14764,6 +15503,7 @@
     var findType = A.findType;
     return {
       AsyncError: findType("AsyncError"),
+      BootstrapResult: findType("BootstrapResult"),
       BoundResourceView: findType("BoundResourceView"),
       Comparable_dynamic: findType("Comparable<@>"),
       CompiledProgram: findType("CompiledProgram"),
@@ -14773,6 +15513,7 @@
       EfficientLengthIterable_dynamic: findType("EfficientLengthIterable<@>"),
       Error: findType("Error"),
       Float32List: findType("Float32List"),
+      Float64List: findType("Float64List"),
       FramePassStats: findType("FramePassStats"),
       Function: findType("Function"),
       GpuObject: findType("GpuObject"),
@@ -14785,7 +15526,9 @@
       JSArray_InstanceBatch: findType("JSArray<InstanceBatch>"),
       JSArray_PassDeclaration: findType("JSArray<PassDeclaration>"),
       JSArray_Plane: findType("JSArray<Plane>"),
+      JSArray_ProfileAttempt: findType("JSArray<ProfileAttempt>"),
       JSArray_Record_2_double_influence_and_SpotLight_light: findType("JSArray<+influence,light(double,SpotLight)>"),
+      JSArray_Record_2_double_influence_and_VolumetricSource_source: findType("JSArray<+influence,source(double,VolumetricSource)>"),
       JSArray_RenderFeature: findType("JSArray<RenderFeature>"),
       JSArray_RenderPass: findType("JSArray<RenderPass>"),
       JSArray_RenderWorldImpl: findType("JSArray<RenderWorldImpl>"),
@@ -14796,6 +15539,7 @@
       JSArray_SortableItem_OpaqueSortKey: findType("JSArray<SortableItem<OpaqueSortKey>>"),
       JSArray_SpotLight: findType("JSArray<SpotLight>"),
       JSArray_String: findType("JSArray<String>"),
+      JSArray_VolumetricSource: findType("JSArray<VolumetricSource>"),
       JSArray__PendingGpuTiming: findType("JSArray<_PendingGpuTiming>"),
       JSArray__Slot_MaterialDefinition: findType("JSArray<_Slot<MaterialDefinition>>"),
       JSArray__Slot_MeshData: findType("JSArray<_Slot<MeshData>>"),
@@ -14823,11 +15567,14 @@
       Object: findType("Object"),
       OpaqueSortKey: findType("OpaqueSortKey"),
       PassDeclaration: findType("PassDeclaration"),
+      ProfileAttempt: findType("ProfileAttempt"),
+      QualityProfile: findType("QualityProfile"),
       Record: findType("Record"),
       Record_0: findType("+()"),
       Record_2_MeshHandle_and_MeshData: findType("+(MeshHandle,MeshData)"),
       Record_2_TextureHandle_and__TextureRecord: findType("+(TextureHandle,_TextureRecord)"),
       Record_2_double_influence_and_SpotLight_light: findType("+influence,light(double,SpotLight)"),
+      Record_2_double_influence_and_VolumetricSource_source: findType("+influence,source(double,VolumetricSource)"),
       RenderPass: findType("RenderPass"),
       ResourceRegistry_InstanceId_RetainedItemDescriptor: findType("ResourceRegistry<InstanceId,RetainedItemDescriptor>"),
       ResourceRegistry_MaterialHandle_MaterialDefinition: findType("ResourceRegistry<MaterialHandle,MaterialDefinition>"),
@@ -14843,6 +15590,7 @@
       StateField: findType("StateField"),
       String: findType("String"),
       TextureHandle: findType("TextureHandle"),
+      ThermalSource: findType("ThermalSource"),
       TrustedGetRuntimeType: findType("TrustedGetRuntimeType"),
       TypeError: findType("TypeError"),
       UnknownJavaScriptObject: findType("UnknownJavaScriptObject"),
@@ -14904,7 +15652,9 @@
     B.LinearColor_0_0_0 = new A.LinearColor(0, 0, 0);
     B.LinearColor_1_1_1 = new A.LinearColor(1, 1, 1);
     B.List_empty = makeConstList([], A.findType("JSArray<PointLight>"));
-    B.List_empty1 = makeConstList([], type$.JSArray_SpotLight);
+    B.List_empty3 = makeConstList([], type$.JSArray_SpotLight);
+    B.List_empty0 = makeConstList([], type$.JSArray_VolumetricSource);
+    B.List_empty1 = makeConstList([], A.findType("JSArray<ThermalSource>"));
     B.C_FrameEnvironment = new A.FrameEnvironment();
     B.GpuTextureFilter_1 = new A.GpuTextureFilter(1, "linear");
     B.GpuTextureWrap_0 = new A.GpuTextureWrap(0, "clampToEdge");
@@ -15050,6 +15800,7 @@
     B.ColorEncoding_1 = new A.ColorEncoding(1, "srgb");
     B.CullFace_1 = new A.CullFace(1, "back");
     B.DepthFunc_0 = new A.DepthFunc(0, "less");
+    B.DrawStateDescriptor_1Ob = new A.DrawStateDescriptor(false, B.DepthFunc_0, false, true, B.BlendFactor_1, B.BlendFactor_1, B.BlendEquation_0, false, B.CullFace_1, true, false, true, true, true, true, false);
     B.FramePassStats_0_0_0 = new A.FramePassStats(0, 0, 0);
     B.FrameQueueState_0 = new A.FrameQueueState(0, "idle");
     B.FrameQueueState_1 = new A.FrameQueueState(1, "active");
@@ -15086,15 +15837,32 @@
     B.HandleRejection_0 = new A.HandleRejection(0, "wrongKind");
     B.HandleRejection_1 = new A.HandleRejection(1, "staleGeneration");
     B.HandleRejection_3 = new A.HandleRejection(3, "releasedResource");
-    B.List_0lp = makeConstList(["uViewProjection", "uModel", "uNormalMatrix", "uLightDir", "uAmbientColor", "uAmbientIntensity"], type$.JSArray_String);
-    B.List_43N = makeConstList(["uViewProjection", "uView", "uModel", "uNormalMatrix", "uLightViewProjection", "uLightPosition", "uLightDirection", "uLightColor", "uLightIntensity", "uLightRange", "uLightInnerCos", "uLightOuterCos", "uSpotEnabled", "uDirectionalDirection", "uDirectionalColor", "uDirectionalIntensity", "uPointPosition0", "uPointColor0", "uPointIntensity0", "uPointRadius0", "uPointPosition1", "uPointColor1", "uPointIntensity1", "uPointRadius1", "uPointPosition2", "uPointColor2", "uPointIntensity2", "uPointRadius2", "uPointPosition3", "uPointColor3", "uPointIntensity3", "uPointRadius3", "uDirectSpotPosition0", "uDirectSpotDirection0", "uDirectSpotColor0", "uDirectSpotIntensity0", "uDirectSpotRange0", "uDirectSpotInnerCos0", "uDirectSpotOuterCos0", "uDirectSpotEnabled0", "uDirectSpotPosition1", "uDirectSpotDirection1", "uDirectSpotColor1", "uDirectSpotIntensity1", "uDirectSpotRange1", "uDirectSpotInnerCos1", "uDirectSpotOuterCos1", "uDirectSpotEnabled1", "uDirectSpotPosition2", "uDirectSpotDirection2", "uDirectSpotColor2", "uDirectSpotIntensity2", "uDirectSpotRange2", "uDirectSpotInnerCos2", "uDirectSpotOuterCos2", "uDirectSpotEnabled2", "uAmbientColor", "uAmbientIntensity", "uShadowMapTexelSize", "uSceneColorSize", "uEmissiveStrength", "uUvScaleOffset", "uNormalStrength", "uRoughness", "uMetallic", "uOcclusionStrength", "uClearcoatStrength", "uClearcoatRoughness", "uLightmapIntensity", "uCameraPosition", "uVertexSnapGrid", "uAffineWarpStrength", "uAlphaCutoff", "uOpaqueCoverage", "uFogColor", "uFogStart", "uFogEnd", "uFogHeightFalloff", "uFogDensity", "uReceivesShadow", "uRainWetness"], type$.JSArray_String);
     B.List_4ld = makeConstList(["uNear", "uFar", "uProjScaleX", "uProjScaleY", "uRadius", "uStrength"], type$.JSArray_String);
+    B.List_EHm = makeConstList(["uViewProjection", "uView", "uModel", "uNormalMatrix", "uLightViewProjection", "uLightPosition", "uLightDirection", "uLightColor", "uLightIntensity", "uLightRange", "uLightInnerCos", "uLightOuterCos", "uSpotEnabled", "uDirectionalDirection", "uDirectionalColor", "uDirectionalIntensity", "uPointPosition0", "uPointColor0", "uPointIntensity0", "uPointRadius0", "uPointPosition1", "uPointColor1", "uPointIntensity1", "uPointRadius1", "uPointPosition2", "uPointColor2", "uPointIntensity2", "uPointRadius2", "uPointPosition3", "uPointColor3", "uPointIntensity3", "uPointRadius3", "uDirectSpotPosition0", "uDirectSpotDirection0", "uDirectSpotColor0", "uDirectSpotIntensity0", "uDirectSpotRange0", "uDirectSpotInnerCos0", "uDirectSpotOuterCos0", "uDirectSpotEnabled0", "uDirectSpotPosition1", "uDirectSpotDirection1", "uDirectSpotColor1", "uDirectSpotIntensity1", "uDirectSpotRange1", "uDirectSpotInnerCos1", "uDirectSpotOuterCos1", "uDirectSpotEnabled1", "uDirectSpotPosition2", "uDirectSpotDirection2", "uDirectSpotColor2", "uDirectSpotIntensity2", "uDirectSpotRange2", "uDirectSpotInnerCos2", "uDirectSpotOuterCos2", "uDirectSpotEnabled2", "uAmbientColor", "uAmbientIntensity", "uAmbientLightScale", "uDirectLightScale", "uShadowMapTexelSize", "uShadowFilterRadius", "uShadowBias", "uReflectionColor", "uReflectionIntensity", "uReflectionConfidence", "uSceneColorSize", "uEmissiveStrength", "uUvScaleOffset", "uNormalStrength", "uRoughness", "uMetallic", "uSpecularScale", "uOcclusionStrength", "uClearcoatStrength", "uClearcoatRoughness", "uLightmapIntensity", "uCameraPosition", "uVertexSnapGrid", "uAffineWarpStrength", "uAlphaCutoff", "uOpaqueCoverage", "uFogColor", "uFogStart", "uFogEnd", "uFogHeightFalloff", "uFogDensity", "uReceivesShadow", "uRainWetness", "uSurfaceSnowCoverage", "uSurfaceDissolution", "uThermalSourceCount", "uThermalSourcePosition0", "uThermalSourceRadius0", "uThermalSourceDissolution0", "uThermalSourcePosition1", "uThermalSourceRadius1", "uThermalSourceDissolution1", "uThermalSourcePosition2", "uThermalSourceRadius2", "uThermalSourceDissolution2", "uThermalSourcePosition3", "uThermalSourceRadius3", "uThermalSourceDissolution3"], type$.JSArray_String);
     B.List_Es0 = makeConstList(["uQuantizationBits", "uDitherStrength"], type$.JSArray_String);
     B.List_F48 = makeConstList(["uTime", "uChromaWeight", "uTrackingWeight", "uNoiseWeight", "uHeadSwitchWeight", "uDropoutWeight", "uGhostWeight"], type$.JSArray_String);
+    B.List_Is9 = makeConstList(["uNear", "uFar", "uLightDir", "uLightColor", "uShaftIntensity", "uFogDensity", "uAnisotropy", "uViewProjection", "uView", "uInverseProjection", "uVolumetricAlbedo", "uVolumetricHeightFalloff", "uVolumetricDustDensity", "uVolumetricJitter", "uVolumetricIntensity", "uVolumetricSampleCount"], type$.JSArray_String);
     B.List_KZn = makeConstList(["uNear", "uFar", "uFocusDistance", "uFocusRange", "uStrength"], type$.JSArray_String);
     B.List_NFc = makeConstList(["uViewProjection", "uModel", "uVertexSnapGrid", "uAffineWarpStrength", "uAlphaCutoff"], type$.JSArray_String);
-    B.List_bt2 = makeConstList(["uExposure", "uVignette", "uGrain", "uRainIntensity", "uRainWindowVisibility", "uOutputEncoding", "uToneMap"], type$.JSArray_String);
-    B.List_empty0 = makeConstList([], type$.JSArray_RenderPass);
+    B.List_byt = makeConstList(["uViewProjection", "uModel", "uNormalMatrix", "uLightDir", "uAmbientColor", "uAmbientIntensity", "uAmbientLightScale", "uDirectLightScale"], type$.JSArray_String);
+    B.List_empty2 = makeConstList([], type$.JSArray_RenderPass);
+    B.QualityProfileKind_2 = new A.QualityProfileKind(2, "high");
+    B.Object_ril = {shadows: 0, ssao: 1, bloom: 2, dof: 3, grade: 4, volumetric: 5};
+    B.Set_rgu3b = new A.ConstantStringSet(B.Object_ril, 6, type$.ConstantStringSet_String);
+    B.QualityProfile_QualityProfileKind_2_Set_rgu3b = new A.QualityProfile(B.QualityProfileKind_2, B.Set_rgu3b);
+    B.Object_Kbg = {shadows: 0, ssao: 1, bloom: 2, dof: 3, grade: 4};
+    B.Set_Ma1c8 = new A.ConstantStringSet(B.Object_Kbg, 5, type$.ConstantStringSet_String);
+    B.QualityProfile_QualityProfileKind_2_Set_Ma1c8 = new A.QualityProfile(B.QualityProfileKind_2, B.Set_Ma1c8);
+    B.QualityProfileKind_1 = new A.QualityProfileKind(1, "standard");
+    B.Object_shadows_0 = {shadows: 0};
+    B.Set_zc2Dw = new A.ConstantStringSet(B.Object_shadows_0, 1, type$.ConstantStringSet_String);
+    B.QualityProfile_QualityProfileKind_1_Set_zc2Dw = new A.QualityProfile(B.QualityProfileKind_1, B.Set_zc2Dw);
+    B.QualityProfileKind_0 = new A.QualityProfileKind(0, "safe");
+    B.Object_empty = {};
+    B.Set_empty = new A.ConstantStringSet(B.Object_empty, 0, type$.ConstantStringSet_String);
+    B.QualityProfile_QualityProfileKind_0_Set_empty = new A.QualityProfile(B.QualityProfileKind_0, B.Set_empty);
+    B.List_jSM = makeConstList([B.QualityProfile_QualityProfileKind_2_Set_rgu3b, B.QualityProfile_QualityProfileKind_2_Set_Ma1c8, B.QualityProfile_QualityProfileKind_1_Set_zc2Dw, B.QualityProfile_QualityProfileKind_0_Set_empty], A.findType("JSArray<QualityProfile>"));
+    B.List_khX = makeConstList(["uExposure", "uVignette", "uGrain", "uOutputEncoding", "uToneMap", "uClearColor", "uSkyHorizon", "uSkyZenith", "uSkyGround", "uSkyEnabled", "uSkyHorizonGlow", "uSkyStarDensity", "uSkyTexture", "uSkyTextureEnabled", "uSkyRotation", "uSkyExposure", "uSkyTextureSrgb", "uInverseProjection", "uInverseView", "uCameraPosition", "uCloudCoverage", "uCloudDensity", "uCloudBaseHeight", "uCloudThickness", "uCloudScale", "uCloudWind", "uCloudPhase", "uCloudDetail", "uCloudSilverLining", "uCloudSampleCount", "uCloudLightDirection", "uCloudLightColor", "uCloudLightIntensity"], type$.JSArray_String);
     B.StateField_0 = new A.StateField(0, "depthTest");
     B.StateField_1 = new A.StateField(1, "depthFunc");
     B.StateField_2 = new A.StateField(2, "depthWrite");
@@ -15113,6 +15881,7 @@
     B.List_uLutSize_uStrength = makeConstList(["uLutSize", "uStrength"], type$.JSArray_String);
     B.List_uTexelSize_uNear_uFar = makeConstList(["uTexelSize", "uNear", "uFar"], type$.JSArray_String);
     B.List_uTexelStep = makeConstList(["uTexelStep"], type$.JSArray_String);
+    B.List_uVolumetricStrength = makeConstList(["uVolumetricStrength"], type$.JSArray_String);
     B.Object_uAlbedo_0 = {uAlbedo: 0};
     B.Map_6Y6km = new A.ConstantStringMap(B.Object_uAlbedo_0, [0], type$.ConstantStringMap_String_int);
     B.Object_uSsaoRaw_0_uSceneDepth_1 = {uSsaoRaw: 0, uSceneDepth: 1};
@@ -15129,39 +15898,27 @@
     B.Map_RkR7l = new A.ConstantStringMap(B.Object_rOo, [0, 1, 2, 3, 4, 5, 6], type$.ConstantStringMap_String_int);
     B.Object_Rxe = {uSharp: 0, uBlurred: 1, uSceneDepth: 2};
     B.Map_Vt6q7 = new A.ConstantStringMap(B.Object_Rxe, [0, 1, 2], type$.ConstantStringMap_String_int);
+    B.Object_uTex_0_uSkyTexture_1 = {uTex: 0, uSkyTexture: 1};
+    B.Map_chmai = new A.ConstantStringMap(B.Object_uTex_0_uSkyTexture_1, [0, 1], type$.ConstantStringMap_String_int);
     B.Object_uBloom_0 = {uBloom: 0};
     B.Map_eEHw8 = new A.ConstantStringMap(B.Object_uBloom_0, [0], type$.ConstantStringMap_String_int);
     B.Object_uSceneDepth_0 = {uSceneDepth: 0};
     B.Map_eLegi = new A.ConstantStringMap(B.Object_uSceneDepth_0, [0], type$.ConstantStringMap_String_int);
     B.Object_uScene_0 = {uScene: 0};
     B.Map_eWjtK = new A.ConstantStringMap(B.Object_uScene_0, [0], type$.ConstantStringMap_String_int);
-    B.Object_empty = {};
     B.Map_empty0 = new A.ConstantStringMap(B.Object_empty, [], A.findType("ConstantStringMap<String,String>"));
     B.Map_empty = new A.ConstantStringMap(B.Object_empty, [], type$.ConstantStringMap_String_int);
     B.Object_Deh = {aPosition: 0, aNormal: 1, aColor: 2, aAlpha: 3, aUvMat: 4, aTangent: 5, aUv1: 6};
     B.Map_jaYU8 = new A.ConstantStringMap(B.Object_Deh, [0, 1, 2, 3, 4, 5, 6], type$.ConstantStringMap_String_int);
+    B.Object_uVolumetric_0 = {uVolumetric: 0};
+    B.Map_pEjDQ = new A.ConstantStringMap(B.Object_uVolumetric_0, [0], type$.ConstantStringMap_String_int);
     B.Object_ohC = {aPosition: 0, aNormal: 1, aColor: 2, aAlpha: 3};
     B.Map_unJqY = new A.ConstantStringMap(B.Object_ohC, [0, 1, 2, 3], type$.ConstantStringMap_String_int);
-    B.Object_uTex_0 = {uTex: 0};
-    B.Map_xTGca = new A.ConstantStringMap(B.Object_uTex_0, [0], type$.ConstantStringMap_String_int);
     B.PipelineHandle_0_1_null = new A.PipelineHandle(0, 1, null);
-    B.QualityProfileKind_0 = new A.QualityProfileKind(0, "safe");
-    B.QualityProfileKind_2 = new A.QualityProfileKind(2, "high");
-    B.Set_empty = new A.ConstantStringSet(B.Object_empty, 0, type$.ConstantStringSet_String);
-    B.QualityProfile_QualityProfileKind_0_Set_empty = new A.QualityProfile(B.QualityProfileKind_0, B.Set_empty);
-    B.QualityProfileKind_1 = new A.QualityProfileKind(1, "standard");
-    B.Object_shadows_0 = {shadows: 0};
-    B.Set_zc2Dw = new A.ConstantStringSet(B.Object_shadows_0, 1, type$.ConstantStringSet_String);
-    B.QualityProfile_QualityProfileKind_1_Set_zc2Dw = new A.QualityProfile(B.QualityProfileKind_1, B.Set_zc2Dw);
-    B.Object_Kbg = {shadows: 0, ssao: 1, bloom: 2, dof: 3, grade: 4};
-    B.Set_Ma1c8 = new A.ConstantStringSet(B.Object_Kbg, 5, type$.ConstantStringSet_String);
-    B.QualityProfile_QualityProfileKind_2_Set_Ma1c8 = new A.QualityProfile(B.QualityProfileKind_2, B.Set_Ma1c8);
     B.QualityProfileKind_4 = new A.QualityProfileKind(4, "shipping");
     B.Object_QyB = {shadows: 0, ssao: 1, bloom: 2, dof: 3, grade: 4, ps1: 5, vhs: 6};
     B.Set_R3bKe = new A.ConstantStringSet(B.Object_QyB, 7, type$.ConstantStringSet_String);
     B.QualityProfile_QualityProfileKind_4_Set_R3bKe = new A.QualityProfile(B.QualityProfileKind_4, B.Set_R3bKe);
-    B.DiagnosticLevel_1 = new A.DiagnosticLevel(1, "errorsOnly");
-    B.RendererConfiguration_7v0 = new A.RendererConfiguration(B.QualityProfile_QualityProfileKind_0_Set_empty, 384, 216, 1, 0);
     B.RendererState_0 = new A.RendererState(0, "constructed");
     B.RendererState_1 = new A.RendererState(1, "initializing");
     B.RendererState_2 = new A.RendererState(2, "ready");
@@ -15175,6 +15932,8 @@
     B.ResourceRef_9Ho = new A.ResourceRef("dofOutput", B.ResourceFormat_0, 384, 216, 1, 0);
     B.ResourceFormat_2 = new A.ResourceFormat(2, "depth24");
     B.ResourceRef_Bey = new A.ResourceRef("shadowMap", B.ResourceFormat_2, 512, 512, 1, 0);
+    B.ResourceRef_EZ2 = new A.ResourceRef("volumetricLight", B.ResourceFormat_0, 192, 108, 1, 0);
+    B.ResourceRef_OV9 = new A.ResourceRef("sceneColor", B.ResourceFormat_0, 384, 216, 1, 1);
     B.ResourceRef_PIK = new A.ResourceRef("ssaoRaw", B.ResourceFormat_0, 192, 108, 1, 0);
     B.ResourceRef_Rap = new A.ResourceRef("ssaoBlurred", B.ResourceFormat_0, 192, 108, 1, 0);
     B.ResourceRef_SSV = new A.ResourceRef("gradeOutput", B.ResourceFormat_0, 384, 216, 1, 0);
@@ -15185,8 +15944,8 @@
     B.ResourceRef_qfj = new A.ResourceRef("present", B.ResourceFormat_0, 384, 216, 1, 0);
     B.ResourceRef_rRS = new A.ResourceRef("sceneColor", B.ResourceFormat_0, 384, 216, 1, 0);
     B.ResourceRef_tcv = new A.ResourceRef("ps1Output", B.ResourceFormat_0, 384, 216, 1, 0);
-    B.Object_4zr = {shadows: 0, ssao: 1, bloom: 2, dof: 3, grade: 4, ps1: 5, vhs: 6, msaa: 7, "material-array": 8};
-    B.Set_wtCB7 = new A.ConstantStringSet(B.Object_4zr, 9, type$.ConstantStringSet_String);
+    B.Object_YDp = {shadows: 0, ssao: 1, bloom: 2, dof: 3, grade: 4, ps1: 5, vhs: 6, msaa: 7, "material-array": 8, volumetric: 9};
+    B.Set_PGzT9 = new A.ConstantStringSet(B.Object_YDp, 10, type$.ConstantStringSet_String);
     B.ShaderCompileStage_2 = new A.ShaderCompileStage(2, "link");
     B.ShaderCompileException_MjR = new A.ShaderCompileException(B.ShaderCompileStage_2, "gl.createProgram() returned null");
     B.ShaderCompileStage_0 = new A.ShaderCompileStage(0, "vertex");
@@ -15315,7 +16074,7 @@
     _lazyFinal($, "_Utf8Decoder__reusableBuffer", "$get$_Utf8Decoder__reusableBuffer", () => A.NativeUint8List_NativeUint8List(4096));
     _lazyFinal($, "_Utf8Decoder__decoder", "$get$_Utf8Decoder__decoder", () => new A._Utf8Decoder__decoder_closure().call$0());
     _lazyFinal($, "_Utf8Decoder__decoderNonfatal", "$get$_Utf8Decoder__decoderNonfatal", () => new A._Utf8Decoder__decoderNonfatal_closure().call$0());
-    _lazyFinal($, "_Base64Decoder__inverseAlphabet", "$get$_Base64Decoder__inverseAlphabet", () => new Int8Array(A._ensureNativeList(A._setArrayType([-2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1, -2, -2, -2, -2, -2, 62, -2, 62, -2, 63, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, -2, -2, -2, -1, -2, -2, -2, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, -2, -2, -2, -2, 63, -2, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, -2, -2, -2, -2, -2], type$.JSArray_int))));
+    _lazyFinal($, "_Base64Decoder__inverseAlphabet", "$get$_Base64Decoder__inverseAlphabet", () => A.NativeInt8List__create1(A._ensureNativeList(A._setArrayType([-2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1, -2, -2, -2, -2, -2, 62, -2, 62, -2, 63, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, -2, -2, -2, -1, -2, -2, -2, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, -2, -2, -2, -2, 63, -2, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, -2, -2, -2, -2, -2], type$.JSArray_int))));
     _lazyFinal($, "_hashSeed", "$get$_hashSeed", () => A.objectHashCode(B.Type_Object_A4p));
     _lazyFinal($, "BloomResources_sceneColorPostBloom", "$get$BloomResources_sceneColorPostBloom", () => B.ResourceRef_rRS.nextVersion$0());
     _lazyFinal($, "FallbackPixels_whiteAlbedo", "$get$FallbackPixels_whiteAlbedo", () => A.NativeUint8List_NativeUint8List$fromList(A._setArrayType([255, 255, 255, 255], type$.JSArray_int)));
