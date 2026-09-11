@@ -354,7 +354,8 @@ void main(){
   // (N.L * shadow * attenuation) term, only the ambient fill, or it would
   // double up with real shadowing and read as an incorrect global darkening
   // rather than contact occlusion specifically.
-  vec3 ambient=uAmbientColor*uAmbientIntensity*uAmbientLightScale*ao;
+  float upward=clamp(n.y*0.5+0.5,0.0,1.0);
+  vec3 ambient=uAmbientColor*uAmbientIntensity*uAmbientLightScale*ao*mix(0.85,1.15,upward);
   vec3 baseColor=vColor.rgb*tex.rgb*uMaterialTint;
   // Metallic surfaces contribute less diffuse energy; roughness keeps a
   // small, stable broadening factor until the surface-v2 camera/specular
@@ -368,7 +369,6 @@ void main(){
   float wetDepth=1.0-smoothstep(2.0,18.0,max(vViewDepth,0.0));
   float wetness=clamp(uRainWetness,0.0,1.0)*wetDepth;
   baseColor=mix(baseColor,baseColor*vec3(0.84,0.90,0.98),wetness*0.22);
-  float upward=clamp(n.y*0.5+0.5,0.0,1.0);
   float thermalDissolution=clamp(uSurfaceDissolution,0.0,1.0);
   // A steady spherical conductive field decays approximately as 1/r. The
   // host keeps the slow latent material memory in uSurfaceDissolution; this
@@ -453,14 +453,16 @@ void main(){
   // by wetness/grazing angle. A real probe/history hit can raise confidence;
   // the current host fallback remains visible but never masquerades as SSR.
   float reflectionNdotV=max(dot(n,viewDir),0.0);
-  float reflectionFresnel=0.04+0.96*pow(1.0-reflectionNdotV,5.0);
-  float reflectionSurface=clamp(wetness+0.18*dissolution,0.0,1.0);
+  vec3 f0=mix(vec3(0.04),baseColor,metal);
+  vec3 envFresnel=f0+(max(vec3(1.0-specRough),f0)-f0)*pow(clamp(1.0-reflectionNdotV,0.0,1.0),5.0);
+  float envGloss=(1.0-specRough)*(1.0-specRough);
+  float reflectionSurface=clamp(metal*0.85+(1.0-metal)*(wetness+0.18*dissolution+envGloss*0.25),0.0,1.0);
   float reflectionConfidence=0.20+0.80*clamp(uReflectionConfidence,0.0,1.0);
   float reflectionWeight=clamp(
-    uReflectionIntensity*reflectionSurface*reflectionFresnel*
+    uReflectionIntensity*reflectionSurface*
       (1.0-0.72*rough)*reflectionConfidence,
     0.0,1.0);
-  lit+=uReflectionColor*reflectionWeight;
+  lit+=uReflectionColor*envFresnel*reflectionWeight*ao;
   vec3 emissive=texture(uEmissiveMap,uv).rgb*uMaterialTint*uEmissiveStrength;
   lit+=emissive;
   if(uLightmapIntensity>0.0){

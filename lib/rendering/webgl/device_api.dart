@@ -276,6 +276,7 @@ abstract interface class GpuDevice {
     required int offsetBytes,
   });
   void enableVertexAttribArray(int location);
+  void vertexAttribDivisor(int location, int divisor);
 
   /// Binds a buffer (created via [createBuffer]) as the currently bound
   /// VAO's element (index) array, for `drawElements`. Uint16 is compact;

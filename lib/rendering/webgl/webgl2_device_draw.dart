@@ -349,6 +349,11 @@ extension WebGl2DeviceDraw on WebGl2Device {
     gl.enableVertexAttribArray(location);
   }
 
+  void vertexAttribDivisorImpl(int location, int divisor) {
+    _requireReady();
+    gl.vertexAttribDivisor(location, divisor);
+  }
+
   /// Accepts either a standalone texture ([_WebGlTexture], from
   /// `createTexture`) or a single-sample render target ([_WebGlFramebuffer],
   /// from `createTarget`) and samples its color attachment. A multisampled

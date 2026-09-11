@@ -353,6 +353,10 @@ final class WebGl2Device with _WebGlTimerSupport implements GpuDevice {
       enableVertexAttribArrayImpl(location);
 
   @override
+  void vertexAttribDivisor(int location, int divisor) =>
+      vertexAttribDivisorImpl(location, divisor);
+
+  @override
   void bindTexture(int unit, GpuObject texture) =>
       bindTextureImpl(unit, texture);
 

@@ -27,6 +27,8 @@ final class FakeGpuDevice with _FakeGpuTimerSupport implements GpuDevice {
 
   int bufferCreateCalls = 0;
   int bufferDeleteCalls = 0;
+  int bufferUploadCalls = 0;
+  final Map<int, Float32List> uploadedBufferData = {};
   int textureCreateCalls = 0;
   int textureDeleteCalls = 0;
   int targetCreateCalls = 0;
@@ -105,6 +107,8 @@ final class FakeGpuDevice with _FakeGpuTimerSupport implements GpuDevice {
     int dstByteOffset = 0,
   }) {
     _requireReady();
+    bufferUploadCalls += 1;
+    uploadedBufferData[(buffer as _FakeGpuObject).id] = Float32List.fromList(data);
   }
 
   @override
@@ -422,6 +426,12 @@ final class FakeGpuDevice with _FakeGpuTimerSupport implements GpuDevice {
   void enableVertexAttribArray(int location) {
     _requireReady();
     drawLog.add('enableVertexAttribArray($location)');
+  }
+
+  @override
+  void vertexAttribDivisor(int location, int divisor) {
+    _requireReady();
+    drawLog.add('vertexAttribDivisor($location, $divisor)');
   }
 
   @override
