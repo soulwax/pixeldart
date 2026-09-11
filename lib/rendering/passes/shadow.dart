@@ -1,7 +1,9 @@
+import 'dart:math' as math;
 import 'dart:typed_data';
 
 import '../api/handles.dart';
 import '../api/lights.dart';
+import '../math/bounds.dart';
 import '../api/materials.dart';
 import '../api/scene.dart';
 import '../core/batching.dart';
@@ -44,6 +46,33 @@ final class ShadowLightView {
       aspect: 1,
       near: 0.05,
       far: light.range,
+    );
+    return ShadowLightView(projection * view);
+  }
+
+  /// Builds an orthographic light-space projection tightly encompassing [bounds].
+  factory ShadowLightView.fromDirectionalLight({
+    required DirectionalLight light,
+    required Aabb bounds,
+  }) {
+    final center = bounds.center;
+    final dir = light.direction.normalized;
+    final extent = bounds.extent;
+    final radius = math.sqrt(
+      extent.x * extent.x + extent.y * extent.y + extent.z * extent.z,
+    );
+
+    final eye = center - (dir * radius);
+    final up = dir.x.abs() < 0.99 ? const Vec3(1, 0, 0) : const Vec3(0, 1, 0);
+    final view = Mat4.lookAt(eye: eye, forward: dir, up: up);
+
+    final projection = Mat4.orthographic(
+      left: -radius,
+      right: radius,
+      bottom: -radius,
+      top: radius,
+      near: 0.1,
+      far: radius * 2.0,
     );
     return ShadowLightView(projection * view);
   }

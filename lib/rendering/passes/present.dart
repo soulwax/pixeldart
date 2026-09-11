@@ -16,6 +16,8 @@ import '../webgl/draw_encoder.dart';
 import 'pass_context_impl.dart';
 import 'safe_graph_resources.dart';
 
+enum ToneMappingMode { off, reinhard, aces }
+
 /// CPU reference for the final shader's deterministic color contract. It is
 /// used by pure color-ramp fixtures; the live image path remains GLSL so the
 /// conversion runs per pixel on the GPU.
@@ -26,6 +28,12 @@ final class PresentOutputPolicy {
       encoding == ColorEncoding.srgb ? 1 : 0;
 
   static const double toneMapUniform = 1;
+
+  static double toneMapUniformFor(ToneMappingMode mode) => switch (mode) {
+    ToneMappingMode.off => 0.0,
+    ToneMappingMode.reinhard => 1.0,
+    ToneMappingMode.aces => 2.5,
+  };
 
   static List<double> encodeLinearColor(
     Iterable<double> color, {

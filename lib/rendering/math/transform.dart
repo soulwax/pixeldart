@@ -62,6 +62,13 @@ final class Transform {
 
   Vec3 transformDir(Vec3 d) => rotation.rotate(d * scale);
 
+  /// Composes this parent transform with a [child] transform.
+  Transform operator *(Transform child) => Transform(
+    translation: translation + rotation.rotate(child.translation * scale),
+    rotation: (rotation * child.rotation).normalized,
+    scale: scale * child.scale,
+  );
+
   @override
   String toString() => 'Transform($translation, $rotation, scale=$scale)';
 }

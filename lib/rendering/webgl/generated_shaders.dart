@@ -768,6 +768,10 @@ vec3 reinhardToneMap(vec3 color){
   return color/(vec3(1.)+color);
 }
 
+vec3 acesToneMap(vec3 color){
+  return clamp((color*(2.51*color+0.03))/(color*(2.43*color+0.59)+0.14),0.0,1.0);
+}
+
 vec3 linearToSrgb(vec3 color){
   vec3 cutoff=step(vec3(.0031308),color);
   vec3 low=color*12.92;
@@ -922,7 +926,9 @@ void main(){
   // Exposure operates in scene-linear space; tone mapping prevents HDR
   // highlights from clipping before the selected output transfer function.
   vec3 color=max(source.rgb,vec3(0.))*max(uExposure,0.);
-  color=mix(color,reinhardToneMap(color),clamp(uToneMap,0.,1.));
+  vec3 mapped=uToneMap>1.5?acesToneMap(color):reinhardToneMap(color);
+  float toneMix=uToneMap>1.5?clamp(uToneMap-1.5,0.,1.):clamp(uToneMap,0.,1.);
+  color=mix(color,mapped,toneMix);
   float edge=distance(vUv,vec2(.5));
   float vignette=smoothstep(.35,.78,edge);
   color*=1.-clamp(uVignette,0.,1.)*vignette;

@@ -5,6 +5,8 @@ import '../api/renderer_factory.dart';
 import 'webgl2_device.dart';
 
 export 'device_api.dart';
+export 'pixeldart_app.dart';
+export 'texture_loader.dart';
 
 /// Owns a browser WebGL device and its context listeners. Hosts retain the
 /// lease for the renderer lifetime and call [dispose] exactly once.

@@ -106,6 +106,31 @@ final class Mat4 {
     );
   }
 
+  /// Right-handed orthographic projection matching WebGL's [-1, 1] clip-space
+  /// depth convention.
+  factory Mat4.orthographic({
+    required double left,
+    required double right,
+    required double bottom,
+    required double top,
+    required double near,
+    required double far,
+  }) {
+    final rl = 1.0 / (right - left);
+    final tb = 1.0 / (top - bottom);
+    final fn = 1.0 / (far - near);
+    return Mat4._(
+      Float32List(16)
+        ..[0] = 2.0 * rl
+        ..[5] = 2.0 * tb
+        ..[10] = -2.0 * fn
+        ..[12] = -(right + left) * rl
+        ..[13] = -(top + bottom) * tb
+        ..[14] = -(far + near) * fn
+        ..[15] = 1.0,
+    );
+  }
+
   /// Right-handed look-at. `forward` need not be normalized; `up` must not
   /// be parallel to `forward`.
   factory Mat4.lookAt({
