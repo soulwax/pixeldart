@@ -1,6 +1,8 @@
 import '../api/handles.dart';
 import '../api/scene.dart';
+import '../math/quat.dart';
 import '../math/transform.dart';
+import '../math/vec.dart';
 
 /// Hierarchical scene node representing an entity, group, or visual item.
 final class SceneNode {
@@ -55,6 +57,87 @@ final class SceneNode {
   /// Alias for [localTransform] for natural ergonomic code.
   Transform get transform => _localTransform;
   set transform(Transform value) => localTransform = value;
+
+  /// Local translation vector.
+  Vec3 get position => _localTransform.translation;
+  set position(Vec3 value) {
+    localTransform = Transform(
+      translation: value,
+      rotation: _localTransform.rotation,
+      scale: _localTransform.scale,
+    );
+  }
+
+  /// Local rotation quaternion.
+  Quat get rotation => _localTransform.rotation;
+  set rotation(Quat value) {
+    localTransform = Transform(
+      translation: _localTransform.translation,
+      rotation: value,
+      scale: _localTransform.scale,
+    );
+  }
+
+  /// Local uniform scale.
+  double get scale => _localTransform.scale;
+  set scale(double value) {
+    localTransform = Transform(
+      translation: _localTransform.translation,
+      rotation: _localTransform.rotation,
+      scale: value,
+    );
+  }
+
+  /// Translates node by [delta].
+  void translate(Vec3 delta) {
+    position = _localTransform.translation + delta;
+  }
+
+  /// Rotates node around a normalized [axis] by [radians].
+  void rotateAxis(Vec3 axis, double radians) {
+    final q = Quat.axisAngle(axis, radians);
+    rotation = _localTransform.rotation * q;
+  }
+
+  /// Rotates node around the X axis by [radians].
+  void rotateX(double radians) => rotateAxis(const Vec3(1, 0, 0), radians);
+
+  /// Rotates node around the Y axis by [radians].
+  void rotateY(double radians) => rotateAxis(const Vec3(0, 1, 0), radians);
+
+  /// Rotates node around the Z axis by [radians].
+  void rotateZ(double radians) => rotateAxis(const Vec3(0, 0, 1), radians);
+
+  /// Uniformly scales the node by [factor].
+  void scaleBy(double factor) {
+    scale = _localTransform.scale * factor;
+  }
+
+  /// Orients the node so its [forward] vector faces toward [target].
+  void lookAt(Vec3 target, {Vec3 forward = const Vec3(0, 0, 1)}) {
+    final dir = target - _localTransform.translation;
+    if (dir.lengthSquared > 1e-8) {
+      rotation = Quat.fromTo(forward, dir.normalized);
+    }
+  }
+
+  /// Recursively searches this subtree for a node with the given [queryName].
+  SceneNode? findByName(String queryName) {
+    if (name == queryName) return this;
+    for (final child in _children) {
+      final found = child.findByName(queryName);
+      if (found != null) return found;
+    }
+    return null;
+  }
+
+  /// Traverses this node and all its descendants in depth-first order.
+  void traverse(void Function(SceneNode node) callback) {
+    callback(this);
+    for (final child in _children) {
+      child.traverse(callback);
+    }
+  }
 
   /// The computed world transform, resolving parent hierarchy on demand.
   Transform get worldTransform {

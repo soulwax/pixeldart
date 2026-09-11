@@ -19,6 +19,21 @@ final class Quat {
     return Quat(a.x * s, a.y * s, a.z * s, math.cos(half));
   }
 
+  /// Creates a quaternion that rotates vector [v1] into vector [v2].
+  factory Quat.fromTo(Vec3 v1, Vec3 v2) {
+    final a = v1.normalized;
+    final b = v2.normalized;
+    final d = a.dot(b);
+    if (d >= 0.999999) return identity;
+    if (d <= -0.999999) {
+      var axis = Vec3.unitX.cross(a);
+      if (axis.lengthSquared < 0.001) axis = Vec3.unitY.cross(a);
+      return Quat.axisAngle(axis.normalized, math.pi);
+    }
+    final axis = a.cross(b);
+    return Quat(axis.x, axis.y, axis.z, 1.0 + d).normalized;
+  }
+
   Quat operator *(Quat o) => Quat(
     w * o.x + x * o.w + y * o.z - z * o.y,
     w * o.y - x * o.z + y * o.w + z * o.x,

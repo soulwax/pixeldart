@@ -17,20 +17,35 @@ void main() async {
   );
   if (app == null) return;
 
-  // Initial camera view
+  // Initial camera view with turntable auto-rotation
   app.cameraController?.distance = 8.5;
   app.cameraController?.elevationRadians = 0.45;
   app.cameraController?.target = const Vec3(0, 0.5, 0);
+  app.cameraController?.autoRotate = true;
+  app.cameraController?.autoRotateSpeed = 0.18;
+
+  // Atmospheric Skybox declaration
+  app.skybox = const SkyboxDeclaration(
+    assetId: 'showcase_sky',
+    horizon: LinearColor(0.12, 0.16, 0.24),
+    zenith: LinearColor(0.03, 0.06, 0.14),
+    ground: LinearColor(0.015, 0.02, 0.03),
+    horizonGlow: 0.12,
+    starDensity: 0.005,
+    cloudCoverage: 0.32,
+    cloudDensity: 0.40,
+    cloudSampleCount: 12,
+  );
 
   // Environment with Split-Sum IBL and AgX tone mapping
-  app.environment = const FrameEnvironment(
-    clearColor: LinearColor(0.015, 0.02, 0.03),
-    ambientColor: LinearColor(0.04, 0.05, 0.07),
+  app.environment = app.environment.copyWith(
+    clearColor: const LinearColor(0.015, 0.02, 0.03),
+    ambientColor: const LinearColor(0.04, 0.05, 0.07),
     ambientIntensity: 1.0,
-    reflectionColor: LinearColor(0.7, 0.8, 1.0),
+    reflectionColor: const LinearColor(0.7, 0.8, 1.0),
     reflectionIntensity: 1.2,
     reflectionConfidence: 0.85,
-    directionalLight: DirectionalLight(
+    directionalLight: const DirectionalLight(
       direction: Vec3(0.6, -1.0, 0.4),
       color: LinearColor(1.0, 0.95, 0.88),
       intensity: 2.4,
@@ -66,6 +81,18 @@ void main() async {
     );
   }
 
+  // Wire turntable auto-rotate toggle
+  final turntableToggle = web.document.querySelector('#turntable-toggle');
+  if (turntableToggle is web.HTMLInputElement) {
+    turntableToggle.checked = true;
+    turntableToggle.addEventListener(
+      'change',
+      ((web.Event _) {
+        app.cameraController?.autoRotate = turntableToggle.checked;
+      }).toJS,
+    );
+  }
+
   // Create procedural meshes using Primitives
   final groundMesh = app.createMesh(
     Primitives.plane(width: 30, depth: 30, subdivisionsX: 4, subdivisionsZ: 4),
@@ -96,82 +123,97 @@ void main() async {
     debugLabel: 'satellite_cube',
   );
 
-  // Create high-fidelity PBR materials
+  // Create high-fidelity PBR materials using new presets
   final groundMat = app.createMaterial(
-    const MaterialDefinition(
+    MaterialDefinition.matte(
       key: 'ground',
-      tintR: 0.10,
-      tintG: 0.12,
-      tintB: 0.16,
-      roughness: 0.65,
-      metallic: 0.2,
+      color: const LinearColor(0.10, 0.12, 0.16),
+      roughness: 0.70,
     ),
   );
-  final goldSphereMat = app.createMaterial(
-    const MaterialDefinition(
-      key: 'gold_sphere',
-      tintR: 1.0,
-      tintG: 0.78,
-      tintB: 0.35,
-      roughness: 0.12,
-      metallic: 0.95,
-      clearcoatStrength: 0.85,
-      clearcoatRoughness: 0.08,
+
+  final heroMaterials = <String, MaterialHandle>{
+    'gold': app.createMaterial(
+      MaterialDefinition.gold(
+        key: 'hero_gold',
+        roughness: 0.12,
+      ),
     ),
-  );
+    'chrome': app.createMaterial(
+      MaterialDefinition.chrome(
+        key: 'hero_chrome',
+        roughness: 0.05,
+      ),
+    ),
+    'copper': app.createMaterial(
+      MaterialDefinition.copper(
+        key: 'hero_copper',
+        roughness: 0.15,
+      ),
+    ),
+    'silver': app.createMaterial(
+      MaterialDefinition.silver(
+        key: 'hero_silver',
+        roughness: 0.08,
+      ),
+    ),
+    'ceramic': app.createMaterial(
+      MaterialDefinition.ceramic(
+        key: 'hero_ceramic',
+        color: const LinearColor(0.95, 0.12, 0.22),
+        roughness: 0.18,
+        clearcoat: 0.9,
+      ),
+    ),
+    'plastic': app.createMaterial(
+      MaterialDefinition.plastic(
+        key: 'hero_plastic',
+        color: const LinearColor(0.10, 0.85, 0.45),
+        roughness: 0.22,
+      ),
+    ),
+    'iron': app.createMaterial(
+      MaterialDefinition.iron(
+        key: 'hero_iron',
+        roughness: 0.28,
+      ),
+    ),
+  };
+
   final chromeTorusMat = app.createMaterial(
-    const MaterialDefinition(
-      key: 'chrome_torus',
-      tintR: 0.92,
-      tintG: 0.94,
-      tintB: 0.98,
-      roughness: 0.06,
-      metallic: 0.98,
-    ),
+    MaterialDefinition.chrome(key: 'torus_chrome', roughness: 0.06),
   );
-  final emeraldMat = app.createMaterial(
-    const MaterialDefinition(
-      key: 'emerald',
-      tintR: 0.10,
-      tintG: 0.88,
-      tintB: 0.42,
-      roughness: 0.25,
-      metallic: 0.4,
-      clearcoatStrength: 0.6,
+
+  final satelliteMaterials = [
+    app.createMaterial(
+      MaterialDefinition.plastic(
+        key: 'sat_emerald',
+        color: const LinearColor(0.10, 0.88, 0.42),
+        roughness: 0.22,
+      ),
     ),
-  );
-  final rubyMat = app.createMaterial(
-    const MaterialDefinition(
-      key: 'ruby',
-      tintR: 0.98,
-      tintG: 0.12,
-      tintB: 0.22,
-      roughness: 0.20,
-      metallic: 0.5,
-      clearcoatStrength: 0.7,
+    app.createMaterial(
+      MaterialDefinition.ceramic(
+        key: 'sat_ruby',
+        color: const LinearColor(0.98, 0.12, 0.22),
+        roughness: 0.18,
+        clearcoat: 0.8,
+      ),
     ),
-  );
-  final sapphireMat = app.createMaterial(
-    const MaterialDefinition(
-      key: 'sapphire',
-      tintR: 0.18,
-      tintG: 0.42,
-      tintB: 0.98,
-      roughness: 0.22,
-      metallic: 0.45,
-      clearcoatStrength: 0.6,
+    app.createMaterial(
+      MaterialDefinition.plastic(
+        key: 'sat_sapphire',
+        color: const LinearColor(0.18, 0.42, 0.98),
+        roughness: 0.20,
+      ),
     ),
-  );
-  final amethystMat = app.createMaterial(
-    const MaterialDefinition(
-      key: 'amethyst',
-      tintR: 0.72,
-      tintG: 0.25,
-      tintB: 0.95,
-      roughness: 0.30,
-      metallic: 0.35,
+    app.createMaterial(
+      MaterialDefinition.copper(
+        key: 'sat_copper',
+        roughness: 0.20,
+      ),
     ),
-  );
+  ];
 
   // Build Scene Graph
   app.scene.add(
@@ -183,10 +225,24 @@ void main() async {
 
   final centerNode = app.scene.add(
     mesh: sphereMesh,
-    material: goldSphereMat,
+    material: heroMaterials['gold']!,
     transform: Transform.at(const Vec3(0, 0.5, 0)),
     name: 'center_sphere_node',
   );
+
+  // Wire hero material selector
+  final matSelect = web.document.querySelector('#material-select');
+  if (matSelect is web.HTMLSelectElement) {
+    matSelect.addEventListener(
+      'change',
+      ((web.Event _) {
+        final mat = heroMaterials[matSelect.value];
+        if (mat != null) {
+          centerNode.material = mat;
+        }
+      }).toJS,
+    );
+  }
 
   final torusNode = app.scene.add(
     mesh: torusMesh,
@@ -198,20 +254,14 @@ void main() async {
   final orbitRing = SceneNode.group(name: 'orbit_ring');
   centerNode.addChild(orbitRing);
 
-  final satellites = [
-    (mesh: capsuleMesh, mat: emeraldMat),
-    (mesh: cylinderMesh, mat: rubyMat),
-    (mesh: coneMesh, mat: sapphireMat),
-    (mesh: cubeMesh, mat: amethystMat),
-  ];
-
+  final satelliteMeshes = [capsuleMesh, cylinderMesh, coneMesh, cubeMesh];
   final satelliteNodes = <SceneNode>[];
   const count = 4;
   for (var i = 0; i < count; i++) {
     final angle = i * (math.pi * 2.0 / count);
     final sat = orbitRing.add(
-      mesh: satellites[i].mesh,
-      material: satellites[i].mat,
+      mesh: satelliteMeshes[i],
+      material: satelliteMaterials[i],
       transform: Transform.at(
         Vec3(math.cos(angle) * 3.2, 0.0, math.sin(angle) * 3.2),
       ),
@@ -220,23 +270,19 @@ void main() async {
     satelliteNodes.add(sat);
   }
 
-  // Animation frame loop
+  // Animation frame loop using ergonomic SceneNode methods
   app.onFrame = (ctx) {
     final t = ctx.timeSeconds;
+    final dt = ctx.deltaTime;
 
-    centerNode.transform = Transform(
-      translation: Vec3(0, 0.5 + math.sin(t * 1.4) * 0.15, 0),
-      rotation: Quat.axisAngle(const Vec3(0, 1, 0), t * 0.35),
-    );
+    // Use SceneNode position setter and rotate methods
+    centerNode.position = Vec3(0, 0.5 + math.sin(t * 1.4) * 0.15, 0);
+    centerNode.rotateY(0.35 * dt);
 
-    torusNode.transform = Transform(
-      translation: Vec3(0, 0.5 + math.sin(t * 1.4) * 0.15, 0),
-      rotation: Quat.axisAngle(const Vec3(1, 0.3, 0.2).normalized, t * 0.7),
-    );
+    torusNode.position = Vec3(0, 0.5 + math.sin(t * 1.4) * 0.15, 0);
+    torusNode.rotateAxis(const Vec3(1, 0.3, 0.2).normalized, 0.7 * dt);
 
-    orbitRing.transform = Transform(
-      rotation: Quat.axisAngle(const Vec3(0, 1, 0), t * 0.65),
-    );
+    orbitRing.rotateY(0.65 * dt);
 
     for (var i = 0; i < satelliteNodes.length; i++) {
       final axis = switch (i % 3) {
@@ -244,10 +290,7 @@ void main() async {
         1 => const Vec3(0, 1, 1).normalized,
         _ => const Vec3(1, 0, 1).normalized,
       };
-      satelliteNodes[i].transform = Transform(
-        translation: satelliteNodes[i].transform.translation,
-        rotation: Quat.axisAngle(axis, t * 2.2 + i * 1.2),
-      );
+      satelliteNodes[i].rotateAxis(axis, (2.2 + i * 1.2) * dt);
     }
 
     final p0 = Vec3(
@@ -267,18 +310,8 @@ void main() async {
     );
     final p3 = Vec3(0, 3.8 + math.sin(t * 2.2) * 0.9, 0);
 
-    app.environment = FrameEnvironment(
-      clearColor: const LinearColor(0.015, 0.02, 0.03),
-      ambientColor: const LinearColor(0.04, 0.05, 0.07),
-      ambientIntensity: 1.0,
-      reflectionColor: const LinearColor(0.7, 0.8, 1.0),
-      reflectionIntensity: 1.2,
-      reflectionConfidence: 0.85,
-      directionalLight: const DirectionalLight(
-        direction: Vec3(0.5, -1.0, 0.3),
-        color: LinearColor(1.0, 0.95, 0.85),
-        intensity: 2.2,
-      ),
+    // Update point lights on environment using copyWith
+    app.environment = app.environment.copyWith(
       pointLights: [
         PointLight(
           id: 0,

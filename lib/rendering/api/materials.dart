@@ -1,4 +1,5 @@
 import 'handles.dart';
+import 'lights.dart';
 
 enum AlphaMode { opaque, masked, blended }
 
@@ -92,6 +93,166 @@ final class MaterialDefinition {
     this.affineSampling = false,
     this.quantized = false,
   });
+
+  /// Creates a standard metallic material.
+  factory MaterialDefinition.metal({
+    String key = 'metal',
+    required LinearColor color,
+    double roughness = 0.2,
+    double clearcoat = 0.0,
+  }) => MaterialDefinition(
+    key: key,
+    tintR: color.r,
+    tintG: color.g,
+    tintB: color.b,
+    metallic: 1.0,
+    roughness: roughness,
+    clearcoatStrength: clearcoat,
+  );
+
+  /// Creates a standard dielectric (non-metallic) material.
+  factory MaterialDefinition.dielectric({
+    String key = 'dielectric',
+    required LinearColor color,
+    double roughness = 0.5,
+    double clearcoat = 0.0,
+  }) => MaterialDefinition(
+    key: key,
+    tintR: color.r,
+    tintG: color.g,
+    tintB: color.b,
+    metallic: 0.0,
+    roughness: roughness,
+    clearcoatStrength: clearcoat,
+  );
+
+  /// Physically calibrated gold preset (F0 = [1.0, 0.78, 0.35], metallic = 1.0).
+  factory MaterialDefinition.gold({
+    String key = 'gold',
+    double roughness = 0.15,
+  }) => MaterialDefinition(
+    key: key,
+    tintR: 1.0,
+    tintG: 0.78,
+    tintB: 0.35,
+    metallic: 1.0,
+    roughness: roughness,
+    clearcoatStrength: 0.5,
+    clearcoatRoughness: 0.1,
+  );
+
+  /// Physically calibrated silver preset (F0 = [0.97, 0.96, 0.91], metallic = 1.0).
+  factory MaterialDefinition.silver({
+    String key = 'silver',
+    double roughness = 0.12,
+  }) => MaterialDefinition(
+    key: key,
+    tintR: 0.97,
+    tintG: 0.96,
+    tintB: 0.91,
+    metallic: 1.0,
+    roughness: roughness,
+  );
+
+  /// Physically calibrated copper preset (F0 = [0.95, 0.64, 0.54], metallic = 1.0).
+  factory MaterialDefinition.copper({
+    String key = 'copper',
+    double roughness = 0.20,
+  }) => MaterialDefinition(
+    key: key,
+    tintR: 0.95,
+    tintG: 0.64,
+    tintB: 0.54,
+    metallic: 1.0,
+    roughness: roughness,
+  );
+
+  /// High-reflectivity chrome / mirror preset.
+  factory MaterialDefinition.chrome({
+    String key = 'chrome',
+    double roughness = 0.05,
+  }) => MaterialDefinition(
+    key: key,
+    tintR: 0.95,
+    tintG: 0.95,
+    tintB: 0.98,
+    metallic: 0.98,
+    roughness: roughness,
+  );
+
+  /// Rough cast iron preset.
+  factory MaterialDefinition.iron({
+    String key = 'iron',
+    double roughness = 0.40,
+  }) => MaterialDefinition(
+    key: key,
+    tintR: 0.56,
+    tintG: 0.57,
+    tintB: 0.58,
+    metallic: 0.85,
+    roughness: roughness,
+  );
+
+  /// Smooth glossy plastic preset.
+  factory MaterialDefinition.plastic({
+    String key = 'plastic',
+    required LinearColor color,
+    double roughness = 0.25,
+  }) => MaterialDefinition(
+    key: key,
+    tintR: color.r,
+    tintG: color.g,
+    tintB: color.b,
+    metallic: 0.0,
+    roughness: roughness,
+    clearcoatStrength: 0.3,
+  );
+
+  /// Glazed ceramic / porcelain preset with strong dielectric clearcoat.
+  factory MaterialDefinition.ceramic({
+    String key = 'ceramic',
+    required LinearColor color,
+    double roughness = 0.10,
+    double clearcoat = 0.85,
+  }) => MaterialDefinition(
+    key: key,
+    tintR: color.r,
+    tintG: color.g,
+    tintB: color.b,
+    metallic: 0.0,
+    roughness: roughness,
+    clearcoatStrength: clearcoat,
+    clearcoatRoughness: 0.08,
+  );
+
+  /// Rough matte diffuse surface.
+  factory MaterialDefinition.matte({
+    String key = 'matte',
+    required LinearColor color,
+    double roughness = 0.90,
+  }) => MaterialDefinition(
+    key: key,
+    tintR: color.r,
+    tintG: color.g,
+    tintB: color.b,
+    metallic: 0.0,
+    roughness: roughness,
+  );
+
+  /// Glowing emissive material.
+  factory MaterialDefinition.emissive({
+    String key = 'emissive',
+    required LinearColor color,
+    double strength = 2.0,
+  }) => MaterialDefinition(
+    key: key,
+    tintR: color.r,
+    tintG: color.g,
+    tintB: color.b,
+    emissiveStrength: strength,
+    roughness: 0.5,
+    metallic: 0.0,
+  );
 
   void validate() {
     if (key.isEmpty) {

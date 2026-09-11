@@ -516,6 +516,92 @@ final class FrameEnvironment {
       }
     }
   }
+
+  static const _sentinel = Object();
+
+  FrameEnvironment copyWith({
+    LinearColor? clearColor,
+    LinearColor? fogColor,
+    double? fogStart,
+    double? fogEnd,
+    Object? fogHeightFalloff = _sentinel,
+    Object? fogDensity = _sentinel,
+    LinearColor? volumetricAlbedo,
+    double? volumetricHeightFalloff,
+    double? volumetricDustDensity,
+    double? volumetricAnisotropy,
+    double? volumetricJitter,
+    double? volumetricIntensity,
+    int? volumetricSampleCount,
+    double? shadowFilterRadius,
+    double? ambientLightScale,
+    double? directLightScale,
+    double? normalStrengthScale,
+    double? roughnessScale,
+    double? metallicScale,
+    double? specularScale,
+    double? shadowBias,
+    LinearColor? reflectionColor,
+    double? reflectionIntensity,
+    double? reflectionConfidence,
+    LinearColor? ambientColor,
+    double? ambientIntensity,
+    Object? directionalLight = _sentinel,
+    List<PointLight>? pointLights,
+    List<SpotLight>? spotLights,
+    List<VolumetricSource>? volumetricSources,
+    List<ThermalSource>? thermalSources,
+    Object? skybox = _sentinel,
+  }) {
+    return FrameEnvironment(
+      clearColor: clearColor ?? this.clearColor,
+      fogColor: fogColor ?? this.fogColor,
+      fogStart: fogStart ?? this.fogStart,
+      fogEnd: fogEnd ?? this.fogEnd,
+      fogHeightFalloff: identical(fogHeightFalloff, _sentinel)
+          ? this.fogHeightFalloff
+          : fogHeightFalloff as double?,
+      fogDensity: identical(fogDensity, _sentinel)
+          ? this.fogDensity
+          : fogDensity as double?,
+      volumetricAlbedo: volumetricAlbedo ?? this.volumetricAlbedo,
+      volumetricHeightFalloff:
+          volumetricHeightFalloff ?? this.volumetricHeightFalloff,
+      volumetricDustDensity:
+          volumetricDustDensity ?? this.volumetricDustDensity,
+      volumetricAnisotropy:
+          volumetricAnisotropy ?? this.volumetricAnisotropy,
+      volumetricJitter: volumetricJitter ?? this.volumetricJitter,
+      volumetricIntensity: volumetricIntensity ?? this.volumetricIntensity,
+      volumetricSampleCount:
+          volumetricSampleCount ?? this.volumetricSampleCount,
+      shadowFilterRadius: shadowFilterRadius ?? this.shadowFilterRadius,
+      ambientLightScale: ambientLightScale ?? this.ambientLightScale,
+      directLightScale: directLightScale ?? this.directLightScale,
+      normalStrengthScale: normalStrengthScale ?? this.normalStrengthScale,
+      roughnessScale: roughnessScale ?? this.roughnessScale,
+      metallicScale: metallicScale ?? this.metallicScale,
+      specularScale: specularScale ?? this.specularScale,
+      shadowBias: shadowBias ?? this.shadowBias,
+      reflectionColor: reflectionColor ?? this.reflectionColor,
+      reflectionIntensity:
+          reflectionIntensity ?? this.reflectionIntensity,
+      reflectionConfidence:
+          reflectionConfidence ?? this.reflectionConfidence,
+      ambientColor: ambientColor ?? this.ambientColor,
+      ambientIntensity: ambientIntensity ?? this.ambientIntensity,
+      directionalLight: identical(directionalLight, _sentinel)
+          ? this.directionalLight
+          : directionalLight as DirectionalLight?,
+      pointLights: pointLights ?? this.pointLights,
+      spotLights: spotLights ?? this.spotLights,
+      volumetricSources: volumetricSources ?? this.volumetricSources,
+      thermalSources: thermalSources ?? this.thermalSources,
+      skybox: identical(skybox, _sentinel)
+          ? this.skybox
+          : skybox as SkyboxDeclaration?,
+    );
+  }
 }
 
 /// Everything a renderer needs for exactly one frame. [historyEpoch] is the

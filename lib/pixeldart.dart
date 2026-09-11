@@ -37,6 +37,7 @@ export 'assets/packages/model_package.dart';
 export 'assets/packages/model_package_loader.dart';
 export 'assets/packages/model_package_manifest.dart';
 export 'rendering/assets/model_package_diagnostics.dart';
+export 'rendering/assets/glb_decoder.dart';
 export 'rendering/math/bounds.dart';
 export 'rendering/math/mat4.dart';
 export 'rendering/math/quat.dart';

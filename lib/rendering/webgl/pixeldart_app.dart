@@ -1,6 +1,9 @@
 import 'dart:js_interop';
+import 'dart:typed_data';
 
 import 'package:web/web.dart' as web;
+
+import '../assets/glb_decoder.dart';
 
 import '../api/capabilities.dart';
 import '../api/effects.dart';
@@ -154,6 +157,80 @@ final class PixeldartApp {
       renderer.resources.registerMesh(data, debugLabel: debugLabel);
   MaterialHandle createMaterial(MaterialDefinition def) =>
       renderer.resources.registerMaterial(def);
+  TextureHandle createTexture({
+    required int width,
+    required int height,
+    int layers = 1,
+    bool hasMips = false,
+    GpuTextureFilter minFilter = GpuTextureFilter.linear,
+    GpuTextureFilter magFilter = GpuTextureFilter.linear,
+    GpuTextureWrap wrap = GpuTextureWrap.clampToEdge,
+    double anisotropy = 1,
+    Uint8List? pixels,
+    String? debugLabel,
+  }) =>
+      renderer.resources.registerTexture(
+        width: width,
+        height: height,
+        layers: layers,
+        hasMips: hasMips,
+        minFilter: minFilter,
+        magFilter: magFilter,
+        wrap: wrap,
+        anisotropy: anisotropy,
+        pixels: pixels,
+        debugLabel: debugLabel,
+      );
+
+  /// Current skybox declaration configured on [environment].
+  SkyboxDeclaration? get skybox => environment.skybox;
+
+  /// Sets or clears the skybox declaration on [environment].
+  set skybox(SkyboxDeclaration? value) {
+    environment = environment.copyWith(skybox: value);
+  }
+
+  /// Sets the skybox declaration on [environment].
+  void setSkybox(SkyboxDeclaration? skybox) {
+    this.skybox = skybox;
+  }
+
+  /// Decodes GLB bytes, registers meshes and materials with GPU resources,
+  /// attaches them to the scene hierarchy, and returns the root [SceneNode].
+  SceneNode loadGlb(Uint8List bytes) {
+    final result = GlbDecoder.decode(bytes);
+    final meshHandles = <MeshHandle>[];
+    for (final meshData in result.meshes) {
+      meshHandles.add(createMesh(meshData));
+    }
+    final materialHandles = <MaterialHandle>[];
+    for (final matDef in result.materials) {
+      materialHandles.add(createMaterial(matDef));
+    }
+
+    var meshCursor = 0;
+    result.rootNode.traverse((node) {
+      if (node.sortTiebreaker >= 0 && meshCursor < meshHandles.length) {
+        node.mesh = meshHandles[meshCursor];
+        final matIdx = node.sortTiebreaker;
+        node.material = matIdx < materialHandles.length
+            ? materialHandles[matIdx]
+            : materialHandles.first;
+        meshCursor++;
+      }
+    });
+
+    scene.addChild(result.rootNode);
+    return result.rootNode;
+  }
+
+  /// Asynchronously fetches a GLB file from [url], decodes it, and attaches it to the scene.
+  Future<SceneNode> loadGlbFromUrl(String url) async {
+    final response = await web.window.fetch(url.toJS).toDart;
+    final buffer = await response.arrayBuffer().toDart;
+    final bytes = buffer.toDart.asUint8List();
+    return loadGlb(bytes);
+  }
 
   void _installListeners() {
     web.window.addEventListener('resize', ((web.Event _) => _resize()).toJS);

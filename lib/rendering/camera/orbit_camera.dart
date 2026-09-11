@@ -19,6 +19,8 @@ final class OrbitCameraController {
   double near;
   double far;
   double damping;
+  bool autoRotate;
+  double autoRotateSpeed;
 
   double _targetAzimuth;
   double _targetElevation;
@@ -38,6 +40,8 @@ final class OrbitCameraController {
     this.near = 0.1,
     this.far = 200.0,
     this.damping = 10.0,
+    this.autoRotate = false,
+    this.autoRotateSpeed = 0.5,
   })  : _targetAzimuth = azimuthRadians,
         _targetElevation = elevationRadians,
         _targetDistance = distance,
@@ -95,9 +99,18 @@ final class OrbitCameraController {
     _targetPos = _targetPos + shift;
   }
 
+  /// Smoothly tracks or immediately snaps camera target to [newTarget].
+  void trackTarget(Vec3 newTarget, {bool snap = false}) {
+    _targetPos = newTarget;
+    if (snap) target = newTarget;
+  }
+
   /// Advances camera state towards targets using smooth exponential decay.
   void update(double dt) {
     if (dt <= 0) return;
+    if (autoRotate) {
+      _targetAzimuth += autoRotateSpeed * dt;
+    }
     final t = (1.0 - math.exp(-damping * dt)).clamp(0.0, 1.0);
 
     azimuthRadians += (_targetAzimuth - azimuthRadians) * t;
