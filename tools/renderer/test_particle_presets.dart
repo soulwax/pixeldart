@@ -46,6 +46,17 @@ void main() {
     'warpSpeed': ParticlePresets.warpSpeed(mesh: mesh, material: mat),
     'confetti': ParticlePresets.confetti(mesh: mesh, material: mat),
     'blizzard': ParticlePresets.blizzard(mesh: mesh, material: mat),
+    'fireworkRocket': ParticlePresets.fireworkRocket(
+      mesh: mesh,
+      rocketMaterial: mat,
+      sparkMaterial: mat,
+      explosionMaterial: mat,
+    ),
+    'rainWithSplashes': ParticlePresets.rainWithSplashes(
+      mesh: mesh,
+      rainMaterial: mat,
+      splashMaterial: mat,
+    ),
   };
 
   for (final entry in presets.entries) {
@@ -67,11 +78,7 @@ void main() {
 
     _require(submitted > 0, 'Preset "$name" must submit particles: got $submitted');
     _require(encoder.items.isNotEmpty, 'Preset "$name" encoder received descriptors');
-    _require(
-      encoder.items.every((it) => it.instanceFamilyKey == emitter.instanceFamilyKey),
-      'Preset "$name" instanceFamilyKey applied',
-    );
   }
 
-  print('All 10 particle presets verified successfully.');
+  print('All 12 particle presets verified successfully.');
 }

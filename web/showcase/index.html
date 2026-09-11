@@ -106,6 +106,8 @@
         <option value="iron">Iron (Brushed)</option>
         <option value="brushed">Brushed Titanium (ORM Texture)</option>
         <option value="carbon">Carbon Fiber (2x2 Twill ORM)</option>
+        <option value="damascus">Damascus Steel (Folded ORM)</option>
+        <option value="marble">Marble (Calacatta Vein)</option>
         <option value="hex">Hex Energy Shield (Honeycomb)</option>
         <option value="voronoi">Voronoi Bio-Cell (Worley Noise)</option>
       </select>
@@ -127,6 +129,7 @@
         <option value="orbit" selected>Orbit (Turntable)</option>
         <option value="fly">Free Fly (WASD + Look)</option>
         <option value="follow">Smooth Follow (Satellite Chase)</option>
+        <option value="tour">Cinematic Drone Tour (Spline)</option>
       </select>
     </div>
 
@@ -188,6 +191,22 @@
     </div>
 
     <div class="control-group">
+      <label class="control-label" for="vfx-particles-select">VFX Dynamic Emitter</label>
+      <select id="vfx-particles-select">
+        <option value="none">None (Off)</option>
+        <option value="campfire">Campfire (Turbulent Flame & Smoke)</option>
+        <option value="fireworks">Fireworks (Rocket -> Burst -> Bounce)</option>
+        <option value="sparks">Bouncing Sparks (Physics Plane)</option>
+        <option value="vortex">Swirling Vortex (Orbital Swirl)</option>
+        <option value="fountain">Water Fountain (Parabolic Jets)</option>
+        <option value="rain">Rain & Splashes (Impact Rings)</option>
+        <option value="blizzard">Blizzard (Wind & Curl Noise)</option>
+        <option value="warp">Warp Speed (Velocity Stretched)</option>
+        <option value="confetti">Confetti (Axial Tumbling)</option>
+      </select>
+    </div>
+
+    <div class="control-group">
       <label class="control-label" for="fog-select">Atmospheric Fog</label>
       <select id="fog-select">
         <option value="on" selected>Atmospheric Mist (Depth + Height)</option>
@@ -204,6 +223,11 @@
     <div class="control-group" id="turntable-group" style="display: flex; align-items: center; justify-content: space-between; margin-top: 6px;">
       <label class="control-label" for="turntable-toggle" style="margin-bottom: 0; cursor: pointer;">Turntable Auto-Rotate</label>
       <input type="checkbox" id="turntable-toggle" checked style="width: auto; cursor: pointer;">
+    </div>
+
+    <div class="control-group" id="terrain-group" style="display: flex; align-items: center; justify-content: space-between; margin-top: 6px;">
+      <label class="control-label" for="terrain-toggle" style="margin-bottom: 0; cursor: pointer;">Terrain & Ocean Biome</label>
+      <input type="checkbox" id="terrain-toggle" checked style="width: auto; cursor: pointer;">
     </div>
 
     <div id="picking-status" style="margin-top: 10px; padding: 8px 10px; background: rgba(26, 34, 48, 0.7); border-radius: 6px; font-size: 11px; color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.2);">

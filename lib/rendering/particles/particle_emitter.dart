@@ -142,18 +142,37 @@ final class ParticleColorGradient {
   }
 }
 
-/// Spatial point attractor applying distance-scaled inward or outward pull.
+/// Distance falloff curve for [ParticleAttractor] force calculation.
+enum AttractorFalloff {
+  /// Linear falloff from center to range: (1 - dist / range).
+  linear,
+
+  /// Inverse-square falloff: 1 / (1 + 4 * (dist / range)^2).
+  inverseSquare,
+
+  /// Constant force regardless of distance within range.
+  constant,
+}
+
+/// Spatial point attractor applying distance-scaled inward or outward pull,
+/// with optional tangential vortex swirl around an axis.
 final class ParticleAttractor {
   final Vec3 position;
   final double strength;
   final double range;
   final double killRadius;
+  final AttractorFalloff falloff;
+  final double orbitalStrength;
+  final Vec3 axis;
 
   const ParticleAttractor({
     required this.position,
     required this.strength,
     required this.range,
     this.killRadius = 0.0,
+    this.falloff = AttractorFalloff.linear,
+    this.orbitalStrength = 0.0,
+    this.axis = Vec3.unitY,
   });
 
   void validate() {
@@ -168,6 +187,12 @@ final class ParticleAttractor {
     }
     if (!killRadius.isFinite || killRadius < 0 || killRadius >= range) {
       throw ArgumentError('ParticleAttractor.killRadius must be in [0, range)');
+    }
+    if (!orbitalStrength.isFinite) {
+      throw ArgumentError('ParticleAttractor.orbitalStrength must be finite');
+    }
+    if (!axis.isFinite || axis.lengthSquared < 1e-6) {
+      throw ArgumentError('ParticleAttractor.axis must be finite and non-zero');
     }
   }
 }
@@ -197,6 +222,72 @@ final class ParticleCollisionPlane {
     }
     if (!friction.isFinite || friction < 0 || friction > 1) {
       throw ArgumentError('ParticleCollisionPlane.friction must be in [0, 1]');
+    }
+  }
+}
+
+/// Lifecycle events that trigger emission on a [SubEmitter].
+enum SubEmitterTrigger {
+  /// Fires when a parent particle is born (e.g. muzzle flashbang, sparks on ignition).
+  birth,
+
+  /// Fires when a parent particle expires or is killed (e.g. firework burst, popping bubbles, smoke puff).
+  death,
+
+  /// Fires when a parent particle strikes a collision plane (e.g. water droplet splash, bouncing spark shards).
+  collision,
+
+  /// Emits trailing particles continuously behind living parent particles (e.g. rocket smoke trail, ribbon dust).
+  trail,
+}
+
+/// Cascading sub-emitter triggered by parent particle lifecycle and physics events.
+final class SubEmitter {
+  /// Child emitter that will be triggered.
+  final ParticleEmitter emitter;
+
+  /// Lifecycle event that triggers emission.
+  final SubEmitterTrigger trigger;
+
+  /// Particle count triggered per event.
+  final int count;
+
+  /// Whether spawned sub-particles inherit parent particle velocity.
+  final bool inheritVelocity;
+
+  /// Multiplier for inherited parent velocity.
+  final double inheritVelocityFactor;
+
+  /// Interval between trail particle emissions in seconds (for [SubEmitterTrigger.trail]).
+  final double trailInterval;
+
+  /// Distance threshold between trail emissions in world units (for [SubEmitterTrigger.trail]).
+  /// When > 0, particles are emitted continuously along the travel path, preventing gaps at high speeds.
+  final double trailDistance;
+
+  const SubEmitter({
+    required this.emitter,
+    required this.trigger,
+    this.count = 5,
+    this.inheritVelocity = false,
+    this.inheritVelocityFactor = 0.5,
+    this.trailInterval = 0.05,
+    this.trailDistance = 0.0,
+  });
+
+  void validate() {
+    emitter.validate();
+    if (count <= 0) {
+      throw ArgumentError('SubEmitter.count must be > 0');
+    }
+    if (!inheritVelocityFactor.isFinite) {
+      throw ArgumentError('SubEmitter.inheritVelocityFactor must be finite');
+    }
+    if (!trailInterval.isFinite || trailInterval <= 0) {
+      throw ArgumentError('SubEmitter.trailInterval must be finite and > 0');
+    }
+    if (!trailDistance.isFinite || trailDistance < 0) {
+      throw ArgumentError('SubEmitter.trailDistance must be finite and >= 0');
     }
   }
 }
@@ -254,6 +345,11 @@ final class _ParticleState {
   double spawnY = 0.0;
   double spawnZ = 0.0;
 
+  double prevX = 0.0;
+  double prevY = 0.0;
+  double prevZ = 0.0;
+  double trailDistanceAccumulator = 0.0;
+
   double age = 0.0;
   double lifetime = 1.0;
   double size = 1.0;
@@ -264,12 +360,15 @@ final class _ParticleState {
   double angularVelocity = 0.0;
   double mass = 1.0;
   int materialIndex = 0;
+  double trailTimer = 0.0;
   bool isAlive = false;
 
   void reset() {
     x = y = z = 0.0;
     vx = vy = vz = 0.0;
     spawnX = spawnY = spawnZ = 0.0;
+    prevX = prevY = prevZ = 0.0;
+    trailDistanceAccumulator = 0.0;
     age = 0.0;
     lifetime = 1.0;
     size = 1.0;
@@ -279,6 +378,7 @@ final class _ParticleState {
     angularVelocity = 0.0;
     mass = 1.0;
     materialIndex = 0;
+    trailTimer = 0.0;
     isAlive = false;
   }
 }
@@ -348,8 +448,18 @@ final class ParticleEmitter {
   double noiseStrength;
   double noiseFrequency;
   double noiseSpeed;
-  ParticleAttractor? attractor;
+  final List<ParticleAttractor> attractors;
   ParticleCollisionPlane? collisionPlane;
+
+  /// Accesses or modifies the primary attractor (for single-attractor ergonomics).
+  ParticleAttractor? get attractor => attractors.isNotEmpty ? attractors.first : null;
+  set attractor(ParticleAttractor? value) {
+    attractors.clear();
+    if (value != null) attractors.add(value);
+  }
+
+  // Cascading Sub-Emitters
+  final List<SubEmitter> subEmitters;
 
   // Memory & Capacity
   final int maxParticles;
@@ -380,6 +490,7 @@ final class ParticleEmitter {
     this.stretchFactor = 0.1,
     this.rate = 0.0,
     List<ParticleBurst>? bursts,
+    List<SubEmitter>? subEmitters,
     this.duration = 0.0,
     this.isLooping = true,
     this.startDelay = 0.0,
@@ -411,7 +522,8 @@ final class ParticleEmitter {
     this.noiseStrength = 0.0,
     this.noiseFrequency = 1.0,
     this.noiseSpeed = 1.0,
-    this.attractor,
+    ParticleAttractor? attractor,
+    List<ParticleAttractor>? attractors,
     this.collisionPlane,
     this.maxParticles = 500,
     int? seed,
@@ -422,6 +534,11 @@ final class ParticleEmitter {
         maxStartSize = maxStartSize ?? minStartSize,
         maxEndSize = maxEndSize ?? minEndSize,
         bursts = bursts == null ? const [] : List.unmodifiable(bursts),
+        subEmitters = subEmitters == null ? const [] : List.unmodifiable(subEmitters),
+        attractors = [
+          if (attractor != null) attractor,
+          if (attractors != null) ...attractors,
+        ],
         _burstTriggerCounts = bursts == null ? [] : List.filled(bursts.length, 0),
         _random = seed != null ? math.Random(seed) : math.Random(),
         _pool = List<_ParticleState>.generate(maxParticles, (_) => _ParticleState(), growable: false) {
@@ -503,7 +620,12 @@ final class ParticleEmitter {
     if (!noiseStrength.isFinite || noiseStrength < 0 || !noiseFrequency.isFinite || !noiseSpeed.isFinite) {
       throw ArgumentError('ParticleEmitter noise parameters must be finite');
     }
-    attractor?.validate();
+    for (final s in subEmitters) {
+      s.validate();
+    }
+    for (final a in attractors) {
+      a.validate();
+    }
     collisionPlane?.validate();
     colorGradient?.validate();
     if (maxParticles <= 0) {
@@ -512,12 +634,14 @@ final class ParticleEmitter {
   }
 
   /// Triggers an immediate burst of [count] particles (clamped to remaining pool capacity).
-  int burst(int count) {
+  ///
+  /// Optionally overrides spawn position and applies inherited velocity (e.g. from parent particles).
+  int burst(int count, {Vec3? position, Vec3? inheritedVelocity}) {
     if (count <= 0) return 0;
     var spawned = 0;
     final toSpawn = math.min(count, maxParticles - _activeCount);
     for (var i = 0; i < toSpawn; i++) {
-      _spawnOne();
+      _spawnOne(positionOverride: position, inheritedVelocity: inheritedVelocity);
       spawned++;
     }
     return spawned;
@@ -535,6 +659,9 @@ final class ParticleEmitter {
     }
     for (var i = 0; i < _pool.length; i++) {
       _pool[i].reset();
+    }
+    for (var i = 0; i < subEmitters.length; i++) {
+      subEmitters[i].emitter.reset();
     }
   }
 
@@ -599,22 +726,38 @@ final class ParticleEmitter {
 
     // Integrate live particles
     _integrateParticles(dt);
+
+    // Update cascading sub-emitters
+    for (var s = 0; s < subEmitters.length; s++) {
+      subEmitters[s].emitter.update(dt);
+    }
   }
 
-  void _spawnOne() {
+  void _spawnOne({Vec3? positionOverride, Vec3? inheritedVelocity}) {
     if (_activeCount >= maxParticles) return;
 
     final p = _pool[_activeCount++];
     p.isAlive = true;
+    p.trailTimer = 0.0;
+    p.trailDistanceAccumulator = 0.0;
 
     // Spatial spawn
     final sample = shape.sampleSpawn(_random, transform);
-    p.x = sample.position.x;
-    p.y = sample.position.y;
-    p.z = sample.position.z;
+    if (positionOverride != null) {
+      p.x = positionOverride.x;
+      p.y = positionOverride.y;
+      p.z = positionOverride.z;
+    } else {
+      p.x = sample.position.x;
+      p.y = sample.position.y;
+      p.z = sample.position.z;
+    }
     p.spawnX = p.x;
     p.spawnY = p.y;
     p.spawnZ = p.z;
+    p.prevX = p.x;
+    p.prevY = p.y;
+    p.prevZ = p.z;
 
     // Velocity & Speed
     final speed = _lerpDouble(minSpeed, maxSpeed, _random.nextDouble());
@@ -622,6 +765,11 @@ final class ParticleEmitter {
     p.vx = launchVel.x;
     p.vy = launchVel.y;
     p.vz = launchVel.z;
+    if (inheritedVelocity != null) {
+      p.vx += inheritedVelocity.x;
+      p.vy += inheritedVelocity.y;
+      p.vz += inheritedVelocity.z;
+    }
 
     // Lifetime & Size
     p.age = 0.0;
@@ -637,6 +785,17 @@ final class ParticleEmitter {
     p.materialIndex = 0;
 
     _totalSpawned++;
+
+    // Trigger birth sub-emitters
+    for (var s = 0; s < subEmitters.length; s++) {
+      final sub = subEmitters[s];
+      if (sub.trigger == SubEmitterTrigger.birth) {
+        final vel = sub.inheritVelocity
+            ? Vec3(p.vx, p.vy, p.vz) * sub.inheritVelocityFactor
+            : Vec3.zero;
+        sub.emitter.burst(sub.count, position: Vec3(p.x, p.y, p.z), inheritedVelocity: vel);
+      }
+    }
   }
 
   void _integrateParticles(double dt) {
@@ -653,7 +812,6 @@ final class ParticleEmitter {
     final normOrbitalAxis = orbitalAxis.normalized;
 
     final plane = collisionPlane;
-    final attr = attractor;
     final matRamp = materialRamp;
 
     var index = 0;
@@ -668,6 +826,11 @@ final class ParticleEmitter {
       }
 
       final tNorm = p.age / p.lifetime;
+
+      // Store previous position for trajectory and distance tracking
+      p.prevX = p.x;
+      p.prevY = p.y;
+      p.prevZ = p.z;
 
       // Base forces: gravity + constant acceleration
       var ax = gravX + accelX;
@@ -714,8 +877,10 @@ final class ParticleEmitter {
         az += nz * noiseStrength;
       }
 
-      // Attractor field
-      if (attr != null) {
+      // Attractor fields evaluation
+      var absorbed = false;
+      for (var a = 0; a < attractors.length; a++) {
+        final attr = attractors[a];
         final dx = attr.position.x - p.x;
         final dy = attr.position.y - p.y;
         final dz = attr.position.z - p.z;
@@ -724,17 +889,46 @@ final class ParticleEmitter {
 
         if (attr.killRadius > 0 && dist <= attr.killRadius) {
           _killParticleAt(index);
-          continue;
+          absorbed = true;
+          break;
         }
 
         if (dist <= attr.range && dist > 1e-4) {
-          final falloff = 1.0 - (dist / attr.range);
-          final attrMag = (attr.strength * falloff) / dist;
+          double strengthFactor;
+          switch (attr.falloff) {
+            case AttractorFalloff.linear:
+              strengthFactor = 1.0 - (dist / attr.range);
+            case AttractorFalloff.inverseSquare:
+              final normDist = dist / attr.range;
+              strengthFactor = 1.0 / (1.0 + normDist * normDist * 4.0);
+            case AttractorFalloff.constant:
+              strengthFactor = 1.0;
+          }
+          final attrMag = (attr.strength * strengthFactor) / dist;
           ax += dx * attrMag;
           ay += dy * attrMag;
           az += dz * attrMag;
+
+          // Localized tangential vortex swirl around attractor axis
+          if (attr.orbitalStrength.abs() > 1e-6) {
+            final normAxis = attr.axis.normalized;
+            final rx = -dx;
+            final ry = -dy;
+            final rz = -dz;
+            final tx = normAxis.y * rz - normAxis.z * ry;
+            final ty = normAxis.z * rx - normAxis.x * rz;
+            final tz = normAxis.x * ry - normAxis.y * rx;
+            final tLen = math.sqrt(tx * tx + ty * ty + tz * tz);
+            if (tLen > 1e-5) {
+              final tanScale = (attr.orbitalStrength * strengthFactor) / tLen;
+              ax += tx * tanScale;
+              ay += ty * tanScale;
+              az += tz * tanScale;
+            }
+          }
         }
       }
+      if (absorbed) continue;
 
       // Position integration with acceleration term (exact for constant acceleration)
       p.x += p.vx * dt + 0.5 * ax * dt * dt;
@@ -747,15 +941,21 @@ final class ParticleEmitter {
       p.vz = (p.vz + az * dt) * dragDecay;
 
       // Post-move attractor absorption check
-      if (attr != null && attr.killRadius > 0) {
-        final kdx = attr.position.x - p.x;
-        final kdy = attr.position.y - p.y;
-        final kdz = attr.position.z - p.z;
-        if (kdx * kdx + kdy * kdy + kdz * kdz <= attr.killRadius * attr.killRadius) {
-          _killParticleAt(index);
-          continue;
+      var postAbsorbed = false;
+      for (var a = 0; a < attractors.length; a++) {
+        final attr = attractors[a];
+        if (attr.killRadius > 0) {
+          final kdx = attr.position.x - p.x;
+          final kdy = attr.position.y - p.y;
+          final kdz = attr.position.z - p.z;
+          if (kdx * kdx + kdy * kdy + kdz * kdz <= attr.killRadius * attr.killRadius) {
+            _killParticleAt(index);
+            postAbsorbed = true;
+            break;
+          }
         }
       }
+      if (postAbsorbed) continue;
 
       // Collision plane evaluation
       if (plane != null) {
@@ -766,6 +966,17 @@ final class ParticleEmitter {
         final dist = toPlaneX * normal.x + toPlaneY * normal.y + toPlaneZ * normal.z;
 
         if (dist <= 0) {
+          // Trigger collision sub-emitters
+          for (var s = 0; s < subEmitters.length; s++) {
+            final sub = subEmitters[s];
+            if (sub.trigger == SubEmitterTrigger.collision) {
+              final vel = sub.inheritVelocity
+                  ? Vec3(p.vx, p.vy, p.vz) * sub.inheritVelocityFactor
+                  : Vec3.zero;
+              sub.emitter.burst(sub.count, position: Vec3(p.x, p.y, p.z), inheritedVelocity: vel);
+            }
+          }
+
           switch (plane.action) {
             case ParticleCollisionAction.kill:
               _killParticleAt(index);
@@ -809,6 +1020,46 @@ final class ParticleEmitter {
       // Modulators: Rotation
       p.rotation += p.angularVelocity * dt;
 
+      // Trail sub-emitter emission (both continuous distance-based and time-based)
+      final moveX = p.x - p.prevX;
+      final moveY = p.y - p.prevY;
+      final moveZ = p.z - p.prevZ;
+      final moveDist = math.sqrt(moveX * moveX + moveY * moveY + moveZ * moveZ);
+
+      p.trailTimer += dt;
+      var hasFiredTimeTrail = false;
+
+      for (var s = 0; s < subEmitters.length; s++) {
+        final sub = subEmitters[s];
+        if (sub.trigger == SubEmitterTrigger.trail) {
+          final vel = sub.inheritVelocity
+              ? Vec3(p.vx, p.vy, p.vz) * sub.inheritVelocityFactor
+              : Vec3.zero;
+
+          if (sub.trailDistance > 0) {
+            p.trailDistanceAccumulator += moveDist;
+            while (p.trailDistanceAccumulator >= sub.trailDistance) {
+              p.trailDistanceAccumulator -= sub.trailDistance;
+              final frac = moveDist > 1e-6
+                  ? (moveDist - p.trailDistanceAccumulator).clamp(0.0, moveDist) / moveDist
+                  : 1.0;
+              final emitPos = Vec3(
+                p.prevX + moveX * frac,
+                p.prevY + moveY * frac,
+                p.prevZ + moveZ * frac,
+              );
+              sub.emitter.burst(sub.count, position: emitPos, inheritedVelocity: vel);
+            }
+          } else if (p.trailTimer >= sub.trailInterval) {
+            sub.emitter.burst(sub.count, position: Vec3(p.x, p.y, p.z), inheritedVelocity: vel);
+            hasFiredTimeTrail = true;
+          }
+        }
+      }
+      if (hasFiredTimeTrail) {
+        p.trailTimer = 0.0;
+      }
+
       // Material ramp selection
       if (matRamp != null && matRamp.isNotEmpty) {
         final matIdx = (tNorm * matRamp.length).floor().clamp(0, matRamp.length - 1);
@@ -820,10 +1071,23 @@ final class ParticleEmitter {
   }
 
   void _killParticleAt(int index) {
+    final dying = _pool[index];
+    final deathPos = Vec3(dying.x, dying.y, dying.z);
+
+    // Trigger death sub-emitters before slot overwrite
+    for (var s = 0; s < subEmitters.length; s++) {
+      final sub = subEmitters[s];
+      if (sub.trigger == SubEmitterTrigger.death) {
+        final vel = sub.inheritVelocity
+            ? Vec3(dying.vx, dying.vy, dying.vz) * sub.inheritVelocityFactor
+            : Vec3.zero;
+        sub.emitter.burst(sub.count, position: deathPos, inheritedVelocity: vel);
+      }
+    }
+
     _activeCount--;
     _totalDied++;
     if (index < _activeCount) {
-      final dying = _pool[index];
       final last = _pool[_activeCount];
 
       // Swap fields
@@ -836,6 +1100,10 @@ final class ParticleEmitter {
       dying.spawnX = last.spawnX;
       dying.spawnY = last.spawnY;
       dying.spawnZ = last.spawnZ;
+      dying.prevX = last.prevX;
+      dying.prevY = last.prevY;
+      dying.prevZ = last.prevZ;
+      dying.trailDistanceAccumulator = last.trailDistanceAccumulator;
       dying.age = last.age;
       dying.lifetime = last.lifetime;
       dying.size = last.size;
@@ -845,87 +1113,109 @@ final class ParticleEmitter {
       dying.angularVelocity = last.angularVelocity;
       dying.mass = last.mass;
       dying.materialIndex = last.materialIndex;
+      dying.trailTimer = last.trailTimer;
       dying.isAlive = last.isAlive;
     }
     _pool[_activeCount].reset();
   }
 
   /// Calculates the dynamic axis-aligned bounding box enclosing all active particles.
-  Aabb computeBounds() {
+  Aabb computeBounds({bool includeSubEmitters = true}) {
+    Aabb bounds;
     if (_activeCount == 0) {
       final c = transform.translation;
-      return Aabb(c, c);
+      bounds = Aabb(c, c);
+    } else {
+      var minX = double.infinity, minY = double.infinity, minZ = double.infinity;
+      var maxX = -double.infinity, maxY = -double.infinity, maxZ = -double.infinity;
+
+      for (var i = 0; i < _activeCount; i++) {
+        final p = _pool[i];
+        final halfSize = p.size * 0.5;
+        if (p.x - halfSize < minX) minX = p.x - halfSize;
+        if (p.y - halfSize < minY) minY = p.y - halfSize;
+        if (p.z - halfSize < minZ) minZ = p.z - halfSize;
+        if (p.x + halfSize > maxX) maxX = p.x + halfSize;
+        if (p.y + halfSize > maxY) maxY = p.y + halfSize;
+        if (p.z + halfSize > maxZ) maxZ = p.z + halfSize;
+      }
+
+      bounds = Aabb(Vec3(minX, minY, minZ), Vec3(maxX, maxY, maxZ));
     }
 
-    var minX = double.infinity, minY = double.infinity, minZ = double.infinity;
-    var maxX = -double.infinity, maxY = -double.infinity, maxZ = -double.infinity;
-
-    for (var i = 0; i < _activeCount; i++) {
-      final p = _pool[i];
-      final halfSize = p.size * 0.5;
-      if (p.x - halfSize < minX) minX = p.x - halfSize;
-      if (p.y - halfSize < minY) minY = p.y - halfSize;
-      if (p.z - halfSize < minZ) minZ = p.z - halfSize;
-      if (p.x + halfSize > maxX) maxX = p.x + halfSize;
-      if (p.y + halfSize > maxY) maxY = p.y + halfSize;
-      if (p.z + halfSize > maxZ) maxZ = p.z + halfSize;
+    if (includeSubEmitters) {
+      for (var s = 0; s < subEmitters.length; s++) {
+        if (subEmitters[s].emitter.activeCount > 0) {
+          bounds = bounds.union(subEmitters[s].emitter.computeBounds(includeSubEmitters: true));
+        }
+      }
     }
 
-    return Aabb(Vec3(minX, minY, minZ), Vec3(maxX, maxY, maxZ));
+    return bounds;
   }
 
   /// Submits all active particles as frame-local transient items through [encoder].
   /// Returns the count of particles submitted.
-  int submit(RenderEncoder encoder, FrameInput frame) {
-    if (_activeCount == 0) return 0;
-
-    final frustum = frame.camera.buildFrustum();
-    final cameraEye = frame.camera.eye;
-    final cameraForward = frame.camera.forward;
+  int submit(RenderEncoder encoder, FrameInput frame, {bool includeSubEmitters = true}) {
     var submitted = 0;
+    if (_activeCount > 0) {
+      final frustum = frame.camera.buildFrustum();
+      final cameraEye = frame.camera.eye;
+      final cameraForward = frame.camera.forward;
 
-    final matRamp = materialRamp;
-    final defaultMat = material;
+      final matRamp = materialRamp;
+      final defaultMat = material;
 
-    for (var i = 0; i < _activeCount; i++) {
-      final p = _pool[i];
-      final pos = Vec3(p.x, p.y, p.z);
-      final halfExtent = Vec3(p.size * 0.5, p.size * 0.5, p.size * 0.5);
+      for (var i = 0; i < _activeCount; i++) {
+        final p = _pool[i];
+        final pos = Vec3(p.x, p.y, p.z);
+        final halfExtent = Vec3(p.size * 0.5, p.size * 0.5, p.size * 0.5);
 
-      // Frustum culling test
-      final cullTest = frustum.testAabb(Aabb(pos - halfExtent, pos + halfExtent));
-      if (cullTest == FrustumTest.outside) continue;
+        // Frustum culling test
+        final cullTest = frustum.testAabb(Aabb(pos - halfExtent, pos + halfExtent));
+        if (cullTest == FrustumTest.outside) continue;
 
-      // Particle rotation construction
-      final rotation = _rotationForParticle(p, cameraEye, cameraForward);
+        // Particle rotation construction
+        final rotation = _rotationForParticle(p, cameraEye, cameraForward);
 
-      // Compute scale
-      var finalScale = p.size;
-      if (finalScale <= 1e-6) finalScale = 1e-6;
+        // Compute scale
+        var finalScale = p.size;
+        if (alignment == ParticleAlignment.velocityStretched) {
+          final speed = math.sqrt(p.vx * p.vx + p.vy * p.vy + p.vz * p.vz);
+          finalScale = p.size * (1.0 + speed * stretchFactor);
+        }
+        if (finalScale <= 1e-6) finalScale = 1e-6;
 
-      // Select active material
-      final activeMat = (matRamp != null && matRamp.isNotEmpty)
-          ? matRamp[p.materialIndex.clamp(0, matRamp.length - 1)]
-          : defaultMat;
+        // Select active material
+        final activeMat = (matRamp != null && matRamp.isNotEmpty)
+            ? matRamp[p.materialIndex.clamp(0, matRamp.length - 1)]
+            : defaultMat;
 
-      encoder.submit(
-        RetainedItemDescriptor(
-          mesh: mesh,
-          material: activeMat,
-          transform: Transform(
-            translation: pos,
-            rotation: rotation,
-            scale: finalScale,
+        encoder.submit(
+          RetainedItemDescriptor(
+            mesh: mesh,
+            material: activeMat,
+            transform: Transform(
+              translation: pos,
+              rotation: rotation,
+              scale: finalScale,
+            ),
+            drawMode: drawMode,
+            blendMode: blendMode,
+            castsShadow: castsShadow,
+            receivesShadow: receivesShadow,
+            sortTiebreaker: sortTiebreakerBase + i,
+            instanceFamilyKey: instanceFamilyKey,
           ),
-          drawMode: drawMode,
-          blendMode: blendMode,
-          castsShadow: castsShadow,
-          receivesShadow: receivesShadow,
-          sortTiebreaker: sortTiebreakerBase + i,
-          instanceFamilyKey: instanceFamilyKey,
-        ),
-      );
-      submitted++;
+        );
+        submitted++;
+      }
+    }
+
+    if (includeSubEmitters) {
+      for (var s = 0; s < subEmitters.length; s++) {
+        submitted += subEmitters[s].emitter.submit(encoder, frame, includeSubEmitters: true);
+      }
     }
 
     return submitted;

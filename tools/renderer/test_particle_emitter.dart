@@ -292,5 +292,196 @@ void main() {
     _require(diag.frustumCulledCount == 0, 'Diagnostics culledCount match');
   }
 
+  // 9. Cascading sub-emitter triggers (birth, death, collision, trail, inherit velocity)
+  {
+    final childEmitter = ParticleEmitter(
+      mesh: mesh,
+      material: mat,
+      rate: 0.0,
+      minLifetime: 0.5,
+      maxLifetime: 0.5,
+      minSpeed: 0.0,
+      maxSpeed: 0.0,
+      maxParticles: 100,
+    );
+
+    // Test SubEmitterTrigger.birth
+    {
+      final parent = ParticleEmitter(
+        mesh: mesh,
+        material: mat,
+        rate: 0.0,
+        subEmitters: [
+          SubEmitter(
+            emitter: childEmitter,
+            trigger: SubEmitterTrigger.birth,
+            count: 3,
+            inheritVelocity: true,
+            inheritVelocityFactor: 0.5,
+          ),
+        ],
+        minSpeed: 10.0,
+        maxSpeed: 10.0,
+        maxParticles: 10,
+      );
+
+      parent.burst(2);
+      _require(parent.activeCount == 2, 'Parent spawned 2');
+      _require(childEmitter.activeCount == 6, 'Child spawned 2 * 3 = 6 on birth');
+      childEmitter.reset();
+    }
+
+    // Test SubEmitterTrigger.death
+    {
+      final parent = ParticleEmitter(
+        mesh: mesh,
+        material: mat,
+        rate: 0.0,
+        minLifetime: 0.1,
+        maxLifetime: 0.1,
+        subEmitters: [
+          SubEmitter(
+            emitter: childEmitter,
+            trigger: SubEmitterTrigger.death,
+            count: 4,
+          ),
+        ],
+        maxParticles: 10,
+      );
+
+      parent.burst(2);
+      _require(childEmitter.activeCount == 0, 'Child not spawned yet');
+      parent.update(0.15); // parent dies
+      _require(parent.activeCount == 0, 'Parent died');
+      _require(childEmitter.activeCount == 8, 'Child spawned 2 * 4 = 8 on death');
+      childEmitter.reset();
+    }
+
+    // Test SubEmitterTrigger.collision
+    {
+      final parent = ParticleEmitter(
+        mesh: mesh,
+        material: mat,
+        shape: const PointShape(direction: Vec3(0, -1, 0), spreadAngleRadians: 0),
+        minSpeed: 10.0,
+        maxSpeed: 10.0,
+        collisionPlane: const ParticleCollisionPlane(
+          point: Vec3(0, -2, 0),
+          normal: Vec3.unitY,
+          action: ParticleCollisionAction.bounce,
+        ),
+        subEmitters: [
+          SubEmitter(
+            emitter: childEmitter,
+            trigger: SubEmitterTrigger.collision,
+            count: 5,
+          ),
+        ],
+        maxParticles: 10,
+      );
+
+      parent.burst(1);
+      _require(childEmitter.activeCount == 0, 'No collision yet');
+      parent.update(0.3); // travels down 3 units, strikes plane at y = -2
+      _require(childEmitter.activeCount == 5, 'Child spawned 5 on collision');
+      childEmitter.reset();
+    }
+
+    // Test SubEmitterTrigger.trail with distance interval
+    {
+      final trailEmitter = ParticleEmitter(
+        mesh: mesh,
+        material: mat,
+        rate: 0.0,
+        maxParticles: 200,
+      );
+
+      final parent = ParticleEmitter(
+        mesh: mesh,
+        material: mat,
+        shape: const PointShape(direction: Vec3.unitX, spreadAngleRadians: 0),
+        minSpeed: 10.0,
+        maxSpeed: 10.0,
+        subEmitters: [
+          SubEmitter(
+            emitter: trailEmitter,
+            trigger: SubEmitterTrigger.trail,
+            count: 1,
+            trailDistance: 1.0, // emits every 1.0 unit traveled
+          ),
+        ],
+        maxParticles: 10,
+      );
+
+      parent.burst(1);
+      _require(trailEmitter.activeCount == 0, 'No trail yet');
+      parent.update(0.55); // travels 5.5 units => 5 trail emissions
+      _require(trailEmitter.activeCount == 5, 'Trail spawned 5 particles along distance: got ${trailEmitter.activeCount}');
+    }
+  }
+
+  // 10. Multi-attractor force field with localized vortex dynamics
+  {
+    final vortexAttractor = ParticleAttractor(
+      position: const Vec3(0, 0, 0),
+      strength: 10.0,
+      range: 20.0,
+      falloff: AttractorFalloff.inverseSquare,
+      orbitalStrength: 15.0,
+      axis: Vec3.unitY,
+    );
+
+    final secondAttractor = ParticleAttractor(
+      position: const Vec3(10, 0, 0),
+      strength: 5.0,
+      range: 15.0,
+      falloff: AttractorFalloff.constant,
+    );
+
+    final emitter = ParticleEmitter(
+      mesh: mesh,
+      material: mat,
+      attractors: [vortexAttractor, secondAttractor],
+      rate: 0.0,
+      maxParticles: 10,
+    );
+
+    _require(emitter.attractors.length == 2, 'Two attractors registered');
+    _require(emitter.attractor == vortexAttractor, 'Primary attractor getter returns first');
+
+    emitter.burst(5);
+    emitter.update(0.1);
+    _require(emitter.activeCount == 5, 'Particles simulated under multi-attractor force field');
+  }
+
+  // 11. Velocity stretching dynamic scale verification
+  {
+    final emitter = ParticleEmitter(
+      mesh: mesh,
+      material: mat,
+      alignment: ParticleAlignment.velocityStretched,
+      stretchFactor: 0.5,
+      minStartSize: 2.0,
+      maxStartSize: 2.0,
+      minEndSize: 2.0,
+      maxEndSize: 2.0,
+      minSpeed: 10.0,
+      maxSpeed: 10.0,
+      shape: const PointShape(direction: Vec3.unitY, spreadAngleRadians: 0),
+      maxParticles: 5,
+    );
+
+    emitter.burst(1);
+    final encoder = _CollectingEncoder();
+    final frame = _mockFrame();
+    emitter.submit(encoder, frame);
+
+    _require(encoder.items.length == 1, 'Submitted 1 item');
+    final desc = encoder.items.first;
+    // Speed is 10.0, stretchFactor is 0.5 => scale = 2.0 * (1 + 10 * 0.5) = 2.0 * 6.0 = 12.0
+    final scale = desc.transform.scale;
+    _require((scale - 12.0).abs() < 1e-3, 'Expected scale 12.0 for stretched particle: got $scale');
+  }
+
   print('Particle emitter fixtures passed.');
 }

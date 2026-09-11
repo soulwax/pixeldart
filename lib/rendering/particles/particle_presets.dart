@@ -449,4 +449,208 @@ abstract final class ParticlePresets {
       seed: seed ?? 10101,
     );
   }
+
+  /// Multi-stage firework rocket that trails glowing sparks, bursts at apex into
+  /// a colorful explosion, and produces ground-impact bounce sparks.
+  static ParticleEmitter fireworkRocket({
+    required MeshHandle mesh,
+    required MaterialHandle rocketMaterial,
+    required MaterialHandle sparkMaterial,
+    required MaterialHandle explosionMaterial,
+    Vec3 origin = Vec3.zero,
+    int? seed,
+  }) {
+    // 1. Trail sparks emitted behind the rising rocket
+    final trailSparks = ParticleEmitter(
+      mesh: mesh,
+      material: sparkMaterial,
+      shape: const PointShape(),
+      rate: 0.0,
+      minLifetime: 0.3,
+      maxLifetime: 0.6,
+      minSpeed: 0.2,
+      maxSpeed: 0.8,
+      minStartSize: 0.06,
+      minEndSize: 0.01,
+      gravity: const Vec3(0, -3.0, 0),
+      dragCoefficient: 1.5,
+      alignment: ParticleAlignment.billboard,
+      blendMode: BlendMode.additive,
+      drawMode: DrawMode.blended,
+      maxParticles: 150,
+      seed: seed != null ? seed + 1 : null,
+    );
+
+    // 2. Secondary ground bounce sparks triggered on collision
+    final groundSparks = ParticleEmitter(
+      mesh: mesh,
+      material: sparkMaterial,
+      shape: const PointShape(spreadAngleRadians: 0.8),
+      rate: 0.0,
+      minLifetime: 0.4,
+      maxLifetime: 0.8,
+      minSpeed: 2.0,
+      maxSpeed: 4.5,
+      minStartSize: 0.05,
+      minEndSize: 0.01,
+      gravity: const Vec3(0, -9.81, 0),
+      dragCoefficient: 1.2,
+      alignment: ParticleAlignment.velocityStretched,
+      blendMode: BlendMode.additive,
+      drawMode: DrawMode.blended,
+      maxParticles: 80,
+      seed: seed != null ? seed + 2 : null,
+    );
+
+    // 3. Apex burst explosion with ground collision sub-emitter
+    final burstExplosion = ParticleEmitter(
+      mesh: mesh,
+      material: explosionMaterial,
+      shape: const SphereShape(radius: 0.1, mode: SphereEmissionMode.volume),
+      rate: 0.0,
+      minLifetime: 0.9,
+      maxLifetime: 1.5,
+      minSpeed: 8.0,
+      maxSpeed: 14.0,
+      minStartSize: 0.20,
+      minEndSize: 0.03,
+      gravity: const Vec3(0, -6.0, 0),
+      dragCoefficient: 2.0,
+      collisionPlane: const ParticleCollisionPlane(
+        point: Vec3.zero,
+        normal: Vec3.unitY,
+        restitution: 0.4,
+        action: ParticleCollisionAction.bounce,
+      ),
+      subEmitters: [
+        SubEmitter(
+          emitter: groundSparks,
+          trigger: SubEmitterTrigger.collision,
+          count: 4,
+          inheritVelocity: true,
+          inheritVelocityFactor: 0.3,
+        ),
+      ],
+      alignment: ParticleAlignment.velocityStretched,
+      stretchFactor: 0.2,
+      blendMode: BlendMode.additive,
+      drawMode: DrawMode.blended,
+      maxParticles: 120,
+      seed: seed != null ? seed + 3 : null,
+    );
+
+    // 4. Root rocket projectile
+    return ParticleEmitter(
+      mesh: mesh,
+      material: rocketMaterial,
+      shape: const PointShape(direction: Vec3.unitY, spreadAngleRadians: 0.05),
+      transform: Transform.at(origin),
+      rate: 0.8,
+      bursts: const [
+        ParticleBurst(time: 0.0, minCount: 1),
+      ],
+      minLifetime: 1.2,
+      maxLifetime: 1.5,
+      minSpeed: 18.0,
+      maxSpeed: 22.0,
+      minStartSize: 0.14,
+      minEndSize: 0.14,
+      gravity: const Vec3(0, -9.81, 0),
+      dragCoefficient: 0.1,
+      alignment: ParticleAlignment.velocityAligned,
+      blendMode: BlendMode.additive,
+      drawMode: DrawMode.blended,
+      maxParticles: 10,
+      seed: seed,
+      subEmitters: [
+        SubEmitter(
+          emitter: trailSparks,
+          trigger: SubEmitterTrigger.trail,
+          count: 1,
+          trailDistance: 0.3,
+          trailInterval: 0.03,
+          inheritVelocity: true,
+          inheritVelocityFactor: 0.1,
+        ),
+        SubEmitter(
+          emitter: burstExplosion,
+          trigger: SubEmitterTrigger.death,
+          count: 80,
+          inheritVelocity: true,
+          inheritVelocityFactor: 0.2,
+        ),
+      ],
+    );
+  }
+
+  /// Downward falling rain droplets triggering ring splashes upon ground impact.
+  static ParticleEmitter rainWithSplashes({
+    required MeshHandle mesh,
+    required MaterialHandle rainMaterial,
+    required MaterialHandle splashMaterial,
+    Vec3 origin = const Vec3(0, 10, 0),
+    Vec3 areaHalfExtents = const Vec3(10, 1, 10),
+    double groundHeight = 0.0,
+    int? seed,
+  }) {
+    // Water splash droplet droplets triggered on ground collision
+    final splashDroplets = ParticleEmitter(
+      mesh: mesh,
+      material: splashMaterial,
+      shape: const CircleShape(
+        radius: 0.3,
+        normal: Vec3.unitY,
+        mode: CircleEmissionMode.edge,
+        directionMode: CircleDirectionMode.radialOutward,
+      ),
+      rate: 0.0,
+      minLifetime: 0.2,
+      maxLifetime: 0.4,
+      minSpeed: 1.0,
+      maxSpeed: 2.5,
+      minStartSize: 0.04,
+      minEndSize: 0.01,
+      gravity: const Vec3(0, -9.81, 0),
+      dragCoefficient: 0.5,
+      alignment: ParticleAlignment.billboard,
+      blendMode: BlendMode.alpha,
+      drawMode: DrawMode.blended,
+      maxParticles: 200,
+      seed: seed != null ? seed + 1 : null,
+    );
+
+    return ParticleEmitter(
+      mesh: mesh,
+      material: rainMaterial,
+      shape: BoxShape(halfExtents: areaHalfExtents, mode: BoxEmissionMode.volume),
+      transform: Transform.at(origin),
+      rate: 150.0,
+      minLifetime: 0.8,
+      maxLifetime: 1.2,
+      minSpeed: 14.0,
+      maxSpeed: 18.0,
+      minStartSize: 0.06,
+      minEndSize: 0.06,
+      gravity: const Vec3(0, -9.81, 0),
+      dragCoefficient: 0.1,
+      collisionPlane: ParticleCollisionPlane(
+        point: Vec3(0, groundHeight, 0),
+        normal: Vec3.unitY,
+        action: ParticleCollisionAction.kill,
+      ),
+      subEmitters: [
+        SubEmitter(
+          emitter: splashDroplets,
+          trigger: SubEmitterTrigger.collision,
+          count: 5,
+        ),
+      ],
+      alignment: ParticleAlignment.velocityStretched,
+      stretchFactor: 0.25,
+      blendMode: BlendMode.alpha,
+      drawMode: DrawMode.blended,
+      maxParticles: 300,
+      seed: seed,
+    );
+  }
 }

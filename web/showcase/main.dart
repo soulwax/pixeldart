@@ -975,6 +975,174 @@ void main() async {
     );
   }
 
+  // Specialized materials for dynamic VFX particle systems
+  final vfxFireMat = app.createMaterial(
+    const MaterialDefinition(
+      key: 'vfx_fire_mat',
+      tintR: 1.0,
+      tintG: 0.4,
+      tintB: 0.05,
+      emissiveStrength: 4.0,
+      roughness: 0.2,
+      metallic: 0.0,
+    ),
+  );
+
+  final vfxSparkMat = app.createMaterial(
+    const MaterialDefinition(
+      key: 'vfx_spark_mat',
+      tintR: 1.0,
+      tintG: 0.85,
+      tintB: 0.4,
+      emissiveStrength: 6.0,
+      roughness: 0.1,
+      metallic: 0.0,
+    ),
+  );
+
+  final vfxRocketMat = app.createMaterial(
+    const MaterialDefinition(
+      key: 'vfx_rocket_mat',
+      tintR: 1.0,
+      tintG: 0.2,
+      tintB: 0.05,
+      emissiveStrength: 5.0,
+      roughness: 0.1,
+      metallic: 0.0,
+    ),
+  );
+
+  final vfxWaterMat = app.createMaterial(
+    const MaterialDefinition(
+      key: 'vfx_water_mat',
+      tintR: 0.4,
+      tintG: 0.8,
+      tintB: 1.0,
+      emissiveStrength: 0.8,
+      roughness: 0.1,
+      metallic: 0.1,
+    ),
+  );
+
+  final vfxSplashMat = app.createMaterial(
+    const MaterialDefinition(
+      key: 'vfx_splash_mat',
+      tintR: 0.9,
+      tintG: 0.95,
+      tintB: 1.0,
+      emissiveStrength: 1.5,
+      roughness: 0.3,
+      metallic: 0.0,
+    ),
+  );
+
+  final vfxVortexMat = app.createMaterial(
+    const MaterialDefinition(
+      key: 'vfx_vortex_mat',
+      tintR: 0.85,
+      tintG: 0.25,
+      tintB: 1.0,
+      emissiveStrength: 4.5,
+      roughness: 0.2,
+      metallic: 0.0,
+    ),
+  );
+
+  // Wire VFX dynamic particle emitter selector
+  final vfxSelect = web.document.querySelector('#vfx-particles-select');
+  if (vfxSelect is web.HTMLSelectElement) {
+    void updateVfxEmitter(String value) {
+      app.clearEmitters();
+      switch (value) {
+        case 'campfire':
+          app.addEmitter(
+            ParticlePresets.campfire(
+              mesh: particleMesh,
+              material: vfxFireMat,
+              origin: const Vec3(0, -0.9, 0),
+            ),
+          );
+        case 'fireworks':
+          app.addEmitter(
+            ParticlePresets.fireworkRocket(
+              mesh: particleMesh,
+              rocketMaterial: vfxRocketMat,
+              sparkMaterial: vfxSparkMat,
+              explosionMaterial: vfxFireMat,
+              origin: const Vec3(0, -0.9, 0),
+            ),
+          );
+        case 'sparks':
+          app.addEmitter(
+            ParticlePresets.bouncingSparks(
+              mesh: particleMesh,
+              material: vfxSparkMat,
+              origin: const Vec3(0, 0.6, 0),
+              groundHeight: -1.0,
+            ),
+          );
+        case 'vortex':
+          app.addEmitter(
+            ParticlePresets.swirlingVortex(
+              mesh: particleMesh,
+              material: vfxVortexMat,
+              origin: const Vec3(0, 0.5, 0),
+            ),
+          );
+        case 'fountain':
+          app.addEmitter(
+            ParticlePresets.waterFountain(
+              mesh: particleMesh,
+              material: vfxWaterMat,
+              origin: const Vec3(0, -0.9, 0),
+            ),
+          );
+        case 'rain':
+          app.addEmitter(
+            ParticlePresets.rainWithSplashes(
+              mesh: particleMesh,
+              rainMaterial: vfxWaterMat,
+              splashMaterial: vfxSplashMat,
+              origin: const Vec3(0, 10, 0),
+              groundHeight: -1.0,
+            ),
+          );
+        case 'blizzard':
+          app.addEmitter(
+            ParticlePresets.blizzard(
+              mesh: particleMesh,
+              material: snowMat,
+              origin: const Vec3(0, 5, 0),
+            ),
+          );
+        case 'warp':
+          app.addEmitter(
+            ParticlePresets.warpSpeed(
+              mesh: particleMesh,
+              material: vfxSparkMat,
+              origin: const Vec3(0, 2, 0),
+            ),
+          );
+        case 'confetti':
+          app.addEmitter(
+            ParticlePresets.confetti(
+              mesh: particleMesh,
+              material: vfxFireMat,
+              origin: const Vec3(0, 6, 0),
+            ),
+          );
+        case 'none':
+        default:
+          break;
+      }
+    }
+
+    vfxSelect.addEventListener(
+      'change',
+      ((web.Event _) => updateVfxEmitter(vfxSelect.value)).toJS,
+    );
+  }
+
   // Enable atmospheric depth fog by default
   app.enableFog(
     color: const LinearColor(0.02, 0.03, 0.05),
