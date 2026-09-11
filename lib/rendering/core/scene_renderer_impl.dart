@@ -41,7 +41,7 @@ part 'resource_library_impl.dart';
 final class SceneRendererImpl with _GpuTimingSupport implements SceneRenderer {
   @override
   final GpuDevice device;
-  final ConfigurationCoordinator _configurations = ConfigurationCoordinator();
+  ConfigurationCoordinator _configurations = ConfigurationCoordinator();
   final FrameQueue _frames = FrameQueue();
   final List<RenderWorldImpl> _worlds = [];
   RendererState _state = RendererState.constructed;
@@ -98,6 +98,8 @@ final class SceneRendererImpl with _GpuTimingSupport implements SceneRenderer {
       _gpuResources?.dispose();
       _resources?.dispose();
       _resources = null;
+      _configurations.dispose();
+      _configurations = ConfigurationCoordinator();
       _state = RendererState.constructed;
       rethrow;
     }

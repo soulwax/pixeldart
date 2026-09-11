@@ -29,61 +29,169 @@
       position: absolute;
       top: 16px;
       right: 16px;
-      background: rgba(12, 16, 24, 0.82);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 8px;
-      padding: 16px 20px;
-      min-width: 260px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+      background: rgba(12, 17, 26, 0.88);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      border-radius: 12px;
+      padding: 16px 18px;
+      width: 330px;
+      max-height: calc(100vh - 32px);
+      overflow-y: auto;
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.55);
       z-index: 100;
     }
+    #ui-panel::-webkit-scrollbar {
+      width: 5px;
+    }
+    #ui-panel::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 4px;
+    }
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
     h1 {
-      margin: 0 0 4px 0;
-      font-size: 16px;
-      font-weight: 600;
+      margin: 0;
+      font-size: 15px;
+      font-weight: 700;
       letter-spacing: -0.01em;
       color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
     .subtitle {
-      font-size: 11px;
+      font-size: 10.5px;
       color: #8a99a8;
+      margin-top: 2px;
+    }
+    .solar-badge {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 12px;
+      background: rgba(56, 189, 248, 0.12);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.28);
+      white-space: nowrap;
+    }
+    /* Smart Topic Tabs Bar */
+    .tabs-bar {
+      display: flex;
+      gap: 3px;
+      background: rgba(22, 30, 46, 0.7);
+      padding: 3px;
+      border-radius: 8px;
       margin-bottom: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 6px 2px;
+      font-size: 10.5px;
+      font-weight: 600;
+      border: none;
+      border-radius: 6px;
+      background: transparent;
+      color: #94a3b8;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      text-align: center;
+      white-space: nowrap;
+    }
+    .tab-btn:hover {
+      color: #e2e8f0;
+      background: rgba(255, 255, 255, 0.04);
+    }
+    .tab-btn.active {
+      background: #2563eb;
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35);
+    }
+    .topic-panel {
+      display: none;
+    }
+    .topic-panel.active {
+      display: block;
+      animation: fadeIn 0.15s ease-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(2px); }
+      to { opacity: 1; transform: translateY(0); }
     }
     .control-group {
       margin-bottom: 12px;
     }
     .control-label {
       display: block;
-      font-size: 11px;
-      font-weight: 500;
+      font-size: 10.5px;
+      font-weight: 600;
       color: #a0aec0;
-      margin-bottom: 6px;
+      margin-bottom: 5px;
       text-transform: uppercase;
       letter-spacing: 0.04em;
     }
     select, button {
       width: 100%;
-      background: #1a2230;
+      background: #182232;
       color: #ffffff;
-      border: 1px solid #2d3748;
+      border: 1px solid #2a374c;
       padding: 6px 10px;
-      font-size: 13px;
+      font-size: 12px;
       border-radius: 6px;
       outline: none;
-      transition: border-color 0.15s;
+      transition: all 0.15s;
     }
     select:focus, button:hover {
       border-color: #3b82f6;
+      background: #1e2c40;
+    }
+    button.action-btn {
+      cursor: pointer;
+      background: #1e293b;
+      font-weight: 500;
+    }
+    button.action-btn:hover {
+      background: #2563eb;
+      border-color: #3b82f6;
+    }
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 8px;
+      padding: 5px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    }
+    .toggle-row:last-child {
+      border-bottom: none;
+    }
+    .toggle-row label {
+      margin-bottom: 0;
+      cursor: pointer;
+      font-size: 11px;
+    }
+    .toggle-row input[type="checkbox"] {
+      cursor: pointer;
+      width: auto;
+      accent-color: #3b82f6;
     }
     .help-hint {
       margin-top: 14px;
       padding-top: 10px;
       border-top: 1px solid rgba(255, 255, 255, 0.06);
-      font-size: 11px;
+      font-size: 10px;
       line-height: 1.5;
-      color: #718096;
+      color: #64748b;
+    }
+    .help-hint strong {
+      color: #94a3b8;
     }
   </style>
 </head>
@@ -91,155 +199,187 @@
   <canvas id="showcase-canvas"></canvas>
 
   <div id="ui-panel">
-    <h1>Pixeldart 3D</h1>
-    <div class="subtitle">Pure Dart WebGL2 High-Fidelity Engine</div>
-
-    <div class="control-group">
-      <label class="control-label" for="material-select">Hero Material</label>
-      <select id="material-select">
-        <option value="gold" selected>Gold (24K Mirror)</option>
-        <option value="chrome">Chrome (Liquid Mirror)</option>
-        <option value="copper">Copper (Burnished)</option>
-        <option value="silver">Silver (Sterling)</option>
-        <option value="ceramic">Ceramic (Glazed Ruby)</option>
-        <option value="plastic">Plastic (Emerald Gloss)</option>
-        <option value="iron">Iron (Brushed)</option>
-        <option value="brushed">Brushed Titanium (ORM Texture)</option>
-        <option value="carbon">Carbon Fiber (2x2 Twill ORM)</option>
-        <option value="damascus">Damascus Steel (Folded ORM)</option>
-        <option value="marble">Marble (Calacatta Vein)</option>
-        <option value="hex">Hex Energy Shield (Honeycomb)</option>
-        <option value="voronoi">Voronoi Bio-Cell (Worley Noise)</option>
-      </select>
-    </div>
-
-    <div class="control-group">
-      <label class="control-label" for="tone-map-select">Tone Mapping</label>
-      <select id="tone-map-select">
-        <option value="agx" selected>AgX (Modern Khronos)</option>
-        <option value="aces">ACES Filmic</option>
-        <option value="reinhard">Reinhard</option>
-        <option value="off">Off (Linear)</option>
-      </select>
-    </div>
-
-    <div class="control-group">
-      <label class="control-label" for="camera-mode-select">Camera Mode</label>
-      <select id="camera-mode-select">
-        <option value="orbit" selected>Orbit (Turntable)</option>
-        <option value="fly">Free Fly (WASD + Look)</option>
-        <option value="follow">Smooth Follow (Satellite Chase)</option>
-        <option value="tour">Cinematic Drone Tour (Spline)</option>
-      </select>
-    </div>
-
-    <div class="control-group">
-      <button id="shake-button" type="button">Cinematic Impact Shake</button>
-    </div>
-
-    <div class="control-group">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-        <label class="control-label" for="solar-time-slider" style="margin-bottom: 0;">Time of Day</label>
-        <span id="solar-time-label" style="font-size: 11px; color: #38bdf8; font-family: monospace;">14:00</span>
+    <div class="panel-header">
+      <div>
+        <h1><span style="color:#38bdf8;">◈</span> Pixeldart 3D</h1>
+        <div class="subtitle">Pure Dart WebGL2 High-Fidelity Engine</div>
       </div>
-      <input type="range" id="solar-time-slider" min="0" max="24" step="0.25" value="14" style="width: 100%; cursor: pointer;">
+      <div id="solar-phase-badge" class="solar-badge">☀️ 14:00 Day</div>
     </div>
 
-    <div class="control-group">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-        <label class="control-label" for="dof-slider" style="margin-bottom: 0;">Depth of Field</label>
-        <span id="dof-label" style="font-size: 11px; color: #38bdf8; font-family: monospace;">Off</span>
-      </div>
-      <input type="range" id="dof-slider" min="0" max="1" step="0.05" value="0" style="width: 100%; cursor: pointer;">
+    <!-- Smart Topic Tabs Navigation -->
+    <div class="tabs-bar" role="tablist">
+      <button class="tab-btn active" data-topic="time" type="button">☀️ Sky</button>
+      <button class="tab-btn" data-topic="camera" type="button">🎥 Camera</button>
+      <button class="tab-btn" data-topic="materials" type="button">🎨 World</button>
+      <button class="tab-btn" data-topic="vfx" type="button">✨ VFX</button>
     </div>
 
-    <div class="control-group" style="display: flex; gap: 8px;">
-      <div style="flex: 1;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-          <label class="control-label" for="bloom-slider" style="margin-bottom: 0; font-size: 10px;">Bloom</label>
-          <span id="bloom-label" style="font-size: 10px; color: #38bdf8; font-family: monospace;">0.30</span>
+    <!-- Topic 1: Atmosphere & Solar Time -->
+    <div id="panel-time" class="topic-panel active">
+      <div class="control-group">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+          <label class="control-label" for="solar-time-slider" style="margin-bottom: 0;">Solar Time of Day</label>
+          <span id="solar-time-label" style="font-size: 11px; color: #38bdf8; font-family: monospace; font-weight: 600;">14:00</span>
         </div>
-        <input type="range" id="bloom-slider" min="0" max="1" step="0.05" value="0.30" style="width: 100%; cursor: pointer;">
+        <input type="range" id="solar-time-slider" min="0" max="24" step="0.05" value="14" style="width: 100%; cursor: pointer;">
       </div>
-      <div style="flex: 1;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-          <label class="control-label" for="ssao-slider" style="margin-bottom: 0; font-size: 10px;">SSAO</label>
-          <span id="ssao-label" style="font-size: 10px; color: #38bdf8; font-family: monospace;">0.75</span>
+
+      <div class="control-group" style="display: flex; gap: 8px;">
+        <button id="solar-play-pause-btn" class="action-btn" type="button" style="flex: 1.2;">⏸ Pause Time</button>
+        <select id="solar-speed-select" style="flex: 1;">
+          <option value="0.25">0.25x Slow</option>
+          <option value="1.0" selected>1x Normal</option>
+          <option value="3.0">3x Fast</option>
+          <option value="8.0">8x Hyper</option>
+        </select>
+      </div>
+
+      <div class="control-group">
+        <label class="control-label" for="fog-select">Atmospheric Fog</label>
+        <select id="fog-select">
+          <option value="on" selected>Atmospheric Mist (Depth + Height)</option>
+          <option value="volumetric">Volumetric Light Shafts</option>
+          <option value="off">Off (Clear Sky)</option>
+        </select>
+      </div>
+
+      <div class="control-group">
+        <label class="control-label" for="particles-select">Atmospheric Particles</label>
+        <select id="particles-select">
+          <option value="embers" selected>Floating Embers (Additive)</option>
+          <option value="dust">Cosmic Dust Motes</option>
+          <option value="snow">Falling Snowflakes</option>
+          <option value="off">Off</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Topic 2: Camera & Optics -->
+    <div id="panel-camera" class="topic-panel">
+      <div class="control-group">
+        <label class="control-label" for="camera-mode-select">Camera Mode</label>
+        <select id="camera-mode-select">
+          <option value="orbit" selected>Orbit (Turntable)</option>
+          <option value="fly">Free Fly (WASD + Look)</option>
+          <option value="follow">Smooth Follow (Satellite Chase)</option>
+          <option value="tour">Cinematic Drone Tour (Spline)</option>
+        </select>
+      </div>
+
+      <div class="control-group">
+        <button id="shake-button" class="action-btn" type="button">Cinematic Impact Shake</button>
+      </div>
+
+      <div class="control-group">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+          <label class="control-label" for="dof-slider" style="margin-bottom: 0;">Optical Bokeh Depth of Field</label>
+          <span id="dof-label" style="font-size: 11px; color: #38bdf8; font-family: monospace;">Off</span>
         </div>
-        <input type="range" id="ssao-slider" min="0" max="1" step="0.05" value="0.75" style="width: 100%; cursor: pointer;">
+        <input type="range" id="dof-slider" min="0" max="1" step="0.05" value="0" style="width: 100%; cursor: pointer;">
+      </div>
+
+      <div class="toggle-row" id="turntable-group">
+        <label class="control-label" for="turntable-toggle">Turntable Auto-Rotate</label>
+        <input type="checkbox" id="turntable-toggle" checked>
       </div>
     </div>
 
-    <div class="control-group">
-      <label class="control-label" for="post-preset-select">Post Processing</label>
-      <select id="post-preset-select">
-        <option value="cinematic" selected>Cinematic AgX (Bloom + SSAO)</option>
-        <option value="clean">Clean (Pure PBR)</option>
-        <option value="ps1">Stylized PS1 (Quantize + Dither)</option>
-        <option value="vhs">Retro VHS (Tape Jitter + Noise)</option>
-      </select>
+    <!-- Topic 3: Materials & World Scene -->
+    <div id="panel-materials" class="topic-panel">
+      <div class="control-group">
+        <label class="control-label" for="material-select">Hero PBR Material</label>
+        <select id="material-select">
+          <option value="gold" selected>Gold (24K Mirror)</option>
+          <option value="damascus">Damascus Steel (Folded ORM)</option>
+          <option value="marble">Marble (Calacatta Vein)</option>
+          <option value="chrome">Chrome (Liquid Mirror)</option>
+          <option value="copper">Copper (Burnished)</option>
+          <option value="silver">Silver (Sterling)</option>
+          <option value="ceramic">Ceramic (Glazed Ruby)</option>
+          <option value="plastic">Plastic (Emerald Gloss)</option>
+          <option value="iron">Iron (Brushed)</option>
+          <option value="brushed">Brushed Titanium (ORM Texture)</option>
+          <option value="carbon">Carbon Fiber (2x2 Twill ORM)</option>
+          <option value="hex">Hex Energy Shield (Honeycomb)</option>
+          <option value="voronoi">Voronoi Bio-Cell (Worley Noise)</option>
+        </select>
+      </div>
+
+      <div class="toggle-row" id="terrain-group">
+        <label class="control-label" for="terrain-toggle">Terrain & Ocean Biome</label>
+        <input type="checkbox" id="terrain-toggle" checked>
+      </div>
+
+      <div class="toggle-row" id="asteroid-group">
+        <label class="control-label" for="asteroid-toggle">Instanced Asteroid Belt</label>
+        <input type="checkbox" id="asteroid-toggle" checked>
+      </div>
+
+      <div id="picking-status" style="margin-top: 10px; padding: 8px 10px; background: rgba(26, 34, 48, 0.7); border-radius: 6px; font-size: 11px; color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.2);">
+        Click any 3D object to inspect
+      </div>
     </div>
 
-    <div class="control-group">
-      <label class="control-label" for="particles-select">Atmospheric Particles</label>
-      <select id="particles-select">
-        <option value="embers" selected>Floating Embers (Additive)</option>
-        <option value="dust">Cosmic Dust Motes</option>
-        <option value="snow">Falling Snowflakes</option>
-        <option value="off">Off</option>
-      </select>
-    </div>
+    <!-- Topic 4: VFX & Post Processing -->
+    <div id="panel-vfx" class="topic-panel">
+      <div class="control-group">
+        <label class="control-label" for="tone-map-select">Tone Mapping</label>
+        <select id="tone-map-select">
+          <option value="agx" selected>AgX (Modern Khronos)</option>
+          <option value="aces">ACES Filmic</option>
+          <option value="reinhard">Reinhard</option>
+          <option value="off">Off (Linear)</option>
+        </select>
+      </div>
 
-    <div class="control-group">
-      <label class="control-label" for="vfx-particles-select">VFX Dynamic Emitter</label>
-      <select id="vfx-particles-select">
-        <option value="none">None (Off)</option>
-        <option value="campfire">Campfire (Turbulent Flame & Smoke)</option>
-        <option value="fireworks">Fireworks (Rocket -> Burst -> Bounce)</option>
-        <option value="sparks">Bouncing Sparks (Physics Plane)</option>
-        <option value="vortex">Swirling Vortex (Orbital Swirl)</option>
-        <option value="fountain">Water Fountain (Parabolic Jets)</option>
-        <option value="rain">Rain & Splashes (Impact Rings)</option>
-        <option value="blizzard">Blizzard (Wind & Curl Noise)</option>
-        <option value="warp">Warp Speed (Velocity Stretched)</option>
-        <option value="confetti">Confetti (Axial Tumbling)</option>
-      </select>
-    </div>
+      <div class="control-group">
+        <label class="control-label" for="post-preset-select">Post Processing Style</label>
+        <select id="post-preset-select">
+          <option value="cinematic" selected>Cinematic AgX (Bloom + SSAO)</option>
+          <option value="clean">Clean (Pure PBR)</option>
+          <option value="ps1">Stylized PS1 (Quantize + Dither)</option>
+          <option value="vhs">Retro VHS (Tape Jitter + Noise)</option>
+        </select>
+      </div>
 
-    <div class="control-group">
-      <label class="control-label" for="fog-select">Atmospheric Fog</label>
-      <select id="fog-select">
-        <option value="on" selected>Atmospheric Mist (Depth + Height)</option>
-        <option value="volumetric">Volumetric Light Shafts</option>
-        <option value="off">Off (Clear Sky)</option>
-      </select>
-    </div>
+      <div class="control-group" style="display: flex; gap: 8px;">
+        <div style="flex: 1;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+            <label class="control-label" for="bloom-slider" style="margin-bottom: 0; font-size: 10px;">Bloom</label>
+            <span id="bloom-label" style="font-size: 10px; color: #38bdf8; font-family: monospace;">0.30</span>
+          </div>
+          <input type="range" id="bloom-slider" min="0" max="1" step="0.05" value="0.30" style="width: 100%; cursor: pointer;">
+        </div>
+        <div style="flex: 1;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+            <label class="control-label" for="ssao-slider" style="margin-bottom: 0; font-size: 10px;">SSAO</label>
+            <span id="ssao-label" style="font-size: 10px; color: #38bdf8; font-family: monospace;">0.75</span>
+          </div>
+          <input type="range" id="ssao-slider" min="0" max="1" step="0.05" value="0.75" style="width: 100%; cursor: pointer;">
+        </div>
+      </div>
 
-    <div class="control-group" id="asteroid-group" style="display: flex; align-items: center; justify-content: space-between; margin-top: 6px;">
-      <label class="control-label" for="asteroid-toggle" style="margin-bottom: 0; cursor: pointer;">Instanced Asteroid Ring</label>
-      <input type="checkbox" id="asteroid-toggle" checked style="width: auto; cursor: pointer;">
-    </div>
-
-    <div class="control-group" id="turntable-group" style="display: flex; align-items: center; justify-content: space-between; margin-top: 6px;">
-      <label class="control-label" for="turntable-toggle" style="margin-bottom: 0; cursor: pointer;">Turntable Auto-Rotate</label>
-      <input type="checkbox" id="turntable-toggle" checked style="width: auto; cursor: pointer;">
-    </div>
-
-    <div class="control-group" id="terrain-group" style="display: flex; align-items: center; justify-content: space-between; margin-top: 6px;">
-      <label class="control-label" for="terrain-toggle" style="margin-bottom: 0; cursor: pointer;">Terrain & Ocean Biome</label>
-      <input type="checkbox" id="terrain-toggle" checked style="width: auto; cursor: pointer;">
-    </div>
-
-    <div id="picking-status" style="margin-top: 10px; padding: 8px 10px; background: rgba(26, 34, 48, 0.7); border-radius: 6px; font-size: 11px; color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.2);">
-      Click any 3D object to inspect
+      <div class="control-group">
+        <label class="control-label" for="vfx-particles-select">VFX Dynamic Emitter</label>
+        <select id="vfx-particles-select">
+          <option value="none">None (Off)</option>
+          <option value="campfire">Campfire (Turbulent Flame & Smoke)</option>
+          <option value="fireworks">Fireworks (Rocket -> Burst -> Bounce)</option>
+          <option value="sparks">Bouncing Sparks (Physics Plane)</option>
+          <option value="vortex">Swirling Vortex (Orbital Swirl)</option>
+          <option value="fountain">Water Fountain (Parabolic Jets)</option>
+          <option value="rain">Rain & Splashes (Impact Rings)</option>
+          <option value="blizzard">Blizzard (Wind & Curl Noise)</option>
+          <option value="warp">Warp Speed (Velocity Stretched)</option>
+          <option value="confetti">Confetti (Axial Tumbling)</option>
+        </select>
+      </div>
     </div>
 
     <div class="help-hint">
-      <strong>Controls</strong><br>
-      • Orbit: Left drag rotate, Right drag pan, Wheel zoom<br>
-      • Fly: WASD move, Space/Shift up/down, Drag look<br>
-      • Follow: Smooth chase camera with orbit adjustment<br>
-      • Click: Raycast 3D object picking & selection
+      <strong>Shortcuts</strong>: <code>Space</code> Play/Pause • <code>1-4</code> Topics • <code>C</code> Camera • <code>M</code> Material • <code>T</code> +3h Time<br>
+      <strong>Mouse</strong>: Left-drag Rotate • Right-drag Pan • Wheel Zoom • Click Inspect
     </div>
   </div>
 

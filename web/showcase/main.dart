@@ -189,28 +189,124 @@ void main() async {
     );
   }
 
-  // Wire solar time-of-day slider
+  // Wire smart topic tabs
+  final tabButtons = web.document.querySelectorAll('.tab-btn');
+  final topicPanels = web.document.querySelectorAll('.topic-panel');
+
+  void switchTopic(String topicName) {
+    for (var i = 0; i < tabButtons.length; i++) {
+      final btn = tabButtons.item(i);
+      if (btn is web.HTMLElement) {
+        if (btn.getAttribute('data-topic') == topicName) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      }
+    }
+    for (var i = 0; i < topicPanels.length; i++) {
+      final panel = topicPanels.item(i);
+      if (panel is web.HTMLElement) {
+        if (panel.id == 'panel-$topicName') {
+          panel.classList.add('active');
+        } else {
+          panel.classList.remove('active');
+        }
+      }
+    }
+  }
+
+  for (var i = 0; i < tabButtons.length; i++) {
+    final btn = tabButtons.item(i);
+    if (btn is web.HTMLElement) {
+      final topic = btn.getAttribute('data-topic') ?? '';
+      btn.addEventListener(
+        'click',
+        ((web.Event _) => switchTopic(topic)).toJS,
+      );
+    }
+  }
+
+  // Continuous dynamic solar time progression state
+  var solarTimeHours = 14.0;
+  var solarRunning = true;
+  var solarSpeed = 1.0;
+  var isUserDraggingSolar = false;
+
   final solarSlider = web.document.querySelector('#solar-time-slider');
   final solarLabel = web.document.querySelector('#solar-time-label');
-  if (solarSlider is web.HTMLInputElement) {
-    void updateSolar() {
-      final hour = double.tryParse(solarSlider.value) ?? 14.0;
-      final h = hour.floor();
-      final m = ((hour - h) * 60).round();
-      final hStr = h.toString().padLeft(2, '0');
-      final mStr = m.toString().padLeft(2, '0');
-      if (solarLabel is web.HTMLElement) {
-        solarLabel.innerText = '$hStr:$mStr';
-      }
-      app.setSolarTime(hour, cloudCover01: 0.25);
-    }
+  final solarPhaseBadge = web.document.querySelector('#solar-phase-badge');
+  final solarPlayPauseBtn = web.document.querySelector('#solar-play-pause-btn');
+  final solarSpeedSelect = web.document.querySelector('#solar-speed-select');
 
+  void updateSolarDisplay() {
+    final h = solarTimeHours.floor();
+    final m = ((solarTimeHours - h) * 60).round();
+    final hStr = h.toString().padLeft(2, '0');
+    final mStr = m.toString().padLeft(2, '0');
+    final timeStr = '$hStr:$mStr';
+    if (solarLabel is web.HTMLElement) {
+      solarLabel.innerText = timeStr;
+    }
+    if (solarPhaseBadge is web.HTMLElement) {
+      final String icon;
+      final String phase;
+      if (solarTimeHours >= 5.0 && solarTimeHours < 8.0) {
+        icon = '🌅';
+        phase = 'Sunrise';
+      } else if (solarTimeHours >= 8.0 && solarTimeHours < 17.5) {
+        icon = '☀️';
+        phase = 'Day';
+      } else if (solarTimeHours >= 17.5 && solarTimeHours < 20.5) {
+        icon = '🌇';
+        phase = 'Sunset';
+      } else {
+        icon = '🌙';
+        phase = 'Night';
+      }
+      solarPhaseBadge.innerText = '$icon $timeStr $phase';
+    }
+  }
+
+  void applySolarTime() {
+    app.setSolarTime(solarTimeHours, cloudCover01: 0.25);
+    updateSolarDisplay();
+  }
+
+  if (solarSlider is web.HTMLInputElement) {
     solarSlider.addEventListener(
       'input',
-      ((web.Event _) => updateSolar()).toJS,
+      ((web.Event _) {
+        solarTimeHours = double.tryParse(solarSlider.value) ?? 14.0;
+        applySolarTime();
+      }).toJS,
     );
-    updateSolar();
+    solarSlider.addEventListener('mousedown', ((web.Event _) => isUserDraggingSolar = true).toJS);
+    solarSlider.addEventListener('mouseup', ((web.Event _) => isUserDraggingSolar = false).toJS);
+    solarSlider.addEventListener('touchstart', ((web.Event _) => isUserDraggingSolar = true).toJS);
+    solarSlider.addEventListener('touchend', ((web.Event _) => isUserDraggingSolar = false).toJS);
   }
+
+  if (solarPlayPauseBtn is web.HTMLButtonElement) {
+    solarPlayPauseBtn.addEventListener(
+      'click',
+      ((web.Event _) {
+        solarRunning = !solarRunning;
+        solarPlayPauseBtn.innerText = solarRunning ? '⏸ Pause Time' : '▶ Play Time';
+      }).toJS,
+    );
+  }
+
+  if (solarSpeedSelect is web.HTMLSelectElement) {
+    solarSpeedSelect.addEventListener(
+      'change',
+      ((web.Event _) {
+        solarSpeed = double.tryParse(solarSpeedSelect.value) ?? 1.0;
+      }).toJS,
+    );
+  }
+
+  applySolarTime();
 
   // Wire Depth of Field slider
   final dofSlider = web.document.querySelector('#dof-slider');
@@ -1368,7 +1464,66 @@ void main() async {
         ),
       ],
     );
+
+    // Continuous dynamic solar time progression
+    if (solarRunning && !isUserDraggingSolar) {
+      // 1x speed: 1 full 24h cycle every 90 seconds (0.2667 hr/sec)
+      solarTimeHours = (solarTimeHours + dt * 0.2667 * solarSpeed) % 24.0;
+      app.setSolarTime(solarTimeHours, cloudCover01: 0.25);
+      if (solarSlider is web.HTMLInputElement) {
+        solarSlider.value = solarTimeHours.toStringAsFixed(2);
+      }
+      updateSolarDisplay();
+    }
   };
+
+  // Global Keyboard Shortcuts
+  web.window.addEventListener(
+    'keydown',
+    ((web.KeyboardEvent e) {
+      final activeTag = web.document.activeElement?.tagName.toLowerCase();
+      if (activeTag == 'input' || activeTag == 'select') return;
+
+      switch (e.key) {
+        case ' ':
+          e.preventDefault();
+          solarRunning = !solarRunning;
+          if (solarPlayPauseBtn is web.HTMLButtonElement) {
+            solarPlayPauseBtn.innerText = solarRunning ? '⏸ Pause Time' : '▶ Play Time';
+          }
+        case '1':
+          switchTopic('time');
+        case '2':
+          switchTopic('camera');
+        case '3':
+          switchTopic('materials');
+        case '4':
+          switchTopic('vfx');
+        case 't':
+        case 'T':
+          solarTimeHours = (solarTimeHours + 3.0) % 24.0;
+          if (solarSlider is web.HTMLInputElement) {
+            solarSlider.value = solarTimeHours.toStringAsFixed(2);
+          }
+          applySolarTime();
+        case 'c':
+        case 'C':
+          if (cameraSelect is web.HTMLSelectElement) {
+            final nextIdx = (cameraSelect.selectedIndex + 1) % cameraSelect.options.length;
+            cameraSelect.selectedIndex = nextIdx;
+            cameraSelect.dispatchEvent(web.Event('change'));
+          }
+        case 'm':
+        case 'M':
+          final matSelect = web.document.querySelector('#material-select');
+          if (matSelect is web.HTMLSelectElement) {
+            final nextIdx = (matSelect.selectedIndex + 1) % matSelect.options.length;
+            matSelect.selectedIndex = nextIdx;
+            matSelect.dispatchEvent(web.Event('change'));
+          }
+      }
+    }).toJS,
+  );
 
   app.start();
 }

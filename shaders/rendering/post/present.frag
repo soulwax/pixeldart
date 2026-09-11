@@ -255,6 +255,16 @@ void main(){
   vec4 rawSource=texture(uTex,vUv);
   bool isBackground=uSkyEnabled>0.5 && distance(rawSource.rgb,uClearColor)<0.004;
   vec4 source=isBackground?rawSource:applyFxaa(uTex,vUv);
+  // Lens spectral dispersion (radial chromatic aberration towards viewport edges)
+  if(!isBackground){
+    vec2 centerOffset=vUv-vec2(0.5);
+    float distSq=dot(centerOffset,centerOffset);
+    if(distSq>0.04){
+      vec2 chromaOffset=centerOffset*distSq*0.010;
+      source.r=applyFxaa(uTex,vUv-chromaOffset).r;
+      source.b=applyFxaa(uTex,vUv+chromaOffset).b;
+    }
+  }
   // The world pass clears untouched pixels to uClearColor. Replace only that
   // exact background, so the sky is always active without covering geometry.
   if(isBackground){

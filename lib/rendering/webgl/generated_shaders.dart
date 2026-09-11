@@ -366,10 +366,6 @@ float pointAttenuation(vec3 worldPos,vec3 lightPosition,float lightRadius){
 
 vec3 pointContribution(vec3 normal,vec3 worldPos,vec3 lightPosition,
   vec3 lightColor,float lightIntensity,float lightRadius){
-}
-
-vec3 pointContribution(vec3 normal,vec3 worldPos,vec3 lightPosition,
-  vec3 lightColor,float lightIntensity,float lightRadius){
   vec3 toLight=lightPosition-worldPos;
   float ndotl=max(dot(normal,normalize(toLight)),0.);
   return lightColor*lightIntensity*ndotl*
@@ -405,6 +401,22 @@ float distributionGgx(float ndoth,float roughness){
   return a2/(3.14159265*denom*denom);
 }
 
+// Disney/Burley energy-conserving diffuse retro-reflection model
+float diffuseBurley(float ndotl,float ndotv,float lndoth,float roughness){
+  float fd90=0.5+2.0*roughness*lndoth*lndoth;
+  float lightScatter=1.0+(fd90-1.0)*pow(clamp(1.0-ndotl,0.0,1.0),5.0);
+  float viewScatter=1.0+(fd90-1.0)*pow(clamp(1.0-ndotv,0.0,1.0),5.0);
+  return lightScatter*viewScatter;
+}
+
+// Heitz (2014) height-correlated Smith GGX visibility: V = G / (4 * NdotV * NdotL)
+float visibilitySmithGgxCorrelated(float ndotv,float ndotl,float roughness){
+  float a2=roughness*roughness;
+  float ggxV=ndotl*sqrt(ndotv*ndotv*(1.0-a2)+a2);
+  float ggxL=ndotv*sqrt(ndotl*ndotl*(1.0-a2)+a2);
+  return 0.5/max(ggxV+ggxL,0.0001);
+}
+
 float geometrySchlick(float ndotv,float roughness){
   float k=(roughness+1.0)*(roughness+1.0)/8.0;
   return ndotv/(ndotv*(1.0-k)+k);
@@ -418,21 +430,23 @@ vec3 fresnelSchlick(float cosTheta,vec3 f0){
   return f0+(1.0-f0)*pow(1.0-clamp(cosTheta,0.0,1.0),5.0);
 }
 
+vec3 fresnelSchlickRoughness(float cosTheta,vec3 f0,float roughness){
+  return f0+(max(vec3(1.0-roughness),f0)-f0)*pow(clamp(1.0-cosTheta,0.0,1.0),5.0);
+}
+
 vec3 specularContribution(vec3 normal,vec3 viewDir,vec3 lightDir,
   vec3 lightColor,float lightIntensity,float attenuation,vec3 baseColor,
   float roughness,float metallic){
   vec3 halfDir=normalize(viewDir+lightDir);
-  float ndotv=max(dot(normal,viewDir),0.0);
-  float ndotl=max(dot(normal,lightDir),0.0);
+  float ndotv=max(dot(normal,viewDir),0.0001);
+  float ndotl=max(dot(normal,lightDir),0.0001);
   float ndoth=max(dot(normal,halfDir),0.0);
   float hdotv=max(dot(halfDir,viewDir),0.0);
   vec3 f0=mix(vec3(0.04),baseColor,metallic);
-  vec3 fresnel=fresnelSchlick(hdotv,f0);
+  vec3 fresnel=fresnelSchlickRoughness(hdotv,f0,roughness);
   float distribution=distributionGgx(ndoth,roughness);
-  float geometry=geometrySmith(ndotv,ndotl,roughness);
-  vec3 numerator=distribution*geometry*fresnel;
-  float denominator=max(4.0*ndotv*ndotl,0.001);
-  return numerator/denominator*lightColor*lightIntensity*attenuation*ndotl;
+  float vis=visibilitySmithGgxCorrelated(ndotv,ndotl,roughness);
+  return distribution*vis*fresnel*lightColor*lightIntensity*attenuation*ndotl;
 }
 
 float sampleShadow(vec3 projCoord,float bias){
@@ -500,9 +514,26 @@ float shadowFactor(float ndotl){
   // 16-tap Vogel spiral with golden ratio rotation produces silky smooth
   // penumbras free of regular lattice banding or directional noise.
   vec2 t=uShadowMapTexelSize*clamp(uShadowFilterRadius,0.,3.);
+  // Adaptive contact-hardening: estimate blocker proximity to sharpen contact shadows
+  float blockerSum=0.0;
+  float blockerCount=0.0;
+  for(int b=0;b<4;b++){
+    float depthSample=texture(uShadowMap,projCoord.xy+VOGEL_16[b*4]*t*1.5).r;
+    if(depthSample<projCoord.z-bias){
+      blockerSum+=depthSample;
+      blockerCount+=1.0;
+    }
+  }
+  float penumbraScale=1.0;
+  if(blockerCount>0.0){
+    float avgBlockerDepth=blockerSum/blockerCount;
+    float penumbraRatio=clamp((projCoord.z-avgBlockerDepth)/max(projCoord.z,0.0001),0.0,1.0);
+    penumbraScale=mix(0.38,1.0,smoothstep(0.0002,0.012,penumbraRatio));
+  }
+  vec2 filterRadius=t*penumbraScale;
   float sum=0.;
   for(int i=0;i<16;i++){
-    sum+=sampleShadow(projCoord+vec3(VOGEL_16[i]*t,0.),bias);
+    sum+=sampleShadow(projCoord+vec3(VOGEL_16[i]*filterRadius,0.),bias);
   }
   return sum/16.;
 }
@@ -689,8 +720,13 @@ void main(){
   // producing the broad plastic patches visible in low-roughness samples.
   // This split is bounded by the material metalness and lets the final
   // composite perform the intentional HDR compression once.
+  vec3 sunLightDir=normalize(uDirectionalDirection);
+  vec3 sunHalfDir=normalize(viewDir+sunLightDir);
+  float sunNdotV=max(dot(n,viewDir),0.0001);
+  float sunHdotL=max(dot(sunHalfDir,sunLightDir),0.0);
+  float burleySun=diffuseBurley(directionalNdotL,sunNdotV,sunHdotL,specRough);
   vec3 diffuseEnergy=baseColor*(1.0-metal)*
-    (ambient+direct*(1.0-0.25*rough));
+    (ambient+direct*mix(1.0-0.25*rough,burleySun,0.65));
   vec3 lit=diffuseEnergy+specular;
   // A restrained dielectric clearcoat is intentionally separate from the
   // base roughness/metalness response. It gives porcelain a broad, stable
@@ -730,7 +766,16 @@ void main(){
   lit+=envRadiance*envFresnel*reflectionWeight*ao;
   float backScatter=max(dot(-viewDir,normalize(uDirectionalDirection)),0.0);
   vec3 subsurface=baseColor*uDirectionalColor*(pow(backScatter,4.0)*(1.0-metal)*0.12*uDirectionalIntensity);
-  lit+=subsurface;
+  float wrapNdotL=max((directionalNdotL+0.35)/1.35,0.0);
+  float rimWrap=pow(clamp(1.0-coatNdotV,0.0,1.0),2.5);
+  vec3 wrapSubsurface=baseColor*uDirectionalColor*(wrapNdotL*rimWrap*(1.0-metal)*0.14*uDirectionalIntensity);
+  lit+=subsurface+wrapSubsurface;
+  // Wave crest foam glint and subsurface forward scatter for organic water bodies
+  float foamFactor=clamp(vColor.r*vColor.g*vColor.b,0.0,1.0);
+  if(foamFactor>0.04){
+    vec3 foamSheen=vec3(0.92,0.96,1.0)*uDirectionalColor*uDirectionalIntensity*0.55;
+    lit=mix(lit,lit+foamSheen,foamFactor*0.7);
+  }
   vec3 emissive=texture(uEmissiveMap,uv).rgb*uMaterialTint*uEmissiveStrength;
   lit+=emissive;
   if(uLightmapIntensity>0.0){
@@ -1031,6 +1076,16 @@ void main(){
   vec4 rawSource=texture(uTex,vUv);
   bool isBackground=uSkyEnabled>0.5 && distance(rawSource.rgb,uClearColor)<0.004;
   vec4 source=isBackground?rawSource:applyFxaa(uTex,vUv);
+  // Lens spectral dispersion (radial chromatic aberration towards viewport edges)
+  if(!isBackground){
+    vec2 centerOffset=vUv-vec2(0.5);
+    float distSq=dot(centerOffset,centerOffset);
+    if(distSq>0.04){
+      vec2 chromaOffset=centerOffset*distSq*0.010;
+      source.r=applyFxaa(uTex,vUv-chromaOffset).r;
+      source.b=applyFxaa(uTex,vUv+chromaOffset).b;
+    }
+  }
   // The world pass clears untouched pixels to uClearColor. Replace only that
   // exact background, so the sky is always active without covering geometry.
   if(isBackground){
@@ -1213,6 +1268,11 @@ float pinnedRotation(vec2 fragCoord){
 }
 
 void main(){
+  float rawDepth=texture(uSceneDepth,vUv).r;
+  if(rawDepth>=0.9999){
+    oColor=vec4(1.0);
+    return;
+  }
   vec3 originView=viewPosAt(vUv);
   // Screen-space derivatives reconstruct a per-fragment normal from
   // neighboring depth samples alone — no G-buffer normal attachment exists
@@ -1246,22 +1306,16 @@ void main(){
       samplePos.x*uProjScaleX/(-samplePos.z),
       samplePos.y*uProjScaleY/(-samplePos.z)
     );
-    // NDC [-1,1] -> UV [0,1] requires the constant 0.5, not vUv (the
-    // *current* fragment's own UV) — adding vUv here was a real bug: it
-    // conflated "this sample's own absolute reprojected screen position"
-    // with "an offset relative to the current fragment," producing an
-    // error of (vUv-0.5) per axis that grows with distance from screen
-    // center. That's exactly what produced a huge, blobby, non-local dark
-    // region instead of contact occlusion — every sample tested a wildly
-    // wrong depth location except right at screen center, where the error
-    // happened to be near zero.
     sampleUv=sampleUv*0.5+0.5;
     if(sampleUv.x<0.0||sampleUv.x>1.0||sampleUv.y<0.0||sampleUv.y>1.0){
       continue;
     }
     vec3 occluderView=viewPosAt(sampleUv);
     float rangeCheck=smoothstep(0.0,1.0,uRadius/max(abs(originView.z-occluderView.z),0.0001));
-    occlusion+=(occluderView.z>=samplePos.z+0.02?1.0:0.0)*rangeCheck;
+    vec3 toOccluder=occluderView-originView;
+    float angleWeight=max(dot(normalView,normalize(toOccluder)),0.0);
+    float bias=max(0.015,abs(originView.z)*0.001);
+    occlusion+=(occluderView.z>=samplePos.z+bias?1.0:0.0)*rangeCheck*(0.35+0.65*angleWeight);
   }
   float ao=1.0-clamp((occlusion/float(KERNEL_SIZE))*uStrength,0.0,1.0);
   oColor=vec4(vec3(ao),1.0);
@@ -1291,17 +1345,27 @@ float linearDepth(float raw){
 // close its depth is to the center tap's depth is what keeps the blur
 // confined to one surface at a time.
 void main(){
-  float centerDepth=linearDepth(texture(uSceneDepth,vUv).r);
+  float rawCenter=texture(uSceneDepth,vUv).r;
+  if(rawCenter>=0.9999){
+    oColor=vec4(1.0);
+    return;
+  }
+  float centerDepth=linearDepth(rawCenter);
   float sum=0.0;
   float weightSum=0.0;
   for(int y=-2;y<=2;y++){
     for(int x=-2;x<=2;x++){
       vec2 offset=vec2(float(x),float(y))*uTexelSize;
       vec2 sampleUv=vUv+offset;
-      float sampleDepth=linearDepth(texture(uSceneDepth,sampleUv).r);
-      float depthWeight=1.0/(1.0+abs(sampleDepth-centerDepth)*4.0);
-      sum+=texture(uSsaoRaw,sampleUv).r*depthWeight;
-      weightSum+=depthWeight;
+      float sampleRaw=texture(uSceneDepth,sampleUv).r;
+      if(sampleRaw>=0.9999) continue;
+      float sampleDepth=linearDepth(sampleRaw);
+      float spatialDistSq=float(x*x+y*y);
+      float spatialWeight=exp(-spatialDistSq*0.22);
+      float depthWeight=1.0/(1.0+abs(sampleDepth-centerDepth)*6.0);
+      float totalWeight=spatialWeight*depthWeight;
+      sum+=texture(uSsaoRaw,sampleUv).r*totalWeight;
+      weightSum+=totalWeight;
     }
   }
   float blurred=sum/max(weightSum,0.0001);
@@ -1364,17 +1428,59 @@ float linearDepth(float raw){
   return (2.0*uNear*uFar)/(uFar+uNear-ndc*(uFar-uNear));
 }
 
-// Circle-of-confusion is a simple linear ramp from the focus distance
-// outward (front and back treated the same — no separate near/far falloff
-// curve), clamped to [0,1] and scaled by uStrength so
-// PostProcessState.depthOfFieldStrength == 0 is a true no-op (coc == 0
-// everywhere, oColor == the sharp source exactly).
 void main(){
+  if(uStrength<=0.0001){
+    oColor=vec4(texture(uSharp,vUv).rgb,1.0);
+    return;
+  }
+
+  vec2 texelSize=1.0/vec2(textureSize(uSharp,0));
   float depth=linearDepth(texture(uSceneDepth,vUv).r);
-  float coc=clamp(abs(depth-uFocusDistance)/max(uFocusRange,0.0001),0.0,1.0)*uStrength;
+
+  // Signed disparity relative to physical focal plane:
+  // Foreground (signedDisparity < 0) exhibits optical hyper-focal expansion,
+  // blurring at a steeper rate than background (signedDisparity > 0).
+  float signedDisparity=depth-uFocusDistance;
+  float normRange=max(uFocusRange,0.0001);
+  float signedCoc=(signedDisparity<0.0)
+    ?(signedDisparity/(normRange*0.75))
+    :(signedDisparity/(normRange*1.25));
+  float rawCoc=clamp(abs(signedCoc),0.0,1.0)*clamp(uStrength,0.0,1.0);
+
+  // Depth-aware disparity weighting to prevent out-of-focus foreground halos
+  // from bleeding over sharp in-focus background edges.
+  float depthN=linearDepth(texture(uSceneDepth,vUv+vec2(0.0,texelSize.y*2.0)).r);
+  float depthS=linearDepth(texture(uSceneDepth,vUv-vec2(0.0,texelSize.y*2.0)).r);
+  float depthE=linearDepth(texture(uSceneDepth,vUv+vec2(texelSize.x*2.0,0.0)).r);
+  float depthW=linearDepth(texture(uSceneDepth,vUv-vec2(texelSize.x*2.0,0.0)).r);
+  float minNeighborDepth=min(min(depthN,depthS),min(depthE,depthW));
+
+  // If this pixel is in-focus background but neighbors are close foreground,
+  // suppress foreground halo bleeding onto this sharp pixel.
+  float coc=rawCoc;
+  if(depth>uFocusDistance && minNeighborDepth<uFocusDistance){
+    float bleedProtection=clamp((depth-minNeighborDepth)/(normRange*2.0),0.0,1.0);
+    coc=mix(rawCoc,rawCoc*0.25,bleedProtection);
+  }
+
+  // Smooth cubic hermite curve for cinematic optical circle of confusion
+  float smoothCoc=coc*coc*(3.0-2.0*coc);
+
+  // Longitudinal (axial) chromatic aberration inside the optical bokeh circle:
+  // Out-of-focus highlights separate into subtle complementary chromatic fringes.
+  vec2 radialDir=vUv-vec2(0.5);
+  float radialDist=length(radialDir);
+  vec2 chromaDir=(radialDist>0.001)?(radialDir/radialDist):vec2(0.0,1.0);
+  vec2 chromaOffset=chromaDir*(smoothCoc*texelSize*2.8*sign(signedDisparity));
+
+  vec3 blurred=vec3(
+    texture(uBlurred,vUv-chromaOffset).r,
+    texture(uBlurred,vUv).g,
+    texture(uBlurred,vUv+chromaOffset).b
+  );
+
   vec3 sharp=texture(uSharp,vUv).rgb;
-  vec3 blurred=texture(uBlurred,vUv).rgb;
-  oColor=vec4(mix(sharp,blurred,coc),1.0);
+  oColor=vec4(mix(sharp,blurred,smoothCoc),1.0);
 }
 ''';
 

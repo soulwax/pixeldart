@@ -54,6 +54,11 @@ float pinnedRotation(vec2 fragCoord){
 }
 
 void main(){
+  float rawDepth=texture(uSceneDepth,vUv).r;
+  if(rawDepth>=0.9999){
+    oColor=vec4(1.0);
+    return;
+  }
   vec3 originView=viewPosAt(vUv);
   // Screen-space derivatives reconstruct a per-fragment normal from
   // neighboring depth samples alone — no G-buffer normal attachment exists
@@ -87,22 +92,16 @@ void main(){
       samplePos.x*uProjScaleX/(-samplePos.z),
       samplePos.y*uProjScaleY/(-samplePos.z)
     );
-    // NDC [-1,1] -> UV [0,1] requires the constant 0.5, not vUv (the
-    // *current* fragment's own UV) — adding vUv here was a real bug: it
-    // conflated "this sample's own absolute reprojected screen position"
-    // with "an offset relative to the current fragment," producing an
-    // error of (vUv-0.5) per axis that grows with distance from screen
-    // center. That's exactly what produced a huge, blobby, non-local dark
-    // region instead of contact occlusion — every sample tested a wildly
-    // wrong depth location except right at screen center, where the error
-    // happened to be near zero.
     sampleUv=sampleUv*0.5+0.5;
     if(sampleUv.x<0.0||sampleUv.x>1.0||sampleUv.y<0.0||sampleUv.y>1.0){
       continue;
     }
     vec3 occluderView=viewPosAt(sampleUv);
     float rangeCheck=smoothstep(0.0,1.0,uRadius/max(abs(originView.z-occluderView.z),0.0001));
-    occlusion+=(occluderView.z>=samplePos.z+0.02?1.0:0.0)*rangeCheck;
+    vec3 toOccluder=occluderView-originView;
+    float angleWeight=max(dot(normalView,normalize(toOccluder)),0.0);
+    float bias=max(0.015,abs(originView.z)*0.001);
+    occlusion+=(occluderView.z>=samplePos.z+bias?1.0:0.0)*rangeCheck*(0.35+0.65*angleWeight);
   }
   float ao=1.0-clamp((occlusion/float(KERNEL_SIZE))*uStrength,0.0,1.0);
   oColor=vec4(vec3(ao),1.0);

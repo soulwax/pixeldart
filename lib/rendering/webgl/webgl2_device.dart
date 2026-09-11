@@ -132,7 +132,10 @@ final class WebGl2Device with _WebGlTimerSupport implements GpuDevice {
     return {for (final extension in extensions.toDart) extension.toDart};
   }
 
-  bool _hasExtension(String name) => _supportedExtensions.contains(name);
+  bool _hasExtension(String name) {
+    if (!_supportedExtensions.contains(name)) return false;
+    return gl.getExtension(name) != null;
+  }
 
   /// Detaches the listeners installed in the constructor. Callers must
   /// invoke this before dropping their last reference to a `WebGl2Device`,
