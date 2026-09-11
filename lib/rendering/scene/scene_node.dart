@@ -52,6 +52,10 @@ final class SceneNode {
     _markDirty();
   }
 
+  /// Alias for [localTransform] for natural ergonomic code.
+  Transform get transform => _localTransform;
+  set transform(Transform value) => localTransform = value;
+
   /// The computed world transform, resolving parent hierarchy on demand.
   Transform get worldTransform {
     if (_isDirty) {
@@ -79,6 +83,37 @@ final class SceneNode {
     child._parent = this;
     child._markDirty();
     _children.add(child);
+  }
+
+  /// Creates a child node and attaches it to this node.
+  SceneNode add({
+    String? name,
+    Transform transform = Transform.identity,
+    MeshHandle? mesh,
+    MaterialHandle? material,
+    int visibilityMask = -1,
+    DrawMode drawMode = DrawMode.opaque,
+    BlendMode blendMode = BlendMode.alpha,
+    bool castsShadow = true,
+    bool receivesShadow = true,
+    int sortTiebreaker = 0,
+    int? instanceFamilyKey,
+  }) {
+    final child = SceneNode(
+      name: name,
+      transform: transform,
+      mesh: mesh,
+      material: material,
+      visibilityMask: visibilityMask,
+      drawMode: drawMode,
+      blendMode: blendMode,
+      castsShadow: castsShadow,
+      receivesShadow: receivesShadow,
+      sortTiebreaker: sortTiebreaker,
+      instanceFamilyKey: instanceFamilyKey,
+    );
+    addChild(child);
+    return child;
   }
 
   /// Removes [child] from this node.

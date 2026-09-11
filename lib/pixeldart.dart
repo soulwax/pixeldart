@@ -39,5 +39,6 @@ export 'assets/packages/model_package_manifest.dart';
 export 'rendering/assets/model_package_diagnostics.dart';
 export 'rendering/math/bounds.dart';
 export 'rendering/math/mat4.dart';
+export 'rendering/math/quat.dart';
 export 'rendering/math/transform.dart';
 export 'rendering/math/vec.dart';

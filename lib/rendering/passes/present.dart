@@ -16,8 +16,6 @@ import '../webgl/draw_encoder.dart';
 import 'pass_context_impl.dart';
 import 'safe_graph_resources.dart';
 
-enum ToneMappingMode { off, reinhard, aces }
-
 /// CPU reference for the final shader's deterministic color contract. It is
 /// used by pure color-ramp fixtures; the live image path remains GLSL so the
 /// conversion runs per pixel on the GPU.
@@ -33,6 +31,7 @@ final class PresentOutputPolicy {
     ToneMappingMode.off => 0.0,
     ToneMappingMode.reinhard => 1.0,
     ToneMappingMode.aces => 2.5,
+    ToneMappingMode.agx => 3.5,
   };
 
   static List<double> encodeLinearColor(
@@ -256,7 +255,7 @@ final class _PresentPass implements RenderPass {
     );
     encoder.setUniform(
       'uToneMap',
-      const UniformValue.float1(PresentOutputPolicy.toneMapUniform),
+      UniformValue.float1(PresentOutputPolicy.toneMapUniformFor(post.toneMapping)),
     );
     final clear = environment.clearColor;
     final skybox = environment.skybox;

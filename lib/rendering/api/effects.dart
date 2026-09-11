@@ -1,3 +1,6 @@
+/// Available HDR tone mapping modes for the final present pass.
+enum ToneMappingMode { off, reinhard, aces, agx }
+
 /// Frame presentation and appearance weights, not game states (§5.2).
 /// A host frame adapter maps simulation time, interaction data, panel state,
 /// URL profile, and accessibility preferences into these values. Weather and
@@ -45,6 +48,7 @@ final class PostProcessState {
   final double vhsGhostWeight;
 
   final bool reducedMotion;
+  final ToneMappingMode toneMapping;
 
   const PostProcessState({
     this.exposure = 1,
@@ -70,6 +74,7 @@ final class PostProcessState {
     this.vhsDropoutWeight = 0,
     this.vhsGhostWeight = 0,
     this.reducedMotion = false,
+    this.toneMapping = ToneMappingMode.reinhard,
   });
 
   static const PostProcessState off = PostProcessState();

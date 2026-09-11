@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Pixeldart 3D High-Fidelity Showcase</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: #060709;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: #e0e6ed;
+    }
+    #showcase-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      cursor: grab;
+    }
+    #showcase-canvas:active {
+      cursor: grabbing;
+    }
+    #ui-panel {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: rgba(12, 16, 24, 0.82);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 16px 20px;
+      min-width: 260px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+      z-index: 100;
+    }
+    h1 {
+      margin: 0 0 4px 0;
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: #ffffff;
+    }
+    .subtitle {
+      font-size: 11px;
+      color: #8a99a8;
+      margin-bottom: 14px;
+    }
+    .control-group {
+      margin-bottom: 12px;
+    }
+    .control-label {
+      display: block;
+      font-size: 11px;
+      font-weight: 500;
+      color: #a0aec0;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    select, button {
+      width: 100%;
+      background: #1a2230;
+      color: #ffffff;
+      border: 1px solid #2d3748;
+      padding: 6px 10px;
+      font-size: 13px;
+      border-radius: 6px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    select:focus, button:hover {
+      border-color: #3b82f6;
+    }
+    .help-hint {
+      margin-top: 14px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      font-size: 11px;
+      line-height: 1.5;
+      color: #718096;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="showcase-canvas"></canvas>
+
+  <div id="ui-panel">
+    <h1>Pixeldart 3D</h1>
+    <div class="subtitle">Pure Dart WebGL2 High-Fidelity Engine</div>
+
+    <div class="control-group">
+      <label class="control-label" for="tone-map-select">Tone Mapping</label>
+      <select id="tone-map-select">
+        <option value="agx" selected>AgX (Modern Khronos)</option>
+        <option value="aces">ACES Filmic</option>
+        <option value="reinhard">Reinhard</option>
+        <option value="off">Off (Linear)</option>
+      </select>
+    </div>
+
+    <div class="help-hint">
+      <strong>Controls</strong><br>
+      • Left drag: Orbit rotation<br>
+      • Right / Shift drag: Pan<br>
+      • Wheel: Zoom
+    </div>
+  </div>
+
+  <script defer src="main.dart.js"></script>
+</body>
+</html>
