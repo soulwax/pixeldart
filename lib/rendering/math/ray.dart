@@ -130,6 +130,7 @@ final class RaycastHit {
   final Vec3 normal;
   final double distance;
   final int? triangleIndex;
+  final int? instanceIndex;
 
   const RaycastHit({
     required this.node,
@@ -137,9 +138,12 @@ final class RaycastHit {
     required this.normal,
     required this.distance,
     this.triangleIndex,
+    this.instanceIndex,
   });
 
   @override
-  String toString() =>
-      'RaycastHit(node: "${node.name}", distance: ${distance.toStringAsFixed(2)}, point: $point)';
+  String toString() {
+    final inst = instanceIndex != null ? ', instance: #$instanceIndex' : '';
+    return 'RaycastHit(node: "${node.name}"$inst, distance: ${distance.toStringAsFixed(2)}, point: $point)';
+  }
 }

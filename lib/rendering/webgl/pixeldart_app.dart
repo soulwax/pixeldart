@@ -18,11 +18,15 @@ import '../api/renderer.dart';
 import '../api/scene.dart';
 import '../api/settings.dart';
 import '../api/stats.dart';
+import '../atmosphere/solar_cycle.dart';
 import '../camera/camera_controller.dart';
+import '../camera/camera_shake.dart';
 import '../camera/fly_camera.dart';
 import '../camera/orbit_camera.dart';
+import '../camera/smooth_follow_camera.dart';
 import '../math/ray.dart';
 import '../math/vec.dart';
+import '../particles/atmospheric_particles.dart';
 import '../scene/animation.dart';
 import '../scene/scene_node.dart';
 import 'webgl2_renderer_factory.dart';
@@ -80,6 +84,16 @@ final class PixeldartApp {
       cameraController is FlyCameraController
           ? cameraController as FlyCameraController
           : null;
+  SmoothFollowCameraController? get followCamera =>
+      cameraController is SmoothFollowCameraController
+          ? cameraController as SmoothFollowCameraController
+          : null;
+
+  /// Active procedural camera shake engine.
+  final CameraShakeEngine shakeEngine = CameraShakeEngine();
+
+  /// Current evaluated astronomical solar state, if solar time is active.
+  SolarLightingState? currentSolarState;
   final Set<String> _pressedKeys = {};
 
   /// Active animation player for scene timelines and tweens.
@@ -88,6 +102,27 @@ final class PixeldartApp {
   /// Plays [clip] using the internal [animations] player.
   void playAnimation(AnimationClip clip, {double speed = 1.0}) {
     animations.play(clip, speed: speed);
+  }
+
+  final List<AtmosphericParticleField> _particleFields = [];
+
+  /// Unmodifiable view of registered atmospheric particle fields.
+  List<AtmosphericParticleField> get particleFields =>
+      List.unmodifiable(_particleFields);
+
+  /// Registers an atmospheric particle field for automatic per-frame rendering.
+  void addParticleField(AtmosphericParticleField field) {
+    _particleFields.add(field);
+  }
+
+  /// Removes an atmospheric particle field.
+  void removeParticleField(AtmosphericParticleField field) {
+    _particleFields.remove(field);
+  }
+
+  /// Clears all registered atmospheric particle fields.
+  void clearParticleFields() {
+    _particleFields.clear();
   }
 
   void Function(FrameContext ctx)? onFrame;
@@ -297,6 +332,115 @@ final class PixeldartApp {
     return ctrl;
   }
 
+  /// Sets the active camera controller to third-person smooth follow controls tracking [target].
+  SmoothFollowCameraController useFollowCamera({
+    SceneNode? target,
+    Vec3 targetPosition = Vec3.zero,
+    Vec3 targetOffset = const Vec3(0, 0.8, 0),
+    double distance = 5.5,
+    double height = 1.8,
+    double damping = 6.0,
+  }) {
+    final ctrl = SmoothFollowCameraController(
+      targetNode: target,
+      targetPosition: targetPosition,
+      targetOffset: targetOffset,
+      distance: distance,
+      height: height,
+      positionDamping: damping,
+    );
+    cameraController = ctrl;
+    return ctrl;
+  }
+
+  /// Triggers a procedural trauma-based camera shake with [trauma] in [0, 1].
+  void shakeCamera({double trauma = 0.5}) {
+    shakeEngine.addTrauma(trauma);
+  }
+
+  /// Evaluates and applies astronomical solar lighting and skybox colors for [timeHours] (0 to 24).
+  void setSolarTime(
+    double timeHours, {
+    double latitudeRadians = 0.65,
+    double cloudCover01 = 0.0,
+    double turbidity = 2.0,
+    double solarIntensity = 2.5,
+  }) {
+    final input = SolarCycleInput(
+      timeHours: timeHours,
+      latitudeRadians: latitudeRadians,
+      solarDeclinationRadians: 0.35,
+      cloudCover01: cloudCover01,
+      aerosolTurbidity: turbidity,
+      solarIntensity: solarIntensity,
+    );
+    final state = SolarCycleEngine.evaluate(input);
+    currentSolarState = state;
+
+    // Update directional light and ambient light
+    environment = environment.copyWith(
+      directionalLight: state.directionalLight,
+      ambientColor: state.ambientColor,
+      ambientIntensity: state.ambientIntensity,
+      fogColor: state.fogColor,
+    );
+
+    // Update skybox declaration colors to match solar phase
+    final sky = environment.skybox;
+    if (sky != null) {
+      final zenithColor = LinearColor(
+        (state.fogColor.r * 0.4 + 0.02).clamp(0.0, 1.0),
+        (state.fogColor.g * 0.5 + 0.04).clamp(0.0, 1.0),
+        (state.fogColor.b * 0.8 + 0.08).clamp(0.0, 1.0),
+      );
+      final horizonColor = state.fogColor;
+      environment = environment.copyWith(
+        skybox: SkyboxDeclaration(
+          assetId: sky.assetId,
+          texture: sky.texture,
+          zenith: zenithColor,
+          horizon: horizonColor,
+          ground: LinearColor(
+            (state.fogColor.r * 0.2).clamp(0.0, 1.0),
+            (state.fogColor.g * 0.2).clamp(0.0, 1.0),
+            (state.fogColor.b * 0.2).clamp(0.0, 1.0),
+          ),
+          horizonGlow: (state.horizonVisibility01 * 0.25).clamp(0.0, 1.0),
+          starDensity: ((1.0 - state.twilightFactor01) * 0.008).clamp(0.0, 0.1),
+          rotationRadians: sky.rotationRadians,
+          exposure: sky.exposure,
+          textureIsSrgb: sky.textureIsSrgb,
+          cloudCoverage: sky.cloudCoverage,
+          cloudDensity: sky.cloudDensity,
+          cloudBaseHeight: sky.cloudBaseHeight,
+          cloudThickness: sky.cloudThickness,
+          cloudScale: sky.cloudScale,
+          cloudWindX: sky.cloudWindX,
+          cloudWindZ: sky.cloudWindZ,
+          cloudPhase: sky.cloudPhase,
+          cloudDetail: sky.cloudDetail,
+          cloudSilverLining: sky.cloudSilverLining,
+          cloudSampleCount: sky.cloudSampleCount,
+        ),
+      );
+    }
+  }
+
+  /// Convenience helper to adjust exposure.
+  void setExposure(double value) {
+    post = post.copyWith(exposure: value);
+  }
+
+  /// Convenience helper to adjust vignette strength.
+  void setVignette(double strength) {
+    post = post.copyWith(vignette: strength);
+  }
+
+  /// Convenience helper to adjust film grain strength.
+  void setGrain(double strength) {
+    post = post.copyWith(grain: strength);
+  }
+
   /// Convenience helper to adjust or enable bloom post-processing.
   void enableBloom({double strength = 0.30}) {
     post = post.copyWith(bloomStrength: strength);
@@ -307,9 +451,71 @@ final class PixeldartApp {
     post = post.copyWith(ssaoStrength: strength);
   }
 
+  /// Convenience helper to set bloom strength.
+  void setBloom(double strength) => enableBloom(strength: strength);
+
+  /// Convenience helper to set SSAO strength.
+  void setSsao(double strength) => enableSsao(strength: strength);
+
+  /// Configures Depth of Field post-processing blur.
+  void setDepthOfField({double strength = 0.70}) {
+    post = post.copyWith(depthOfFieldStrength: strength);
+  }
+
+  /// Disables Depth of Field post-processing.
+  void disableDepthOfField() {
+    post = post.copyWith(depthOfFieldStrength: 0.0);
+  }
+
   /// Convenience helper to change tone mapping mode.
   void setToneMapping(ToneMappingMode mode) {
     post = post.copyWith(toneMapping: mode);
+  }
+
+  /// Configures linear distance fog with optional exponential height falloff.
+  void enableFog({
+    LinearColor color = const LinearColor(0.04, 0.05, 0.07),
+    double start = 5.0,
+    double end = 60.0,
+    double? density,
+    double? heightFalloff,
+  }) {
+    environment = environment.copyWith(
+      fogColor: color,
+      fogStart: start,
+      fogEnd: end,
+      fogDensity: density,
+      fogHeightFalloff: heightFalloff,
+    );
+  }
+
+  /// Disables distance and height fog.
+  void disableFog() {
+    environment = environment.copyWith(
+      fogStart: 10000.0,
+      fogEnd: 10001.0,
+      fogDensity: null,
+      fogHeightFalloff: null,
+    );
+  }
+
+  /// Configures volumetric participating medium and light shafts.
+  void enableVolumetricFog({
+    LinearColor albedo = LinearColor.white,
+    double intensity = 1.0,
+    double heightFalloff = 0.02,
+    double dustDensity = 0.05,
+    double anisotropy = 0.70,
+    int sampleCount = 16,
+  }) {
+    environment = environment.copyWith(
+      volumetricAlbedo: albedo,
+      volumetricIntensity: intensity,
+      volumetricHeightFalloff: heightFalloff,
+      volumetricDustDensity: dustDensity,
+      volumetricAnisotropy: anisotropy,
+      volumetricSampleCount: sampleCount,
+    );
   }
 
   /// Decodes GLB bytes synchronously (geometry and basic material parameters),
@@ -495,6 +701,8 @@ final class PixeldartApp {
             }
           } else if (ctrl is FlyCameraController) {
             ctrl.look(dx * ctrl.lookSpeed, dy * ctrl.lookSpeed);
+          } else if (ctrl is SmoothFollowCameraController) {
+            ctrl.orbit(dx * 0.006, -dy * 0.006);
           }
         }
       }).toJS,
@@ -515,6 +723,8 @@ final class PixeldartApp {
             ctrl.zoom(e.deltaY * 0.003);
           } else if (ctrl is FlyCameraController) {
             ctrl.moveForward(-e.deltaY * 0.002);
+          } else if (ctrl is SmoothFollowCameraController) {
+            ctrl.zoom(e.deltaY * 0.003);
           }
         }
       }).toJS,
@@ -607,8 +817,10 @@ final class PixeldartApp {
         camCtrl.update(dt);
       }
 
+      shakeEngine.update(dt);
+
       final aspect = _surface.pixelWidth / _surface.pixelHeight;
-      final camera = camCtrl != null
+      var camera = camCtrl != null
           ? camCtrl.toCameraView(aspect)
           : CameraView.look(
               eye: const Vec3(0, 2, 5),
@@ -618,6 +830,7 @@ final class PixeldartApp {
               near: 0.1,
               far: 200,
             );
+      camera = shakeEngine.applyTo(camera);
 
       final frameInput = sequencer.next(
         camera: camera,
@@ -627,6 +840,11 @@ final class PixeldartApp {
       );
 
       final encoder = renderer.beginFrame(world, frameInput);
+
+      // Submit registered atmospheric particle fields
+      for (var i = 0; i < _particleFields.length; i++) {
+        _particleFields[i].submit(encoder, frameInput);
+      }
       final ctx = FrameContext(
         timeSeconds: timeSeconds,
         deltaTime: dt,

@@ -398,6 +398,312 @@ abstract final class Primitives {
     final totalH = halfH + radius;
     return b.build(Aabb(Vec3(-radius, -totalH, -radius), Vec3(radius, totalH, radius)));
   }
+
+  /// Generates a geodesic sphere (icosphere) by recursively subdividing an icosahedron.
+  /// Provides mathematically uniform vertex and triangle distribution across the sphere.
+  static MeshData icosphere({double radius = 0.5, int subdivisions = 2}) {
+    if (radius <= 0) throw ArgumentError.value(radius, 'radius', 'must be > 0');
+    if (subdivisions < 0 || subdivisions > 5) {
+      throw ArgumentError.value(subdivisions, 'subdivisions', 'must be between 0 and 5');
+    }
+
+    final phi = (1.0 + math.sqrt(5.0)) / 2.0;
+
+    final baseVerts = [
+      Vec3(-1, phi, 0), Vec3(1, phi, 0), Vec3(-1, -phi, 0), Vec3(1, -phi, 0),
+      Vec3(0, -1, phi), Vec3(0, 1, phi), Vec3(0, -1, -phi), Vec3(0, 1, -phi),
+      Vec3(phi, 0, -1), Vec3(phi, 0, 1), Vec3(-phi, 0, -1), Vec3(-phi, 0, 1),
+    ].map((v) => v.normalized).toList();
+
+    var faces = <List<int>>[
+      [0, 11, 5], [0, 5, 1], [0, 1, 7], [0, 7, 10], [0, 10, 11],
+      [1, 5, 9], [5, 11, 4], [11, 10, 2], [10, 7, 6], [7, 1, 8],
+      [3, 9, 4], [3, 4, 2], [3, 2, 6], [3, 6, 8], [3, 8, 9],
+      [4, 9, 5], [2, 4, 11], [6, 2, 10], [8, 6, 7], [9, 8, 1],
+    ];
+
+    var vertices = List<Vec3>.from(baseVerts);
+    final midpointCache = <int, int>{};
+
+    int getMidpoint(int p1, int p2) {
+      final smaller = math.min(p1, p2);
+      final greater = math.max(p1, p2);
+      final key = (smaller << 16) | greater;
+
+      final cached = midpointCache[key];
+      if (cached != null) return cached;
+
+      final mid = ((vertices[p1] + vertices[p2]) * 0.5).normalized;
+      final index = vertices.length;
+      vertices.add(mid);
+      midpointCache[key] = index;
+      return index;
+    }
+
+    for (var sub = 0; sub < subdivisions; sub++) {
+      final newFaces = <List<int>>[];
+      for (final tri in faces) {
+        final a = tri[0];
+        final b = tri[1];
+        final c = tri[2];
+
+        final ab = getMidpoint(a, b);
+        final bc = getMidpoint(b, c);
+        final ca = getMidpoint(c, a);
+
+        newFaces.add([a, ab, ca]);
+        newFaces.add([b, bc, ab]);
+        newFaces.add([c, ca, bc]);
+        newFaces.add([ab, bc, ca]);
+      }
+      faces = newFaces;
+    }
+
+    final b = _PrimitiveMeshBuilder();
+    for (final v in vertices) {
+      final pos = v * radius;
+      final n = v;
+      var tx = -v.z;
+      var tz = v.x;
+      final tLen = math.sqrt(tx * tx + tz * tz);
+      final t = tLen > 1e-6 ? Vec3(tx / tLen, 0, tz / tLen) : const Vec3(1, 0, 0);
+
+      final u = 0.5 + math.atan2(v.z, v.x) / (2.0 * math.pi);
+      final vCoord = 0.5 - math.asin(v.y.clamp(-1.0, 1.0)) / math.pi;
+      b.addVertex(pos, n, t, Vec2(u, vCoord));
+    }
+
+    for (final tri in faces) {
+      b.addTriangleIndices(tri[0], tri[1], tri[2]);
+    }
+
+    final rVec = Vec3(radius, radius, radius);
+    return b.build(Aabb(rVec * -1, rVec));
+  }
+
+  /// Generates a faceted 3D octahedron crystal centered at the origin.
+  static MeshData octahedron({double radius = 0.5}) {
+    if (radius <= 0) throw ArgumentError.value(radius, 'radius', 'must be > 0');
+
+    final b = _PrimitiveMeshBuilder();
+    final pTop = Vec3(0, radius, 0);
+    final pBot = Vec3(0, -radius, 0);
+    final p0 = Vec3(radius, 0, 0);
+    final p1 = Vec3(0, 0, radius);
+    final p2 = Vec3(-radius, 0, 0);
+    final p3 = Vec3(0, 0, -radius);
+
+    final triangles = [
+      [pTop, p0, p1], [pTop, p1, p2], [pTop, p2, p3], [pTop, p3, p0],
+      [pBot, p1, p0], [pBot, p2, p1], [pBot, p3, p2], [pBot, p0, p3],
+    ];
+
+    for (final tri in triangles) {
+      final v0 = tri[0];
+      final v1 = tri[1];
+      final v2 = tri[2];
+
+      final normal = (v1 - v0).cross(v2 - v0).normalized;
+      var tangent = (v1 - v0).normalized;
+      if (tangent.lengthSquared < 1e-6) tangent = const Vec3(1, 0, 0);
+
+      final base = b.vertexCount;
+      b.addVertex(v0, normal, tangent, const Vec2(0.5, 1.0));
+      b.addVertex(v1, normal, tangent, const Vec2(0.0, 0.0));
+      b.addVertex(v2, normal, tangent, const Vec2(1.0, 0.0));
+      b.addTriangleIndices(base, base + 1, base + 2);
+    }
+
+    final rVec = Vec3(radius, radius, radius);
+    return b.build(Aabb(rVec * -1, rVec));
+  }
+
+  /// Generates a faceted 3D regular dodecahedron with 12 pentagonal faces.
+  static MeshData dodecahedron({double radius = 0.5}) {
+    if (radius <= 0) throw ArgumentError.value(radius, 'radius', 'must be > 0');
+
+    final phi = (1.0 + math.sqrt(5.0)) / 2.0;
+    final invPhi = 1.0 / phi;
+
+    final rawVertices = [
+      Vec3(-1, -1, -1), Vec3(-1, -1, 1), Vec3(-1, 1, -1), Vec3(-1, 1, 1),
+      Vec3(1, -1, -1), Vec3(1, -1, 1), Vec3(1, 1, -1), Vec3(1, 1, 1),
+      Vec3(0, -invPhi, -phi), Vec3(0, -invPhi, phi), Vec3(0, invPhi, -phi), Vec3(0, invPhi, phi),
+      Vec3(-invPhi, -phi, 0), Vec3(-invPhi, phi, 0), Vec3(invPhi, -phi, 0), Vec3(invPhi, phi, 0),
+      Vec3(-phi, 0, -invPhi), Vec3(phi, 0, -invPhi), Vec3(-phi, 0, invPhi), Vec3(phi, 0, invPhi),
+    ].map((v) => v.normalized * radius).toList();
+
+    const pentagons = [
+      [3, 11, 7, 19, 5],
+      [7, 11, 10, 8, 17],
+      [11, 3, 13, 15, 10],
+      [3, 5, 9, 12, 13],
+      [5, 19, 14, 4, 9],
+      [19, 7, 17, 1, 14],
+      [2, 12, 9, 4, 8],
+      [2, 8, 10, 15, 6],
+      [6, 15, 13, 0, 16],
+      [16, 0, 1, 17, 8],
+      [14, 1, 0, 18, 4],
+      [2, 6, 16, 18, 12],
+    ];
+
+    final b = _PrimitiveMeshBuilder();
+
+    for (final p in pentagons) {
+      final v0 = rawVertices[p[0]];
+      final v1 = rawVertices[p[1]];
+      final v2 = rawVertices[p[2]];
+      final normal = (v1 - v0).cross(v2 - v0).normalized;
+      var tangent = (v1 - v0).normalized;
+      if (tangent.lengthSquared < 1e-6) tangent = const Vec3(1, 0, 0);
+
+      final base = b.vertexCount;
+      for (var i = 0; i < 5; i++) {
+        final v = rawVertices[p[i]];
+        final uvAngle = i * (2.0 * math.pi / 5.0);
+        final uv = Vec2(0.5 + 0.5 * math.cos(uvAngle), 0.5 + 0.5 * math.sin(uvAngle));
+        b.addVertex(v, normal, tangent, uv);
+      }
+      b.addTriangleIndices(base, base + 1, base + 2);
+      b.addTriangleIndices(base, base + 2, base + 3);
+      b.addTriangleIndices(base, base + 3, base + 4);
+    }
+
+    final rVec = Vec3(radius, radius, radius);
+    return b.build(Aabb(rVec * -1, rVec));
+  }
+
+  /// Generates a box with smooth chamfered/rounded edges and corners.
+  /// Rounded bevels catch specular edge glints for heightened realism in PBR lighting.
+  static MeshData roundedBox({
+    double width = 1.0,
+    double height = 1.0,
+    double depth = 1.0,
+    double bevelRadius = 0.08,
+    int bevelSegments = 3,
+  }) {
+    if (width <= 0 || height <= 0 || depth <= 0) {
+      throw ArgumentError('dimensions must be > 0');
+    }
+    if (bevelSegments < 1) throw ArgumentError('bevelSegments must be >= 1');
+
+    final maxBevel = math.min(width, math.min(height, depth)) * 0.45;
+    final r = bevelRadius.clamp(0.001, maxBevel);
+
+    final hw = width * 0.5 - r;
+    final hh = height * 0.5 - r;
+    final hd = depth * 0.5 - r;
+
+    final b = _PrimitiveMeshBuilder();
+
+    // 6 Flat faces
+    void face(Vec3 p0, Vec3 p1, Vec3 p2, Vec3 p3, Vec3 n, Vec3 t) {
+      final base = b.vertexCount;
+      b.addVertex(p0, n, t, const Vec2(0, 0));
+      b.addVertex(p1, n, t, const Vec2(1, 0));
+      b.addVertex(p2, n, t, const Vec2(1, 1));
+      b.addVertex(p3, n, t, const Vec2(0, 1));
+      b.addQuadIndices(base, base + 1, base + 2, base + 3);
+    }
+
+    // Front / Back
+    face(Vec3(-hw, -hh, hd + r), Vec3(hw, -hh, hd + r), Vec3(hw, hh, hd + r), Vec3(-hw, hh, hd + r), const Vec3(0, 0, 1), const Vec3(1, 0, 0));
+    face(Vec3(hw, -hh, -hd - r), Vec3(-hw, -hh, -hd - r), Vec3(-hw, hh, -hd - r), Vec3(hw, hh, -hd - r), const Vec3(0, 0, -1), const Vec3(-1, 0, 0));
+    // Top / Bottom
+    face(Vec3(-hw, hh + r, hd), Vec3(hw, hh + r, hd), Vec3(hw, hh + r, -hd), Vec3(-hw, hh + r, -hd), const Vec3(0, 1, 0), const Vec3(1, 0, 0));
+    face(Vec3(-hw, -hh - r, -hd), Vec3(hw, -hh - r, -hd), Vec3(hw, -hh - r, hd), Vec3(-hw, -hh - r, hd), const Vec3(0, -1, 0), const Vec3(1, 0, 0));
+    // Right / Left
+    face(Vec3(hw + r, -hh, hd), Vec3(hw + r, -hh, -hd), Vec3(hw + r, hh, -hd), Vec3(hw + r, hh, hd), const Vec3(1, 0, 0), const Vec3(0, 0, -1));
+    face(Vec3(-hw - r, -hh, -hd), Vec3(-hw - r, -hh, hd), Vec3(-hw - r, hh, hd), Vec3(-hw - r, hh, -hd), const Vec3(-1, 0, 0), const Vec3(0, 0, 1));
+
+    // 12 Beveled Edges
+    void edgeStrip(Vec3 aStart, Vec3 aEnd, Vec3 nA, Vec3 nB, Vec3 tangent) {
+      for (var seg = 0; seg < bevelSegments; seg++) {
+        final t0 = seg / bevelSegments;
+        final t1 = (seg + 1) / bevelSegments;
+        final angle0 = t0 * (math.pi * 0.5);
+        final angle1 = t1 * (math.pi * 0.5);
+
+        final norm0 = (nA * math.cos(angle0) + nB * math.sin(angle0)).normalized;
+        final norm1 = (nA * math.cos(angle1) + nB * math.sin(angle1)).normalized;
+
+        final p0 = aStart + norm0 * r;
+        final p1 = aEnd + norm0 * r;
+        final p2 = aEnd + norm1 * r;
+        final p3 = aStart + norm1 * r;
+
+        final base = b.vertexCount;
+        b.addVertex(p0, norm0, tangent, Vec2(0, t0));
+        b.addVertex(p1, norm0, tangent, Vec2(1, t0));
+        b.addVertex(p2, norm1, tangent, Vec2(1, t1));
+        b.addVertex(p3, norm1, tangent, Vec2(0, t1));
+        b.addQuadIndices(base, base + 1, base + 2, base + 3);
+      }
+    }
+
+    // 4 X-aligned edges
+    edgeStrip(Vec3(-hw, hh, hd), Vec3(hw, hh, hd), const Vec3(0, 0, 1), const Vec3(0, 1, 0), const Vec3(1, 0, 0));
+    edgeStrip(Vec3(-hw, -hh, hd), Vec3(hw, -hh, hd), const Vec3(0, -1, 0), const Vec3(0, 0, 1), const Vec3(1, 0, 0));
+    edgeStrip(Vec3(-hw, hh, -hd), Vec3(hw, hh, -hd), const Vec3(0, 1, 0), const Vec3(0, 0, -1), const Vec3(1, 0, 0));
+    edgeStrip(Vec3(-hw, -hh, -hd), Vec3(hw, -hh, -hd), const Vec3(0, 0, -1), const Vec3(0, -1, 0), const Vec3(1, 0, 0));
+
+    // 4 Y-aligned edges
+    edgeStrip(Vec3(hw, -hh, hd), Vec3(hw, hh, hd), const Vec3(0, 0, 1), const Vec3(1, 0, 0), const Vec3(0, 1, 0));
+    edgeStrip(Vec3(-hw, -hh, hd), Vec3(-hw, hh, hd), const Vec3(-1, 0, 0), const Vec3(0, 0, 1), const Vec3(0, 1, 0));
+    edgeStrip(Vec3(hw, -hh, -hd), Vec3(hw, hh, -hd), const Vec3(1, 0, 0), const Vec3(0, 0, -1), const Vec3(0, 1, 0));
+    edgeStrip(Vec3(-hw, -hh, -hd), Vec3(-hw, hh, -hd), const Vec3(0, 0, -1), const Vec3(-1, 0, 0), const Vec3(0, 1, 0));
+
+    // 4 Z-aligned edges
+    edgeStrip(Vec3(hw, hh, -hd), Vec3(hw, hh, hd), const Vec3(0, 1, 0), const Vec3(1, 0, 0), const Vec3(0, 0, 1));
+    edgeStrip(Vec3(-hw, hh, -hd), Vec3(-hw, hh, hd), const Vec3(-1, 0, 0), const Vec3(0, 1, 0), const Vec3(0, 0, 1));
+    edgeStrip(Vec3(hw, -hh, -hd), Vec3(hw, -hh, hd), const Vec3(1, 0, 0), const Vec3(0, -1, 0), const Vec3(0, 0, 1));
+    edgeStrip(Vec3(-hw, -hh, -hd), Vec3(-hw, -hh, hd), const Vec3(0, -1, 0), const Vec3(-1, 0, 0), const Vec3(0, 0, 1));
+
+    // 8 Corner spherical patches
+    for (final sx in [-1.0, 1.0]) {
+      for (final sy in [-1.0, 1.0]) {
+        for (final sz in [-1.0, 1.0]) {
+          final center = Vec3(hw * sx, hh * sy, hd * sz);
+          final cornerBase = b.vertexCount;
+          for (var i = 0; i <= bevelSegments; i++) {
+            final theta = (i / bevelSegments) * (math.pi * 0.5);
+            for (var j = 0; j <= bevelSegments; j++) {
+              final phi = (j / bevelSegments) * (math.pi * 0.5);
+              final nx = sx * math.sin(theta) * math.cos(phi);
+              final ny = sy * math.cos(theta);
+              final nz = sz * math.sin(theta) * math.sin(phi);
+              final norm = Vec3(nx, ny, nz).normalized;
+              final pos = center + norm * r;
+              var ref = const Vec3(0, 1, 0);
+              if (norm.y.abs() > 0.85) {
+                ref = const Vec3(1, 0, 0);
+              }
+              final tangent = (ref - norm * norm.dot(ref)).normalized;
+              b.addVertex(pos, norm, tangent, Vec2(i / bevelSegments, j / bevelSegments));
+            }
+          }
+          final stride = bevelSegments + 1;
+          for (var i = 0; i < bevelSegments; i++) {
+            for (var j = 0; j < bevelSegments; j++) {
+              final i0 = cornerBase + i * stride + j;
+              final i1 = cornerBase + (i + 1) * stride + j;
+              final i2 = cornerBase + (i + 1) * stride + (j + 1);
+              final i3 = cornerBase + i * stride + (j + 1);
+              if (sx * sy * sz > 0) {
+                b.addQuadIndices(i0, i1, i2, i3);
+              } else {
+                b.addQuadIndices(i0, i3, i2, i1);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    final halfSize = Vec3(width * 0.5, height * 0.5, depth * 0.5);
+    return b.build(Aabb(halfSize * -1, halfSize));
+  }
 }
 
 final class _PrimitiveMeshBuilder {

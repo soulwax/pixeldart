@@ -114,7 +114,9 @@ void main() async {
     );
   }
 
-  // Wire camera mode selector (Orbit turntable vs Free fly)
+  final satelliteNodes = <SceneNode>[];
+
+  // Wire camera mode selector (Orbit turntable vs Free fly vs Smooth follow)
   final cameraSelect = web.document.querySelector('#camera-mode-select');
   if (cameraSelect is web.HTMLSelectElement) {
     cameraSelect.addEventListener(
@@ -125,6 +127,18 @@ void main() async {
             position: const Vec3(0, 2.0, 7.0),
             moveSpeed: 6.0,
           );
+          if (turntableGroup is web.HTMLElement) {
+            turntableGroup.style.display = 'none';
+          }
+        } else if (cameraSelect.value == 'follow') {
+          if (satelliteNodes.isNotEmpty) {
+            app.useFollowCamera(
+              target: satelliteNodes[0],
+              distance: 3.8,
+              height: 1.2,
+              damping: 7.0,
+            );
+          }
           if (turntableGroup is web.HTMLElement) {
             turntableGroup.style.display = 'none';
           }
@@ -142,6 +156,88 @@ void main() async {
             turntableGroup.style.display = 'flex';
           }
         }
+      }).toJS,
+    );
+  }
+
+  // Wire camera shake button
+  final shakeBtn = web.document.querySelector('#shake-button');
+  if (shakeBtn is web.HTMLButtonElement) {
+    shakeBtn.addEventListener(
+      'click',
+      ((web.Event _) {
+        app.shakeCamera(trauma: 0.65);
+      }).toJS,
+    );
+  }
+
+  // Wire solar time-of-day slider
+  final solarSlider = web.document.querySelector('#solar-time-slider');
+  final solarLabel = web.document.querySelector('#solar-time-label');
+  if (solarSlider is web.HTMLInputElement) {
+    void updateSolar() {
+      final hour = double.tryParse(solarSlider.value) ?? 14.0;
+      final h = hour.floor();
+      final m = ((hour - h) * 60).round();
+      final hStr = h.toString().padLeft(2, '0');
+      final mStr = m.toString().padLeft(2, '0');
+      if (solarLabel is web.HTMLElement) {
+        solarLabel.innerText = '$hStr:$mStr';
+      }
+      app.setSolarTime(hour, cloudCover01: 0.25);
+    }
+
+    solarSlider.addEventListener(
+      'input',
+      ((web.Event _) => updateSolar()).toJS,
+    );
+    updateSolar();
+  }
+
+  // Wire Depth of Field slider
+  final dofSlider = web.document.querySelector('#dof-slider');
+  final dofLabel = web.document.querySelector('#dof-label');
+  if (dofSlider is web.HTMLInputElement) {
+    dofSlider.addEventListener(
+      'input',
+      ((web.Event _) {
+        final val = double.tryParse(dofSlider.value) ?? 0.0;
+        if (dofLabel is web.HTMLElement) {
+          dofLabel.innerText = val <= 0 ? 'Off' : val.toStringAsFixed(2);
+        }
+        app.setDepthOfField(strength: val);
+      }).toJS,
+    );
+  }
+
+  // Wire Bloom slider
+  final bloomSlider = web.document.querySelector('#bloom-slider');
+  final bloomLabel = web.document.querySelector('#bloom-label');
+  if (bloomSlider is web.HTMLInputElement) {
+    bloomSlider.addEventListener(
+      'input',
+      ((web.Event _) {
+        final val = double.tryParse(bloomSlider.value) ?? 0.30;
+        if (bloomLabel is web.HTMLElement) {
+          bloomLabel.innerText = val.toStringAsFixed(2);
+        }
+        app.setBloom(val);
+      }).toJS,
+    );
+  }
+
+  // Wire SSAO slider
+  final ssaoSlider = web.document.querySelector('#ssao-slider');
+  final ssaoLabel = web.document.querySelector('#ssao-label');
+  if (ssaoSlider is web.HTMLInputElement) {
+    ssaoSlider.addEventListener(
+      'input',
+      ((web.Event _) {
+        final val = double.tryParse(ssaoSlider.value) ?? 0.75;
+        if (ssaoLabel is web.HTMLElement) {
+          ssaoLabel.innerText = val.toStringAsFixed(2);
+        }
+        app.setSsao(val);
       }).toJS,
     );
   }
@@ -184,12 +280,36 @@ void main() async {
   );
   final cubeData = Primitives.cube(size: 0.65);
 
-  final satelliteDatas = [capsuleData, cylinderData, coneData, cubeData];
+  final icosphereData = Primitives.icosphere(radius: 0.35, subdivisions: 2);
+  final octahedronData = Primitives.octahedron(radius: 0.38);
+  final dodecahedronData = Primitives.dodecahedron(radius: 0.35);
+  final roundedBoxData = Primitives.roundedBox(
+    width: 0.55,
+    height: 0.55,
+    depth: 0.55,
+    bevelRadius: 0.08,
+    bevelSegments: 2,
+  );
+
+  final satelliteDatas = [
+    capsuleData,
+    cylinderData,
+    coneData,
+    cubeData,
+    icosphereData,
+    octahedronData,
+    dodecahedronData,
+    roundedBoxData,
+  ];
   final satelliteMeshes = [
     app.createMesh(capsuleData, debugLabel: 'satellite_capsule'),
     app.createMesh(cylinderData, debugLabel: 'satellite_cylinder'),
     app.createMesh(coneData, debugLabel: 'satellite_cone'),
     app.createMesh(cubeData, debugLabel: 'satellite_cube'),
+    app.createMesh(icosphereData, debugLabel: 'satellite_icosphere'),
+    app.createMesh(octahedronData, debugLabel: 'satellite_octahedron'),
+    app.createMesh(dodecahedronData, debugLabel: 'satellite_dodecahedron'),
+    app.createMesh(roundedBoxData, debugLabel: 'satellite_rounded_box'),
   ];
 
   // Generate procedural PBR textures
@@ -240,6 +360,49 @@ void main() async {
     width: 256,
     height: 256,
     debugLabel: 'brushed_metal_orm',
+  );
+
+  final carbonOrmPixels = ProceduralTextures.carbonFiberOrm(
+    width: 256,
+    height: 256,
+    cellSize: 8,
+    baseRoughness: 0.22,
+    metallic: 0.40,
+  );
+  final carbonOrmTex = app.createProceduralTexture(
+    carbonOrmPixels,
+    width: 256,
+    height: 256,
+    debugLabel: 'carbon_fiber_orm',
+  );
+
+  final hexPixels = ProceduralTextures.hexGrid(
+    width: 256,
+    height: 256,
+    hexRadius: 20.0,
+    lineWidth: 2.0,
+    lineColor: const LinearColor(0.20, 0.85, 1.0),
+    fillColor: const LinearColor(0.04, 0.08, 0.16),
+  );
+  final hexAlbedoTex = app.createProceduralTexture(
+    hexPixels,
+    width: 256,
+    height: 256,
+    debugLabel: 'hex_shield_albedo',
+  );
+
+  final voronoiPixels = ProceduralTextures.voronoi(
+    width: 256,
+    height: 256,
+    cellCount: 6,
+    cellColor: const LinearColor(0.92, 0.35, 0.25),
+    edgeColor: const LinearColor(0.08, 0.02, 0.04),
+  );
+  final voronoiAlbedoTex = app.createProceduralTexture(
+    voronoiPixels,
+    width: 256,
+    height: 256,
+    debugLabel: 'voronoi_cell_albedo',
   );
 
   // Create high-fidelity PBR materials with procedural textures
@@ -298,6 +461,35 @@ void main() async {
         tintB: 1.0,
       ),
     ),
+    'carbon': app.createMaterial(
+      MaterialDefinition(
+        key: 'hero_carbon',
+        ormTexture: carbonOrmTex,
+        roughness: 0.25,
+        metallic: 0.35,
+        tintR: 0.15,
+        tintG: 0.15,
+        tintB: 0.18,
+      ),
+    ),
+    'hex': app.createMaterial(
+      MaterialDefinition(
+        key: 'hero_hex',
+        albedoTexture: hexAlbedoTex,
+        roughness: 0.15,
+        metallic: 0.70,
+        clearcoatStrength: 0.8,
+      ),
+    ),
+    'voronoi': app.createMaterial(
+      MaterialDefinition(
+        key: 'hero_voronoi',
+        albedoTexture: voronoiAlbedoTex,
+        roughness: 0.30,
+        metallic: 0.10,
+        clearcoatStrength: 0.85,
+      ),
+    ),
   };
 
   final chromeTorusMat = app.createMaterial(
@@ -329,6 +521,27 @@ void main() async {
     ),
     app.createMaterial(
       MaterialDefinition.copper(key: 'sat_copper', roughness: 0.20),
+    ),
+    app.createMaterial(
+      MaterialDefinition.gold(key: 'sat_gold', roughness: 0.14),
+    ),
+    app.createMaterial(
+      MaterialDefinition.chrome(key: 'sat_chrome', roughness: 0.05),
+    ),
+    app.createMaterial(
+      MaterialDefinition.plastic(
+        key: 'sat_amethyst',
+        color: const LinearColor(0.72, 0.18, 0.92),
+        roughness: 0.24,
+      ),
+    ),
+    app.createMaterial(
+      MaterialDefinition(
+        key: 'sat_brushed',
+        ormTexture: brushedOrmTex,
+        roughness: 0.25,
+        metallic: 0.90,
+      ),
     ),
   ];
 
@@ -374,8 +587,8 @@ void main() async {
   final orbitRing = SceneNode.group(name: 'orbit_ring');
   centerNode.addChild(orbitRing);
 
-  final satelliteNodes = <SceneNode>[];
-  const count = 4;
+  satelliteNodes.clear();
+  const count = 8;
   for (var i = 0; i < count; i++) {
     final angle = i * (math.pi * 2.0 / count);
     final sat = orbitRing.add(
@@ -383,11 +596,187 @@ void main() async {
       meshData: satelliteDatas[i],
       material: satelliteMaterials[i],
       transform: Transform.at(
-        Vec3(math.cos(angle) * 3.2, 0.0, math.sin(angle) * 3.2),
+        Vec3(math.cos(angle) * 3.4, 0.0, math.sin(angle) * 3.4),
       ),
       name: 'satellite_$i',
     );
     satelliteNodes.add(sat);
+  }
+
+  // Create an instanced asteroid belt surrounding the orbit
+  final asteroidData = Primitives.cube(size: 0.35);
+  final asteroidMesh = app.createMesh(asteroidData, debugLabel: 'asteroid_mesh');
+  final asteroidMat = app.createMaterial(
+    const MaterialDefinition(
+      key: 'asteroid_pbr',
+      tintR: 0.28,
+      tintG: 0.32,
+      tintB: 0.42,
+      roughness: 0.65,
+      metallic: 0.40,
+    ),
+  );
+
+  final asteroidTransforms = <Transform>[];
+  const asteroidCount = 48;
+  final rng = math.Random(1337);
+  for (var i = 0; i < asteroidCount; i++) {
+    final angle = (i / asteroidCount) * math.pi * 2.0 + (rng.nextDouble() * 0.1);
+    final dist = 5.2 + rng.nextDouble() * 1.8;
+    final y = (rng.nextDouble() - 0.5) * 0.8;
+    final scale = 0.5 + rng.nextDouble() * 0.9;
+    final axis = Vec3(
+      rng.nextDouble() * 2 - 1,
+      rng.nextDouble() * 2 - 1,
+      rng.nextDouble() * 2 - 1,
+    ).normalized;
+    final rot = Quat.axisAngle(axis, rng.nextDouble() * math.pi * 2);
+    asteroidTransforms.add(
+      Transform(
+        translation: Vec3(math.cos(angle) * dist, y + 0.5, math.sin(angle) * dist),
+        rotation: rot,
+        scale: scale,
+      ),
+    );
+  }
+
+  final asteroidBelt = InstancedMeshNode(
+    name: 'asteroid_belt',
+    mesh: asteroidMesh,
+    meshData: asteroidData,
+    material: asteroidMat,
+    transforms: asteroidTransforms,
+  );
+  app.scene.addChild(asteroidBelt);
+
+  // Atmospheric particle presets
+  final particleData = Primitives.cube(size: 0.08);
+  final particleMesh = app.createMesh(particleData, debugLabel: 'particle_mesh');
+
+  final emberMat = app.createMaterial(
+    const MaterialDefinition(
+      key: 'ember_mat',
+      tintR: 1.0,
+      tintG: 0.45,
+      tintB: 0.08,
+      emissiveStrength: 2.5,
+      roughness: 0.2,
+      metallic: 0.0,
+    ),
+  );
+
+  final dustMat = app.createMaterial(
+    const MaterialDefinition(
+      key: 'dust_mat',
+      tintR: 0.7,
+      tintG: 0.85,
+      tintB: 1.0,
+      emissiveStrength: 0.5,
+      roughness: 0.4,
+      metallic: 0.2,
+    ),
+  );
+
+  final snowMat = app.createMaterial(
+    const MaterialDefinition(
+      key: 'snow_mat',
+      tintR: 0.95,
+      tintG: 0.98,
+      tintB: 1.0,
+      roughness: 0.8,
+      metallic: 0.1,
+    ),
+  );
+
+  final emberField = AtmosphericPresets.floatingEmbers(
+    mesh: particleMesh,
+    material: emberMat,
+    particleCount: 48,
+  );
+  final dustField = AtmosphericPresets.dustMotes(
+    mesh: particleMesh,
+    material: dustMat,
+    particleCount: 64,
+  );
+  final snowField = AtmosphericPresets.snow(
+    mesh: particleMesh,
+    material: snowMat,
+    particleCount: 80,
+  );
+
+  // Enable floating embers by default
+  app.addParticleField(emberField);
+
+  // Wire particle selector
+  final particleSelect = web.document.querySelector('#particles-select');
+  if (particleSelect is web.HTMLSelectElement) {
+    particleSelect.addEventListener(
+      'change',
+      ((web.Event _) {
+        app.clearParticleFields();
+        switch (particleSelect.value) {
+          case 'embers':
+            app.addParticleField(emberField);
+          case 'dust':
+            app.addParticleField(dustField);
+          case 'snow':
+            app.addParticleField(snowField);
+          case 'off':
+            break;
+        }
+      }).toJS,
+    );
+  }
+
+  // Enable atmospheric depth fog by default
+  app.enableFog(
+    color: const LinearColor(0.02, 0.03, 0.05),
+    start: 6.0,
+    end: 35.0,
+    heightFalloff: 0.08,
+  );
+
+  // Wire fog selector
+  final fogSelect = web.document.querySelector('#fog-select');
+  if (fogSelect is web.HTMLSelectElement) {
+    fogSelect.addEventListener(
+      'change',
+      ((web.Event _) {
+        switch (fogSelect.value) {
+          case 'on':
+            app.enableFog(
+              color: const LinearColor(0.02, 0.03, 0.05),
+              start: 6.0,
+              end: 35.0,
+              heightFalloff: 0.08,
+            );
+          case 'volumetric':
+            app.enableFog(
+              color: const LinearColor(0.03, 0.04, 0.06),
+              start: 8.0,
+              end: 45.0,
+            );
+            app.enableVolumetricFog(
+              intensity: 1.2,
+              dustDensity: 0.04,
+              sampleCount: 16,
+            );
+          case 'off':
+            app.disableFog();
+        }
+      }).toJS,
+    );
+  }
+
+  // Wire asteroid toggle
+  final asteroidToggle = web.document.querySelector('#asteroid-toggle');
+  if (asteroidToggle is web.HTMLInputElement) {
+    asteroidToggle.addEventListener(
+      'change',
+      ((web.Event _) {
+        asteroidBelt.visibilityMask = asteroidToggle.checked ? -1 : 0;
+      }).toJS,
+    );
   }
 
   // Interactive 3D Raycasting & Object Picking
@@ -408,8 +797,11 @@ void main() async {
         final pointStr =
             '(${pt.x.toStringAsFixed(1)}, ${pt.y.toStringAsFixed(1)}, ${pt.z.toStringAsFixed(1)})';
         final nodeName = hit.node.name ?? 'unnamed';
+        final instStr = hit.instanceIndex != null
+            ? ' (Instance #${hit.instanceIndex})'
+            : '';
         pickingStatus?.textContent =
-            'Selected: $nodeName | Dist: $distStr | Pt: $pointStr';
+            'Selected: $nodeName$instStr | Dist: $distStr | Pt: $pointStr';
       } else {
         selectedNode = null;
         pickingStatus?.textContent = 'Click any 3D object to inspect';
@@ -468,6 +860,9 @@ void main() async {
 
     // Orbit ring rotation
     orbitRing.rotateY(0.65 * dt);
+
+    // Instanced asteroid belt rotation
+    asteroidBelt.rotateY(0.12 * dt);
 
     // Satellite rotation and selection pulse
     for (var i = 0; i < satelliteNodes.length; i++) {

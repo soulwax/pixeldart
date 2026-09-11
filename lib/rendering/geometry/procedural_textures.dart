@@ -211,6 +211,189 @@ abstract final class ProceduralTextures {
     return buffer;
   }
 
+  /// Generates a seamless Voronoi / Worley cellular distance texture (F1 Euclidean metric).
+  static Uint8List voronoi({
+    int width = 256,
+    int height = 256,
+    int cellCount = 8,
+    bool inverted = false,
+    LinearColor cellColor = const LinearColor(0.85, 0.85, 0.88),
+    LinearColor edgeColor = const LinearColor(0.10, 0.12, 0.15),
+  }) {
+    final buffer = Uint8List(width * height * 4);
+    var offset = 0;
+
+    for (var y = 0; y < height; y++) {
+      final ny = (y / height) * cellCount;
+      final iy = ny.floor();
+
+      for (var x = 0; x < width; x++) {
+        final nx = (x / width) * cellCount;
+        final ix = nx.floor();
+
+        var minDist = 1e9;
+        for (var oy = -1; oy <= 1; oy++) {
+          for (var ox = -1; ox <= 1; ox++) {
+            final cx = ix + ox;
+            final cy = iy + oy;
+
+            // Periodic toroidal wrap for seamless tiling
+            final wx = (cx % cellCount + cellCount) % cellCount;
+            final wy = (cy % cellCount + cellCount) % cellCount;
+
+            final hx = _hash2d(wx, wy);
+            final hy = _hash2d(wx + 107, wy + 233);
+
+            final px = cx + hx;
+            final py = cy + hy;
+
+            final dx = nx - px;
+            final dy = ny - py;
+            final dist = math.sqrt(dx * dx + dy * dy);
+            if (dist < minDist) {
+              minDist = dist;
+            }
+          }
+        }
+
+        final t = minDist.clamp(0.0, 1.0);
+        final factor = inverted ? 1.0 - t : t;
+
+        final r = ((cellColor.r * (1.0 - factor) + edgeColor.r * factor).clamp(0.0, 1.0) * 255.0).round();
+        final g = ((cellColor.g * (1.0 - factor) + edgeColor.g * factor).clamp(0.0, 1.0) * 255.0).round();
+        final b = ((cellColor.b * (1.0 - factor) + edgeColor.b * factor).clamp(0.0, 1.0) * 255.0).round();
+
+        buffer[offset] = r;
+        buffer[offset + 1] = g;
+        buffer[offset + 2] = b;
+        buffer[offset + 3] = 255;
+        offset += 4;
+      }
+    }
+    return buffer;
+  }
+
+  /// Generates a seamless hexagonal honeycomb grid texture.
+  static Uint8List hexGrid({
+    int width = 256,
+    int height = 256,
+    double hexRadius = 24.0,
+    double lineWidth = 2.5,
+    LinearColor lineColor = const LinearColor(0.25, 0.75, 1.0),
+    LinearColor fillColor = const LinearColor(0.05, 0.07, 0.10),
+  }) {
+    final buffer = Uint8List(width * height * 4);
+    final rL = (lineColor.r.clamp(0.0, 1.0) * 255.0).round();
+    final gL = (lineColor.g.clamp(0.0, 1.0) * 255.0).round();
+    final bL = (lineColor.b.clamp(0.0, 1.0) * 255.0).round();
+
+    final rF = (fillColor.r.clamp(0.0, 1.0) * 255.0).round();
+    final gF = (fillColor.g.clamp(0.0, 1.0) * 255.0).round();
+    final bF = (fillColor.b.clamp(0.0, 1.0) * 255.0).round();
+
+    final sqrt3 = math.sqrt(3.0);
+    final halfSqrt3 = sqrt3 * 0.5;
+    final rowPitch = hexRadius * 1.5;
+    final colPitch = hexRadius * sqrt3;
+    final apothem = hexRadius * halfSqrt3;
+    const piOver3 = math.pi / 3.0;
+    const piOver6 = math.pi / 6.0;
+
+    var offset = 0;
+    for (var y = 0; y < height; y++) {
+      for (var x = 0; x < width; x++) {
+        // Approximate hex row
+        final row = (y / rowPitch).round();
+        final isOddRow = (row & 1) != 0;
+        final xOffset = isOddRow ? colPitch * 0.5 : 0.0;
+        final col = ((x - xOffset) / colPitch).round();
+
+        // Hex center candidate 1
+        final cx1 = col * colPitch + xOffset;
+        final cy1 = row * rowPitch;
+
+        // Try adjacent candidate 2 for clean boundary snapping
+        final dx1 = x - cx1;
+        final dy1 = y - cy1;
+        final d1Sq = dx1 * dx1 + dy1 * dy1;
+
+        final row2 = (dy1 > 0) ? row + 1 : row - 1;
+        final isOddRow2 = (row2 & 1) != 0;
+        final xOffset2 = isOddRow2 ? colPitch * 0.5 : 0.0;
+        final col2 = ((x - xOffset2) / colPitch).round();
+        final cx2 = col2 * colPitch + xOffset2;
+        final cy2 = row2 * rowPitch;
+
+        final dx2 = x - cx2;
+        final dy2 = y - cy2;
+        final d2Sq = dx2 * dx2 + dy2 * dy2;
+
+        final dx = d1Sq < d2Sq ? dx1 : dx2;
+        final dy = d1Sq < d2Sq ? dy1 : dy2;
+
+        final angle = math.atan2(dy, dx);
+        final modAngle = ((angle % piOver3) + piOver3) % piOver3 - piOver6;
+        final distToEdge = apothem / math.cos(modAngle);
+        final dist = math.sqrt(dx * dx + dy * dy);
+
+        final isLine = (distToEdge - dist).abs() <= (lineWidth * 0.5);
+
+        buffer[offset] = isLine ? rL : rF;
+        buffer[offset + 1] = isLine ? gL : gF;
+        buffer[offset + 2] = isLine ? bL : bF;
+        buffer[offset + 3] = 255;
+        offset += 4;
+      }
+    }
+    return buffer;
+  }
+
+  /// Generates a packed PBR ORM map for a 2x2 twill carbon fiber weave.
+  /// R: Ambient Occlusion, G: Roughness, B: Metallic.
+  static Uint8List carbonFiberOrm({
+    int width = 256,
+    int height = 256,
+    int cellSize = 8,
+    double baseRoughness = 0.22,
+    double metallic = 0.35,
+  }) {
+    final buffer = Uint8List(width * height * 4);
+    final metByte = (metallic.clamp(0.0, 1.0) * 255.0).round();
+
+    var offset = 0;
+    for (var y = 0; y < height; y++) {
+      final cellY = y ~/ cellSize;
+      final localY = (y % cellSize) / cellSize;
+
+      for (var x = 0; x < width; x++) {
+        final cellX = x ~/ cellSize;
+        final localX = (x % cellSize) / cellSize;
+
+        // 2x2 twill weave pattern
+        final pattern = (cellX + cellY) % 4;
+        final isHorizontal = pattern == 0 || pattern == 1;
+
+        // Groove depth at thread boundary
+        final borderDist = isHorizontal
+            ? math.min(localY, 1.0 - localY)
+            : math.min(localX, 1.0 - localX);
+        final grooveAo = (borderDist * 8.0).clamp(0.65, 1.0);
+
+        // Thread curvature roughness variation
+        final threadPhase = isHorizontal ? localX : localY;
+        final roughMod = math.sin(threadPhase * math.pi) * 0.12;
+        final rough = (baseRoughness + roughMod).clamp(0.05, 0.95);
+
+        buffer[offset] = (grooveAo * 255.0).round();
+        buffer[offset + 1] = (rough * 255.0).round();
+        buffer[offset + 2] = metByte;
+        buffer[offset + 3] = 255;
+        offset += 4;
+      }
+    }
+    return buffer;
+  }
+
   static double _sample2d(double x, double y) {
     final ix = x.floor();
     final iy = y.floor();

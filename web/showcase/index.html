@@ -105,6 +105,9 @@
         <option value="plastic">Plastic (Emerald Gloss)</option>
         <option value="iron">Iron (Brushed)</option>
         <option value="brushed">Brushed Titanium (ORM Texture)</option>
+        <option value="carbon">Carbon Fiber (2x2 Twill ORM)</option>
+        <option value="hex">Hex Energy Shield (Honeycomb)</option>
+        <option value="voronoi">Voronoi Bio-Cell (Worley Noise)</option>
       </select>
     </div>
 
@@ -123,7 +126,45 @@
       <select id="camera-mode-select">
         <option value="orbit" selected>Orbit (Turntable)</option>
         <option value="fly">Free Fly (WASD + Look)</option>
+        <option value="follow">Smooth Follow (Satellite Chase)</option>
       </select>
+    </div>
+
+    <div class="control-group">
+      <button id="shake-button" type="button">Cinematic Impact Shake</button>
+    </div>
+
+    <div class="control-group">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+        <label class="control-label" for="solar-time-slider" style="margin-bottom: 0;">Time of Day</label>
+        <span id="solar-time-label" style="font-size: 11px; color: #38bdf8; font-family: monospace;">14:00</span>
+      </div>
+      <input type="range" id="solar-time-slider" min="0" max="24" step="0.25" value="14" style="width: 100%; cursor: pointer;">
+    </div>
+
+    <div class="control-group">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+        <label class="control-label" for="dof-slider" style="margin-bottom: 0;">Depth of Field</label>
+        <span id="dof-label" style="font-size: 11px; color: #38bdf8; font-family: monospace;">Off</span>
+      </div>
+      <input type="range" id="dof-slider" min="0" max="1" step="0.05" value="0" style="width: 100%; cursor: pointer;">
+    </div>
+
+    <div class="control-group" style="display: flex; gap: 8px;">
+      <div style="flex: 1;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+          <label class="control-label" for="bloom-slider" style="margin-bottom: 0; font-size: 10px;">Bloom</label>
+          <span id="bloom-label" style="font-size: 10px; color: #38bdf8; font-family: monospace;">0.30</span>
+        </div>
+        <input type="range" id="bloom-slider" min="0" max="1" step="0.05" value="0.30" style="width: 100%; cursor: pointer;">
+      </div>
+      <div style="flex: 1;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+          <label class="control-label" for="ssao-slider" style="margin-bottom: 0; font-size: 10px;">SSAO</label>
+          <span id="ssao-label" style="font-size: 10px; color: #38bdf8; font-family: monospace;">0.75</span>
+        </div>
+        <input type="range" id="ssao-slider" min="0" max="1" step="0.05" value="0.75" style="width: 100%; cursor: pointer;">
+      </div>
     </div>
 
     <div class="control-group">
@@ -136,7 +177,31 @@
       </select>
     </div>
 
-    <div class="control-group" id="turntable-group" style="display: flex; align-items: center; justify-content: space-between; margin-top: 10px;">
+    <div class="control-group">
+      <label class="control-label" for="particles-select">Atmospheric Particles</label>
+      <select id="particles-select">
+        <option value="embers" selected>Floating Embers (Additive)</option>
+        <option value="dust">Cosmic Dust Motes</option>
+        <option value="snow">Falling Snowflakes</option>
+        <option value="off">Off</option>
+      </select>
+    </div>
+
+    <div class="control-group">
+      <label class="control-label" for="fog-select">Atmospheric Fog</label>
+      <select id="fog-select">
+        <option value="on" selected>Atmospheric Mist (Depth + Height)</option>
+        <option value="volumetric">Volumetric Light Shafts</option>
+        <option value="off">Off (Clear Sky)</option>
+      </select>
+    </div>
+
+    <div class="control-group" id="asteroid-group" style="display: flex; align-items: center; justify-content: space-between; margin-top: 6px;">
+      <label class="control-label" for="asteroid-toggle" style="margin-bottom: 0; cursor: pointer;">Instanced Asteroid Ring</label>
+      <input type="checkbox" id="asteroid-toggle" checked style="width: auto; cursor: pointer;">
+    </div>
+
+    <div class="control-group" id="turntable-group" style="display: flex; align-items: center; justify-content: space-between; margin-top: 6px;">
       <label class="control-label" for="turntable-toggle" style="margin-bottom: 0; cursor: pointer;">Turntable Auto-Rotate</label>
       <input type="checkbox" id="turntable-toggle" checked style="width: auto; cursor: pointer;">
     </div>
@@ -149,6 +214,7 @@
       <strong>Controls</strong><br>
       • Orbit: Left drag rotate, Right drag pan, Wheel zoom<br>
       • Fly: WASD move, Space/Shift up/down, Drag look<br>
+      • Follow: Smooth chase camera with orbit adjustment<br>
       • Click: Raycast 3D object picking & selection
     </div>
   </div>

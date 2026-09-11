@@ -8,7 +8,7 @@ import '../math/transform.dart';
 import '../math/vec.dart';
 
 /// Hierarchical scene node representing an entity, group, or visual item.
-final class SceneNode {
+base class SceneNode {
   final String? name;
   Transform _localTransform;
   Transform _worldTransform = Transform.identity;
@@ -161,14 +161,17 @@ final class SceneNode {
     return _worldTransform;
   }
 
-  void _markDirty() {
+  /// Marks this node and all descendants as needing transform recalculation.
+  void markDirty() {
     if (_isDirty) return;
     _isDirty = true;
     _worldDirty = true;
     for (final child in _children) {
-      child._markDirty();
+      child.markDirty();
     }
   }
+
+  void _markDirty() => markDirty();
 
   /// Adds [child] to this node. Detaches from any prior parent first.
   void addChild(SceneNode child) {
