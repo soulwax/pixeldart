@@ -28,6 +28,7 @@ import '../camera/smooth_follow_camera.dart';
 import '../math/ray.dart';
 import '../math/vec.dart';
 import '../particles/atmospheric_particles.dart';
+import '../particles/particle_emitter.dart';
 import '../scene/animation.dart';
 import '../scene/scene_node.dart';
 import 'webgl2_renderer_factory.dart';
@@ -124,6 +125,26 @@ final class PixeldartApp {
   /// Clears all registered atmospheric particle fields.
   void clearParticleFields() {
     _particleFields.clear();
+  }
+
+  final List<ParticleEmitter> _emitters = [];
+
+  /// Unmodifiable view of registered dynamic particle emitters.
+  List<ParticleEmitter> get emitters => List.unmodifiable(_emitters);
+
+  /// Registers a dynamic particle emitter for automatic simulation and rendering.
+  void addEmitter(ParticleEmitter emitter) {
+    _emitters.add(emitter);
+  }
+
+  /// Removes a registered dynamic particle emitter.
+  void removeEmitter(ParticleEmitter emitter) {
+    _emitters.remove(emitter);
+  }
+
+  /// Clears all registered particle emitters.
+  void clearEmitters() {
+    _emitters.clear();
   }
 
   void Function(FrameContext ctx)? onFrame;
@@ -864,6 +885,12 @@ final class PixeldartApp {
       // Submit registered atmospheric particle fields
       for (var i = 0; i < _particleFields.length; i++) {
         _particleFields[i].submit(encoder, frameInput);
+      }
+
+      // Update and submit registered dynamic particle emitters
+      for (var i = 0; i < _emitters.length; i++) {
+        _emitters[i].update(dt);
+        _emitters[i].submit(encoder, frameInput);
       }
       final ctx = FrameContext(
         timeSeconds: timeSeconds,
