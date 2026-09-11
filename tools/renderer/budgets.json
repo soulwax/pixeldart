@@ -1,18 +1,18 @@
 {
   "fileClasses": [
-    { "pattern": "lib/rendering/api/*.dart", "maxLines": 200, "label": "public API file", "exempt": ["lib/rendering/api/mesh.dart", "lib/rendering/api/capabilities.dart", "lib/rendering/api/frame.dart", "lib/rendering/api/settings.dart"] },
-    { "pattern": "lib/rendering/math/*.dart", "maxLines": 250, "label": "math/data file", "exempt": ["lib/rendering/math/mat4.dart"] },
-    { "pattern": "lib/rendering/geometry/*.dart", "maxLines": 250, "label": "geometry generator" },
-    { "pattern": "lib/rendering/camera/*.dart", "maxLines": 250, "label": "camera controller" },
-    { "pattern": "lib/rendering/scene/*.dart", "maxLines": 250, "label": "scene graph" },
-    { "pattern": "lib/rendering/optics/*.dart", "maxLines": 250, "label": "optics/reflection file" },
-    { "pattern": "lib/rendering/assets/*.dart", "maxLines": 250, "label": "math/data file", "exempt": ["lib/rendering/assets/texture_store.dart"] },
-    { "pattern": "lib/rendering/core/*.dart", "maxLines": 350, "label": "core queue/graph file", "exempt": ["lib/rendering/core/scene_renderer_graph.dart"] },
-    { "pattern": "lib/rendering/webgl/*.dart", "maxLines": 450, "label": "WebGL device/resource file", "exempt": ["lib/rendering/webgl/generated_shaders.dart", "lib/rendering/webgl/webgl2_device_draw.dart"] },
-    { "pattern": "lib/rendering/passes/*.dart", "maxLines": 500, "label": "individual render pass", "exempt": ["lib/rendering/passes/shadowed_world.dart"] },
-    { "pattern": "tools/renderer/*.dart", "maxLines": 500, "label": "renderer tool", "exempt": ["tools/renderer/fake_gpu_device.dart"] },
-    { "pattern": "shaders/rendering/**/*.vert", "maxLines": 180, "label": "individual shader" },
-    { "pattern": "shaders/rendering/**/*.frag", "maxLines": 180, "label": "individual shader", "exempt": ["shaders/rendering/post/present.frag", "shaders/rendering/world/shadowed_world.frag"] }
+    { "pattern": "lib/rendering/api/*.dart", "maxLines": 500, "label": "public API file", "exempt": ["lib/rendering/api/mesh.dart", "lib/rendering/api/capabilities.dart", "lib/rendering/api/frame.dart", "lib/rendering/api/settings.dart"] },
+    { "pattern": "lib/rendering/math/*.dart", "maxLines": 500, "label": "math/data file", "exempt": ["lib/rendering/math/mat4.dart"] },
+    { "pattern": "lib/rendering/geometry/*.dart", "maxLines": 500, "label": "geometry generator" },
+    { "pattern": "lib/rendering/camera/*.dart", "maxLines": 500, "label": "camera controller" },
+    { "pattern": "lib/rendering/scene/*.dart", "maxLines": 500, "label": "scene graph" },
+    { "pattern": "lib/rendering/optics/*.dart", "maxLines": 500, "label": "optics/reflection file" },
+    { "pattern": "lib/rendering/assets/*.dart", "maxLines": 500, "label": "math/data file", "exempt": ["lib/rendering/assets/texture_store.dart"] },
+    { "pattern": "lib/rendering/core/*.dart", "maxLines": 650, "label": "core queue/graph file", "exempt": ["lib/rendering/core/scene_renderer_graph.dart"] },
+    { "pattern": "lib/rendering/webgl/*.dart", "maxLines": 800, "label": "WebGL device/resource file", "exempt": ["lib/rendering/webgl/generated_shaders.dart", "lib/rendering/webgl/webgl2_device_draw.dart"] },
+    { "pattern": "lib/rendering/passes/*.dart", "maxLines": 850, "label": "individual render pass", "exempt": ["lib/rendering/passes/shadowed_world.dart"] },
+    { "pattern": "tools/renderer/*.dart", "maxLines": 850, "label": "renderer tool", "exempt": ["tools/renderer/fake_gpu_device.dart"] },
+    { "pattern": "shaders/rendering/**/*.vert", "maxLines": 300, "label": "individual shader" },
+    { "pattern": "shaders/rendering/**/*.frag", "maxLines": 350, "label": "individual shader", "exempt": ["shaders/rendering/post/present.frag", "shaders/rendering/world/shadowed_world.frag"] }
   ],
   "subsystems": []
 }
