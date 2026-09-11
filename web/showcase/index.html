@@ -95,6 +95,19 @@
     <div class="subtitle">Pure Dart WebGL2 High-Fidelity Engine</div>
 
     <div class="control-group">
+      <label class="control-label" for="material-select">Hero Material</label>
+      <select id="material-select">
+        <option value="gold" selected>Gold (24K Mirror)</option>
+        <option value="chrome">Chrome (Liquid Mirror)</option>
+        <option value="copper">Copper (Burnished)</option>
+        <option value="silver">Silver (Sterling)</option>
+        <option value="ceramic">Ceramic (Glazed Ruby)</option>
+        <option value="plastic">Plastic (Emerald Gloss)</option>
+        <option value="iron">Iron (Brushed)</option>
+      </select>
+    </div>
+
+    <div class="control-group">
       <label class="control-label" for="tone-map-select">Tone Mapping</label>
       <select id="tone-map-select">
         <option value="agx" selected>AgX (Modern Khronos)</option>
@@ -102,6 +115,11 @@
         <option value="reinhard">Reinhard</option>
         <option value="off">Off (Linear)</option>
       </select>
+    </div>
+
+    <div class="control-group" style="display: flex; align-items: center; justify-content: space-between; margin-top: 14px;">
+      <label class="control-label" for="turntable-toggle" style="margin-bottom: 0; cursor: pointer;">Turntable Auto-Rotate</label>
+      <input type="checkbox" id="turntable-toggle" checked style="width: auto; cursor: pointer;">
     </div>
 
     <div class="help-hint">
