@@ -11,7 +11,13 @@ final class Vec2 {
   Vec2 operator *(double s) => Vec2(x * s, y * s);
 
   double dot(Vec2 o) => x * o.x + y * o.y;
-  double get length => math.sqrt(x * x + y * y);
+  double get lengthSquared => x * x + y * y;
+  double get length => math.sqrt(lengthSquared);
+
+  Vec2 get normalized {
+    final len = length;
+    return len < 1e-9 ? zero : Vec2(x / len, y / len);
+  }
 
   @override
   bool operator ==(Object other) =>

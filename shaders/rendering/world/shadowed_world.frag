@@ -149,10 +149,23 @@ float pointAttenuation(vec3 worldPos,vec3 lightPosition,float lightRadius){
 
 vec3 pointContribution(vec3 normal,vec3 worldPos,vec3 lightPosition,
   vec3 lightColor,float lightIntensity,float lightRadius){
+}
+
+vec3 pointContribution(vec3 normal,vec3 worldPos,vec3 lightPosition,
+  vec3 lightColor,float lightIntensity,float lightRadius){
   vec3 toLight=lightPosition-worldPos;
   float ndotl=max(dot(normal,normalize(toLight)),0.);
   return lightColor*lightIntensity*ndotl*
     pointAttenuation(worldPos,lightPosition,lightRadius);
+}
+
+float directSpotAttenuation(vec3 worldPos,vec3 lightPosition,
+  vec3 lightDirection,float lightRange,float innerCos,float outerCos,float enabled){
+  vec3 toFrag=worldPos-lightPosition;
+  float cosAngle=dot(normalize(toFrag),normalize(lightDirection));
+  float coneFalloff=smoothstep(outerCos,innerCos,cosAngle);
+  float distanceFalloff=rangeAttenuation(length(toFrag),lightRange);
+  return coneFalloff*distanceFalloff*enabled;
 }
 
 vec3 directSpotContribution(vec3 normal,vec3 worldPos,vec3 lightPosition,
@@ -160,12 +173,9 @@ vec3 directSpotContribution(vec3 normal,vec3 worldPos,vec3 lightPosition,
   float innerCos,float outerCos,float enabled){
   vec3 toLight=lightPosition-worldPos;
   float ndotl=max(dot(normal,normalize(toLight)),0.);
-  vec3 toFrag=worldPos-lightPosition;
-  float cosAngle=dot(normalize(toFrag),normalize(lightDirection));
-  float coneFalloff=smoothstep(outerCos,innerCos,cosAngle);
-  float distanceFalloff=rangeAttenuation(length(toFrag),lightRange);
-  return lightColor*lightIntensity*ndotl*coneFalloff*
-    distanceFalloff*enabled;
+  float atten=directSpotAttenuation(worldPos,lightPosition,lightDirection,
+    lightRange,innerCos,outerCos,enabled);
+  return lightColor*lightIntensity*ndotl*atten;
 }
 
 // Compact Cook-Torrance response for the clean/high path. The bounded
@@ -242,6 +252,25 @@ float fogFactor(float viewDepth,float worldY){
   return clamp(max(distFactor,mediumFactor),0.,1.);
 }
 
+const vec2 VOGEL_16[16]=vec2[16](
+  vec2( 0.1768,  0.0000),
+  vec2(-0.2263,  0.2064),
+  vec2( 0.0346, -0.3938),
+  vec2( 0.2809,  0.3739),
+  vec2(-0.5186, -0.1111),
+  vec2( 0.4907, -0.3224),
+  vec2(-0.1724,  0.6137),
+  vec2(-0.2642, -0.6316),
+  vec2( 0.6186,  0.3860),
+  vec2(-0.6698,  0.3824),
+  vec2( 0.3479, -0.7314),
+  vec2( 0.1770,  0.8291),
+  vec2(-0.6558, -0.5927),
+  vec2( 0.8719,  0.2891),
+  vec2(-0.7099,  0.6348),
+  vec2( 0.1983, -0.9641)
+);
+
 float shadowFactor(float ndotl){
   vec3 projCoord=vLightSpacePos.xyz/vLightSpacePos.w;
   projCoord=projCoord*.5+.5;
@@ -251,20 +280,14 @@ float shadowFactor(float ndotl){
   // Receiver-plane style slope bias keeps grazing surfaces from acne while
   // avoiding the detached-shadow look of a large constant offset.
   float bias=max(uShadowBias*(1.-ndotl),uShadowBias*0.2666667);
-  // Fixed low-discrepancy offsets avoid the directional shimmer of a regular
-  // square lattice while remaining deterministic and free of per-frame noise.
+  // 16-tap Vogel spiral with golden ratio rotation produces silky smooth
+  // penumbras free of regular lattice banding or directional noise.
   vec2 t=uShadowMapTexelSize*clamp(uShadowFilterRadius,0.,3.);
   float sum=0.;
-  sum+=sampleShadow(projCoord+vec3(vec2(-.942,-.399)*t,0.),bias);
-  sum+=sampleShadow(projCoord+vec3(vec2(.945,-.768)*t,0.),bias);
-  sum+=sampleShadow(projCoord+vec3(vec2(-.094,.886)*t,0.),bias);
-  sum+=sampleShadow(projCoord+vec3(vec2(.344,.294)*t,0.),bias);
-  sum+=sampleShadow(projCoord+vec3(vec2(-.716,.642)*t,0.),bias);
-  sum+=sampleShadow(projCoord+vec3(vec2(.688,-.089)*t,0.),bias);
-  sum+=sampleShadow(projCoord+vec3(vec2(-.287,-.885)*t,0.),bias);
-  sum+=sampleShadow(projCoord+vec3(vec2(.052,.008)*t,0.),bias);
-  sum+=sampleShadow(projCoord+vec3(vec2(.831,.486)*t,0.),bias);
-  return sum/9.;
+  for(int i=0;i<16;i++){
+    sum+=sampleShadow(projCoord+vec3(VOGEL_16[i]*t,0.),bias);
+  }
+  return sum/16.;
 }
 
 void main(){
@@ -278,8 +301,6 @@ void main(){
   vec2 uv=uAffineWarpStrength>0.?vUv/vUvW:vUv;
   uv=uv*uUvScaleOffset.xy+uUvScaleOffset.zw;
   vec4 tex=texture(uAlbedo,uv);
-  // §6.2's alpha-masked route. Deliberately the first thing after the
-  // fetch it depends on, and ahead of all the lighting below: a discarded
   // fragment must not pay for four shadow-map taps and two normalizes it
   // will never use. uAlphaCutoff==0 is the pass's "this material has no
   // cutout" sentinel (MaterialDefinition.validate forbids a real zero), so
@@ -424,6 +445,27 @@ void main(){
   specular+=specularContribution(n,viewDir,
     normalize(uLightPosition-vWorldPos),uLightColor,uLightIntensity,
     lightAttenuation(vWorldPos)*uSpotEnabled*shadow,baseColor,specRough,metal);
+  float spotAtten0=directSpotAttenuation(vWorldPos,uDirectSpotPosition0,
+    uDirectSpotDirection0,uDirectSpotRange0,uDirectSpotInnerCos0,uDirectSpotOuterCos0,
+    uDirectSpotEnabled0);
+  if(spotAtten0>0.001){
+    specular+=specularContribution(n,viewDir,normalize(uDirectSpotPosition0-vWorldPos),
+      uDirectSpotColor0,uDirectSpotIntensity0,spotAtten0,baseColor,specRough,metal);
+  }
+  float spotAtten1=directSpotAttenuation(vWorldPos,uDirectSpotPosition1,
+    uDirectSpotDirection1,uDirectSpotRange1,uDirectSpotInnerCos1,uDirectSpotOuterCos1,
+    uDirectSpotEnabled1);
+  if(spotAtten1>0.001){
+    specular+=specularContribution(n,viewDir,normalize(uDirectSpotPosition1-vWorldPos),
+      uDirectSpotColor1,uDirectSpotIntensity1,spotAtten1,baseColor,specRough,metal);
+  }
+  float spotAtten2=directSpotAttenuation(vWorldPos,uDirectSpotPosition2,
+    uDirectSpotDirection2,uDirectSpotRange2,uDirectSpotInnerCos2,uDirectSpotOuterCos2,
+    uDirectSpotEnabled2);
+  if(spotAtten2>0.001){
+    specular+=specularContribution(n,viewDir,normalize(uDirectSpotPosition2-vWorldPos),
+      uDirectSpotColor2,uDirectSpotIntensity2,spotAtten2,baseColor,specRough,metal);
+  }
   specular*=uDirectLightScale*uSpecularScale;
   // Keep reflected energy available to the specular lobe. The previous
   // diffuse-first clamp clipped bright ceramic response before tone mapping,
@@ -462,7 +504,16 @@ void main(){
     uReflectionIntensity*reflectionSurface*
       (1.0-0.72*rough)*reflectionConfidence,
     0.0,1.0);
-  lit+=uReflectionColor*envFresnel*reflectionWeight*ao;
+  vec3 reflectDir=reflect(-viewDir,n);
+  float refUp=clamp(reflectDir.y*0.5+0.5,0.0,1.0);
+  vec3 envRadiance=mix(uAmbientColor*0.35,mix(uAmbientColor,uReflectionColor,refUp),refUp);
+  vec3 sunReflectDir=normalize(uDirectionalDirection);
+  float sunRdotL=max(dot(reflectDir,sunReflectDir),0.0);
+  envRadiance+=uDirectionalColor*pow(sunRdotL,mix(32.0,4.0,specRough))*(1.0-specRough)*0.4;
+  lit+=envRadiance*envFresnel*reflectionWeight*ao;
+  float backScatter=max(dot(-viewDir,normalize(uDirectionalDirection)),0.0);
+  vec3 subsurface=baseColor*uDirectionalColor*(pow(backScatter,4.0)*(1.0-metal)*0.12*uDirectionalIntensity);
+  lit+=subsurface;
   vec3 emissive=texture(uEmissiveMap,uv).rgb*uMaterialTint*uEmissiveStrength;
   lit+=emissive;
   if(uLightmapIntensity>0.0){

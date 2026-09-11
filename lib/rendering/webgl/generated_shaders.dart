@@ -366,10 +366,23 @@ float pointAttenuation(vec3 worldPos,vec3 lightPosition,float lightRadius){
 
 vec3 pointContribution(vec3 normal,vec3 worldPos,vec3 lightPosition,
   vec3 lightColor,float lightIntensity,float lightRadius){
+}
+
+vec3 pointContribution(vec3 normal,vec3 worldPos,vec3 lightPosition,
+  vec3 lightColor,float lightIntensity,float lightRadius){
   vec3 toLight=lightPosition-worldPos;
   float ndotl=max(dot(normal,normalize(toLight)),0.);
   return lightColor*lightIntensity*ndotl*
     pointAttenuation(worldPos,lightPosition,lightRadius);
+}
+
+float directSpotAttenuation(vec3 worldPos,vec3 lightPosition,
+  vec3 lightDirection,float lightRange,float innerCos,float outerCos,float enabled){
+  vec3 toFrag=worldPos-lightPosition;
+  float cosAngle=dot(normalize(toFrag),normalize(lightDirection));
+  float coneFalloff=smoothstep(outerCos,innerCos,cosAngle);
+  float distanceFalloff=rangeAttenuation(length(toFrag),lightRange);
+  return coneFalloff*distanceFalloff*enabled;
 }
 
 vec3 directSpotContribution(vec3 normal,vec3 worldPos,vec3 lightPosition,
@@ -377,12 +390,9 @@ vec3 directSpotContribution(vec3 normal,vec3 worldPos,vec3 lightPosition,
   float innerCos,float outerCos,float enabled){
   vec3 toLight=lightPosition-worldPos;
   float ndotl=max(dot(normal,normalize(toLight)),0.);
-  vec3 toFrag=worldPos-lightPosition;
-  float cosAngle=dot(normalize(toFrag),normalize(lightDirection));
-  float coneFalloff=smoothstep(outerCos,innerCos,cosAngle);
-  float distanceFalloff=rangeAttenuation(length(toFrag),lightRange);
-  return lightColor*lightIntensity*ndotl*coneFalloff*
-    distanceFalloff*enabled;
+  float atten=directSpotAttenuation(worldPos,lightPosition,lightDirection,
+    lightRange,innerCos,outerCos,enabled);
+  return lightColor*lightIntensity*ndotl*atten;
 }
 
 // Compact Cook-Torrance response for the clean/high path. The bounded
@@ -459,6 +469,25 @@ float fogFactor(float viewDepth,float worldY){
   return clamp(max(distFactor,mediumFactor),0.,1.);
 }
 
+const vec2 VOGEL_16[16]=vec2[16](
+  vec2( 0.1768,  0.0000),
+  vec2(-0.2263,  0.2064),
+  vec2( 0.0346, -0.3938),
+  vec2( 0.2809,  0.3739),
+  vec2(-0.5186, -0.1111),
+  vec2( 0.4907, -0.3224),
+  vec2(-0.1724,  0.6137),
+  vec2(-0.2642, -0.6316),
+  vec2( 0.6186,  0.3860),
+  vec2(-0.6698,  0.3824),
+  vec2( 0.3479, -0.7314),
+  vec2( 0.1770,  0.8291),
+  vec2(-0.6558, -0.5927),
+  vec2( 0.8719,  0.2891),
+  vec2(-0.7099,  0.6348),
+  vec2( 0.1983, -0.9641)
+);
+
 float shadowFactor(float ndotl){
   vec3 projCoord=vLightSpacePos.xyz/vLightSpacePos.w;
   projCoord=projCoord*.5+.5;
@@ -468,20 +497,14 @@ float shadowFactor(float ndotl){
   // Receiver-plane style slope bias keeps grazing surfaces from acne while
   // avoiding the detached-shadow look of a large constant offset.
   float bias=max(uShadowBias*(1.-ndotl),uShadowBias*0.2666667);
-  // Fixed low-discrepancy offsets avoid the directional shimmer of a regular
-  // square lattice while remaining deterministic and free of per-frame noise.
+  // 16-tap Vogel spiral with golden ratio rotation produces silky smooth
+  // penumbras free of regular lattice banding or directional noise.
   vec2 t=uShadowMapTexelSize*clamp(uShadowFilterRadius,0.,3.);
   float sum=0.;
-  sum+=sampleShadow(projCoord+vec3(vec2(-.942,-.399)*t,0.),bias);
-  sum+=sampleShadow(projCoord+vec3(vec2(.945,-.768)*t,0.),bias);
-  sum+=sampleShadow(projCoord+vec3(vec2(-.094,.886)*t,0.),bias);
-  sum+=sampleShadow(projCoord+vec3(vec2(.344,.294)*t,0.),bias);
-  sum+=sampleShadow(projCoord+vec3(vec2(-.716,.642)*t,0.),bias);
-  sum+=sampleShadow(projCoord+vec3(vec2(.688,-.089)*t,0.),bias);
-  sum+=sampleShadow(projCoord+vec3(vec2(-.287,-.885)*t,0.),bias);
-  sum+=sampleShadow(projCoord+vec3(vec2(.052,.008)*t,0.),bias);
-  sum+=sampleShadow(projCoord+vec3(vec2(.831,.486)*t,0.),bias);
-  return sum/9.;
+  for(int i=0;i<16;i++){
+    sum+=sampleShadow(projCoord+vec3(VOGEL_16[i]*t,0.),bias);
+  }
+  return sum/16.;
 }
 
 void main(){
@@ -495,8 +518,6 @@ void main(){
   vec2 uv=uAffineWarpStrength>0.?vUv/vUvW:vUv;
   uv=uv*uUvScaleOffset.xy+uUvScaleOffset.zw;
   vec4 tex=texture(uAlbedo,uv);
-  // §6.2's alpha-masked route. Deliberately the first thing after the
-  // fetch it depends on, and ahead of all the lighting below: a discarded
   // fragment must not pay for four shadow-map taps and two normalizes it
   // will never use. uAlphaCutoff==0 is the pass's "this material has no
   // cutout" sentinel (MaterialDefinition.validate forbids a real zero), so
@@ -641,6 +662,27 @@ void main(){
   specular+=specularContribution(n,viewDir,
     normalize(uLightPosition-vWorldPos),uLightColor,uLightIntensity,
     lightAttenuation(vWorldPos)*uSpotEnabled*shadow,baseColor,specRough,metal);
+  float spotAtten0=directSpotAttenuation(vWorldPos,uDirectSpotPosition0,
+    uDirectSpotDirection0,uDirectSpotRange0,uDirectSpotInnerCos0,uDirectSpotOuterCos0,
+    uDirectSpotEnabled0);
+  if(spotAtten0>0.001){
+    specular+=specularContribution(n,viewDir,normalize(uDirectSpotPosition0-vWorldPos),
+      uDirectSpotColor0,uDirectSpotIntensity0,spotAtten0,baseColor,specRough,metal);
+  }
+  float spotAtten1=directSpotAttenuation(vWorldPos,uDirectSpotPosition1,
+    uDirectSpotDirection1,uDirectSpotRange1,uDirectSpotInnerCos1,uDirectSpotOuterCos1,
+    uDirectSpotEnabled1);
+  if(spotAtten1>0.001){
+    specular+=specularContribution(n,viewDir,normalize(uDirectSpotPosition1-vWorldPos),
+      uDirectSpotColor1,uDirectSpotIntensity1,spotAtten1,baseColor,specRough,metal);
+  }
+  float spotAtten2=directSpotAttenuation(vWorldPos,uDirectSpotPosition2,
+    uDirectSpotDirection2,uDirectSpotRange2,uDirectSpotInnerCos2,uDirectSpotOuterCos2,
+    uDirectSpotEnabled2);
+  if(spotAtten2>0.001){
+    specular+=specularContribution(n,viewDir,normalize(uDirectSpotPosition2-vWorldPos),
+      uDirectSpotColor2,uDirectSpotIntensity2,spotAtten2,baseColor,specRough,metal);
+  }
   specular*=uDirectLightScale*uSpecularScale;
   // Keep reflected energy available to the specular lobe. The previous
   // diffuse-first clamp clipped bright ceramic response before tone mapping,
@@ -679,7 +721,16 @@ void main(){
     uReflectionIntensity*reflectionSurface*
       (1.0-0.72*rough)*reflectionConfidence,
     0.0,1.0);
-  lit+=uReflectionColor*envFresnel*reflectionWeight*ao;
+  vec3 reflectDir=reflect(-viewDir,n);
+  float refUp=clamp(reflectDir.y*0.5+0.5,0.0,1.0);
+  vec3 envRadiance=mix(uAmbientColor*0.35,mix(uAmbientColor,uReflectionColor,refUp),refUp);
+  vec3 sunReflectDir=normalize(uDirectionalDirection);
+  float sunRdotL=max(dot(reflectDir,sunReflectDir),0.0);
+  envRadiance+=uDirectionalColor*pow(sunRdotL,mix(32.0,4.0,specRough))*(1.0-specRough)*0.4;
+  lit+=envRadiance*envFresnel*reflectionWeight*ao;
+  float backScatter=max(dot(-viewDir,normalize(uDirectionalDirection)),0.0);
+  vec3 subsurface=baseColor*uDirectionalColor*(pow(backScatter,4.0)*(1.0-metal)*0.12*uDirectionalIntensity);
+  lit+=subsurface;
   vec3 emissive=texture(uEmissiveMap,uv).rgb*uMaterialTint*uEmissiveStrength;
   lit+=emissive;
   if(uLightmapIntensity>0.0){
@@ -930,11 +981,59 @@ vec3 equirectangularSky(vec2 uv){
   return linear*max(uSkyExposure,0.0);
 }
 
+vec4 applyFxaa(sampler2D tex, vec2 uv){
+  vec2 texelSize=1.0/vec2(textureSize(tex,0));
+  vec3 rgbM=texture(tex,uv).rgb;
+  vec3 rgbNW=texture(tex,uv+vec2(-texelSize.x,-texelSize.y)).rgb;
+  vec3 rgbNE=texture(tex,uv+vec2( texelSize.x,-texelSize.y)).rgb;
+  vec3 rgbSW=texture(tex,uv+vec2(-texelSize.x, texelSize.y)).rgb;
+  vec3 rgbSE=texture(tex,uv+vec2( texelSize.x, texelSize.y)).rgb;
+
+  const vec3 luma=vec3(0.299,0.587,0.114);
+  float lumaM =dot(rgbM, luma);
+  float lumaNW=dot(rgbNW,luma);
+  float lumaNE=dot(rgbNE,luma);
+  float lumaSW=dot(rgbSW,luma);
+  float lumaSE=dot(rgbSE,luma);
+
+  float lumaMin=min(lumaM,min(min(lumaNW,lumaNE),min(lumaSW,lumaSE)));
+  float lumaMax=max(lumaM,max(max(lumaNW,lumaNE),max(lumaSW,lumaSE)));
+
+  float range=lumaMax-lumaMin;
+  if(range<max(0.04,lumaMax*0.125)){
+    return vec4(rgbM,1.0);
+  }
+
+  vec2 dir=vec2(
+    -((lumaNW+lumaNE)-(lumaSW+lumaSE)),
+    ((lumaNW+lumaSW)-(lumaNE+lumaSE))
+  );
+  float dirReduce=max((lumaNW+lumaNE+lumaSW+lumaSE)*0.03125,0.0078125);
+  float rcpDirMin=1.0/(min(abs(dir.x),abs(dir.y))+dirReduce);
+  dir=min(vec2(8.0),max(vec2(-8.0),dir*rcpDirMin))*texelSize;
+
+  vec3 rgbA=0.5*(
+    texture(tex,uv+dir*(1.0/3.0-0.5)).rgb+
+    texture(tex,uv+dir*(2.0/3.0-0.5)).rgb
+  );
+  vec3 rgbB=rgbA*0.5+0.25*(
+    texture(tex,uv+dir*-0.5).rgb+
+    texture(tex,uv+dir* 0.5).rgb
+  );
+  float lumaB=dot(rgbB,luma);
+  if((lumaB<lumaMin)||(lumaB>lumaMax)){
+    return vec4(rgbA,1.0);
+  }
+  return vec4(rgbB,1.0);
+}
+
 void main(){
-  vec4 source=texture(uTex,vUv);
+  vec4 rawSource=texture(uTex,vUv);
+  bool isBackground=uSkyEnabled>0.5 && distance(rawSource.rgb,uClearColor)<0.004;
+  vec4 source=isBackground?rawSource:applyFxaa(uTex,vUv);
   // The world pass clears untouched pixels to uClearColor. Replace only that
   // exact background, so the sky is always active without covering geometry.
-  if(uSkyEnabled>0.5 && distance(source.rgb,uClearColor)<0.004){
+  if(isBackground){
     vec3 viewDirection=worldDirectionForUv(vUv);
     vec3 worldDirection=normalize((uInverseView*vec4(viewDirection,0.0)).xyz);
     source.rgb=uSkyTextureEnabled>0.5
@@ -1070,8 +1169,8 @@ uniform float uRadius;
 uniform float uStrength;
 out vec4 oColor;
 
-const int KERNEL_SIZE=8;
-const vec3 KERNEL[8]=vec3[8](
+const int KERNEL_SIZE=16;
+const vec3 KERNEL[16]=vec3[16](
   vec3( 0.35, 0.23, 0.45),
   vec3(-0.28, 0.41, 0.32),
   vec3( 0.18,-0.36, 0.55),
@@ -1079,7 +1178,15 @@ const vec3 KERNEL[8]=vec3[8](
   vec3( 0.51, 0.08, 0.18),
   vec3(-0.11, 0.53, 0.16),
   vec3( 0.07,-0.48, 0.38),
-  vec3(-0.33,-0.31, 0.48)
+  vec3(-0.33,-0.31, 0.48),
+  vec3( 0.22, 0.14, 0.72),
+  vec3(-0.18,-0.25, 0.65),
+  vec3( 0.42,-0.28, 0.35),
+  vec3(-0.36, 0.32, 0.52),
+  vec3( 0.15, 0.58, 0.25),
+  vec3(-0.48, 0.12, 0.39),
+  vec3( 0.28,-0.52, 0.22),
+  vec3(-0.24,-0.42, 0.58)
 );
 
 float linearDepth(float raw){
@@ -1210,11 +1317,13 @@ uniform sampler2D uSource;
 uniform vec2 uTexelStep;
 out vec4 oColor;
 
-const float WEIGHTS[5]=float[5](0.227027,0.1945946,0.1216216,0.054054,0.016216);
+const float WEIGHTS[7]=float[7](
+  0.167465,0.153582,0.118331,0.076665,0.041582,0.018907,0.007203
+);
 
 void main(){
   vec3 sum=texture(uSource,vUv).rgb*WEIGHTS[0];
-  for(int i=1;i<5;i++){
+  for(int i=1;i<7;i++){
     vec2 offset=uTexelStep*float(i);
     sum+=texture(uSource,vUv+offset).rgb*WEIGHTS[i];
     sum+=texture(uSource,vUv-offset).rgb*WEIGHTS[i];

@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import '../api/mesh.dart';
 import '../math/bounds.dart';
+import '../math/quat.dart';
 import '../math/vec.dart';
 
 /// Procedural geometry generators producing validated surface-v2 [MeshData].
@@ -526,26 +527,35 @@ abstract final class Primitives {
     final invPhi = 1.0 / phi;
 
     final rawVertices = [
-      Vec3(-1, -1, -1), Vec3(-1, -1, 1), Vec3(-1, 1, -1), Vec3(-1, 1, 1),
-      Vec3(1, -1, -1), Vec3(1, -1, 1), Vec3(1, 1, -1), Vec3(1, 1, 1),
-      Vec3(0, -invPhi, -phi), Vec3(0, -invPhi, phi), Vec3(0, invPhi, -phi), Vec3(0, invPhi, phi),
-      Vec3(-invPhi, -phi, 0), Vec3(-invPhi, phi, 0), Vec3(invPhi, -phi, 0), Vec3(invPhi, phi, 0),
-      Vec3(-phi, 0, -invPhi), Vec3(phi, 0, -invPhi), Vec3(-phi, 0, invPhi), Vec3(phi, 0, invPhi),
+      // 0..7: (+-1, +-1, +-1)
+      const Vec3(-1, -1, -1), const Vec3(-1, -1, 1),
+      const Vec3(-1, 1, -1), const Vec3(-1, 1, 1),
+      const Vec3(1, -1, -1), const Vec3(1, -1, 1),
+      const Vec3(1, 1, -1), const Vec3(1, 1, 1),
+      // 8..11: (0, +-invPhi, +-phi)
+      Vec3(0, -invPhi, -phi), Vec3(0, -invPhi, phi),
+      Vec3(0, invPhi, -phi), Vec3(0, invPhi, phi),
+      // 12..15: (+-invPhi, +-phi, 0)
+      Vec3(-invPhi, -phi, 0), Vec3(-invPhi, phi, 0),
+      Vec3(invPhi, -phi, 0), Vec3(invPhi, phi, 0),
+      // 16..19: (+-phi, 0, +-invPhi)
+      Vec3(-phi, 0, -invPhi), Vec3(-phi, 0, invPhi),
+      Vec3(phi, 0, -invPhi), Vec3(phi, 0, invPhi),
     ].map((v) => v.normalized * radius).toList();
 
     const pentagons = [
-      [3, 11, 7, 19, 5],
-      [7, 11, 10, 8, 17],
-      [11, 3, 13, 15, 10],
-      [3, 5, 9, 12, 13],
-      [5, 19, 14, 4, 9],
-      [19, 7, 17, 1, 14],
-      [2, 12, 9, 4, 8],
-      [2, 8, 10, 15, 6],
-      [6, 15, 13, 0, 16],
-      [16, 0, 1, 17, 8],
-      [14, 1, 0, 18, 4],
-      [2, 6, 16, 18, 12],
+      [0, 8, 4, 14, 12],
+      [0, 16, 2, 10, 8],
+      [0, 12, 1, 17, 16],
+      [1, 12, 14, 5, 9],
+      [1, 9, 11, 3, 17],
+      [2, 13, 15, 6, 10],
+      [2, 16, 17, 3, 13],
+      [3, 11, 7, 15, 13],
+      [4, 8, 10, 6, 18],
+      [4, 18, 19, 5, 14],
+      [5, 19, 7, 11, 9],
+      [6, 15, 7, 19, 18],
     ];
 
     final b = _PrimitiveMeshBuilder();
@@ -619,6 +629,12 @@ abstract final class Primitives {
 
     // 12 Beveled Edges
     void edgeStrip(Vec3 aStart, Vec3 aEnd, Vec3 nA, Vec3 nB, Vec3 tangent) {
+      final edgeDir = aEnd - aStart;
+      final deltaN = nB - nA;
+      final cross = edgeDir.cross(deltaN);
+      final outward = (nA + nB).normalized;
+      final reversed = cross.dot(outward) < 0;
+
       for (var seg = 0; seg < bevelSegments; seg++) {
         final t0 = seg / bevelSegments;
         final t1 = (seg + 1) / bevelSegments;
@@ -638,7 +654,11 @@ abstract final class Primitives {
         b.addVertex(p1, norm0, tangent, Vec2(1, t0));
         b.addVertex(p2, norm1, tangent, Vec2(1, t1));
         b.addVertex(p3, norm1, tangent, Vec2(0, t1));
-        b.addQuadIndices(base, base + 1, base + 2, base + 3);
+        if (reversed) {
+          b.addQuadIndices(base, base + 3, base + 2, base + 1);
+        } else {
+          b.addQuadIndices(base, base + 1, base + 2, base + 3);
+        }
       }
     }
 
@@ -690,7 +710,7 @@ abstract final class Primitives {
               final i1 = cornerBase + (i + 1) * stride + j;
               final i2 = cornerBase + (i + 1) * stride + (j + 1);
               final i3 = cornerBase + i * stride + (j + 1);
-              if (sx * sy * sz > 0) {
+              if (sx * sy * sz < 0) {
                 b.addQuadIndices(i0, i1, i2, i3);
               } else {
                 b.addQuadIndices(i0, i3, i2, i1);
@@ -703,6 +723,132 @@ abstract final class Primitives {
 
     final halfSize = Vec3(width * 0.5, height * 0.5, depth * 0.5);
     return b.build(Aabb(halfSize * -1, halfSize));
+  }
+
+  /// Generates a continuous 3D tubular conduit or cable extruded along an arbitrary [spine] curve.
+  ///
+  /// Employs a Parallel Transport Frame (Bishop Frame) along the spine to eliminate twists
+  /// and abrupt 180-degree Frenet flips across inflection points.
+  static MeshData tubePath({
+    required List<Vec3> spine,
+    double radius = 0.15,
+    int radialSegments = 12,
+    bool closed = false,
+  }) {
+    if (spine.length < 2) {
+      throw ArgumentError('tubePath requires at least 2 spine points');
+    }
+    if (radius <= 0) throw ArgumentError.value(radius, 'radius', 'must be > 0');
+    if (radialSegments < 3) {
+      throw ArgumentError.value(radialSegments, 'radialSegments', 'must be >= 3');
+    }
+
+    final points = List<Vec3>.from(spine);
+    if (closed && (points.last - points.first).length > 1e-4) {
+      points.add(points.first);
+    }
+
+    final ringCount = points.length;
+
+    // Compute tangents along spine
+    final tangents = <Vec3>[];
+    for (var i = 0; i < ringCount; i++) {
+      Vec3 t;
+      if (i == 0) {
+        t = (points[1] - points[0]).normalized;
+      } else if (i == ringCount - 1) {
+        t = (points[ringCount - 1] - points[ringCount - 2]).normalized;
+      } else {
+        t = (points[i + 1] - points[i - 1]).normalized;
+      }
+      if (t.lengthSquared < 1e-8) t = const Vec3(0, 0, 1);
+      tangents.add(t);
+    }
+
+    // Build Parallel Transport Frames
+    final normals = <Vec3>[];
+    final binormals = <Vec3>[];
+
+    var upRef = const Vec3(0, 1, 0);
+    if (tangents[0].y.abs() > 0.85) {
+      upRef = const Vec3(1, 0, 0);
+    }
+    var n0 = (upRef - tangents[0] * tangents[0].dot(upRef)).normalized;
+    var b0 = tangents[0].cross(n0).normalized;
+    normals.add(n0);
+    binormals.add(b0);
+
+    for (var i = 0; i < ringCount - 1; i++) {
+      final tCurr = tangents[i];
+      final tNext = tangents[i + 1];
+      final axis = tCurr.cross(tNext);
+      final axisLen = axis.length;
+
+      Vec3 nNext;
+      if (axisLen > 1e-6) {
+        final axisNorm = axis * (1.0 / axisLen);
+        final dot = tCurr.dot(tNext).clamp(-1.0, 1.0);
+        final angle = math.acos(dot);
+        final rot = Quat.axisAngle(axisNorm, angle);
+        nNext = rot.rotate(normals[i]).normalized;
+      } else {
+        nNext = normals[i];
+      }
+      final bNext = tNext.cross(nNext).normalized;
+      normals.add(nNext);
+      binormals.add(bNext);
+    }
+
+    final b = _PrimitiveMeshBuilder();
+    const twoPi = math.pi * 2.0;
+
+    var minP = Vec3(double.infinity, double.infinity, double.infinity);
+    var maxP = Vec3(-double.infinity, -double.infinity, -double.infinity);
+
+    // Generate rings
+    for (var i = 0; i < ringCount; i++) {
+      final center = points[i];
+      final nRing = normals[i];
+      final bRing = binormals[i];
+      final tRing = tangents[i];
+      final vCoord = i / (ringCount - 1);
+
+      for (var j = 0; j <= radialSegments; j++) {
+        final uCoord = j / radialSegments;
+        final theta = uCoord * twoPi;
+        final cosTh = math.cos(theta);
+        final sinTh = math.sin(theta);
+
+        final norm = (nRing * cosTh + bRing * sinTh).normalized;
+        final pos = center + norm * radius;
+
+        if (pos.x < minP.x) minP = Vec3(pos.x, minP.y, minP.z);
+        if (pos.y < minP.y) minP = Vec3(minP.x, pos.y, minP.z);
+        if (pos.z < minP.z) minP = Vec3(minP.x, minP.y, pos.z);
+
+        if (pos.x > maxP.x) maxP = Vec3(pos.x, maxP.y, maxP.z);
+        if (pos.y > maxP.y) maxP = Vec3(maxP.x, pos.y, maxP.z);
+        if (pos.z > maxP.z) maxP = Vec3(maxP.x, maxP.y, pos.z);
+
+        b.addVertex(pos, norm, tRing, Vec2(uCoord, vCoord));
+      }
+    }
+
+    // Connect quads
+    final stride = radialSegments + 1;
+    for (var i = 0; i < ringCount - 1; i++) {
+      final baseCurr = i * stride;
+      final baseNext = (i + 1) * stride;
+      for (var j = 0; j < radialSegments; j++) {
+        final i0 = baseCurr + j;
+        final i1 = baseNext + j;
+        final i2 = baseNext + j + 1;
+        final i3 = baseCurr + j + 1;
+        b.addQuadIndices(i0, i1, i2, i3);
+      }
+    }
+
+    return b.build(Aabb(minP, maxP));
   }
 }
 

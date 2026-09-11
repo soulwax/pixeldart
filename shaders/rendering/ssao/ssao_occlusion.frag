@@ -10,8 +10,8 @@ uniform float uRadius;
 uniform float uStrength;
 out vec4 oColor;
 
-const int KERNEL_SIZE=8;
-const vec3 KERNEL[8]=vec3[8](
+const int KERNEL_SIZE=16;
+const vec3 KERNEL[16]=vec3[16](
   vec3( 0.35, 0.23, 0.45),
   vec3(-0.28, 0.41, 0.32),
   vec3( 0.18,-0.36, 0.55),
@@ -19,7 +19,15 @@ const vec3 KERNEL[8]=vec3[8](
   vec3( 0.51, 0.08, 0.18),
   vec3(-0.11, 0.53, 0.16),
   vec3( 0.07,-0.48, 0.38),
-  vec3(-0.33,-0.31, 0.48)
+  vec3(-0.33,-0.31, 0.48),
+  vec3( 0.22, 0.14, 0.72),
+  vec3(-0.18,-0.25, 0.65),
+  vec3( 0.42,-0.28, 0.35),
+  vec3(-0.36, 0.32, 0.52),
+  vec3( 0.15, 0.58, 0.25),
+  vec3(-0.48, 0.12, 0.39),
+  vec3( 0.28,-0.52, 0.22),
+  vec3(-0.24,-0.42, 0.58)
 );
 
 float linearDepth(float raw){

@@ -5,11 +5,13 @@ uniform sampler2D uSource;
 uniform vec2 uTexelStep;
 out vec4 oColor;
 
-const float WEIGHTS[5]=float[5](0.227027,0.1945946,0.1216216,0.054054,0.016216);
+const float WEIGHTS[7]=float[7](
+  0.167465,0.153582,0.118331,0.076665,0.041582,0.018907,0.007203
+);
 
 void main(){
   vec3 sum=texture(uSource,vUv).rgb*WEIGHTS[0];
-  for(int i=1;i<5;i++){
+  for(int i=1;i<7;i++){
     vec2 offset=uTexelStep*float(i);
     sum+=texture(uSource,vUv+offset).rgb*WEIGHTS[i];
     sum+=texture(uSource,vUv-offset).rgb*WEIGHTS[i];

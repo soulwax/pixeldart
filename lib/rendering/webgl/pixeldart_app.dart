@@ -21,6 +21,7 @@ import '../api/stats.dart';
 import '../atmosphere/solar_cycle.dart';
 import '../camera/camera_controller.dart';
 import '../camera/camera_shake.dart';
+import '../camera/cinematic_tour_camera.dart';
 import '../camera/fly_camera.dart';
 import '../camera/orbit_camera.dart';
 import '../camera/smooth_follow_camera.dart';
@@ -348,6 +349,21 @@ final class PixeldartApp {
       distance: distance,
       height: height,
       positionDamping: damping,
+    );
+    cameraController = ctrl;
+    return ctrl;
+  }
+
+  /// Sets the active camera controller to an automated cinematic tour along [waypoints].
+  CinematicTourCameraController useCinematicTour({
+    required List<CameraWaypoint> waypoints,
+    double duration = 20.0,
+    bool loop = true,
+  }) {
+    final ctrl = CinematicTourCameraController(
+      waypoints: waypoints,
+      duration: duration,
+      loop: loop,
     );
     cameraController = ctrl;
     return ctrl;

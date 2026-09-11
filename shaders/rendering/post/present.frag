@@ -205,11 +205,59 @@ vec3 equirectangularSky(vec2 uv){
   return linear*max(uSkyExposure,0.0);
 }
 
+vec4 applyFxaa(sampler2D tex, vec2 uv){
+  vec2 texelSize=1.0/vec2(textureSize(tex,0));
+  vec3 rgbM=texture(tex,uv).rgb;
+  vec3 rgbNW=texture(tex,uv+vec2(-texelSize.x,-texelSize.y)).rgb;
+  vec3 rgbNE=texture(tex,uv+vec2( texelSize.x,-texelSize.y)).rgb;
+  vec3 rgbSW=texture(tex,uv+vec2(-texelSize.x, texelSize.y)).rgb;
+  vec3 rgbSE=texture(tex,uv+vec2( texelSize.x, texelSize.y)).rgb;
+
+  const vec3 luma=vec3(0.299,0.587,0.114);
+  float lumaM =dot(rgbM, luma);
+  float lumaNW=dot(rgbNW,luma);
+  float lumaNE=dot(rgbNE,luma);
+  float lumaSW=dot(rgbSW,luma);
+  float lumaSE=dot(rgbSE,luma);
+
+  float lumaMin=min(lumaM,min(min(lumaNW,lumaNE),min(lumaSW,lumaSE)));
+  float lumaMax=max(lumaM,max(max(lumaNW,lumaNE),max(lumaSW,lumaSE)));
+
+  float range=lumaMax-lumaMin;
+  if(range<max(0.04,lumaMax*0.125)){
+    return vec4(rgbM,1.0);
+  }
+
+  vec2 dir=vec2(
+    -((lumaNW+lumaNE)-(lumaSW+lumaSE)),
+    ((lumaNW+lumaSW)-(lumaNE+lumaSE))
+  );
+  float dirReduce=max((lumaNW+lumaNE+lumaSW+lumaSE)*0.03125,0.0078125);
+  float rcpDirMin=1.0/(min(abs(dir.x),abs(dir.y))+dirReduce);
+  dir=min(vec2(8.0),max(vec2(-8.0),dir*rcpDirMin))*texelSize;
+
+  vec3 rgbA=0.5*(
+    texture(tex,uv+dir*(1.0/3.0-0.5)).rgb+
+    texture(tex,uv+dir*(2.0/3.0-0.5)).rgb
+  );
+  vec3 rgbB=rgbA*0.5+0.25*(
+    texture(tex,uv+dir*-0.5).rgb+
+    texture(tex,uv+dir* 0.5).rgb
+  );
+  float lumaB=dot(rgbB,luma);
+  if((lumaB<lumaMin)||(lumaB>lumaMax)){
+    return vec4(rgbA,1.0);
+  }
+  return vec4(rgbB,1.0);
+}
+
 void main(){
-  vec4 source=texture(uTex,vUv);
+  vec4 rawSource=texture(uTex,vUv);
+  bool isBackground=uSkyEnabled>0.5 && distance(rawSource.rgb,uClearColor)<0.004;
+  vec4 source=isBackground?rawSource:applyFxaa(uTex,vUv);
   // The world pass clears untouched pixels to uClearColor. Replace only that
   // exact background, so the sky is always active without covering geometry.
-  if(uSkyEnabled>0.5 && distance(source.rgb,uClearColor)<0.004){
+  if(isBackground){
     vec3 viewDirection=worldDirectionForUv(vUv);
     vec3 worldDirection=normalize((uInverseView*vec4(viewDirection,0.0)).xyz);
     source.rgb=uSkyTextureEnabled>0.5

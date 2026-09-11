@@ -142,6 +142,24 @@ void main() async {
           if (turntableGroup is web.HTMLElement) {
             turntableGroup.style.display = 'none';
           }
+        } else if (cameraSelect.value == 'tour') {
+          final tourWaypoints = [
+            const CameraWaypoint(eye: Vec3(0, 4.5, 11.0), target: Vec3(0, 0.5, 0), fovYRadians: 1.05),
+            const CameraWaypoint(eye: Vec3(8.0, 3.2, 5.5), target: Vec3(1.0, 0.8, 0), fovYRadians: 0.95),
+            const CameraWaypoint(eye: Vec3(7.0, 2.2, -4.5), target: Vec3(5.5, 0.2, -5.5), fovYRadians: 1.05),
+            const CameraWaypoint(eye: Vec3(3.5, 4.2, -7.5), target: Vec3(0, 0.5, 0), fovYRadians: 1.15),
+            const CameraWaypoint(eye: Vec3(-6.5, 2.8, -5.0), target: Vec3(-0.5, 0.5, 0), fovYRadians: 0.90),
+            const CameraWaypoint(eye: Vec3(-8.5, 4.0, 2.0), target: Vec3(0, 0.5, 0.5), fovYRadians: 1.00),
+            const CameraWaypoint(eye: Vec3(-3.5, 2.0, 8.5), target: Vec3(0.5, 0.5, 0), fovYRadians: 1.10),
+          ];
+          app.useCinematicTour(
+            waypoints: tourWaypoints,
+            duration: 22.0,
+            loop: true,
+          );
+          if (turntableGroup is web.HTMLElement) {
+            turntableGroup.style.display = 'none';
+          }
         } else {
           final newOrbit = app.useOrbitCamera(
             target: const Vec3(0, 0.5, 0),
@@ -649,6 +667,178 @@ void main() async {
   );
   app.scene.addChild(asteroidBelt);
 
+  // 3D Procedural Conduit Rail extruded along a centripetal Catmull-Rom spline
+  final railSpline = CatmullRomSpline3D(
+    points: const [
+      Vec3(0, 3.2, -6.5),
+      Vec3(6.5, 1.8, -3.5),
+      Vec3(7.5, 4.0, 3.5),
+      Vec3(2.5, 2.2, 7.0),
+      Vec3(-4.5, 3.5, 6.0),
+      Vec3(-7.5, 1.5, -1.0),
+      Vec3(-5.0, 4.2, -5.5),
+    ],
+    closed: true,
+  );
+  const railSamples = 120;
+  final railPoints = <Vec3>[];
+  for (var i = 0; i <= railSamples; i++) {
+    railPoints.add(railSpline.sample(i / railSamples));
+  }
+  final conduitData = Primitives.tubePath(
+    spine: railPoints,
+    radius: 0.12,
+    radialSegments: 10,
+    closed: true,
+  );
+  final conduitMesh = app.createMesh(conduitData, debugLabel: 'conduit_rail');
+  final conduitMat = app.createMaterial(
+    const MaterialDefinition(
+      key: 'conduit_emissive_rail',
+      tintR: 0.1,
+      tintG: 0.85,
+      tintB: 1.0,
+      emissiveStrength: 1.8,
+      roughness: 0.25,
+      metallic: 0.85,
+    ),
+  );
+  app.scene.add(
+    mesh: conduitMesh,
+    meshData: conduitData,
+    material: conduitMat,
+    name: 'conduit_rail_node',
+  );
+
+  // Dynamic ocean wave simulation and physical buoyant beacon
+  final oceanEvaluator = GerstnerWaveEvaluator.ocean(baseHeight: 0.0);
+  final buoyData = Primitives.icosphere(radius: 0.45, subdivisions: 2);
+  final buoyMesh = app.createMesh(buoyData, debugLabel: 'ocean_buoy');
+  final buoyMat = app.createMaterial(
+    const MaterialDefinition(
+      key: 'buoy_beacon',
+      tintR: 1.0,
+      tintG: 0.45,
+      tintB: 0.1,
+      emissiveStrength: 1.2,
+      roughness: 0.35,
+      metallic: 0.5,
+    ),
+  );
+  final buoyNode = app.scene.add(
+    mesh: buoyMesh,
+    meshData: buoyData,
+    material: buoyMat,
+    transform: Transform.at(const Vec3(5.2, 0.0, 5.2)),
+    name: 'buoy_beacon_node',
+  );
+
+  // Procedural fractal island terrain
+  final terrainGen = TerrainGenerator(
+    width: 32.0,
+    depth: 32.0,
+    subdivisionsX: 36,
+    subdivisionsZ: 36,
+    maxHeight: 3.2,
+    baseHeight: -0.6,
+    islandRadius: 13.5,
+  );
+  final terrainData = terrainGen.generateMesh();
+  final terrainMesh = app.createMesh(terrainData, debugLabel: 'island_terrain');
+  final biomePixels = terrainGen.generateBiomeTexture(width: 256, height: 256);
+  final biomeTex = app.createProceduralTexture(
+    biomePixels,
+    width: 256,
+    height: 256,
+    debugLabel: 'terrain_biome_albedo',
+  );
+  final terrainMat = app.createMaterial(
+    MaterialDefinition(
+      key: 'terrain_biome_pbr',
+      albedoTexture: biomeTex,
+      roughness: 0.85,
+      metallic: 0.05,
+    ),
+  );
+  final terrainNode = app.scene.add(
+    mesh: terrainMesh,
+    meshData: terrainData,
+    material: terrainMat,
+    name: 'terrain_node',
+  );
+
+  // Deforming dynamic water surface plane
+  final waterSurface = WaterSurfaceMesh(
+    width: 38.0,
+    depth: 38.0,
+    subdivisionsX: 32,
+    subdivisionsZ: 32,
+    baseHeight: 0.0,
+  );
+  final waterMesh = app.createMesh(waterSurface.mesh, debugLabel: 'water_surface');
+  final waterMat = app.createMaterial(
+    const MaterialDefinition(
+      key: 'water_pbr',
+      tintR: 0.08,
+      tintG: 0.35,
+      tintB: 0.65,
+      roughness: 0.08,
+      metallic: 0.45,
+      clearcoatStrength: 0.9,
+      clearcoatRoughness: 0.05,
+    ),
+  );
+  final waterNode = app.scene.add(
+    mesh: waterMesh,
+    meshData: waterSurface.mesh,
+    material: waterMat,
+    name: 'water_node',
+  );
+
+  // 4-probe buoyant research vessel
+  final vesselBody = BuoyantVesselBody(
+    position: const Vec3(5.5, 0.0, -5.5),
+    width: 2.0,
+    length: 3.5,
+  );
+  final vesselHullData = Primitives.roundedBox(
+    width: 1.8,
+    height: 0.45,
+    depth: 3.2,
+    bevelRadius: 0.08,
+  );
+  final vesselMesh = app.createMesh(vesselHullData, debugLabel: 'vessel_hull');
+  final vesselMat = app.createMaterial(
+    const MaterialDefinition(
+      key: 'vessel_hull_pbr',
+      tintR: 0.95,
+      tintG: 0.95,
+      tintB: 0.98,
+      roughness: 0.25,
+      metallic: 0.85,
+    ),
+  );
+  final vesselNode = app.scene.add(
+    mesh: vesselMesh,
+    meshData: vesselHullData,
+    material: vesselMat,
+    name: 'buoyant_vessel_node',
+  );
+
+  // Wire terrain & ocean toggle
+  final terrainToggle = web.document.querySelector('#terrain-toggle');
+  if (terrainToggle is web.HTMLInputElement) {
+    terrainToggle.addEventListener(
+      'change',
+      ((web.Event _) {
+        final show = terrainToggle.checked;
+        terrainNode.visibilityMask = show ? -1 : 0;
+        waterNode.visibilityMask = show ? -1 : 0;
+        vesselNode.visibilityMask = show ? -1 : 0;
+      }).toJS,
+    );
+  }
+
   // Atmospheric particle presets
   final particleData = Primitives.cube(size: 0.08);
   final particleMesh = app.createMesh(particleData, debugLabel: 'particle_mesh');
@@ -863,6 +1053,22 @@ void main() async {
 
     // Instanced asteroid belt rotation
     asteroidBelt.rotateY(0.12 * dt);
+
+    // Animate buoyant beacon responding to dynamic Gerstner ocean waves
+    final buoyPos = oceanEvaluator.samplePosition(5.2, 5.2, t);
+    final buoyNorm = oceanEvaluator.sampleNormal(5.2, 5.2, t);
+    buoyNode.position = buoyPos + const Vec3(0, 0.4, 0);
+    final buoyTiltAxis = const Vec3(0, 1, 0).cross(buoyNorm);
+    if (buoyTiltAxis.lengthSquared > 1e-6) {
+      final tiltAngle = math.acos(buoyNorm.y.clamp(-1.0, 1.0));
+      buoyNode.rotation = Quat.axisAngle(buoyTiltAxis.normalized, tiltAngle * 0.75);
+    }
+
+    // Animate deforming dynamic ocean water surface mesh
+    waterSurface.updateWaves(t, oceanEvaluator);
+
+    // Animate 4-probe buoyant vessel physics
+    vesselNode.transform = vesselBody.update(dt, t, oceanEvaluator);
 
     // Satellite rotation and selection pulse
     for (var i = 0; i < satelliteNodes.length; i++) {
