@@ -8,6 +8,7 @@ void main() {
   _testFovInterpolation();
   _testToCameraView();
   _testInvalidArguments();
+  _testFocusDistanceAndBreathing();
   print('Cinematic tour camera tests passed.');
 }
 
@@ -131,4 +132,22 @@ void _testInvalidArguments() {
     threw = true;
   }
   assert(threw, 'non-positive duration must throw');
+}
+
+void _testFocusDistanceAndBreathing() {
+  final waypoints = [
+    const CameraWaypoint(eye: Vec3(0, 0, 10), target: Vec3(0, 0, 0)),
+    const CameraWaypoint(eye: Vec3(0, 0, 20), target: Vec3(0, 0, 0)),
+  ];
+
+  final controller = CinematicTourCameraController(
+    waypoints: waypoints,
+    duration: 10.0,
+    breathingAmplitude: 0.1,
+    breathingSpeed: 2.0,
+  );
+
+  assert((controller.focusDistance - 10.0).abs() < 0.2);
+  controller.update(5.0);
+  assert((controller.focusDistance - 15.0).abs() < 0.3);
 }

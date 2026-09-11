@@ -423,6 +423,36 @@ void main() async {
     debugLabel: 'voronoi_cell_albedo',
   );
 
+  final marblePixels = ProceduralTextures.marble(
+    width: 256,
+    height: 256,
+    scale: 3.5,
+    turbulence: 4.5,
+    veinColor: const LinearColor(0.12, 0.15, 0.20),
+    baseColor: const LinearColor(0.92, 0.94, 0.97),
+  );
+  final marbleAlbedoTex = app.createProceduralTexture(
+    marblePixels,
+    width: 256,
+    height: 256,
+    debugLabel: 'marble_albedo',
+  );
+
+  final damascusOrmPixels = ProceduralTextures.damascusSteelOrm(
+    width: 256,
+    height: 256,
+    layerFrequency: 18.0,
+    foldDistortion: 4.0,
+    baseRoughness: 0.18,
+    metallic: 0.95,
+  );
+  final damascusOrmTex = app.createProceduralTexture(
+    damascusOrmPixels,
+    width: 256,
+    height: 256,
+    debugLabel: 'damascus_steel_orm',
+  );
+
   // Create high-fidelity PBR materials with procedural textures
   final groundMat = app.createMaterial(
     MaterialDefinition(
@@ -490,6 +520,28 @@ void main() async {
         tintB: 0.18,
       ),
     ),
+    'damascus': app.createMaterial(
+      MaterialDefinition(
+        key: 'hero_damascus',
+        ormTexture: damascusOrmTex,
+        roughness: 0.18,
+        metallic: 0.95,
+        tintR: 0.88,
+        tintG: 0.90,
+        tintB: 0.94,
+        clearcoatStrength: 0.6,
+      ),
+    ),
+    'marble': app.createMaterial(
+      MaterialDefinition(
+        key: 'hero_marble',
+        albedoTexture: marbleAlbedoTex,
+        roughness: 0.15,
+        metallic: 0.05,
+        clearcoatStrength: 0.85,
+        clearcoatRoughness: 0.08,
+      ),
+    ),
     'hex': app.createMaterial(
       MaterialDefinition(
         key: 'hero_hex',
@@ -547,18 +599,23 @@ void main() async {
       MaterialDefinition.chrome(key: 'sat_chrome', roughness: 0.05),
     ),
     app.createMaterial(
-      MaterialDefinition.plastic(
-        key: 'sat_amethyst',
-        color: const LinearColor(0.72, 0.18, 0.92),
-        roughness: 0.24,
+      MaterialDefinition(
+        key: 'sat_marble',
+        albedoTexture: marbleAlbedoTex,
+        roughness: 0.16,
+        metallic: 0.05,
+        clearcoatStrength: 0.8,
       ),
     ),
     app.createMaterial(
       MaterialDefinition(
-        key: 'sat_brushed',
-        ormTexture: brushedOrmTex,
-        roughness: 0.25,
-        metallic: 0.90,
+        key: 'sat_damascus',
+        ormTexture: damascusOrmTex,
+        roughness: 0.20,
+        metallic: 0.95,
+        tintR: 0.90,
+        tintG: 0.92,
+        tintB: 0.96,
       ),
     ),
   ];
@@ -1084,6 +1141,13 @@ void main() async {
         _ => const Vec3(1, 0, 1).normalized,
       };
       sat.rotateAxis(axis, (2.2 + i * 1.2) * dt);
+    }
+
+    // Dynamic autofocus tracking in cinematic tour mode
+    if (cameraSelect is web.HTMLSelectElement && cameraSelect.value == 'tour') {
+      final rawDof = (dofSlider is web.HTMLInputElement) ? (double.tryParse(dofSlider.value) ?? 0.0) : 0.0;
+      final dofStrength = rawDof > 0.0 ? rawDof : 0.40;
+      app.setDepthOfField(strength: dofStrength);
     }
 
     final p0 = Vec3(

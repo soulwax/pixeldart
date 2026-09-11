@@ -66,6 +66,14 @@ void _testWaveUpdate() {
     final len = (nx * nx + ny * ny + nz * nz);
     assert((len - 1.0).abs() < 1e-3);
     assert(ny > 0.0);
+
+    // Verify foam vertex colors are populated and valid
+    final cr = verts[i * 18 + 10];
+    final cg = verts[i * 18 + 11];
+    final cb = verts[i * 18 + 12];
+    assert(cr >= 0.35 && cr <= 1.0);
+    assert(cg >= 0.65 && cg <= 1.0);
+    assert(cb >= 0.90 && cb <= 1.0);
   }
 }
 

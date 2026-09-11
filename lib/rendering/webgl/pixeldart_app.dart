@@ -359,11 +359,15 @@ final class PixeldartApp {
     required List<CameraWaypoint> waypoints,
     double duration = 20.0,
     bool loop = true,
+    double breathingAmplitude = 0.04,
+    double breathingSpeed = 1.2,
   }) {
     final ctrl = CinematicTourCameraController(
       waypoints: waypoints,
       duration: duration,
       loop: loop,
+      breathingAmplitude: breathingAmplitude,
+      breathingSpeed: breathingSpeed,
     );
     cameraController = ctrl;
     return ctrl;

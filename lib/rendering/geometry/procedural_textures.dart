@@ -394,6 +394,130 @@ abstract final class ProceduralTextures {
     return buffer;
   }
 
+  /// Generates a procedural marble diffuse texture with turbulent mineral veining.
+  static Uint8List marble({
+    int width = 256,
+    int height = 256,
+    double scale = 4.0,
+    double turbulence = 5.0,
+    LinearColor veinColor = const LinearColor(0.12, 0.14, 0.18),
+    LinearColor baseColor = const LinearColor(0.92, 0.94, 0.96),
+  }) {
+    if (width <= 0 || height <= 0) throw ArgumentError('dimensions must be > 0');
+    final buffer = Uint8List(width * height * 4);
+    var offset = 0;
+
+    for (var y = 0; y < height; y++) {
+      final ny = y / height;
+      for (var x = 0; x < width; x++) {
+        final nx = x / width;
+
+        // Fractional Brownian Motion turbulence
+        var turb = 0.0;
+        var amp = 1.0;
+        var freq = 1.0;
+        for (var oct = 0; oct < 4; oct++) {
+          turb += _sample2d(nx * scale * freq, ny * scale * freq) * amp;
+          freq *= 2.02;
+          amp *= 0.5;
+        }
+
+        // Sine vein displacement
+        final veinPhase = (nx * scale + turb * turbulence) * math.pi * 2.0;
+        final vein = (math.sin(veinPhase) * 0.5 + 0.5);
+        final veinSharpened = math.pow(vein, 4.0).toDouble();
+
+        final r = (baseColor.r + (veinColor.r - baseColor.r) * veinSharpened).clamp(0.0, 1.0);
+        final g = (baseColor.g + (veinColor.g - baseColor.g) * veinSharpened).clamp(0.0, 1.0);
+        final b = (baseColor.b + (veinColor.b - baseColor.b) * veinSharpened).clamp(0.0, 1.0);
+
+        buffer[offset] = (r * 255.0).round();
+        buffer[offset + 1] = (g * 255.0).round();
+        buffer[offset + 2] = (b * 255.0).round();
+        buffer[offset + 3] = 255;
+        offset += 4;
+      }
+    }
+    return buffer;
+  }
+
+  /// Generates a packed PBR ORM map for folded pattern-welded Damascus steel.
+  /// R: Ambient Occlusion, G: Roughness, B: Metallic.
+  static Uint8List damascusSteelOrm({
+    int width = 256,
+    int height = 256,
+    double layerFrequency = 16.0,
+    double foldDistortion = 3.5,
+    double baseRoughness = 0.18,
+    double metallic = 0.95,
+  }) {
+    if (width <= 0 || height <= 0) throw ArgumentError('dimensions must be > 0');
+    final buffer = Uint8List(width * height * 4);
+    final metByte = (metallic.clamp(0.0, 1.0) * 255.0).round();
+    var offset = 0;
+
+    for (var y = 0; y < height; y++) {
+      final ny = y / height;
+      for (var x = 0; x < width; x++) {
+        final nx = x / width;
+
+        final warp = _sample2d(nx * 4.0, ny * 4.0) * foldDistortion;
+        final wave = math.sin((nx + warp) * layerFrequency * math.pi * 2.0) * 0.5 + 0.5;
+
+        // Alternating hard/soft steel layers in Damascus forging
+        final roughness = (baseRoughness + wave * 0.12).clamp(0.05, 0.95);
+        final ao = (0.85 + (1.0 - wave) * 0.15).clamp(0.0, 1.0);
+
+        buffer[offset] = (ao * 255.0).round();
+        buffer[offset + 1] = (roughness * 255.0).round();
+        buffer[offset + 2] = metByte;
+        buffer[offset + 3] = 255;
+        offset += 4;
+      }
+    }
+    return buffer;
+  }
+
+  /// Generates an emissive energy plasma texture with multi-frequency radial ripples.
+  static Uint8List energyPlasma({
+    int width = 256,
+    int height = 256,
+    double time = 0.0,
+    LinearColor coreColor = const LinearColor(0.2, 0.85, 1.0),
+    LinearColor edgeColor = const LinearColor(0.02, 0.10, 0.35),
+  }) {
+    if (width <= 0 || height <= 0) throw ArgumentError('dimensions must be > 0');
+    final buffer = Uint8List(width * height * 4);
+    final halfW = width * 0.5;
+    final halfH = height * 0.5;
+    var offset = 0;
+
+    for (var y = 0; y < height; y++) {
+      final dy = (y - halfH) / halfH;
+      for (var x = 0; x < width; x++) {
+        final dx = (x - halfW) / halfW;
+        final dist = math.sqrt(dx * dx + dy * dy);
+        final angle = math.atan2(dy, dx);
+
+        // Multi-arm swirling energy pattern
+        final armPhase = angle * 3.0 + dist * 8.0 - time * 2.5;
+        final ripple = math.sin(armPhase) * 0.5 + 0.5;
+        final intensity = ((1.0 - dist) * ripple).clamp(0.0, 1.0);
+
+        final r = (edgeColor.r + (coreColor.r - edgeColor.r) * intensity).clamp(0.0, 1.0);
+        final g = (edgeColor.g + (coreColor.g - edgeColor.g) * intensity).clamp(0.0, 1.0);
+        final b = (edgeColor.b + (coreColor.b - edgeColor.b) * intensity).clamp(0.0, 1.0);
+
+        buffer[offset] = (r * 255.0).round();
+        buffer[offset + 1] = (g * 255.0).round();
+        buffer[offset + 2] = (b * 255.0).round();
+        buffer[offset + 3] = 255;
+        offset += 4;
+      }
+    }
+    return buffer;
+  }
+
   static double _sample2d(double x, double y) {
     final ix = x.floor();
     final iy = y.floor();

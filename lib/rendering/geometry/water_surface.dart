@@ -186,6 +186,14 @@ final class WaterSurfaceMesh {
       verts[floatIdx + 7] = orthoY;
       verts[floatIdx + 8] = orthoZ;
 
+      // Analytical wave crest foam & ocean spray synthesis
+      final crestRatio = ((disp.y - 0.15) * 1.8).clamp(0.0, 1.0);
+      final foam = crestRatio * crestRatio;
+      verts[floatIdx + 10] = 0.35 + 0.65 * foam;
+      verts[floatIdx + 11] = 0.65 + 0.35 * foam;
+      verts[floatIdx + 12] = 0.90 + 0.10 * foam;
+      verts[floatIdx + 13] = 1.0;
+
       floatIdx += 18;
     }
   }

@@ -26,6 +26,9 @@ final class CinematicTourCameraController implements CameraController {
   final double near;
   final double far;
 
+  final double breathingAmplitude;
+  final double breathingSpeed;
+
   late final CatmullRomSpline3D _eyeSpline;
   late final CatmullRomSpline3D _targetSpline;
 
@@ -43,6 +46,8 @@ final class CinematicTourCameraController implements CameraController {
     this.loop = true,
     this.near = 0.1,
     this.far = 300.0,
+    this.breathingAmplitude = 0.0,
+    this.breathingSpeed = 1.2,
   }) : waypoints = List.unmodifiable(waypoints) {
     if (this.waypoints.length < 2) {
       throw ArgumentError('CinematicTourCameraController requires at least 2 waypoints');
@@ -72,6 +77,9 @@ final class CinematicTourCameraController implements CameraController {
 
   /// Current look target focus point in world space.
   Vec3 get target => _currentTarget;
+
+  /// Instantaneous distance from camera eye to look target (for dynamic Depth of Field auto-focus).
+  double get focusDistance => (_currentTarget - _currentEye).length;
 
   /// Current field of view in radians.
   double get fovYRadians => _currentFov;
@@ -103,8 +111,20 @@ final class CinematicTourCameraController implements CameraController {
   }
 
   void _evaluateAtProgress(double t) {
-    _currentEye = _eyeSpline.sample(t);
-    _currentTarget = _targetSpline.sample(t);
+    final eyeBase = _eyeSpline.sample(t);
+    final targetBase = _targetSpline.sample(t);
+
+    if (breathingAmplitude > 0.0) {
+      final totalTime = t * duration;
+      final bPhase = totalTime * breathingSpeed;
+      final bx = math.sin(bPhase * 1.1) * breathingAmplitude;
+      final by = math.cos(bPhase * 0.85) * (breathingAmplitude * 0.75);
+      final bz = math.sin(bPhase * 0.7 + 1.2) * breathingAmplitude;
+      _currentEye = eyeBase + Vec3(bx, by, bz);
+    } else {
+      _currentEye = eyeBase;
+    }
+    _currentTarget = targetBase;
 
     // Interpolate FOV smoothly between waypoints
     final count = waypoints.length;
