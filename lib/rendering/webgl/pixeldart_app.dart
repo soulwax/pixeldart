@@ -23,6 +23,7 @@ import '../camera/fly_camera.dart';
 import '../camera/orbit_camera.dart';
 import '../math/ray.dart';
 import '../math/vec.dart';
+import '../scene/animation.dart';
 import '../scene/scene_node.dart';
 import 'webgl2_renderer_factory.dart';
 
@@ -80,6 +81,14 @@ final class PixeldartApp {
           ? cameraController as FlyCameraController
           : null;
   final Set<String> _pressedKeys = {};
+
+  /// Active animation player for scene timelines and tweens.
+  final AnimationPlayer animations = AnimationPlayer();
+
+  /// Plays [clip] using the internal [animations] player.
+  void playAnimation(AnimationClip clip, {double speed = 1.0}) {
+    animations.play(clip, speed: speed);
+  }
 
   void Function(FrameContext ctx)? onFrame;
   bool _running = false;
@@ -194,6 +203,36 @@ final class PixeldartApp {
         debugLabel: debugLabel,
       );
 
+  /// Registers raw RGBA8 pixel data (from [ProceduralTextures] or custom source)
+  /// as a GPU texture handle with optional mipmaps and anisotropic filtering.
+  TextureHandle createProceduralTexture(
+    Uint8List pixels, {
+    required int width,
+    required int height,
+    bool hasMips = true,
+    double anisotropy = 16,
+    GpuTextureWrap wrap = GpuTextureWrap.repeat,
+    GpuTextureFilter minFilter = GpuTextureFilter.linearMipmapLinear,
+    GpuTextureFilter magFilter = GpuTextureFilter.linear,
+    String? debugLabel,
+  }) {
+    final handle = createTexture(
+      width: width,
+      height: height,
+      pixels: pixels,
+      hasMips: hasMips,
+      anisotropy: anisotropy,
+      wrap: wrap,
+      minFilter: minFilter,
+      magFilter: magFilter,
+      debugLabel: debugLabel,
+    );
+    if (hasMips) {
+      resources.finalizeTextureMips(handle);
+    }
+    return handle;
+  }
+
   /// Current skybox declaration configured on [environment].
   SkyboxDeclaration? get skybox => environment.skybox;
 
@@ -273,7 +312,7 @@ final class PixeldartApp {
     post = post.copyWith(toneMapping: mode);
   }
 
-  /// Decodes GLB bytes, registers meshes and materials with GPU resources,
+  /// Decodes GLB bytes synchronously (geometry and basic material parameters),
   /// attaches them to the scene hierarchy, and returns the root [SceneNode].
   SceneNode loadGlb(Uint8List bytes) {
     final result = GlbDecoder.decode(bytes);
@@ -302,12 +341,102 @@ final class PixeldartApp {
     return result.rootNode;
   }
 
-  /// Asynchronously fetches a GLB file from [url], decodes it, and attaches it to the scene.
+  /// Asynchronously decodes GLB bytes, registers meshes, embedded textures, and materials,
+  /// attaches them to the scene hierarchy, and returns the root [SceneNode].
+  Future<SceneNode> loadGlbAsync(Uint8List bytes) async {
+    final result = GlbDecoder.decode(bytes);
+    final meshHandles = <MeshHandle>[];
+    for (final meshData in result.meshes) {
+      meshHandles.add(createMesh(meshData));
+    }
+
+    // Register embedded textures
+    final textureHandles = <TextureHandle>[];
+    for (final img in result.images) {
+      final tex = await TextureLoader.loadFromBytes(
+        resources: resources,
+        bytes: img.bytes,
+        mimeType: img.mimeType,
+        debugLabel: img.name,
+      );
+      textureHandles.add(tex);
+    }
+
+    // Build materials with texture bindings
+    final materialHandles = <MaterialHandle>[];
+    for (var i = 0; i < result.materials.length; i++) {
+      var matDef = result.materials[i];
+      if (i < result.materialTextures.length) {
+        final texIndices = result.materialTextures[i];
+        TextureHandle? albedo;
+        TextureHandle? normal;
+        TextureHandle? orm;
+        TextureHandle? emissive;
+
+        final aIdx = texIndices.albedoTextureIndex;
+        if (aIdx != null && aIdx < textureHandles.length) {
+          albedo = textureHandles[aIdx];
+        }
+        final nIdx = texIndices.normalTextureIndex;
+        if (nIdx != null && nIdx < textureHandles.length) {
+          normal = textureHandles[nIdx];
+        }
+        final oIdx = texIndices.ormTextureIndex;
+        if (oIdx != null && oIdx < textureHandles.length) {
+          orm = textureHandles[oIdx];
+        }
+        final eIdx = texIndices.emissiveTextureIndex;
+        if (eIdx != null && eIdx < textureHandles.length) {
+          emissive = textureHandles[eIdx];
+        }
+
+        matDef = MaterialDefinition(
+          key: matDef.key,
+          albedoTexture: albedo,
+          normalTexture: normal,
+          ormTexture: orm,
+          emissiveTexture: emissive,
+          tintR: matDef.tintR,
+          tintG: matDef.tintG,
+          tintB: matDef.tintB,
+          roughness: matDef.roughness,
+          metallic: matDef.metallic,
+          emissiveStrength: matDef.emissiveStrength,
+          normalStrength: matDef.normalStrength,
+          occlusionStrength: matDef.occlusionStrength,
+          clearcoatStrength: matDef.clearcoatStrength,
+          clearcoatRoughness: matDef.clearcoatRoughness,
+          alphaMode: matDef.alphaMode,
+          alphaCutoff: matDef.alphaCutoff,
+          doubleSided: matDef.doubleSided,
+        );
+      }
+      materialHandles.add(createMaterial(matDef));
+    }
+
+    var meshCursor = 0;
+    result.rootNode.traverse((node) {
+      if (node.sortTiebreaker >= 0 && meshCursor < meshHandles.length) {
+        node.mesh = meshHandles[meshCursor];
+        final matIdx = node.sortTiebreaker;
+        node.material = matIdx < materialHandles.length
+            ? materialHandles[matIdx]
+            : materialHandles.first;
+        meshCursor++;
+      }
+    });
+
+    scene.addChild(result.rootNode);
+    return result.rootNode;
+  }
+
+  /// Asynchronously fetches a GLB file from [url], decodes meshes and embedded textures,
+  /// and attaches the textured hierarchy to the scene.
   Future<SceneNode> loadGlbFromUrl(String url) async {
     final response = await web.window.fetch(url.toJS).toDart;
     final buffer = await response.arrayBuffer().toDart;
     final bytes = buffer.toDart.asUint8List();
-    return loadGlb(bytes);
+    return loadGlbAsync(bytes);
   }
 
   void _installListeners() {
@@ -467,6 +596,9 @@ final class PixeldartApp {
     _resize();
 
     if (!_contextLost && renderer.state != RendererState.contextLost) {
+      // Step active animation clips and timelines
+      animations.update(dt);
+
       // Synchronize scene graph tree to retained world
       root.syncToWorld(world);
 

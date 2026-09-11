@@ -1,5 +1,6 @@
 import 'dart:js_interop';
 import 'dart:math' as math;
+import 'dart:typed_data';
 
 import 'package:pixeldart/pixeldart.dart';
 import 'package:pixeldart/rendering/webgl/pixeldart_app.dart';
@@ -191,12 +192,67 @@ void main() async {
     app.createMesh(cubeData, debugLabel: 'satellite_cube'),
   ];
 
-  // Create high-fidelity PBR materials
+  // Generate procedural PBR textures
+  final groundGridPixels = ProceduralTextures.grid(
+    width: 256,
+    height: 256,
+    cellSize: 32,
+    lineWidth: 2,
+    lineColor: const LinearColor(0.22, 0.48, 0.95),
+    cellColor: const LinearColor(0.06, 0.08, 0.12),
+  );
+  final groundAlbedoTex = app.createProceduralTexture(
+    groundGridPixels,
+    width: 256,
+    height: 256,
+    debugLabel: 'ground_grid_albedo',
+  );
+
+  final gridHeights = Uint8List(256 * 256);
+  for (var y = 0; y < 256; y++) {
+    final isLineY = (y % 32) < 2;
+    for (var x = 0; x < 256; x++) {
+      final isLine = isLineY || ((x % 32) < 2);
+      gridHeights[y * 256 + x] = isLine ? 220 : 50;
+    }
+  }
+  final groundNormalPixels = ProceduralTextures.normalFromHeight(
+    gridHeights,
+    width: 256,
+    height: 256,
+    strength: 3.0,
+  );
+  final groundNormalTex = app.createProceduralTexture(
+    groundNormalPixels,
+    width: 256,
+    height: 256,
+    debugLabel: 'ground_grid_normal',
+  );
+
+  final brushedOrmPixels = ProceduralTextures.brushedMetalOrm(
+    width: 256,
+    height: 256,
+    baseRoughness: 0.22,
+    metallic: 0.95,
+  );
+  final brushedOrmTex = app.createProceduralTexture(
+    brushedOrmPixels,
+    width: 256,
+    height: 256,
+    debugLabel: 'brushed_metal_orm',
+  );
+
+  // Create high-fidelity PBR materials with procedural textures
   final groundMat = app.createMaterial(
-    MaterialDefinition.matte(
-      key: 'ground',
-      color: const LinearColor(0.10, 0.12, 0.16),
-      roughness: 0.70,
+    MaterialDefinition(
+      key: 'ground_pbr',
+      albedoTexture: groundAlbedoTex,
+      normalTexture: groundNormalTex,
+      normalStrength: 1.5,
+      uvScaleU: 8.0,
+      uvScaleV: 8.0,
+      roughness: 0.50,
+      metallic: 0.10,
     ),
   );
 
@@ -230,6 +286,17 @@ void main() async {
     ),
     'iron': app.createMaterial(
       MaterialDefinition.iron(key: 'hero_iron', roughness: 0.28),
+    ),
+    'brushed': app.createMaterial(
+      MaterialDefinition(
+        key: 'hero_brushed',
+        ormTexture: brushedOrmTex,
+        roughness: 0.22,
+        metallic: 0.95,
+        tintR: 0.95,
+        tintG: 0.95,
+        tintB: 1.0,
+      ),
     ),
   };
 
@@ -350,6 +417,31 @@ void main() async {
     }).toJS,
   );
 
+  // Drive smooth floating bob animation using the pure-Dart AnimationClip engine
+  final centerBobTrack = Vector3Track(
+    target: centerNode,
+    keyframes: const [
+      Keyframe(0.0, Vec3(0, 0.35, 0), Curves.easeInOutCubic),
+      Keyframe(2.0, Vec3(0, 0.65, 0), Curves.easeInOutCubic),
+      Keyframe(4.0, Vec3(0, 0.35, 0), Curves.easeInOutCubic),
+    ],
+  );
+  final torusBobTrack = Vector3Track(
+    target: torusNode,
+    keyframes: const [
+      Keyframe(0.0, Vec3(0, 0.35, 0), Curves.easeInOutCubic),
+      Keyframe(2.0, Vec3(0, 0.65, 0), Curves.easeInOutCubic),
+      Keyframe(4.0, Vec3(0, 0.35, 0), Curves.easeInOutCubic),
+    ],
+  );
+  final bobClip = AnimationClip(
+    name: 'hero_bob',
+    duration: 4.0,
+    loopMode: LoopMode.loop,
+    tracks: [centerBobTrack, torusBobTrack],
+  );
+  app.playAnimation(bobClip);
+
   // Animation frame loop using ergonomic SceneNode methods
   app.onFrame = (ctx) {
     final t = ctx.timeSeconds;
@@ -370,12 +462,8 @@ void main() async {
         : 1.0;
     torusNode.scale = torusScale;
 
-    // Center sphere animation
-    centerNode.position = Vec3(0, 0.5 + math.sin(t * 1.4) * 0.15, 0);
+    // Center sphere & torus rotation (vertical bob is driven by AnimationClip)
     centerNode.rotateY(0.35 * dt);
-
-    // Torus ring animation
-    torusNode.position = Vec3(0, 0.5 + math.sin(t * 1.4) * 0.15, 0);
     torusNode.rotateAxis(const Vec3(1, 0.3, 0.2).normalized, 0.7 * dt);
 
     // Orbit ring rotation

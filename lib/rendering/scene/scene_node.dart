@@ -13,6 +13,7 @@ final class SceneNode {
   Transform _localTransform;
   Transform _worldTransform = Transform.identity;
   bool _isDirty = true;
+  bool _worldDirty = true;
 
   SceneNode? _parent;
   final List<SceneNode> _children = [];
@@ -163,6 +164,7 @@ final class SceneNode {
   void _markDirty() {
     if (_isDirty) return;
     _isDirty = true;
+    _worldDirty = true;
     for (final child in _children) {
       child._markDirty();
     }
@@ -266,28 +268,42 @@ final class SceneNode {
     final mat = material;
 
     if (m != null && mat != null) {
-      final desc = RetainedItemDescriptor(
-        mesh: m,
-        material: mat,
-        transform: worldTransform,
-        visibilityMask: visibilityMask,
-        drawMode: drawMode,
-        blendMode: blendMode,
-        castsShadow: castsShadow,
-        receivesShadow: receivesShadow,
-        sortTiebreaker: sortTiebreaker,
-        instanceFamilyKey: instanceFamilyKey,
-      );
-
       final currentId = _instanceId;
       if (currentId == null) {
+        final desc = RetainedItemDescriptor(
+          mesh: m,
+          material: mat,
+          transform: worldTransform,
+          visibilityMask: visibilityMask,
+          drawMode: drawMode,
+          blendMode: blendMode,
+          castsShadow: castsShadow,
+          receivesShadow: receivesShadow,
+          sortTiebreaker: sortTiebreaker,
+          instanceFamilyKey: instanceFamilyKey,
+        );
         _instanceId = world.addItem(desc);
-      } else {
+        _worldDirty = false;
+      } else if (_worldDirty || _isDirty) {
+        final desc = RetainedItemDescriptor(
+          mesh: m,
+          material: mat,
+          transform: worldTransform,
+          visibilityMask: visibilityMask,
+          drawMode: drawMode,
+          blendMode: blendMode,
+          castsShadow: castsShadow,
+          receivesShadow: receivesShadow,
+          sortTiebreaker: sortTiebreaker,
+          instanceFamilyKey: instanceFamilyKey,
+        );
         world.updateItem(currentId, desc);
+        _worldDirty = false;
       }
     } else if (_instanceId != null) {
       world.removeItem(_instanceId!);
       _instanceId = null;
+      _worldDirty = true;
     }
 
     for (final child in _children) {
@@ -301,6 +317,7 @@ final class SceneNode {
     if (currentId != null) {
       world.removeItem(currentId);
       _instanceId = null;
+      _worldDirty = true;
     }
     for (final child in _children) {
       child.removeFromWorld(world);

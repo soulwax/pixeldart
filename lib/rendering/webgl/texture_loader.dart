@@ -47,6 +47,39 @@ abstract final class TextureLoader {
     );
   }
 
+  /// Asynchronously decodes raw [bytes] (e.g. embedded PNG/JPEG in a GLB)
+  /// into a texture registered with [resources].
+  static Future<TextureHandle> loadFromBytes({
+    required ResourceLibrary resources,
+    required Uint8List bytes,
+    String mimeType = 'image/png',
+    String? debugLabel,
+    bool generateMips = true,
+    double anisotropy = 16.0,
+    GpuTextureWrap wrap = GpuTextureWrap.repeat,
+    GpuTextureFilter minFilter = GpuTextureFilter.linearMipmapLinear,
+    GpuTextureFilter magFilter = GpuTextureFilter.linear,
+  }) async {
+    final blob = web.Blob(
+      [bytes.toJS].toJS,
+      web.BlobPropertyBag(type: mimeType),
+    );
+    final url = web.URL.createObjectURL(blob);
+    try {
+      return await loadFromUrl(
+        resources: resources,
+        url: url,
+        generateMips: generateMips,
+        anisotropy: anisotropy,
+        wrap: wrap,
+        minFilter: minFilter,
+        magFilter: magFilter,
+      );
+    } finally {
+      web.URL.revokeObjectURL(url);
+    }
+  }
+
   /// Extracts pixel data from an [image] element and registers it with [resources].
   static TextureHandle loadFromImage({
     required ResourceLibrary resources,

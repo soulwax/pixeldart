@@ -34,6 +34,46 @@ final class Quat {
     return Quat(axis.x, axis.y, axis.z, 1.0 + d).normalized;
   }
 
+  /// Spherical linear interpolation between [a] and [b] by factor [t] in [0, 1].
+  static Quat slerp(Quat a, Quat b, double t) {
+    var cosHalfTheta = a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w;
+
+    var bx = b.x, by = b.y, bz = b.z, bw = b.w;
+    if (cosHalfTheta < 0.0) {
+      cosHalfTheta = -cosHalfTheta;
+      bx = -bx;
+      by = -by;
+      bz = -bz;
+      bw = -bw;
+    }
+
+    if (cosHalfTheta.abs() >= 1.0) {
+      return a;
+    }
+
+    if (cosHalfTheta > 0.9995) {
+      return Quat(
+        a.x + t * (bx - a.x),
+        a.y + t * (by - a.y),
+        a.z + t * (bz - a.z),
+        a.w + t * (bw - a.w),
+      ).normalized;
+    }
+
+    final halfTheta = math.acos(cosHalfTheta);
+    final sinHalfTheta = math.sqrt(1.0 - cosHalfTheta * cosHalfTheta);
+
+    final ratioA = math.sin((1.0 - t) * halfTheta) / sinHalfTheta;
+    final ratioB = math.sin(t * halfTheta) / sinHalfTheta;
+
+    return Quat(
+      a.x * ratioA + bx * ratioB,
+      a.y * ratioA + by * ratioB,
+      a.z * ratioA + bz * ratioB,
+      a.w * ratioA + bw * ratioB,
+    );
+  }
+
   Quat operator *(Quat o) => Quat(
     w * o.x + x * o.w + y * o.z - z * o.y,
     w * o.y - x * o.z + y * o.w + z * o.x,

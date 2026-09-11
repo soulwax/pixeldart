@@ -25,6 +25,7 @@ final class RenderWorldImpl implements RenderWorld {
       ResourceRegistry<InstanceId, RetainedItemDescriptor>(
         (slot, generation, label) => InstanceId(slot, generation, label),
       );
+  final Map<InstanceId, _ItemView> _itemViews = {};
 
   RenderWorldImpl(this._meshRegistry);
 
@@ -36,38 +37,41 @@ final class RenderWorldImpl implements RenderWorld {
 
   @override
   InstanceId addItem(RetainedItemDescriptor descriptor) {
-    _worldBoundsFor(descriptor);
-    return _instances.declare(descriptor);
+    final bounds = _worldBoundsFor(descriptor);
+    final id = _instances.declare(descriptor);
+    _itemViews[id] = _ItemView(id, descriptor, bounds);
+    return id;
   }
 
   @override
   void updateItem(InstanceId id, RetainedItemDescriptor descriptor) {
-    _worldBoundsFor(descriptor);
+    final bounds = _worldBoundsFor(descriptor);
     _instances.updateDescriptor(id, descriptor);
+    _itemViews[id] = _ItemView(id, descriptor, bounds);
   }
 
   @override
   void removeItem(InstanceId id) {
     _instances.release(id);
+    _itemViews.remove(id);
   }
 
   @override
   RetainedItemView itemView(InstanceId id) {
+    final cached = _itemViews[id];
+    if (cached != null) return cached;
     final descriptor = _instances.descriptorOf(id);
     return _ItemView(id, descriptor, _worldBoundsFor(descriptor));
   }
 
   @override
-  Iterable<RetainedItemView> get items sync* {
-    for (final (id, descriptor) in _instances.liveDescriptors()) {
-      yield _ItemView(id, descriptor, _worldBoundsFor(descriptor));
-    }
-  }
+  Iterable<RetainedItemView> get items => _itemViews.values;
 
   int get liveItemCount => _instances.liveCount;
 
   @override
   void dispose() {
+    _itemViews.clear();
     for (final (id, _) in _instances.liveDescriptors().toList()) {
       _instances.release(id);
     }
