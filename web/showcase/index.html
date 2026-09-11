@@ -117,16 +117,38 @@
       </select>
     </div>
 
-    <div class="control-group" style="display: flex; align-items: center; justify-content: space-between; margin-top: 14px;">
+    <div class="control-group">
+      <label class="control-label" for="camera-mode-select">Camera Mode</label>
+      <select id="camera-mode-select">
+        <option value="orbit" selected>Orbit (Turntable)</option>
+        <option value="fly">Free Fly (WASD + Look)</option>
+      </select>
+    </div>
+
+    <div class="control-group">
+      <label class="control-label" for="post-preset-select">Post Processing</label>
+      <select id="post-preset-select">
+        <option value="cinematic" selected>Cinematic AgX (Bloom + SSAO)</option>
+        <option value="clean">Clean (Pure PBR)</option>
+        <option value="ps1">Stylized PS1 (Quantize + Dither)</option>
+        <option value="vhs">Retro VHS (Tape Jitter + Noise)</option>
+      </select>
+    </div>
+
+    <div class="control-group" id="turntable-group" style="display: flex; align-items: center; justify-content: space-between; margin-top: 10px;">
       <label class="control-label" for="turntable-toggle" style="margin-bottom: 0; cursor: pointer;">Turntable Auto-Rotate</label>
       <input type="checkbox" id="turntable-toggle" checked style="width: auto; cursor: pointer;">
     </div>
 
+    <div id="picking-status" style="margin-top: 10px; padding: 8px 10px; background: rgba(26, 34, 48, 0.7); border-radius: 6px; font-size: 11px; color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.2);">
+      Click any 3D object to inspect
+    </div>
+
     <div class="help-hint">
       <strong>Controls</strong><br>
-      • Left drag: Orbit rotation<br>
-      • Right / Shift drag: Pan<br>
-      • Wheel: Zoom
+      • Orbit: Left drag rotate, Right drag pan, Wheel zoom<br>
+      • Fly: WASD move, Space/Shift up/down, Drag look<br>
+      • Click: Raycast 3D object picking & selection
     </div>
   </div>
 
