@@ -18,11 +18,14 @@ void main() async {
   if (app == null) return;
 
   // Initial camera view with turntable auto-rotation
-  app.cameraController?.distance = 8.5;
-  app.cameraController?.elevationRadians = 0.45;
-  app.cameraController?.target = const Vec3(0, 0.5, 0);
-  app.cameraController?.autoRotate = true;
-  app.cameraController?.autoRotateSpeed = 0.18;
+  final orbit = app.orbitCamera;
+  if (orbit != null) {
+    orbit.distance = 8.5;
+    orbit.elevationRadians = 0.45;
+    orbit.target = const Vec3(0, 0.5, 0);
+    orbit.autoRotate = true;
+    orbit.autoRotateSpeed = 0.18;
+  }
 
   // Atmospheric Skybox declaration
   app.skybox = const SkyboxDeclaration(
@@ -52,12 +55,8 @@ void main() async {
     ),
   );
 
-  app.post = const PostProcessState(
-    exposure: 1.15,
-    toneMapping: ToneMappingMode.agx,
-    vignette: 0.22,
-    grain: 0.12,
-  );
+  // Start with high-fidelity cinematic post-processing
+  app.post = PostProcessState.cinematic();
 
   // Wire tone mapping selector
   final toneSelect = web.document.querySelector('#tone-map-select');
@@ -71,59 +70,128 @@ void main() async {
           'off' => ToneMappingMode.off,
           _ => ToneMappingMode.agx,
         };
-        app.post = PostProcessState(
-          exposure: app.post.exposure,
-          toneMapping: mode,
-          vignette: app.post.vignette,
-          grain: app.post.grain,
-        );
+        app.setToneMapping(mode);
+      }).toJS,
+    );
+  }
+
+  // Wire post-processing preset selector
+  final postPresetSelect = web.document.querySelector('#post-preset-select');
+  if (postPresetSelect is web.HTMLSelectElement) {
+    postPresetSelect.addEventListener(
+      'change',
+      ((web.Event _) {
+        final preset = switch (postPresetSelect.value) {
+          'clean' => PostProcessState.clean(),
+          'ps1' => PostProcessState.stylizedPs1(),
+          'vhs' => PostProcessState.retroVhs(),
+          _ => PostProcessState.cinematic(),
+        };
+        app.post = preset;
+        if (toneSelect is web.HTMLSelectElement) {
+          toneSelect.value = switch (preset.toneMapping) {
+            ToneMappingMode.aces => 'aces',
+            ToneMappingMode.reinhard => 'reinhard',
+            ToneMappingMode.off => 'off',
+            ToneMappingMode.agx => 'agx',
+          };
+        }
       }).toJS,
     );
   }
 
   // Wire turntable auto-rotate toggle
   final turntableToggle = web.document.querySelector('#turntable-toggle');
+  final turntableGroup = web.document.querySelector('#turntable-group');
   if (turntableToggle is web.HTMLInputElement) {
     turntableToggle.checked = true;
     turntableToggle.addEventListener(
       'change',
       ((web.Event _) {
-        app.cameraController?.autoRotate = turntableToggle.checked;
+        app.orbitCamera?.autoRotate = turntableToggle.checked;
       }).toJS,
     );
   }
 
-  // Create procedural meshes using Primitives
-  final groundMesh = app.createMesh(
-    Primitives.plane(width: 30, depth: 30, subdivisionsX: 4, subdivisionsZ: 4),
-    debugLabel: 'ground',
-  );
-  final sphereMesh = app.createMesh(
-    Primitives.sphere(radius: 1.0, rings: 40, sectors: 40),
-    debugLabel: 'center_sphere',
-  );
-  final torusMesh = app.createMesh(
-    Primitives.torus(radius: 1.8, tubeRadius: 0.08, radialSegments: 20, tubularSegments: 48),
-    debugLabel: 'orbit_torus',
-  );
-  final capsuleMesh = app.createMesh(
-    Primitives.capsule(radius: 0.3, cylinderHeight: 0.6, rings: 12, sectors: 24),
-    debugLabel: 'satellite_capsule',
-  );
-  final cylinderMesh = app.createMesh(
-    Primitives.cylinder(radius: 0.35, height: 0.9, radialSegments: 24),
-    debugLabel: 'satellite_cylinder',
-  );
-  final coneMesh = app.createMesh(
-    Primitives.cone(radius: 0.4, height: 0.9, radialSegments: 24),
-    debugLabel: 'satellite_cone',
-  );
-  final cubeMesh = app.createMesh(
-    Primitives.cube(size: 0.65),
-    debugLabel: 'satellite_cube',
-  );
+  // Wire camera mode selector (Orbit turntable vs Free fly)
+  final cameraSelect = web.document.querySelector('#camera-mode-select');
+  if (cameraSelect is web.HTMLSelectElement) {
+    cameraSelect.addEventListener(
+      'change',
+      ((web.Event _) {
+        if (cameraSelect.value == 'fly') {
+          app.useFlyCamera(
+            position: const Vec3(0, 2.0, 7.0),
+            moveSpeed: 6.0,
+          );
+          if (turntableGroup is web.HTMLElement) {
+            turntableGroup.style.display = 'none';
+          }
+        } else {
+          final newOrbit = app.useOrbitCamera(
+            target: const Vec3(0, 0.5, 0),
+            distance: 8.5,
+          );
+          newOrbit.elevationRadians = 0.45;
+          if (turntableToggle is web.HTMLInputElement) {
+            newOrbit.autoRotate = turntableToggle.checked;
+            newOrbit.autoRotateSpeed = 0.18;
+          }
+          if (turntableGroup is web.HTMLElement) {
+            turntableGroup.style.display = 'flex';
+          }
+        }
+      }).toJS,
+    );
+  }
 
-  // Create high-fidelity PBR materials using new presets
+  // Create procedural meshes with geometry data retained for raycast picking
+  final groundData = Primitives.plane(
+    width: 30,
+    depth: 30,
+    subdivisionsX: 4,
+    subdivisionsZ: 4,
+  );
+  final groundMesh = app.createMesh(groundData, debugLabel: 'ground');
+
+  final sphereData = Primitives.sphere(radius: 1.0, rings: 40, sectors: 40);
+  final sphereMesh = app.createMesh(sphereData, debugLabel: 'center_sphere');
+
+  final torusData = Primitives.torus(
+    radius: 1.8,
+    tubeRadius: 0.08,
+    radialSegments: 20,
+    tubularSegments: 48,
+  );
+  final torusMesh = app.createMesh(torusData, debugLabel: 'orbit_torus');
+
+  final capsuleData = Primitives.capsule(
+    radius: 0.3,
+    cylinderHeight: 0.6,
+    rings: 12,
+    sectors: 24,
+  );
+  final cylinderData = Primitives.cylinder(
+    radius: 0.35,
+    height: 0.9,
+    radialSegments: 24,
+  );
+  final coneData = Primitives.cone(
+    radius: 0.4,
+    height: 0.9,
+    radialSegments: 24,
+  );
+  final cubeData = Primitives.cube(size: 0.65);
+
+  final satelliteDatas = [capsuleData, cylinderData, coneData, cubeData];
+  final satelliteMeshes = [
+    app.createMesh(capsuleData, debugLabel: 'satellite_capsule'),
+    app.createMesh(cylinderData, debugLabel: 'satellite_cylinder'),
+    app.createMesh(coneData, debugLabel: 'satellite_cone'),
+    app.createMesh(cubeData, debugLabel: 'satellite_cube'),
+  ];
+
+  // Create high-fidelity PBR materials
   final groundMat = app.createMaterial(
     MaterialDefinition.matte(
       key: 'ground',
@@ -134,28 +202,16 @@ void main() async {
 
   final heroMaterials = <String, MaterialHandle>{
     'gold': app.createMaterial(
-      MaterialDefinition.gold(
-        key: 'hero_gold',
-        roughness: 0.12,
-      ),
+      MaterialDefinition.gold(key: 'hero_gold', roughness: 0.12),
     ),
     'chrome': app.createMaterial(
-      MaterialDefinition.chrome(
-        key: 'hero_chrome',
-        roughness: 0.05,
-      ),
+      MaterialDefinition.chrome(key: 'hero_chrome', roughness: 0.05),
     ),
     'copper': app.createMaterial(
-      MaterialDefinition.copper(
-        key: 'hero_copper',
-        roughness: 0.15,
-      ),
+      MaterialDefinition.copper(key: 'hero_copper', roughness: 0.15),
     ),
     'silver': app.createMaterial(
-      MaterialDefinition.silver(
-        key: 'hero_silver',
-        roughness: 0.08,
-      ),
+      MaterialDefinition.silver(key: 'hero_silver', roughness: 0.08),
     ),
     'ceramic': app.createMaterial(
       MaterialDefinition.ceramic(
@@ -173,10 +229,7 @@ void main() async {
       ),
     ),
     'iron': app.createMaterial(
-      MaterialDefinition.iron(
-        key: 'hero_iron',
-        roughness: 0.28,
-      ),
+      MaterialDefinition.iron(key: 'hero_iron', roughness: 0.28),
     ),
   };
 
@@ -208,16 +261,14 @@ void main() async {
       ),
     ),
     app.createMaterial(
-      MaterialDefinition.copper(
-        key: 'sat_copper',
-        roughness: 0.20,
-      ),
+      MaterialDefinition.copper(key: 'sat_copper', roughness: 0.20),
     ),
   ];
 
-  // Build Scene Graph
+  // Build Scene Graph with bounds and meshData for precise raycasting
   app.scene.add(
     mesh: groundMesh,
+    meshData: groundData,
     material: groundMat,
     transform: Transform.at(const Vec3(0, -1.0, 0)),
     name: 'ground_node',
@@ -225,6 +276,7 @@ void main() async {
 
   final centerNode = app.scene.add(
     mesh: sphereMesh,
+    meshData: sphereData,
     material: heroMaterials['gold']!,
     transform: Transform.at(const Vec3(0, 0.5, 0)),
     name: 'center_sphere_node',
@@ -246,6 +298,7 @@ void main() async {
 
   final torusNode = app.scene.add(
     mesh: torusMesh,
+    meshData: torusData,
     material: chromeTorusMat,
     transform: Transform.at(const Vec3(0, 0.5, 0)),
     name: 'torus_ring_node',
@@ -254,13 +307,13 @@ void main() async {
   final orbitRing = SceneNode.group(name: 'orbit_ring');
   centerNode.addChild(orbitRing);
 
-  final satelliteMeshes = [capsuleMesh, cylinderMesh, coneMesh, cubeMesh];
   final satelliteNodes = <SceneNode>[];
   const count = 4;
   for (var i = 0; i < count; i++) {
     final angle = i * (math.pi * 2.0 / count);
     final sat = orbitRing.add(
       mesh: satelliteMeshes[i],
+      meshData: satelliteDatas[i],
       material: satelliteMaterials[i],
       transform: Transform.at(
         Vec3(math.cos(angle) * 3.2, 0.0, math.sin(angle) * 3.2),
@@ -270,27 +323,78 @@ void main() async {
     satelliteNodes.add(sat);
   }
 
+  // Interactive 3D Raycasting & Object Picking
+  SceneNode? selectedNode;
+  var selectionPulse = 0.0;
+  final pickingStatus = web.document.querySelector('#picking-status');
+
+  canvas.addEventListener(
+    'click',
+    ((web.Event e) {
+      if (e is! web.MouseEvent) return;
+      final hit = app.pick(e.clientX.toDouble(), e.clientY.toDouble());
+      if (hit != null) {
+        selectedNode = hit.node;
+        selectionPulse = 1.0;
+        final distStr = hit.distance.toStringAsFixed(2);
+        final pt = hit.point;
+        final pointStr =
+            '(${pt.x.toStringAsFixed(1)}, ${pt.y.toStringAsFixed(1)}, ${pt.z.toStringAsFixed(1)})';
+        final nodeName = hit.node.name ?? 'unnamed';
+        pickingStatus?.textContent =
+            'Selected: $nodeName | Dist: $distStr | Pt: $pointStr';
+      } else {
+        selectedNode = null;
+        pickingStatus?.textContent = 'Click any 3D object to inspect';
+      }
+    }).toJS,
+  );
+
   // Animation frame loop using ergonomic SceneNode methods
   app.onFrame = (ctx) {
     final t = ctx.timeSeconds;
     final dt = ctx.deltaTime;
 
-    // Use SceneNode position setter and rotate methods
+    // Decay selection pulse for visual feedback
+    if (selectionPulse > 0.0) {
+      selectionPulse = math.max(0.0, selectionPulse - dt * 2.5);
+    }
+
+    final heroScale = (selectedNode == centerNode)
+        ? 1.0 + math.sin(selectionPulse * math.pi) * 0.20
+        : 1.0;
+    centerNode.scale = heroScale;
+
+    final torusScale = (selectedNode == torusNode)
+        ? 1.0 + math.sin(selectionPulse * math.pi) * 0.18
+        : 1.0;
+    torusNode.scale = torusScale;
+
+    // Center sphere animation
     centerNode.position = Vec3(0, 0.5 + math.sin(t * 1.4) * 0.15, 0);
     centerNode.rotateY(0.35 * dt);
 
+    // Torus ring animation
     torusNode.position = Vec3(0, 0.5 + math.sin(t * 1.4) * 0.15, 0);
     torusNode.rotateAxis(const Vec3(1, 0.3, 0.2).normalized, 0.7 * dt);
 
+    // Orbit ring rotation
     orbitRing.rotateY(0.65 * dt);
 
+    // Satellite rotation and selection pulse
     for (var i = 0; i < satelliteNodes.length; i++) {
+      final sat = satelliteNodes[i];
+      final satScale = (sat == selectedNode)
+          ? 1.0 + math.sin(selectionPulse * math.pi) * 0.25
+          : 1.0;
+      sat.scale = satScale;
+
       final axis = switch (i % 3) {
         0 => const Vec3(1, 1, 0).normalized,
         1 => const Vec3(0, 1, 1).normalized,
         _ => const Vec3(1, 0, 1).normalized,
       };
-      satelliteNodes[i].rotateAxis(axis, (2.2 + i * 1.2) * dt);
+      sat.rotateAxis(axis, (2.2 + i * 1.2) * dt);
     }
 
     final p0 = Vec3(

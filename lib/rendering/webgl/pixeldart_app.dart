@@ -18,7 +18,10 @@ import '../api/renderer.dart';
 import '../api/scene.dart';
 import '../api/settings.dart';
 import '../api/stats.dart';
+import '../camera/camera_controller.dart';
+import '../camera/fly_camera.dart';
 import '../camera/orbit_camera.dart';
+import '../math/ray.dart';
 import '../math/vec.dart';
 import '../scene/scene_node.dart';
 import 'webgl2_renderer_factory.dart';
@@ -67,7 +70,16 @@ final class PixeldartApp {
   bool showStats = false;
 
   SurfaceMetrics _surface;
-  OrbitCameraController? cameraController;
+  CameraController? cameraController;
+  OrbitCameraController? get orbitCamera =>
+      cameraController is OrbitCameraController
+          ? cameraController as OrbitCameraController
+          : null;
+  FlyCameraController? get flyCamera =>
+      cameraController is FlyCameraController
+          ? cameraController as FlyCameraController
+          : null;
+  final Set<String> _pressedKeys = {};
 
   void Function(FrameContext ctx)? onFrame;
   bool _running = false;
@@ -195,6 +207,72 @@ final class PixeldartApp {
     this.skybox = skybox;
   }
 
+  /// Raycasts against the scene hierarchy using client window coordinates [clientX], [clientY].
+  /// Returns the closest [RaycastHit], or `null` if nothing was hit.
+  RaycastHit? pick(double clientX, double clientY) {
+    final rect = canvas.getBoundingClientRect();
+    final x = clientX - rect.left;
+    final y = clientY - rect.top;
+    if (x < 0 || x > rect.width || y < 0 || y > rect.height) return null;
+
+    final camCtrl = cameraController;
+    final aspect = _surface.pixelWidth / _surface.pixelHeight;
+    final camera = camCtrl != null
+        ? camCtrl.toCameraView(aspect)
+        : CameraView.look(
+            eye: const Vec3(0, 2, 5),
+            forward: const Vec3(0, -0.2, -1),
+            fovYRadians: 1.0,
+            aspect: aspect,
+            near: 0.1,
+            far: 200,
+          );
+
+    final ray = camera.screenPointToRay(
+      x,
+      y,
+      rect.width.toInt(),
+      rect.height.toInt(),
+    );
+
+    return scene.raycast(ray);
+  }
+
+  /// Sets the active camera controller to orbit controls around [target].
+  OrbitCameraController useOrbitCamera({
+    Vec3 target = const Vec3(0, 0, 0),
+    double distance = 5.0,
+  }) {
+    final ctrl = OrbitCameraController(target: target, distance: distance);
+    cameraController = ctrl;
+    return ctrl;
+  }
+
+  /// Sets the active camera controller to first-person fly controls at [position].
+  FlyCameraController useFlyCamera({
+    Vec3 position = const Vec3(0, 1.8, 5),
+    double moveSpeed = 8.0,
+  }) {
+    final ctrl = FlyCameraController(position: position, moveSpeed: moveSpeed);
+    cameraController = ctrl;
+    return ctrl;
+  }
+
+  /// Convenience helper to adjust or enable bloom post-processing.
+  void enableBloom({double strength = 0.30}) {
+    post = post.copyWith(bloomStrength: strength);
+  }
+
+  /// Convenience helper to adjust or enable screen-space ambient occlusion.
+  void enableSsao({double strength = 0.75}) {
+    post = post.copyWith(ssaoStrength: strength);
+  }
+
+  /// Convenience helper to change tone mapping mode.
+  void setToneMapping(ToneMappingMode mode) {
+    post = post.copyWith(toneMapping: mode);
+  }
+
   /// Decodes GLB bytes, registers meshes and materials with GPU resources,
   /// attaches them to the scene hierarchy, and returns the root [SceneNode].
   SceneNode loadGlb(Uint8List bytes) {
@@ -276,13 +354,18 @@ final class PixeldartApp {
           _lastPointerX = x;
           _lastPointerY = y;
 
-          if (_activeButton == 0 && !e.shiftKey) {
-            cameraController!.rotate(dx * 0.006, dy * 0.006);
-          } else {
-            cameraController!.pan(
-              -dx * 0.003 * cameraController!.distance,
-              dy * 0.003 * cameraController!.distance,
-            );
+          final ctrl = cameraController;
+          if (ctrl is OrbitCameraController) {
+            if (_activeButton == 0 && !e.shiftKey) {
+              ctrl.rotate(dx * 0.006, dy * 0.006);
+            } else {
+              ctrl.pan(
+                -dx * 0.003 * ctrl.distance,
+                dy * 0.003 * ctrl.distance,
+              );
+            }
+          } else if (ctrl is FlyCameraController) {
+            ctrl.look(dx * ctrl.lookSpeed, dy * ctrl.lookSpeed);
           }
         }
       }).toJS,
@@ -298,10 +381,49 @@ final class PixeldartApp {
       ((web.Event e) {
         if (e is web.WheelEvent && cameraController != null) {
           e.preventDefault();
-          cameraController!.zoom(e.deltaY * 0.003);
+          final ctrl = cameraController;
+          if (ctrl is OrbitCameraController) {
+            ctrl.zoom(e.deltaY * 0.003);
+          } else if (ctrl is FlyCameraController) {
+            ctrl.moveForward(-e.deltaY * 0.002);
+          }
         }
       }).toJS,
     );
+    web.window.addEventListener(
+      'keydown',
+      ((web.Event e) {
+        if (e is web.KeyboardEvent) {
+          _pressedKeys.add(e.code.toLowerCase());
+          _updateFlyIntent();
+        }
+      }).toJS,
+    );
+    web.window.addEventListener(
+      'keyup',
+      ((web.Event e) {
+        if (e is web.KeyboardEvent) {
+          _pressedKeys.remove(e.code.toLowerCase());
+          _updateFlyIntent();
+        }
+      }).toJS,
+    );
+  }
+
+  void _updateFlyIntent() {
+    final ctrl = cameraController;
+    if (ctrl is FlyCameraController) {
+      var fwd = 0.0;
+      var rgt = 0.0;
+      var up = 0.0;
+      if (_pressedKeys.contains('keyw') || _pressedKeys.contains('arrowup')) fwd += 1.0;
+      if (_pressedKeys.contains('keys') || _pressedKeys.contains('arrowdown')) fwd -= 1.0;
+      if (_pressedKeys.contains('keya') || _pressedKeys.contains('arrowleft')) rgt -= 1.0;
+      if (_pressedKeys.contains('keyd') || _pressedKeys.contains('arrowright')) rgt += 1.0;
+      if (_pressedKeys.contains('space') || _pressedKeys.contains('keye')) up += 1.0;
+      if (_pressedKeys.contains('shiftleft') || _pressedKeys.contains('keyq')) up -= 1.0;
+      ctrl.setMovementIntent(forward: fwd, right: rgt, up: up);
+    }
   }
 
   void _resize() {

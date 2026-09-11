@@ -135,6 +135,8 @@ final class MeshData {
     required this.localBounds,
   });
 
+  Aabb get bounds => localBounds;
+
   int get vertexCount => vertices.length ~/ layout.strideFloats;
 
   void validate() {

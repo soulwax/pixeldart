@@ -23,16 +23,46 @@ final class GlbMesh {
   const GlbMesh({required this.name, required this.primitives});
 }
 
+/// An embedded image decoded from a glTF bufferView or binary chunk.
+final class GlbImage {
+  final String name;
+  final String mimeType;
+  final Uint8List bytes;
+  const GlbImage({
+    required this.name,
+    required this.mimeType,
+    required this.bytes,
+  });
+}
+
+/// Texture slot references associated with a decoded glTF material.
+final class GlbMaterialTextures {
+  final int? albedoTextureIndex;
+  final int? normalTextureIndex;
+  final int? ormTextureIndex;
+  final int? emissiveTextureIndex;
+  const GlbMaterialTextures({
+    this.albedoTextureIndex,
+    this.normalTextureIndex,
+    this.ormTextureIndex,
+    this.emissiveTextureIndex,
+  });
+}
+
 /// Result of decoding a GLB asset, containing CPU meshes, materials, and a scene hierarchy.
 final class GlbResult {
   final SceneNode rootNode;
   final List<MeshData> meshes;
   final List<MaterialDefinition> materials;
+  final List<GlbImage> images;
+  final List<GlbMaterialTextures> materialTextures;
 
   const GlbResult({
     required this.rootNode,
     required this.meshes,
     required this.materials,
+    this.images = const [],
+    this.materialTextures = const [],
   });
 }
 
@@ -94,7 +124,8 @@ final class GlbDecoder {
   }
 
   GlbResult _decodeAll() {
-    final materials = _decodeMaterials();
+    final (materials, materialTextures) = _decodeMaterials();
+    final images = _decodeImages();
     final meshes = _decodeMeshes();
     final allMeshDatas = <MeshData>[];
     for (final m in meshes) {
@@ -104,16 +135,48 @@ final class GlbDecoder {
     }
 
     final rootNode = _decodeSceneHierarchy(meshes, materials);
-    return GlbResult(rootNode: rootNode, meshes: allMeshDatas, materials: materials);
+    return GlbResult(
+      rootNode: rootNode,
+      meshes: allMeshDatas,
+      materials: materials,
+      images: images,
+      materialTextures: materialTextures,
+    );
   }
 
-  List<MaterialDefinition> _decodeMaterials() {
+  List<GlbImage> _decodeImages() {
+    final rawImages = _json['images'] as List<dynamic>?;
+    if (rawImages == null || rawImages.isEmpty) return const [];
+    final bufferViews = _json['bufferViews'] as List<dynamic>? ?? const [];
+
+    final images = <GlbImage>[];
+    for (var i = 0; i < rawImages.length; i++) {
+      final img = rawImages[i] as Map<String, dynamic>;
+      final name = img['name'] as String? ?? 'image_$i';
+      final mime = img['mimeType'] as String? ?? 'image/png';
+      final viewIdx = img['bufferView'] as int?;
+      if (viewIdx != null && viewIdx >= 0 && viewIdx < bufferViews.length) {
+        final view = bufferViews[viewIdx] as Map<String, dynamic>;
+        final offset = (view['byteOffset'] as int? ?? 0);
+        final length = (view['byteLength'] as int? ?? 0);
+        final bytes = Uint8List.sublistView(_bin, offset, offset + length);
+        images.add(GlbImage(name: name, mimeType: mime, bytes: bytes));
+      }
+    }
+    return images;
+  }
+
+  (List<MaterialDefinition>, List<GlbMaterialTextures>) _decodeMaterials() {
     final rawMaterials = _json['materials'] as List<dynamic>?;
     if (rawMaterials == null || rawMaterials.isEmpty) {
-      return [const MaterialDefinition(key: 'default_glb_mat')];
+      return (
+        [const MaterialDefinition(key: 'default_glb_mat')],
+        [const GlbMaterialTextures()],
+      );
     }
 
     final materials = <MaterialDefinition>[];
+    final textures = <GlbMaterialTextures>[];
     for (var i = 0; i < rawMaterials.length; i++) {
       final mat = rawMaterials[i] as Map<String, dynamic>;
       final name = mat['name'] as String? ?? 'material_$i';
@@ -122,6 +185,8 @@ final class GlbDecoder {
       var r = 1.0, g = 1.0, b = 1.0;
       var metallic = 1.0;
       var roughness = 1.0;
+      int? albedoTexIdx;
+      int? ormTexIdx;
 
       if (pbr != null) {
         final baseColor = pbr['baseColorFactor'] as List<dynamic>?;
@@ -132,6 +197,27 @@ final class GlbDecoder {
         }
         metallic = (pbr['metallicFactor'] as num?)?.toDouble() ?? 1.0;
         roughness = (pbr['roughnessFactor'] as num?)?.toDouble() ?? 1.0;
+
+        final baseTex = pbr['baseColorTexture'] as Map<String, dynamic>?;
+        if (baseTex != null) {
+          albedoTexIdx = baseTex['index'] as int?;
+        }
+        final ormTex = pbr['metallicRoughnessTexture'] as Map<String, dynamic>?;
+        if (ormTex != null) {
+          ormTexIdx = ormTex['index'] as int?;
+        }
+      }
+
+      int? normalTexIdx;
+      final normTex = mat['normalTexture'] as Map<String, dynamic>?;
+      if (normTex != null) {
+        normalTexIdx = normTex['index'] as int?;
+      }
+
+      int? emissiveTexIdx;
+      final emissiveTex = mat['emissiveTexture'] as Map<String, dynamic>?;
+      if (emissiveTex != null) {
+        emissiveTexIdx = emissiveTex['index'] as int?;
       }
 
       materials.add(
@@ -144,8 +230,17 @@ final class GlbDecoder {
           roughness: roughness.clamp(0.0, 1.0),
         ),
       );
+
+      textures.add(
+        GlbMaterialTextures(
+          albedoTextureIndex: albedoTexIdx,
+          normalTextureIndex: normalTexIdx,
+          ormTextureIndex: ormTexIdx,
+          emissiveTextureIndex: emissiveTexIdx,
+        ),
+      );
     }
-    return materials;
+    return (materials, textures);
   }
 
   List<GlbMesh> _decodeMeshes() {
@@ -296,6 +391,8 @@ final class GlbDecoder {
           // In CPU GlbResult, mesh and material references are identified by index
           // MeshHandles and MaterialHandles are assigned by PixeldartApp upon scene attachment
           primNode.sortTiebreaker = prim.materialIndex;
+          primNode.bounds = prim.mesh.bounds;
+          primNode.meshData = prim.mesh;
         }
       }
     }

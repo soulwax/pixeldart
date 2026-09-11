@@ -79,6 +79,117 @@ final class PostProcessState {
 
   static const PostProcessState off = PostProcessState();
 
+  /// Clean, modern filmic presentation with soft bloom, contact ambient occlusion,
+  /// subtle vignette, and modern AgX tone mapping.
+  factory PostProcessState.cinematic({
+    double exposure = 1.15,
+    double bloomStrength = 0.30,
+    double ssaoStrength = 0.75,
+    double vignette = 0.22,
+    double grain = 0.08,
+    ToneMappingMode toneMapping = ToneMappingMode.agx,
+  }) => PostProcessState(
+    exposure: exposure,
+    bloomStrength: bloomStrength,
+    ssaoStrength: ssaoStrength,
+    vignette: vignette,
+    grain: grain,
+    toneMapping: toneMapping,
+  );
+
+  /// Unfiltered clean HDR presentation without stylized lens artifacts.
+  factory PostProcessState.clean({
+    double exposure = 1.0,
+    ToneMappingMode toneMapping = ToneMappingMode.agx,
+  }) => PostProcessState(
+    exposure: exposure,
+    toneMapping: toneMapping,
+  );
+
+  /// Retro 90s console aesthetic with reduced bit-depth color quantization,
+  /// ordered matrix dithering, and affine texture warp.
+  factory PostProcessState.stylizedPs1({
+    int quantizationBits = 5,
+    double ditherStrength = 0.65,
+    double affineWarpStrength = 0.35,
+    ToneMappingMode toneMapping = ToneMappingMode.off,
+  }) => PostProcessState(
+    quantizationBits: quantizationBits,
+    ditherStrength: ditherStrength,
+    affineWarpStrength: affineWarpStrength,
+    toneMapping: toneMapping,
+  );
+
+  /// Analog magnetic tape simulation with chromatic aberration, horizontal sync jitter,
+  /// and composite video tracking noise.
+  factory PostProcessState.retroVhs({
+    double trackingWeight = 0.40,
+    double chromaWeight = 0.45,
+    double noiseWeight = 0.25,
+    double vignette = 0.30,
+    ToneMappingMode toneMapping = ToneMappingMode.reinhard,
+  }) => PostProcessState(
+    vhsTrackingWeight: trackingWeight,
+    vhsChromaWeight: chromaWeight,
+    vhsNoiseWeight: noiseWeight,
+    vignette: vignette,
+    toneMapping: toneMapping,
+  );
+
+  PostProcessState copyWith({
+    double? exposure,
+    double? bloomStrength,
+    double? ssaoStrength,
+    double? depthOfFieldStrength,
+    double? vignette,
+    double? grain,
+    double? rainIntensity,
+    double? surfaceWetness,
+    double? surfaceSnowCoverage,
+    double? surfaceDissolution,
+    double? rainWindowVisibility,
+    double? ditherStrength,
+    double? colorGradeStrength,
+    double? affineWarpStrength,
+    double? vertexSnapGrid,
+    int? quantizationBits,
+    double? vhsChromaWeight,
+    double? vhsTrackingWeight,
+    double? vhsNoiseWeight,
+    double? vhsHeadSwitchWeight,
+    double? vhsDropoutWeight,
+    double? vhsGhostWeight,
+    bool? reducedMotion,
+    ToneMappingMode? toneMapping,
+  }) {
+    return PostProcessState(
+      exposure: exposure ?? this.exposure,
+      bloomStrength: bloomStrength ?? this.bloomStrength,
+      ssaoStrength: ssaoStrength ?? this.ssaoStrength,
+      depthOfFieldStrength: depthOfFieldStrength ?? this.depthOfFieldStrength,
+      vignette: vignette ?? this.vignette,
+      grain: grain ?? this.grain,
+      rainIntensity: rainIntensity ?? this.rainIntensity,
+      surfaceWetness: surfaceWetness ?? this.surfaceWetness,
+      surfaceSnowCoverage: surfaceSnowCoverage ?? this.surfaceSnowCoverage,
+      surfaceDissolution: surfaceDissolution ?? this.surfaceDissolution,
+      rainWindowVisibility: rainWindowVisibility ?? this.rainWindowVisibility,
+      ditherStrength: ditherStrength ?? this.ditherStrength,
+      colorGradeStrength: colorGradeStrength ?? this.colorGradeStrength,
+      affineWarpStrength: affineWarpStrength ?? this.affineWarpStrength,
+      vertexSnapGrid: vertexSnapGrid ?? this.vertexSnapGrid,
+      quantizationBits: quantizationBits ?? this.quantizationBits,
+      vhsChromaWeight: vhsChromaWeight ?? this.vhsChromaWeight,
+      vhsTrackingWeight: vhsTrackingWeight ?? this.vhsTrackingWeight,
+      vhsNoiseWeight: vhsNoiseWeight ?? this.vhsNoiseWeight,
+      vhsHeadSwitchWeight: vhsHeadSwitchWeight ?? this.vhsHeadSwitchWeight,
+      vhsDropoutWeight: vhsDropoutWeight ?? this.vhsDropoutWeight,
+      vhsGhostWeight: vhsGhostWeight ?? this.vhsGhostWeight,
+      reducedMotion: reducedMotion ?? this.reducedMotion,
+      toneMapping: toneMapping ?? this.toneMapping,
+    );
+  }
+
   void validate() {
     for (final MapEntry(:key, :value) in _weights.entries) {
       if (!value.isFinite || value < 0) {

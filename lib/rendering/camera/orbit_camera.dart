@@ -2,9 +2,10 @@ import 'dart:math' as math;
 
 import '../api/frame.dart';
 import '../math/vec.dart';
+import 'camera_controller.dart';
 
 /// Interactive orbit camera controller for inspecting 3D scenes.
-final class OrbitCameraController {
+final class OrbitCameraController implements CameraController {
   Vec3 target;
   double distance;
   double azimuthRadians;
@@ -48,6 +49,7 @@ final class OrbitCameraController {
         _targetPos = target;
 
   /// Eye position derived from current spherical coordinates.
+  @override
   Vec3 get eye {
     final cosEl = math.cos(elevationRadians);
     final sinEl = math.sin(elevationRadians);
@@ -63,6 +65,7 @@ final class OrbitCameraController {
   }
 
   /// Forward unit vector pointing from camera eye to target.
+  @override
   Vec3 get forward => (target - eye).normalized;
 
   /// Right unit vector in the camera's horizontal view plane.
@@ -106,6 +109,7 @@ final class OrbitCameraController {
   }
 
   /// Advances camera state towards targets using smooth exponential decay.
+  @override
   void update(double dt) {
     if (dt <= 0) return;
     if (autoRotate) {
@@ -122,6 +126,7 @@ final class OrbitCameraController {
   }
 
   /// Builds an authoritative [CameraView] for the given viewport aspect ratio.
+  @override
   CameraView toCameraView(double aspect) {
     return CameraView.lookAt(
       eye: eye,

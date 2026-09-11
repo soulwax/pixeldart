@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import '../math/frustum.dart';
 import '../math/mat4.dart';
+import '../math/ray.dart';
 import '../math/vec.dart';
 import '../atmosphere/volumetric_media.dart';
 import '../atmosphere/thermal_field.dart';
@@ -31,6 +32,29 @@ final class CameraView {
 
   /// Inverse view used to reconstruct world rays for presentation effects.
   late final Mat4 inverseView = view.inverse();
+
+  /// Inverse view-projection used to unproject screen points into world space.
+  late final Mat4 inverseViewProjection = viewProjection.inverse();
+
+  /// Constructs a world-space [Ray] passing through the given screen/viewport pixel coordinates.
+  Ray screenPointToRay(
+    double screenX,
+    double screenY,
+    int viewportWidth,
+    int viewportHeight,
+  ) {
+    if (viewportWidth <= 0 || viewportHeight <= 0) {
+      throw ArgumentError('Viewport dimensions must be > 0');
+    }
+    final ndcX = (screenX / viewportWidth) * 2.0 - 1.0;
+    final ndcY = 1.0 - (screenY / viewportHeight) * 2.0;
+
+    final nearPoint = inverseViewProjection.transformPoint(Vec3(ndcX, ndcY, -1.0));
+    final farPoint = inverseViewProjection.transformPoint(Vec3(ndcX, ndcY, 1.0));
+    final dir = (farPoint - nearPoint).normalized;
+
+    return Ray(origin: eye, direction: dir);
+  }
 
   CameraView({
     required this.view,

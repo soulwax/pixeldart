@@ -1,6 +1,9 @@
 import '../api/handles.dart';
+import '../api/mesh.dart';
 import '../api/scene.dart';
+import '../math/bounds.dart';
 import '../math/quat.dart';
+import '../math/ray.dart';
 import '../math/transform.dart';
 import '../math/vec.dart';
 
@@ -16,6 +19,8 @@ final class SceneNode {
 
   MeshHandle? mesh;
   MaterialHandle? material;
+  Aabb? bounds;
+  MeshData? meshData;
   int visibilityMask;
   DrawMode drawMode;
   BlendMode blendMode;
@@ -31,6 +36,8 @@ final class SceneNode {
     Transform transform = Transform.identity,
     this.mesh,
     this.material,
+    this.bounds,
+    this.meshData,
     this.visibilityMask = -1,
     this.drawMode = DrawMode.opaque,
     this.blendMode = BlendMode.alpha,
@@ -38,7 +45,9 @@ final class SceneNode {
     this.receivesShadow = true,
     this.sortTiebreaker = 0,
     this.instanceFamilyKey,
-  }) : _localTransform = transform;
+  }) : _localTransform = transform {
+    bounds ??= meshData?.bounds;
+  }
 
   /// Creates a grouping node with no visual mesh.
   factory SceneNode.group({String? name, Transform transform = Transform.identity}) =>
@@ -174,6 +183,8 @@ final class SceneNode {
     Transform transform = Transform.identity,
     MeshHandle? mesh,
     MaterialHandle? material,
+    Aabb? bounds,
+    MeshData? meshData,
     int visibilityMask = -1,
     DrawMode drawMode = DrawMode.opaque,
     BlendMode blendMode = BlendMode.alpha,
@@ -187,6 +198,8 @@ final class SceneNode {
       transform: transform,
       mesh: mesh,
       material: material,
+      bounds: bounds,
+      meshData: meshData,
       visibilityMask: visibilityMask,
       drawMode: drawMode,
       blendMode: blendMode,
@@ -197,6 +210,41 @@ final class SceneNode {
     );
     addChild(child);
     return child;
+  }
+
+  /// The world-space axis-aligned bounding box of this node, transformed from [bounds].
+  Aabb? get worldBounds => bounds?.transformed(worldTransform.toMat4());
+
+  /// Recursively tests this node and its descendants against [ray].
+  /// Returns the closest [RaycastHit] or `null` if no intersection occurs.
+  RaycastHit? raycast(Ray ray) {
+    RaycastHit? closest;
+
+    void testNode(SceneNode node) {
+      final b = node.worldBounds;
+      if (b != null) {
+        final dist = ray.intersectAabb(b);
+        if (dist != null) {
+          if (closest == null || dist < closest!.distance) {
+            final hitPoint = ray.at(dist);
+            final normal = (hitPoint - b.center).normalized;
+            closest = RaycastHit(
+              node: node,
+              point: hitPoint,
+              normal: normal,
+              distance: dist,
+            );
+          }
+        }
+      }
+
+      for (final child in node._children) {
+        testNode(child);
+      }
+    }
+
+    testNode(this);
+    return closest;
   }
 
   /// Removes [child] from this node.
