@@ -10,8 +10,8 @@ final class FallbackPixels {
   static final Uint8List blackEmissive = Uint8List.fromList([0, 0, 0, 255]);
   static final Uint8List whiteAo = Uint8List.fromList([255, 255, 255, 255]);
 
-  /// Neutral linear ORM: full occlusion, authored roughness 1, no metal.
-  static final Uint8List identityOrm = Uint8List.fromList([255, 255, 0, 255]);
+  /// Neutral linear ORM: full occlusion, neutral roughness 1, neutral metal 1.
+  static final Uint8List identityOrm = Uint8List.fromList([255, 255, 255, 255]);
   static final Uint8List neutralLightmap = Uint8List.fromList([
     255,
     255,

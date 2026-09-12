@@ -137,8 +137,6 @@ final class MaterialDefinition {
     tintB: 0.35,
     metallic: 1.0,
     roughness: roughness,
-    clearcoatStrength: 0.5,
-    clearcoatRoughness: 0.1,
   );
 
   /// Physically calibrated silver preset (F0 = [0.97, 0.96, 0.91], metallic = 1.0).

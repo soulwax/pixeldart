@@ -46,8 +46,8 @@ void main() async {
     clearColor: const LinearColor(0.015, 0.02, 0.03),
     ambientColor: const LinearColor(0.04, 0.05, 0.07),
     ambientIntensity: 1.0,
-    reflectionColor: const LinearColor(0.7, 0.8, 1.0),
-    reflectionIntensity: 1.2,
+    reflectionColor: const LinearColor(0.5, 0.6, 0.75),
+    reflectionIntensity: 0.65,
     reflectionConfidence: 0.85,
     directionalLight: const DirectionalLight(
       direction: Vec3(0.6, -1.0, 0.4),
@@ -1242,9 +1242,9 @@ void main() async {
   // Enable atmospheric depth fog by default
   app.enableFog(
     color: const LinearColor(0.02, 0.03, 0.05),
-    start: 6.0,
-    end: 35.0,
-    heightFalloff: 0.08,
+    start: 20.0,
+    end: 120.0,
+    heightFalloff: 0.04,
   );
 
   // Wire fog selector
@@ -1257,15 +1257,15 @@ void main() async {
           case 'on':
             app.enableFog(
               color: const LinearColor(0.02, 0.03, 0.05),
-              start: 6.0,
-              end: 35.0,
-              heightFalloff: 0.08,
+              start: 20.0,
+              end: 120.0,
+              heightFalloff: 0.04,
             );
           case 'volumetric':
             app.enableFog(
               color: const LinearColor(0.03, 0.04, 0.06),
-              start: 8.0,
-              end: 45.0,
+              start: 20.0,
+              end: 120.0,
             );
             app.enableVolumetricFog(
               intensity: 1.2,
@@ -1438,29 +1438,29 @@ void main() async {
           id: 0,
           position: p0,
           color: const LinearColor(1.0, 0.25, 0.25),
-          intensity: 4.0,
-          radius: 9.0,
+          intensity: 1.5,
+          radius: 8.0,
         ),
         PointLight(
           id: 1,
           position: p1,
           color: const LinearColor(0.25, 0.5, 1.0),
-          intensity: 4.0,
-          radius: 9.0,
+          intensity: 1.5,
+          radius: 8.0,
         ),
         PointLight(
           id: 2,
           position: p2,
           color: const LinearColor(0.2, 1.0, 0.45),
-          intensity: 3.5,
-          radius: 8.0,
+          intensity: 1.2,
+          radius: 7.5,
         ),
         PointLight(
           id: 3,
           position: p3,
           color: const LinearColor(1.0, 0.85, 0.35),
-          intensity: 4.5,
-          radius: 10.0,
+          intensity: 1.6,
+          radius: 9.0,
         ),
       ],
     );

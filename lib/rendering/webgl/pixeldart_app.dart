@@ -418,22 +418,29 @@ final class PixeldartApp {
     final state = SolarCycleEngine.evaluate(input);
     currentSolarState = state;
 
-    // Update directional light and ambient light
+    // Update directional light, ambient light, and sky reflection
+    final sky = environment.skybox;
+    final zenithColor = LinearColor(
+      (state.fogColor.r * 0.4 + 0.02).clamp(0.0, 1.0),
+      (state.fogColor.g * 0.5 + 0.04).clamp(0.0, 1.0),
+      (state.fogColor.b * 0.8 + 0.08).clamp(0.0, 1.0),
+    );
+    final reflection = LinearColor(
+      (zenithColor.r * 0.5 + state.fogColor.r * 0.5).clamp(0.0, 1.0),
+      (zenithColor.g * 0.5 + state.fogColor.g * 0.5).clamp(0.0, 1.0),
+      (zenithColor.b * 0.5 + state.fogColor.b * 0.5).clamp(0.0, 1.0),
+    );
+
     environment = environment.copyWith(
       directionalLight: state.directionalLight,
       ambientColor: state.ambientColor,
       ambientIntensity: state.ambientIntensity,
       fogColor: state.fogColor,
+      reflectionColor: reflection,
     );
 
     // Update skybox declaration colors to match solar phase
-    final sky = environment.skybox;
     if (sky != null) {
-      final zenithColor = LinearColor(
-        (state.fogColor.r * 0.4 + 0.02).clamp(0.0, 1.0),
-        (state.fogColor.g * 0.5 + 0.04).clamp(0.0, 1.0),
-        (state.fogColor.b * 0.8 + 0.08).clamp(0.0, 1.0),
-      );
       final horizonColor = state.fogColor;
       environment = environment.copyWith(
         skybox: SkyboxDeclaration(

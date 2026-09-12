@@ -22,7 +22,7 @@ a[c]=function(){if(a[b]===s){a[b]=d()}a[c]=function(){return this[b]}
 return a[b]}}function lazyFinal(a,b,c,d){var s=a
 a[b]=s
 a[c]=function(){if(a[b]===s){var r=d()
-if(a[b]!==s){A.r_(b)}a[b]=r}var q=a[b]
+if(a[b]!==s){A.qZ(b)}a[b]=r}var q=a[b]
 a[c]=function(){return q}
 return q}}function makeConstList(a,b){if(b!=null)A.b(a,b)
 a.$flags=7
@@ -54,18 +54,18 @@ function initializeDeferredHunk(a){x=v.types.length
 a(hunkHelpers,v,w,$)}var J={
 m4(a,b,c,d){return{i:a,p:b,e:c,x:d}},
 m0(a){var s,r,q,p,o,n="_$dart_js",m=a[v.dispatchPropertyName]
-if(m==null)if($.m2==null){A.qK()
+if(m==null)if($.m2==null){A.qJ()
 m=a[v.dispatchPropertyName]}if(m!=null){s=m.p
 if(!1===s)return m.i
 if(!0===s)return a
 r=Object.getPrototypeOf(a)
 if(s===r)return m.i
-if(m.e===r)throw A.c(A.mX("Return interceptor for "+A.o(s(a,m))))}q=a.constructor
+if(m.e===r)throw A.c(A.mW("Return interceptor for "+A.n(s(a,m))))}q=a.constructor
 if(q==null)p=null
 else{o=$.jW
 if(o==null)o=$.jW=A.kA(n)
 p=q[o]}if(p!=null)return p
-p=A.qQ(a)
+p=A.qP(a)
 if(p!=null)return p
 if(typeof a=="function")return B.cp
 s=Object.getPrototypeOf(a)
@@ -84,15 +84,15 @@ return A.b(new Array(a),b.h("q<0>"))},
 lo(a,b){var s=A.b(a,b.h("q<0>"))
 s.$flags=1
 return s},
-oi(a,b){var s=t.e8
+oh(a,b){var s=t.e8
 return J.md(s.a(a),s.a(b))},
 mt(a){if(a<256)switch(a){case 9:case 10:case 11:case 12:case 13:case 32:case 133:case 160:return!0
 default:return!1}switch(a){case 5760:case 8192:case 8193:case 8194:case 8195:case 8196:case 8197:case 8198:case 8199:case 8200:case 8201:case 8202:case 8232:case 8233:case 8239:case 8287:case 12288:case 65279:return!0
 default:return!1}},
-oj(a,b){var s,r
+oi(a,b){var s,r
 for(s=a.length;b<s;){r=a.charCodeAt(b)
 if(r!==32&&r!==13&&!J.mt(r))break;++b}return b},
-ok(a,b){var s,r,q
+oj(a,b){var s,r,q
 for(s=a.length;b>0;b=r){r=b-1
 if(!(r<s))return A.d(a,r)
 q=a.charCodeAt(r)
@@ -122,29 +122,29 @@ if(typeof a=="symbol")return J.dq.prototype
 if(typeof a=="bigint")return J.dn.prototype
 return a}if(a instanceof A.z)return a
 return J.m0(a)},
-qG(a){if(typeof a=="number")return J.cx.prototype
+qF(a){if(typeof a=="number")return J.cx.prototype
 if(typeof a=="string")return J.bz.prototype
 if(a==null)return a
 if(!(a instanceof A.z))return J.c0.prototype
 return a},
-qH(a){if(typeof a=="string")return J.bz.prototype
+qG(a){if(typeof a=="string")return J.bz.prototype
 if(a==null)return a
 if(!(a instanceof A.z))return J.c0.prototype
 return a},
 aJ(a,b){if(a==null)return b==null
 if(typeof a!="object")return b!=null&&a===b
 return J.ce(a).a8(a,b)},
-li(a,b){if(typeof b==="number")if(Array.isArray(a)||A.qO(a,a[v.dispatchPropertyName]))if(b>>>0===b&&b<a.length)return a[b]
+li(a,b){if(typeof b==="number")if(Array.isArray(a)||A.qN(a,a[v.dispatchPropertyName]))if(b>>>0===b&&b<a.length)return a[b]
 return J.cZ(a).C(a,b)},
 hy(a,b,c){return J.cZ(a).K(a,b,c)},
 hz(a,b){return J.cZ(a).i(a,b)},
-md(a,b){return J.qG(a).S(a,b)},
+md(a,b){return J.qF(a).S(a,b)},
 lj(a,b){return J.cZ(a).a5(a,b)},
 V(a){return J.ce(a).gU(a)},
 ac(a){return J.cZ(a).gJ(a)},
 bN(a){return J.kz(a).gB(a)},
 ev(a){return J.ce(a).gT(a)},
-nW(a,b){return J.qH(a).dC(a,b)},
+nV(a,b){return J.qG(a).dC(a,b)},
 ci(a){return J.ce(a).j(a)},
 f2:function f2(){},
 f5:function f5(){},
@@ -170,8 +170,8 @@ dl:function dl(){},
 f6:function f6(){},
 bz:function bz(){}},A={lp:function lp(){},
 mu(a){return new A.cy("Field '"+a+"' has been assigned during initialization.")},
-om(a){return new A.cy("Field '"+a+"' has not been initialized.")},
-ol(a){return new A.cy("Field '"+a+"' has already been initialized.")},
+ol(a){return new A.cy("Field '"+a+"' has not been initialized.")},
+ok(a){return new A.cy("Field '"+a+"' has already been initialized.")},
 a9(a,b){a=a+b&536870911
 a=a+((a&524287)<<10)&536870911
 return a^a>>>6},
@@ -240,27 +240,27 @@ o=p+1
 q[r]=p}n=A.bU(new A.aZ(a,l.h("aZ<2>")),!0,c)
 m=new A.X(q,n,b.h("@<0>").X(c).h("X<1,2>"))
 m.$keys=k
-return m}return new A.dd(A.oo(a,b,c),b.h("@<0>").X(c).h("dd<1,2>"))},
-o4(){throw A.c(A.c1("Cannot modify constant Set"))},
-nI(a){var s=A.nH(a)
+return m}return new A.dd(A.on(a,b,c),b.h("@<0>").X(c).h("dd<1,2>"))},
+o3(){throw A.c(A.c1("Cannot modify constant Set"))},
+nH(a){var s=A.nG(a)
 if(s!=null)return s
 return"minified:"+a},
-qO(a,b){var s
+qN(a,b){var s
 if(b!=null){s=b.x
 if(s!=null)return s}return t.aU.b(a)},
-o(a){var s
+n(a){var s
 if(typeof a=="string")return a
 if(typeof a=="number"){if(a!==0)return""+a}else if(!0===a)return"true"
 else if(!1===a)return"false"
 else if(a==null)return"null"
 s=J.ci(a)
 return s},
-ft(a){var s,r=$.mH
-if(r==null)r=$.mH=Symbol("identityHashCode")
+ft(a){var s,r=$.mG
+if(r==null)r=$.mG=Symbol("identityHashCode")
 s=a[r]
 if(s==null){s=Math.random()*0x3fffffff|0
 a[r]=s}return s},
-oI(a,b){var s,r=/^\s*[+-]?((0x[a-f0-9]+)|(\d+)|([a-z0-9]+))\s*$/i.exec(a)
+oH(a,b){var s,r=/^\s*[+-]?((0x[a-f0-9]+)|(\d+)|([a-z0-9]+))\s*$/i.exec(a)
 if(r==null)return null
 if(3>=r.length)return A.d(r,3)
 s=r[3]
@@ -281,64 +281,64 @@ if(r!=="Object"&&r!=="")return r
 q=a.constructor
 if(typeof q=="function"){p=q.name
 if(typeof p=="string"&&p!=="Object"&&p!=="")return p}}return A.aH(A.cf(a),null)},
-mK(a){var s,r,q
+mJ(a){var s,r,q
 if(a==null||typeof a=="number"||A.lT(a))return J.ci(a)
 if(typeof a=="string")return JSON.stringify(a)
 if(a instanceof A.bw)return a.j(0)
 if(a instanceof A.aT)return a.cR(!0)
-s=$.nV()
+s=$.nU()
 for(r=0;r<1;++r){q=s[r].fI(a)
 if(q!=null)return q}return"Instance of '"+A.fu(a)+"'"},
 cD(a){if(a.date===void 0)a.date=new Date(a.a)
 return a.date},
-oG(a){var s=A.cD(a).getUTCFullYear()+0
+oF(a){var s=A.cD(a).getUTCFullYear()+0
 return s},
-oE(a){var s=A.cD(a).getUTCMonth()+1
+oD(a){var s=A.cD(a).getUTCMonth()+1
 return s},
-oA(a){var s=A.cD(a).getUTCDate()+0
+oz(a){var s=A.cD(a).getUTCDate()+0
 return s},
-oB(a){var s=A.cD(a).getUTCHours()+0
+oA(a){var s=A.cD(a).getUTCHours()+0
 return s},
-oD(a){var s=A.cD(a).getUTCMinutes()+0
+oC(a){var s=A.cD(a).getUTCMinutes()+0
 return s},
-oF(a){var s=A.cD(a).getUTCSeconds()+0
+oE(a){var s=A.cD(a).getUTCSeconds()+0
 return s},
-oC(a){var s=A.cD(a).getUTCMilliseconds()+0
+oB(a){var s=A.cD(a).getUTCMilliseconds()+0
 return s},
-oz(a){var s=a.$thrownJsError
+oy(a){var s=a.$thrownJsError
 if(s==null)return null
 return A.d_(s)},
-mL(a,b){var s
+mK(a,b){var s
 if(a.$thrownJsError==null){s=new Error()
 A.Z(a,s)
 a.$thrownJsError=s
 s.stack=b.j(0)}},
-bd(a){throw A.c(A.nz(a))},
+bd(a){throw A.c(A.ny(a))},
 d(a,b){if(a==null)J.bN(a)
 throw A.c(A.kx(a,b))},
 kx(a,b){var s,r="index"
-if(!A.nq(b))return new A.b2(!0,b,r,null)
+if(!A.np(b))return new A.b2(!0,b,r,null)
 s=A.e(J.bN(a))
 if(b<0||b>=s)return A.ig(b,s,a,r)
 return new A.cG(null,null,!0,b,r,"Value not in range")},
-nz(a){return new A.b2(!0,a,null,null)},
+ny(a){return new A.b2(!0,a,null,null)},
 cd(a){return a},
 c(a){return A.Z(a,new Error())},
 Z(a,b){var s
 if(a==null)a=new A.bo()
 b.dartException=a
-s=A.r0
+s=A.r_
 if("defineProperty" in Object){Object.defineProperty(b,"message",{get:s})
 b.name=""}else b.toString=s
 return b},
-r0(){return J.ci(this.dartException)},
+r_(){return J.ci(this.dartException)},
 l(a,b){throw A.Z(a,b==null?new Error():b)},
 be(a,b,c){var s
 if(b==null)b=0
 if(c==null)c=0
 s=Error()
-A.l(A.pQ(a,b,c),s)},
-pQ(a,b,c){var s,r,q,p,o,n,m,l,k
+A.l(A.pP(a,b,c),s)},
+pP(a,b,c){var s,r,q,p,o,n,m,l,k
 if(typeof b=="string")s=b
 else{r="[]=;add;removeWhere;retainWhere;removeRange;setRange;setInt8;setInt16;setInt32;setUint8;setUint16;setUint32;setFloat32;setFloat64".split(";")
 q=r.length
@@ -354,7 +354,7 @@ l="an "}else k=(m&1)!==0?"fixed-length ":""
 return new A.dX("'"+s+"': Cannot "+o+" "+l+k+n)},
 C(a){throw A.c(A.aL(a))},
 bp(a){var s,r,q,p,o,n
-a=A.qU(a.replace(String({}),"$receiver$"))
+a=A.qT(a.replace(String({}),"$receiver$"))
 s=a.match(/\\\$[a-zA-Z]+\\\$/g)
 if(s==null)s=A.b([],t.s)
 r=s.indexOf("\\$arguments\\$")
@@ -365,7 +365,7 @@ n=s.indexOf("\\$receiver\\$")
 return new A.jt(a.replace(new RegExp("\\\\\\$arguments\\\\\\$","g"),"((?:x|[^x])*)").replace(new RegExp("\\\\\\$argumentsExpr\\\\\\$","g"),"((?:x|[^x])*)").replace(new RegExp("\\\\\\$expr\\\\\\$","g"),"((?:x|[^x])*)").replace(new RegExp("\\\\\\$method\\\\\\$","g"),"((?:x|[^x])*)").replace(new RegExp("\\\\\\$receiver\\\\\\$","g"),"((?:x|[^x])*)"),r,q,p,o,n)},
 ju(a){return function($expr$){var $argumentsExpr$="$arguments$"
 try{$expr$.$method$($argumentsExpr$)}catch(s){return s.message}}(a)},
-mW(a){return function($expr$){try{$expr$.$method$}catch(s){return s.message}}(a)},
+mV(a){return function($expr$){try{$expr$.$method$}catch(s){return s.message}}(a)},
 lq(a,b){var s=b==null,r=s?null:b.method
 return new A.f7(a,r,s?null:b.receiver)},
 ch(a){var s
@@ -373,26 +373,26 @@ if(a==null)return new A.iy(a)
 if(a instanceof A.dh){s=a.a
 return A.bM(a,s==null?A.eq(s):s)}if(typeof a!=="object")return a
 if("dartException" in a)return A.bM(a,a.dartException)
-return A.qq(a)},
+return A.qp(a)},
 bM(a,b){if(t.Q.b(b))if(b.$thrownJsError==null)b.$thrownJsError=a
 return b},
-qq(a){var s,r,q,p,o,n,m,l,k,j,i,h,g
+qp(a){var s,r,q,p,o,n,m,l,k,j,i,h,g
 if(!("message" in a))return a
 s=a.message
 if("number" in a&&typeof a.number=="number"){r=a.number
 q=r&65535
-if((B.e.eo(r,16)&8191)===10)switch(q){case 438:return A.bM(a,A.lq(A.o(s)+" (Error "+q+")",null))
-case 445:case 5007:A.o(s)
-return A.bM(a,new A.dD())}}if(a instanceof TypeError){p=$.nL()
-o=$.nM()
-n=$.nN()
-m=$.nO()
-l=$.nR()
-k=$.nS()
-j=$.nQ()
-$.nP()
-i=$.nU()
-h=$.nT()
+if((B.e.eo(r,16)&8191)===10)switch(q){case 438:return A.bM(a,A.lq(A.n(s)+" (Error "+q+")",null))
+case 445:case 5007:A.n(s)
+return A.bM(a,new A.dD())}}if(a instanceof TypeError){p=$.nK()
+o=$.nL()
+n=$.nM()
+m=$.nN()
+l=$.nQ()
+k=$.nR()
+j=$.nP()
+$.nO()
+i=$.nT()
+h=$.nS()
 g=p.ah(s)
 if(g!=null)return A.bM(a,A.lq(A.K(s),g))
 else{g=o.ah(s)
@@ -413,14 +413,14 @@ return s},
 hx(a){if(a==null)return J.V(a)
 if(typeof a=="object")return A.ft(a)
 return J.V(a)},
-qE(a,b){var s,r,q,p=a.length
+qD(a,b){var s,r,q,p=a.length
 for(s=0;s<p;s=q){r=s+1
 q=r+1
 b.K(0,a[s],a[r])}return b},
-qF(a,b){var s,r=a.length
+qE(a,b){var s,r=a.length
 for(s=0;s<r;++s)b.i(0,a[s])
 return b},
-q2(a,b,c,d,e,f){t.f.a(a)
+q1(a,b,c,d,e,f){t.f.a(a)
 switch(A.e(b)){case 0:return a.$0()
 case 1:return a.$1(c)
 case 2:return a.$2(c,d)
@@ -428,10 +428,10 @@ case 3:return a.$3(c,d,e)
 case 4:return a.$4(c,d,e,f)}throw A.c(new A.jJ("Unsupported number of arguments for wrapped closure"))},
 cX(a,b){var s=a.$identity
 if(!!s)return s
-s=A.qx(a,b)
+s=A.qw(a,b)
 a.$identity=s
 return s},
-qx(a,b){var s
+qw(a,b){var s
 switch(b){case 0:s=a.$0
 break
 case 1:s=a.$1
@@ -443,8 +443,8 @@ break
 case 4:s=a.$4
 break
 default:s=null}if(s!=null)return s.bind(a)
-return function(c,d,e){return function(f,g,h,i){return e(c,d,f,g,h,i)}}(a,b,A.q2)},
-o3(a2){var s,r,q,p,o,n,m,l,k,j,i=a2.co,h=a2.iS,g=a2.iI,f=a2.nDA,e=a2.aI,d=a2.fs,c=a2.cs,b=d[0],a=c[0],a0=i[b],a1=a2.fT
+return function(c,d,e){return function(f,g,h,i){return e(c,d,f,g,h,i)}}(a,b,A.q1)},
+o2(a2){var s,r,q,p,o,n,m,l,k,j,i=a2.co,h=a2.iS,g=a2.iI,f=a2.nDA,e=a2.aI,d=a2.fs,c=a2.cs,b=d[0],a=c[0],a0=i[b],a1=a2.fT
 a1.toString
 s=h?Object.create(new A.fH().constructor.prototype):Object.create(new A.cm(null,null).constructor.prototype)
 s.$initialize=s.constructor
@@ -456,7 +456,7 @@ s.$_target=a0
 q=!h
 if(q)p=A.mk(b,a0,g,f)
 else{s.$static_name=b
-p=a0}s.$S=A.o_(a1,h,g)
+p=a0}s.$S=A.nZ(a1,h,g)
 s[a]=p
 for(o=p,n=1;n<d.length;++n){m=d[n]
 if(typeof m=="string"){l=i[m]
@@ -468,10 +468,10 @@ s[j]=m}if(n===e)o=m}s.$C=o
 s.$R=a2.rC
 s.$D=a2.dV
 return r},
-o_(a,b,c){if(typeof a=="number")return a
+nZ(a,b,c){if(typeof a=="number")return a
 if(typeof a=="string"){if(b)throw A.c("Cannot compute signature for static tearoff.")
-return function(d,e){return function(){return e(this,d)}}(a,A.nX)}throw A.c("Error in functionType of tearoff")},
-o0(a,b,c,d){var s=A.mh
+return function(d,e){return function(){return e(this,d)}}(a,A.nW)}throw A.c("Error in functionType of tearoff")},
+o_(a,b,c,d){var s=A.mh
 switch(b?-1:a){case 0:return function(e,f){return function(){return f(this)[e]()}}(c,s)
 case 1:return function(e,f){return function(g){return f(this)[e](g)}}(c,s)
 case 2:return function(e,f){return function(g,h){return f(this)[e](g,h)}}(c,s)
@@ -479,9 +479,9 @@ case 3:return function(e,f){return function(g,h,i){return f(this)[e](g,h,i)}}(c,
 case 4:return function(e,f){return function(g,h,i,j){return f(this)[e](g,h,i,j)}}(c,s)
 case 5:return function(e,f){return function(g,h,i,j,k){return f(this)[e](g,h,i,j,k)}}(c,s)
 default:return function(e,f){return function(){return e.apply(f(this),arguments)}}(d,s)}},
-mk(a,b,c,d){if(c)return A.o2(a,b,d)
-return A.o0(b.length,d,a,b)},
-o1(a,b,c,d){var s=A.mh,r=A.nY
+mk(a,b,c,d){if(c)return A.o1(a,b,d)
+return A.o_(b.length,d,a,b)},
+o0(a,b,c,d){var s=A.mh,r=A.nX
 switch(b?-1:a){case 0:throw A.c(new A.fy("Intercepted function with no arguments."))
 case 1:return function(e,f,g){return function(){return f(this)[e](g(this))}}(c,r,s)
 case 2:return function(e,f,g){return function(h){return f(this)[e](g(this),h)}}(c,r,s)
@@ -492,29 +492,29 @@ case 6:return function(e,f,g){return function(h,i,j,k,l){return f(this)[e](g(thi
 default:return function(e,f,g){return function(){var q=[g(this)]
 Array.prototype.push.apply(q,arguments)
 return e.apply(f(this),q)}}(d,r,s)}},
-o2(a,b,c){var s,r
+o1(a,b,c){var s,r
 if($.mf==null)$.mf=A.me("interceptor")
 if($.mg==null)$.mg=A.me("receiver")
 s=b.length
-r=A.o1(s,c,a,b)
+r=A.o0(s,c,a,b)
 return r},
-lZ(a){return A.o3(a)},
-nX(a,b){return A.ei(v.typeUniverse,A.cf(a.a),b)},
+lZ(a){return A.o2(a)},
+nW(a,b){return A.ei(v.typeUniverse,A.cf(a.a),b)},
 mh(a){return a.a},
-nY(a){return a.b},
+nX(a){return a.b},
 me(a){var s,r,q,p=new A.cm("receiver","interceptor"),o=Object.getOwnPropertyNames(p)
 o.$flags=1
 s=o
 for(o=s.length,r=0;r<o;++r){q=s[r]
 if(p[q]===a)return q}throw A.c(A.i("Field name "+a+" not found.",null))},
 kA(a){return v.getIsolateTag(a)},
-nG(){return v.G},
-qQ(a){var s,r,q,p,o,n=A.K($.nD.$1(a)),m=$.ky[n]
+nF(){return v.G},
+qP(a){var s,r,q,p,o,n=A.K($.nC.$1(a)),m=$.ky[n]
 if(m!=null){Object.defineProperty(a,v.dispatchPropertyName,{value:m,enumerable:false,writable:true,configurable:true})
 return m.i}s=$.kE[n]
 if(s!=null)return s
 r=v.interceptorsByTag[n]
-if(r==null){q=A.bv($.ny.$2(a,n))
+if(r==null){q=A.bv($.nx.$2(a,n))
 if(q!=null){m=$.ky[q]
 if(m!=null){Object.defineProperty(a,v.dispatchPropertyName,{value:m,enumerable:false,writable:true,configurable:true})
 return m.i}s=$.kE[q]
@@ -529,32 +529,32 @@ Object.defineProperty(a,v.dispatchPropertyName,{value:m,enumerable:false,writabl
 return m.i}if(p==="~"){$.kE[n]=s
 return s}if(p==="-"){o=A.l8(s)
 Object.defineProperty(Object.getPrototypeOf(a),v.dispatchPropertyName,{value:o,enumerable:false,writable:true,configurable:true})
-return o.i}if(p==="+")return A.nE(a,s)
-if(p==="*")throw A.c(A.mX(n))
+return o.i}if(p==="+")return A.nD(a,s)
+if(p==="*")throw A.c(A.mW(n))
 if(v.leafTags[n]===true){o=A.l8(s)
 Object.defineProperty(Object.getPrototypeOf(a),v.dispatchPropertyName,{value:o,enumerable:false,writable:true,configurable:true})
-return o.i}else return A.nE(a,s)},
-nE(a,b){var s=Object.getPrototypeOf(a)
+return o.i}else return A.nD(a,s)},
+nD(a,b){var s=Object.getPrototypeOf(a)
 Object.defineProperty(s,v.dispatchPropertyName,{value:J.m4(b,s,null,null),enumerable:false,writable:true,configurable:true})
 return b},
 l8(a){return J.m4(a,!1,null,!!a.$iaB)},
-qS(a,b,c){var s=b.prototype
+qR(a,b,c){var s=b.prototype
 if(v.leafTags[a]===true)return A.l8(s)
 else return J.m4(s,c,null,null)},
-qK(){if(!0===$.m2)return
+qJ(){if(!0===$.m2)return
 $.m2=!0
-A.qL()},
-qL(){var s,r,q,p,o,n,m,l
+A.qK()},
+qK(){var s,r,q,p,o,n,m,l
 $.ky=Object.create(null)
 $.kE=Object.create(null)
-A.qJ()
+A.qI()
 s=v.interceptorsByTag
 r=Object.getOwnPropertyNames(s)
 if(typeof window!="undefined"){window
 q=function(){}
 for(p=0;p<r.length;++p){o=r[p]
-n=$.nF.$1(o)
-if(n!=null){m=A.qS(o,s[o],n)
+n=$.nE.$1(o)
+if(n!=null){m=A.qR(o,s[o],n)
 if(m!=null){Object.defineProperty(n,v.dispatchPropertyName,{value:m,enumerable:false,writable:true,configurable:true})
 q.prototype=n}}}}for(p=0;p<r.length;++p){o=r[p]
 if(/^[A-Za-z_]/.test(o)){l=s[o]
@@ -563,7 +563,7 @@ s["~"+o]=l
 s["-"+o]=l
 s["+"+o]=l
 s["*"+o]=l}}},
-qJ(){var s,r,q,p,o,n,m=B.by()
+qI(){var s,r,q,p,o,n,m=B.by()
 m=A.cW(B.bz,A.cW(B.bA,A.cW(B.aD,A.cW(B.aD,A.cW(B.bB,A.cW(B.bC,A.cW(B.bD(B.aC),m)))))))
 if(typeof dartNativeDispatchHooksTransformer!="undefined"){s=dartNativeDispatchHooksTransformer
 if(typeof s=="function")s=[s]
@@ -571,18 +571,18 @@ if(Array.isArray(s))for(r=0;r<s.length;++r){q=s[r]
 if(typeof q=="function")m=q(m)||m}}p=m.getTag
 o=m.getUnknownTag
 n=m.prototypeForTag
-$.nD=new A.kB(p)
-$.ny=new A.kC(o)
-$.nF=new A.kD(n)},
+$.nC=new A.kB(p)
+$.nx=new A.kC(o)
+$.nE=new A.kD(n)},
 cW(a,b){return a(b)||b},
-qy(a,b){var s=b.length,r=v.rttc[""+s+";"+a]
+qx(a,b){var s=b.length,r=v.rttc[""+s+";"+a]
 if(r==null)return null
 if(s===0)return r
 if(s===r.length)return r.apply(null,b)
 return r(b)},
-qZ(a,b,c){var s=a.indexOf(b,c)
+qY(a,b,c){var s=a.indexOf(b,c)
 return s>=0},
-qU(a){if(/[[\]{}()*+?.\\^$|]/.test(a))return a.replace(/[[\]{}()*+?.\\^$|]/g,"\\$&")
+qT(a){if(/[[\]{}()*+?.\\^$|]/.test(a))return a.replace(/[[\]{}()*+?.\\^$|]/g,"\\$&")
 return a},
 F:function F(a,b){this.a=a
 this.b=b},
@@ -702,21 +702,21 @@ e7:function e7(){},
 e8:function e8(){},
 lz(a,b){var s=b.c
 return s==null?b.c=A.eg(a,"bS",[b.x]):s},
-mP(a){var s=a.w
-if(s===6||s===7)return A.mP(a.x)
+mO(a){var s=a.w
+if(s===6||s===7)return A.mO(a.x)
 return s===11||s===12},
-p1(a){return a.as},
+p0(a){return a.as},
 bL(a){return A.k2(v.typeUniverse,a,!1)},
 cb(a1,a2,a3,a4){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0=a2.w
 switch(a0){case 5:case 1:case 2:case 3:case 4:return a2
 case 6:s=a2.x
 r=A.cb(a1,s,a3,a4)
 if(r===s)return a2
-return A.ne(a1,r,!0)
+return A.nd(a1,r,!0)
 case 7:s=a2.x
 r=A.cb(a1,s,a3,a4)
 if(r===s)return a2
-return A.nd(a1,r,!0)
+return A.nc(a1,r,!0)
 case 8:q=a2.y
 p=A.cV(a1,q,a3,a4)
 if(p===q)return a2
@@ -731,13 +731,13 @@ case 10:k=a2.x
 j=a2.y
 i=A.cV(a1,j,a3,a4)
 if(i===j)return a2
-return A.nf(a1,k,i)
+return A.ne(a1,k,i)
 case 11:h=a2.x
 g=A.cb(a1,h,a3,a4)
 f=a2.y
-e=A.qn(a1,f,a3,a4)
+e=A.qm(a1,f,a3,a4)
 if(g===h&&e===f)return a2
-return A.nc(a1,g,e)
+return A.nb(a1,g,e)
 case 12:d=a2.y
 a4+=d.length
 c=A.cV(a1,d,a3,a4)
@@ -756,14 +756,14 @@ for(s=!1,r=0;r<o;++r){q=b[r]
 p=A.cb(a,q,c,d)
 if(p!==q)s=!0
 n[r]=p}return s?n:b},
-qo(a,b,c,d){var s,r,q,p,o,n,m=b.length,l=A.k3(m)
+qn(a,b,c,d){var s,r,q,p,o,n,m=b.length,l=A.k3(m)
 for(s=!1,r=0;r<m;r+=3){q=b[r]
 p=b[r+1]
 o=b[r+2]
 n=A.cb(a,o,c,d)
 if(n!==o)s=!0
 l.splice(r,3,q,p,n)}return s?l:b},
-qn(a,b,c,d){var s,r=b.a,q=A.cV(a,r,c,d),p=b.b,o=A.cV(a,p,c,d),n=b.c,m=A.qo(a,n,c,d)
+qm(a,b,c,d){var s,r=b.a,q=A.cV(a,r,c,d),p=b.b,o=A.cV(a,p,c,d),n=b.c,m=A.qn(a,n,c,d)
 if(q===r&&o===p&&m===n)return b
 s=new A.h6()
 s.a=q
@@ -773,10 +773,10 @@ return s},
 b(a,b){a[v.arrayRti]=b
 return a},
 m_(a){var s=a.$S
-if(s!=null){if(typeof s=="number")return A.qI(s)
+if(s!=null){if(typeof s=="number")return A.qH(s)
 return a.$S()}return null},
-qM(a,b){var s
-if(A.mP(b))if(a instanceof A.bw){s=A.m_(a)
+qL(a,b){var s
+if(A.mO(b))if(a instanceof A.bw){s=A.m_(a)
 if(s!=null)return s}return A.cf(a)},
 cf(a){if(a instanceof A.z)return A.x(a)
 if(Array.isArray(a))return A.H(a)
@@ -789,11 +789,11 @@ x(a){var s=a.$ti
 return s!=null?s:A.lS(a)},
 lS(a){var s=a.constructor,r=s.$ccache
 if(r!=null)return r
-return A.pZ(a,s)},
-pZ(a,b){var s=a instanceof A.bw?Object.getPrototypeOf(Object.getPrototypeOf(a)).constructor:b,r=A.pH(v.typeUniverse,s.name)
+return A.pY(a,s)},
+pY(a,b){var s=a instanceof A.bw?Object.getPrototypeOf(Object.getPrototypeOf(a)).constructor:b,r=A.pG(v.typeUniverse,s.name)
 b.$ccache=r
 return r},
-qI(a){var s,r=v.types,q=r[a]
+qH(a){var s,r=v.types,q=r[a]
 if(typeof q=="string"){s=A.k2(v.typeUniverse,q,!1)
 r[a]=s
 return s}return q},
@@ -807,46 +807,46 @@ if(Array.isArray(a))return A.H(a)
 return A.cf(a)},
 bc(a){var s=a.r
 return s==null?a.r=new A.k1(a):s},
-qD(a,b){var s,r,q=b,p=q.length
+qC(a,b){var s,r,q=b,p=q.length
 if(p===0)return t.bQ
 if(0>=p)return A.d(q,0)
 s=A.ei(v.typeUniverse,A.lX(q[0]),"@<0>")
 for(r=1;r<p;++r){if(!(r<q.length))return A.d(q,r)
-s=A.nh(v.typeUniverse,s,A.lX(q[r]))}return A.ei(v.typeUniverse,s,a)},
+s=A.ng(v.typeUniverse,s,A.lX(q[r]))}return A.ei(v.typeUniverse,s,a)},
 aW(a){return A.bc(A.k2(v.typeUniverse,a,!1))},
-pY(a){var s=this
-s.b=A.ql(s)
+pX(a){var s=this
+s.b=A.qk(s)
 return s.b(a)},
-ql(a){var s,r,q,p,o
-if(a===t.K)return A.q8
-if(A.cg(a))return A.qc
+qk(a){var s,r,q,p,o
+if(a===t.K)return A.q7
+if(A.cg(a))return A.qb
 s=a.w
-if(s===6)return A.pW
-if(s===1)return A.ns
-if(s===7)return A.q3
-r=A.qk(a)
+if(s===6)return A.pV
+if(s===1)return A.nr
+if(s===7)return A.q2
+r=A.qj(a)
 if(r!=null)return r
 if(s===8){q=a.x
 if(a.y.every(A.cg)){a.f="$i"+q
-if(q==="A")return A.q6
-if(a===t.m)return A.q5
-return A.qb}}else if(s===10){p=A.qy(a.x,a.y)
-o=p==null?A.ns:p
-return o==null?A.eq(o):o}return A.pU},
-qk(a){if(a.w===8){if(a===t.S)return A.nq
-if(a===t.i||a===t.r)return A.q7
-if(a===t.N)return A.qa
+if(q==="A")return A.q5
+if(a===t.m)return A.q4
+return A.qa}}else if(s===10){p=A.qx(a.x,a.y)
+o=p==null?A.nr:p
+return o==null?A.eq(o):o}return A.pT},
+qj(a){if(a.w===8){if(a===t.S)return A.np
+if(a===t.i||a===t.r)return A.q6
+if(a===t.N)return A.q9
 if(a===t.y)return A.lT}return null},
-pX(a){var s=this,r=A.pT
-if(A.cg(s))r=A.pM
+pW(a){var s=this,r=A.pS
+if(A.cg(s))r=A.pL
 else if(s===t.K)r=A.eq
-else if(A.d0(s)){r=A.pV
-if(s===t.h6)r=A.pL
+else if(A.d0(s)){r=A.pU
+if(s===t.h6)r=A.pK
 else if(s===t.dk)r=A.bv
-else if(s===t.fQ)r=A.pK
-else if(s===t.cg)r=A.nk
+else if(s===t.fQ)r=A.pJ
+else if(s===t.cg)r=A.nj
 else if(s===t.cD)r=A.lN
-else if(s===t.bX)r=A.u}else if(s===t.S)r=A.e
+else if(s===t.bX)r=A.v}else if(s===t.S)r=A.e
 else if(s===t.N)r=A.K
 else if(s===t.y)r=A.c9
 else if(s===t.r)r=A.aV
@@ -854,53 +854,53 @@ else if(s===t.i)r=A.ep
 else if(s===t.m)r=A.k
 s.a=r
 return s.a(a)},
-pU(a){var s=this
+pT(a){var s=this
 if(a==null)return A.d0(s)
-return A.qP(v.typeUniverse,A.qM(a,s),s)},
-pW(a){if(a==null)return!0
+return A.qO(v.typeUniverse,A.qL(a,s),s)},
+pV(a){if(a==null)return!0
 return this.x.b(a)},
-qb(a){var s,r=this
+qa(a){var s,r=this
 if(a==null)return A.d0(r)
 s=r.f
 if(a instanceof A.z)return!!a[s]
 return!!J.ce(a)[s]},
-q6(a){var s,r=this
+q5(a){var s,r=this
 if(a==null)return A.d0(r)
 if(typeof a!="object")return!1
 if(Array.isArray(a))return!0
 s=r.f
 if(a instanceof A.z)return!!a[s]
 return!!J.ce(a)[s]},
-q5(a){var s=this
+q4(a){var s=this
 if(a==null)return!1
 if(typeof a=="object"){if(a instanceof A.z)return!!a[s.f]
 return!0}if(typeof a=="function")return!0
 return!1},
-nr(a){if(typeof a=="object"){if(a instanceof A.z)return t.m.b(a)
+nq(a){if(typeof a=="object"){if(a instanceof A.z)return t.m.b(a)
 return!0}if(typeof a=="function")return!0
 return!1},
-pT(a){var s=this
+pS(a){var s=this
 if(a==null){if(A.d0(s))return a}else if(s.b(a))return a
-throw A.Z(A.nl(a,s),new Error())},
-pV(a){var s=this
+throw A.Z(A.nk(a,s),new Error())},
+pU(a){var s=this
 if(a==null||s.b(a))return a
-throw A.Z(A.nl(a,s),new Error())},
-nl(a,b){return new A.ee("TypeError: "+A.n7(a,A.aH(b,null)))},
-n7(a,b){return A.hV(a)+": type '"+A.aH(A.lX(a),null)+"' is not a subtype of type '"+b+"'"},
-aU(a,b){return new A.ee("TypeError: "+A.n7(a,b))},
-q3(a){var s=this
+throw A.Z(A.nk(a,s),new Error())},
+nk(a,b){return new A.ee("TypeError: "+A.n6(a,A.aH(b,null)))},
+n6(a,b){return A.hV(a)+": type '"+A.aH(A.lX(a),null)+"' is not a subtype of type '"+b+"'"},
+aU(a,b){return new A.ee("TypeError: "+A.n6(a,b))},
+q2(a){var s=this
 return s.x.b(a)||A.lz(v.typeUniverse,s).b(a)},
-q8(a){return a!=null},
+q7(a){return a!=null},
 eq(a){if(a!=null)return a
 throw A.Z(A.aU(a,"Object"),new Error())},
-qc(a){return!0},
-pM(a){return a},
-ns(a){return!1},
+qb(a){return!0},
+pL(a){return a},
+nr(a){return!1},
 lT(a){return!0===a||!1===a},
 c9(a){if(!0===a)return!0
 if(!1===a)return!1
 throw A.Z(A.aU(a,"bool"),new Error())},
-pK(a){if(!0===a)return!0
+pJ(a){if(!0===a)return!0
 if(!1===a)return!1
 if(a==null)return a
 throw A.Z(A.aU(a,"bool?"),new Error())},
@@ -909,34 +909,34 @@ throw A.Z(A.aU(a,"double"),new Error())},
 lN(a){if(typeof a=="number")return a
 if(a==null)return a
 throw A.Z(A.aU(a,"double?"),new Error())},
-nq(a){return typeof a=="number"&&Math.floor(a)===a},
+np(a){return typeof a=="number"&&Math.floor(a)===a},
 e(a){if(typeof a=="number"&&Math.floor(a)===a)return a
 throw A.Z(A.aU(a,"int"),new Error())},
-pL(a){if(typeof a=="number"&&Math.floor(a)===a)return a
+pK(a){if(typeof a=="number"&&Math.floor(a)===a)return a
 if(a==null)return a
 throw A.Z(A.aU(a,"int?"),new Error())},
-q7(a){return typeof a=="number"},
+q6(a){return typeof a=="number"},
 aV(a){if(typeof a=="number")return a
 throw A.Z(A.aU(a,"num"),new Error())},
-nk(a){if(typeof a=="number")return a
+nj(a){if(typeof a=="number")return a
 if(a==null)return a
 throw A.Z(A.aU(a,"num?"),new Error())},
-qa(a){return typeof a=="string"},
+q9(a){return typeof a=="string"},
 K(a){if(typeof a=="string")return a
 throw A.Z(A.aU(a,"String"),new Error())},
 bv(a){if(typeof a=="string")return a
 if(a==null)return a
 throw A.Z(A.aU(a,"String?"),new Error())},
-k(a){if(A.nr(a))return a
+k(a){if(A.nq(a))return a
 throw A.Z(A.aU(a,"JSObject"),new Error())},
-u(a){if(a==null)return a
-if(A.nr(a))return a
+v(a){if(a==null)return a
+if(A.nq(a))return a
 throw A.Z(A.aU(a,"JSObject?"),new Error())},
-nv(a,b){var s,r,q
+nu(a,b){var s,r,q
 for(s="",r="",q=0;q<a.length;++q,r=", ")s+=r+A.aH(a[q],b)
 return s},
-qf(a,b){var s,r,q,p,o,n,m=a.x,l=a.y
-if(""===m)return"("+A.nv(l,b)+")"
+qe(a,b){var s,r,q,p,o,n,m=a.x,l=a.y
+if(""===m)return"("+A.nu(l,b)+")"
 s=l.length
 r=m.split(",")
 q=r.length-s
@@ -944,7 +944,7 @@ for(p="(",o="",n=0;n<s;++n,o=", "){p+=o
 if(q===0)p+="{"
 p+=A.aH(l[n],b)
 if(q>=0)p+=" "+r[q];++q}return p+"})"},
-nn(a3,a4,a5){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0,a1=", ",a2=null
+nm(a3,a4,a5){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0,a1=", ",a2=null
 if(a5!=null){s=a5.length
 if(a4==null)a4=A.b([],t.s)
 else a2=a4.length
@@ -984,23 +984,23 @@ if(l===6){s=a.x
 r=A.aH(s,b)
 q=s.w
 return(q===11||q===12?"("+r+")":r)+"?"}if(l===7)return"FutureOr<"+A.aH(a.x,b)+">"
-if(l===8){p=A.qp(a.x)
+if(l===8){p=A.qo(a.x)
 o=a.y
-return o.length>0?p+("<"+A.nv(o,b)+">"):p}if(l===10)return A.qf(a,b)
-if(l===11)return A.nn(a,b,null)
-if(l===12)return A.nn(a.x,b,a.y)
+return o.length>0?p+("<"+A.nu(o,b)+">"):p}if(l===10)return A.qe(a,b)
+if(l===11)return A.nm(a,b,null)
+if(l===12)return A.nm(a.x,b,a.y)
 if(l===13){n=a.x
 m=b.length
 n=m-1-n
 if(!(n>=0&&n<m))return A.d(b,n)
 return b[n]}return"?"},
-qp(a){var s=A.nH(a)
+qo(a){var s=A.nG(a)
 if(s!=null)return s
 return"minified:"+a},
-pI(a,b){var s=a.tR[b]
+pH(a,b){var s=a.tR[b]
 while(typeof s=="string")s=a.tR[s]
 return s},
-pH(a,b){var s,r,q,p,o,n=a.eT,m=n[b]
+pG(a,b){var s,r,q,p,o,n=a.eT,m=n[b]
 if(m==null)return A.k2(a,b,!1)
 else if(typeof m=="number"){s=m
 r=A.eh(a,5,"#")
@@ -1009,21 +1009,21 @@ for(p=0;p<s;++p)q[p]=r
 o=A.eg(a,b,q)
 n[b]=o
 return o}else return m},
-pG(a,b){return A.ni(a.tR,b)},
-pF(a,b){return A.ni(a.eT,b)},
+pF(a,b){return A.nh(a.tR,b)},
+pE(a,b){return A.nh(a.eT,b)},
 k2(a,b,c){var s,r=a.eC,q=r.get(b)
 if(q!=null)return q
-s=A.ng(a,null,b,!1)
+s=A.nf(a,null,b,!1)
 r.set(b,s)
 return s},
 ei(a,b,c){var s,r,q=b.z
 if(q==null)q=b.z=new Map()
 s=q.get(c)
 if(s!=null)return s
-r=A.ng(a,b,c,!0)
+r=A.nf(a,b,c,!0)
 q.set(c,r)
 return r},
-nh(a,b,c){var s,r,q,p=b.Q
+ng(a,b,c){var s,r,q,p=b.Q
 if(p==null)p=b.Q=new Map()
 s=c.as
 r=p.get(s)
@@ -1031,9 +1031,9 @@ if(r!=null)return r
 q=A.lL(a,b,c.w===9?c.y:[c])
 p.set(s,q)
 return q},
-ng(a,b,c,d){return A.px(A.pr(a,b,c,d))},
-bK(a,b){b.a=A.pX
-b.b=A.pY
+nf(a,b,c,d){return A.pw(A.pq(a,b,c,d))},
+bK(a,b){b.a=A.pW
+b.b=A.pX
 return b},
 eh(a,b,c){var s,r,q=a.eC.get(c)
 if(q!=null)return q
@@ -1043,12 +1043,12 @@ s.as=c
 r=A.bK(a,s)
 a.eC.set(c,r)
 return r},
-ne(a,b,c){var s,r=b.as+"?",q=a.eC.get(r)
+nd(a,b,c){var s,r=b.as+"?",q=a.eC.get(r)
 if(q!=null)return q
-s=A.pD(a,b,r,c)
+s=A.pC(a,b,r,c)
 a.eC.set(r,s)
 return s},
-pD(a,b,c,d){var s,r,q
+pC(a,b,c,d){var s,r,q
 if(d){s=b.w
 r=!0
 if(!A.cg(b))if(!(b===t.b||b===t.T))if(s!==6)r=s===7&&A.d0(b.x)
@@ -1058,12 +1058,12 @@ q.w=6
 q.x=b
 q.as=c
 return A.bK(a,q)},
-nd(a,b,c){var s,r=b.as+"/",q=a.eC.get(r)
+nc(a,b,c){var s,r=b.as+"/",q=a.eC.get(r)
 if(q!=null)return q
-s=A.pB(a,b,r,c)
+s=A.pA(a,b,r,c)
 a.eC.set(r,s)
 return s},
-pB(a,b,c,d){var s,r
+pA(a,b,c,d){var s,r
 if(d){s=b.w
 if(A.cg(b)||b===t.K)return b
 else if(s===1)return A.eg(a,"bS",[b])
@@ -1072,7 +1072,7 @@ r.w=7
 r.x=b
 r.as=c
 return A.bK(a,r)},
-pE(a,b){var s,r,q=""+b+"^",p=a.eC.get(q)
+pD(a,b){var s,r,q=""+b+"^",p=a.eC.get(q)
 if(p!=null)return p
 s=new A.b_(null,null)
 s.w=13
@@ -1084,7 +1084,7 @@ return r},
 ef(a){var s,r,q,p=a.length
 for(s="",r="",q=0;q<p;++q,r=",")s+=r+a[q].as
 return s},
-pA(a){var s,r,q,p,o,n=a.length
+pz(a){var s,r,q,p,o,n=a.length
 for(s="",r="",q=0;q<n;q+=3,r=","){p=a[q]
 o=a[q+1]?"!":":"
 s+=r+p+o+a[q+2].as}return s},
@@ -1115,7 +1115,7 @@ o.as=q
 n=A.bK(a,o)
 a.eC.set(q,n)
 return n},
-nf(a,b,c){var s,r,q="+"+(b+"("+A.ef(c)+")"),p=a.eC.get(q)
+ne(a,b,c){var s,r,q="+"+(b+"("+A.ef(c)+")"),p=a.eC.get(q)
 if(p!=null)return p
 s=new A.b_(null,null)
 s.w=10
@@ -1125,10 +1125,10 @@ s.as=q
 r=A.bK(a,s)
 a.eC.set(q,r)
 return r},
-nc(a,b,c){var s,r,q,p,o,n=b.as,m=c.a,l=m.length,k=c.b,j=k.length,i=c.c,h=i.length,g="("+A.ef(m)
+nb(a,b,c){var s,r,q,p,o,n=b.as,m=c.a,l=m.length,k=c.b,j=k.length,i=c.c,h=i.length,g="("+A.ef(m)
 if(j>0){s=l>0?",":""
 g+=s+"["+A.ef(k)+"]"}if(h>0){s=l>0?",":""
-g+=s+"{"+A.pA(i)+"}"}r=n+(g+")")
+g+=s+"{"+A.pz(i)+"}"}r=n+(g+")")
 q=a.eC.get(r)
 if(q!=null)return q
 p=new A.b_(null,null)
@@ -1141,10 +1141,10 @@ a.eC.set(r,o)
 return o},
 lM(a,b,c,d){var s,r=b.as+("<"+A.ef(c)+">"),q=a.eC.get(r)
 if(q!=null)return q
-s=A.pC(a,b,c,r,d)
+s=A.pB(a,b,c,r,d)
 a.eC.set(r,s)
 return s},
-pC(a,b,c,d,e){var s,r,q,p,o,n,m,l
+pB(a,b,c,d,e){var s,r,q,p,o,n,m,l
 if(e){s=c.length
 r=A.k3(s)
 for(q=0,p=0;p<s;++p){o=c[p]
@@ -1156,12 +1156,12 @@ l.x=b
 l.y=c
 l.as=d
 return A.bK(a,l)},
-pr(a,b,c,d){return{u:a,e:b,r:c,s:[],p:0,n:d}},
-px(a){var s,r,q,p,o,n,m,l=a.r,k=a.s
+pq(a,b,c,d){return{u:a,e:b,r:c,s:[],p:0,n:d}},
+pw(a){var s,r,q,p,o,n,m,l=a.r,k=a.s
 for(s=l.length,r=0;r<s;){q=l.charCodeAt(r)
-if(q>=48&&q<=57)r=A.pt(r+1,q,l,k)
-else if((((q|32)>>>0)-97&65535)<26||q===95||q===36||q===124)r=A.n9(a,r,l,k,!1)
-else if(q===46)r=A.n9(a,r,l,k,!0)
+if(q>=48&&q<=57)r=A.ps(r+1,q,l,k)
+else if((((q|32)>>>0)-97&65535)<26||q===95||q===36||q===124)r=A.n8(a,r,l,k,!1)
+else if(q===46)r=A.n8(a,r,l,k,!0)
 else{++r
 switch(q){case 44:break
 case 58:k.push(!1)
@@ -1170,7 +1170,7 @@ case 33:k.push(!0)
 break
 case 59:k.push(A.c6(a.u,a.e,k.pop()))
 break
-case 94:k.push(A.pE(a.u,k.pop()))
+case 94:k.push(A.pD(a.u,k.pop()))
 break
 case 35:k.push(A.eh(a.u,5,"#"))
 break
@@ -1181,27 +1181,27 @@ break
 case 60:k.push(a.p)
 a.p=k.length
 break
-case 62:A.pv(a,k)
+case 62:A.pu(a,k)
 break
-case 38:A.pu(a,k)
+case 38:A.pt(a,k)
 break
 case 63:p=a.u
-k.push(A.ne(p,A.c6(p,a.e,k.pop()),a.n))
+k.push(A.nd(p,A.c6(p,a.e,k.pop()),a.n))
 break
 case 47:p=a.u
-k.push(A.nd(p,A.c6(p,a.e,k.pop()),a.n))
+k.push(A.nc(p,A.c6(p,a.e,k.pop()),a.n))
 break
 case 40:k.push(-3)
 k.push(a.p)
 a.p=k.length
 break
-case 41:A.ps(a,k)
+case 41:A.pr(a,k)
 break
 case 91:k.push(a.p)
 a.p=k.length
 break
 case 93:o=k.splice(a.p)
-A.na(a.u,a.e,o)
+A.n9(a.u,a.e,o)
 a.p=k.pop()
 k.push(o)
 k.push(-1)
@@ -1210,7 +1210,7 @@ case 123:k.push(a.p)
 a.p=k.length
 break
 case 125:o=k.splice(a.p)
-A.py(a.u,a.e,o)
+A.px(a.u,a.e,o)
 a.p=k.pop()
 k.push(o)
 k.push(-2)
@@ -1224,12 +1224,12 @@ r=n+1
 break
 default:throw"Bad character "+q}}}m=k.pop()
 return A.c6(a.u,a.e,m)},
-pt(a,b,c,d){var s,r,q=b-48
+ps(a,b,c,d){var s,r,q=b-48
 for(s=c.length;a<s;++a){r=c.charCodeAt(a)
 if(!(r>=48&&r<=57))break
 q=q*10+(r-48)}d.push(q)
 return a},
-n9(a,b,c,d,e){var s,r,q,p,o,n,m=b+1
+n8(a,b,c,d,e){var s,r,q,p,o,n,m=b+1
 for(s=c.length;m<s;++m){r=c.charCodeAt(m)
 if(r===46){if(e)break
 e=!0}else{if(!((((r|32)>>>0)-97&65535)<26||r===95||r===36||r===124))q=r>=48&&r<=57
@@ -1238,25 +1238,25 @@ if(!q)break}}p=c.substring(b,m)
 if(e){s=a.u
 o=a.e
 if(o.w===9)o=o.x
-n=A.pI(s,o.x)[p]
-if(n==null)A.l('No "'+p+'" in "'+A.p1(o)+'"')
+n=A.pH(s,o.x)[p]
+if(n==null)A.l('No "'+p+'" in "'+A.p0(o)+'"')
 d.push(A.ei(s,o,n))}else d.push(p)
 return m},
-pv(a,b){var s,r=a.u,q=A.n8(a,b),p=b.pop()
+pu(a,b){var s,r=a.u,q=A.n7(a,b),p=b.pop()
 if(typeof p=="string")b.push(A.eg(r,p,q))
 else{s=A.c6(r,a.e,p)
 switch(s.w){case 11:b.push(A.lM(r,s,q,a.n))
 break
 default:b.push(A.lL(r,s,q))
 break}}},
-ps(a,b){var s,r,q,p=a.u,o=b.pop(),n=null,m=null
+pr(a,b){var s,r,q,p=a.u,o=b.pop(),n=null,m=null
 if(typeof o=="number")switch(o){case-1:n=b.pop()
 break
 case-2:m=b.pop()
 break
 default:b.push(o)
 break}else b.push(o)
-s=A.n8(a,b)
+s=A.n7(a,b)
 o=b.pop()
 switch(o){case-3:o=b.pop()
 if(n==null)n=p.sEA
@@ -1266,27 +1266,27 @@ q=new A.h6()
 q.a=s
 q.b=n
 q.c=m
-b.push(A.nc(p,r,q))
+b.push(A.nb(p,r,q))
 return
-case-4:b.push(A.nf(p,b.pop(),s))
+case-4:b.push(A.ne(p,b.pop(),s))
 return
-default:throw A.c(A.ex("Unexpected state under `()`: "+A.o(o)))}},
-pu(a,b){var s=b.pop()
+default:throw A.c(A.ex("Unexpected state under `()`: "+A.n(o)))}},
+pt(a,b){var s=b.pop()
 if(0===s){b.push(A.eh(a.u,1,"0&"))
 return}if(1===s){b.push(A.eh(a.u,4,"1&"))
-return}throw A.c(A.ex("Unexpected extended operation "+A.o(s)))},
-n8(a,b){var s=b.splice(a.p)
-A.na(a.u,a.e,s)
+return}throw A.c(A.ex("Unexpected extended operation "+A.n(s)))},
+n7(a,b){var s=b.splice(a.p)
+A.n9(a.u,a.e,s)
 a.p=b.pop()
 return s},
 c6(a,b,c){if(typeof c=="string")return A.eg(a,c,a.sEA)
 else if(typeof c=="number"){b.toString
-return A.pw(a,b,c)}else return c},
-na(a,b,c){var s,r=c.length
+return A.pv(a,b,c)}else return c},
+n9(a,b,c){var s,r=c.length
 for(s=0;s<r;++s)c[s]=A.c6(a,b,c[s])},
-py(a,b,c){var s,r=c.length
+px(a,b,c){var s,r=c.length
 for(s=2;s<r;s+=3)c[s]=A.c6(a,b,c[s])},
-pw(a,b,c){var s,r,q=b.w
+pv(a,b,c){var s,r,q=b.w
 if(q===9){if(c===0)return b.x
 s=b.y
 r=s.length
@@ -1298,12 +1298,12 @@ if(q!==8)throw A.c(A.ex("Indexed base must be an interface type"))
 s=b.y
 if(c<=s.length)return s[c-1]
 throw A.c(A.ex("Bad index "+c+" for "+b.j(0)))},
-qP(a,b,c){var s,r=b.d
+qO(a,b,c){var s,r=b.d
 if(r==null)r=b.d=new Map()
 s=r.get(c)
-if(s==null){s=A.a4(a,b,null,c,null)
+if(s==null){s=A.a5(a,b,null,c,null)
 r.set(c,s)}return s},
-a4(a,b,c,d,e){var s,r,q,p,o,n,m,l,k,j,i
+a5(a,b,c,d,e){var s,r,q,p,o,n,m,l,k,j,i
 if(b===d)return!0
 if(A.cg(d))return!0
 s=b.w
@@ -1311,15 +1311,15 @@ if(s===4)return!0
 if(A.cg(b))return!1
 if(b.w===1)return!0
 r=s===13
-if(r)if(A.a4(a,c[b.x],c,d,e))return!0
+if(r)if(A.a5(a,c[b.x],c,d,e))return!0
 q=d.w
 p=t.b
-if(b===p||b===t.T){if(q===7)return A.a4(a,b,c,d.x,e)
-return d===p||d===t.T||q===6}if(d===t.K){if(s===7)return A.a4(a,b.x,c,d,e)
-return s!==6}if(s===7){if(!A.a4(a,b.x,c,d,e))return!1
-return A.a4(a,A.lz(a,b),c,d,e)}if(s===6)return A.a4(a,p,c,d,e)&&A.a4(a,b.x,c,d,e)
-if(q===7){if(A.a4(a,b,c,d.x,e))return!0
-return A.a4(a,b,c,A.lz(a,d),e)}if(q===6)return A.a4(a,b,c,p,e)||A.a4(a,b,c,d.x,e)
+if(b===p||b===t.T){if(q===7)return A.a5(a,b,c,d.x,e)
+return d===p||d===t.T||q===6}if(d===t.K){if(s===7)return A.a5(a,b.x,c,d,e)
+return s!==6}if(s===7){if(!A.a5(a,b.x,c,d,e))return!1
+return A.a5(a,A.lz(a,b),c,d,e)}if(s===6)return A.a5(a,p,c,d,e)&&A.a5(a,b.x,c,d,e)
+if(q===7){if(A.a5(a,b,c,d.x,e))return!0
+return A.a5(a,b,c,A.lz(a,d),e)}if(q===6)return A.a5(a,b,c,p,e)||A.a5(a,b,c,d.x,e)
 if(r)return!1
 p=s!==11
 if((!p||s===12)&&d===t.f)return!0
@@ -1335,13 +1335,13 @@ c=c==null?n:n.concat(c)
 e=e==null?m:m.concat(e)
 for(k=0;k<l;++k){j=n[k]
 i=m[k]
-if(!A.a4(a,j,c,i,e)||!A.a4(a,i,e,j,c))return!1}return A.np(a,b.x,c,d.x,e)}if(q===11){if(b===t.cj)return!0
+if(!A.a5(a,j,c,i,e)||!A.a5(a,i,e,j,c))return!1}return A.no(a,b.x,c,d.x,e)}if(q===11){if(b===t.cj)return!0
 if(p)return!1
-return A.np(a,b,c,d,e)}if(s===8){if(q!==8)return!1
-return A.q4(a,b,c,d,e)}if(o&&q===10)return A.q9(a,b,c,d,e)
+return A.no(a,b,c,d,e)}if(s===8){if(q!==8)return!1
+return A.q3(a,b,c,d,e)}if(o&&q===10)return A.q8(a,b,c,d,e)
 return!1},
-np(a3,a4,a5,a6,a7){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0,a1,a2
-if(!A.a4(a3,a4.x,a5,a6.x,a7))return!1
+no(a3,a4,a5,a6,a7){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0,a1,a2
+if(!A.a5(a3,a4.x,a5,a6.x,a7))return!1
 s=a4.y
 r=a6.y
 q=s.a
@@ -1356,9 +1356,9 @@ j=l.length
 i=k.length
 if(o+j<n+i)return!1
 for(h=0;h<o;++h){g=q[h]
-if(!A.a4(a3,p[h],a7,g,a5))return!1}for(h=0;h<m;++h){g=l[h]
-if(!A.a4(a3,p[o+h],a7,g,a5))return!1}for(h=0;h<i;++h){g=l[m+h]
-if(!A.a4(a3,k[h],a7,g,a5))return!1}f=s.c
+if(!A.a5(a3,p[h],a7,g,a5))return!1}for(h=0;h<m;++h){g=l[h]
+if(!A.a5(a3,p[o+h],a7,g,a5))return!1}for(h=0;h<i;++h){g=l[m+h]
+if(!A.a5(a3,k[h],a7,g,a5))return!1}f=s.c
 e=r.c
 d=f.length
 c=e.length
@@ -1372,10 +1372,10 @@ if(a1<a0){if(a2)return!1
 continue}g=e[a+1]
 if(a2&&!g)return!1
 g=f[b-1]
-if(!A.a4(a3,e[a+2],a7,g,a5))return!1
+if(!A.a5(a3,e[a+2],a7,g,a5))return!1
 break}}while(b<d){if(f[b+1])return!1
 b+=3}return!0},
-q4(a,b,c,d,e){var s,r,q,p,o,n=b.x,m=d.x
+q3(a,b,c,d,e){var s,r,q,p,o,n=b.x,m=d.x
 while(n!==m){s=a.tR[n]
 if(s==null)return!1
 if(typeof s=="string"){n=s
@@ -1384,21 +1384,21 @@ if(r==null)return!1
 q=r.length
 p=q>0?new Array(q):v.typeUniverse.sEA
 for(o=0;o<q;++o)p[o]=A.ei(a,b,r[o])
-return A.nj(a,p,null,c,d.y,e)}return A.nj(a,b.y,null,c,d.y,e)},
-nj(a,b,c,d,e,f){var s,r=b.length
-for(s=0;s<r;++s)if(!A.a4(a,b[s],d,e[s],f))return!1
+return A.ni(a,p,null,c,d.y,e)}return A.ni(a,b.y,null,c,d.y,e)},
+ni(a,b,c,d,e,f){var s,r=b.length
+for(s=0;s<r;++s)if(!A.a5(a,b[s],d,e[s],f))return!1
 return!0},
-q9(a,b,c,d,e){var s,r=b.y,q=d.y,p=r.length
+q8(a,b,c,d,e){var s,r=b.y,q=d.y,p=r.length
 if(p!==q.length)return!1
 if(b.x!==d.x)return!1
-for(s=0;s<p;++s)if(!A.a4(a,r[s],c,q[s],e))return!1
+for(s=0;s<p;++s)if(!A.a5(a,r[s],c,q[s],e))return!1
 return!0},
 d0(a){var s=a.w,r=!0
 if(!(a===t.b||a===t.T))if(!A.cg(a))if(s!==6)r=s===7&&A.d0(a.x)
 return r},
 cg(a){var s=a.w
 return s===2||s===3||s===4||s===5||a===t.X},
-ni(a,b){var s,r,q=Object.keys(b),p=q.length
+nh(a,b){var s,r,q=Object.keys(b),p=q.length
 for(s=0;s<p;++s){r=q[s]
 a[r]=b[r]}},
 k3(a){return a>0?new Array(a):v.typeUniverse.sEA},
@@ -1412,30 +1412,30 @@ h6:function h6(){this.c=this.b=this.a=null},
 k1:function k1(a){this.a=a},
 h4:function h4(){},
 ee:function ee(a){this.a=a},
-pm(){var s,r,q
-if(self.scheduleImmediate!=null)return A.qr()
+pl(){var s,r,q
+if(self.scheduleImmediate!=null)return A.qq()
 if(self.MutationObserver!=null&&self.document!=null){s={}
 r=self.document.createElement("div")
 q=self.document.createElement("span")
 s.a=null
 new self.MutationObserver(A.cX(new A.jF(s),1)).observe(r,{childList:true})
-return new A.jE(s,r,q)}else if(self.setImmediate!=null)return A.qs()
-return A.qt()},
-pn(a){self.scheduleImmediate(A.cX(new A.jG(t.M.a(a)),0))},
-po(a){self.setImmediate(A.cX(new A.jH(t.M.a(a)),0))},
-pp(a){t.M.a(a)
-A.pz(0,a)},
-pz(a,b){var s=new A.k_()
+return new A.jE(s,r,q)}else if(self.setImmediate!=null)return A.qr()
+return A.qs()},
+pm(a){self.scheduleImmediate(A.cX(new A.jG(t.M.a(a)),0))},
+pn(a){self.setImmediate(A.cX(new A.jH(t.M.a(a)),0))},
+po(a){t.M.a(a)
+A.py(0,a)},
+py(a,b){var s=new A.k_()
 s.dJ(a,b)
 return s},
 lV(a){return new A.fV(new A.a1($.U,a.h("a1<0>")),a.h("fV<0>"))},
 lR(a,b){a.$2(0,null)
 b.b=!0
 return b.a},
-lO(a,b){A.pN(a,b)},
+lO(a,b){A.pM(a,b)},
 lQ(a,b){b.bP(a)},
 lP(a,b){b.bQ(A.ch(a),A.d_(a))},
-pN(a,b){var s,r,q=new A.k5(b),p=new A.k6(b)
+pM(a,b){var s,r,q=new A.k5(b),p=new A.k6(b)
 if(a instanceof A.a1)a.cO(q,p,t.A)
 else{s=t.A
 if(a instanceof A.a1)a.di(q,p,s)
@@ -1447,21 +1447,21 @@ lY(a){var s=function(b,c){return function(d,e){while(true){try{b(d,e)
 break}catch(r){e=r
 d=c}}}}(a,1)
 return $.U.de(new A.kr(s),t.H,t.S,t.A)},
-nb(a,b,c){return 0},
+na(a,b,c){return 0},
 lk(a){var s
 if(t.Q.b(a)){s=a.gaU()
 if(s!=null)return s}return B.U},
-q_(a,b){if($.U===B.C)return null
+pZ(a,b){if($.U===B.C)return null
 return null},
-q0(a,b){if($.U!==B.C)A.q_(a,b)
+q_(a,b){if($.U!==B.C)A.pZ(a,b)
 if(b==null)if(t.Q.b(a)){b=a.gaU()
-if(b==null){A.mL(a,B.U)
+if(b==null){A.mK(a,B.U)
 b=B.U}}else b=B.U
-else if(t.Q.b(a))A.mL(a,b)
+else if(t.Q.b(a))A.mK(a,b)
 return new A.aK(a,b)},
 lF(a,b,c){var s,r,q,p,o={},n=o.a=a
 for(s=t.e;r=n.a,(r&4)!==0;n=a){a=s.a(n.c)
-o.a=a}if(n===b){s=A.p5()
+o.a=a}if(n===b){s=A.p4()
 b.bA(new A.aK(new A.b2(!0,n,null,"Cannot complete a future with itself"),s))
 return}q=b.a&1
 s=n.a=r|q
@@ -1529,26 +1529,26 @@ f.c=p}else{s.a(p)
 f.a=f.a&1|16
 f.c=p}d.a=f
 c=f}},
-qg(a,b){var s
+qf(a,b){var s
 if(t.q.b(a))return b.de(a,t.A,t.K,t.l)
 s=t.x
 if(s.b(a))return s.a(a)
 throw A.c(A.a2(a,"onError",u.c))},
-qe(){var s,r
+qd(){var s,r
 for(s=$.cU;s!=null;s=$.cU){$.es=null
 r=s.b
 $.cU=r
 if(r==null)$.er=null
 s.a.$0()}},
-qm(){$.lU=!0
-try{A.qe()}finally{$.es=null
+ql(){$.lU=!0
+try{A.qd()}finally{$.es=null
 $.lU=!1
-if($.cU!=null)$.mc().$1(A.nA())}},
-nw(a){var s=new A.fW(a),r=$.er
+if($.cU!=null)$.mc().$1(A.nz())}},
+nv(a){var s=new A.fW(a),r=$.er
 if(r==null){$.cU=$.er=s
-if(!$.lU)$.mc().$1(A.nA())}else $.er=r.b=s},
-qj(a){var s,r,q,p=$.cU
-if(p==null){A.nw(a)
+if(!$.lU)$.mc().$1(A.nz())}else $.er=r.b=s},
+qi(a){var s,r,q,p=$.cU
+if(p==null){A.nv(a)
 $.es=$.er
 return}s=new A.fW(a)
 r=$.es
@@ -1557,22 +1557,22 @@ $.cU=$.es=s}else{q=r.b
 s.b=q
 $.es=r.b=s
 if(q==null)$.er=s}},
-re(a,b){A.cc(a,"stream",t.K)
+rd(a,b){A.cc(a,"stream",t.K)
 return new A.hm(b.h("hm<0>"))},
-lW(a,b){A.qj(new A.kq(a,b))},
-nu(a,b,c,d,e){var s,r=$.U
+lW(a,b){A.qi(new A.kq(a,b))},
+nt(a,b,c,d,e){var s,r=$.U
 if(r===c)return d.$0()
 $.U=c
 s=r
 try{r=d.$0()
 return r}finally{$.U=s}},
-qi(a,b,c,d,e,f,g){var s,r=$.U
+qh(a,b,c,d,e,f,g){var s,r=$.U
 if(r===c)return d.$1(e)
 $.U=c
 s=r
 try{r=d.$1(e)
 return r}finally{$.U=s}},
-qh(a,b,c,d,e,f,g,h,i){var s,r=$.U
+qg(a,b,c,d,e,f,g,h,i){var s,r=$.U
 if(r===c)return d.$2(e,f)
 $.U=c
 s=r
@@ -1580,7 +1580,7 @@ try{r=d.$2(e,f)
 return r}finally{$.U=s}},
 hw(a,b,c,d){t.M.a(d)
 if(B.C!==c){d=c.eE(d)
-d=d}A.nw(d)},
+d=d}A.nv(d)},
 jF:function jF(a){this.a=a},
 jE:function jE(a,b,c){this.a=a
 this.b=b
@@ -1656,12 +1656,12 @@ lH(){var s=Object.create(null)
 A.lI(s,"<non-identifier-key>",s)
 delete s["<non-identifier-key>"]
 return s},
-on(a,b){return new A.bh(a.h("@<0>").X(b).h("bh<1,2>"))},
-mw(a,b,c){return b.h("@<0>").X(c).h("mv<1,2>").a(A.qE(a,new A.bh(b.h("@<0>").X(c).h("bh<1,2>"))))},
+om(a,b){return new A.bh(a.h("@<0>").X(b).h("bh<1,2>"))},
+mw(a,b,c){return b.h("@<0>").X(c).h("mv<1,2>").a(A.qD(a,new A.bh(b.h("@<0>").X(c).h("bh<1,2>"))))},
 aC(a,b){return new A.bh(a.h("@<0>").X(b).h("bh<1,2>"))},
 lr(a){return new A.b1(a.h("b1<0>"))},
 ax(a){return new A.b1(a.h("b1<0>"))},
-dt(a,b){return b.h("mx<0>").a(A.qF(a,new A.b1(b.h("b1<0>"))))},
+dt(a,b){return b.h("mx<0>").a(A.qE(a,new A.b1(b.h("b1<0>"))))},
 lK(){var s=Object.create(null)
 s["<non-identifier-key>"]=s
 delete s["<non-identifier-key>"]
@@ -1669,10 +1669,10 @@ return s},
 lJ(a,b,c){var s=new A.c5(a,b,c.h("c5<0>"))
 s.c=a.e
 return s},
-oo(a,b,c){var s=A.on(b,c)
+on(a,b,c){var s=A.om(b,c)
 a.b_(0,new A.il(s,b,c))
 return s},
-op(a,b){var s,r,q=A.lr(b)
+oo(a,b){var s,r,q=A.lr(b)
 for(s=a.length,r=0;r<a.length;a.length===s||(0,A.C)(a),++r)q.i(0,b.a(a[r]))
 return q},
 ls(a,b){var s=A.lr(b)
@@ -1689,7 +1689,7 @@ a.b_(0,new A.io(r,s))
 s.a+="}"}finally{if(0>=$.aI.length)return A.d($.aI,-1)
 $.aI.pop()}r=s.a
 return r.charCodeAt(0)==0?r:r},
-pJ(){throw A.c(A.c1("Cannot change an unmodifiable set"))},
+pI(){throw A.c(A.c1("Cannot change an unmodifiable set"))},
 e1:function e1(){},
 e4:function e4(a){var _=this
 _.a=0
@@ -1732,10 +1732,10 @@ dW:function dW(a,b){this.a=a
 this.$ti=b},
 cT:function cT(){},
 ek:function ek(){},
-qN(a){var s=A.oI(a,null)
+qM(a){var s=A.oH(a,null)
 if(s!=null)return s
 throw A.c(new A.i1(a))},
-oa(a,b){a=A.Z(a,new Error())
+o9(a,b){a=A.Z(a,new Error())
 if(a==null)a=A.eq(a)
 a.stack=b.j(0)
 throw a},
@@ -1755,13 +1755,13 @@ return s},
 aN(a,b){var s=A.bU(a,!1,b)
 s.$flags=3
 return s},
-mT(a,b,c){var s=J.ac(b)
+mS(a,b,c){var s=J.ac(b)
 if(!s.n())return a
-if(c.length===0){do a+=A.o(s.gt())
-while(s.n())}else{a+=A.o(s.gt())
-while(s.n())a=a+c+A.o(s.gt())}return a},
-p5(){return A.d_(new Error())},
-o7(a){var s=Math.abs(a),r=a<0?"-":""
+if(c.length===0){do a+=A.n(s.gt())
+while(s.n())}else{a+=A.n(s.gt())
+while(s.n())a=a+c+A.n(s.gt())}return a},
+p4(){return A.d_(new Error())},
+o6(a){var s=Math.abs(a),r=a<0?"-":""
 if(s>=1000)return""+a
 if(s>=100)return r+"0"+s
 if(s>=10)return r+"00"+s
@@ -1773,54 +1773,54 @@ eM(a){if(a>=10)return""+a
 return"0"+a},
 hV(a){if(typeof a=="number"||A.lT(a)||a==null)return J.ci(a)
 if(typeof a=="string")return JSON.stringify(a)
-return A.mK(a)},
-ob(a,b){A.cc(a,"error",t.K)
+return A.mJ(a)},
+oa(a,b){A.cc(a,"error",t.K)
 A.cc(b,"stackTrace",t.l)
-A.oa(a,b)},
+A.o9(a,b)},
 ex(a){return new A.ew(a)},
 i(a,b){return new A.b2(!1,null,b,a)},
 a2(a,b,c){return new A.b2(!0,a,b,c)},
-mO(a){var s=null
+mN(a){var s=null
 return new A.cG(s,s,!1,s,s,a)},
 aQ(a,b,c,d,e){return new A.cG(b,c,!0,a,d,"Invalid value")},
-oV(a,b,c){if(0>a||a>c)throw A.c(A.aQ(a,0,c,"start",null))
+oU(a,b,c){if(0>a||a>c)throw A.c(A.aQ(a,0,c,"start",null))
 if(b!=null){if(a>b||b>c)throw A.c(A.aQ(b,a,c,"end",null))
 return b}return c},
 j0(a,b){if(a<0)throw A.c(A.aQ(a,0,null,b,null))
 return a},
 ig(a,b,c,d){return new A.f0(b,!0,a,d,"Index out of range")},
 c1(a){return new A.dX(a)},
-mX(a){return new A.fM(a)},
+mW(a){return new A.fM(a)},
 m(a){return new A.cK(a)},
 aL(a){return new A.eJ(a)},
-oh(a,b,c){var s,r
+og(a,b,c){var s,r
 if(A.m3(a)){if(b==="("&&c===")")return"(...)"
 return b+"..."+c}s=A.b([],t.s)
 B.a.i($.aI,a)
-try{A.qd(a,s)}finally{if(0>=$.aI.length)return A.d($.aI,-1)
-$.aI.pop()}r=A.mT(b,t.hf.a(s),", ")+c
+try{A.qc(a,s)}finally{if(0>=$.aI.length)return A.d($.aI,-1)
+$.aI.pop()}r=A.mS(b,t.hf.a(s),", ")+c
 return r.charCodeAt(0)==0?r:r},
 ln(a,b,c){var s,r
 if(A.m3(a))return b+"..."+c
 s=new A.fI(b)
 B.a.i($.aI,a)
 try{r=s
-r.a=A.mT(r.a,a,", ")}finally{if(0>=$.aI.length)return A.d($.aI,-1)
+r.a=A.mS(r.a,a,", ")}finally{if(0>=$.aI.length)return A.d($.aI,-1)
 $.aI.pop()}s.a+=c
 r=s.a
 return r.charCodeAt(0)==0?r:r},
-qd(a,b){var s,r,q,p,o,n,m,l=a.gJ(a),k=0,j=0
+qc(a,b){var s,r,q,p,o,n,m,l=a.gJ(a),k=0,j=0
 for(;;){if(!(k<80||j<3))break
 if(!l.n())return
-s=A.o(l.gt())
+s=A.n(l.gt())
 B.a.i(b,s)
 k+=s.length+2;++j}if(!l.n()){if(j<=5)return
 if(0>=b.length)return A.d(b,-1)
 r=b.pop()
 if(0>=b.length)return A.d(b,-1)
 q=b.pop()}else{p=l.gt();++j
-if(!l.n()){if(j<=4){B.a.i(b,A.o(p))
-return}r=A.o(p)
+if(!l.n()){if(j<=4){B.a.i(b,A.n(p))
+return}r=A.n(p)
 if(0>=b.length)return A.d(b,-1)
 q=b.pop()
 k+=r.length+2}else{o=l.gt();++j
@@ -1828,8 +1828,8 @@ for(;l.n();p=o,o=n){n=l.gt();++j
 if(j>100){for(;;){if(!(k>75&&j>3))break
 if(0>=b.length)return A.d(b,-1)
 k-=b.pop().length+2;--j}B.a.i(b,"...")
-return}}q=A.o(p)
-r=A.o(o)
+return}}q=A.n(p)
+r=A.n(o)
 k+=r.length+q.length+4}}if(j>b.length+2){k+=5
 m="..."}else m=null
 for(;;){if(!(k>80&&b.length>3))break
@@ -1895,7 +1895,7 @@ fl:function fl(){},
 dS:function dS(){},
 jJ:function jJ(a){this.a=a},
 i1:function i1(a){this.a=a},
-n:function n(){},
+o:function o(){},
 am:function am(a,b,c){this.a=a
 this.b=b
 this.$ti=c},
@@ -1906,20 +1906,20 @@ fI:function fI(a){this.a=a},
 ix:function ix(a){this.a=a},
 E(a){var s
 if(typeof a=="function")throw A.c(A.i("Attempting to rewrap a JS function.",null))
-s=function(b,c){return function(d){return b(c,d,arguments.length)}}(A.pO,a)
+s=function(b,c){return function(d){return b(c,d,arguments.length)}}(A.pN,a)
 s[$.m6()]=a
 return s},
-pO(a,b,c){t.f.a(a)
+pN(a,b,c){t.f.a(a)
 if(A.e(c)>=1)return a.$1(b)
 return a.$0()},
-nC(a,b,c){return c.a(a[b])},
-no(a,b){return a[b]},
+nB(a,b,c){return c.a(a[b])},
+nn(a,b){return a[b]},
 ak(a,b,c,d){return d.a(a[b].apply(a,c))},
-qT(a,b){var s=new A.a1($.U,b.h("a1<0>")),r=new A.dZ(s,b.h("dZ<0>"))
+qS(a,b){var s=new A.a1($.U,b.h("a1<0>")),r=new A.dZ(s,b.h("dZ<0>"))
 a.then(A.cX(new A.l9(r,b),1),A.cX(new A.la(r),1))
 return s},
-nt(a){return a==null||typeof a==="boolean"||typeof a==="number"||typeof a==="string"||a instanceof Int8Array||a instanceof Uint8Array||a instanceof Uint8ClampedArray||a instanceof Int16Array||a instanceof Uint16Array||a instanceof Int32Array||a instanceof Uint32Array||a instanceof Float32Array||a instanceof Float64Array||a instanceof ArrayBuffer||a instanceof DataView},
-cY(a){if(A.nt(a))return a
+ns(a){return a==null||typeof a==="boolean"||typeof a==="number"||typeof a==="string"||a instanceof Int8Array||a instanceof Uint8Array||a instanceof Uint8ClampedArray||a instanceof Int16Array||a instanceof Uint16Array||a instanceof Int32Array||a instanceof Uint32Array||a instanceof Float32Array||a instanceof Float64Array||a instanceof ArrayBuffer||a instanceof DataView},
+cY(a){if(A.ns(a))return a
 return new A.kv(new A.e4(t.hg)).$1(a)},
 l9:function l9(a,b){this.a=a
 this.b=b},
@@ -1939,7 +1939,7 @@ eL:function eL(){this.a=null
 this.d=0
 this.e=!1},
 fr(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,a0,a1,a2,a3,a4){return new A.fq(f,b,l,d,a4,g,i,o,n,m,j,e,c,a,q,h,r,a3,a2,a1,s,a0,!1,p)},
-mG(){return A.fr(0,0.3,0,0,0,1.15,0.08,8,0,1,!1,0.75,0,0,0,B.au,0,0,0,0,0,0,0,0.22)},
+mF(){return A.fr(0,0.3,0,0,0,1.15,0.08,8,0,1,!1,0.75,0,0,0,B.au,0,0,0,0,0,0,0,0.22)},
 cM:function cM(a,b){this.a=a
 this.b=b},
 fq:function fq(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,a0,a1,a2,a3,a4){var _=this
@@ -1970,7 +1970,7 @@ _.fr=a4},
 mi(a,b,c,d,e,f,g,h){return new A.d5(g,f,h,b,d,e,c,a)},
 eE(a,b,c,d,e,f,g){var s,r,q,p
 if(!d.gE(0)||d.gO()<1e-12)throw A.c(A.i("CameraView.look requires a finite, nonzero forward: "+d.j(0),null))
-if(!isFinite(e)||e<=0||e>=3.141592653589793)throw A.c(A.i("CameraView.look requires 0 < fovYRadians < pi: "+A.o(e),null))
+if(!isFinite(e)||e<=0||e>=3.141592653589793)throw A.c(A.i("CameraView.look requires 0 < fovYRadians < pi: "+A.n(e),null))
 s=d.gm()
 if(g.R(s).gO()<1e-12)throw A.c(A.i("CameraView.look requires up ("+g.j(0)+") not parallel to forward ("+d.j(0)+")",null))
 r=A.lt(b,s,g)
@@ -2075,8 +2075,8 @@ cw:function cw(a,b){this.a=a
 this.b=b},
 ie:function ie(a,b){this.a=a
 this.b=b},
-ks(a,b,c,d){return A.qv(a,b,c,d)},
-qv(a,b,a0,a1){var s=0,r=A.lV(t.fW),q,p=2,o=[],n,m,l,k,j,i,h,g,f,e,d,c
+ks(a,b,c,d){return A.qu(a,b,c,d)},
+qu(a,b,a0,a1){var s=0,r=A.lV(t.fW),q,p=2,o=[],n,m,l,k,j,i,h,g,f,e,d,c
 var $async$ks=A.lY(function(a2,a3){if(a2===1){o.push(a3)
 s=p}for(;;)switch(s){case 0:d=b.length
 if(d===0)throw A.c(A.i("bootstrapRenderer requires a non-empty profile ladder",null))
@@ -2124,7 +2124,7 @@ case 4:throw A.c(A.m("bootstrapRenderer exhausted its ladder without a result"))
 case 1:return A.lQ(q,r)
 case 2:return A.lP(o.at(-1),r)}})
 return A.lR($async$ks,r)},
-qC(a){var s,r,q=B.a.bX(B.ac,new A.kw(a))
+qB(a){var s,r,q=B.a.bX(B.ac,new A.kw(a))
 if(q>=0)return A.aN(B.a.dA(B.ac,q),t.W)
 s=t.W
 r=A.dt([a],s)
@@ -2134,13 +2134,13 @@ cE:function cE(a,b){this.a=a
 this.b=b},
 eC:function eC(){},
 kw:function kw(a){this.a=a},
-qV(a,b,c,d){var s,r,q,p,o,n,m=A.b([],t.cw)
+qU(a,b,c,d){var s,r,q,p,o,n,m=A.b([],t.cw)
 for(s=0-c.a,r=1-c.b,q=0-c.c,q=1+(s*s+r*r+q*q),p=0;!1;++p){o=a[p]
 B.a.i(m,new A.e9(Math.max(Math.max(1,Math.max(1,1)),0.000001)/q,o))}B.a.ao(m,new A.lb())
 s=A.b([],t.w)
 for(r=A.jl(m,0,A.cc(b,"count",t.S),t.fk),q=r.$ti,r=new A.at(r,r.gB(0),q.h("at<T.E>")),q=q.h("T.E");r.n();){n=r.d
 s.push((n==null?q.a(n):n).b)}return s},
-v:function v(a,b,c){this.a=a
+u:function u(a,b,c){this.a=a
 this.b=b
 this.c=c},
 cr:function cr(a,b,c){this.a=a
@@ -2153,11 +2153,10 @@ _.d=c
 _.e=d},
 az:function az(){},
 lb:function lb(){},
-a6(a,b,c,d,e,f,g,h,i,j,k,l,m,n){return new A.a0(d,a,l,k,j,0,g,f,h,i,e,c,b,m,n)},
-mB(a,b){return A.a6(null,0.1,0.5,a,1,1,null,null,b,0.35,0.78,1,1,1)},
-lu(a,b,c){return A.a6(null,0.2,0.3,b,0,1,null,null,c,a.c,a.b,a.a,1,1)},
-mA(a,b,c,d){return A.a6(null,0.08,a,c,0,1,null,null,d,b.c,b.b,b.a,1,1)},
-f9(a,b){if(!isFinite(b)||b<0||b>1)throw A.c(A.i("MaterialDefinition."+a+" must be in [0, 1]: "+A.o(b),null))},
+a3(a,b,c,d,e,f,g,h,i,j,k,l,m,n){return new A.a0(d,a,l,k,j,0,g,f,h,i,e,c,b,m,n)},
+lu(a,b,c){return A.a3(null,0.2,0.3,b,0,1,null,null,c,a.c,a.b,a.a,1,1)},
+mA(a,b,c,d){return A.a3(null,0.08,a,c,0,1,null,null,d,b.c,b.b,b.a,1,1)},
+f9(a,b){if(!isFinite(b)||b<0||b>1)throw A.c(A.i("MaterialDefinition."+a+" must be in [0, 1]: "+A.n(b),null))},
 hA:function hA(a,b){this.a=a
 this.b=b},
 fa:function fa(a,b){this.a=a
@@ -2178,7 +2177,7 @@ _.ch=l
 _.CW=m
 _.db=n
 _.dx=o},
-or(a){A:{break A}return a},
+oq(a){A:{break A}return a},
 br:function br(a,b){this.a=a
 this.b=b},
 ao:function ao(a,b,c){this.a=a
@@ -2229,9 +2228,9 @@ _.f=f
 _.r=g
 _.w=h
 _.y=i},
-mU(a,b,c,d,e){var s,r
-if(!isFinite(c)||c<=0)throw A.c(A.i("SurfaceMetrics.forCanvas devicePixelRatio must be finite and > 0: "+A.o(c),null))
-if(!isFinite(d)||d<=0)throw A.c(A.i("SurfaceMetrics.forCanvas maxDevicePixelRatio must be finite and > 0: "+A.o(d),null))
+mT(a,b,c,d,e){var s,r
+if(!isFinite(c)||c<=0)throw A.c(A.i("SurfaceMetrics.forCanvas devicePixelRatio must be finite and > 0: "+A.n(c),null))
+if(!isFinite(d)||d<=0)throw A.c(A.i("SurfaceMetrics.forCanvas maxDevicePixelRatio must be finite and > 0: "+A.n(d),null))
 s=c>d?d:c
 r=new A.jm(b,a,B.b.I(b*s),B.b.I(a*s),s,!0)
 r.p()
@@ -2263,10 +2262,10 @@ _.c=c
 _.d=d
 _.e=e
 _.r=f},
-oq(){return new A.fb(new A.b8(new A.iq(),A.b([],t.ha),A.b([],t.t),t.ex))},
+op(){return new A.fb(new A.b8(new A.iq(),A.b([],t.ha),A.b([],t.t),t.ex))},
 fb:function fb(a){this.a=a},
 iq:function iq(){},
-nx(a){var s=4
+nw(a){var s=4
 switch(a.a){case 0:s=0
 break
 case 1:s=1
@@ -2284,11 +2283,11 @@ case 8:break
 case 3:s=A.l(A.c1("MeshStore: no shader location reserved for VertexAttributeKind.emissive yet \u2014 safe_world.vert has no emissive input"))
 break
 default:s=null}return s},
-pP(a,b,c){var s,r,q
+pO(a,b,c){var s,r,q
 for(s=0,r=0;r<7;++r){q=B.M[r]
-if(A.nx(q.a)===b)s+=q.c}return s},
-os(a){return new A.iu(a,new A.b8(new A.iv(),A.b([],t.c9),A.b([],t.t),t.cE),A.aC(t.S,t.bw))},
-mC(a){var s
+if(A.nw(q.a)===b)s+=q.c}return s},
+or(a){return new A.iu(a,new A.b8(new A.iv(),A.b([],t.c9),A.b([],t.t),t.cE),A.aC(t.S,t.bw))},
+mB(a){var s
 A:{s=a.byteLength
 break A}return s},
 fO:function fO(a,b,c,d,e,f){var _=this
@@ -2303,7 +2302,7 @@ this.b=b
 this.c=c},
 iv:function iv(){},
 iw:function iw(){},
-p6(a){var s=new A.fL(a,new A.b8(new A.jq(),A.b([],t.fq),A.b([],t.t),t.g2),A.aC(t.S,t.j))
+p5(a){var s=new A.fL(a,new A.b8(new A.jq(),A.b([],t.fq),A.b([],t.t),t.g2),A.aC(t.S,t.j))
 s.d=s.ag($.mb())
 s.e=s.ag($.m8())
 s.f=s.ag($.m9())
@@ -2321,10 +2320,10 @@ _.w=_.r=_.f=_.e=_.d=$},
 jq:function jq(){},
 js:function js(){},
 jr:function jr(){},
-p4(a,b,c,d,e){var s,r,q
+p3(a,b,c,d,e){var s,r,q
 if(c)return B.f_
 if(d)return B.eU
-s=A.mR(b,e)
+s=A.mQ(b,e)
 if(Math.abs(s)<0.5&&a>=0.2617993877991494)return B.f3
 r=s<0
 if(a>=0.2617993877991494)return r?B.ba:B.f4
@@ -2335,11 +2334,11 @@ if(q>=-6)return r?B.f1:B.eW
 if(q>=-12)return r?B.f0:B.eX
 if(q>=-18)return r?B.eV:B.eY
 return B.eZ},
-mS(a,b,c){var s
+mR(a,b,c){var s
 if(b<=a)return c<a?0:1
 s=B.b.l((c-a)/(b-a),0,1)
 return s*s*(3-2*s)},
-mR(a,b){var s=a-b
+mQ(a,b){var s=a-b
 while(s>12)s-=24
 while(s<-12)s+=24
 return s},
@@ -2352,16 +2351,16 @@ _.d=c
 _.e=d
 _.r=e
 _.x=f},
-qW(a,b,c){var s,r,q,p,o,n,m,l,k,j,i=b.gE(0)
+qV(a,b,c){var s,r,q,p,o,n,m,l,k,j,i=b.gE(0)
 if(!i)throw A.c(A.i("invalid volumetric source selection inputs",null))
 s=A.ax(t.N)
 r=A.b([],t.gg)
 for(q=0;!1;++q){p=c[q]
 p.p()
-if(!s.i(0,p.gN()))throw A.c(A.i("duplicate volumetric source id: "+A.o(p.gN()),null))
+if(!s.i(0,p.gN()))throw A.c(A.i("duplicate volumetric source id: "+A.n(p.gN()),null))
 o=p.gam().P(0,b).length
 i=p.gfU()
-n=A.pa(p.gfR(),o,i)
+n=A.p9(p.gfR(),o,i)
 i=p.gcW().gbt()
 m=p.gcW().gbu()
 l=p.gcW().gbv()
@@ -2371,10 +2370,10 @@ B.a.i(r,new A.ea(p.gfT().k(0,k).k(0,n),p))}B.a.ao(r,new A.lc())
 i=A.b([],t.az)
 for(m=A.jl(r,0,A.cc(a,"count",t.S),t.eS),l=m.$ti,m=new A.at(m,m.gB(0),l.h("at<T.E>")),l=l.h("T.E");m.n();){j=m.d
 i.push((j==null?l.a(j):j).b)}return i},
-pa(a,b,c){var s,r,q,p,o,n
+p9(a,b,c){var s,r,q,p,o,n
 for(s=[new A.F("distance",b),new A.F("referenceDistance",c),new A.F("cutoffDistance",a)],r=0;r<3;++r){q=s[r]
 p=q.b
-if(!isFinite(p))A.l(A.i(q.a+" must be finite: "+A.o(p),null))}if(b.ds(0,0)||c.aR(0,0)||a.aR(0,0))throw A.c(A.i("invalid inverse-square attenuation inputs",null))
+if(!isFinite(p))A.l(A.i(q.a+" must be finite: "+A.n(p),null))}if(b.ds(0,0)||c.aR(0,0)||a.aR(0,0))throw A.c(A.i("invalid inverse-square attenuation inputs",null))
 if(b.dm(0,a))return 0
 s=c.k(0,c)
 q=c.k(0,c)
@@ -2385,7 +2384,7 @@ A.cd(o)
 return n.k(0,1-Math.pow(o,4)).l(0,0,1).fV(0)},
 lc:function lc(){},
 hJ:function hJ(){this.b=this.a=0},
-nZ(a,b,c,d,e){var s=new A.eF(A.aN(e,t.Z),!0,c,a,b,B.f,B.f)
+nY(a,b,c,d,e){var s=new A.eF(A.aN(e,t.Z),!0,c,a,b,B.f,B.f)
 s.dG(a,b,c,300,!0,0.1,e)
 return s},
 aw:function aw(a,b,c){this.a=a
@@ -2411,7 +2410,7 @@ _.c=_.b=0
 _.d=b
 _.y=c
 _.z=d},
-mD(a,b){return new A.bC(b,a,a,b)},
+mC(a,b){return new A.bC(b,a,a,b)},
 bC:function bC(a,b,c,d){var _=this
 _.a=a
 _.b=b
@@ -2435,11 +2434,11 @@ _.Q=0.25
 _.as=g
 _.at=h
 _.ax=!1},
-qu(a){var s,r,q,p,o,n,m,l,k,j=A.b([],t.gk),i=A.aC(t.N,t.S)
+qt(a){var s,r,q,p,o,n,m,l,k,j=A.b([],t.gk),i=A.aC(t.N,t.S)
 for(s=a.length,r=t.dR,q=0;q<a.length;a.length===s||(0,A.C)(a),++q){p=a[q]
 o=p.gq().y
 if(o==null){B.a.i(j,new A.bg(p,A.b([p],r)))
-continue}n=""+p.gq().a.a+":"+p.gq().b.a+":"+A.o(o)
+continue}n=""+p.gq().a.a+":"+p.gq().b.a+":"+A.n(o)
 m=i.C(0,n)
 if(m==null){i.K(0,n,j.length)
 B.a.i(j,new A.bg(p,A.b([p],r)))}else{l=j.length
@@ -2461,7 +2460,7 @@ this.b=b},
 eT:function eT(a,b){this.a=a
 this.b=b
 this.c=0},
-pq(){return new A.cQ()},
+pp(){return new A.cQ()},
 i2:function i2(a){this.a=a
 this.b=null},
 cQ:function cQ(){var _=this
@@ -2526,7 +2525,7 @@ this.b=b
 this.c=c},
 j5:function j5(a,b){this.a=a
 this.b=b},
-p_(a){return new A.dJ(a,new A.b8(new A.jc(),A.b([],t.aO),A.b([],t.t),t.b0),A.aC(t.gL,t.cm))},
+oZ(a){return new A.dJ(a,new A.b8(new A.jc(),A.b([],t.aO),A.b([],t.t),t.b0),A.aC(t.gL,t.cm))},
 bH:function bH(a,b,c){this.a=a
 this.b=b
 this.c=c},
@@ -2534,29 +2533,29 @@ dJ:function dJ(a,b,c){this.a=a
 this.b=b
 this.c=c},
 jc:function jc(){},
-nm(a){var s,r=a.y
+nl(a){var s,r=a.y
 r.toString
 s=a.as
 s.toString
-a.Q=A.pR(a,r,s,a.x.gt().a.b.a).b},
-pR(a,b,c,d){var s,r,q,p,o,n,m,l="sceneColor",k=new A.km(a),j=new A.kn(d,a),i=c.a,h=a.a,g=c.b,f=c.c,e=c.d
+a.Q=A.pQ(a,r,s,a.x.gt().a.b.a).b},
+pQ(a,b,c,d){var s,r,q,p,o,n,m,l="sceneColor",k=new A.km(a),j=new A.kn(d,a),i=c.a,h=a.a,g=c.b,f=c.c,e=c.d
 if(i.b.A(0,"shadows")){s=a.w
 r=s.b
 s=s.c
-q=A.qw(b,h,B.a5,i,s.gfn(),new A.k7(j),new A.k8(j),new A.k9(a),new A.ke(a),new A.kf(a),new A.kg(j),new A.kh(j),s.gfp(),new A.ki(a),s.gfu(),r.gfs(),k,s.gfw(),s.gfA(),new A.kj(j,c),new A.kk(j),new A.kl(j),new A.ka(j),new A.kb(j),new A.kc(a),new A.kd(j),e,f,g,512)}else{p=new A.W(l,B.u,g,f,e,0)
+q=A.qv(b,h,B.a5,i,s.gfn(),new A.k7(j),new A.k8(j),new A.k9(a),new A.ke(a),new A.kf(a),new A.kg(j),new A.kh(j),s.gfp(),new A.ki(a),s.gfu(),r.gfs(),k,s.gfw(),s.gfA(),new A.kj(j,c),new A.kk(j),new A.kl(j),new A.ka(j),new A.kb(j),new A.kc(a),new A.kd(j),e,f,g,512)}else{p=new A.W(l,B.u,g,f,e,0)
 o=new A.W(l,B.u,g,f,1,1)
 j=e>1
 i=j?o:p
 n=j?new A.dx(h,p,o):null
 k=A.b([new A.fU(b,"#version 300 es\nlayout(location=0) in vec3 aPosition;\nlayout(location=1) in vec3 aNormal;\nlayout(location=2) in vec4 aColor;\nlayout(location=3) in float aAlpha;\nlayout(location=4) in vec3 aUvMat;\nuniform mat4 uViewProjection;\nuniform mat4 uModel;\nuniform mat4 uNormalMatrix;\nuniform mat4 uInstanceModels[16];\nuniform mat4 uInstanceNormalMatrices[16];\nuniform float uUseInstances;\nout vec4 vColor;\nout vec3 vNormal;\nvoid main(){\n  mat4 model=uModel;\n  mat4 normalMatrix=uNormalMatrix;\n  if(uUseInstances>0.5){model=uInstanceModels[gl_InstanceID];normalMatrix=uInstanceNormalMatrices[gl_InstanceID];}\n  vColor=vec4(aColor.rgb,aAlpha);\n  vNormal=mat3(normalMatrix)*aNormal;\n  gl_Position=uViewProjection*model*vec4(aPosition,1.0);\n}\n","#version 300 es\nprecision highp float;\nin vec4 vColor;\nin vec3 vNormal;\nuniform vec3 uLightDir;\nuniform vec3 uAmbientColor;\nuniform float uAmbientIntensity;\nuniform float uAmbientLightScale;\nuniform float uDirectLightScale;\nout vec4 oColor;\nvoid main(){\n  vec3 n=normalize(vNormal);\n  float ndotl=max(dot(n,normalize(uLightDir)),0.0);\n  vec3 lit=vColor.rgb*clamp(uAmbientColor*uAmbientIntensity*uAmbientLightScale+\n    vec3(ndotl)*uDirectLightScale,0.0,1.0);\n  oColor=vec4(lit,vColor.a);\n}\n",k,p)],t.cL)
 if(n!=null)k.push(n)
-k.push(new A.dG(b,u.l,u.j,h,i,B.a5))
+k.push(new A.dG(b,u.l,u.o,h,i,B.a5))
 q=new A.eQ(k)}a.r.toString
 m=q.eG(B.aj,new A.j4(),!1,new A.hd())
 k=m.a.b
-if(k.length!==0)throw A.c(A.m("safe renderer graph is invalid: "+A.o(k)))
+if(k.length!==0)throw A.c(A.m("safe renderer graph is invalid: "+A.n(k)))
 return new A.jZ(q,m)},
-pS(b6,b7,b8,b9){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0,a1,a2,a3,a4,a5,a6,a7,a8,a9,b0,b1,b2,b3,b4=b6.Q,b5=b6.x
+pR(b6,b7,b8,b9){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0,a1,a2,a3,a4,a5,a6,a7,a8,a9,b0,b1,b2,b3,b4=b6.Q,b5=b6.x
 if(b4==null||b5==null)throw A.c(A.m("renderer graph is not initialized"))
 s=b7.c
 s=A.af(new A.aZ(s,A.x(s).h("aZ<2>")),t.Y)
@@ -2574,7 +2573,7 @@ o=q.c.ad()
 p=p.gaz()
 n=A.H(p)
 B.a.i(s,new A.ho(new A.b4((r|1073741824)>>>0,0,"transient"),q,A.cj(new A.M(p,n.h("a(1)").a(o.gaB()),n.h("M<1,a>")))))}p=b8.a
-m=A.qz(A.mo(p.c),s,b8.d)
+m=A.qy(A.mo(p.c),s,b8.d)
 for(o=s.length,l=0,k=0;k<s.length;s.length===o||(0,A.C)(s),++k){n=s[k].gq().a
 j=b6.w.a
 i=n.a
@@ -2615,14 +2614,14 @@ c.e+=m.b.b
 b=A.b([],t.c1)
 a=A.b([],t.aM)
 for(i=s.length,g=t.k,a0=p.a,a1=t.d,k=0;k<s.length;s.length===i||(0,A.C)(s),++k){a2=s[k]
-if(a2.gq().e===B.r)B.a.i(a,new A.a3(new A.av(a0.ai(a2.gq().c.a).c,a2.gN().a),a2,a1))
-else B.a.i(b,new A.a3(new A.ay(B.em,a2.gq().b,a2.gq().a,a2.gN().a),a2,g))}a3=new A.h5(A.qu(A.qY(b)),A.qX(a),p,b8.b,b8.c)
+if(a2.gq().e===B.r)B.a.i(a,new A.a4(new A.av(a0.ai(a2.gq().c.a).c,a2.gN().a),a2,a1))
+else B.a.i(b,new A.a4(new A.ay(B.em,a2.gq().b,a2.gq().a,a2.gN().a),a2,g))}a3=new A.h5(A.qt(A.qX(b)),A.qW(a),p,b8.b,b8.c)
 a4=new A.eO(b6.a,e)
 for(s=b4.b,p=s.length,i=t.do,k=0;k<s.length;s.length===p||(0,A.C)(s),++k){a5=s[k]
 g=a5.gq().a
 if(g.length===0)A.l(A.a2(g,"passId",null))
 e.b=g
-n.c3(g,A.nB())
+n.c3(g,A.nA())
 a6=A.aC(o,i)
 for(g=a5.gq().c,a0=g.length,a7=0;a7<g.length;g.length===a0||(0,A.C)(g),++a7){a8=g[a7].a
 a9=b5.c
@@ -2697,14 +2696,14 @@ jV:function jV(){},
 hh:function hh(){},
 fB:function fB(a,b){this.a=a
 this.b=b},
-qY(a){var s,r,q=A.af(a,t.k)
+qX(a){var s,r,q=A.af(a,t.k)
 B.a.ao(q,new A.lg())
 s=A.H(q)
 r=s.h("M<1,aR>")
 s=A.af(new A.M(q,s.h("aR(1)").a(new A.lh()),r),r.h("T.E"))
 s.$flags=1
 return s},
-qX(a){var s,r,q=A.af(a,t.d)
+qW(a){var s,r,q=A.af(a,t.d)
 B.a.ao(q,new A.le())
 s=A.H(q)
 r=s.h("M<1,aR>")
@@ -2718,14 +2717,14 @@ _.c=c
 _.d=d},
 av:function av(a,b){this.a=a
 this.b=b},
-a3:function a3(a,b,c){this.a=a
+a4:function a4(a,b,c){this.a=a
 this.b=b
 this.$ti=c},
 lg:function lg(){},
 lh:function lh(){},
 le:function le(){},
 lf:function lf(){},
-qz(a,b,c){var s,r,q,p,o,n,m,l=A.b([],t.dR)
+qy(a,b,c){var s,r,q,p,o,n,m,l=A.b([],t.dR)
 for(s=b.length,r=0,q=0,p=0;p<b.length;b.length===s||(0,A.C)(b),++p){o=b[p];++r
 if((o.gq().d&c)>>>0===0){++q
 continue}n=o.gaQ()
@@ -2750,8 +2749,8 @@ q.$6(new A.a(p,s,s),new A.a(s,s,s),new A.a(s,s,p),new A.a(p,s,p),B.d,B.k)
 q.$6(new A.a(p,p,p),new A.a(s,p,p),new A.a(s,p,s),new A.a(p,p,s),B.q,B.x)
 q.$6(new A.a(s,p,s),new A.a(s,p,p),new A.a(s,s,p),new A.a(s,s,s),B.k,B.D)
 q.$6(new A.a(p,p,p),new A.a(p,p,s),new A.a(p,s,s),new A.a(p,s,p),B.x,B.p)
-return r.a9(new A.a5(new A.a(p,p,p),new A.a(s,s,s)))},
-oJ(a,a0,a1,a2){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b
+return r.a9(new A.a6(new A.a(p,p,p),new A.a(s,s,s)))},
+oI(a,a0,a1,a2){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b
 if(a2<=0||a<=0)throw A.c(A.i("dimensions must be > 0",null))
 if(a0<1||a1<1)throw A.c(A.i("subdivisions must be >= 1",null))
 s=A.b([],t.n)
@@ -2767,8 +2766,8 @@ p.L(new A.a(s+h*a2,0,j),B.d,B.k,new A.B(h,k))}}g=a0+1
 for(l=0;l<a1;)for(f=l*g,++l,e=l*g,i=0;i<a0;++i){d=f+i
 c=e+i
 b=c+1
-B.a.G(q,A.b([d,c,b,d,b,d+1],r))}return p.a9(new A.a5(new A.a(s,0,m),new A.a(o,0,n)))},
-oK(a6,a7,a8){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0,a1,a2,a3,a4,a5
+B.a.G(q,A.b([d,c,b,d,b,d+1],r))}return p.a9(new A.a6(new A.a(s,0,m),new A.a(o,0,n)))},
+oJ(a6,a7,a8){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0,a1,a2,a3,a4,a5
 if(a6<=0)throw A.c(A.a2(a6,"radius","must be > 0"))
 if(a7<2||a8<3)throw A.c(A.i("invalid ring or sector count",null))
 s=A.b([],t.n)
@@ -2794,8 +2793,8 @@ for(o=0;o<a7;)for(s=o*a0,++o,a1=o*a0,j=0;j<a8;++j){a2=s+j
 a3=a1+j
 a4=a3+1
 B.a.G(q,A.b([a2,a2+1,a4,a2,a4,a3],r))}a5=new A.a(a6,a6,a6)
-return p.a9(new A.a5(a5.k(0,-1),a5))},
-ox(a,a0,a1){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b
+return p.a9(new A.a6(a5.k(0,-1),a5))},
+ow(a,a0,a1){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b
 if(a1<=0||a<=0)throw A.c(A.i("radius and height must be > 0",null))
 if(a0<3)throw A.c(A.i("radialSegments must be >= 3",null))
 s=A.b([],t.n)
@@ -2827,8 +2826,8 @@ j=Math.cos(k)
 i=Math.sin(k)
 p.L(new A.a(j*a1,n,i*a1),B.q,B.x,new A.B(j*0.5+0.5,i*0.5+0.5))}for(s=b+2,f=b+1,m=0;m<a0;++m)B.a.G(q,A.b([b,s+m,f+m],r))
 s=-a1
-return p.a9(new A.a5(new A.a(s,n,s),new A.a(a1,o,a1)))},
-ow(a4,a5,a6){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0,a1,a2,a3
+return p.a9(new A.a6(new A.a(s,n,s),new A.a(a1,o,a1)))},
+ov(a4,a5,a6){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0,a1,a2,a3
 if(a6<=0||a4<=0)throw A.c(A.i("radius and height must be > 0",null))
 if(a5<3)throw A.c(A.i("radialSegments must be >= 3",null))
 s=A.b([],t.n)
@@ -2858,8 +2857,8 @@ a1=Math.cos(a0)
 a2=Math.sin(a0)
 p.L(new A.a(a1*a6,m,a2*a6),B.q,B.x,new A.B(a1*0.5+0.5,a2*0.5+0.5))}for(s=a+2,a3=a+1,j=0;j<a5;++j)B.a.G(q,A.b([a,s+j,a3+j],r))
 s=-a6
-return p.a9(new A.a5(new A.a(s,m,s),new A.a(a6,o,a6)))},
-oL(a0,a1,a2,a3){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a
+return p.a9(new A.a6(new A.a(s,m,s),new A.a(a6,o,a6)))},
+oK(a0,a1,a2,a3){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a
 if(a1<=0||a2<=0)throw A.c(A.i("radii must be > 0",null))
 if(a0<3||a3<3)throw A.c(A.i("segments must be >= 3",null))
 s=A.b([],t.n)
@@ -2880,8 +2879,8 @@ h=k+i
 b=h+1
 B.a.G(q,A.b([c,c+1,b,c,b,h],r))}a=a1+a2
 s=-a
-return p.a9(new A.a5(new A.a(s,-a2,s),new A.a(a,a2,a)))},
-ov(a5,a6,a7,a8){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0,a1,a2,a3,a4
+return p.a9(new A.a6(new A.a(s,-a2,s),new A.a(a,a2,a)))},
+ou(a5,a6,a7,a8){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0,a1,a2,a3,a4
 if(a6<=0||a5<=0)throw A.c(A.i("radius and height must be > 0",null))
 if(a7<2||a8<3)throw A.c(A.i("invalid ring or sector count",null))
 s=A.b([],t.n)
@@ -2922,8 +2921,8 @@ s=a2+i
 j=s+1
 B.a.G(q,A.b([i,a3,j,i,j,s],r))}a4=o+a6
 s=-a6
-return p.a9(new A.a5(new A.a(s,-a4,s),new A.a(a6,a4,a6)))},
-mI(a7,a8){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0,a1,a2,a3,a4,a5,a6
+return p.a9(new A.a6(new A.a(s,-a4,s),new A.a(a6,a4,a6)))},
+mH(a7,a8){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0,a1,a2,a3,a4,a5,a6
 if(a7<=0)throw A.c(A.a2(a7,"radius","must be > 0"))
 if(a8>5)throw A.c(A.a2(a8,"subdivisions","must be between 0 and 5"))
 s=(1+Math.sqrt(5))/2
@@ -2969,8 +2968,8 @@ if(1>=g)return A.d(h,1)
 a2=h[1]
 if(2>=g)return A.d(h,2)
 B.a.G(m,A.b([a1,a2,h[2]],r))}a6=new A.a(a7,a7,a7)
-return e.a9(new A.a5(a6.k(0,-1),a6))},
-oH(a7){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0,a1,a2,a3,a4,a5,a6
+return e.a9(new A.a6(a6.k(0,-1),a6))},
+oG(a7){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0,a1,a2,a3,a4,a5,a6
 if(a7<=0)throw A.c(A.a2(a7,"radius","must be > 0"))
 s=A.b([],t.n)
 r=t.t
@@ -3010,8 +3009,8 @@ p.L(e,a3,a4,B.fy)
 p.L(d,a3,a4,B.ax)
 p.L(c,a3,a4,B.az)
 B.a.G(q,A.b([a5,a5+1,a5+2],r))}a6=new A.a(a7,a7,a7)
-return p.a9(new A.a5(a6.k(0,-1),a6))},
-oy(a5){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0,a1,a2,a3,a4
+return p.a9(new A.a6(a6.k(0,-1),a6))},
+ox(a5){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0,a1,a2,a3,a4
 if(a5<=0)throw A.c(A.a2(a5,"radius","must be > 0"))
 s=(1+Math.sqrt(5))/2
 r=1/s
@@ -3055,8 +3054,8 @@ B.a.G(o,A.b([a1,a1+1,j],p))
 i=a1+3
 B.a.G(o,A.b([a1,j,i],p))
 B.a.G(o,A.b([a1,i,a1+4],p))}a4=new A.a(a5,a5,a5)
-return m.a9(new A.a5(a4.k(0,-1),a4))},
-mJ(c9,d0,d1,d2,d3){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0,a1,a2,a3,a4,a5,a6,a7,a8,a9,b0,b1,b2,b3,b4,b5,b6,b7,b8,b9,c0,c1,c2,c3,c4,c5,c6,c7,c8
+return m.a9(new A.a6(a4.k(0,-1),a4))},
+mI(c9,d0,d1,d2,d3){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0,a1,a2,a3,a4,a5,a6,a7,a8,a9,b0,b1,b2,b3,b4,b5,b6,b7,b8,b9,c0,c1,c2,c3,c4,c5,c6,c7,c8
 if(d3<=0||d2<=0||d1<=0)throw A.c(A.i("dimensions must be > 0",null))
 if(d0<1)throw A.c(A.i("bevelSegments must be >= 1",null))
 s=B.b.l(c9,0.001,Math.min(d3,Math.min(d2,d1))*0.45)
@@ -3123,8 +3122,8 @@ c6=b3+b2
 c7=b0+b2
 if(a7)B.a.G(j,A.b([c4,c5,c6,c4,c6,c7],k))
 else B.a.G(j,A.b([c4,c7,c6,c4,c6,c5],k))}}}}c8=new A.a(r,p,n)
-return i.a9(new A.a5(c8.k(0,-1),c8))},
-oM(d3,d4,d5,d6){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0,a1,a2,a3,a4,a5,a6,a7,a8,a9,b0,b1,b2,b3,b4,b5,b6,b7,b8,b9,c0,c1,c2,c3,c4,c5,c6,c7,c8,c9,d0,d1,d2
+return i.a9(new A.a6(c8.k(0,-1),c8))},
+oL(d3,d4,d5,d6){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0,a1,a2,a3,a4,a5,a6,a7,a8,a9,b0,b1,b2,b3,b4,b5,b6,b7,b8,b9,c0,c1,c2,c3,c4,c5,c6,c7,c8,c9,d0,d1,d2
 if(d6.length<2)throw A.c(A.i("tubePath requires at least 2 spine points",null))
 if(d5<=0)throw A.c(A.a2(d5,"radius","must be > 0"))
 if(d4<3)throw A.c(A.a2(d4,"radialSegments","must be >= 3"))
@@ -3213,7 +3212,7 @@ d0=m*c8
 for(b9=0;b9<d4;++b9){b=c9+b9
 d1=d0+b9
 d2=d1+1
-B.a.G(l,A.b([b,d1,d2,b,d2,b+1],n))}}return a5.a9(new A.a5(a6,a7))},
+B.a.G(l,A.b([b,d1,d2,b,d2,b+1],n))}}return a5.a9(new A.a6(a6,a7))},
 iT:function iT(a,b){this.a=a
 this.b=b},
 iV:function iV(){},
@@ -3226,7 +3225,7 @@ this.b=b
 this.c=c},
 aA:function aA(a,b){this.a=a
 this.b=b},
-oQ(a,b,c,d,a0,a1){var s,r,q,p,o,n,m,l=a1*c*4,k=new Uint8Array(l),j=B.b.I(B.b.l(d.a,0,1)*255),i=B.b.I(B.b.l(d.b,0,1)*255),h=B.b.I(B.b.l(d.c,0,1)*255),g=B.b.I(B.b.l(a.a,0,1)*255),f=B.b.I(B.b.l(a.b,0,1)*255),e=B.b.I(B.b.l(a.c,0,1)*255)
+oP(a,b,c,d,a0,a1){var s,r,q,p,o,n,m,l=a1*c*4,k=new Uint8Array(l),j=B.b.I(B.b.l(d.a,0,1)*255),i=B.b.I(B.b.l(d.b,0,1)*255),h=B.b.I(B.b.l(d.c,0,1)*255),g=B.b.I(B.b.l(a.a,0,1)*255),f=B.b.I(B.b.l(a.b,0,1)*255),e=B.b.I(B.b.l(a.c,0,1)*255)
 for(s=0,r=0;r<c;++r)for(q=B.e.F(r,b)>=a0,p=0;p<a1;++p){o=!q||B.e.F(p,b)<a0
 n=o?j:g
 if(!(s>=0&&s<l))return A.d(k,s)
@@ -3243,7 +3242,7 @@ n=s+3
 if(!(n<l))return A.d(k,n)
 k[n]=255
 s+=4}return k},
-oT(a3,a4,a5,a6){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0=a6*a4*4,a1=new Uint8Array(a0),a2=new A.iZ(a6,a4,a3)
+oS(a3,a4,a5,a6){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0=a6*a4*4,a1=new Uint8Array(a0),a2=new A.iZ(a6,a4,a3)
 for(s=0,r=0;r<a4;r=p)for(q=r-1,p=r+1,o=0;o<a6;o=n){n=o+1
 m=a2.$2(n,q)
 l=a2.$2(n,r)
@@ -3286,7 +3285,7 @@ b=s+3
 if(!(b<a0))return A.d(a1,b)
 a1[b]=255
 s+=4}return a1},
-oN(a,b,c,d){var s,r,q,p,o,n,m,l,k,j=d*b*4,i=new Uint8Array(j),h=new A.c7()
+oM(a,b,c,d){var s,r,q,p,o,n,m,l,k,j=d*b*4,i=new Uint8Array(j),h=new A.c7()
 h.b7(1337)
 s=new Float32Array(b)
 for(r=0;r<b;++r){q=h.M()
@@ -3306,7 +3305,7 @@ k=o+3
 if(!(k<j))return A.d(i,k)
 i[k]=255
 o+=4}return i},
-oU(b1,b2,b3,b4,b5){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0,a1,a2,a3,a4,a5,a6,a7,a8,a9=b5*b4*4,b0=new Uint8Array(a9)
+oT(b1,b2,b3,b4,b5){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0,a1,a2,a3,a4,a5,a6,a7,a8,a9=b5*b4*4,b0=new Uint8Array(a9)
 for(s=b1.a,r=b3.a,q=b1.b,p=b3.b,o=b1.c,n=b3.c,m=0,l=0;l<b4;++l){k=l/b4*b2
 j=B.b.ab(k)
 for(i=0;i<b5;++i){h=i/b5*b2
@@ -3334,7 +3333,7 @@ a5=m+3
 if(!(a5<a9))return A.d(b0,a5)
 b0[a5]=255
 m+=4}}return b0},
-oR(b2,b3,b4,b5,b6,b7){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0=b7*b3*4,a1=new Uint8Array(a0),a2=B.b.I(B.b.l(b5.a,0,1)*255),a3=B.b.I(B.b.l(b5.b,0,1)*255),a4=B.b.I(B.b.l(b5.c,0,1)*255),a5=B.b.I(B.b.l(b2.a,0,1)*255),a6=B.b.I(B.b.l(b2.b,0,1)*255),a7=B.b.I(B.b.l(b2.c,0,1)*255),a8=Math.sqrt(3),a9=b4*1.5,b0=b4*a8,b1=b4*(a8*0.5)
+oQ(b2,b3,b4,b5,b6,b7){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0=b7*b3*4,a1=new Uint8Array(a0),a2=B.b.I(B.b.l(b5.a,0,1)*255),a3=B.b.I(B.b.l(b5.b,0,1)*255),a4=B.b.I(B.b.l(b5.c,0,1)*255),a5=B.b.I(B.b.l(b2.a,0,1)*255),a6=B.b.I(B.b.l(b2.b,0,1)*255),a7=B.b.I(B.b.l(b2.c,0,1)*255),a8=Math.sqrt(3),a9=b4*1.5,b0=b4*a8,b1=b4*(a8*0.5)
 for(s=b6*0.5,r=b0*0.5,q=0,p=0;p<b3;++p)for(o=p/a9,n=0;n<b7;++n){m=B.b.I(o)
 l=(m&1)!==0?r:0
 k=n-(B.b.I((n-l)/b0)*b0+l)
@@ -3362,7 +3361,7 @@ e=q+3
 if(!(e<a0))return A.d(a1,e)
 a1[e]=255
 q+=4}return a1},
-oO(a,b,a0,a1,a2){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e=a2*a0*4,d=new Uint8Array(e),c=B.b.I(B.b.l(a1,0,1)*255)
+oN(a,b,a0,a1,a2){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e=a2*a0*4,d=new Uint8Array(e),c=B.b.I(B.b.l(a1,0,1)*255)
 for(s=0,r=0;r<a0;++r){q=B.e.cg(r,b)
 p=B.e.F(r,b)/b
 for(o=1-p,n=0;n<a2;++n){m=B.e.cg(n,b)
@@ -3385,11 +3384,11 @@ f=s+3
 if(!(f<e))return A.d(d,f)
 d[f]=255
 s+=4}}return d},
-oS(a3,a4,a5,a6,a7,a8){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0,a1,a2
+oR(a3,a4,a5,a6,a7,a8){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0,a1,a2
 if(a8<=0||a4<=0)throw A.c(A.i("dimensions must be > 0",null))
 s=a8*a4*4
 r=new Uint8Array(s)
-for(q=a3.a,p=a7.a-q,o=a3.b,n=a7.b-o,m=a3.c,l=a7.c-m,k=0,j=0;j<a4;++j)for(i=j/a4*a5,h=0;h<a8;++h){for(g=h/a8*a5,f=0,e=1,d=1,c=0;c<4;++c){f+=A.mM(g*d,i*d)*e
+for(q=a3.a,p=a7.a-q,o=a3.b,n=a7.b-o,m=a3.c,l=a7.c-m,k=0,j=0;j<a4;++j)for(i=j/a4*a5,h=0;h<a8;++h){for(g=h/a8*a5,f=0,e=1,d=1,c=0;c<4;++c){f+=A.mL(g*d,i*d)*e
 d*=2.02
 e*=0.5}b=Math.pow(Math.sin((g+f*a6)*3.141592653589793*2)*0.5+0.5,4)
 a=B.b.l(q+p*b,0,1)
@@ -3410,13 +3409,13 @@ g=k+3
 if(!(g<s))return A.d(r,g)
 r[g]=255
 k+=4}return r},
-oP(a,b,c,d,e,f){var s,r,q,p,o,n,m,l,k,j,i,h
+oO(a,b,c,d,e,f){var s,r,q,p,o,n,m,l,k,j,i,h
 if(f<=0||c<=0)throw A.c(A.i("dimensions must be > 0",null))
 s=f*c*4
 r=new Uint8Array(s)
 q=B.b.I(B.b.l(e,0,1)*255)
 for(p=0,o=0;o<c;++o)for(n=o/c*4,m=0;m<f;++m){l=m/f
-k=Math.sin((l+A.mM(l*4,n)*b)*d*3.141592653589793*2)*0.5+0.5
+k=Math.sin((l+A.mL(l*4,n)*b)*d*3.141592653589793*2)*0.5+0.5
 j=B.b.l(a+k*0.12,0.05,0.95)
 i=B.b.I(B.b.l(0.85+(1-k)*0.15,0,1)*255)
 if(!(p>=0&&p<s))return A.d(r,p)
@@ -3432,14 +3431,14 @@ h=p+3
 if(!(h<s))return A.d(r,h)
 r[h]=255
 p+=4}return r},
-mM(a,b){var s=B.b.ab(a),r=B.b.ab(b),q=a-s,p=b-r,o=q*q*q*(q*(q*6-15)+10),n=p*p*p*(p*(p*6-15)+10),m=s+1,l=r+1,k=1-o,j=1-n
+mL(a,b){var s=B.b.ab(a),r=B.b.ab(b),q=a-s,p=b-r,o=q*q*q*(q*(q*6-15)+10),n=p*p*p*(p*(p*6-15)+10),m=s+1,l=r+1,k=1-o,j=1-n
 return A.dI(s,r)*k*j+A.dI(m,r)*o*j+A.dI(s,l)*k*n+A.dI(m,l)*o*n},
 dI(a,b){var s=a*374761393+b*668265263&2147483647
 return((s^s>>>13)*1274126177&2147483647)/2147483647},
 iZ:function iZ(a,b,c){this.a=a
 this.b=b
 this.c=c},
-mV(a){return a*a*a*(a*(a*6-15)+10)},
+mU(a){return a*a*a*(a*(a*6-15)+10)},
 jp(a,b,c){var s=a&7,r=s<4,q=r?b:c,p=r?c:b
 r=(s&1)!==0?-q:q
 return r+((s&2)!==0?-2*p:2*p)},
@@ -3471,10 +3470,10 @@ j=Math.min(q.b,k)
 n=n.c
 q=new A.a(l,j,Math.min(q.c,n))
 p=new A.a(Math.max(p.a,m),Math.max(p.b,k),Math.max(p.c,n))}if(!o)throw A.c(A.i("Aabb.fromPoints requires at least one point",null))
-return new A.a5(q,p)},
-a5:function a5(a,b){this.a=a
+return new A.a6(q,p)},
+a6:function a6(a,b){this.a=a
 this.b=b},
-o6(a){A.ep(a)
+o5(a){A.ep(a)
 return a*a},
 mm(a){var s
 A.ep(a)
@@ -3531,7 +3530,7 @@ bl:function bl(a){this.a=a},
 ip:function ip(){},
 ai(a,b){var s=a.gm(),r=b/2,q=Math.sin(r)
 return new A.bZ(s.a*q,s.b*q,s.c*q,Math.cos(r))},
-mN(a,b){var s,r=a.gm(),q=b.gm(),p=r.aA(q)
+mM(a,b){var s,r=a.gm(),q=b.gm(),p=r.aA(q)
 if(p>=0.999999)return B.o
 if(p<=-0.999999){s=B.k.R(r)
 return A.ai((s.gO()<0.001?B.d.R(r):s).gm(),3.141592653589793)}s=r.R(q)
@@ -3622,13 +3621,13 @@ _.ay=n
 _.ch=o
 _.CW=p},
 hE:function hE(){},
-ot(a){var s=t.eH,r=A.bU(a,!0,s)
+os(a){var s=t.eH,r=A.bU(a,!0,s)
 B.a.ao(r,new A.iD())
 s=new A.iC(A.aN(r,s))
 s.p()
 return s},
-aP(a,b,c,d,e,f,g,h,i,a0,a1,a2,a3,a4,a5,a6,a7,a8,a9,b0,b1,b2,b3,b4,b5,b6,b7,b8,b9,c0,c1,c2,c3,c4,c5,c6,c7,c8,c9,d0){var s,r,q,p,o,n,m,l,k,j=$.mE
-$.mE=j+1
+aP(a,b,c,d,e,f,g,h,i,a0,a1,a2,a3,a4,a5,a6,a7,a8,a9,b0,b1,b2,b3,b4,b5,b6,b7,b8,b9,c0,c1,c2,c3,c4,c5,c6,c7,c8,c9,d0){var s,r,q,p,o,n,m,l,k,j=$.mD
+$.mD=j+1
 s=b0==null?b7:b0
 r=a5==null?b3:a5
 q=d==null
@@ -3907,7 +3906,7 @@ _.db=p
 _.dx=q
 _.dy=r
 _.fr=s},
-ou(a){var s
+ot(a){var s
 switch(a.a){case 0:s=0
 break
 case 1:s=1
@@ -3943,7 +3942,7 @@ _.b=b
 _.c=c
 _.d=d
 _.e=e},
-mQ(a){var s=A.lt(B.d,B.q,Math.abs(0)<0.99?B.k:B.d)
+mP(a){var s=A.lt(B.d,B.q,Math.abs(0)<0.99?B.k:B.d)
 return new A.c_(A.mz(1,1,B.e.l(1,0.1,3),0.05).k(0,s))},
 c_:function c_(a){this.a=a},
 fC:function fC(a,b,c,d,e,f,g,h,i,j,k){var _=this
@@ -3968,7 +3967,7 @@ _.f=f
 _.r=g
 _.w=h
 _.x=i},
-qw(c1,c2,c3,c4,c5,c6,c7,c8,c9,d0,d1,d2,d3,d4,d5,d6,d7,d8,d9,e0,e1,e2,e3,e4,e5,e6,e7,e8,e9,f0){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0,a1,a2,a3,a4,a5,a6,a7,a8,a9,b0,b1,b2=null,b3=u.l,b4="#version 300 es\nprecision highp float;\nin vec2 vUv;\nuniform sampler2D uSource;\nuniform vec2 uTexelStep;\nout vec4 oColor;\n\nconst float WEIGHTS[7]=float[7](\n  0.167465,0.153582,0.118331,0.076665,0.041582,0.018907,0.007203\n);\n\nvoid main(){\n  vec3 sum=texture(uSource,vUv).rgb*WEIGHTS[0];\n  for(int i=1;i<7;i++){\n    vec2 offset=uTexelStep*float(i);\n    sum+=texture(uSource,vUv+offset).rgb*WEIGHTS[i];\n    sum+=texture(uSource,vUv-offset).rgb*WEIGHTS[i];\n  }\n  oColor=vec4(sum,1.0);\n}\n",b5="bloomBlurH",b6="bloomBlurV",b7="dofBlurH",b8="dofBlurV",b9={},c0=c4.b
+qv(c1,c2,c3,c4,c5,c6,c7,c8,c9,d0,d1,d2,d3,d4,d5,d6,d7,d8,d9,e0,e1,e2,e3,e4,e5,e6,e7,e8,e9,f0){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0,a1,a2,a3,a4,a5,a6,a7,a8,a9,b0,b1,b2=null,b3=u.l,b4="#version 300 es\nprecision highp float;\nin vec2 vUv;\nuniform sampler2D uSource;\nuniform vec2 uTexelStep;\nout vec4 oColor;\n\nconst float WEIGHTS[7]=float[7](\n  0.167465,0.153582,0.118331,0.076665,0.041582,0.018907,0.007203\n);\n\nvoid main(){\n  vec3 sum=texture(uSource,vUv).rgb*WEIGHTS[0];\n  for(int i=1;i<7;i++){\n    vec2 offset=uTexelStep*float(i);\n    sum+=texture(uSource,vUv+offset).rgb*WEIGHTS[i];\n    sum+=texture(uSource,vUv-offset).rgb*WEIGHTS[i];\n  }\n  oColor=vec4(sum,1.0);\n}\n",b5="bloomBlurH",b6="bloomBlurV",b7="dofBlurH",b8="dofBlurV",b9={},c0=c4.b
 if(!c0.A(0,"shadows"))throw A.c(A.a2(c4,"profile","buildShadowGraph requires the shadows feature; use buildSafeGraph for a shadow-free profile"))
 s=c0.A(0,"ssao")
 r=c0.A(0,"bloom")
@@ -3991,7 +3990,7 @@ d=A.ah(B.eC,c0,l,b2,b2)
 c=A.ah(B.eD,c0,l,b2,b2)
 b=A.ah(B.eH,c0,l,b2,b2)
 a=A.ah(B.eI,c0,l,b2,b2)
-a0=$.nJ()
+a0=$.nI()
 a1=i?1:0
 a2=A.ah(a0,e9,e8,b2,a1+(m?1:0)+1)
 a0=A.ah(B.ew,c0,l,b2,b2)
@@ -4002,7 +4001,7 @@ a5=A.ah(B.eK,e9,e8,b2,b2)
 a6=A.ah(B.eF,e9,e8,b2,b2)
 a7=i?new A.dx(c2,k,j):b2
 b9.a=null
-a8=A.mQ(B.bH)
+a8=A.mP(B.bH)
 if(m){a9=i?j:k
 b0=new A.fR(c1,b3,"#version 300 es\nprecision highp float;\n\nin vec2 vUv;\nlayout(location = 0) out vec4 oColor;\n\nuniform sampler2D uSceneDepth;\nuniform float uNear;\nuniform float uFar;\nuniform mat4 uViewProjection;\nuniform vec3 uLightDir;\nuniform vec3 uLightColor;\nuniform float uShaftIntensity;\nuniform float uFogDensity;\nuniform float uAnisotropy;\nuniform mat4 uView;\nuniform mat4 uInverseProjection;\nuniform vec3 uVolumetricAlbedo;\nuniform float uVolumetricHeightFalloff;\nuniform float uVolumetricDustDensity;\nuniform float uVolumetricJitter;\nuniform float uVolumetricIntensity;\nuniform float uVolumetricSampleCount;\nuniform float uVolumetricSourceCount;\n\nuniform vec3 uSourcePosition0;\nuniform vec3 uSourceColor0;\nuniform float uSourceIntensity0;\nuniform float uSourceReferenceDistance0;\nuniform float uSourceCutoffDistance0;\nuniform vec3 uSourcePosition1;\nuniform vec3 uSourceColor1;\nuniform float uSourceIntensity1;\nuniform float uSourceReferenceDistance1;\nuniform float uSourceCutoffDistance1;\nuniform vec3 uSourcePosition2;\nuniform vec3 uSourceColor2;\nuniform float uSourceIntensity2;\nuniform float uSourceReferenceDistance2;\nuniform float uSourceCutoffDistance2;\nuniform vec3 uSourcePosition3;\nuniform vec3 uSourceColor3;\nuniform float uSourceIntensity3;\nuniform float uSourceReferenceDistance3;\nuniform float uSourceCutoffDistance3;\n\nfloat linearDepth(float depth) {\n  float z = depth * 2.0 - 1.0;\n  return (2.0 * uNear * uFar) / max(uFar + uNear - z * (uFar - uNear), 1e-4);\n}\n\nfloat phaseHenyeyGreenstein(float cosTheta, float anisotropy) {\n  float g = clamp(anisotropy, -0.85, 0.85);\n  float denominator = 1.0 + g * g - 2.0 * g * cosTheta;\n  return (1.0 - g * g) / (12.5663706 * pow(max(denominator, 1e-3), 1.5));\n}\n\nvec3 sourceContribution(\n  vec3 position,\n  vec3 color,\n  float intensity,\n  float referenceDistance,\n  float cutoffDistance,\n  vec3 viewRay,\n  float rayLength\n) {\n  vec4 clip = uViewProjection * vec4(position, 1.0);\n  if (clip.w <= 0.0) return vec3(0.0);\n  vec3 sourceView = (uView * vec4(position, 1.0)).xyz;\n  float sourceDistance = length(sourceView);\n  float tClosest = clamp(dot(sourceView, viewRay), 0.0, rayLength);\n  vec3 sampleToSource = sourceView - viewRay * tClosest;\n  float distanceToSource = max(length(sampleToSource), 1e-3);\n  float cutoff = 1.0 - smoothstep(\n    cutoffDistance * 0.65, cutoffDistance, sourceDistance);\n  float inverseSquare = intensity * referenceDistance * referenceDistance /\n      max(distanceToSource * distanceToSource,\n          referenceDistance * referenceDistance);\n  // The incoming direction is source -> sample and the outgoing direction is\n  // sample -> camera. This is the same phase convention as the directional\n  // medium path, but now evaluated against the located source.\n  float phase = phaseHenyeyGreenstein(\n    dot(normalize(sampleToSource), viewRay), uAnisotropy);\n  // Located practicals and lightning must also acquire visible body in a\n  // dust-filled room. Use the same broad haze plus particulate density as the\n  // directional march; otherwise a clear-air fog toggle would accidentally\n  // erase dust-lit source rays while the directional shafts still showed it.\n  float mediumDensity = max(uFogDensity + uVolumetricDustDensity, 0.0);\n  float mediumWeight = 1.0 - exp(-max(\n    mediumDensity * min(rayLength, cutoffDistance), 0.0));\n  float pathWeight = clamp(\n    rayLength / max(sourceDistance, referenceDistance), 0.0, 1.0);\n  return color * inverseSquare * phase * cutoff * mediumWeight * pathWeight *\n    uVolumetricIntensity * 0.35;\n}\n\nvoid main() {\n  float depth = texture(uSceneDepth, vUv).r;\n  vec4 viewPoint = uInverseProjection * vec4(vUv * 2.0 - 1.0, -1.0, 1.0);\n  viewPoint /= max(abs(viewPoint.w), 1e-5);\n  vec3 viewRay = normalize(viewPoint.xyz);\n  // linearDepth is camera-space Z; convert it to distance along the actual\n  // reconstructed ray so wide and tall projections integrate equally.\n  float cameraDepth = linearDepth(depth);\n  float rayLength = min(cameraDepth / max(-viewRay.z, 1e-3), uFar);\n  float density = max(uFogDensity, 0.0);\n\n  // A fixed, bounded integral keeps the pass deterministic and makes its\n  // cost predictable on weak adapters. The depth buffer stops integration at\n  // the first opaque surface, so shafts do not leak through geometry.\n  const int maxSampleCount = 24;\n  int sampleCount = int(clamp(uVolumetricSampleCount, 4.0, 24.0));\n  vec3 scatter = vec3(0.0);\n  float transmittance = 1.0;\n  float stepLength = rayLength / float(sampleCount);\n  float jitterSeed = fract(sin(dot(vUv, vec2(127.1, 311.7))) * 43758.5453);\n  float jitter = (jitterSeed - 0.5) * clamp(uVolumetricJitter, 0.0, 0.5);\n  for (int i = 0; i < maxSampleCount; i++) {\n    if (i >= sampleCount) break;\n    float distanceAlongRay = clamp(\n      (float(i) + 0.5 + jitter) * stepLength, 0.0, rayLength);\n    float heightWeight = exp(-max(distanceAlongRay * uVolumetricHeightFalloff, 0.0));\n    // Dust is a separate, host-resolved particulate phase. It is denser near\n    // the occupied room volume than the broad atmospheric haze, so shafts gain\n    // visible body without turning the far horizon opaque. At zero density the\n    // extra term is exactly zero and the established fog path is unchanged.\n    float dustWeight = exp(-max(distanceAlongRay *\n      uVolumetricHeightFalloff * 0.45, 0.0));\n    float opticalDensity = density +\n      max(uVolumetricDustDensity, 0.0) * dustWeight;\n    float opticalDepth = opticalDensity * stepLength * heightWeight;\n    float sampleTransmittance = exp(-opticalDepth);\n    float phase = phaseHenyeyGreenstein(dot(normalize(-uLightDir), viewRay), uAnisotropy);\n    scatter += transmittance * (uLightColor * uVolumetricAlbedo *\n      uShaftIntensity * uVolumetricIntensity * phase) * opticalDepth;\n    transmittance *= sampleTransmittance;\n  }\n\n  if (uVolumetricSourceCount > 0.5) {\n    scatter += sourceContribution(\n      uSourcePosition0, uSourceColor0, uSourceIntensity0,\n      uSourceReferenceDistance0, uSourceCutoffDistance0, viewRay, rayLength);\n  }\n  if (uVolumetricSourceCount > 1.5) {\n    scatter += sourceContribution(\n      uSourcePosition1, uSourceColor1, uSourceIntensity1,\n      uSourceReferenceDistance1, uSourceCutoffDistance1, viewRay, rayLength);\n  }\n  if (uVolumetricSourceCount > 2.5) {\n    scatter += sourceContribution(\n      uSourcePosition2, uSourceColor2, uSourceIntensity2,\n      uSourceReferenceDistance2, uSourceCutoffDistance2, viewRay, rayLength);\n  }\n  if (uVolumetricSourceCount > 3.5) {\n    scatter += sourceContribution(\n      uSourcePosition3, uSourceColor3, uSourceIntensity3,\n      uSourceReferenceDistance3, uSourceCutoffDistance3, viewRay, rayLength);\n  }\n\n  // Fade the final sample at the far plane and keep the additive output\n  // bounded so a storm flash cannot blow out the entire frame.\n  float farFade = 1.0 - smoothstep(uFar * 0.75, uFar, rayLength);\n  oColor = vec4(min(scatter * farFade, vec3(8.0)), 1.0);\n}\n","#version 300 es\nprecision highp float;\n\nin vec2 vUv;\nlayout(location = 0) out vec4 oColor;\nuniform sampler2D uVolumetric;\nuniform float uVolumetricStrength;\n\nvoid main() {\n  vec3 light = texture(uVolumetric, vUv).rgb;\n  oColor = vec4(light * max(uVolumetricStrength, 0.0), 1.0);\n}\n",c2,e1,c8,g,f,a9,h,A.b([],t.J))}else b0=b2
 g=t.cL
@@ -4017,11 +4016,11 @@ h=a6}j=A.b([new A.eN(c1,"#version 300 es\nlayout(location=0) in vec3 aPosition;\
 if(s)j.push(new A.fG(c1,b3,"#version 300 es\nprecision highp float;\nin vec2 vUv;\nuniform sampler2D uSceneDepth;\nuniform float uNear;\nuniform float uFar;\nuniform float uProjScaleX;\nuniform float uProjScaleY;\nuniform float uRadius;\nuniform float uStrength;\nout vec4 oColor;\n\nconst int KERNEL_SIZE=16;\nconst vec3 KERNEL[16]=vec3[16](\n  vec3( 0.35, 0.23, 0.45),\n  vec3(-0.28, 0.41, 0.32),\n  vec3( 0.18,-0.36, 0.55),\n  vec3(-0.42,-0.19, 0.28),\n  vec3( 0.51, 0.08, 0.18),\n  vec3(-0.11, 0.53, 0.16),\n  vec3( 0.07,-0.48, 0.38),\n  vec3(-0.33,-0.31, 0.48),\n  vec3( 0.22, 0.14, 0.72),\n  vec3(-0.18,-0.25, 0.65),\n  vec3( 0.42,-0.28, 0.35),\n  vec3(-0.36, 0.32, 0.52),\n  vec3( 0.15, 0.58, 0.25),\n  vec3(-0.48, 0.12, 0.39),\n  vec3( 0.28,-0.52, 0.22),\n  vec3(-0.24,-0.42, 0.58)\n);\n\nfloat linearDepth(float raw){\n  float ndc=raw*2.0-1.0;\n  return (2.0*uNear*uFar)/(uFar+uNear-ndc*(uFar-uNear));\n}\n\nvec3 viewPosAt(vec2 uv){\n  float viewZ=-linearDepth(texture(uSceneDepth,uv).r);\n  vec2 ndc=uv*2.0-1.0;\n  float viewX=ndc.x*(-viewZ)/uProjScaleX;\n  float viewY=ndc.y*(-viewZ)/uProjScaleY;\n  return vec3(viewX,viewY,viewZ);\n}\n\n// Pinned per-pixel kernel rotation \u2014 a deterministic hash of screen\n// position, not per-frame randomness, matching \xa78.5's \"rotates a small\n// kernel from pinned blue noise\" without the extra machinery of an actual\n// noise texture: the rotation angle is stable across frames for a given\n// pixel, which is what \"pinned\" requires (temporal stability), while still\n// varying spatially enough to break up banding between neighboring samples.\nfloat pinnedRotation(vec2 fragCoord){\n  return fract(sin(dot(fragCoord,vec2(12.9898,78.233)))*43758.5453)*6.2831853;\n}\n\nvoid main(){\n  float rawDepth=texture(uSceneDepth,vUv).r;\n  if(rawDepth>=0.9999){\n    oColor=vec4(1.0);\n    return;\n  }\n  vec3 originView=viewPosAt(vUv);\n  // Screen-space derivatives reconstruct a per-fragment normal from\n  // neighboring depth samples alone \u2014 no G-buffer normal attachment exists\n  // (deferred; see depth_prepass.dart's doc comment), which is sufficient\n  // for a chunky/stylized AO term rather than a precision-critical one.\n  vec3 normalView=normalize(cross(dFdx(originView),dFdy(originView)));\n\n  // Rotates each kernel sample's tangent-plane (x,y) offset in place, before\n  // it's transformed into view space by tbn below \u2014 this is what actually\n  // varies the kernel per pixel; rotating the already-reprojected screen UV\n  // afterward would rotate around the wrong origin and misalign every\n  // sample from the surface it's meant to test.\n  float angle=pinnedRotation(gl_FragCoord.xy);\n  float ca=cos(angle);\n  float sa=sin(angle);\n  mat2 rot=mat2(ca,sa,-sa,ca);\n\n  vec3 up=abs(normalView.z)<0.99?vec3(0.0,0.0,1.0):vec3(1.0,0.0,0.0);\n  vec3 tangent=normalize(cross(up,normalView));\n  vec3 bitangent=cross(normalView,tangent);\n  mat3 tbn=mat3(tangent,bitangent,normalView);\n\n  float occlusion=0.0;\n  for(int i=0;i<KERNEL_SIZE;i++){\n    vec3 kernelSample=KERNEL[i];\n    kernelSample.xy=rot*kernelSample.xy;\n    vec3 samplePos=originView+tbn*kernelSample*uRadius;\n    // Project the sample's view-space position back to screen UV using the\n    // same scale factors used to reconstruct it, inverted.\n    vec2 sampleUv=vec2(\n      samplePos.x*uProjScaleX/(-samplePos.z),\n      samplePos.y*uProjScaleY/(-samplePos.z)\n    );\n    sampleUv=sampleUv*0.5+0.5;\n    if(sampleUv.x<0.0||sampleUv.x>1.0||sampleUv.y<0.0||sampleUv.y>1.0){\n      continue;\n    }\n    vec3 occluderView=viewPosAt(sampleUv);\n    float rangeCheck=smoothstep(0.0,1.0,uRadius/max(abs(originView.z-occluderView.z),0.0001));\n    vec3 toOccluder=occluderView-originView;\n    float angleWeight=max(dot(normalView,normalize(toOccluder)),0.0);\n    float bias=max(0.015,abs(originView.z)*0.001);\n    occlusion+=(occluderView.z>=samplePos.z+bias?1.0:0.0)*rangeCheck*(0.35+0.65*angleWeight);\n  }\n  float ao=1.0-clamp((occlusion/float(KERNEL_SIZE))*uStrength,0.0,1.0);\n  oColor=vec4(vec3(ao),1.0);\n}\n",c2,e1,c8,d))
 if(s)j.push(new A.fF(c1,b3,'#version 300 es\nprecision highp float;\nin vec2 vUv;\nuniform sampler2D uSsaoRaw;\nuniform sampler2D uSceneDepth;\nuniform vec2 uTexelSize;\nuniform float uNear;\nuniform float uFar;\nout vec4 oColor;\n\nfloat linearDepth(float raw){\n  float ndc=raw*2.0-1.0;\n  return (2.0*uNear*uFar)/(uFar+uNear-ndc*(uFar-uNear));\n}\n\n// \xa78.5: "uses a depth-aware bilateral blur rather than smearing across\n// silhouettes" \u2014 a plain box blur would bleed occlusion from a near object\n// onto a far background behind it (or vice versa) whenever they share\n// screen-space pixels near a silhouette edge; weighting each tap by how\n// close its depth is to the center tap\'s depth is what keeps the blur\n// confined to one surface at a time.\nvoid main(){\n  float rawCenter=texture(uSceneDepth,vUv).r;\n  if(rawCenter>=0.9999){\n    oColor=vec4(1.0);\n    return;\n  }\n  float centerDepth=linearDepth(rawCenter);\n  float sum=0.0;\n  float weightSum=0.0;\n  for(int y=-2;y<=2;y++){\n    for(int x=-2;x<=2;x++){\n      vec2 offset=vec2(float(x),float(y))*uTexelSize;\n      vec2 sampleUv=vUv+offset;\n      float sampleRaw=texture(uSceneDepth,sampleUv).r;\n      if(sampleRaw>=0.9999) continue;\n      float sampleDepth=linearDepth(sampleRaw);\n      float spatialDistSq=float(x*x+y*y);\n      float spatialWeight=exp(-spatialDistSq*0.22);\n      float depthWeight=1.0/(1.0+abs(sampleDepth-centerDepth)*6.0);\n      float totalWeight=spatialWeight*depthWeight;\n      sum+=texture(uSsaoRaw,sampleUv).r*totalWeight;\n      weightSum+=totalWeight;\n    }\n  }\n  float blurred=sum/max(weightSum,0.0001);\n  oColor=vec4(vec3(blurred),1.0);\n}\n',c2,e4,e1,c8,c0,l,d,c))
 j.push(new A.fC(c1,"#version 300 es\nlayout(location=0) in vec3 aPosition;\nlayout(location=4) in vec3 aUvMat;\nuniform mat4 uLightViewProjection;\nuniform mat4 uModel;\nuniform mat4 uInstanceModels[16];\nuniform float uUseInstances;\nout highp vec2 vUv;\n// No affine premultiply here, unlike depth_prepass.vert. Affine sampling is\n// an artifact of *this camera's* screen-space rasterization; the shadow map\n// rasterizes the same triangle from the light, where the equivalent warp\n// would be a different, unrelated distortion. A masked surface therefore\n// cuts its shadow from the perspective-correct UVs \u2014 the geometrically\n// right holes \u2014 while the camera passes cut theirs from whatever the PS1\n// profile asked for. That divergence is deliberate: the two rasterizations\n// have no shared screen space to agree in.\nvoid main(){\n  mat4 model=uModel;\n  if(uUseInstances>0.5){model=uInstanceModels[gl_InstanceID];}\n  vUv=aUvMat.xy;\n  gl_Position=uLightViewProjection*model*vec4(aPosition,1.0);\n}\n",'#version 300 es\nprecision highp float;\nin highp vec2 vUv;\nuniform sampler2D uAlbedo;\nuniform float uAlphaCutoff;\n// \xa76.2: "alpha-masked geometry participates in shadow, prepass, and opaque\n// depth-writing routes." Without this discard a lattice, a leaf or a grille\n// casts the solid shadow of its bounding quad \u2014 the single most obvious way\n// a masked material reads as fake. uAlphaCutoff==0 skips the fetch, so\n// every opaque caster costs exactly what it did before this existed.\nvoid main(){\n  if(uAlphaCutoff>0.&&texture(uAlbedo,vUv).a<uAlphaCutoff)discard;\n}\n',d7,d6,c5,c9,b2,b2,new A.kt(b9),e))
-j.push(new A.fD(c1,"#version 300 es\nlayout(location=0) in vec3 aPosition;\nlayout(location=1) in vec3 aNormal;\nlayout(location=2) in vec4 aColor;\nlayout(location=3) in float aAlpha;\nlayout(location=4) in vec3 aUvMat;\nlayout(location=5) in vec4 aTangent;\nlayout(location=6) in vec2 aUv1;\nuniform mat4 uViewProjection;\nuniform mat4 uView;\nuniform mat4 uModel;\nuniform mat4 uNormalMatrix;\nuniform mat4 uInstanceModels[16];\nuniform mat4 uInstanceNormalMatrices[16];\nuniform float uUseInstances;\nuniform mat4 uLightViewProjection;\nuniform float uVertexSnapGrid;\nuniform float uAffineWarpStrength;\nout vec4 vColor;\nout vec3 vNormal;\nout highp vec2 vUv;\nout highp float vUvW;\nout highp vec2 vUv1;\nout vec4 vLightSpacePos;\nout vec3 vWorldPos;\nout vec4 vTangent;\nout float vViewDepth;\nvoid main(){\n  mat4 model=uModel;\n  mat4 normalMatrix=uNormalMatrix;\n  if(uUseInstances>0.5){model=uInstanceModels[gl_InstanceID];normalMatrix=uInstanceNormalMatrices[gl_InstanceID];}\n  vColor=vec4(aColor.rgb,aAlpha);\n  vNormal=mat3(normalMatrix)*aNormal;\n  vec4 worldPos=model*vec4(aPosition,1.0);\n  vWorldPos=worldPos.xyz;\n  vTangent=vec4(mat3(normalMatrix)*aTangent.xyz,aTangent.w);\n  vLightSpacePos=uLightViewProjection*worldPos;\n  // RV-09 rung 5's fog: the same \"linear view depth\" convention SSAO/DOF\n  // already reconstruct from a depth texture, computed directly here\n  // instead \u2014 this pass rasterizes the actual geometry, so there is a true\n  // view-space Z per-vertex already, with no texture round-trip needed.\n  vViewDepth=-(uView*worldPos).z;\n  vec4 clip=uViewProjection*worldPos;\n  // RV-09 rung 3's PS1 profile: snaps clip-space xy to a fixed grid before\n  // the perspective divide, emulating the fixed-point vertex transform\n  // precision loss that gives PS1 geometry its characteristic wobble as it\n  // moves. uVertexSnapGrid==0 skips the branch entirely, so the default/\n  // safe path is bit-for-bit unchanged from before this rung.\n  if(uVertexSnapGrid>0.0){\n    vec2 ndc=clip.xy/clip.w;\n    ndc=floor(ndc/uVertexSnapGrid+0.5)*uVertexSnapGrid;\n    clip.xy=ndc*clip.w;\n  }\n  gl_Position=clip;\n  // Affine UV, the PS1 rung's deferred half. GLSL ES 300 has no\n  // `noperspective` qualifier, so the divide the rasterizer already performs\n  // is cancelled instead of disabled: hardware hands the fragment\n  // interp(v/w)/interp(1/w), so premultiplying a varying by w makes that\n  // expression collapse to interp(v) \u2014 screen-space linear, which *is*\n  // affine. Both varyings are scaled by the same factor so the fragment's\n  // vUv/vUvW recovers exactly that, and the intermediate blend between the\n  // two regimes stays continuous rather than popping at any strength.\n  // uAffineWarpStrength==0 gives affineW==1.0 exactly, leaving vUv equal to\n  // aUvMat.xy bit-for-bit; the fragment then skips the divide entirely on\n  // the same uniform, so the perspective-correct path is untouched rather\n  // than merely round-tripped. Snapping above only rewrites clip.xy, never\n  // clip.w, so the two PS1 halves are independent.\n  float affineW=mix(1.0,clip.w,uAffineWarpStrength);\n  vUv=aUvMat.xy*affineW;\n  vUvW=affineW;\n  vUv1=aUv1;\n}\n","#version 300 es\nprecision highp float;\nin vec4 vColor;\nin vec3 vNormal;\nin highp vec2 vUv;\nin highp float vUvW;\nin highp vec2 vUv1;\nin vec4 vLightSpacePos;\nin vec3 vWorldPos;\nin vec4 vTangent;\nin float vViewDepth;\nuniform sampler2D uAlbedo;\nuniform sampler2D uNormalMap;\nuniform sampler2D uOrmMap;\nuniform sampler2D uEmissiveMap;\nuniform sampler2D uLightmap;\nuniform sampler2D uShadowMap;\nuniform vec3 uCameraPosition;\nuniform vec3 uLightPosition;\nuniform vec3 uLightDirection;\nuniform vec3 uLightColor;\nuniform float uLightIntensity;\nuniform float uLightRange;\nuniform float uLightInnerCos;\nuniform float uLightOuterCos;\nuniform float uSpotEnabled;\nuniform vec3 uDirectionalDirection;\nuniform vec3 uDirectionalColor;\nuniform float uDirectionalIntensity;\nuniform vec3 uPointPosition0;\nuniform vec3 uPointColor0;\nuniform float uPointIntensity0;\nuniform float uPointRadius0;\nuniform vec3 uPointPosition1;\nuniform vec3 uPointColor1;\nuniform float uPointIntensity1;\nuniform float uPointRadius1;\nuniform vec3 uPointPosition2;\nuniform vec3 uPointColor2;\nuniform float uPointIntensity2;\nuniform float uPointRadius2;\nuniform vec3 uPointPosition3;\nuniform vec3 uPointColor3;\nuniform float uPointIntensity3;\nuniform float uPointRadius3;\nuniform vec3 uDirectSpotPosition0;\nuniform vec3 uDirectSpotDirection0;\nuniform vec3 uDirectSpotColor0;\nuniform float uDirectSpotIntensity0;\nuniform float uDirectSpotRange0;\nuniform float uDirectSpotInnerCos0;\nuniform float uDirectSpotOuterCos0;\nuniform float uDirectSpotEnabled0;\nuniform vec3 uDirectSpotPosition1;\nuniform vec3 uDirectSpotDirection1;\nuniform vec3 uDirectSpotColor1;\nuniform float uDirectSpotIntensity1;\nuniform float uDirectSpotRange1;\nuniform float uDirectSpotInnerCos1;\nuniform float uDirectSpotOuterCos1;\nuniform float uDirectSpotEnabled1;\nuniform vec3 uDirectSpotPosition2;\nuniform vec3 uDirectSpotDirection2;\nuniform vec3 uDirectSpotColor2;\nuniform float uDirectSpotIntensity2;\nuniform float uDirectSpotRange2;\nuniform float uDirectSpotInnerCos2;\nuniform float uDirectSpotOuterCos2;\nuniform float uDirectSpotEnabled2;\nuniform vec3 uAmbientColor;\nuniform float uAmbientIntensity;\nuniform float uAmbientLightScale;\nuniform float uDirectLightScale;\nuniform vec3 uReflectionColor;\nuniform float uReflectionIntensity;\nuniform float uReflectionConfidence;\nuniform vec2 uShadowMapTexelSize;\nuniform float uShadowFilterRadius;\nuniform float uShadowBias;\nuniform vec3 uMaterialTint;\nuniform vec4 uUvScaleOffset;\nuniform sampler2D uSsao;\nuniform vec2 uSceneColorSize;\nuniform float uEmissiveStrength;\nuniform float uNormalStrength;\nuniform float uRoughness;\nuniform float uMetallic;\nuniform float uSpecularScale;\nuniform float uOcclusionStrength;\nuniform float uClearcoatStrength;\nuniform float uClearcoatRoughness;\nuniform float uLightmapIntensity;\nuniform float uAffineWarpStrength;\nuniform float uAlphaCutoff;\nuniform float uOpaqueCoverage;\nuniform vec3 uFogColor;\nuniform float uFogStart;\nuniform float uFogEnd;\nuniform float uFogHeightFalloff;\nuniform float uFogDensity;\nuniform float uReceivesShadow;\nuniform float uRainWetness;\nuniform float uSurfaceSnowCoverage;\nuniform float uSurfaceDissolution;\nuniform float uThermalSourceCount;\nuniform vec3 uThermalSourcePosition0;\nuniform float uThermalSourceRadius0;\nuniform float uThermalSourceDissolution0;\nuniform vec3 uThermalSourcePosition1;\nuniform float uThermalSourceRadius1;\nuniform float uThermalSourceDissolution1;\nuniform vec3 uThermalSourcePosition2;\nuniform float uThermalSourceRadius2;\nuniform float uThermalSourceDissolution2;\nuniform vec3 uThermalSourcePosition3;\nuniform float uThermalSourceRadius3;\nuniform float uThermalSourceDissolution3;\nlayout(location=0)out vec4 oColor;\nlayout(location=1)out vec4 oGlow;\n\n// Distance falloff (smooth to zero at uLightRange, matching SpotLight.range\n// rather than an unbounded inverse-square that never reaches zero) times\n// cone-edge falloff (smoothstep between the outer and inner cone angles,\n  // SpotLight.outerConeRadians/innerConeRadians \u2014 both fields existed on the\n  // API already but nothing read them before this, so the light previously\n  // had a hard-edged, non-attenuating cone that read as flat/harsh instead of\n// a graduated pool of light).\nfloat rangeAttenuation(float dist,float range){\n  float normalized=clamp(dist/max(range,.001),0.,1.);\n  // Smooth quartic cutoff avoids a visible ring at the authored range while\n  // retaining an inverse-square response inside the light's influence.\n  float cutoff=1.-normalized*normalized*normalized*normalized;\n  float inverseSquare=1./(1.+(dist*dist)/max(range*range,.001));\n  return cutoff*cutoff*inverseSquare;\n}\n\nfloat lightAttenuation(vec3 worldPos){\n  vec3 toFrag=worldPos-uLightPosition;\n  float dist=length(toFrag);\n  float cosAngle=dot(normalize(toFrag),normalize(uLightDirection));\n  float coneFalloff=smoothstep(uLightOuterCos,uLightInnerCos,cosAngle);\n  return rangeAttenuation(dist,uLightRange)*coneFalloff;\n}\n\nfloat pointAttenuation(vec3 worldPos,vec3 lightPosition,float lightRadius){\n  float dist=length(lightPosition-worldPos);\n  return rangeAttenuation(dist,lightRadius);\n}\n\nvec3 pointContribution(vec3 normal,vec3 worldPos,vec3 lightPosition,\n  vec3 lightColor,float lightIntensity,float lightRadius){\n  vec3 toLight=lightPosition-worldPos;\n  float ndotl=max(dot(normal,normalize(toLight)),0.);\n  return lightColor*lightIntensity*ndotl*\n    pointAttenuation(worldPos,lightPosition,lightRadius);\n}\n\nfloat directSpotAttenuation(vec3 worldPos,vec3 lightPosition,\n  vec3 lightDirection,float lightRange,float innerCos,float outerCos,float enabled){\n  vec3 toFrag=worldPos-lightPosition;\n  float cosAngle=dot(normalize(toFrag),normalize(lightDirection));\n  float coneFalloff=smoothstep(outerCos,innerCos,cosAngle);\n  float distanceFalloff=rangeAttenuation(length(toFrag),lightRange);\n  return coneFalloff*distanceFalloff*enabled;\n}\n\nvec3 directSpotContribution(vec3 normal,vec3 worldPos,vec3 lightPosition,\n  vec3 lightDirection,vec3 lightColor,float lightIntensity,float lightRange,\n  float innerCos,float outerCos,float enabled){\n  vec3 toLight=lightPosition-worldPos;\n  float ndotl=max(dot(normal,normalize(toLight)),0.);\n  float atten=directSpotAttenuation(worldPos,lightPosition,lightDirection,\n    lightRange,innerCos,outerCos,enabled);\n  return lightColor*lightIntensity*ndotl*atten;\n}\n\n// Compact Cook-Torrance response for the clean/high path. The bounded\n// per-light evaluation makes roughness and metallic maps visibly useful\n// without introducing a deferred light buffer.\nfloat distributionGgx(float ndoth,float roughness){\n  float a=roughness*roughness;\n  float a2=a*a;\n  float denom=ndoth*ndoth*(a2-1.0)+1.0;\n  return a2/(3.14159265*denom*denom);\n}\n\n// Disney/Burley energy-conserving diffuse retro-reflection model\nfloat diffuseBurley(float ndotl,float ndotv,float lndoth,float roughness){\n  float fd90=0.5+2.0*roughness*lndoth*lndoth;\n  float lightScatter=1.0+(fd90-1.0)*pow(clamp(1.0-ndotl,0.0,1.0),5.0);\n  float viewScatter=1.0+(fd90-1.0)*pow(clamp(1.0-ndotv,0.0,1.0),5.0);\n  return lightScatter*viewScatter;\n}\n\n// Heitz (2014) height-correlated Smith GGX visibility: V = G / (4 * NdotV * NdotL)\nfloat visibilitySmithGgxCorrelated(float ndotv,float ndotl,float roughness){\n  float a2=roughness*roughness;\n  float ggxV=ndotl*sqrt(ndotv*ndotv*(1.0-a2)+a2);\n  float ggxL=ndotv*sqrt(ndotl*ndotl*(1.0-a2)+a2);\n  return 0.5/max(ggxV+ggxL,0.0001);\n}\n\nfloat geometrySchlick(float ndotv,float roughness){\n  float k=(roughness+1.0)*(roughness+1.0)/8.0;\n  return ndotv/(ndotv*(1.0-k)+k);\n}\n\nfloat geometrySmith(float ndotv,float ndotl,float roughness){\n  return geometrySchlick(ndotv,roughness)*geometrySchlick(ndotl,roughness);\n}\n\nvec3 fresnelSchlick(float cosTheta,vec3 f0){\n  return f0+(1.0-f0)*pow(1.0-clamp(cosTheta,0.0,1.0),5.0);\n}\n\nvec3 fresnelSchlickRoughness(float cosTheta,vec3 f0,float roughness){\n  return f0+(max(vec3(1.0-roughness),f0)-f0)*pow(clamp(1.0-cosTheta,0.0,1.0),5.0);\n}\n\nvec3 specularContribution(vec3 normal,vec3 viewDir,vec3 lightDir,\n  vec3 lightColor,float lightIntensity,float attenuation,vec3 baseColor,\n  float roughness,float metallic){\n  vec3 halfDir=normalize(viewDir+lightDir);\n  float ndotv=max(dot(normal,viewDir),0.0001);\n  float ndotl=max(dot(normal,lightDir),0.0001);\n  float ndoth=max(dot(normal,halfDir),0.0);\n  float hdotv=max(dot(halfDir,viewDir),0.0);\n  vec3 f0=mix(vec3(0.04),baseColor,metallic);\n  vec3 fresnel=fresnelSchlickRoughness(hdotv,f0,roughness);\n  float distribution=distributionGgx(ndoth,roughness);\n  float vis=visibilitySmithGgxCorrelated(ndotv,ndotl,roughness);\n  return distribution*vis*fresnel*lightColor*lightIntensity*attenuation*ndotl;\n}\n\nfloat sampleShadow(vec3 projCoord,float bias){\n  float shadowDepth=texture(uShadowMap,projCoord.xy).r;\n  return projCoord.z-bias>shadowDepth?0.:1.;\n}\n\n// \xa78.5's fog keeps the smooth distance ramp for authored horizon control, but\n// the participating-medium term is an analytic optical depth along the actual\n// camera-to-surface segment. For rho(y)=density*exp(-falloff*max(y,0)), the\n// integral has a stable constant-height limit and therefore does not shimmer\n// when a surface is nearly level with the camera. Zero density remains an\n// exact no-op; the host can still use the distance ramp independently.\nfloat heightFogOpticalDepth(vec3 rayStart,vec3 rayEnd){\n  float segmentLength=length(rayEnd-rayStart);\n  if(segmentLength<=0.0001||uFogDensity<=0.)return 0.;\n  float falloff=max(uFogHeightFalloff,0.);\n  float h0=max(rayStart.y,0.);\n  float h1=max(rayEnd.y,0.);\n  float integral;\n  if(falloff<=0.||abs(h1-h0)<=0.0001){\n    integral=segmentLength*exp(-falloff*h0);\n  }else{\n    float denominator=falloff*(h1-h0);\n    integral=segmentLength*(exp(-falloff*h0)-exp(-falloff*h1))/denominator;\n  }\n  return max(uFogDensity*integral,0.);\n}\n\nfloat fogFactor(float viewDepth,float worldY){\n  float distFactor=smoothstep(uFogStart,uFogEnd,viewDepth);\n  float opticalDepth=heightFogOpticalDepth(uCameraPosition,vWorldPos);\n  float mediumFactor=1.-exp(-opticalDepth);\n  return clamp(max(distFactor,mediumFactor),0.,1.);\n}\n\nconst vec2 VOGEL_16[16]=vec2[16](\n  vec2( 0.1768,  0.0000),\n  vec2(-0.2263,  0.2064),\n  vec2( 0.0346, -0.3938),\n  vec2( 0.2809,  0.3739),\n  vec2(-0.5186, -0.1111),\n  vec2( 0.4907, -0.3224),\n  vec2(-0.1724,  0.6137),\n  vec2(-0.2642, -0.6316),\n  vec2( 0.6186,  0.3860),\n  vec2(-0.6698,  0.3824),\n  vec2( 0.3479, -0.7314),\n  vec2( 0.1770,  0.8291),\n  vec2(-0.6558, -0.5927),\n  vec2( 0.8719,  0.2891),\n  vec2(-0.7099,  0.6348),\n  vec2( 0.1983, -0.9641)\n);\n\nfloat shadowFactor(float ndotl){\n  vec3 projCoord=vLightSpacePos.xyz/vLightSpacePos.w;\n  projCoord=projCoord*.5+.5;\n  if(projCoord.x<0.||projCoord.x>1.||projCoord.y<0.||projCoord.y>1.||projCoord.z>1.){\n    return 1.;\n  }\n  // Receiver-plane style slope bias keeps grazing surfaces from acne while\n  // avoiding the detached-shadow look of a large constant offset.\n  float bias=max(uShadowBias*(1.-ndotl),uShadowBias*0.2666667);\n  // 16-tap Vogel spiral with golden ratio rotation produces silky smooth\n  // penumbras free of regular lattice banding or directional noise.\n  vec2 t=uShadowMapTexelSize*clamp(uShadowFilterRadius,0.,3.);\n  // Adaptive contact-hardening: estimate blocker proximity to sharpen contact shadows\n  float blockerSum=0.0;\n  float blockerCount=0.0;\n  for(int b=0;b<4;b++){\n    float depthSample=texture(uShadowMap,projCoord.xy+VOGEL_16[b*4]*t*1.5).r;\n    if(depthSample<projCoord.z-bias){\n      blockerSum+=depthSample;\n      blockerCount+=1.0;\n    }\n  }\n  float penumbraScale=1.0;\n  if(blockerCount>0.0){\n    float avgBlockerDepth=blockerSum/blockerCount;\n    float penumbraRatio=clamp((projCoord.z-avgBlockerDepth)/max(projCoord.z,0.0001),0.0,1.0);\n    penumbraScale=mix(0.38,1.0,smoothstep(0.0002,0.012,penumbraRatio));\n  }\n  vec2 filterRadius=t*penumbraScale;\n  float sum=0.;\n  for(int i=0;i<16;i++){\n    sum+=sampleShadow(projCoord+vec3(VOGEL_16[i]*filterRadius,0.),bias);\n  }\n  return sum/16.;\n}\n\nvoid main(){\n  // The divide that undoes the rasterizer's own perspective correction (see\n  // shadowed_world.vert). Branched on the uniform rather than always\n  // dividing, so a zero-strength draw samples the untouched vUv and is\n  // bit-identical to the pre-affine path \u2014 the divisor is 1.0 there, but\n  // only after an interpolate/divide round-trip that need not return\n  // exactly 1.0. The branch is uniform across the whole draw, so it costs\n  // no divergence.\n  vec2 uv=uAffineWarpStrength>0.?vUv/vUvW:vUv;\n  uv=uv*uUvScaleOffset.xy+uUvScaleOffset.zw;\n  vec4 tex=texture(uAlbedo,uv);\n  // fragment must not pay for four shadow-map taps and two normalizes it\n  // will never use. uAlphaCutoff==0 is the pass's \"this material has no\n  // cutout\" sentinel (MaterialDefinition.validate forbids a real zero), so\n  // opaque and blended draws take a path containing no alpha compare at\n  // all rather than one comparing against an unreachable threshold. The\n  // same test, against the same uv, runs in depth_prepass.frag and\n  // shadow_caster.frag \u2014 three passes must agree on which fragments exist\n  // or SSAO, DOF and shadowing all occlude against holes this pass shaded\n  // through.\n  if(uAlphaCutoff>0.&&tex.a<uAlphaCutoff)discard;\n  vec3 n=normalize(vNormal);\n  // Surface-v2 supplies a tangent4 with OpenGL's +/-1 handedness in W.\n  // Compatibility14 meshes leave the attribute at its default zero and use\n  // the derivative frame below, so old content and authored tangents share\n  // one shader contract.\n  if(uNormalStrength>0.0){\n    vec3 dp1=dFdx(vWorldPos),dp2=dFdy(vWorldPos);\n    vec2 duv1=dFdx(uv),duv2=dFdy(uv);\n    vec3 derivativeT=normalize(dp1*duv2.y-dp2*duv1.y);\n    vec3 derivativeB=normalize(-dp1*duv2.x+dp2*duv1.x);\n    vec3 authoredT=normalize(vTangent.xyz-n*dot(n,vTangent.xyz));\n    bool hasAuthoredT=dot(vTangent.xyz,vTangent.xyz)>0.25;\n    vec3 t=hasAuthoredT?authoredT:derivativeT;\n    vec3 b=hasAuthoredT?normalize(cross(n,t)*vTangent.w):derivativeB;\n    vec3 map=texture(uNormalMap,uv).xyz*2.0-1.0;\n    map.xy*=uNormalStrength;\n    n=normalize(mat3(t,b,n)*normalize(map));\n  }\n  vec3 orm=texture(uOrmMap,uv).rgb;\n  float normalVariance=0.0;\n  if(uNormalStrength>0.0){\n    // Toksvig-style widening suppresses sub-pixel normal sparkle when a high\n    // resolution map is minified. It preserves authored relief at distance\n    // while converting unresolved detail into a stable roughness increase.\n    vec3 normalSample=texture(uNormalMap,uv).xyz*2.0-1.0;\n    vec3 normalDx=dFdx(normalSample);\n    vec3 normalDy=dFdy(normalSample);\n    normalVariance=dot(normalDx,normalDx)+dot(normalDy,normalDy);\n  }\n  float ao=texture(uSsao,gl_FragCoord.xy/uSceneColorSize).r;\n  ao*=mix(1.0,orm.r,clamp(uOcclusionStrength,0.0,1.0));\n  vec3 direct=vec3(0.);\n  float directionalNdotL=max(dot(n,normalize(uDirectionalDirection)),0.);\n  direct+=uDirectionalColor*uDirectionalIntensity*directionalNdotL;\n  direct+=pointContribution(n,vWorldPos,uPointPosition0,uPointColor0,\n    uPointIntensity0,uPointRadius0);\n  direct+=pointContribution(n,vWorldPos,uPointPosition1,uPointColor1,\n    uPointIntensity1,uPointRadius1);\n  direct+=pointContribution(n,vWorldPos,uPointPosition2,uPointColor2,\n    uPointIntensity2,uPointRadius2);\n  direct+=pointContribution(n,vWorldPos,uPointPosition3,uPointColor3,\n    uPointIntensity3,uPointRadius3);\n  direct+=directSpotContribution(n,vWorldPos,uDirectSpotPosition0,\n    uDirectSpotDirection0,uDirectSpotColor0,uDirectSpotIntensity0,\n    uDirectSpotRange0,uDirectSpotInnerCos0,uDirectSpotOuterCos0,\n    uDirectSpotEnabled0);\n  direct+=directSpotContribution(n,vWorldPos,uDirectSpotPosition1,\n    uDirectSpotDirection1,uDirectSpotColor1,uDirectSpotIntensity1,\n    uDirectSpotRange1,uDirectSpotInnerCos1,uDirectSpotOuterCos1,\n    uDirectSpotEnabled1);\n  direct+=directSpotContribution(n,vWorldPos,uDirectSpotPosition2,\n    uDirectSpotDirection2,uDirectSpotColor2,uDirectSpotIntensity2,\n    uDirectSpotRange2,uDirectSpotInnerCos2,uDirectSpotOuterCos2,\n    uDirectSpotEnabled2);\n  vec3 toSpot=normalize(uLightPosition-vWorldPos);\n  float spotNdotL=max(dot(n,toSpot),0.);\n  float shadow=uReceivesShadow>0.5?shadowFactor(spotNdotL):1.;\n  float attenuation=lightAttenuation(vWorldPos);\n  direct+=uLightColor*uLightIntensity*spotNdotL*shadow*attenuation*uSpotEnabled;\n  direct*=uDirectLightScale;\n  // \xa78.5: \"modulates ambient only\" \u2014 SSAO must never darken the direct\n  // (N.L * shadow * attenuation) term, only the ambient fill, or it would\n  // double up with real shadowing and read as an incorrect global darkening\n  // rather than contact occlusion specifically.\n  float upward=clamp(n.y*0.5+0.5,0.0,1.0);\n  vec3 ambient=uAmbientColor*uAmbientIntensity*uAmbientLightScale*ao*mix(0.85,1.15,upward);\n  vec3 baseColor=vColor.rgb*tex.rgb*uMaterialTint;\n  // Metallic surfaces contribute less diffuse energy; roughness keeps a\n  // small, stable broadening factor until the surface-v2 camera/specular\n  // block lands. Both channels therefore affect the live output rather than\n  // being metadata-only fields.\n  float metal=clamp(uMetallic*orm.b,0.0,1.0);\n  float rough=clamp(uRoughness*orm.g,0.0,1.0);\n  // Weather changes the material before direct and environment response.\n  // Thawing therefore affects the same specular lobe the viewer sees,\n  // instead of changing only diffuse color after the highlight is computed.\n  float wetDepth=1.0-smoothstep(2.0,18.0,max(vViewDepth,0.0));\n  float wetness=clamp(uRainWetness,0.0,1.0)*wetDepth;\n  baseColor=mix(baseColor,baseColor*vec3(0.84,0.90,0.98),wetness*0.22);\n  float thermalDissolution=clamp(uSurfaceDissolution,0.0,1.0);\n  // A steady spherical conductive field decays approximately as 1/r. The\n  // host keeps the slow latent material memory in uSurfaceDissolution; this\n  // local term therefore models the spatial heat field without making warm\n  // surfaces snap back or disappear at an arbitrary exponential radius.\n  if(uThermalSourceCount>0.5) thermalDissolution=max(thermalDissolution,\n    uThermalSourceDissolution0*clamp(uThermalSourceRadius0/\n      max(distance(vWorldPos,uThermalSourcePosition0),uThermalSourceRadius0),0.,1.));\n  if(uThermalSourceCount>1.5) thermalDissolution=max(thermalDissolution,\n    uThermalSourceDissolution1*clamp(uThermalSourceRadius1/\n      max(distance(vWorldPos,uThermalSourcePosition1),uThermalSourceRadius1),0.,1.));\n  if(uThermalSourceCount>2.5) thermalDissolution=max(thermalDissolution,\n    uThermalSourceDissolution2*clamp(uThermalSourceRadius2/\n      max(distance(vWorldPos,uThermalSourcePosition2),uThermalSourceRadius2),0.,1.));\n  if(uThermalSourceCount>3.5) thermalDissolution=max(thermalDissolution,\n    uThermalSourceDissolution3*clamp(uThermalSourceRadius3/\n      max(distance(vWorldPos,uThermalSourcePosition3),uThermalSourceRadius3),0.,1.));\n  thermalDissolution=clamp(thermalDissolution,0.0,1.0);\n  float snowCoverage=clamp(uSurfaceSnowCoverage,0.0,1.0)*\n    smoothstep(0.18,0.82,upward)*(1.0-thermalDissolution*0.72);\n  baseColor=mix(baseColor,vec3(0.78,0.86,0.95),snowCoverage*0.82);\n  float dissolution=thermalDissolution;\n  baseColor=mix(baseColor,baseColor*vec3(0.82,0.86,0.90),dissolution*0.16);\n  rough=mix(rough,max(0.06,rough*0.58),dissolution*0.72);\n  // Avoid singular highlights while retaining a visibly sharp porcelain\n  // response at the authored low end of the roughness range.\n  float specRough=max(0.045,sqrt(rough*rough+normalVariance*0.18));\n  // A continuous water film forms a second dielectric lobe. It smooths the\n  // authored surface only as coverage rises, so damp cloth stays diffuse\n  // while puddled stone gains a tight grazing reflection.\n  float waterCoverage=smoothstep(0.20,0.88,wetness)*(1.0-0.35*rough);\n  specRough=mix(specRough,max(0.035,specRough*0.18),waterCoverage);\n  vec3 viewDir=normalize(uCameraPosition-vWorldPos);\n  vec3 specular=vec3(0.0);\n  specular+=specularContribution(n,viewDir,normalize(uDirectionalDirection),\n    uDirectionalColor,uDirectionalIntensity,1.0,baseColor,specRough,metal);\n  specular+=specularContribution(n,viewDir,\n    normalize(uPointPosition0-vWorldPos),uPointColor0,uPointIntensity0,\n    pointAttenuation(vWorldPos,uPointPosition0,uPointRadius0),baseColor,\n    specRough,metal);\n  specular+=specularContribution(n,viewDir,\n    normalize(uPointPosition1-vWorldPos),uPointColor1,uPointIntensity1,\n    pointAttenuation(vWorldPos,uPointPosition1,uPointRadius1),baseColor,\n    specRough,metal);\n  specular+=specularContribution(n,viewDir,\n    normalize(uPointPosition2-vWorldPos),uPointColor2,uPointIntensity2,\n    pointAttenuation(vWorldPos,uPointPosition2,uPointRadius2),baseColor,\n    specRough,metal);\n  specular+=specularContribution(n,viewDir,\n    normalize(uPointPosition3-vWorldPos),uPointColor3,uPointIntensity3,\n    pointAttenuation(vWorldPos,uPointPosition3,uPointRadius3),baseColor,\n    specRough,metal);\n  specular+=specularContribution(n,viewDir,\n    normalize(uLightPosition-vWorldPos),uLightColor,uLightIntensity,\n    lightAttenuation(vWorldPos)*uSpotEnabled*shadow,baseColor,specRough,metal);\n  float spotAtten0=directSpotAttenuation(vWorldPos,uDirectSpotPosition0,\n    uDirectSpotDirection0,uDirectSpotRange0,uDirectSpotInnerCos0,uDirectSpotOuterCos0,\n    uDirectSpotEnabled0);\n  if(spotAtten0>0.001){\n    specular+=specularContribution(n,viewDir,normalize(uDirectSpotPosition0-vWorldPos),\n      uDirectSpotColor0,uDirectSpotIntensity0,spotAtten0,baseColor,specRough,metal);\n  }\n  float spotAtten1=directSpotAttenuation(vWorldPos,uDirectSpotPosition1,\n    uDirectSpotDirection1,uDirectSpotRange1,uDirectSpotInnerCos1,uDirectSpotOuterCos1,\n    uDirectSpotEnabled1);\n  if(spotAtten1>0.001){\n    specular+=specularContribution(n,viewDir,normalize(uDirectSpotPosition1-vWorldPos),\n      uDirectSpotColor1,uDirectSpotIntensity1,spotAtten1,baseColor,specRough,metal);\n  }\n  float spotAtten2=directSpotAttenuation(vWorldPos,uDirectSpotPosition2,\n    uDirectSpotDirection2,uDirectSpotRange2,uDirectSpotInnerCos2,uDirectSpotOuterCos2,\n    uDirectSpotEnabled2);\n  if(spotAtten2>0.001){\n    specular+=specularContribution(n,viewDir,normalize(uDirectSpotPosition2-vWorldPos),\n      uDirectSpotColor2,uDirectSpotIntensity2,spotAtten2,baseColor,specRough,metal);\n  }\n  specular*=uDirectLightScale*uSpecularScale;\n  // Keep reflected energy available to the specular lobe. The previous\n  // diffuse-first clamp clipped bright ceramic response before tone mapping,\n  // producing the broad plastic patches visible in low-roughness samples.\n  // This split is bounded by the material metalness and lets the final\n  // composite perform the intentional HDR compression once.\n  vec3 sunLightDir=normalize(uDirectionalDirection);\n  vec3 sunHalfDir=normalize(viewDir+sunLightDir);\n  float sunNdotV=max(dot(n,viewDir),0.0001);\n  float sunHdotL=max(dot(sunHalfDir,sunLightDir),0.0);\n  float burleySun=diffuseBurley(directionalNdotL,sunNdotV,sunHdotL,specRough);\n  vec3 diffuseEnergy=baseColor*(1.0-metal)*\n    (ambient+direct*mix(1.0-0.25*rough,burleySun,0.65));\n  vec3 lit=diffuseEnergy+specular;\n  // A restrained dielectric clearcoat is intentionally separate from the\n  // base roughness/metalness response. It gives porcelain a broad, stable\n  // grazing highlight without turning the surface into a mirror.\n  vec3 coatLight=normalize(uDirectionalDirection);\n  vec3 coatHalf=normalize(viewDir+coatLight);\n  float coatNdotV=max(dot(n,viewDir),0.);\n  float coatNdotH=max(dot(n,coatHalf),0.);\n  float coatNdotL=max(dot(n,coatLight),0.);\n  float coatPower=mix(128.0,8.0,clamp(uClearcoatRoughness,0.0,1.0));\n  float coatFresnel=0.04+0.96*pow(1.0-coatNdotV,5.0);\n  float coatStrength=max(clamp(uClearcoatStrength,0.0,1.0),waterCoverage*0.82);\n  float coat=coatStrength*coatFresnel*\n    pow(coatNdotH,coatPower)*coatNdotL*uDirectionalIntensity*\n    uDirectLightScale*uSpecularScale;\n  lit+=uDirectionalColor*coat;\n  lit+=direct*(wetness*(0.035+0.075*(1.0-rough)));\n  // Environment fallback reflections are deliberately bounded and weighted\n  // by wetness/grazing angle. A real probe/history hit can raise confidence;\n  // the current host fallback remains visible but never masquerades as SSR.\n  float reflectionNdotV=max(dot(n,viewDir),0.0);\n  vec3 f0=mix(vec3(0.04),baseColor,metal);\n  vec3 envFresnel=f0+(max(vec3(1.0-specRough),f0)-f0)*pow(clamp(1.0-reflectionNdotV,0.0,1.0),5.0);\n  float envGloss=(1.0-specRough)*(1.0-specRough);\n  float reflectionSurface=clamp(metal*0.85+(1.0-metal)*(wetness+0.18*dissolution+envGloss*0.25),0.0,1.0);\n  float reflectionConfidence=0.20+0.80*clamp(uReflectionConfidence,0.0,1.0);\n  float reflectionWeight=clamp(\n    uReflectionIntensity*reflectionSurface*\n      (1.0-0.72*rough)*reflectionConfidence,\n    0.0,1.0);\n  vec3 reflectDir=reflect(-viewDir,n);\n  float refUp=clamp(reflectDir.y*0.5+0.5,0.0,1.0);\n  vec3 envRadiance=mix(uAmbientColor*0.35,mix(uAmbientColor,uReflectionColor,refUp),refUp);\n  vec3 sunReflectDir=normalize(uDirectionalDirection);\n  float sunRdotL=max(dot(reflectDir,sunReflectDir),0.0);\n  envRadiance+=uDirectionalColor*pow(sunRdotL,mix(32.0,4.0,specRough))*(1.0-specRough)*0.4;\n  lit+=envRadiance*envFresnel*reflectionWeight*ao;\n  float backScatter=max(dot(-viewDir,normalize(uDirectionalDirection)),0.0);\n  vec3 subsurface=baseColor*uDirectionalColor*(pow(backScatter,4.0)*(1.0-metal)*0.12*uDirectionalIntensity);\n  float wrapNdotL=max((directionalNdotL+0.35)/1.35,0.0);\n  float rimWrap=pow(clamp(1.0-coatNdotV,0.0,1.0),2.5);\n  vec3 wrapSubsurface=baseColor*uDirectionalColor*(wrapNdotL*rimWrap*(1.0-metal)*0.14*uDirectionalIntensity);\n  lit+=subsurface+wrapSubsurface;\n  // Wave crest foam glint and subsurface forward scatter for organic water bodies\n  float foamFactor=clamp(vColor.r*vColor.g*vColor.b,0.0,1.0);\n  if(foamFactor>0.04){\n    vec3 foamSheen=vec3(0.92,0.96,1.0)*uDirectionalColor*uDirectionalIntensity*0.55;\n    lit=mix(lit,lit+foamSheen,foamFactor*0.7);\n  }\n  vec3 emissive=texture(uEmissiveMap,uv).rgb*uMaterialTint*uEmissiveStrength;\n  lit+=emissive;\n  if(uLightmapIntensity>0.0){\n    lit+=baseColor*texture(uLightmap,vUv1).rgb*uLightmapIntensity;\n  }\n  // Fog blends the surface's own lit color toward uFogColor only \u2014 never\n  // oGlow below, which stays a declared emissive quantity independent of\n  // how much atmosphere sits between the surface and the camera, matching\n  // \xa78.7's \"does not infer glow from final luma\" scoping: fog is a\n  // property of oColor's reflected/lit light, not of emission.\n  float fog=fogFactor(vViewDepth,vWorldPos.y);\n  vec3 foggedLit=mix(lit,uFogColor,fog);\n  // Bug 18: vColor.a*tex.a is the correct alpha for a blended draw and the\n  // wrong one for everything else. present.frag copies this channel\n  // straight through to a canvas created with the default alpha:true, so an\n  // opaque or masked surface that emitted a texel's own alpha would show\n  // the *page* through solid geometry. Coverage, not transparency, is what\n  // an opaque or masked fragment writes: whatever survived the discard\n  // above is fully covering, and an opaque draw always was. uOpaqueCoverage\n  // is exactly 0 or 1, so the mix is exact in both directions and the\n  // blended path keeps its pre-existing expression bit-for-bit.\n  float outAlpha=mix(vColor.a*tex.a,1.,uOpaqueCoverage);\n  oColor=vec4(foggedLit,outAlpha);\n  // \xa78.7: bloom reads this declared attachment directly, never inferring\n  // glow from oColor's final luma \u2014 a bright-but-non-emissive lit surface\n  // (e.g. the checkerboard floor under strong light) must never bloom, only\n  // a material with real emissiveStrength does, independent of how the\n  // surface happens to be lit this frame.\n  oGlow=vec4(emissive,1.);\n}\n",d7,d6,c5,d8,d9,d3,d5,e2,new A.ku(b9,a8),c9,d0,e3,s,e9,e8,f0,f0,e,c,k))
+j.push(new A.fD(c1,"#version 300 es\nlayout(location=0) in vec3 aPosition;\nlayout(location=1) in vec3 aNormal;\nlayout(location=2) in vec4 aColor;\nlayout(location=3) in float aAlpha;\nlayout(location=4) in vec3 aUvMat;\nlayout(location=5) in vec4 aTangent;\nlayout(location=6) in vec2 aUv1;\nuniform mat4 uViewProjection;\nuniform mat4 uView;\nuniform mat4 uModel;\nuniform mat4 uNormalMatrix;\nuniform mat4 uInstanceModels[16];\nuniform mat4 uInstanceNormalMatrices[16];\nuniform float uUseInstances;\nuniform mat4 uLightViewProjection;\nuniform float uVertexSnapGrid;\nuniform float uAffineWarpStrength;\nout vec4 vColor;\nout vec3 vNormal;\nout highp vec2 vUv;\nout highp float vUvW;\nout highp vec2 vUv1;\nout vec4 vLightSpacePos;\nout vec3 vWorldPos;\nout vec4 vTangent;\nout float vViewDepth;\nvoid main(){\n  mat4 model=uModel;\n  mat4 normalMatrix=uNormalMatrix;\n  if(uUseInstances>0.5){model=uInstanceModels[gl_InstanceID];normalMatrix=uInstanceNormalMatrices[gl_InstanceID];}\n  vColor=vec4(aColor.rgb,aAlpha);\n  vNormal=mat3(normalMatrix)*aNormal;\n  vec4 worldPos=model*vec4(aPosition,1.0);\n  vWorldPos=worldPos.xyz;\n  vTangent=vec4(mat3(normalMatrix)*aTangent.xyz,aTangent.w);\n  vLightSpacePos=uLightViewProjection*worldPos;\n  // RV-09 rung 5's fog: the same \"linear view depth\" convention SSAO/DOF\n  // already reconstruct from a depth texture, computed directly here\n  // instead \u2014 this pass rasterizes the actual geometry, so there is a true\n  // view-space Z per-vertex already, with no texture round-trip needed.\n  vViewDepth=-(uView*worldPos).z;\n  vec4 clip=uViewProjection*worldPos;\n  // RV-09 rung 3's PS1 profile: snaps clip-space xy to a fixed grid before\n  // the perspective divide, emulating the fixed-point vertex transform\n  // precision loss that gives PS1 geometry its characteristic wobble as it\n  // moves. uVertexSnapGrid==0 skips the branch entirely, so the default/\n  // safe path is bit-for-bit unchanged from before this rung.\n  if(uVertexSnapGrid>0.0){\n    vec2 ndc=clip.xy/clip.w;\n    ndc=floor(ndc/uVertexSnapGrid+0.5)*uVertexSnapGrid;\n    clip.xy=ndc*clip.w;\n  }\n  gl_Position=clip;\n  // Affine UV, the PS1 rung's deferred half. GLSL ES 300 has no\n  // `noperspective` qualifier, so the divide the rasterizer already performs\n  // is cancelled instead of disabled: hardware hands the fragment\n  // interp(v/w)/interp(1/w), so premultiplying a varying by w makes that\n  // expression collapse to interp(v) \u2014 screen-space linear, which *is*\n  // affine. Both varyings are scaled by the same factor so the fragment's\n  // vUv/vUvW recovers exactly that, and the intermediate blend between the\n  // two regimes stays continuous rather than popping at any strength.\n  // uAffineWarpStrength==0 gives affineW==1.0 exactly, leaving vUv equal to\n  // aUvMat.xy bit-for-bit; the fragment then skips the divide entirely on\n  // the same uniform, so the perspective-correct path is untouched rather\n  // than merely round-tripped. Snapping above only rewrites clip.xy, never\n  // clip.w, so the two PS1 halves are independent.\n  float affineW=mix(1.0,clip.w,uAffineWarpStrength);\n  vUv=aUvMat.xy*affineW;\n  vUvW=affineW;\n  vUv1=aUv1;\n}\n","#version 300 es\nprecision highp float;\nin vec4 vColor;\nin vec3 vNormal;\nin highp vec2 vUv;\nin highp float vUvW;\nin highp vec2 vUv1;\nin vec4 vLightSpacePos;\nin vec3 vWorldPos;\nin vec4 vTangent;\nin float vViewDepth;\nuniform sampler2D uAlbedo;\nuniform sampler2D uNormalMap;\nuniform sampler2D uOrmMap;\nuniform sampler2D uEmissiveMap;\nuniform sampler2D uLightmap;\nuniform sampler2D uShadowMap;\nuniform vec3 uCameraPosition;\nuniform vec3 uLightPosition;\nuniform vec3 uLightDirection;\nuniform vec3 uLightColor;\nuniform float uLightIntensity;\nuniform float uLightRange;\nuniform float uLightInnerCos;\nuniform float uLightOuterCos;\nuniform float uSpotEnabled;\nuniform vec3 uDirectionalDirection;\nuniform vec3 uDirectionalColor;\nuniform float uDirectionalIntensity;\nuniform vec3 uPointPosition0;\nuniform vec3 uPointColor0;\nuniform float uPointIntensity0;\nuniform float uPointRadius0;\nuniform vec3 uPointPosition1;\nuniform vec3 uPointColor1;\nuniform float uPointIntensity1;\nuniform float uPointRadius1;\nuniform vec3 uPointPosition2;\nuniform vec3 uPointColor2;\nuniform float uPointIntensity2;\nuniform float uPointRadius2;\nuniform vec3 uPointPosition3;\nuniform vec3 uPointColor3;\nuniform float uPointIntensity3;\nuniform float uPointRadius3;\nuniform vec3 uDirectSpotPosition0;\nuniform vec3 uDirectSpotDirection0;\nuniform vec3 uDirectSpotColor0;\nuniform float uDirectSpotIntensity0;\nuniform float uDirectSpotRange0;\nuniform float uDirectSpotInnerCos0;\nuniform float uDirectSpotOuterCos0;\nuniform float uDirectSpotEnabled0;\nuniform vec3 uDirectSpotPosition1;\nuniform vec3 uDirectSpotDirection1;\nuniform vec3 uDirectSpotColor1;\nuniform float uDirectSpotIntensity1;\nuniform float uDirectSpotRange1;\nuniform float uDirectSpotInnerCos1;\nuniform float uDirectSpotOuterCos1;\nuniform float uDirectSpotEnabled1;\nuniform vec3 uDirectSpotPosition2;\nuniform vec3 uDirectSpotDirection2;\nuniform vec3 uDirectSpotColor2;\nuniform float uDirectSpotIntensity2;\nuniform float uDirectSpotRange2;\nuniform float uDirectSpotInnerCos2;\nuniform float uDirectSpotOuterCos2;\nuniform float uDirectSpotEnabled2;\nuniform vec3 uAmbientColor;\nuniform float uAmbientIntensity;\nuniform float uAmbientLightScale;\nuniform float uDirectLightScale;\nuniform vec3 uReflectionColor;\nuniform float uReflectionIntensity;\nuniform float uReflectionConfidence;\nuniform vec2 uShadowMapTexelSize;\nuniform float uShadowFilterRadius;\nuniform float uShadowBias;\nuniform vec3 uMaterialTint;\nuniform vec4 uUvScaleOffset;\nuniform sampler2D uSsao;\nuniform vec2 uSceneColorSize;\nuniform float uEmissiveStrength;\nuniform float uNormalStrength;\nuniform float uRoughness;\nuniform float uMetallic;\nuniform float uSpecularScale;\nuniform float uOcclusionStrength;\nuniform float uClearcoatStrength;\nuniform float uClearcoatRoughness;\nuniform float uLightmapIntensity;\nuniform float uAffineWarpStrength;\nuniform float uAlphaCutoff;\nuniform float uOpaqueCoverage;\nuniform vec3 uFogColor;\nuniform float uFogStart;\nuniform float uFogEnd;\nuniform float uFogHeightFalloff;\nuniform float uFogDensity;\nuniform float uReceivesShadow;\nuniform float uRainWetness;\nuniform float uSurfaceSnowCoverage;\nuniform float uSurfaceDissolution;\nuniform float uThermalSourceCount;\nuniform vec3 uThermalSourcePosition0;\nuniform float uThermalSourceRadius0;\nuniform float uThermalSourceDissolution0;\nuniform vec3 uThermalSourcePosition1;\nuniform float uThermalSourceRadius1;\nuniform float uThermalSourceDissolution1;\nuniform vec3 uThermalSourcePosition2;\nuniform float uThermalSourceRadius2;\nuniform float uThermalSourceDissolution2;\nuniform vec3 uThermalSourcePosition3;\nuniform float uThermalSourceRadius3;\nuniform float uThermalSourceDissolution3;\nlayout(location=0)out vec4 oColor;\nlayout(location=1)out vec4 oGlow;\n\n// Distance falloff (smooth to zero at uLightRange, matching SpotLight.range\n// rather than an unbounded inverse-square that never reaches zero) times\n// cone-edge falloff (smoothstep between the outer and inner cone angles,\n  // SpotLight.outerConeRadians/innerConeRadians \u2014 both fields existed on the\n  // API already but nothing read them before this, so the light previously\n  // had a hard-edged, non-attenuating cone that read as flat/harsh instead of\n// a graduated pool of light).\nfloat rangeAttenuation(float dist,float range){\n  float normalized=clamp(dist/max(range,.001),0.,1.);\n  // Smooth quartic cutoff avoids a visible ring at the authored range while\n  // retaining an inverse-square response inside the light's influence.\n  float cutoff=1.-normalized*normalized*normalized*normalized;\n  float inverseSquare=1./(1.+(dist*dist)/max(range*range,.001));\n  return cutoff*cutoff*inverseSquare;\n}\n\nfloat lightAttenuation(vec3 worldPos){\n  vec3 toFrag=worldPos-uLightPosition;\n  float dist=length(toFrag);\n  float cosAngle=dot(normalize(toFrag),normalize(uLightDirection));\n  float coneFalloff=smoothstep(uLightOuterCos,uLightInnerCos,cosAngle);\n  return rangeAttenuation(dist,uLightRange)*coneFalloff;\n}\n\nfloat pointAttenuation(vec3 worldPos,vec3 lightPosition,float lightRadius){\n  float dist=length(lightPosition-worldPos);\n  return rangeAttenuation(dist,lightRadius);\n}\n\nvec3 pointContribution(vec3 normal,vec3 worldPos,vec3 lightPosition,\n  vec3 lightColor,float lightIntensity,float lightRadius){\n  vec3 toLight=lightPosition-worldPos;\n  float ndotl=max(dot(normal,normalize(toLight)),0.);\n  return lightColor*lightIntensity*ndotl*\n    pointAttenuation(worldPos,lightPosition,lightRadius);\n}\n\nfloat directSpotAttenuation(vec3 worldPos,vec3 lightPosition,\n  vec3 lightDirection,float lightRange,float innerCos,float outerCos,float enabled){\n  vec3 toFrag=worldPos-lightPosition;\n  float cosAngle=dot(normalize(toFrag),normalize(lightDirection));\n  float coneFalloff=smoothstep(outerCos,innerCos,cosAngle);\n  float distanceFalloff=rangeAttenuation(length(toFrag),lightRange);\n  return coneFalloff*distanceFalloff*enabled;\n}\n\nvec3 directSpotContribution(vec3 normal,vec3 worldPos,vec3 lightPosition,\n  vec3 lightDirection,vec3 lightColor,float lightIntensity,float lightRange,\n  float innerCos,float outerCos,float enabled){\n  vec3 toLight=lightPosition-worldPos;\n  float ndotl=max(dot(normal,normalize(toLight)),0.);\n  float atten=directSpotAttenuation(worldPos,lightPosition,lightDirection,\n    lightRange,innerCos,outerCos,enabled);\n  return lightColor*lightIntensity*ndotl*atten;\n}\n\n// Compact Cook-Torrance response for the clean/high path. The bounded\n// per-light evaluation makes roughness and metallic maps visibly useful\n// without introducing a deferred light buffer.\nfloat distributionGgx(float ndoth,float roughness){\n  float a=roughness*roughness;\n  float a2=a*a;\n  float denom=ndoth*ndoth*(a2-1.0)+1.0;\n  return a2/(3.14159265*denom*denom);\n}\n\n// Disney/Burley energy-conserving diffuse retro-reflection model\nfloat diffuseBurley(float ndotl,float ndotv,float lndoth,float roughness){\n  float fd90=0.5+2.0*roughness*lndoth*lndoth;\n  float lightScatter=1.0+(fd90-1.0)*pow(clamp(1.0-ndotl,0.0,1.0),5.0);\n  float viewScatter=1.0+(fd90-1.0)*pow(clamp(1.0-ndotv,0.0,1.0),5.0);\n  return lightScatter*viewScatter;\n}\n\nfloat geometrySchlick(float ndotv,float roughness){\n  float k=(roughness+1.0)*(roughness+1.0)/8.0;\n  return ndotv/(ndotv*(1.0-k)+k);\n}\n\nfloat geometrySmith(float ndotv,float ndotl,float roughness){\n  return geometrySchlick(ndotv,roughness)*geometrySchlick(ndotl,roughness);\n}\n\nvec3 fresnelSchlick(float cosTheta,vec3 f0){\n  return f0+(1.0-f0)*pow(1.0-clamp(cosTheta,0.0,1.0),5.0);\n}\n\nvec3 fresnelSchlickRoughness(float cosTheta,vec3 f0,float roughness){\n  return f0+(max(vec3(1.0-roughness),f0)-f0)*pow(clamp(1.0-cosTheta,0.0,1.0),5.0);\n}\n\nvec3 specularContribution(vec3 normal,vec3 viewDir,vec3 lightDir,\n  vec3 lightColor,float lightIntensity,float attenuation,vec3 baseColor,\n  float roughness,float metallic){\n  vec3 halfDir=normalize(viewDir+lightDir);\n  float ndotv=max(dot(normal,viewDir),0.0);\n  float ndotl=max(dot(normal,lightDir),0.0);\n  float ndoth=max(dot(normal,halfDir),0.0);\n  float hdotv=max(dot(halfDir,viewDir),0.0);\n  vec3 f0=mix(vec3(0.04),baseColor,metallic);\n  vec3 fresnel=fresnelSchlickRoughness(hdotv,f0,roughness);\n  float distribution=distributionGgx(ndoth,roughness);\n  float geometry=geometrySmith(ndotv,ndotl,roughness);\n  vec3 numerator=distribution*geometry*fresnel;\n  float denominator=max(4.0*ndotv*ndotl,0.001);\n  return numerator/denominator*lightColor*lightIntensity*attenuation*ndotl;\n}\n\nfloat sampleShadow(vec3 projCoord,float bias){\n  float shadowDepth=texture(uShadowMap,projCoord.xy).r;\n  return projCoord.z-bias>shadowDepth?0.:1.;\n}\n\n// \xa78.5's fog keeps the smooth distance ramp for authored horizon control, but\n// the participating-medium term is an analytic optical depth along the actual\n// camera-to-surface segment. For rho(y)=density*exp(-falloff*max(y,0)), the\n// integral has a stable constant-height limit and therefore does not shimmer\n// when a surface is nearly level with the camera. Zero density remains an\n// exact no-op; the host can still use the distance ramp independently.\nfloat heightFogOpticalDepth(vec3 rayStart,vec3 rayEnd){\n  float segmentLength=length(rayEnd-rayStart);\n  if(segmentLength<=0.0001||uFogDensity<=0.)return 0.;\n  float falloff=max(uFogHeightFalloff,0.);\n  float h0=max(rayStart.y,0.);\n  float h1=max(rayEnd.y,0.);\n  float integral;\n  if(falloff<=0.||abs(h1-h0)<=0.0001){\n    integral=segmentLength*exp(-falloff*h0);\n  }else{\n    float denominator=falloff*(h1-h0);\n    integral=segmentLength*(exp(-falloff*h0)-exp(-falloff*h1))/denominator;\n  }\n  return max(uFogDensity*integral,0.);\n}\n\nfloat fogFactor(float viewDepth,float worldY){\n  float distFactor=(uFogEnd>uFogStart&&uFogEnd>1.0)?smoothstep(uFogStart,uFogEnd,viewDepth):0.0;\n  float opticalDepth=heightFogOpticalDepth(uCameraPosition,vWorldPos);\n  float mediumFactor=1.-exp(-opticalDepth);\n  return clamp(max(distFactor,mediumFactor),0.,1.);\n}\n\nconst vec2 VOGEL_16[16]=vec2[16](\n  vec2( 0.1768,  0.0000),\n  vec2(-0.2263,  0.2064),\n  vec2( 0.0346, -0.3938),\n  vec2( 0.2809,  0.3739),\n  vec2(-0.5186, -0.1111),\n  vec2( 0.4907, -0.3224),\n  vec2(-0.1724,  0.6137),\n  vec2(-0.2642, -0.6316),\n  vec2( 0.6186,  0.3860),\n  vec2(-0.6698,  0.3824),\n  vec2( 0.3479, -0.7314),\n  vec2( 0.1770,  0.8291),\n  vec2(-0.6558, -0.5927),\n  vec2( 0.8719,  0.2891),\n  vec2(-0.7099,  0.6348),\n  vec2( 0.1983, -0.9641)\n);\n\nfloat shadowFactor(float ndotl){\n  vec3 projCoord=vLightSpacePos.xyz/vLightSpacePos.w;\n  projCoord=projCoord*.5+.5;\n  if(projCoord.x<0.||projCoord.x>1.||projCoord.y<0.||projCoord.y>1.||projCoord.z>1.){\n    return 1.;\n  }\n  // Receiver-plane style slope bias keeps grazing surfaces from acne while\n  // avoiding the detached-shadow look of a large constant offset.\n  float bias=max(uShadowBias*(1.-ndotl),uShadowBias*0.2666667);\n  // 16-tap Vogel spiral with golden ratio rotation produces silky smooth\n  // penumbras free of regular lattice banding or directional noise.\n  vec2 t=uShadowMapTexelSize*clamp(uShadowFilterRadius,0.,3.);\n  // Adaptive contact-hardening: estimate blocker proximity to sharpen contact shadows\n  float blockerSum=0.0;\n  float blockerCount=0.0;\n  for(int b=0;b<4;b++){\n    float depthSample=texture(uShadowMap,projCoord.xy+VOGEL_16[b*4]*t*1.5).r;\n    if(depthSample<projCoord.z-bias){\n      blockerSum+=depthSample;\n      blockerCount+=1.0;\n    }\n  }\n  float penumbraScale=1.0;\n  if(blockerCount>0.0){\n    float avgBlockerDepth=blockerSum/blockerCount;\n    float penumbraRatio=clamp((projCoord.z-avgBlockerDepth)/max(projCoord.z,0.0001),0.0,1.0);\n    penumbraScale=mix(0.38,1.0,smoothstep(0.0002,0.012,penumbraRatio));\n  }\n  vec2 filterRadius=t*penumbraScale;\n  float sum=0.;\n  for(int i=0;i<16;i++){\n    sum+=sampleShadow(projCoord+vec3(VOGEL_16[i]*filterRadius,0.),bias);\n  }\n  return sum/16.;\n}\n\nvoid main(){\n  // The divide that undoes the rasterizer's own perspective correction (see\n  // shadowed_world.vert). Branched on the uniform rather than always\n  // dividing, so a zero-strength draw samples the untouched vUv and is\n  // bit-identical to the pre-affine path \u2014 the divisor is 1.0 there, but\n  // only after an interpolate/divide round-trip that need not return\n  // exactly 1.0. The branch is uniform across the whole draw, so it costs\n  // no divergence.\n  vec2 uv=uAffineWarpStrength>0.?vUv/vUvW:vUv;\n  uv=uv*uUvScaleOffset.xy+uUvScaleOffset.zw;\n  vec4 tex=texture(uAlbedo,uv);\n  // fragment must not pay for four shadow-map taps and two normalizes it\n  // will never use. uAlphaCutoff==0 is the pass's \"this material has no\n  // cutout\" sentinel (MaterialDefinition.validate forbids a real zero), so\n  // opaque and blended draws take a path containing no alpha compare at\n  // all rather than one comparing against an unreachable threshold. The\n  // same test, against the same uv, runs in depth_prepass.frag and\n  // shadow_caster.frag \u2014 three passes must agree on which fragments exist\n  // or SSAO, DOF and shadowing all occlude against holes this pass shaded\n  // through.\n  if(uAlphaCutoff>0.&&tex.a<uAlphaCutoff)discard;\n  vec3 n=normalize(vNormal);\n  // Surface-v2 supplies a tangent4 with OpenGL's +/-1 handedness in W.\n  // Compatibility14 meshes leave the attribute at its default zero and use\n  // the derivative frame below, so old content and authored tangents share\n  // one shader contract.\n  if(uNormalStrength>0.0){\n    vec3 dp1=dFdx(vWorldPos),dp2=dFdy(vWorldPos);\n    vec2 duv1=dFdx(uv),duv2=dFdy(uv);\n    vec3 derivativeT=normalize(dp1*duv2.y-dp2*duv1.y);\n    vec3 derivativeB=normalize(-dp1*duv2.x+dp2*duv1.x);\n    vec3 authoredT=normalize(vTangent.xyz-n*dot(n,vTangent.xyz));\n    bool hasAuthoredT=dot(vTangent.xyz,vTangent.xyz)>0.25;\n    vec3 t=hasAuthoredT?authoredT:derivativeT;\n    vec3 b=hasAuthoredT?normalize(cross(n,t)*vTangent.w):derivativeB;\n    vec3 map=texture(uNormalMap,uv).xyz*2.0-1.0;\n    map.xy*=uNormalStrength;\n    n=normalize(mat3(t,b,n)*normalize(map));\n  }\n  vec3 orm=texture(uOrmMap,uv).rgb;\n  float normalVariance=0.0;\n  if(uNormalStrength>0.0){\n    // Toksvig-style widening suppresses sub-pixel normal sparkle when a high\n    // resolution map is minified. It preserves authored relief at distance\n    // while converting unresolved detail into a stable roughness increase.\n    vec3 normalSample=texture(uNormalMap,uv).xyz*2.0-1.0;\n    vec3 normalDx=dFdx(normalSample);\n    vec3 normalDy=dFdy(normalSample);\n    normalVariance=dot(normalDx,normalDx)+dot(normalDy,normalDy);\n  }\n  float ao=texture(uSsao,gl_FragCoord.xy/uSceneColorSize).r;\n  ao*=mix(1.0,orm.r,clamp(uOcclusionStrength,0.0,1.0));\n  vec3 direct=vec3(0.);\n  float directionalNdotL=max(dot(n,normalize(uDirectionalDirection)),0.);\n  direct+=uDirectionalColor*uDirectionalIntensity*directionalNdotL;\n  direct+=pointContribution(n,vWorldPos,uPointPosition0,uPointColor0,\n    uPointIntensity0,uPointRadius0);\n  direct+=pointContribution(n,vWorldPos,uPointPosition1,uPointColor1,\n    uPointIntensity1,uPointRadius1);\n  direct+=pointContribution(n,vWorldPos,uPointPosition2,uPointColor2,\n    uPointIntensity2,uPointRadius2);\n  direct+=pointContribution(n,vWorldPos,uPointPosition3,uPointColor3,\n    uPointIntensity3,uPointRadius3);\n  direct+=directSpotContribution(n,vWorldPos,uDirectSpotPosition0,\n    uDirectSpotDirection0,uDirectSpotColor0,uDirectSpotIntensity0,\n    uDirectSpotRange0,uDirectSpotInnerCos0,uDirectSpotOuterCos0,\n    uDirectSpotEnabled0);\n  direct+=directSpotContribution(n,vWorldPos,uDirectSpotPosition1,\n    uDirectSpotDirection1,uDirectSpotColor1,uDirectSpotIntensity1,\n    uDirectSpotRange1,uDirectSpotInnerCos1,uDirectSpotOuterCos1,\n    uDirectSpotEnabled1);\n  direct+=directSpotContribution(n,vWorldPos,uDirectSpotPosition2,\n    uDirectSpotDirection2,uDirectSpotColor2,uDirectSpotIntensity2,\n    uDirectSpotRange2,uDirectSpotInnerCos2,uDirectSpotOuterCos2,\n    uDirectSpotEnabled2);\n  vec3 toSpot=normalize(uLightPosition-vWorldPos);\n  float spotNdotL=max(dot(n,toSpot),0.);\n  float shadow=uReceivesShadow>0.5?shadowFactor(spotNdotL):1.;\n  float attenuation=lightAttenuation(vWorldPos);\n  direct+=uLightColor*uLightIntensity*spotNdotL*shadow*attenuation*uSpotEnabled;\n  direct*=uDirectLightScale;\n  // \xa78.5: \"modulates ambient only\" \u2014 SSAO must never darken the direct\n  // (N.L * shadow * attenuation) term, only the ambient fill, or it would\n  // double up with real shadowing and read as an incorrect global darkening\n  // rather than contact occlusion specifically.\n  float upward=clamp(n.y*0.5+0.5,0.0,1.0);\n  vec3 ambient=uAmbientColor*uAmbientIntensity*uAmbientLightScale*ao*mix(0.85,1.15,upward);\n  vec3 baseColor=vColor.rgb*tex.rgb*uMaterialTint;\n  // Metallic surfaces contribute less diffuse energy; roughness keeps a\n  // small, stable broadening factor until the surface-v2 camera/specular\n  // block lands. Both channels therefore affect the live output rather than\n  // being metadata-only fields.\n  float metal=clamp(uMetallic*orm.b,0.0,1.0);\n  float rough=clamp(uRoughness*orm.g,0.0,1.0);\n  // Weather changes the material before direct and environment response.\n  // Thawing therefore affects the same specular lobe the viewer sees,\n  // instead of changing only diffuse color after the highlight is computed.\n  float wetDepth=1.0-smoothstep(2.0,18.0,max(vViewDepth,0.0));\n  float wetness=clamp(uRainWetness,0.0,1.0)*wetDepth;\n  baseColor=mix(baseColor,baseColor*vec3(0.84,0.90,0.98),wetness*0.22);\n  float thermalDissolution=clamp(uSurfaceDissolution,0.0,1.0);\n  // A steady spherical conductive field decays approximately as 1/r. The\n  // host keeps the slow latent material memory in uSurfaceDissolution; this\n  // local term therefore models the spatial heat field without making warm\n  // surfaces snap back or disappear at an arbitrary exponential radius.\n  if(uThermalSourceCount>0.5) thermalDissolution=max(thermalDissolution,\n    uThermalSourceDissolution0*clamp(uThermalSourceRadius0/\n      max(distance(vWorldPos,uThermalSourcePosition0),uThermalSourceRadius0),0.,1.));\n  if(uThermalSourceCount>1.5) thermalDissolution=max(thermalDissolution,\n    uThermalSourceDissolution1*clamp(uThermalSourceRadius1/\n      max(distance(vWorldPos,uThermalSourcePosition1),uThermalSourceRadius1),0.,1.));\n  if(uThermalSourceCount>2.5) thermalDissolution=max(thermalDissolution,\n    uThermalSourceDissolution2*clamp(uThermalSourceRadius2/\n      max(distance(vWorldPos,uThermalSourcePosition2),uThermalSourceRadius2),0.,1.));\n  if(uThermalSourceCount>3.5) thermalDissolution=max(thermalDissolution,\n    uThermalSourceDissolution3*clamp(uThermalSourceRadius3/\n      max(distance(vWorldPos,uThermalSourcePosition3),uThermalSourceRadius3),0.,1.));\n  thermalDissolution=clamp(thermalDissolution,0.0,1.0);\n  float snowCoverage=clamp(uSurfaceSnowCoverage,0.0,1.0)*\n    smoothstep(0.18,0.82,upward)*(1.0-thermalDissolution*0.72);\n  baseColor=mix(baseColor,vec3(0.78,0.86,0.95),snowCoverage*0.82);\n  float dissolution=thermalDissolution;\n  baseColor=mix(baseColor,baseColor*vec3(0.82,0.86,0.90),dissolution*0.16);\n  rough=mix(rough,max(0.06,rough*0.58),dissolution*0.72);\n  // Avoid singular highlights while retaining a visibly sharp porcelain\n  // response at the authored low end of the roughness range.\n  float specRough=max(0.045,sqrt(rough*rough+normalVariance*0.18));\n  // A continuous water film forms a second dielectric lobe. It smooths the\n  // authored surface only as coverage rises, so damp cloth stays diffuse\n  // while puddled stone gains a tight grazing reflection.\n  float waterCoverage=smoothstep(0.20,0.88,wetness)*(1.0-0.35*rough);\n  specRough=mix(specRough,max(0.035,specRough*0.18),waterCoverage);\n  vec3 viewDir=normalize(uCameraPosition-vWorldPos);\n  vec3 specular=vec3(0.0);\n  specular+=specularContribution(n,viewDir,normalize(uDirectionalDirection),\n    uDirectionalColor,uDirectionalIntensity,1.0,baseColor,specRough,metal);\n  specular+=specularContribution(n,viewDir,\n    normalize(uPointPosition0-vWorldPos),uPointColor0,uPointIntensity0,\n    pointAttenuation(vWorldPos,uPointPosition0,uPointRadius0),baseColor,\n    specRough,metal);\n  specular+=specularContribution(n,viewDir,\n    normalize(uPointPosition1-vWorldPos),uPointColor1,uPointIntensity1,\n    pointAttenuation(vWorldPos,uPointPosition1,uPointRadius1),baseColor,\n    specRough,metal);\n  specular+=specularContribution(n,viewDir,\n    normalize(uPointPosition2-vWorldPos),uPointColor2,uPointIntensity2,\n    pointAttenuation(vWorldPos,uPointPosition2,uPointRadius2),baseColor,\n    specRough,metal);\n  specular+=specularContribution(n,viewDir,\n    normalize(uPointPosition3-vWorldPos),uPointColor3,uPointIntensity3,\n    pointAttenuation(vWorldPos,uPointPosition3,uPointRadius3),baseColor,\n    specRough,metal);\n  specular+=specularContribution(n,viewDir,\n    normalize(uLightPosition-vWorldPos),uLightColor,uLightIntensity,\n    lightAttenuation(vWorldPos)*uSpotEnabled*shadow,baseColor,specRough,metal);\n  float spotAtten0=directSpotAttenuation(vWorldPos,uDirectSpotPosition0,\n    uDirectSpotDirection0,uDirectSpotRange0,uDirectSpotInnerCos0,uDirectSpotOuterCos0,\n    uDirectSpotEnabled0);\n  if(spotAtten0>0.001){\n    specular+=specularContribution(n,viewDir,normalize(uDirectSpotPosition0-vWorldPos),\n      uDirectSpotColor0,uDirectSpotIntensity0,spotAtten0,baseColor,specRough,metal);\n  }\n  float spotAtten1=directSpotAttenuation(vWorldPos,uDirectSpotPosition1,\n    uDirectSpotDirection1,uDirectSpotRange1,uDirectSpotInnerCos1,uDirectSpotOuterCos1,\n    uDirectSpotEnabled1);\n  if(spotAtten1>0.001){\n    specular+=specularContribution(n,viewDir,normalize(uDirectSpotPosition1-vWorldPos),\n      uDirectSpotColor1,uDirectSpotIntensity1,spotAtten1,baseColor,specRough,metal);\n  }\n  float spotAtten2=directSpotAttenuation(vWorldPos,uDirectSpotPosition2,\n    uDirectSpotDirection2,uDirectSpotRange2,uDirectSpotInnerCos2,uDirectSpotOuterCos2,\n    uDirectSpotEnabled2);\n  if(spotAtten2>0.001){\n    specular+=specularContribution(n,viewDir,normalize(uDirectSpotPosition2-vWorldPos),\n      uDirectSpotColor2,uDirectSpotIntensity2,spotAtten2,baseColor,specRough,metal);\n  }\n  specular*=uDirectLightScale*uSpecularScale;\n  // Keep reflected energy available to the specular lobe. The previous\n  // diffuse-first clamp clipped bright ceramic response before tone mapping,\n  // producing the broad plastic patches visible in low-roughness samples.\n  // This split is bounded by the material metalness and lets the final\n  // composite perform the intentional HDR compression once.\n  vec3 diffuseEnergy=baseColor*(1.0-metal)*\n    (ambient+direct*(1.0-0.25*rough));\n  vec3 lit=diffuseEnergy+specular;\n  // A restrained dielectric clearcoat is intentionally separate from the\n  // base roughness/metalness response. It gives porcelain a broad, stable\n  // grazing highlight without turning the surface into a mirror.\n  vec3 coatLight=normalize(uDirectionalDirection);\n  vec3 coatHalf=normalize(viewDir+coatLight);\n  float coatNdotV=max(dot(n,viewDir),0.);\n  float coatNdotH=max(dot(n,coatHalf),0.);\n  float coatNdotL=max(dot(n,coatLight),0.);\n  float coatPower=mix(128.0,8.0,clamp(uClearcoatRoughness,0.0,1.0));\n  float coatFresnel=0.04+0.96*pow(1.0-coatNdotV,5.0);\n  float coatStrength=max(clamp(uClearcoatStrength,0.0,1.0),waterCoverage*0.82);\n  float coat=coatStrength*coatFresnel*\n    pow(coatNdotH,coatPower)*coatNdotL*uDirectionalIntensity*\n    uDirectLightScale*uSpecularScale;\n  lit+=uDirectionalColor*coat;\n  lit+=direct*(wetness*(0.035+0.075*(1.0-rough)));\n  // Environment fallback reflections are deliberately bounded and weighted\n  // by wetness/grazing angle. A real probe/history hit can raise confidence;\n  // the current host fallback remains visible but never masquerades as SSR.\n  float reflectionNdotV=max(dot(n,viewDir),0.0);\n  vec3 f0=mix(vec3(0.04),baseColor,metal);\n  vec3 envFresnel=f0+(max(vec3(1.0-specRough),f0)-f0)*pow(clamp(1.0-reflectionNdotV,0.0,1.0),5.0);\n  float envGloss=(1.0-specRough)*(1.0-specRough);\n  float reflectionSurface=clamp(metal*0.85+(1.0-metal)*(wetness+0.18*dissolution+envGloss*0.25),0.0,1.0);\n  float reflectionConfidence=0.20+0.80*clamp(uReflectionConfidence,0.0,1.0);\n  float reflectionWeight=clamp(\n    uReflectionIntensity*reflectionSurface*\n      (1.0-0.72*rough)*reflectionConfidence,\n    0.0,1.0);\n  vec3 reflectDir=reflect(-viewDir,n);\n  float refUp=clamp(reflectDir.y*0.5+0.5,0.0,1.0);\n  vec3 envRadiance=mix(uAmbientColor*0.35,mix(uAmbientColor,uReflectionColor,refUp),refUp);\n  vec3 sunReflectDir=normalize(uDirectionalDirection);\n  float sunRdotL=max(dot(reflectDir,sunReflectDir),0.0);\n  envRadiance+=uDirectionalColor*pow(sunRdotL,mix(32.0,4.0,specRough))*(1.0-specRough)*0.4;\n  lit+=envRadiance*envFresnel*reflectionWeight*ao;\n  float backScatter=max(dot(-viewDir,normalize(uDirectionalDirection)),0.0);\n  vec3 subsurface=baseColor*uDirectionalColor*(pow(backScatter,4.0)*(1.0-metal)*0.12*uDirectionalIntensity);\n  lit+=subsurface;\n  vec3 emissive=texture(uEmissiveMap,uv).rgb*uMaterialTint*uEmissiveStrength;\n  lit+=emissive;\n  if(uLightmapIntensity>0.0){\n    lit+=baseColor*texture(uLightmap,vUv1).rgb*uLightmapIntensity;\n  }\n  // Fog blends the surface's own lit color toward uFogColor only \u2014 never\n  // oGlow below, which stays a declared emissive quantity independent of\n  // how much atmosphere sits between the surface and the camera, matching\n  // \xa78.7's \"does not infer glow from final luma\" scoping: fog is a\n  // property of oColor's reflected/lit light, not of emission.\n  float fog=fogFactor(vViewDepth,vWorldPos.y);\n  vec3 foggedLit=mix(lit,uFogColor,fog);\n  // Bug 18: vColor.a*tex.a is the correct alpha for a blended draw and the\n  // wrong one for everything else. present.frag copies this channel\n  // straight through to a canvas created with the default alpha:true, so an\n  // opaque or masked surface that emitted a texel's own alpha would show\n  // the *page* through solid geometry. Coverage, not transparency, is what\n  // an opaque or masked fragment writes: whatever survived the discard\n  // above is fully covering, and an opaque draw always was. uOpaqueCoverage\n  // is exactly 0 or 1, so the mix is exact in both directions and the\n  // blended path keeps its pre-existing expression bit-for-bit.\n  float outAlpha=mix(vColor.a*tex.a,1.,uOpaqueCoverage);\n  oColor=vec4(foggedLit,outAlpha);\n  // \xa78.7: bloom reads this declared attachment directly, never inferring\n  // glow from oColor's final luma \u2014 a bright-but-non-emissive lit surface\n  // (e.g. the checkerboard floor under strong light) must never bloom, only\n  // a material with real emissiveStrength does, independent of how the\n  // surface happens to be lit this frame.\n  oGlow=vec4(emissive,1.);\n}\n",d7,d6,c5,d8,d9,d3,d5,e2,new A.ku(b9,a8),c9,d0,e3,s,e9,e8,f0,f0,e,c,k))
 if(a7!=null)j.push(a7)
 if(b0!=null)j.push(b0)
 B.a.G(j,b1)
-j.push(new A.dG(c1,b3,u.j,c2,h,c3))
+j.push(new A.dG(c1,b3,u.o,c2,h,c3))
 return new A.eQ(j)},
 kt:function kt(a){this.a=a},
 ku:function ku(a,b){this.a=a
@@ -4164,7 +4163,7 @@ _.a=a
 _.b=b
 _.c=c
 _.d=d},
-mY(a,b){var s=t.c,r=A.bU(a,!0,s)
+mX(a,b){var s=t.c,r=A.bU(a,!0,s)
 B.a.ao(r,new A.ij(t.a))
 s=A.aN(r,s)
 if(s.length===0)A.l(A.i("KeyframeTrack requires at least one keyframe",null))
@@ -4288,18 +4287,18 @@ if(i==null){q=null
 s=1
 break}p=A.e(a.clientWidth)>0?A.e(a.clientWidth):A.e(a.width)
 o=A.e(a.clientHeight)>0?A.e(a.clientHeight):A.e(a.height)
-n=A.mU(o,p,A.aV(A.k(v.G.window).devicePixelRatio),2,!0)
+n=A.mT(o,p,A.aV(A.k(v.G.window).devicePixelRatio),2,!0)
 a.width=n.c
 a.height=n.d
-m=A.qC(c)
+m=A.qB(c)
 s=3
 return A.lO(A.ks(new A.iR(n),m,i,n),$async$iQ)
 case 3:i.b9()
-l=A.p_(i.w.a.b)
+l=A.oZ(i.w.a.b)
 B.a.i(i.d,l)
 m=t.N
 k=new A.dF(a,i,l,new A.i4(),A.lA(B.y,null,!0,B.L,null,null,null,null,"root",!0,0,B.A,-1),B.bZ,B.eq,n,new A.hJ(),A.ax(m),new A.hC(A.aC(m,t.aQ)),A.b([],t.fA),A.b([],t.g7))
-k.y=A.mD(5,B.f)
+k.y=A.mC(5,B.f)
 k.w=!0
 k.ee()
 q=k
@@ -4365,7 +4364,7 @@ _.b=b
 _.c=c
 _.e=_.d=0
 _.$ti=d},
-o9(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p){return new A.cs(l,k,m,b,d,a,c,i,j,!0,!1,!0,!0,!0,!0,!1)},
+o8(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p){return new A.cs(l,k,m,b,d,a,c,i,j,!0,!1,!0,!0,!0,!0,!1)},
 hF:function hF(a,b){this.a=a
 this.b=b},
 cl:function cl(a,b){this.a=a
@@ -4394,10 +4393,10 @@ _.ay=p},
 an:function an(a,b){this.a=a
 this.b=b},
 jD:function jD(){this.a=null},
-pb(a){var s=new A.fS(a,B.i,new A.jD(),A.pl(a))
+pa(a){var s=new A.fS(a,B.i,new A.jD(),A.pk(a))
 s.dI(a)
 return s},
-pl(a){var s,r,q=t.du.a(a.getSupportedExtensions())
+pk(a){var s,r,q=t.du.a(a.getSupportedExtensions())
 if(q==null)return A.ax(t.N)
 s=A.ax(t.N)
 r=J.ac(t.dy.b(q)?q:new A.d7(q,A.H(q).h("d7<1,w>")))
@@ -4412,7 +4411,7 @@ return}r=t.V.a(b.a)
 s=a.a
 s.bindFramebuffer(A.e(v.G.WebGL2RenderingContext.FRAMEBUFFER),r.a)
 s.viewport(0,0,r.w,r.x)},
-n_(a,b){var s
+mZ(a,b){var s
 if(a.b!==B.i)A.l(A.m(u.k))
 switch(b){case 1:a.a.drawBuffers(A.b([A.e(v.G.WebGL2RenderingContext.COLOR_ATTACHMENT0)],t.n))
 break
@@ -4420,7 +4419,7 @@ case 2:s=v.G
 a.a.drawBuffers(A.b([A.e(s.WebGL2RenderingContext.COLOR_ATTACHMENT0),A.e(s.WebGL2RenderingContext.COLOR_ATTACHMENT1)],t.n))
 break
 default:throw A.c(A.i("WebGl2Device.setColorAttachmentCount: count must be 1 or 2, got "+b,null))}},
-pg(a,b,c){var s,r,q,p
+pf(a,b,c){var s,r,q,p
 if(a.b!==B.i)A.l(A.m(u.k))
 s=t.V.a(c.a)
 r=a.a
@@ -4429,7 +4428,7 @@ r.activeTexture(A.e(q.WebGL2RenderingContext.TEXTURE0)+b)
 p=s.f
 if(p!=null){r.bindTexture(A.e(q.WebGL2RenderingContext.TEXTURE_2D),p)
 return}throw A.c(A.m("WebGl2Device.bindGlowTexture: target has no glow attachment \u2014 create it with GpuTargetAttachment.colorAndGlow/colorDepthGlow, and resolve a multisampled source before sampling (single-sample only)"))},
-pf(a,b){var s
+pe(a,b){var s
 switch(b.a){case 0:s=A.e(v.G.WebGL2RenderingContext.LESS)
 break
 case 1:s=A.e(v.G.WebGL2RenderingContext.LEQUAL)
@@ -4439,13 +4438,13 @@ break
 case 3:s=A.e(v.G.WebGL2RenderingContext.NEVER)
 break
 default:s=null}return s},
-pe(a,b){var s
+pd(a,b){var s
 switch(b.a){case 0:s=A.e(v.G.WebGL2RenderingContext.FRONT)
 break
 case 1:s=A.e(v.G.WebGL2RenderingContext.BACK)
 break
 default:s=null}return s},
-mZ(a,b){var s
+mY(a,b){var s
 switch(b.a){case 0:s=A.e(v.G.WebGL2RenderingContext.ZERO)
 break
 case 1:s=A.e(v.G.WebGL2RenderingContext.ONE)
@@ -4459,7 +4458,7 @@ break
 case 5:s=A.e(v.G.WebGL2RenderingContext.ONE_MINUS_DST_ALPHA)
 break
 default:s=null}return s},
-pc(a,b){var s
+pb(a,b){var s
 switch(b.a){case 0:s=A.e(v.G.WebGL2RenderingContext.FUNC_ADD)
 break
 case 1:s=A.e(v.G.WebGL2RenderingContext.FUNC_SUBTRACT)
@@ -4475,23 +4474,23 @@ if(r.a===0)return
 if(r.A(0,B.ak)){q=v.G
 p=a.a
 if(b.a)p.enable(A.e(q.WebGL2RenderingContext.DEPTH_TEST))
-else p.disable(A.e(q.WebGL2RenderingContext.DEPTH_TEST))}if(r.A(0,B.al))a.a.depthFunc(A.pf(a,b.b))
+else p.disable(A.e(q.WebGL2RenderingContext.DEPTH_TEST))}if(r.A(0,B.al))a.a.depthFunc(A.pe(a,b.b))
 if(r.A(0,B.am))a.a.depthMask(b.c)
 if(r.A(0,B.aq)){q=v.G
 p=a.a
 if(b.w)p.enable(A.e(q.WebGL2RenderingContext.CULL_FACE))
-else p.disable(A.e(q.WebGL2RenderingContext.CULL_FACE))}if(r.A(0,B.ar))a.a.cullFace(A.pe(a,b.x))
+else p.disable(A.e(q.WebGL2RenderingContext.CULL_FACE))}if(r.A(0,B.ar))a.a.cullFace(A.pd(a,b.x))
 if(r.A(0,B.bd)){q=v.G.WebGL2RenderingContext
 q=A.e(q.CCW)
 a.a.frontFace(q)}if(r.A(0,B.an)){q=v.G
 p=a.a
 if(b.d)p.enable(A.e(q.WebGL2RenderingContext.BLEND))
-else p.disable(A.e(q.WebGL2RenderingContext.BLEND))}if(r.A(0,B.ao))a.a.blendFunc(A.mZ(a,b.e),A.mZ(a,b.f))
-if(r.A(0,B.ap))a.a.blendEquation(A.pc(a,b.r))
+else p.disable(A.e(q.WebGL2RenderingContext.BLEND))}if(r.A(0,B.ao))a.a.blendFunc(A.mY(a,b.e),A.mY(a,b.f))
+if(r.A(0,B.ap))a.a.blendEquation(A.pb(a,b.r))
 if(r.A(0,B.bb))a.a.colorMask(!0,!0,!0,!0)
 if(r.A(0,B.bc)){q=v.G.WebGL2RenderingContext
 a.a.disable(A.e(q.SCISSOR_TEST))}s.a=b},
-pd(a,b){var s
+pc(a,b){var s
 switch(b.a){case 0:s=A.e(v.G.WebGL2RenderingContext.COLOR_BUFFER_BIT)
 break
 case 1:s=v.G
@@ -4504,7 +4503,7 @@ b0(a,b,c,d,e,f){var s
 if(a.b!==B.i)A.l(A.m(u.k))
 s=a.a
 s.clearColor(f,e,d,c)
-s.clear(A.pd(a,b))},
+s.clear(A.pc(a,b))},
 au(a,b){var s
 if(a.b!==B.i)A.l(A.m(u.k))
 s=A.k(b.a)
@@ -4515,7 +4514,7 @@ if(a.b!==B.i)A.l(A.m(u.k))
 s=a.e
 if(s==null)throw A.c(A.m("WebGl2Device.setUniform called with no bound program"))
 r=a.a
-q=A.u(r.getUniformLocation(s,b))
+q=A.v(r.getUniformLocation(s,b))
 if(q==null)return
 switch(c.a.a){case 0:r.uniform1f(q,A.ep(c.b))
 break
@@ -4567,7 +4566,7 @@ if(o!=null){r.bindTexture(A.e(q.WebGL2RenderingContext.TEXTURE_2D),o)
 return}n=s.e
 if(n!=null){r.bindTexture(A.e(q.WebGL2RenderingContext.TEXTURE_2D),n)
 return}throw A.c(A.m("WebGl2Device.bindTexture: target has no sampleable color or depth texture (multisampled targets must be resolved to a single-sample target before sampling)"))}throw A.c(A.m("WebGl2Device.bindTexture: unrecognized GpuObject handle type"))},
-ph(a,b,c){var s,r,q,p
+pg(a,b,c){var s,r,q,p
 if(a.b!==B.i)A.l(A.m(u.k))
 s=A.k(b.a)
 r=a.a
@@ -4576,7 +4575,7 @@ r.bindBuffer(A.e(q.WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER),s)
 A:{p=q.WebGL2RenderingContext
 r.bufferData(A.e(p.ELEMENT_ARRAY_BUFFER),c,A.e(q.WebGL2RenderingContext.STATIC_DRAW))
 break A}},
-pi(a,b){var s
+ph(a,b){var s
 switch(b.a){case 0:s=A.e(v.G.WebGL2RenderingContext.STATIC_DRAW)
 break
 case 1:s=A.e(v.G.WebGL2RenderingContext.DYNAMIC_DRAW)
@@ -4584,17 +4583,17 @@ break
 case 2:s=A.e(v.G.WebGL2RenderingContext.STREAM_DRAW)
 break
 default:s=null}return s},
-n2(a,b){var s,r,q,p
+n1(a,b){var s,r,q,p
 if(a.b!==B.i)A.l(A.m(u.k))
 s=a.a
-r=A.u(s.createBuffer())
+r=A.v(s.createBuffer())
 if(r==null)throw A.c(A.m("WebGl2Device: gl.createBuffer() returned null"))
 q=v.G
 p=b.c===B.aJ?A.e(q.WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER):A.e(q.WebGL2RenderingContext.ARRAY_BUFFER)
 s.bindBuffer(p,r)
-s.bufferData(p,b.a,A.pi(a,b.b))
+s.bufferData(p,b.a,A.ph(a,b.b))
 return new A.bu(r)},
-n0(a,b){var s
+n_(a,b){var s
 switch(b.a){case 0:s=A.e(v.G.WebGL2RenderingContext.NEAREST)
 break
 case 1:s=A.e(v.G.WebGL2RenderingContext.LINEAR)
@@ -4602,19 +4601,19 @@ break
 case 2:s=A.e(v.G.WebGL2RenderingContext.LINEAR_MIPMAP_LINEAR)
 break
 default:s=null}return s},
-n1(a,b){var s
+n0(a,b){var s
 switch(b.a){case 0:s=A.e(v.G.WebGL2RenderingContext.CLAMP_TO_EDGE)
 break
 case 1:s=A.e(v.G.WebGL2RenderingContext.REPEAT)
 break
 default:s=null}return s},
-pj(a,b,c){var s=b>c?b:c,r=1
+pi(a,b,c){var s=b>c?b:c,r=1
 for(;s>1;s=(s+1)/2|0)++r
 return r},
 lC(a,b){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e
 if(a.b!==B.i)A.l(A.m(u.k))
 s=a.a
-r=A.u(s.createTexture())
+r=A.v(s.createTexture())
 if(r==null)throw A.c(A.m("WebGl2Device: gl.createTexture() returned null"))
 q=b.c
 p=q>1
@@ -4622,17 +4621,17 @@ o=v.G
 n=p?A.e(o.WebGL2RenderingContext.TEXTURE_2D_ARRAY):A.e(o.WebGL2RenderingContext.TEXTURE_2D)
 s.bindTexture(n,r)
 m=b.d
-l=m?A.pj(a,b.a,b.b):1
+l=m?A.pi(a,b.a,b.b):1
 k=t.H
 j=b.a
 i=b.b
 if(p)A.ak(s,"texStorage3D",[n,l,A.e(o.WebGL2RenderingContext.RGBA8),j,i,q],k)
 else A.ak(s,"texStorage2D",[n,l,A.e(o.WebGL2RenderingContext.RGBA8),j,i],k)
-s.texParameteri(n,A.e(o.WebGL2RenderingContext.TEXTURE_MIN_FILTER),A.n0(a,b.e))
-s.texParameteri(n,A.e(o.WebGL2RenderingContext.TEXTURE_MAG_FILTER),A.n0(a,b.f))
+s.texParameteri(n,A.e(o.WebGL2RenderingContext.TEXTURE_MIN_FILTER),A.n_(a,b.e))
+s.texParameteri(n,A.e(o.WebGL2RenderingContext.TEXTURE_MAG_FILTER),A.n_(a,b.f))
 p=b.r
-s.texParameteri(n,A.e(o.WebGL2RenderingContext.TEXTURE_WRAP_S),A.n1(a,p))
-s.texParameteri(n,A.e(o.WebGL2RenderingContext.TEXTURE_WRAP_T),A.n1(a,p))
+s.texParameteri(n,A.e(o.WebGL2RenderingContext.TEXTURE_WRAP_S),A.n0(a,p))
+s.texParameteri(n,A.e(o.WebGL2RenderingContext.TEXTURE_WRAP_T),A.n0(a,p))
 h=a.aF("EXT_texture_filter_anisotropic")
 g=h?a.cD(34047):1
 f=b.w
@@ -4660,7 +4659,7 @@ l.bindTexture(m,s.a)
 k=t.H
 if(r)A.ak(l,"texSubImage3D",[m,0,0,0,c,q,p,1,A.e(n.WebGL2RenderingContext.RGBA),A.e(n.WebGL2RenderingContext.UNSIGNED_BYTE),d],k)
 else A.ak(l,"texSubImage2D",[m,0,0,0,q,p,A.e(n.WebGL2RenderingContext.RGBA),A.e(n.WebGL2RenderingContext.UNSIGNED_BYTE),d],k)},
-n3(a,b){var s,r,q
+n2(a,b){var s,r,q
 if(a.b!==B.i)A.l(A.m(u.k))
 s=t.R.a(b.a)
 if(!s.e)return
@@ -4670,12 +4669,12 @@ r=a.a
 r.bindTexture(q,s.a)
 r.generateMipmap(q)},
 fT(a,b){a.a.deleteTexture(t.R.a(b.a).a)},
-n5(a0,a1){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d=null,c="renderbufferStorageMultisample",b="texStorage2D",a="framebufferTexture2D"
+n4(a0,a1){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d=null,c="renderbufferStorageMultisample",b="texStorage2D",a="framebufferTexture2D"
 if(a0.b!==B.i)A.l(A.m(u.k))
 s=a1.a
 if(s<=0||a1.b<=0)throw A.c(A.i("WebGl2Device.createTarget requires positive dimensions, got "+s+"x"+a1.b,d))
 r=a0.a
-q=A.u(r.createFramebuffer())
+q=A.v(r.createFramebuffer())
 if(q==null)throw A.c(A.m("WebGl2Device: gl.createFramebuffer() returned null"))
 p=v.G
 r.bindFramebuffer(A.e(p.WebGL2RenderingContext.FRAMEBUFFER),q)
@@ -4691,21 +4690,21 @@ if(n){r.drawBuffers(A.b([A.e(p.WebGL2RenderingContext.NONE)],t.n))
 r.readBuffer(A.e(p.WebGL2RenderingContext.NONE))}else{o=a1.c
 h=t.H
 g=a1.b
-if(o>1){k=A.u(r.createRenderbuffer())
+if(o>1){k=A.v(r.createRenderbuffer())
 r.bindRenderbuffer(A.e(p.WebGL2RenderingContext.RENDERBUFFER),k)
 A.ak(r,c,[A.e(p.WebGL2RenderingContext.RENDERBUFFER),o,A.e(p.WebGL2RenderingContext.RGBA8),s,g],h)
 r.framebufferRenderbuffer(A.e(p.WebGL2RenderingContext.FRAMEBUFFER),A.e(p.WebGL2RenderingContext.COLOR_ATTACHMENT0),A.e(p.WebGL2RenderingContext.RENDERBUFFER),k)
-if(m){i=A.u(r.createRenderbuffer())
+if(m){i=A.v(r.createRenderbuffer())
 r.bindRenderbuffer(A.e(p.WebGL2RenderingContext.RENDERBUFFER),i)
 A.ak(r,c,[A.e(p.WebGL2RenderingContext.RENDERBUFFER),o,A.e(p.WebGL2RenderingContext.RGBA8),s,g],h)
 r.framebufferRenderbuffer(A.e(p.WebGL2RenderingContext.FRAMEBUFFER),A.e(p.WebGL2RenderingContext.COLOR_ATTACHMENT1),A.e(p.WebGL2RenderingContext.RENDERBUFFER),i)
-r.drawBuffers(A.b([A.e(p.WebGL2RenderingContext.COLOR_ATTACHMENT0),A.e(p.WebGL2RenderingContext.COLOR_ATTACHMENT1)],t.n))}}else{l=A.u(r.createTexture())
+r.drawBuffers(A.b([A.e(p.WebGL2RenderingContext.COLOR_ATTACHMENT0),A.e(p.WebGL2RenderingContext.COLOR_ATTACHMENT1)],t.n))}}else{l=A.v(r.createTexture())
 r.bindTexture(A.e(p.WebGL2RenderingContext.TEXTURE_2D),l)
 A.ak(r,b,[A.e(p.WebGL2RenderingContext.TEXTURE_2D),1,A.e(p.WebGL2RenderingContext.RGBA8),s,g],h)
 r.texParameteri(A.e(p.WebGL2RenderingContext.TEXTURE_2D),A.e(p.WebGL2RenderingContext.TEXTURE_MIN_FILTER),A.e(p.WebGL2RenderingContext.LINEAR))
 r.texParameteri(A.e(p.WebGL2RenderingContext.TEXTURE_2D),A.e(p.WebGL2RenderingContext.TEXTURE_MAG_FILTER),A.e(p.WebGL2RenderingContext.LINEAR))
 A.ak(r,a,[A.e(p.WebGL2RenderingContext.FRAMEBUFFER),A.e(p.WebGL2RenderingContext.COLOR_ATTACHMENT0),A.e(p.WebGL2RenderingContext.TEXTURE_2D),l,0],h)
-if(m){j=A.u(r.createTexture())
+if(m){j=A.v(r.createTexture())
 r.bindTexture(A.e(p.WebGL2RenderingContext.TEXTURE_2D),j)
 A.ak(r,b,[A.e(p.WebGL2RenderingContext.TEXTURE_2D),1,A.e(p.WebGL2RenderingContext.RGBA8),s,g],h)
 r.texParameteri(A.e(p.WebGL2RenderingContext.TEXTURE_2D),A.e(p.WebGL2RenderingContext.TEXTURE_MIN_FILTER),A.e(p.WebGL2RenderingContext.LINEAR))
@@ -4716,10 +4715,10 @@ e=d
 if(a1.e){o=a1.c
 h=t.H
 g=a1.b
-if(o>1){f=A.u(r.createRenderbuffer())
+if(o>1){f=A.v(r.createRenderbuffer())
 r.bindRenderbuffer(A.e(p.WebGL2RenderingContext.RENDERBUFFER),f)
 A.ak(r,c,[A.e(p.WebGL2RenderingContext.RENDERBUFFER),o,A.e(p.WebGL2RenderingContext.DEPTH_COMPONENT24),s,g],h)
-r.framebufferRenderbuffer(A.e(p.WebGL2RenderingContext.FRAMEBUFFER),A.e(p.WebGL2RenderingContext.DEPTH_ATTACHMENT),A.e(p.WebGL2RenderingContext.RENDERBUFFER),f)}else{e=A.u(r.createTexture())
+r.framebufferRenderbuffer(A.e(p.WebGL2RenderingContext.FRAMEBUFFER),A.e(p.WebGL2RenderingContext.DEPTH_ATTACHMENT),A.e(p.WebGL2RenderingContext.RENDERBUFFER),f)}else{e=A.v(r.createTexture())
 r.bindTexture(A.e(p.WebGL2RenderingContext.TEXTURE_2D),e)
 A.ak(r,b,[A.e(p.WebGL2RenderingContext.TEXTURE_2D),1,A.e(p.WebGL2RenderingContext.DEPTH_COMPONENT24),s,g],h)
 r.texParameteri(A.e(p.WebGL2RenderingContext.TEXTURE_2D),A.e(p.WebGL2RenderingContext.TEXTURE_MIN_FILTER),A.e(p.WebGL2RenderingContext.NEAREST))
@@ -4739,25 +4738,25 @@ if(g!=null)s.deleteTexture(g)
 if(h!=null)s.deleteRenderbuffer(h)},
 aS(a){var s
 if(a.b!==B.i)A.l(A.m(u.k))
-s=A.u(a.a.createVertexArray())
+s=A.v(a.a.createVertexArray())
 if(s==null)throw A.c(A.m("WebGl2Device: gl.createVertexArray() returned null"))
 return new A.bu(s)},
-n4(a,b,c){var s,r="WebGL2RenderingContext",q="VERTEX_SHADER",p=a.a,o=A.u(p.createShader(b))
-if(o==null)throw A.c(A.fA(b===A.nC(A.no(A.nG(),r),q,t.S)?B.b6:B.b7,"gl.createShader() returned null"))
+n3(a,b,c){var s,r="WebGL2RenderingContext",q="VERTEX_SHADER",p=a.a,o=A.v(p.createShader(b))
+if(o==null)throw A.c(A.fA(b===A.nB(A.nn(A.nF(),r),q,t.S)?B.b6:B.b7,"gl.createShader() returned null"))
 p.shaderSource(o,c)
 p.compileShader(o)
 if(!J.aJ(A.cY(p.getShaderParameter(o,A.e(v.G.WebGL2RenderingContext.COMPILE_STATUS))),!0)){s=A.bv(p.getShaderInfoLog(o))
 if(s==null)s="(no info log)"
 p.deleteShader(o)
-throw A.c(A.fA(b===A.nC(A.no(A.nG(),r),q,t.S)?B.b6:B.b7,s))}return o},
-pk(a,b,c,d,e){var s,r,q,p,o,n,m,l,k,j
+throw A.c(A.fA(b===A.nB(A.nn(A.nF(),r),q,t.S)?B.b6:B.b7,s))}return o},
+pj(a,b,c,d,e){var s,r,q,p,o,n,m,l,k,j
 if(a.b!==B.i)A.l(A.m(u.k))
 q=v.G
-s=A.n4(a,A.e(q.WebGL2RenderingContext.VERTEX_SHADER),e)
+s=A.n3(a,A.e(q.WebGL2RenderingContext.VERTEX_SHADER),e)
 r=null
-try{r=A.n4(a,A.e(q.WebGL2RenderingContext.FRAGMENT_SHADER),b)}catch(p){a.a.deleteShader(s)
+try{r=A.n3(a,A.e(q.WebGL2RenderingContext.FRAGMENT_SHADER),b)}catch(p){a.a.deleteShader(s)
 throw p}o=a.a
-n=A.u(o.createProgram())
+n=A.v(o.createProgram())
 if(n==null){o.deleteShader(s)
 o.deleteShader(r)
 throw A.c(B.eQ)}o.attachShader(n,s)
@@ -4773,7 +4772,7 @@ if(A.e(o.getAttribLocation(n,k))<0){o.deleteProgram(n)
 o.deleteShader(s)
 o.deleteShader(r)
 throw A.c(A.fA(B.b9,"missing required attribute: "+k))}}for(q=d.length,l=0;l<q;++l){j=d[l]
-if(A.u(o.getUniformLocation(n,j))==null){o.deleteProgram(n)
+if(A.v(o.getUniformLocation(n,j))==null){o.deleteProgram(n)
 o.deleteShader(s)
 o.deleteShader(r)
 throw A.c(A.fA(B.b9,"missing required uniform: "+j))}}o.deleteShader(s)
@@ -4812,12 +4811,12 @@ k4:function k4(){},
 ht:function ht(){},
 jz:function jz(a){this.a=a},
 jC:function jC(){},
-kF(){return A.qR()},
-qR(){var s=0,r=A.lV(t.H),q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0,a1,a2,a3,a4,a5,a6,a7,a8,a9,b0,b1,b2,b3,b4,b5,b6,b7,b8,b9,c0,c1,c2,c3,c4,c5,c6,c7,c8,c9,d0,d1,d2,d3,d4,d5,d6,d7,d8,d9,e0,e1,e2,e3,e4,e5,e6,e7,e8,e9,f0,f1,f2,f3,f4,f5,f6,f7,f8,f9,g0,g1,g2,g3,g4,g5,g6,g7,g8,g9,h0,h1,h2,h3,h4,h5,h6,h7,h8,h9,i0,i1,i2,i3,i4,i5,i6,i7,i8,i9,j0,j1,j2,j3,j4,j5,j6,j7,j8,j9,k0,k1,k2,k3,k4,k5,k6,k7,k8,k9,l0
+kF(){return A.qQ()},
+qQ(){var s=0,r=A.lV(t.H),q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0,a1,a2,a3,a4,a5,a6,a7,a8,a9,b0,b1,b2,b3,b4,b5,b6,b7,b8,b9,c0,c1,c2,c3,c4,c5,c6,c7,c8,c9,d0,d1,d2,d3,d4,d5,d6,d7,d8,d9,e0,e1,e2,e3,e4,e5,e6,e7,e8,e9,f0,f1,f2,f3,f4,f5,f6,f7,f8,f9,g0,g1,g2,g3,g4,g5,g6,g7,g8,g9,h0,h1,h2,h3,h4,h5,h6,h7,h8,h9,i0,i1,i2,i3,i4,i5,i6,i7,i8,i9,j0,j1,j2,j3,j4,j5,j6,j7,j8,j9,k0,k1,k2,k3,k4,k5,k6,k7,k8,k9,l0
 var $async$kF=A.lY(function(l1,l2){if(l1===1)return A.lP(l2,r)
 for(;;)A:switch(s){case 0:k7={}
 k8=v.G
-k9=A.u(A.k(k8.document).querySelector("#showcase-canvas"))
+k9=A.v(A.k(k8.document).querySelector("#showcase-canvas"))
 l0=t.m
 if(!l0.b(k9)){s=1
 break}s=3
@@ -4832,34 +4831,34 @@ o.a=B.K
 o.as=!0
 o.at=0.18}n=p.f.cZ(B.eT)
 p.f=n
-p.f=n.eQ(B.cE,1,B.aR,B.bV,B.cV,0.85,1.2)
-p.r=A.mG()
-m=A.u(A.k(k8.document).querySelector("#tone-map-select"))
+p.f=n.eQ(B.cE,1,B.aR,B.bV,B.cU,0.85,0.65)
+p.r=A.mF()
+m=A.v(A.k(k8.document).querySelector("#tone-map-select"))
 if(l0.b(m))m.addEventListener("change",A.E(new A.kH(m,p)))
-l=A.u(A.k(k8.document).querySelector("#post-preset-select"))
+l=A.v(A.k(k8.document).querySelector("#post-preset-select"))
 if(l0.b(l))l.addEventListener("change",A.E(new A.kI(l,p,m)))
-k=A.u(A.k(k8.document).querySelector("#turntable-toggle"))
-j=A.u(A.k(k8.document).querySelector("#turntable-group"))
+k=A.v(A.k(k8.document).querySelector("#turntable-toggle"))
+j=A.v(A.k(k8.document).querySelector("#turntable-group"))
 if(l0.b(k)){k.checked=!0
 k.addEventListener("change",A.E(new A.kJ(p,k)))}n=t.D
 i=A.b([],n)
-h=A.u(A.k(k8.document).querySelector("#camera-mode-select"))
+h=A.v(A.k(k8.document).querySelector("#camera-mode-select"))
 if(l0.b(h))h.addEventListener("change",A.E(new A.kU(h,p,j,i,k)))
-g=A.u(A.k(k8.document).querySelector("#shake-button"))
+g=A.v(A.k(k8.document).querySelector("#shake-button"))
 if(l0.b(g))g.addEventListener("click",A.E(new A.kZ(p)))
 f=A.k(A.k(k8.document).querySelectorAll(".tab-btn"))
 e=new A.l5(f,A.k(A.k(k8.document).querySelectorAll(".topic-panel")))
-for(d=0;d<A.e(f.length);++d){c=A.u(f.item(d))
+for(d=0;d<A.e(f.length);++d){c=A.v(f.item(d))
 if(l0.b(c)){b=A.bv(c.getAttribute("data-topic"))
 c.addEventListener("click",A.E(new A.l_(e,b==null?"":b)))}}k7.a=14
 k7.b=!0
 k7.c=1
 k7.d=!1
-a=A.u(A.k(k8.document).querySelector("#solar-time-slider"))
-a0=A.u(A.k(k8.document).querySelector("#solar-time-label"))
-a1=A.u(A.k(k8.document).querySelector("#solar-phase-badge"))
-a2=A.u(A.k(k8.document).querySelector("#solar-play-pause-btn"))
-a3=A.u(A.k(k8.document).querySelector("#solar-speed-select"))
+a=A.v(A.k(k8.document).querySelector("#solar-time-slider"))
+a0=A.v(A.k(k8.document).querySelector("#solar-time-label"))
+a1=A.v(A.k(k8.document).querySelector("#solar-phase-badge"))
+a2=A.v(A.k(k8.document).querySelector("#solar-play-pause-btn"))
+a3=A.v(A.k(k8.document).querySelector("#solar-speed-select"))
 a4=new A.l6(k7,a0,a1)
 a5=new A.kG(k7,p,a4)
 if(l0.b(a)){a.addEventListener("input",A.E(new A.l0(k7,a,a5)))
@@ -4869,98 +4868,98 @@ a.addEventListener("touchstart",A.E(new A.l3(k7)))
 a.addEventListener("touchend",A.E(new A.l4(k7)))}if(l0.b(a2))a2.addEventListener("click",A.E(new A.kK(k7,a2)))
 if(l0.b(a3))a3.addEventListener("change",A.E(new A.kL(k7,a3)))
 a5.$0()
-a6=A.u(A.k(k8.document).querySelector("#dof-slider"))
-a7=A.u(A.k(k8.document).querySelector("#dof-label"))
+a6=A.v(A.k(k8.document).querySelector("#dof-slider"))
+a7=A.v(A.k(k8.document).querySelector("#dof-label"))
 if(l0.b(a6))a6.addEventListener("input",A.E(new A.kM(a6,a7,p)))
-a8=A.u(A.k(k8.document).querySelector("#bloom-slider"))
-a9=A.u(A.k(k8.document).querySelector("#bloom-label"))
+a8=A.v(A.k(k8.document).querySelector("#bloom-slider"))
+a9=A.v(A.k(k8.document).querySelector("#bloom-label"))
 if(l0.b(a8))a8.addEventListener("input",A.E(new A.kN(a8,a9,p)))
-b0=A.u(A.k(k8.document).querySelector("#ssao-slider"))
-b1=A.u(A.k(k8.document).querySelector("#ssao-label"))
+b0=A.v(A.k(k8.document).querySelector("#ssao-slider"))
+b1=A.v(A.k(k8.document).querySelector("#ssao-label"))
 if(l0.b(b0))b0.addEventListener("input",A.E(new A.kO(b0,b1,p)))
-b2=A.oJ(30,4,4,30)
+b2=A.oI(30,4,4,30)
 b3=p.b
 b4=b3.gu().V(b2,"ground")
-b5=A.oK(1,40,40)
+b5=A.oJ(1,40,40)
 b6=b3.gu().V(b5,"center_sphere")
-b7=A.oL(20,1.8,0.08,48)
+b7=A.oK(20,1.8,0.08,48)
 b8=b3.gu().V(b7,"orbit_torus")
-b9=A.ov(0.6,0.3,12,24)
-c0=A.ox(0.9,24,0.35)
-c1=A.ow(0.9,24,0.4)
+b9=A.ou(0.6,0.3,12,24)
+c0=A.ow(0.9,24,0.35)
+c1=A.ov(0.9,24,0.4)
 c2=A.lx(0.65)
-c3=A.mI(0.35,2)
-c4=A.oH(0.38)
-c5=A.oy(0.35)
-c6=A.mJ(0.08,2,0.55,0.55,0.55)
+c3=A.mH(0.35,2)
+c4=A.oG(0.38)
+c5=A.ox(0.35)
+c6=A.mI(0.08,2,0.55,0.55,0.55)
 c7=[b9,c0,c1,c2,c3,c4,c5,c6]
 c8=[b3.gu().V(b9,"satellite_capsule"),b3.gu().V(c0,"satellite_cylinder"),b3.gu().V(c1,"satellite_cone"),b3.gu().V(c2,"satellite_cube"),b3.gu().V(c3,"satellite_icosphere"),b3.gu().V(c4,"satellite_octahedron"),b3.gu().V(c5,"satellite_dodecahedron"),b3.gu().V(c6,"satellite_rounded_box")]
-c9=p.ak(A.oQ(B.cv,32,256,B.cB,2,256),"ground_grid_albedo",256,256)
+c9=p.ak(A.oP(B.cv,32,256,B.cB,2,256),"ground_grid_albedo",256,256)
 d0=new Uint8Array(65536)
 for(d1=0;d1<256;++d1)for(d2=d1*256,d3=B.e.F(d1,32)>=2,d4=0;d4<256;++d4){d5=!d3||B.e.F(d4,32)<2
 d6=d2+d4
 d7=d5?220:50
 if(!(d6<65536)){q=A.d(d0,d6)
 s=1
-break A}d0[d6]=d7}d8=p.ak(A.oT(d0,256,3,256),"ground_grid_normal",256,256)
-d9=p.ak(A.oN(0.22,256,0.95,256),"brushed_metal_orm",256,256)
-e0=p.ak(A.oO(0.22,8,256,0.4,256),"carbon_fiber_orm",256,256)
-e1=p.ak(A.oR(B.cF,256,20,B.cP,2,256),"hex_shield_albedo",256,256)
-e2=p.ak(A.oU(B.cK,6,B.cx,256,256),"voronoi_cell_albedo",256,256)
-e3=p.ak(A.oS(B.cG,256,3.5,4.5,B.cH,256),"marble_albedo",256,256)
-e4=p.ak(A.oP(0.18,4,256,18,0.95,256),"damascus_steel_orm",256,256)
-d2=A.a6(c9,0.2,0,"ground_pbr",0.1,1.5,d8,null,0.5,1,1,1,8,8)
+break A}d0[d6]=d7}d8=p.ak(A.oS(d0,256,3,256),"ground_grid_normal",256,256)
+d9=p.ak(A.oM(0.22,256,0.95,256),"brushed_metal_orm",256,256)
+e0=p.ak(A.oN(0.22,8,256,0.4,256),"carbon_fiber_orm",256,256)
+e1=p.ak(A.oQ(B.cF,256,20,B.cP,2,256),"hex_shield_albedo",256,256)
+e2=p.ak(A.oT(B.cK,6,B.cx,256,256),"voronoi_cell_albedo",256,256)
+e3=p.ak(A.oR(B.cG,256,3.5,4.5,B.cH,256),"marble_albedo",256,256)
+e4=p.ak(A.oO(0.18,4,256,18,0.95,256),"damascus_steel_orm",256,256)
+d2=A.a3(c9,0.2,0,"ground_pbr",0.1,1.5,d8,null,0.5,1,1,1,8,8)
 e5=b3.gu().H(d2)
-d2=A.mB("hero_gold",0.12)
+d2=A.a3(null,0.2,0,"hero_gold",1,1,null,null,0.12,0.35,0.78,1,1,1)
 d2=b3.gu().H(d2)
-d3=A.a6(null,0.2,0,"hero_chrome",0.98,1,null,null,0.05,0.98,0.95,0.95,1,1)
+d3=A.a3(null,0.2,0,"hero_chrome",0.98,1,null,null,0.05,0.98,0.95,0.95,1,1)
 d3=b3.gu().H(d3)
-d6=A.a6(null,0.2,0,"hero_copper",1,1,null,null,0.15,0.54,0.64,0.95,1,1)
+d6=A.a3(null,0.2,0,"hero_copper",1,1,null,null,0.15,0.54,0.64,0.95,1,1)
 d6=b3.gu().H(d6)
-d7=A.a6(null,0.2,0,"hero_silver",1,1,null,null,0.08,0.91,0.96,0.97,1,1)
+d7=A.a3(null,0.2,0,"hero_silver",1,1,null,null,0.08,0.91,0.96,0.97,1,1)
 d7=b3.gu().H(d7)
 e6=A.mA(0.9,B.cC,"hero_ceramic",0.18)
 e6=b3.gu().H(e6)
 e7=A.lu(B.cL,"hero_plastic",0.22)
 e7=b3.gu().H(e7)
-e8=A.a6(null,0.2,0,"hero_iron",0.85,1,null,null,0.28,0.58,0.57,0.56,1,1)
+e8=A.a3(null,0.2,0,"hero_iron",0.85,1,null,null,0.28,0.58,0.57,0.56,1,1)
 e8=b3.gu().H(e8)
-e9=A.a6(null,0.2,0,"hero_brushed",0.95,1,null,d9,0.22,1,0.95,0.95,1,1)
+e9=A.a3(null,0.2,0,"hero_brushed",0.95,1,null,d9,0.22,1,0.95,0.95,1,1)
 e9=b3.gu().H(e9)
-f0=A.a6(null,0.2,0,"hero_carbon",0.35,1,null,e0,0.25,0.18,0.15,0.15,1,1)
+f0=A.a3(null,0.2,0,"hero_carbon",0.35,1,null,e0,0.25,0.18,0.15,0.15,1,1)
 f0=b3.gu().H(f0)
-f1=A.a6(null,0.2,0.6,"hero_damascus",0.95,1,null,e4,0.18,0.94,0.9,0.88,1,1)
+f1=A.a3(null,0.2,0.6,"hero_damascus",0.95,1,null,e4,0.18,0.94,0.9,0.88,1,1)
 f1=b3.gu().H(f1)
-f2=A.a6(e3,0.08,0.85,"hero_marble",0.05,1,null,null,0.15,1,1,1,1,1)
+f2=A.a3(e3,0.08,0.85,"hero_marble",0.05,1,null,null,0.15,1,1,1,1,1)
 f2=b3.gu().H(f2)
-f3=A.a6(e1,0.2,0.8,"hero_hex",0.7,1,null,null,0.15,1,1,1,1,1)
+f3=A.a3(e1,0.2,0.8,"hero_hex",0.7,1,null,null,0.15,1,1,1,1,1)
 f3=b3.gu().H(f3)
-f4=A.a6(e2,0.2,0.85,"hero_voronoi",0.1,1,null,null,0.3,1,1,1,1,1)
+f4=A.a3(e2,0.2,0.85,"hero_voronoi",0.1,1,null,null,0.3,1,1,1,1,1)
 f5=A.mw(["gold",d2,"chrome",d3,"copper",d6,"silver",d7,"ceramic",e6,"plastic",e7,"iron",e8,"brushed",e9,"carbon",f0,"damascus",f1,"marble",f2,"hex",f3,"voronoi",b3.gu().H(f4)],t.N,t.eL)
-f4=A.a6(null,0.2,0,"torus_chrome",0.98,1,null,null,0.06,0.98,0.95,0.95,1,1)
+f4=A.a3(null,0.2,0,"torus_chrome",0.98,1,null,null,0.06,0.98,0.95,0.95,1,1)
 f6=b3.gu().H(f4)
-f4=A.lu(B.cU,"sat_emerald",0.22)
+f4=A.lu(B.cV,"sat_emerald",0.22)
 f4=b3.gu().H(f4)
 f3=A.mA(0.8,B.cS,"sat_ruby",0.18)
 f3=b3.gu().H(f3)
 f2=A.lu(B.cN,"sat_sapphire",0.2)
 f2=b3.gu().H(f2)
-f1=A.a6(null,0.2,0,"sat_copper",1,1,null,null,0.2,0.54,0.64,0.95,1,1)
+f1=A.a3(null,0.2,0,"sat_copper",1,1,null,null,0.2,0.54,0.64,0.95,1,1)
 f1=b3.gu().H(f1)
-f0=A.mB("sat_gold",0.14)
+f0=A.a3(null,0.2,0,"sat_gold",1,1,null,null,0.14,0.35,0.78,1,1,1)
 f0=b3.gu().H(f0)
-e9=A.a6(null,0.2,0,"sat_chrome",0.98,1,null,null,0.05,0.98,0.95,0.95,1,1)
+e9=A.a3(null,0.2,0,"sat_chrome",0.98,1,null,null,0.05,0.98,0.95,0.95,1,1)
 e9=b3.gu().H(e9)
-e8=A.a6(e3,0.2,0.8,"sat_marble",0.05,1,null,null,0.16,1,1,1,1,1)
+e8=A.a3(e3,0.2,0.8,"sat_marble",0.05,1,null,null,0.16,1,1,1,1,1)
 e8=b3.gu().H(e8)
-e7=A.a6(null,0.2,0,"sat_damascus",0.95,1,null,e4,0.2,0.96,0.92,0.9,1,1)
+e7=A.a3(null,0.2,0,"sat_damascus",0.95,1,null,e4,0.2,0.96,0.92,0.9,1,1)
 f7=[f4,f3,f2,f1,f0,e9,e8,b3.gu().H(e7)]
 e7=p.e
 e7.aH(0,e5,b4,b2,"ground_node",new A.O(B.q,B.o,1))
 e8=f5.C(0,"gold")
 e8.toString
 f8=e7.aH(0,e8,b6,b5,"center_sphere_node",new A.O(B.K,B.o,1))
-f9=A.u(A.k(k8.document).querySelector("#material-select"))
+f9=A.v(A.k(k8.document).querySelector("#material-select"))
 if(l0.b(f9))f9.addEventListener("change",A.E(new A.kP(f5,f9,f8)))
 g0=e7.aH(0,f6,b8,b7,"torus_ring_node",new A.O(B.K,B.o,1))
 g1=A.lA(B.y,null,!0,B.L,null,null,null,null,"orbit_ring",!0,0,B.A,-1)
@@ -4992,11 +4991,11 @@ e7.bO(h0)
 h1=A.lm(!0,B.de)
 h2=A.b([],t.G)
 for(d=0;d<=120;++d)B.a.i(h2,h1.au(d/120))
-h3=A.oM(!0,10,0.12,h2)
+h3=A.oL(!0,10,0.12,h2)
 h4=b3.gu().V(h3,"conduit_rail")
 e7.bg(0,b3.gu().H(B.dT),h4,h3,"conduit_rail_node")
 n=A.aN(A.b([A.i8(0.6,B.fx,2.2,0.45,18),A.i8(0.35,B.fw,1.8,0.35,10),A.i8(0.18,B.fu,1.4,0.25,5.5),A.i8(0.08,B.fv,1.1,0.2,2.2)],t.aA),t.ef)
-h5=A.mI(0.45,2)
+h5=A.mH(0.45,2)
 h6=b3.gu().V(h5,"ocean_buoy")
 h7=e7.aH(0,b3.gu().H(B.dU),h6,h5,"buoy_beacon_node",new A.O(B.hi,B.o,1))
 d2=new A.jo(42)
@@ -5004,7 +5003,7 @@ d2.dH(42)
 h8=new A.jn(32,32,36,36,3.2,-0.6,13.5,d2)
 h9=h8.dq()
 i0=b3.gu().V(h9,"island_terrain")
-d2=A.a6(p.ak(h8.dn(256,256),"terrain_biome_albedo",256,256),0.2,0,"terrain_biome_pbr",0.05,1,null,null,0.85,1,1,1,1,1)
+d2=A.a3(p.ak(h8.dn(256,256),"terrain_biome_albedo",256,256),0.2,0,"terrain_biome_pbr",0.05,1,null,null,0.85,1,1,1,1,1)
 i1=e7.bg(0,b3.gu().H(d2),i0,h9,"terrain_node")
 i2=new A.jy(38,38,32,32,0)
 i2.dN()
@@ -5012,10 +5011,10 @@ d2=i2.f
 d2===$&&A.G()
 i3=b3.gu().V(d2,"water_surface")
 i4=e7.bg(0,b3.gu().H(B.dK),i3,d2,"water_node")
-i5=A.mJ(0.08,3,3.2,0.45,1.8)
+i5=A.mI(0.08,3,3.2,0.45,1.8)
 i6=b3.gu().V(i5,"vessel_hull")
 i7=e7.bg(0,b3.gu().H(B.dV),i6,i5,"buoyant_vessel_node")
-i8=A.u(A.k(k8.document).querySelector("#terrain-toggle"))
+i8=A.v(A.k(k8.document).querySelector("#terrain-toggle"))
 if(l0.b(i8))i8.addEventListener("change",A.E(new A.kQ(i8,i1,i4,i7)))
 i9=A.lx(0.08)
 j0=b3.gu().V(i9,"particle_mesh")
@@ -5026,7 +5025,7 @@ j4=A.ll(B.fV,B.br,B.B,!1,0.55,B.fZ,B.h0,5.5,j1,j0,B.f,48,0.055,!1,101,B.hs)
 j5=A.ll(B.h4,B.aB,B.y,!1,0.8,B.fM,B.hd,8,j2,j0,B.f,64,0.035,!0,202,B.hw)
 j6=A.ll(B.fW,B.aB,B.y,!1,0.85,B.fU,B.he,7,j3,j0,B.f,80,0.04,!0,303,B.h3)
 B.a.i(p.ax,j4)
-j7=A.u(A.k(k8.document).querySelector("#particles-select"))
+j7=A.v(A.k(k8.document).querySelector("#particles-select"))
 if(l0.b(j7))j7.addEventListener("change",A.E(new A.kR(p,j7,j4,j5,j6)))
 j8=b3.gu().H(B.dJ)
 j9=b3.gu().H(B.dN)
@@ -5034,17 +5033,17 @@ k0=b3.gu().H(B.dS)
 k1=b3.gu().H(B.dP)
 k2=b3.gu().H(B.dL)
 k3=b3.gu().H(B.dR)
-k4=A.u(A.k(k8.document).querySelector("#vfx-particles-select"))
+k4=A.v(A.k(k8.document).querySelector("#vfx-particles-select"))
 if(l0.b(k4))k4.addEventListener("change",A.E(new A.kS(new A.l7(p,j0,j8,k0,j9,k3,k1,k2,j3),k4)))
-p.bU(B.aQ,35,0.08,6)
-k5=A.u(A.k(k8.document).querySelector("#fog-select"))
+p.bU(B.aQ,120,0.04,20)
+k5=A.v(A.k(k8.document).querySelector("#fog-select"))
 if(l0.b(k5))k5.addEventListener("change",A.E(new A.kT(k5,p)))
-k6=A.u(A.k(k8.document).querySelector("#asteroid-toggle"))
+k6=A.v(A.k(k8.document).querySelector("#asteroid-toggle"))
 if(l0.b(k6))k6.addEventListener("change",A.E(new A.kV(h0,k6)))
 k7.e=null
 k7.f=0
-k9.addEventListener("click",A.E(new A.kW(k7,p,A.u(A.k(k8.document).querySelector("#picking-status")))))
-l0=A.aN(A.b([A.mY(B.aS,f8),A.mY(B.aS,g0)],t.e9),t.a3)
+k9.addEventListener("click",A.E(new A.kW(k7,p,A.v(A.k(k8.document).querySelector("#picking-status")))))
+l0=A.aN(A.b([A.mX(B.aS,f8),A.mX(B.aS,g0)],t.e9),t.a3)
 p.at.a.K(0,"hero_bob",new A.cN(new A.hB("hero_bob",4,B.dx,l0),1))
 p.sfg(new A.kX(k7,f8,g0,g1,h0,new A.i9(n,0),h7,i2,i7,new A.hH(B.hu,2,3.5),i,h,a6,p,a,a4))
 A.k(k8.window).addEventListener("keydown",A.E(new A.kY(k7,a2,e,a,a5,h)))
@@ -5152,12 +5151,12 @@ _.c=c
 _.d=d
 _.e=e
 _.f=f},
-nH(a){return v.mangledGlobalNames[a]},
-r_(a){throw A.Z(A.mu(a),new Error())},
-G(){throw A.Z(A.om(""),new Error())},
-d1(){throw A.Z(A.ol(""),new Error())},
+nG(a){return v.mangledGlobalNames[a]},
+qZ(a){throw A.Z(A.mu(a),new Error())},
+G(){throw A.Z(A.ol(""),new Error())},
+d1(){throw A.Z(A.ok(""),new Error())},
 m5(){throw A.Z(A.mu(""),new Error())},
-p3(a){var s=Math.cos(a)
+p2(a){var s=Math.cos(a)
 if(s>=0)return 1/(s+0.025*Math.exp(-11*s))
 else return 38+(B.b.l(a*57.29577951308232,90,105)-90)/15*62},
 ld(a,b,c){var s,r,q,p,o,n,m=b.b,l=m.length
@@ -5201,7 +5200,7 @@ j(a){return String(a)}}
 J.fp.prototype={}
 J.c0.prototype={}
 J.bA.prototype={
-j(a){var s=a[$.nK()]
+j(a){var s=a[$.nJ()]
 if(s==null)s=a[$.m6()]
 if(s==null)return this.dE(a)
 return"JavaScript function for "+J.ci(s)},
@@ -5221,7 +5220,7 @@ a.$flags&1&&A.be(a,"remove",1)
 for(s=0;s<a.length;++s)if(J.aJ(a[s],b)){a.splice(s,1)
 return!0}return!1},
 G(a,b){var s
-A.H(a).h("n<1>").a(b)
+A.H(a).h("o<1>").a(b)
 a.$flags&1&&A.be(a,"addAll",2)
 if(Array.isArray(b)){this.dL(a,b)
 return}for(s=J.ac(b);s.n();)a.push(s.gt())},
@@ -5259,7 +5258,7 @@ n.h("j(1,1)?").a(b)
 a.$flags&2&&A.be(a,"sort")
 s=a.length
 if(s<2)return
-if(b==null)b=J.q1()
+if(b==null)b=J.q0()
 if(s===2){r=a[0]
 q=a[1]
 n=b.$2(r,q)
@@ -5295,7 +5294,7 @@ if(0>=a.length)return-1
 for(s=0;s<a.length;++s)if(b.$1(a[s]))return s
 return-1},
 gT(a){return A.bc(A.H(a))},
-$in:1,
+$io:1,
 $iA:1}
 J.f4.prototype={
 fI(a){var s,r,q
@@ -5341,7 +5340,7 @@ if(isFinite(r))return r
 throw A.c(A.c1(""+a+".floor()"))},
 I(a){if(a>0){if(a!==1/0)return Math.round(a)}else if(a>-1/0)return 0-Math.round(0-a)
 throw A.c(A.c1(""+a+".round()"))},
-l(a,b,c){if(this.S(b,c)>0)throw A.c(A.nz(b))
+l(a,b,c){if(this.S(b,c)>0)throw A.c(A.ny(b))
 if(this.S(a,b)<0)return b
 if(this.S(a,c)>0)return c
 return a},
@@ -5377,7 +5376,7 @@ a_(a,b){return(a|0)===a?a/b|0:this.cN(a,b)},
 cN(a,b){var s=a/b
 if(s>=-2147483648&&s<=2147483647)return s|0
 if(s>0){if(s!==1/0)return Math.floor(s)}else if(s>-1/0)return Math.ceil(s)
-throw A.c(A.c1("Result of truncating division is "+A.o(s)+": "+A.o(a)+" ~/ "+b))},
+throw A.c(A.c1("Result of truncating division is "+A.n(s)+": "+A.n(a)+" ~/ "+b))},
 eo(a,b){var s
 if(a>0)s=this.en(a,b)
 else{s=b>31?31:b
@@ -5399,16 +5398,16 @@ J.bz.prototype={
 av(a,b){var s=b.length
 if(s>a.length)return!1
 return b===a.substring(0,s)},
-dD(a,b,c){return a.substring(b,A.oV(b,c,a.length))},
+dD(a,b,c){return a.substring(b,A.oU(b,c,a.length))},
 dC(a,b){return this.dD(a,b,null)},
 dk(a){var s,r,q,p=a.trim(),o=p.length
 if(o===0)return p
 if(0>=o)return A.d(p,0)
-if(p.charCodeAt(0)===133){s=J.oj(p,1)
+if(p.charCodeAt(0)===133){s=J.oi(p,1)
 if(s===o)return""}else s=0
 r=o-1
 if(!(r>=0))return A.d(p,r)
-q=p.charCodeAt(r)===133?J.ok(p,r):o
+q=p.charCodeAt(r)===133?J.oj(p,r):o
 if(s===0&&q===o)return p
 return p.substring(s,q)},
 k(a,b){var s,r
@@ -5438,7 +5437,7 @@ gT(a){return A.bc(t.N)},
 gB(a){return a.length},
 $iJ:1,
 $iar:1,
-$imF:1,
+$imE:1,
 $iw:1}
 A.cO.prototype={
 gJ(a){return new A.d6(J.ac(this.gbe()),A.x(this).h("d6<1,2>"))},
@@ -5584,7 +5583,7 @@ return!0},
 $iY:1}
 A.de.prototype={
 i(a,b){A.x(this).c.a(b)
-A.o4()}}
+A.o3()}}
 A.b3.prototype={
 gB(a){return this.b},
 gd8(a){return this.b!==0},
@@ -5635,7 +5634,7 @@ return this.b=s==null?"":s},
 $ibF:1}
 A.bw.prototype={
 j(a){var s=this.constructor,r=s==null?null:s.name
-return"Closure '"+A.nI(r==null?"unknown":r)+"'"},
+return"Closure '"+A.nH(r==null?"unknown":r)+"'"},
 gT(a){var s=A.m_(this)
 return A.bc(s==null?A.cf(this):s)},
 $ibR:1,
@@ -5649,7 +5648,7 @@ A.fK.prototype={}
 A.fH.prototype={
 j(a){var s=this.$static_name
 if(s==null)return"Closure of unknown static method"
-return"Closure '"+A.nI(s)+"'"}}
+return"Closure '"+A.nH(s)+"'"}}
 A.cm.prototype={
 a8(a,b){if(b==null)return!1
 if(this===b)return!0
@@ -5833,7 +5832,7 @@ $1(a){return this.a(A.K(a))},
 $S:37}
 A.aT.prototype={
 gT(a){return A.bc(this.cB())},
-cB(){return A.qD(this.$r,this.bI())},
+cB(){return A.qC(this.$r,this.bI())},
 j(a){return this.cR(!1)},
 cR(a){var s,r,q,p,o,n=this.ea(),m=this.bI(),l=(a?"Record ":"")+"("
 for(s=n.length,r="",q=0;q<s;++q,r=", "){l+=r
@@ -5841,7 +5840,7 @@ p=n[q]
 if(typeof p=="string")l=l+p+": "
 if(!(q<m.length))return A.d(m,q)
 o=m[q]
-l=a?l+A.mK(o):l+A.o(o)}l+=")"
+l=a?l+A.mJ(o):l+A.n(o)}l+=")"
 return l.charCodeAt(0)==0?l:l},
 ea(){var s,r=this.$s
 while($.jX.length<=r)B.a.i($.jX,null)
@@ -5895,9 +5894,9 @@ if(q<r)A.l(A.m("Not enough elements"))
 p=q!==r?d.subarray(0,r):d
 a.set(p,b)
 return},
-$in:1,
+$io:1,
 $iA:1}
-A.dA.prototype={$in:1,$iA:1}
+A.dA.prototype={$io:1,$iA:1}
 A.dy.prototype={
 gT(a){return B.fc},
 $iJ:1,
@@ -5950,7 +5949,7 @@ A.e7.prototype={}
 A.e8.prototype={}
 A.b_.prototype={
 h(a){return A.ei(v.typeUniverse,this,a)},
-X(a){return A.nh(v.typeUniverse,this,a)}}
+X(a){return A.ng(v.typeUniverse,this,a)}}
 A.h6.prototype={}
 A.k1.prototype={
 j(a){return A.aH(this.a,null)}}
@@ -6020,7 +6019,7 @@ o.d=null}q=o.ek(m,n)
 if(1===q)return!0
 if(0===q){o.b=null
 p=o.e
-if(p==null||p.length===0){o.a=A.nb
+if(p==null||p.length===0){o.a=A.na
 return!1}if(0>=p.length)return A.d(p,-1)
 o.a=p.pop()
 m=0
@@ -6031,7 +6030,7 @@ continue}if(3===q){n=o.c
 o.c=null
 p=o.e
 if(p==null||p.length===0){o.b=null
-o.a=A.nb
+o.a=A.na
 throw n
 return!1}if(0>=p.length)return A.d(p,-1)
 o.a=p.pop()
@@ -6049,13 +6048,13 @@ $iY:1}
 A.bJ.prototype={
 gJ(a){return new A.bt(this.a(),this.$ti.h("bt<1>"))}}
 A.aK.prototype={
-j(a){return A.o(this.a)},
+j(a){return A.n(this.a)},
 $iR:1,
 gaU(){return this.b}}
 A.h_.prototype={
 bQ(a,b){var s=this.a
 if((s.a&30)!==0)throw A.c(A.m("Future already completed"))
-s.bA(A.q0(a,b))},
+s.bA(A.q_(a,b))},
 cX(a){return this.bQ(a,null)}}
 A.dZ.prototype={
 bP(a){var s,r=this.$ti
@@ -6077,7 +6076,7 @@ di(a,b,c){var s,r,q=this.$ti
 q.X(c).h("1/(2)").a(a)
 s=$.U
 if(s===B.C){if(!t.q.b(b)&&!t.x.b(b))throw A.c(A.a2(b,"onError",u.c))}else{c.h("@<0/>").X(q.c).h("1(2)").a(a)
-b=A.qg(b,s)}r=new A.a1(s,c.h("a1<0>"))
+b=A.qf(b,s)}r=new A.a1(s,c.h("a1<0>"))
 this.by(new A.c2(r,3,a,b,q.h("@<1>").X(c).h("c2<1,2>")))
 return r},
 cO(a,b,c){var s,r=this.$ti
@@ -6220,33 +6219,33 @@ p=m}p.b=!0}},
 $S:1}
 A.fW.prototype={}
 A.hm.prototype={}
-A.en.prototype={$in6:1}
+A.en.prototype={$in5:1}
 A.hg.prototype={
 fF(a){var s,r,q
 t.M.a(a)
 try{if(B.C===$.U){a.$0()
-return}A.nu(null,null,this,a,t.H)}catch(q){s=A.ch(q)
+return}A.nt(null,null,this,a,t.H)}catch(q){s=A.ch(q)
 r=A.d_(q)
 A.lW(A.eq(s),t.l.a(r))}},
 eE(a){return new A.jY(this,t.M.a(a))},
 fD(a,b){b.h("0()").a(a)
 if($.U===B.C)return a.$0()
-return A.nu(null,null,this,a,b)},
+return A.nt(null,null,this,a,b)},
 c5(a,b,c,d){c.h("@<0>").X(d).h("1(2)").a(a)
 d.a(b)
 if($.U===B.C)return a.$1(b)
-return A.qi(null,null,this,a,b,c,d)},
+return A.qh(null,null,this,a,b,c,d)},
 fE(a,b,c,d,e,f){d.h("@<0>").X(e).X(f).h("1(2,3)").a(a)
 e.a(b)
 f.a(c)
 if($.U===B.C)return a.$2(b,c)
-return A.qh(null,null,this,a,b,c,d,e,f)},
+return A.qg(null,null,this,a,b,c,d,e,f)},
 de(a,b,c,d){return b.h("@<0>").X(c).X(d).h("1(2,3)").a(a)}}
 A.jY.prototype={
 $0(){return this.a.fF(this.b)},
 $S:1}
 A.kq.prototype={
-$0(){A.ob(this.a,this.b)},
+$0(){A.oa(this.a,this.b)},
 $S:1}
 A.e1.prototype={
 gB(a){return this.a},
@@ -6476,9 +6475,9 @@ $2(a,b){var s,r=this.a
 if(!r.a)this.b.a+=", "
 r.a=!1
 r=this.b
-s=A.o(a)
+s=A.n(a)
 r.a=(r.a+=s)+": "
-s=A.o(b)
+s=A.n(b)
 r.a+=s},
 $S:32}
 A.ej.prototype={}
@@ -6497,7 +6496,7 @@ A.dV.prototype={}
 A.bn.prototype={
 gd8(a){return this.gB(this)!==0},
 G(a,b){var s
-for(s=J.ac(A.x(this).h("n<1>").a(b));s.n();)this.i(0,s.gt())},
+for(s=J.ac(A.x(this).h("o<1>").a(b));s.n();)this.i(0,s.gt())},
 d1(a){var s,r,q=this.aO(0)
 for(s=this.gJ(this);s.n();){r=s.gt()
 if(a.A(0,r))q.ac(0,r)}return q},
@@ -6507,9 +6506,9 @@ if(!q.n())return""
 s=J.ci(q.gt())
 if(!q.n())return s
 if(b.length===0){r=s
-do r+=A.o(q.gt())
+do r+=A.n(q.gt())
 while(q.n())}else{r=s
-do r=r+b+A.o(q.gt())
+do r=r+b+A.n(q.gt())
 while(q.n())}return r.charCodeAt(0)==0?r:r},
 ez(a,b){var s
 A.x(this).h("y(1)").a(b)
@@ -6519,7 +6518,7 @@ a5(a,b){var s,r
 A.j0(b,"index")
 s=this.gJ(this)
 for(r=b;s.n();){if(r===0)return s.gt();--r}throw A.c(A.ig(b,b-r,this,"index"))},
-$in:1,
+$io:1,
 $ibE:1}
 A.eb.prototype={
 aO(a){var s=this.eh()
@@ -6527,7 +6526,7 @@ s.G(0,this)
 return s}}
 A.hp.prototype={
 i(a,b){this.$ti.c.a(b)
-return A.pJ()}}
+return A.pI()}}
 A.dW.prototype={
 gB(a){return this.a.a},
 gJ(a){var s=this.a
@@ -6547,13 +6546,13 @@ t.df.a(b)
 s=B.e.S(this.a,b.a)
 if(s!==0)return s
 return B.e.S(this.b,b.b)},
-j(a){var s=this,r=A.o7(A.oG(s)),q=A.eM(A.oE(s)),p=A.eM(A.oA(s)),o=A.eM(A.oB(s)),n=A.eM(A.oD(s)),m=A.eM(A.oF(s)),l=A.mn(A.oC(s)),k=s.b,j=k===0?"":A.mn(k)
+j(a){var s=this,r=A.o6(A.oF(s)),q=A.eM(A.oD(s)),p=A.eM(A.oz(s)),o=A.eM(A.oA(s)),n=A.eM(A.oC(s)),m=A.eM(A.oE(s)),l=A.mn(A.oB(s)),k=s.b,j=k===0?"":A.mn(k)
 return r+"-"+q+"-"+p+" "+o+":"+n+":"+m+"."+l+j+"Z"},
 $iar:1}
 A.jI.prototype={
 j(a){return this.D()}}
 A.R.prototype={
-gaU(){return A.oz(this)}}
+gaU(){return A.oy(this)}}
 A.ew.prototype={
 j(a){var s=this.a
 if(s!=null)return"Assertion failed: "+A.hV(s)
@@ -6562,18 +6561,18 @@ A.bo.prototype={}
 A.b2.prototype={
 gbH(){return"Invalid argument"+(!this.a?"(s)":"")},
 gbG(){return""},
-j(a){var s=this,r=s.c,q=r==null?"":" ("+r+")",p=s.d,o=p==null?"":": "+A.o(p),n=s.gbH()+q+o
+j(a){var s=this,r=s.c,q=r==null?"":" ("+r+")",p=s.d,o=p==null?"":": "+A.n(p),n=s.gbH()+q+o
 if(!s.a)return n
 return n+s.gbG()+": "+A.hV(s.gbZ())},
 gbZ(){return this.b}}
 A.cG.prototype={
-gbZ(){return A.nk(this.b)},
+gbZ(){return A.nj(this.b)},
 gbH(){return"RangeError"},
 gbG(){var s,r=this.e,q=this.f
-if(r==null)s=q!=null?": Not less than or equal to "+A.o(q):""
-else if(q==null)s=": Not greater than or equal to "+A.o(r)
-else if(q>r)s=": Not in inclusive range "+A.o(r)+".."+A.o(q)
-else s=q<r?": Valid value range is empty":": Only valid value is "+A.o(r)
+if(r==null)s=q!=null?": Not less than or equal to "+A.n(q):""
+else if(q==null)s=": Not greater than or equal to "+A.n(r)
+else if(q>r)s=": Not in inclusive range "+A.n(r)+".."+A.n(q)
+else s=q<r?": Valid value range is empty":": Only valid value is "+A.n(r)
 return s}}
 A.f0.prototype={
 gbZ(){return A.e(this.b)},
@@ -6606,10 +6605,10 @@ j(a){return"Exception: "+this.a}}
 A.i1.prototype={
 j(a){var s=this.a,r=""!==s?"FormatException: "+s:"FormatException"
 return r}}
-A.n.prototype={
+A.o.prototype={
 bW(a,b,c,d){var s,r
 d.a(b)
-A.x(this).X(d).h("1(1,n.E)").a(c)
+A.x(this).X(d).h("1(1,o.E)").a(c)
 for(s=this.gJ(this),r=b;s.n();)r=c.$2(r,s.gt())
 return r},
 gB(a){var s,r=this.gJ(this)
@@ -6621,16 +6620,16 @@ s=r.gt()
 if(r.n())throw A.c(A.mq())
 return s},
 f2(a,b){var s,r
-A.x(this).h("y(n.E)").a(b)
+A.x(this).h("y(o.E)").a(b)
 for(s=this.gJ(this);s.n();){r=s.gt()
 if(b.$1(r))return r}throw A.c(A.f3())},
 a5(a,b){var s,r
 A.j0(b,"index")
 s=this.gJ(this)
 for(r=b;s.n();){if(r===0)return s.gt();--r}throw A.c(A.ig(b,b-r,this,"index"))},
-j(a){return A.oh(this,"(",")")}}
+j(a){return A.og(this,"(",")")}}
 A.am.prototype={
-j(a){return"MapEntry("+A.o(this.a)+": "+A.o(this.b)+")"}}
+j(a){return"MapEntry("+A.n(this.a)+": "+A.n(this.b)+")"}}
 A.a7.prototype={
 gU(a){return A.z.prototype.gU.call(this,0)},
 j(a){return"null"}}
@@ -6658,7 +6657,7 @@ return this.a.cX(a)},
 $S:7}
 A.kv.prototype={
 $1(a){var s,r,q,p,o,n,m,l,k,j,i,h
-if(A.nt(a))return a
+if(A.ns(a))return a
 s=this.a
 a.toString
 if(s.aX(a))return s.C(0,a)
@@ -6666,7 +6665,7 @@ if(a instanceof Date){r=a.getTime()
 if(r<-864e13||r>864e13)A.l(A.aQ(r,-864e13,864e13,"millisecondsSinceEpoch",null))
 A.cc(!0,"isUtc",t.y)
 return new A.bO(r,0,!0)}if(a instanceof RegExp)throw A.c(A.i("structured clone of RegExp",null))
-if(a instanceof Promise)return A.qT(a,t.X)
+if(a instanceof Promise)return A.qS(a,t.X)
 q=Object.getPrototypeOf(a)
 if(q===Object.prototype||q===null){p=t.X
 o=A.aC(p,p)
@@ -6685,7 +6684,7 @@ for(s=J.cZ(i),l=0;l<h;++l)o.push(this.$1(s.C(i,l)))
 return o}return a},
 $S:77}
 A.h8.prototype={
-br(a){if(a<=0||a>4294967296)throw A.c(A.mO(u.g+a))
+br(a){if(a<=0||a>4294967296)throw A.c(A.mN(u.g+a))
 return Math.random()*a>>>0},
 M(){return Math.random()},
 c1(){return Math.random()<0.5},
@@ -6728,7 +6727,7 @@ r=m>>>0
 s.a=r
 s.b=B.e.a_(o-n+(q-p)+(m-r),4294967296)>>>0},
 br(a){var s,r,q,p=this
-if(a<=0||a>4294967296)throw A.c(A.mO(u.g+a))
+if(a<=0||a>4294967296)throw A.c(A.mN(u.g+a))
 s=a-1
 if((a&s)>>>0===0){p.aj()
 return(p.a&s)>>>0}do{p.aj()
@@ -6770,7 +6769,7 @@ p(){var s,r,q,p,o,n,m,l,k,j=this,i=null
 for(s=j.r,r=j.w,q=j.x,p=j.y,o=j.z,n=A.mw(["exposure",j.a,"bloomStrength",j.b,"ssaoStrength",j.c,"depthOfFieldStrength",j.d,"vignette",j.e,"grain",j.f,"rainIntensity",s,"surfaceWetness",r,"surfaceSnowCoverage",q,"surfaceDissolution",p,"rainWindowVisibility",o,"ditherStrength",j.Q,"colorGradeStrength",j.as,"affineWarpStrength",j.at,"vertexSnapGrid",j.ax,"vhsChromaWeight",j.ch,"vhsTrackingWeight",j.CW,"vhsNoiseWeight",j.cx,"vhsHeadSwitchWeight",j.cy,"vhsDropoutWeight",j.db,"vhsGhostWeight",j.dx],t.N,t.i),n=new A.bi(n,A.x(n).h("bi<1,2>")).gJ(0);n.n();){m=n.d
 l=m.a
 k=m.b
-if(!isFinite(k)||k<0)throw A.c(A.i("PostProcessState."+l+" must be >= 0: "+A.o(k),i))}n=j.ay
+if(!isFinite(k)||k<0)throw A.c(A.i("PostProcessState."+l+" must be >= 0: "+A.n(k),i))}n=j.ay
 if(n<1||n>8)throw A.c(A.i("PostProcessState.quantizationBits must be in [1, 8]: "+n,i))
 if(s>1)throw A.c(A.i("PostProcessState.rainIntensity must be in [0, 1]: "+s,i))
 if(r>1)throw A.c(A.i("PostProcessState.surfaceWetness must be in [0, 1]: "+r,i))
@@ -6795,9 +6794,9 @@ if(!g.gE(0)||g.gO()<1e-12)throw A.c(A.i("CameraView.forward must be finite and n
 g=i.f
 if(isFinite(g)){s=i.r
 s=!isFinite(s)||g<=0||s<=g}else s=!0
-if(s)throw A.c(A.i("CameraView requires 0 < near < far, got "+A.o(g)+"/"+i.r,h))
+if(s)throw A.c(A.i("CameraView requires 0 < near < far, got "+A.n(g)+"/"+i.r,h))
 g=i.w
-if(!isFinite(g)||g<=0)throw A.c(A.i("CameraView.aspect must be finite and > 0: "+A.o(g),h))
+if(!isFinite(g)||g<=0)throw A.c(A.i("CameraView.aspect must be finite and > 0: "+A.n(g),h))
 g=i.a
 if(!g.gE(0)||!i.b.gE(0)||!i.c.gE(0))throw A.c(A.i("CameraView matrices must be finite",h))
 for(s=i.c.a,r=s.length,g=i.b.k(0,g).a,q=g.length,p=0,o=-1,n=0;n<16;++n){if(!(n<r))return A.d(s,n)
@@ -6812,7 +6811,7 @@ j=B.e.F(o,4)
 if(!(o>=0&&o<r))return A.d(s,o)
 s=s[o]
 if(!(o<q))return A.d(g,o)
-throw A.c(A.i("CameraView.viewProjection must equal projection * view. Worst relative mismatch "+m+" at column "+l+" row "+j+" (got "+A.o(s)+", expected "+A.o(g[o])+"). Prefer CameraView.look/lookAt/fromMatrices, which derive it.",h))}}}
+throw A.c(A.i("CameraView.viewProjection must equal projection * view. Worst relative mismatch "+m+" at column "+l+" row "+j+" (got "+A.n(s)+", expected "+A.n(g[o])+"). Prefer CameraView.look/lookAt/fromMatrices, which derive it.",h))}}}
 A.dR.prototype={}
 A.eS.prototype={
 p(){var s,r,q,p,o,n,m,l,k,j=this,i=null
@@ -6864,16 +6863,16 @@ if(isFinite(s)){r=j.d
 r=!isFinite(r)||r<s}else r=!0
 if(r)throw A.c(A.i("FrameEnvironment requires fogEnd >= fogStart, got "+s+"/"+j.d,i))
 s=j.fy
-if(!isFinite(s)||s<0)throw A.c(A.i("FrameEnvironment.ambientIntensity must be >= 0: "+A.o(s),i))
+if(!isFinite(s)||s<0)throw A.c(A.i("FrameEnvironment.ambientIntensity must be >= 0: "+A.n(s),i))
 s=j.go
 if(s!=null)s.p()
 for(s=j.id,r=s.length,o=0;o<r;++o){n=s[o]
 q=n.b
 if(!(isFinite(q.a)&&isFinite(q.b)&&isFinite(q.c)))A.l(A.i("PointLight.position must be finite: "+q.j(0),i))
 q=n.d
-if(!isFinite(q)||q<0)A.l(A.i("PointLight.intensity must be >= 0: "+A.o(q),i))
+if(!isFinite(q)||q<0)A.l(A.i("PointLight.intensity must be >= 0: "+A.n(q),i))
 q=n.e
-if(!isFinite(q)||q<=0)A.l(A.i("PointLight.radius must be > 0: "+q,i))}for(s=isFinite(0),r=isFinite(1),q=isFinite(-1),o=0;!1;++o){if(s)p=r
+if(!isFinite(q)||q<=0)A.l(A.i("PointLight.radius must be > 0: "+A.n(q),i))}for(s=isFinite(0),r=isFinite(1),q=isFinite(-1),o=0;!1;++o){if(s)p=r
 else p=!1
 if(!p)A.l(A.i("SpotLight.position must be finite: "+B.d.j(0),i))
 if(s)p=q
@@ -6882,7 +6881,7 @@ if(!p)A.l(A.i("SpotLight.direction must be finite and nonzero: "+B.q.j(0),i))}s=
 m=A.ax(s)
 for(r=j.k2,o=0;!1;++o){l=r[o]
 l.p()
-if(!m.i(0,l.gN()))throw A.c(A.i("FrameEnvironment.volumetricSources contains duplicate id: "+A.o(l.gN()),i))}r=j.w
+if(!m.i(0,l.gN()))throw A.c(A.i("FrameEnvironment.volumetricSources contains duplicate id: "+A.n(l.gN()),i))}r=j.w
 q=!0
 if(!(r<0))if(isFinite(r)){r=j.x
 if(!(r<0))if(!(r>0.5))if(isFinite(r)){r=j.y
@@ -6925,7 +6924,7 @@ if(r)throw A.c(A.i("invalid volumetric medium controls",i))
 k=A.ax(s)
 for(s=j.k3,o=0;!1;++o){l=s[o]
 l.p()
-if(!k.i(0,l.gN()))throw A.c(A.i("FrameEnvironment.thermalSources contains duplicate id: "+A.o(l.gN()),i))}},
+if(!k.i(0,l.gN()))throw A.c(A.i("FrameEnvironment.thermalSources contains duplicate id: "+A.n(l.gN()),i))}},
 aw(a2,a3,a4,a5,a6,a7,a8,a9,b0,b1,b2,b3,b4,b5,b6,b7,b8,b9,c0,c1){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0,a1=this
 t.c3.a(b1)
 s=a4==null?a1.a:a4
@@ -6955,11 +6954,11 @@ eQ(a,b,c,d,e,f,g){var s=null
 return this.aw(a,b,c,d,s,B.n,s,B.n,s,s,e,f,g,B.n,s,s,s,s,s,s)},
 eJ(a){var s=null
 return this.aw(s,s,s,B.n,s,B.n,s,B.n,s,a,s,s,s,B.n,s,s,s,s,s,s)},
-eM(a,b,c,d){var s=null
-return this.aw(a,b,s,c,d,B.n,s,B.n,s,s,s,s,s,B.n,s,s,s,s,s,s)},
+eN(a,b,c,d,e){var s=null
+return this.aw(a,b,s,c,d,B.n,s,B.n,s,s,e,s,s,B.n,s,s,s,s,s,s)},
 eP(a,b,c,d,e,f){var s=null
 return this.aw(s,s,s,B.n,s,B.n,s,B.n,s,s,s,s,s,B.n,a,b,c,d,e,f)},
-eN(a,b,c,d){var s=null
+eM(a,b,c,d){var s=null
 return this.aw(s,s,s,B.n,s,a,b,c,d,s,s,s,s,B.n,s,s,s,s,s,s)},
 eO(a,b,c,d,e){var s=null
 return this.aw(s,s,s,B.n,a,b,c,d,e,s,s,s,s,B.n,s,s,s,s,s,s)}}
@@ -6996,22 +6995,22 @@ A.ie.prototype={
 j(a){return"HandleException("+this.a.b+", "+this.b.j(0)+")"}}
 A.cE.prototype={
 j(a){var s=this.b,r=this.a.a
-return s==null?r.b+": ok":r.b+": "+A.o(s)}}
+return s==null?r.b+": ok":r.b+": "+A.n(s)}}
 A.eC.prototype={}
 A.kw.prototype={
 $1(a){return t.W.a(a)===this.a},
 $S:51}
-A.v.prototype={
+A.u.prototype={
 gE(a){return isFinite(this.a)&&isFinite(this.b)&&isFinite(this.c)},
 a8(a,b){if(b==null)return!1
-return b instanceof A.v&&this.a===b.a&&this.b===b.b&&this.c===b.c},
+return b instanceof A.u&&this.a===b.a&&this.b===b.b&&this.c===b.c},
 gU(a){return A.bW(this.a,this.b,this.c,B.m,B.m,B.m)},
-j(a){return"LinearColor("+A.o(this.a)+", "+A.o(this.b)+", "+A.o(this.c)+")"}}
+j(a){return"LinearColor("+A.n(this.a)+", "+A.n(this.b)+", "+A.n(this.c)+")"}}
 A.cr.prototype={
 p(){var s=this.a
 if(!s.gE(0)||s.gO()<1e-12)throw A.c(A.i("DirectionalLight.direction must be finite and nonzero: "+s.j(0),null))
 s=this.c
-if(!isFinite(s)||s<0)throw A.c(A.i("DirectionalLight.intensity must be >= 0: "+A.o(s),null))}}
+if(!isFinite(s)||s<0)throw A.c(A.i("DirectionalLight.intensity must be >= 0: "+A.n(s),null))}}
 A.bD.prototype={}
 A.az.prototype={}
 A.lb.prototype={
@@ -7028,9 +7027,9 @@ A.a0.prototype={
 p(){var s,r,q,p,o,n,m,l=this,k=null
 if(l.a.length===0)throw A.c(A.i("MaterialDefinition.key must not be empty",k))
 s=l.w
-if(!isFinite(s)||s<0)throw A.c(A.i("MaterialDefinition.emissiveStrength must be >= 0: "+A.o(s),k))
+if(!isFinite(s)||s<0)throw A.c(A.i("MaterialDefinition.emissiveStrength must be >= 0: "+A.n(s),k))
 s=l.z
-if(!isFinite(s)||s<0)throw A.c(A.i("MaterialDefinition.normalStrength must be >= 0: "+A.o(s),k))
+if(!isFinite(s)||s<0)throw A.c(A.i("MaterialDefinition.normalStrength must be >= 0: "+A.n(s),k))
 A.f9("roughness",l.at)
 A.f9("metallic",l.ax)
 A.f9("occlusionStrength",1)
@@ -7040,7 +7039,7 @@ if(!isFinite(0))throw A.c(A.i("MaterialDefinition.lightmapIntensity must be >= 0
 for(s=l.db,r=l.dx,q=[new A.F("uvScaleU",s),new A.F("uvScaleV",r),new A.F("uvOffsetU",0),new A.F("uvOffsetV",0),new A.F("tintR",l.d),new A.F("tintG",l.e),new A.F("tintB",l.f)],p=0;p<7;++p){o=q[p]
 n=o.a
 m=o.b
-if(!isFinite(m))throw A.c(A.i("MaterialDefinition."+n+" must be finite: "+A.o(m),k))}if(s===0||r===0)throw A.c(A.i("MaterialDefinition uv scale must not be zero",k))
+if(!isFinite(m))throw A.c(A.i("MaterialDefinition."+n+" must be finite: "+A.n(m),k))}if(s===0||r===0)throw A.c(A.i("MaterialDefinition uv scale must not be zero",k))
 if(!isFinite(0.5))throw A.c(A.i("MaterialDefinition.alphaCutoff must be in (0, 1]: 0.5",k))}}
 A.br.prototype={
 D(){return"VertexAttributeKind."+this.b}}
@@ -7064,7 +7063,7 @@ s=n.b.length
 if(B.e.F(s,18)!==0)throw A.c(A.i("MeshData.vertices length "+s+" is not a multiple of stride 18",null))
 n.ev()
 r=s/18|0
-for(s=A.or(n.c),q=s.length,p=0;p<q;++p){o=s[p]
+for(s=A.oq(n.c),q=s.length,p=0;p<q;++p){o=s[p]
 if(o>=r)throw A.c(A.i("MeshData index "+o+" out of range for "+r+" vertices",null))}s=n.d
 q=s.a
 if(q.gE(0)&&s.b.gE(0)){s=s.b
@@ -7102,8 +7101,8 @@ a=f*f+e*e+d*d
 if(!B.a.bk(A.b([j,h,g,f,e,d,c],p),new A.it()))throw A.c(A.i("surface-v2 tangent basis must be finite",a1))
 if(b<1e-8||a<1e-8)throw A.c(A.i("surface-v2 tangent basis must be non-zero",a1))
 a0=(j*f+h*e+g*d)/Math.sqrt(b*a)
-if(Math.abs(a0)>0.05)throw A.c(A.i("surface-v2 tangent must be orthogonal to its normal: "+A.o(a0),a1))
-if(Math.abs(Math.abs(c)-1)>0.05)throw A.c(A.i("surface-v2 tangent handedness must be -1 or +1: "+A.o(c),a1))}}}
+if(Math.abs(a0)>0.05)throw A.c(A.i("surface-v2 tangent must be orthogonal to its normal: "+A.n(a0),a1))
+if(Math.abs(Math.abs(c)-1)>0.05)throw A.c(A.i("surface-v2 tangent handedness must be -1 or +1: "+A.n(c),a1))}}}
 A.ir.prototype={
 $1(a){return t.p.a(a).a===B.aA},
 $S:8}
@@ -7140,12 +7139,12 @@ D(){return"BlendMode."+this.b}}
 A.b9.prototype={}
 A.jm.prototype={
 j(a){var s=this
-return"SurfaceMetrics(css "+s.a+"x"+s.b+", pixels "+s.c+"x"+s.d+", dpr "+A.o(s.e)+", visible: true)"},
+return"SurfaceMetrics(css "+s.a+"x"+s.b+", pixels "+s.c+"x"+s.d+", dpr "+A.n(s.e)+", visible: true)"},
 p(){var s,r=this
 if(r.a<0||r.b<0)throw A.c(A.i("SurfaceMetrics css size must be >= 0",null))
 if(r.c<0||r.d<0)throw A.c(A.i("SurfaceMetrics pixel size must be >= 0",null))
 s=r.e
-if(!isFinite(s)||s<=0)throw A.c(A.i("SurfaceMetrics.devicePixelRatio must be finite and > 0: "+A.o(s),null))}}
+if(!isFinite(s)||s<=0)throw A.c(A.i("SurfaceMetrics.devicePixelRatio must be finite and > 0: "+A.n(s),null))}}
 A.hO.prototype={
 D(){return"ColorEncoding."+this.b}}
 A.dK.prototype={
@@ -7169,7 +7168,7 @@ $3(a,b,c){return new A.b6(A.e(a),A.e(b),A.bv(c))},
 $S:71}
 A.fO.prototype={}
 A.iu.prototype={
-cU(a){var s,r,q,p,o,n,m,l,k,j,i,h,g=u.k,f=this.a,e=a.b,d=A.n2(f,new A.eU(e.byteLength,B.aK,B.c5))
+cU(a){var s,r,q,p,o,n,m,l,k,j,i,h,g=u.k,f=this.a,e=a.b,d=A.n1(f,new A.eU(e.byteLength,B.aK,B.c5))
 if(f.b!==B.i)A.l(A.m(g))
 s=A.k(d.a)
 r=f.a
@@ -7182,17 +7181,17 @@ if(f.b!==B.i)A.l(A.m(g))
 r.bindBuffer(A.e(q.WebGL2RenderingContext.ARRAY_BUFFER),s)
 o=A.ax(t.S)
 for(n=a.a,m=0;m<7;++m){l=B.M[m]
-k=A.nx(l.a)
+k=A.nw(l.a)
 if(!o.i(0,k))continue
-j=A.pP(n,k,l)
+j=A.pO(n,k,l)
 if(f.b!==B.i)A.l(A.m(g))
 r.vertexAttribPointer.apply(r,[k,j,A.e(q.WebGL2RenderingContext.FLOAT),!1,72,l.b*4])
 if(f.b!==B.i)A.l(A.m(g))
 r.enableVertexAttribArray(k)}i=a.c
-h=A.n2(f,new A.eU(A.mC(i),B.aK,B.aJ))
+h=A.n1(f,new A.eU(A.mB(i),B.aK,B.aJ))
 if(f.b!==B.i)A.l(A.m(g))
 r.bindBuffer(A.e(q.WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER),A.k(h.a))
-A.ph(f,h,t.bW.a(i))
+A.pg(f,h,t.bW.a(i))
 f=i.length
 return new A.fO(d,h,p,f,e.length/18|0,!1)},
 fm(a){var s=this.c.C(0,a.a)
@@ -7212,7 +7211,7 @@ $2(a,b){var s,r
 A.e(a)
 s=t.ai.a(b).b
 r=s.b.byteLength
-s=A.mC(s.c)
+s=A.mB(s.c)
 return a+r+s},
 $S:22}
 A.bb.prototype={}
@@ -7224,7 +7223,7 @@ f1(a){var s,r=this.b,q=r.aJ(a),p=q.a
 if(!p.d)return
 s=this.c.C(0,a.a)
 if(s==null)throw A.c(A.m("TextureStore.finalizeMips: no pixels uploaded yet for "+a.j(0)))
-A.n3(this.a,s)
+A.n2(this.a,s)
 r.c7(a,new A.bb(p,q.b,!0))},
 bN(a,b){var s
 this.b.aJ(a)
@@ -7286,7 +7285,7 @@ o=m.b
 if(B.a.bk(o,new A.js()))continue
 l=A.lC(p,m.a)
 for(k=0;k<o.length;++k){j=o[k]
-if(j!=null)A.lD(p,l,k,j)}if(m.c)A.n3(p,l)
+if(j!=null)A.lD(p,l,k,j)}if(m.c)A.n2(p,l)
 q.K(0,n.a,l)}},
 gb2(){return this.b.b1().bW(0,0,new A.jr(),t.S)}}
 A.jq.prototype={
@@ -7503,11 +7502,11 @@ s=q.c
 r=q.a
 if(s<r.length)B.a.K(r,s,a)
 else B.a.i(r,a);++q.c},
-$ioW:1}
+$ioV:1}
 A.i2.prototype={
 eD(a){if(a.length===0)throw A.c(A.a2(a,"passId",null))
 this.b=a
-this.a.c3(a,A.nB())},
+this.a.c3(a,A.nA())},
 dv(){var s,r,q,p,o=t.A
 o=A.aC(o,o)
 for(s=this.a,s=new A.bi(s,A.x(s).h("bi<1,2>")).gJ(0);s.n();){r=s.d
@@ -7562,9 +7561,9 @@ a2(a){var s,r,q,p,o,n,m=this
 a.p()
 s=null
 try{r=a.d.gar()
-r=A.af(r,A.x(r).h("n.E"))
+r=A.af(r,A.x(r).h("o.E"))
 q=t.dy
-s=A.pk(m.a,a.c,q.a(r),q.a(a.f),a.b)}catch(p){if(A.ch(p) instanceof A.dQ){++m.e
+s=A.pj(m.a,a.c,q.a(r),q.a(a.f),a.b)}catch(p){if(A.ch(p) instanceof A.dQ){++m.e
 throw p}else throw p}o=new A.da(s)
 r=m.b
 q=a.a
@@ -7591,7 +7590,7 @@ if(!n.i(0,p))throw A.c(A.i('ProgramSource "'+l+'": duplicate sampler unit '+p,m)
 A.j4.prototype={}
 A.a8.prototype={
 W(){var s=this
-return A.o9(B.bv,s.f,B.T,B.Q,!0,!0,!0,!0,s.r,B.V,B.W,s.d,s.e,!0,!1,!1)}}
+return A.o8(B.bv,s.f,B.T,B.Q,!0,!0,!0,!0,s.r,B.V,B.W,s.d,s.e,!0,!1,!1)}}
 A.j6.prototype={
 eF(a,b){var s=this.eu(t.U.a(a),!1),r=this.a,q=A.H(r)
 return new A.j5(A.aN(new A.ab(r,q.h("y(1)").a(new A.jb()),q.h("ab<1>")),t.z),s)},
@@ -7601,7 +7600,7 @@ s=A.b([],t.b7)
 r=m.a
 q=A.H(r)
 p=q.h("ab<1>")
-o=A.af(new A.ab(r,q.h("y(1)").a(new A.ja()),p),p.h("n.E"))
+o=A.af(new A.ab(r,q.h("y(1)").a(new A.ja()),p),p.h("o.E"))
 m.dO(o,a,s)
 m.dS(o,s)
 m.dU(o,s)
@@ -7631,9 +7630,9 @@ t.O.a(a)
 t._.a(b)
 for(s=A.H(a),r=s.h("y(1)").a(new A.j9()),q=B.a.gJ(a),s=new A.Q(q,r,s.h("Q<1>"));s.n();){r=q.gt()
 p=r.gaM()
-o=A.af(p,p.$ti.h("n.E"))
+o=A.af(p,p.$ti.h("o.E"))
 p=r.gb4()
-n=A.af(p,p.$ti.h("n.E"))
+n=A.af(p,p.$ti.h("o.E"))
 if(o.length!==1||n.length!==1){B.a.i(b,new A.al(B.aa,r.a,"a resolve must read exactly one source and write exactly one destination"))
 continue}m=B.a.gaT(o).a
 l=B.a.gaT(n).a
@@ -7761,7 +7760,7 @@ this.b.c7(a,b)
 this.c.K(0,a,new A.bH(a,b,s))},
 fk(a){this.b.aN(a)
 this.c.ac(0,a)},
-$ioZ:1}
+$ioY:1}
 A.jc.prototype={
 $3(a,b,c){return new A.b4(A.e(a),A.e(b),A.bv(c))},
 $S:34}
@@ -7816,7 +7815,7 @@ r.a3(0)
 q.a3(0)
 p.aa()
 e.x=!0},
-$ip0:1}
+$ip_:1}
 A.jK.prototype={}
 A.ho.prototype={$iaR:1,
 gN(){return this.a},
@@ -7843,7 +7842,7 @@ A.kf.prototype={
 $0(){var s,r=this.a.at
 if(r==null)return B.ab
 s=r.b
-return A.qV(s.k1,3,r.a.d,null)},
+return A.qU(s.k1,3,r.a.d,null)},
 $S:39}
 A.kk.prototype={
 $0(){return this.a.$1("sceneDepth")},
@@ -7891,8 +7890,8 @@ A.kp.prototype={
 $0(){return null},
 $S:43}
 A.jZ.prototype={}
-A.hd.prototype={$ioY:1}
-A.h5.prototype={$ioc:1}
+A.hd.prototype={$ioX:1}
+A.h5.prototype={$iob:1}
 A.fz.prototype={
 gu(){var s=this.w
 return s==null?A.l(A.m("renderer is not initialized")):s},
@@ -7930,8 +7929,8 @@ q.a=a
 A.iA(a)
 q.d=1
 r.b.d6(o)
-r=A.oq()
-l.w=new A.fx(A.os(s),r,A.p6(s),A.ax(t.cA),A.ax(t.eL),A.ax(t.aj))
+r=A.op()
+l.w=new A.fx(A.or(s),r,A.p5(s),A.ax(t.cA),A.ax(t.eL),A.ax(t.aj))
 r=new A.dN()
 q=new A.ib(s,r)
 o=A.iA(a)
@@ -7941,7 +7940,7 @@ q.c=new A.fs(new A.iS(o),n)
 l.x=q
 l.y=new A.j_(s,A.aC(t.N,t.dN))
 l.as=a
-A.nm(l)
+A.nl(l)
 l.e=B.ag}catch(m){s=l.y
 if(s!=null){r=s.b
 s.e3(new A.aZ(r,A.x(r).h("aZ<2>")))
@@ -7966,7 +7965,7 @@ b.a.p()
 b.b.p()
 b.c.p()
 r=b.w
-if(!isFinite(r))A.l(A.i("FrameInput.timeSeconds must be finite: "+A.o(r),null))
+if(!isFinite(r))A.l(A.i("FrameInput.timeSeconds must be finite: "+A.n(r),null))
 o.at=b
 o.ax=a
 q=o.c
@@ -7994,11 +7993,11 @@ l=m.a
 k=A.jl(l,0,A.cc(m.c,"count",t.S),A.H(l).c).dj(0,!1)
 m.b=B.c1
 q=k
-try{p=A.pS(d,r,s,q)
+try{p=A.pR(d,r,s,q)
 o=p.a.dv()
 m=o.gaY()
 l=A.x(m)
-n=new A.dv(new A.ab(m,l.h("y(n.E)").a(new A.je()),l.h("ab<n.E>")),l.h("a_(n.E)").a(new A.jf()),l.h("dv<n.E,a_>")).bW(0,B.c_,new A.jg(),t.o)
+n=new A.dv(new A.ab(m,l.h("y(o.E)").a(new A.je()),l.h("ab<o.E>")),l.h("a_(o.E)").a(new A.jf()),l.h("dv<o.E,a_>")).bW(0,B.c_,new A.jg(),t.o)
 l=s.e
 m=n.a
 j=n.b
@@ -8032,17 +8031,17 @@ s.c=new A.fs(q.a,s.cu(A.iA(r),r))
 s=p.y
 s.c=null
 s.b.a3(0)
-A.nm(p)
+A.nl(p)
 p.e=B.ag},
 b9(){var s=this,r=s.e
 if(r!==B.ag)throw A.c(A.m("renderer is not ready: "+r.b))
 if(s.a.b===B.X){s.e5()
 s.e=B.ah
 throw A.c(A.m("renderer context lost"))}},
-$ip2:1}
+$ip1:1}
 A.je.prototype={
 $1(a){t.ao.a(a)
-return A.qZ(a.a.toLowerCase(),"world",0)},
+return A.qY(a.a.toLowerCase(),"world",0)},
 $S:44}
 A.jf.prototype={
 $1(a){return t.ao.a(a).b},
@@ -8098,7 +8097,7 @@ s=B.b.S(b.a,this.a)
 if(s!==0)return s
 return B.e.S(this.b,b.b)},
 $iar:1}
-A.a3.prototype={}
+A.a4.prototype={}
 A.lg.prototype={
 $2(a,b){var s=t.k
 return s.a(a).a.S(0,s.a(b).a)},
@@ -8206,7 +8205,7 @@ o=s[r]
 if(!(p>=0&&p<256))return A.d(s,p)
 s[r]=s[p]
 s[p]=o}for(r=0;r<512;++r)n[r]=s[r&255]},
-d2(a,b){var s,r,q,p,o,n,m,l=B.b.ab(a)&255,k=B.b.ab(b)&255,j=a-B.b.ab(a),i=b-B.b.ab(b),h=A.mV(j),g=A.mV(i),f=this.b
+d2(a,b){var s,r,q,p,o,n,m,l=B.b.ab(a)&255,k=B.b.ab(b)&255,j=a-B.b.ab(a),i=b-B.b.ab(b),h=A.mU(j),g=A.mU(i),f=this.b
 f===$&&A.G()
 s=f[l]+k
 if(!(s<512))return A.d(f,s)
@@ -8267,7 +8266,7 @@ a=s*c
 for(p=0;p<b0;++p){a0=b+p
 a1=a+p
 a2=a1+1
-B.a.G(a8,A.b([a0,a1,a2,a0,a2,a0+1],a7))}}a3=new A.b7(B.a3,new Float32Array(A.t(a6)),new Uint16Array(A.t(a8)),new A.a5(b5,b6))
+B.a.G(a8,A.b([a0,a1,a2,a0,a2,a0+1],a7))}}a3=new A.b7(B.a3,new Float32Array(A.t(a6)),new Uint16Array(A.t(a8)),new A.a6(b5,b6))
 a3.p()
 return a3},
 dn(a2,a3){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c=this,b=a3*a2*4,a=new Uint8Array(b),a0=c.a,a1=c.b
@@ -8400,7 +8399,7 @@ if(!(a3>=0&&a3<n))return A.d(m,a3)
 m[a3]=a8
 a3=a9+1
 if(!(a9>=0&&a9<n))return A.d(m,a9)
-m[a9]=a6+1}}b1=new A.b7(B.a3,o,m,new A.a5(new A.a(l-2,j-4,f-2),new A.a(h+2,j+4,g+2)))
+m[a9]=a6+1}}b1=new A.b7(B.a3,o,m,new A.a6(new A.a(l-2,j-4,f-2),new A.a(h+2,j+4,g+2)))
 b0.f!==$&&A.d1()
 b0.f=b1
 b1.p()},
@@ -8487,7 +8486,7 @@ a7=o+13
 if(!(a7<a2))return A.d(s,a7)
 s[a7]=1
 o+=18;++n}}}
-A.a5.prototype={
+A.a6.prototype={
 gaz(){var s,r,q,p=this.a,o=p.a,n=p.b
 p=p.c
 s=this.b
@@ -8496,7 +8495,7 @@ q=s.b
 s=s.c
 return A.b([new A.a(o,n,p),new A.a(r,n,p),new A.a(o,q,p),new A.a(r,q,p),new A.a(o,n,s),new A.a(r,n,s),new A.a(o,q,s),new A.a(r,q,s)],t.G)},
 j(a){return"Aabb("+this.a.j(0)+", "+this.b.j(0)+")"}}
-A.e0.prototype={$io5:1}
+A.e0.prototype={$io4:1}
 A.bX.prototype={}
 A.di.prototype={
 D(){return"FrustumTest."+this.b}}
@@ -8578,7 +8577,7 @@ n=e[4]
 m=e[1]
 l=e[2]
 k=s*o-n*(m*d-q*l)+e[8]*(m*p-r*l)
-if(!isFinite(k)||Math.abs(k)<1e-12)A.l(A.m("Mat4.inverse3x3: singular upper-left 3x3 (det="+A.o(k)+")"))
+if(!isFinite(k)||Math.abs(k)<1e-12)A.l(A.m("Mat4.inverse3x3: singular upper-left 3x3 (det="+A.n(k)+")"))
 j=1/k
 i=new Float32Array(16)
 i[0]=o*j
@@ -8651,7 +8650,7 @@ q=r[q]
 if(!(s<16))return A.d(a0,s)
 a0[s]=q}return new A.bl(a0)},
 gE(a){return B.ad.bk(this.a,new A.ip())},
-j(a){return"Mat4("+A.o(this.a)+")"}}
+j(a){return"Mat4("+A.n(this.a)+")"}}
 A.ip.prototype={
 $1(a){return isFinite(A.ep(a))},
 $S:16}
@@ -8663,7 +8662,7 @@ return n<1e-9?B.o:new A.bZ(r/n,q/n,p/n,o/n)},
 af(a){var s=this,r=new A.a(s.a,s.b,s.c),q=r.R(a),p=r.R(q)
 return a.v(0,q.k(0,2*s.d)).v(0,p.k(0,2))},
 j(a){var s=this
-return"Quat("+A.o(s.a)+", "+A.o(s.b)+", "+A.o(s.c)+", "+A.o(s.d)+")"}}
+return"Quat("+A.n(s.a)+", "+A.n(s.b)+", "+A.n(s.c)+", "+A.n(s.d)+")"}}
 A.j1.prototype={
 fb(a){var s,r,q,p,o,n,m,l,k=null,j=this.b,i=j.a
 if(Math.abs(i)<1e-9){i=this.a
@@ -8707,7 +8706,7 @@ q=Math.max(q,j)
 if(q>Math.min(p,i))return k}return q},
 j(a){return"Ray(origin: "+this.a.j(0)+", direction: "+this.b.j(0)+")"}}
 A.j2.prototype={
-j(a){var s=this,r=s.f,q=r!=null?", instance: #"+A.o(r):""
+j(a){var s=this,r=s.f,q=r!=null?", instance: #"+A.n(r):""
 return'RaycastHit(node: "'+s.a.a+'"'+q+", distance: "+B.b.a6(s.d,2)+", point: "+s.b.j(0)+")"}}
 A.hK.prototype={
 au(a){var s,r,q,p=this,o=B.b.F(B.b.F(a,1)+1,1),n=p.a,m=n.length
@@ -8763,7 +8762,7 @@ if(!s.gE(0))throw A.c(A.i("Transform.translation must be finite: "+s.j(0),null))
 s=this.b
 if(!(isFinite(s.a)&&isFinite(s.b)&&isFinite(s.c)&&isFinite(s.d)))throw A.c(A.i("Transform.rotation must be finite: "+s.j(0),null))
 s=this.c
-if(!isFinite(s)||s<=0)throw A.c(A.i("Transform.scale must be finite and positive: "+A.o(s),null))},
+if(!isFinite(s)||s<=0)throw A.c(A.i("Transform.scale must be finite and positive: "+A.n(s),null))},
 ad(){var s,r,q,p,o,n,m,l,k,j,i,h=this.b,g=h.a,f=g*g,e=h.b,d=e*e,c=h.c,b=c*c,a=g*e,a0=g*c,a1=e*c
 h=h.d
 s=h*g
@@ -8795,7 +8794,7 @@ return A.my(A.b([g*p,o*p,n*p,0,m*p,l*p,k*p,0,j*p,i*p,h[10]*p,0,e.a,e.b,e.c,1],c)
 ai(a){return this.a.v(0,this.b.af(a.k(0,this.c)))},
 k(a,b){var s=this.b,r=this.c
 return new A.O(this.a.v(0,s.af(b.a.k(0,r))),s.k(0,b.b).gm(),r*b.c)},
-j(a){return"Transform("+this.a.j(0)+", "+this.b.j(0)+", scale="+A.o(this.c)+")"}}
+j(a){return"Transform("+this.a.j(0)+", "+this.b.j(0)+", scale="+A.n(this.c)+")"}}
 A.B.prototype={
 k(a,b){return new A.B(this.a*b,this.b*b)},
 gO(){var s=this.a,r=this.b
@@ -8804,7 +8803,7 @@ gB(a){return Math.sqrt(this.gO())},
 a8(a,b){if(b==null)return!1
 return b instanceof A.B&&this.a===b.a&&this.b===b.b},
 gU(a){return A.bW(this.a,this.b,B.m,B.m,B.m,B.m)},
-j(a){return"Vec2("+A.o(this.a)+", "+A.o(this.b)+")"}}
+j(a){return"Vec2("+A.n(this.a)+", "+A.n(this.b)+")"}}
 A.a.prototype={
 v(a,b){return new A.a(this.a+b.a,this.b+b.b,this.c+b.c)},
 P(a,b){return new A.a(this.a-b.a,this.b-b.b,this.c-b.c)},
@@ -8822,7 +8821,7 @@ return r<1e-9?B.f:new A.a(s.a/r,s.b/r,s.c/r)},
 a8(a,b){if(b==null)return!1
 return b instanceof A.a&&this.a===b.a&&this.b===b.b&&this.c===b.c},
 gU(a){return A.bW(this.a,this.b,this.c,B.m,B.m,B.m)},
-j(a){return"Vec3("+A.o(this.a)+", "+A.o(this.b)+", "+A.o(this.c)+")"}}
+j(a){return"Vec3("+A.n(this.a)+", "+A.n(this.b)+", "+A.n(this.c)+")"}}
 A.hH.prototype={
 dr(){var s=this.b*0.5,r=this.c*0.5,q=new A.hI(this,Math.cos(0),Math.sin(0)),p=-s,o=-r
 return A.b([q.$2(p,r),q.$2(s,r),q.$2(p,o),q.$2(s,o)],t.G)},
@@ -9004,13 +9003,13 @@ if(!isFinite(s)||s<0)throw A.c(A.i("ParticleEmitter.rate must be finite and >= 0
 for(s=n.ax.length,r=isFinite(1),q=isFinite(0),p=0;p<s;++p){if(!q)A.l(A.i("ParticleBurst.time must be finite and >= 0",m))
 if(!r)A.l(A.i("ParticleBurst.repeatInterval must be finite and > 0",m))}if(!q)throw A.c(A.i("ParticleEmitter.duration must be finite and >= 0",m))
 s=n.cy
-if(!isFinite(s)||s<=0||n.db<s)throw A.c(A.i("ParticleEmitter lifetime range must be valid: "+A.o(s)+".."+A.o(n.db),m))
+if(!isFinite(s)||s<=0||n.db<s)throw A.c(A.i("ParticleEmitter lifetime range must be valid: "+A.n(s)+".."+A.n(n.db),m))
 s=n.dx
-if(!isFinite(s)||s<0||n.dy<s)throw A.c(A.i("ParticleEmitter speed range must be valid: "+A.o(s)+".."+A.o(n.dy),m))
+if(!isFinite(s)||s<0||n.dy<s)throw A.c(A.i("ParticleEmitter speed range must be valid: "+A.n(s)+".."+A.n(n.dy),m))
 s=n.fr
-if(!isFinite(s)||s<=0||n.fx<s)throw A.c(A.i("ParticleEmitter start size range must be valid: "+A.o(s)+".."+A.o(n.fx),m))
+if(!isFinite(s)||s<=0||n.fx<s)throw A.c(A.i("ParticleEmitter start size range must be valid: "+A.n(s)+".."+A.n(n.fx),m))
 s=n.fy
-if(!isFinite(s)||s<0||n.go<s)throw A.c(A.i("ParticleEmitter end size range must be valid: "+A.o(s)+".."+A.o(n.go),m))
+if(!isFinite(s)||s<0||n.go<s)throw A.c(A.i("ParticleEmitter end size range must be valid: "+A.n(s)+".."+A.n(n.go),m))
 s=n.k1
 if(!isFinite(s)||s<0||s>1)throw A.c(A.i("ParticleEmitter.fadeInFraction must be in [0, 1]",m))
 r=n.k2
@@ -9331,7 +9330,7 @@ e=f.a
 d=f.b
 c=f.c
 b=f.ay*0.5
-if(r.dh(new A.a5(new A.a(e-b,d-b,c-b),new A.a(e+b,d+b,c+b)))===B.a6)continue
+if(r.dh(new A.a6(new A.a(e-b,d-b,c-b),new A.a(e+b,d+b,c+b)))===B.a6)continue
 a=a5.el(f,q,p)
 a0=f.ay
 if(k){b=f.d
@@ -9345,7 +9344,7 @@ bx(a,b){return this.cf(a,b,!0)},
 el(a,b,c){var s,r,q,p,o,n,m
 switch(this.Q.a){case 0:s=b.P(0,new A.a(a.a,a.b,a.c)).gm()
 if(s.gO()<0.000001)return B.o
-r=A.mN(B.p,s)
+r=A.mM(B.p,s)
 q=a.cx
 if(Math.abs(q)>0.000001)return r.k(0,A.ai(B.p,q)).gm()
 return r
@@ -9383,7 +9382,7 @@ l=Math.sqrt(Math.max(0,1-m*m))
 k=a.M()*2*3.141592653589793
 p=Math.cos(k)
 j=Math.sin(k)
-q=A.mN(B.d,o).af(new A.a(l*p,m,l*j)).gm()}}i=b.b.af(q.k(0,b.c)).gm()
+q=A.mM(B.d,o).af(new A.a(l*p,m,l*j)).gm()}}i=b.b.af(q.k(0,b.c)).gm()
 if(!s.gE(0)||!i.gE(0))A.l(A.i("EmitterSpawnSample must be finite",null))
 return new A.bP(s,i)},
 $ibx:1}
@@ -9536,7 +9535,7 @@ A.b0(r,B.G,1,0,0,0)
 A.au(r,o.b.b)
 q=t.j
 p=o.d
-if(o.e)A.pg(r,0,q.a(p.$0()))
+if(o.e)A.pf(r,0,q.a(p.$0()))
 else A.S(r,0,q.a(p.$0()))
 A.f(r,"uSource",B.v)
 A.f(r,"uTexelStep",new A.h(B.N,o.f))
@@ -9556,7 +9555,7 @@ if(p<=0)return
 s=a.b
 r=s.a
 A.ap(r,a.aP(q.f).b)
-A.n_(r,1)
+A.mZ(r,1)
 A.aa(r,B.aI)
 A.au(r,q.b.b)
 A.S(r,0,t.j.a(q.d.$0()))
@@ -9725,7 +9724,7 @@ return s},
 aP(a){var s=a.a,r=this.a.C(0,s+"#"+a.f)
 if(r!=null)return r
 return this.Z(s)},
-$ioX:1}
+$ioW:1}
 A.lw.prototype={}
 A.dG.prototype={
 gN(){return"present"},
@@ -9751,7 +9750,7 @@ A.f(a3,"uExposure",new A.h(B.c,p.a))
 A.f(a3,"uVignette",new A.h(B.c,p.e))
 A.f(a3,"uGrain",new A.h(B.c,p.f))
 A.f(a3,"uOutputEncoding",new A.h(B.c,a.e===B.a5?1:0))
-A.f(a3,"uToneMap",new A.h(B.c,A.ou(p.fr)))
+A.f(a3,"uToneMap",new A.h(B.c,A.ot(p.fr)))
 m=o.a
 l=o.k4
 q=l==null
@@ -9867,7 +9866,7 @@ if(l==null){s=m.a
 A.ap(s,n.b)
 A.aa(s,o.a.W())
 A.b0(s,B.a4,1,0,0,0)
-return}r=A.mQ(l)
+return}r=A.mP(l)
 o.x.$1(r)
 s=m.a
 A.ap(s,n.b)
@@ -10271,7 +10270,7 @@ o=new A.a(n*l+k*j+q*i,n*h+k*g+q*f,n*e+k*d+q*s[10]).gm()}c=r?null:a5.b
 if(c==null)c=B.H
 A.f(a6,"uLightDir",new A.h(B.l,new Float32Array(A.t(A.b([o.a,o.b,o.c],p)))))
 A.f(a6,"uLightColor",new A.h(B.l,new Float32Array(A.t(A.b([c.a,c.b,c.c],p)))))
-b=A.qW(4,a3.d,a4.k2)
+b=A.qV(4,a3.d,a4.k2)
 A.f(a6,"uVolumetricSourceCount",new A.h(B.c,b.length))
 for(a=0;a<4;++a){s=b.length
 if(a<s)if(!(a<s))return A.d(b,a)
@@ -10287,7 +10286,7 @@ gq(){return this.a}}
 A.hr.prototype={
 Y(a){var s=this,r=a.aP(s.e),q=a.aP(s.d),p=a.b,o=p.a
 A.ap(o,r.b)
-A.n_(o,1)
+A.mZ(o,1)
 A.aa(o,B.aI)
 A.au(o,s.b.b)
 A.S(o,0,q.b)
@@ -10427,7 +10426,7 @@ o=n.a
 q=l.a
 p=n.b
 k=l.b
-n=new A.a5(new A.a(Math.min(o.a,q.a),Math.min(o.b,q.b),Math.min(o.c,q.c)),new A.a(Math.max(p.a,k.a),Math.max(p.b,k.b),Math.max(p.c,k.c)))}j.fr=n
+n=new A.a6(new A.a(Math.min(o.a,q.a),Math.min(o.b,q.b),Math.min(o.c,q.c)),new A.a(Math.max(p.a,k.a),Math.max(p.b,k.b),Math.max(p.c,k.c)))}j.fr=n
 s=n}return s},
 b6(b1){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0,a1,a2,a3,a4,a5,a6,a7,a8=this,a9=a8.w,b0=a8.x
 if(a9==null||b0==null||a8.cy.length===0)a8.dW(b1)
@@ -10584,7 +10583,7 @@ r=A.e(s.WebGL2RenderingContext.TRIANGLES)
 s=b?A.e(s.WebGL2RenderingContext.UNSIGNED_INT):A.e(s.WebGL2RenderingContext.UNSIGNED_SHORT)
 A.ak(q.a,"drawElementsInstanced",[r,a,s,d,c],t.H)
 this.b.aG(a,c)},
-$io8:1}
+$io7:1}
 A.ct.prototype={}
 A.dF.prototype={
 ak(a,b,c,d){var s,r,q,p,o,n,m,l,k="resource library is disposed",j=this.b,i=j.gu()
@@ -10626,10 +10625,10 @@ m=1-h/o*2
 r=p.gfc()
 l=r.ai(new A.a(n,m,-1))
 return k.e.fj(new A.j1(p.d,r.ai(new A.a(n,m,1)).P(0,l).gm()))},
-cd(b9,c0){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0,a1,a2,a3,a4,a5,a6,a7,a8,a9,b0,b1,b2,b3,b4,b5,b6,b7,b8=this
-new A.ji(b9,0.65,0.35,c0,2,2.5).p()
-s=B.b.F(B.b.F(b9,24)+24,24)
-r=A.mR(s,12)*3.141592653589793/12
+cd(c1,c2){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0,a1,a2,a3,a4,a5,a6,a7,a8,a9,b0,b1,b2,b3,b4,b5,b6,b7,b8,b9,c0=this
+new A.ji(c1,0.65,0.35,c2,2,2.5).p()
+s=B.b.F(B.b.F(c1,24)+24,24)
+r=A.mQ(s,12)*3.141592653589793/12
 q=Math.sin(0.65)
 p=Math.cos(0.65)
 o=q*Math.sin(0.35)
@@ -10647,39 +10646,43 @@ e=B.b.F(B.b.F(12-f,24)+24,24)
 d=B.b.F(B.b.F(12+f,24)+24,24)
 o=!g
 c=o&&m>0
-A.p4(l,s,c,o&&!c,12)
-b=2+c0*3.5+0
-a=A.p3(Math.max(0,1.5707963267948966-l))
+A.p3(l,s,c,o&&!c,12)
+b=2+c2*3.5+0
+a=A.p2(Math.max(0,1.5707963267948966-l))
 n=B.b.l(Math.exp(-(0.0046416*a*b)),0,1)
 a0=B.b.l(Math.exp(-(0.010846399999999999*a*b)),0,1)
 a1=B.b.l(Math.exp(-(0.02648*a*b)),0,1)
-a2=B.b.l(Math.exp(-(c0*2.2)),0,1)
-a3=A.mS(-0.3141592653589793,0.10471975511965977,l)
-a4=A.mS(-0.014538592669112763,0.03490658503988659,l)
+a2=B.b.l(Math.exp(-(c2*2.2)),0,1)
+a3=A.mR(-0.3141592653589793,0.10471975511965977,l)
+a4=A.mR(-0.014538592669112763,0.03490658503988659,l)
 a5=Math.max(0,Math.sin(l)+a4*0.018)
 a6=n*0.2126+a0*0.7152+a1*0.0722
 a7=2.5*Math.pow(a5,0.35)*a6*a2
 a8=B.b.l(a5*a6,0,1)
 a9=0.42*a8
-b0=1-c0
+b0=1-c2
 b1=0.055+a9*(0.55+0.45*b0)+a3*(0.028+0.018*b0)
-b2=0.0015*(2.12+c0*0.8)
-b0=0.035+n*0.18+c0*0.1
-b3=0.045+a0*0.2+c0*0.12
-b4=0.07+a1*0.24+c0*0.16+a3*0.018
-b5=new A.v(b0,b3,b4)
-b6=new A.v(n,a0,a1)
-a9=new A.v(0.14+0.38*a8,0.16+a9,0.22+0.52*a8)
+b2=0.0015*(2.12+c2*0.8)
+b0=0.035+n*0.18+c2*0.1
+b3=0.045+a0*0.2+c2*0.12
+b4=0.07+a1*0.24+c2*0.16+a3*0.018
+b5=new A.u(b0,b3,b4)
+b6=new A.u(n,a0,a1)
+a9=new A.u(0.14+0.38*a8,0.16+a9,0.22+0.52*a8)
 if(!isFinite(s)||!isFinite(e)||!isFinite(d)||!isFinite(l)||!isFinite(a3)||!isFinite(a4)||!isFinite(j)||!isFinite(a7)||!isFinite(b1)||!isFinite(b2)||!isFinite(0.06)||!i.gE(0)||!new A.a(n,a0,a1).gE(0)||!b6.gE(0)||!a9.gE(0)||!b5.gE(0))A.l(A.m("solar lighting state is not finite"))
 if(i.gO()<0.999||i.gO()>1.001||a7<0||b1<0||b2<0||a2<0||a2>1||a3<0||a3>1||a4<0||a4>1)A.l(A.m("solar lighting state is out of bounds"))
 new A.cr(i,b6,a7).p()
-o=b8.f.eM(a9,b1,new A.cr(i,b6,a7),b5)
-b8.f=o
-b7=o.k4
-if(b7!=null){o=B.b.l(b0*0.4+0.02,0,1)
-n=B.b.l(b3*0.5+0.04,0,1)
-a0=B.b.l(b4*0.8+0.08,0,1)
-b8.f=b8.f.cZ(new A.dR(b7.a,b7.b,b5,new A.v(o,n,a0),new A.v(B.b.l(b0*0.2,0,1),B.b.l(b3*0.2,0,1),B.b.l(b4*0.2,0,1)),B.b.l(a4*0.25,0,1),B.b.l((1-a3)*0.008,0,0.1),b7.w,b7.x,!0,b7.z,b7.Q,b7.as,b7.at,b7.ax,b7.ay,b7.ch,b7.CW,b7.cx,b7.cy,b7.db))}},
+b7=c0.f.k4
+o=B.b.l(b0*0.4+0.02,0,1)
+n=b3*0.5
+a0=B.b.l(n+0.04,0,1)
+a1=B.b.l(b4*0.8+0.08,0,1)
+b8=B.b.l(o*0.5+b0*0.5,0,1)
+n=B.b.l(a0*0.5+n,0,1)
+b9=B.b.l(a1*0.5+b4*0.5,0,1)
+b9=c0.f.eN(a9,b1,new A.cr(i,b6,a7),b5,new A.u(b8,n,b9))
+c0.f=b9
+if(b7!=null)c0.f=b9.cZ(new A.dR(b7.a,b7.b,b5,new A.u(o,a0,a1),new A.u(B.b.l(b0*0.2,0,1),B.b.l(b3*0.2,0,1),B.b.l(b4*0.2,0,1)),B.b.l(a4*0.25,0,1),B.b.l((1-a3)*0.008,0,0.1),b7.w,b7.x,!0,b7.z,b7.Q,b7.as,b7.at,b7.ax,b7.ay,b7.ch,b7.CW,b7.cx,b7.cy,b7.db))},
 bU(a,b,c,d){this.f=this.f.eO(a,null,b,c,d)},
 eT(a,b,c){return this.bU(a,b,null,c)},
 ee(){var s,r=this,q=v.G
@@ -10705,7 +10708,7 @@ o.z=new A.a(q,s.A(0,"shiftleft")||s.A(0,"keyq")?p-1:p,r)}},
 cF(){var s,r=this,q=r.a,p=A.e(q.clientWidth)>0?A.e(q.clientWidth):A.e(q.width),o=A.e(q.clientHeight)>0?A.e(q.clientHeight):A.e(q.height),n=r.x
 if(p===n.a&&o===n.b)return
 n=n.e
-n=A.mU(o,p,n,n,!0)
+n=A.mT(o,p,n,n,!0)
 r.x=n
 q.width=n.c
 q.height=r.x.d
@@ -10771,8 +10774,8 @@ A.k(d.style).lineHeight="1.4"
 A.k(d.style).borderRadius="4px"
 A.k(d.style).pointerEvents="none"
 A.k(d.style).zIndex="9999"
-c=A.u(a.a.parentElement)
-if(c==null)c=A.u(A.k(r.document).body)
+c=A.v(a.a.parentElement)
+if(c==null)c=A.v(A.k(r.document).body)
 if(c!=null)A.k(c.appendChild(d))
 a.fy=d}b=B.b.a6(q*1000,1)
 d.innerText="FPS: "+B.b.a6(a.k1,0)+" ("+b+" ms)\nDraws: "+e.b+" | Tris: "+e.c+"\nInstances: "+e.e+" | VRAM: "+B.b.a6(e.r/1024,0)+" KB"}}}A.e(A.k(v.G.window).requestAnimationFrame(A.E(a.gcP())))},
@@ -10881,20 +10884,20 @@ i=j.h("y(1)")
 j=j.h("ab<1>")
 s=new A.ab(k,i.a(new A.ic()),j)
 for(h=s,g=J.ac(h.a),h=new A.Q(g,h.b,h.$ti.h("Q<1>")),f=a.a;h.n();){r=g.gt()
-q=A.n5(f,a.cv(r,a5))
+q=A.n4(f,a.cv(r,a5))
 J.hz(a3,q)
-J.hy(a2,r,q)}e=A.af(new A.ab(k,i.a(new A.id()),j),j.h("n.E"))
+J.hy(a2,r,q)}e=A.af(new A.ab(k,i.a(new A.id()),j),j.h("o.E"))
 B.a.dw(e)
 p=e
 for(k=p,j=k.length,i=a5.d===1,d=0;d<k.length;k.length===j||(0,A.C)(k),++d){o=k[d]
-n=A.qN(J.nW(o,11))
+n=A.qM(J.nV(o,11))
 if(i){h=J.li(a2,"sceneColor")
 h.toString
 J.hy(a2,o,h)}else{h=n
 if(typeof h!=="number")return h.dm()
 if(h>=2){h=J.li(a2,"sceneColor#1")
 h.toString
-J.hy(a2,o,h)}else{m=A.n5(f,a.cv(o,a5))
+J.hy(a2,o,h)}else{m=A.n4(f,a.cv(o,a5))
 J.hz(a3,m)
 J.hy(a2,o,m)}}}a0=A.ml(a2,a0,a1)
 return a0}catch(c){for(a0=a3,k=A.H(a0).h("dO<1>"),a0=new A.dO(a0,k),a0=new A.at(a0,a0.gB(0),k.h("at<T.E>")),j=a.a,i=t.V,k=k.h("T.E");a0.n();){h=a0.d
@@ -11011,7 +11014,7 @@ A.an.prototype={
 D(){return"StateField."+this.b}}
 A.jD.prototype={
 eS(a){var s,r=this.a
-if(r==null)return A.op(B.dn,t.d5)
+if(r==null)return A.oo(B.dn,t.d5)
 s=A.ax(t.d5)
 if(r.a!==a.a)s.i(0,B.ak)
 if(r.b!==a.b)s.i(0,B.al)
@@ -11033,12 +11036,12 @@ s.d=A.E(new A.jB(s))
 r.addEventListener("webglcontextlost",s.c)
 r.addEventListener("webglcontextrestored",s.d)},
 aF(a){if(!this.r.A(0,a))return!1
-return A.u(this.a.getExtension(a))!=null},
+return A.v(this.a.getExtension(a))!=null},
 aV(a){var s=A.cY(this.a.getParameter(a))
 return typeof s=="number"?B.b.c6(s):0},
 cD(a){var s=A.cY(this.a.getParameter(a))
 return typeof s=="number"?s:0/0},
-$iod:1}
+$ioc:1}
 A.jA.prototype={
 $1(a){A.k(a).preventDefault()
 this.a.b=B.X},
@@ -11049,7 +11052,7 @@ $S:19}
 A.k4.prototype={
 eC(){var s,r=this
 if(r.b!==B.i)A.l(A.m(u.k))
-s=r.w?A.u(r.a.createQuery()):null
+s=r.w?A.v(r.a.createQuery()):null
 if(s==null)return null
 r.a.beginQuery(35007,s)
 return new A.bu(new A.hu(s))},
@@ -11059,9 +11062,9 @@ return s}}
 A.ht.prototype={}
 A.jz.prototype={}
 A.jC.prototype={
-eR(a){var s=A.u(a.getContext("webgl2"))
+eR(a){var s=A.v(a.getContext("webgl2"))
 if(!t.m.b(s))return null
-return new A.jz(A.pb(s))}}
+return new A.jz(A.pa(s))}}
 A.kH.prototype={
 $1(a){var s,r,q
 A.k(a)
@@ -11080,7 +11083,7 @@ s=A.K(this.a.value)
 A:{if("clean"===s){r=A.fr(0,0,0,0,0,1,0,8,0,1,!1,0,0,0,0,B.au,0,0,0,0,0,0,0,0)
 break A}if("ps1"===s){r=A.fr(0.35,0,0,0,0.65,1,0,5,0,1,!1,0,0,0,0,B.bg,0,0,0,0,0,0,0,0)
 break A}if("vhs"===s){r=A.fr(0,0,0,0,0,1,0,8,0,1,!1,0,0,0,0,B.at,0,0.45,0,0,0,0.25,0.4,0.3)
-break A}r=A.mG()
+break A}r=A.mF()
 break A}this.b.r=r
 q=this.c
 if(t.m.b(q)){switch(r.fr.a){case 2:r="aces"
@@ -11112,9 +11115,9 @@ if(r!==0){if(0>=r)return A.d(s,0)
 s=s[0]
 p.b.y=new A.cJ(s,B.f,B.bl,3.8,1.2,7,B.fD,B.f.v(0,B.bl))}s=p.c
 if(t.m.b(s))A.k(s.style).display="none"}else{r=p.b
-if(A.K(s.value)==="tour"){r.y=A.nZ(0.04,1.2,22,!0,t.fy.a(A.b([B.bL,B.bQ,B.bP,B.bK,B.bM,B.bN,B.bO],t.d0)))
+if(A.K(s.value)==="tour"){r.y=A.nY(0.04,1.2,22,!0,t.fy.a(A.b([B.bL,B.bQ,B.bP,B.bK,B.bM,B.bN,B.bO],t.d0)))
 s=p.c
-if(t.m.b(s))A.k(s.style).display="none"}else{q=r.y=A.mD(8.5,B.K)
+if(t.m.b(s))A.k(s.style).display="none"}else{q=r.y=A.mC(8.5,B.K)
 q.d=0.45
 s=p.e
 r=t.m
@@ -11128,9 +11131,9 @@ this.a.z.ey(0.65)},
 $S:0}
 A.l5.prototype={
 $1(a){var s,r,q,p,o,n
-for(s=this.a,r=t.m,q=0;q<A.e(s.length);++q){p=A.u(s.item(q))
+for(s=this.a,r=t.m,q=0;q<A.e(s.length);++q){p=A.v(s.item(q))
 if(r.b(p))if(A.bv(p.getAttribute("data-topic"))===a)A.k(p.classList).add("active")
-else A.k(p.classList).remove("active")}for(s=this.b,o="panel-"+a,q=0;q<A.e(s.length);++q){n=A.u(s.item(q))
+else A.k(p.classList).remove("active")}for(s=this.b,o="panel-"+a,q=0;q<A.e(s.length);++q){n=A.v(s.item(q))
 if(r.b(n))if(A.K(n.id)===o)A.k(n.classList).add("active")
 else A.k(n.classList).remove("active")}},
 $S:20}
@@ -11256,7 +11259,7 @@ $S:0}
 A.l7.prototype={
 $1(a){var s,r,q,p,o=this,n=null,m=o.a.ay
 B.a.a3(m)
-switch(a){case"campfire":B.a.i(m,A.aP(B.f,B.Z,B.B,n,n,A.ot(A.b([B.ej,B.ek,B.el,B.ei],t.aw)),0.4,B.r,0.1,0.4,new A.a(0,0.5,0),o.c,n,1.5,0.1,6.283185307179586,1.1,200,2.2,0.4,o.b,-1.5,0.05,0,0.6,1.2,0.25,1.5,2,1.2,0,B.d,0,75,1001,new A.db(0.15,0.15,0.2,B.aH),B.hP,0.1,n,new A.O(B.a_,B.o,1)))
+switch(a){case"campfire":B.a.i(m,A.aP(B.f,B.Z,B.B,n,n,A.os(A.b([B.ej,B.ek,B.el,B.ei],t.aw)),0.4,B.r,0.1,0.4,new A.a(0,0.5,0),o.c,n,1.5,0.1,6.283185307179586,1.1,200,2.2,0.4,o.b,-1.5,0.05,0,0.6,1.2,0.25,1.5,2,1.2,0,B.d,0,75,1001,new A.db(0.15,0.15,0.2,B.aH),B.hP,0.1,n,new A.O(B.a_,B.o,1)))
 break
 case"fireworks":s=o.b
 r=o.e
@@ -11291,14 +11294,14 @@ $S:12}
 A.kT.prototype={
 $1(a){var s,r=this
 A.k(a)
-switch(A.K(r.a.value)){case"on":r.b.bU(B.aQ,35,0.08,6)
+switch(A.K(r.a.value)){case"on":r.b.bU(B.aQ,120,0.04,20)
 break
 case"volumetric":s=r.b
-s.eT(B.cQ,45,8)
+s.eT(B.cQ,120,20)
 s.f=s.f.eP(B.S,0.7,0.04,0.02,1.2,16)
 break
 case"off":s=r.b
-s.f=s.f.eN(null,10001,null,1e4)
+s.f=s.f.eM(null,10001,null,1e4)
 break}},
 $S:0}
 A.kV.prototype={
@@ -11321,7 +11324,7 @@ r=B.b.a6(o.a,1)
 n=B.b.a6(o.b,1)
 m=B.b.a6(o.c,1)
 l=s.f
-k=l!=null?" (Instance #"+A.o(l)+")":""
+k=l!=null?" (Instance #"+A.n(l)+")":""
 l=j.c
 if(l!=null)l.textContent="Selected: "+q.a+k+" | Dist: "+p+" | Pt: "+("("+r+", "+n+", "+m+")")}else{r.e=null
 r=j.c
@@ -11380,7 +11383,7 @@ b=Math.cos(c)
 c=Math.sin(c)
 a=Math.sin(a3*2.2)
 a0=a2.at
-a0.f=a0.f.eJ(A.b([new A.bD(new A.a(g*4.2,1.5+f*0.6,a6*4.2),B.cw,4,9),new A.bD(new A.a(d*4.5,1.8,e*4.5),B.cD,4,9),new A.bD(new A.a(b*3.8,1.2,c*3.8),B.cO,3.5,8),new A.bD(new A.a(0,3.8+a*0.9,0),B.cR,4.5,10)],t.bs))
+a0.f=a0.f.eJ(A.b([new A.bD(new A.a(g*4.2,1.5+f*0.6,a6*4.2),B.cw,1.5,8),new A.bD(new A.a(d*4.5,1.8,e*4.5),B.cD,1.5,8),new A.bD(new A.a(b*3.8,1.2,c*3.8),B.cO,1.2,7.5),new A.bD(new A.a(0,3.8+a*0.9,0),B.cR,1.6,9)],t.bs))
 if(a5.b&&!a5.d){a1=B.b.F(a5.a+a4*0.2667*a5.c,24)
 a5.a=a1
 a0.cd(a1,0.25)
@@ -11392,7 +11395,7 @@ A.kY.prototype={
 $1(a){var s,r,q,p,o,n,m=this
 A.k(a)
 s=v.G
-r=A.u(A.k(s.document).activeElement)
+r=A.v(A.k(s.document).activeElement)
 q=r==null?null:A.K(r.tagName).toLowerCase()
 if(q==="input"||q==="select")return
 switch(A.K(a.key)){case" ":a.preventDefault()
@@ -11420,18 +11423,18 @@ break
 case"c":case"C":r=m.f
 if(t.m.b(r)){r.selectedIndex=B.e.F(A.e(r.selectedIndex)+1,A.e(A.k(r.options).length))
 A.c9(r.dispatchEvent(A.k(new s.Event("change"))))}break
-case"m":case"M":n=A.u(A.k(s.document).querySelector("#material-select"))
+case"m":case"M":n=A.v(A.k(s.document).querySelector("#material-select"))
 if(t.m.b(n)){n.selectedIndex=B.e.F(A.e(n.selectedIndex)+1,A.e(A.k(n.options).length))
 A.c9(n.dispatchEvent(A.k(new s.Event("change"))))}break}},
 $S:0};(function aliases(){var s=J.bB.prototype
 s.dE=s.j
 s=A.ba.prototype
 s.dF=s.ae})();(function installTearOffs(){var s=hunkHelpers._static_2,r=hunkHelpers._static_1,q=hunkHelpers._static_0,p=hunkHelpers._instance_1u
-s(J,"q1","oi",73)
+s(J,"q0","oh",73)
+r(A,"qq","pm",6)
 r(A,"qr","pn",6)
 r(A,"qs","po",6)
-r(A,"qt","pp",6)
-q(A,"nA","qm",1)
+q(A,"nz","ql",1)
 p(A.fb.prototype,"gfs","ft",70)
 var o
 p(o=A.fL.prototype,"gfn","fo",3)
@@ -11439,21 +11442,21 @@ p(o,"gfw","fz",3)
 p(o,"gfA","fB",3)
 p(o,"gfp","fq",3)
 p(o,"gfu","fv",3)
-q(A,"nB","pq",75)
-q(A,"rt","lv",76)
-r(A,"qB","o6",18)
-r(A,"qA","mm",18)
+q(A,"nA","pp",75)
+q(A,"rs","lv",76)
+r(A,"qA","o5",18)
+r(A,"qz","mm",18)
 p(A.bl.prototype,"gaB","ai",11)
 p(A.dF.prototype,"gcP","er",65)})();(function inheritance(){var s=hunkHelpers.mixin,r=hunkHelpers.inherit,q=hunkHelpers.inheritMany
 r(A.z,null)
-q(A.z,[A.lp,J.f2,A.dP,J.d2,A.n,A.d6,A.R,A.jh,A.at,A.dw,A.Q,A.as,A.aT,A.cz,A.dc,A.c4,A.bn,A.jt,A.iy,A.dh,A.ed,A.bw,A.bV,A.ik,A.ds,A.bk,A.dr,A.b_,A.h6,A.k1,A.k_,A.fV,A.bt,A.aK,A.h_,A.c2,A.a1,A.fW,A.hm,A.en,A.e3,A.h9,A.c5,A.L,A.ej,A.hp,A.bO,A.jI,A.fl,A.dS,A.jJ,A.i1,A.am,A.a7,A.hn,A.fI,A.ix,A.h8,A.c7,A.j3,A.aF,A.eK,A.eL,A.fq,A.d5,A.dR,A.eS,A.i3,A.i4,A.bm,A.ie,A.cE,A.eC,A.v,A.cr,A.bD,A.az,A.a0,A.ao,A.jw,A.b7,A.hT,A.iz,A.iS,A.dN,A.b9,A.jm,A.dK,A.a_,A.i5,A.fb,A.fO,A.iu,A.bb,A.fL,A.ji,A.hJ,A.aw,A.eF,A.bQ,A.bC,A.cJ,A.bg,A.eQ,A.eR,A.eT,A.i2,A.cQ,A.P,A.al,A.W,A.p,A.da,A.j_,A.ad,A.j4,A.a8,A.j6,A.j5,A.bH,A.dJ,A.fx,A.jK,A.ho,A.jZ,A.hd,A.h5,A.hh,A.hc,A.jV,A.ay,A.av,A.a3,A.hS,A.hR,A.aA,A.jo,A.jn,A.jy,A.a5,A.e0,A.bX,A.i6,A.bl,A.bZ,A.j1,A.j2,A.hK,A.O,A.B,A.a,A.hH,A.dj,A.i9,A.ck,A.ez,A.dE,A.aO,A.iC,A.cC,A.bG,A.hb,A.fn,A.bP,A.bY,A.co,A.fE,A.db,A.cq,A.d4,A.fY,A.eB,A.fZ,A.eN,A.h0,A.df,A.h2,A.eP,A.h3,A.f_,A.h7,A.dx,A.ha,A.cn,A.eD,A.lw,A.dG,A.he,A.fv,A.hf,A.c_,A.fC,A.hi,A.fD,A.hj,A.fG,A.hl,A.fF,A.hk,A.fQ,A.hq,A.fR,A.hs,A.hr,A.dL,A.fU,A.hv,A.b5,A.bT,A.hB,A.cN,A.hC,A.ba,A.eU,A.eX,A.dk,A.dQ,A.h,A.eO,A.ct,A.dF,A.fs,A.ib,A.bI,A.b8,A.cs,A.jD,A.bu,A.em,A.el,A.hu,A.ht,A.k4,A.jz,A.jC])
+q(A.z,[A.lp,J.f2,A.dP,J.d2,A.o,A.d6,A.R,A.jh,A.at,A.dw,A.Q,A.as,A.aT,A.cz,A.dc,A.c4,A.bn,A.jt,A.iy,A.dh,A.ed,A.bw,A.bV,A.ik,A.ds,A.bk,A.dr,A.b_,A.h6,A.k1,A.k_,A.fV,A.bt,A.aK,A.h_,A.c2,A.a1,A.fW,A.hm,A.en,A.e3,A.h9,A.c5,A.L,A.ej,A.hp,A.bO,A.jI,A.fl,A.dS,A.jJ,A.i1,A.am,A.a7,A.hn,A.fI,A.ix,A.h8,A.c7,A.j3,A.aF,A.eK,A.eL,A.fq,A.d5,A.dR,A.eS,A.i3,A.i4,A.bm,A.ie,A.cE,A.eC,A.u,A.cr,A.bD,A.az,A.a0,A.ao,A.jw,A.b7,A.hT,A.iz,A.iS,A.dN,A.b9,A.jm,A.dK,A.a_,A.i5,A.fb,A.fO,A.iu,A.bb,A.fL,A.ji,A.hJ,A.aw,A.eF,A.bQ,A.bC,A.cJ,A.bg,A.eQ,A.eR,A.eT,A.i2,A.cQ,A.P,A.al,A.W,A.p,A.da,A.j_,A.ad,A.j4,A.a8,A.j6,A.j5,A.bH,A.dJ,A.fx,A.jK,A.ho,A.jZ,A.hd,A.h5,A.hh,A.hc,A.jV,A.ay,A.av,A.a4,A.hS,A.hR,A.aA,A.jo,A.jn,A.jy,A.a6,A.e0,A.bX,A.i6,A.bl,A.bZ,A.j1,A.j2,A.hK,A.O,A.B,A.a,A.hH,A.dj,A.i9,A.ck,A.ez,A.dE,A.aO,A.iC,A.cC,A.bG,A.hb,A.fn,A.bP,A.bY,A.co,A.fE,A.db,A.cq,A.d4,A.fY,A.eB,A.fZ,A.eN,A.h0,A.df,A.h2,A.eP,A.h3,A.f_,A.h7,A.dx,A.ha,A.cn,A.eD,A.lw,A.dG,A.he,A.fv,A.hf,A.c_,A.fC,A.hi,A.fD,A.hj,A.fG,A.hl,A.fF,A.hk,A.fQ,A.hq,A.fR,A.hs,A.hr,A.dL,A.fU,A.hv,A.b5,A.bT,A.hB,A.cN,A.hC,A.ba,A.eU,A.eX,A.dk,A.dQ,A.h,A.eO,A.ct,A.dF,A.fs,A.ib,A.bI,A.b8,A.cs,A.jD,A.bu,A.em,A.el,A.hu,A.ht,A.k4,A.jz,A.jC])
 q(J.f2,[J.f5,J.dm,J.dp,J.dn,J.dq,J.cx,J.bz])
 q(J.dp,[J.bB,J.q,A.cA,A.dB])
 q(J.bB,[J.fp,J.c0,J.bA])
 r(J.f4,A.dP)
 r(J.ii,J.q)
 q(J.cx,[J.dl,J.f6])
-q(A.n,[A.cO,A.aM,A.dv,A.ab,A.c3,A.bJ])
+q(A.o,[A.cO,A.aM,A.dv,A.ab,A.c3,A.bJ])
 r(A.eo,A.cO)
 r(A.e_,A.eo)
 r(A.d7,A.e_)
@@ -11505,12 +11508,12 @@ s(A.cT,A.ej)
 s(A.ek,A.hp)
 s(A.hh,A.jV)
 s(A.ht,A.k4)})()
-var v={G:typeof self!="undefined"?self:globalThis,typeUniverse:{eC:new Map(),tR:{},eT:{},tPV:{},sEA:[]},mangledGlobalNames:{j:"int",r:"double",aq:"num",w:"String",y:"bool",a7:"Null",A:"List",z:"Object",aD:"Map",N:"JSObject"},mangledNames:{},types:["a7(N)","~()","aX()","aX(aG?)","y(P)","y(N)","~(~())","~(@)","y(ao)","y(w)","y(p)","a(a)","~(N)","a7(@)","a7()","~(a,a,a,a,a,a)","y(r)","a(aw)","r(r)","a7(z?)","~(w)","y(dU?)","j(j,+(aE,b7))","~(j,@)","aG(j,j,w?)","@(@)","j(j,+(aG,bb))","j(+influence,source(r,dY),+influence,source(r,dY))","a7(z,bF)","w(P)","j(D,D)","~(@,@)","~(z?,z?)","y(j)","b4(j,j,w?)","dL(aE)","aX(w{fallback:w?})","@(w)","az?()","A<az>()","d5()","r()","cn()","aX?()","y(am<w,a_>)","a_(am<w,a_>)","a_(a_,a_)","j(a3<ay>,a3<ay>)","aR(a3<ay>)","j(a3<av>,a3<av>)","aR(a3<av>)","y(aF)","j(+influence,light(r,az),+influence,light(r,az))","j(j,j)","~(a,a,a,a,a)","r(j,j)","bX(r,r,r,r)","r(a,a)","a(r,r)","y(ck)","j(aO,aO)","~(c_)","c_()","y(w,cN)","~(ba)","~(aq)","dK(aF)","@(@,w)","a7(~())","a7(@,bF)","a0(b6)","b6(j,j,w?)","~(ct)","j(@,@)","aE(j,j,w?)","cQ()","y()","z?(z?)"],interceptorsByTag:null,leafTags:null,arrayRti:Symbol("$ti"),rttc:{"2;":(a,b)=>c=>c instanceof A.F&&a.b(c.a)&&b.b(c.b),"2;influence,light":(a,b)=>c=>c instanceof A.e9&&a.b(c.a)&&b.b(c.b),"2;influence,source":(a,b)=>c=>c instanceof A.ea&&a.b(c.a)&&b.b(c.b),"2;rotation,translation":(a,b)=>c=>c instanceof A.cS&&a.b(c.a)&&b.b(c.b),"3;":(a,b,c)=>d=>d instanceof A.c8&&a.b(d.a)&&b.b(d.b)&&c.b(d.c)}}
-A.pG(v.typeUniverse,JSON.parse('{"fp":"bB","c0":"bB","bA":"bB","rb":"cA","q":{"A":["1"],"N":[],"n":["1"]},"f5":{"y":[],"J":[]},"dm":{"J":[]},"dp":{"N":[]},"bB":{"N":[]},"f4":{"dP":[]},"ii":{"q":["1"],"A":["1"],"N":[],"n":["1"]},"d2":{"Y":["1"]},"cx":{"r":[],"aq":[],"ar":["aq"]},"dl":{"r":[],"j":[],"aq":[],"ar":["aq"],"J":[]},"f6":{"r":[],"aq":[],"ar":["aq"],"J":[]},"bz":{"w":[],"ar":["w"],"mF":[],"J":[]},"cO":{"n":["2"]},"d6":{"Y":["2"]},"e_":{"L":["2"],"A":["2"],"cO":["1","2"],"n":["2"]},"d7":{"e_":["1","2"],"L":["2"],"A":["2"],"cO":["1","2"],"n":["2"],"L.E":"2","n.E":"2"},"cy":{"R":[]},"aM":{"n":["1"]},"T":{"aM":["1"],"n":["1"]},"dT":{"T":["1"],"aM":["1"],"n":["1"],"T.E":"1","n.E":"1"},"at":{"Y":["1"]},"dv":{"n":["2"],"n.E":"2"},"dw":{"Y":["2"]},"M":{"T":["2"],"aM":["2"],"n":["2"],"T.E":"2","n.E":"2"},"ab":{"n":["1"],"n.E":"1"},"Q":{"Y":["1"]},"dO":{"T":["1"],"aM":["1"],"n":["1"],"T.E":"1","n.E":"1"},"F":{"bs":[],"aT":[]},"e9":{"bs":[],"aT":[]},"ea":{"bs":[],"aT":[]},"cS":{"bs":[],"aT":[]},"c8":{"cR":[],"aT":[]},"dd":{"dV":["1","2"],"cT":["1","2"],"cz":["1","2"],"ej":["1","2"],"aD":["1","2"]},"dc":{"aD":["1","2"]},"X":{"dc":["1","2"],"aD":["1","2"]},"c3":{"n":["1"],"n.E":"1"},"c4":{"Y":["1"]},"de":{"bn":["1"],"bE":["1"],"n":["1"]},"b3":{"de":["1"],"bn":["1"],"bE":["1"],"n":["1"]},"dD":{"bo":[],"R":[]},"f7":{"R":[]},"fN":{"R":[]},"ed":{"bF":[]},"bw":{"bR":[]},"eH":{"bR":[]},"eI":{"bR":[]},"fK":{"bR":[]},"fH":{"bR":[]},"cm":{"bR":[]},"fy":{"R":[]},"bh":{"bV":["1","2"],"mv":["1","2"],"aD":["1","2"]},"bj":{"aM":["1"],"n":["1"],"n.E":"1"},"ds":{"Y":["1"]},"aZ":{"aM":["1"],"n":["1"],"n.E":"1"},"bk":{"Y":["1"]},"bi":{"aM":["am<1,2>"],"n":["am<1,2>"],"n.E":"am<1,2>"},"dr":{"Y":["am<1,2>"]},"bs":{"aT":[]},"cR":{"aT":[]},"cA":{"N":[],"J":[]},"dB":{"N":[]},"fc":{"N":[],"J":[]},"ag":{"aB":["1"],"N":[]},"dz":{"L":["r"],"ag":["r"],"A":["r"],"aB":["r"],"N":[],"n":["r"],"as":["r"]},"dA":{"L":["j"],"ag":["j"],"A":["j"],"aB":["j"],"N":[],"n":["j"],"as":["j"]},"dy":{"i_":[],"L":["r"],"ag":["r"],"A":["r"],"aB":["r"],"N":[],"n":["r"],"as":["r"],"J":[],"L.E":"r"},"fd":{"i0":[],"L":["r"],"ag":["r"],"A":["r"],"aB":["r"],"N":[],"n":["r"],"as":["r"],"J":[],"L.E":"r"},"fe":{"L":["j"],"ag":["j"],"A":["j"],"aB":["j"],"N":[],"n":["j"],"as":["j"],"J":[],"L.E":"j"},"ff":{"L":["j"],"ag":["j"],"A":["j"],"aB":["j"],"N":[],"n":["j"],"as":["j"],"J":[],"L.E":"j"},"fg":{"L":["j"],"ag":["j"],"A":["j"],"aB":["j"],"N":[],"n":["j"],"as":["j"],"J":[],"L.E":"j"},"fh":{"L":["j"],"ag":["j"],"A":["j"],"aB":["j"],"N":[],"n":["j"],"as":["j"],"J":[],"L.E":"j"},"fi":{"L":["j"],"ag":["j"],"A":["j"],"aB":["j"],"N":[],"n":["j"],"as":["j"],"J":[],"L.E":"j"},"dC":{"L":["j"],"ag":["j"],"A":["j"],"aB":["j"],"N":[],"n":["j"],"as":["j"],"J":[],"L.E":"j"},"fj":{"dU":[],"L":["j"],"ag":["j"],"A":["j"],"aB":["j"],"N":[],"n":["j"],"as":["j"],"J":[],"L.E":"j"},"h4":{"R":[]},"ee":{"bo":[],"R":[]},"bt":{"Y":["1"]},"bJ":{"n":["1"],"n.E":"1"},"aK":{"R":[]},"dZ":{"h_":["1"]},"a1":{"bS":["1"]},"en":{"n6":[]},"hg":{"en":[],"n6":[]},"e1":{"bV":["1","2"],"aD":["1","2"]},"e4":{"e1":["1","2"],"bV":["1","2"],"aD":["1","2"]},"e2":{"aM":["1"],"n":["1"],"n.E":"1"},"e3":{"Y":["1"]},"b1":{"bn":["1"],"mx":["1"],"bE":["1"],"n":["1"]},"c5":{"Y":["1"]},"bV":{"aD":["1","2"]},"cz":{"aD":["1","2"]},"dV":{"cT":["1","2"],"cz":["1","2"],"ej":["1","2"],"aD":["1","2"]},"bn":{"bE":["1"],"n":["1"]},"eb":{"bn":["1"],"bE":["1"],"n":["1"]},"dW":{"bn":["1"],"hp":["1"],"bE":["1"],"n":["1"]},"bO":{"ar":["bO"]},"r":{"aq":[],"ar":["aq"]},"j":{"aq":[],"ar":["aq"]},"A":{"n":["1"]},"aq":{"ar":["aq"]},"bE":{"n":["1"]},"w":{"ar":["w"],"mF":[]},"ew":{"R":[]},"bo":{"R":[]},"b2":{"R":[]},"cG":{"R":[]},"f0":{"R":[]},"dX":{"R":[]},"fM":{"R":[]},"cK":{"R":[]},"eJ":{"R":[]},"fl":{"R":[]},"dS":{"R":[]},"hn":{"bF":[]},"h8":{"ly":[]},"c7":{"ly":[]},"aE":{"bm":[]},"aG":{"bm":[]},"b6":{"bm":[]},"b4":{"bm":[]},"fo":{"bm":[]},"eF":{"cp":[]},"bQ":{"cp":[]},"bC":{"cp":[]},"cJ":{"cp":[]},"eT":{"oW":[]},"bH":{"aR":[]},"dJ":{"oZ":[]},"fx":{"p0":[]},"ho":{"aR":[]},"hd":{"oY":[]},"h5":{"oc":[]},"fz":{"p2":[]},"ay":{"ar":["ay"]},"av":{"ar":["av"]},"e0":{"o5":[]},"bY":{"bx":[]},"co":{"bx":[]},"fE":{"bx":[]},"db":{"bx":[]},"cq":{"bx":[]},"d4":{"I":[]},"fY":{"D":[]},"eB":{"I":[]},"fZ":{"D":[]},"eN":{"I":[]},"h0":{"D":[]},"df":{"I":[]},"h2":{"D":[]},"eP":{"I":[]},"h3":{"D":[]},"f_":{"I":[]},"h7":{"D":[]},"dx":{"I":[]},"ha":{"D":[]},"eD":{"oX":[]},"dG":{"I":[]},"he":{"D":[]},"fv":{"I":[]},"hf":{"D":[]},"fC":{"I":[]},"hi":{"D":[]},"fD":{"I":[]},"hj":{"D":[]},"fG":{"I":[]},"hl":{"D":[]},"fF":{"I":[]},"hk":{"D":[]},"fQ":{"I":[]},"hq":{"D":[]},"fR":{"I":[]},"hs":{"D":[]},"hr":{"D":[]},"fU":{"I":[]},"hv":{"D":[]},"fP":{"bT":["a"],"bT.T":"a"},"f1":{"ba":[]},"eO":{"o8":[]},"bu":{"aX":[]},"fS":{"od":[]},"og":{"A":["j"],"n":["j"]},"dU":{"A":["j"],"n":["j"]},"p9":{"A":["j"],"n":["j"]},"oe":{"A":["j"],"n":["j"]},"p7":{"A":["j"],"n":["j"]},"of":{"A":["j"],"n":["j"]},"p8":{"A":["j"],"n":["j"]},"i_":{"A":["r"],"n":["r"]},"i0":{"A":["r"],"n":["r"]}}'))
-A.pF(v.typeUniverse,JSON.parse('{"eo":2,"ag":1,"eb":1,"ek":1}'))
-var u={l:"#version 300 es\nout vec2 vUv;\nvoid main(){\n  vec2 p=vec2(float((gl_VertexID<<1)&2),float(gl_VertexID&2));\n  vUv=p;\n  gl_Position=vec4(p*2.0-1.0,0.0,1.0);\n}\n",j:"#version 300 es\nprecision highp float;\nin vec2 vUv;\nuniform sampler2D uTex;\nuniform float uExposure;\nuniform float uVignette;\nuniform float uGrain;\nuniform float uOutputEncoding;\nuniform float uToneMap;\nuniform vec3 uClearColor;\nuniform vec3 uSkyHorizon;\nuniform vec3 uSkyZenith;\nuniform vec3 uSkyGround;\nuniform float uSkyEnabled;\nuniform float uSkyHorizonGlow;\nuniform float uSkyStarDensity;\nuniform sampler2D uSkyTexture;\nuniform float uSkyTextureEnabled;\nuniform float uSkyRotation;\nuniform float uSkyExposure;\nuniform float uSkyTextureSrgb;\nuniform mat4 uInverseProjection;\nuniform mat4 uInverseView;\nuniform vec3 uCameraPosition;\nuniform float uCloudCoverage;\nuniform float uCloudDensity;\nuniform float uCloudBaseHeight;\nuniform float uCloudThickness;\nuniform float uCloudScale;\nuniform vec2 uCloudWind;\nuniform float uCloudPhase;\nuniform float uCloudDetail;\nuniform float uCloudSilverLining;\nuniform float uCloudSampleCount;\nuniform vec3 uCloudLightDirection;\nuniform vec3 uCloudLightColor;\nuniform float uCloudLightIntensity;\nout vec4 oColor;\n\nfloat hash(vec2 p){\n  return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453123);\n}\n\nvec3 reinhardToneMap(vec3 color){\n  return color/(vec3(1.)+color);\n}\n\nvec3 acesToneMap(vec3 color){\n  return clamp((color*(2.51*color+0.03))/(color*(2.43*color+0.59)+0.14),0.0,1.0);\n}\n\nvec3 agxToneMap(vec3 color){\n  const mat3 agxMat=mat3(\n    0.842479062253094,0.0423282422610123,0.0423756549057051,\n    0.0784335999999992,0.878468636469772,0.0784336,\n    0.0792237451477643,0.0791661274605434,0.879142973793104\n  );\n  const mat3 agxMatInv=mat3(\n    1.19687902425764,-0.0528968517032958,-0.0529716355080549,\n    -0.0980208811401368,1.15190312990417,-0.0980434501171241,\n    -0.0990297440797205,-0.0989611768448433,1.15107367264185\n  );\n  vec3 val=agxMat*color;\n  val=clamp(log2(max(val,vec3(1e-10)))*0.0625+0.625,0.0,1.0);\n  val=val*val*val*(val*(val*6.0-15.0)+10.0);\n  val=agxMatInv*val;\n  return max(val,vec3(0.0));\n}\n\nvec3 linearToSrgb(vec3 color){\n  vec3 cutoff=step(vec3(.0031308),color);\n  vec3 low=color*12.92;\n  vec3 high=1.055*pow(max(color,vec3(0.)),vec3(1./2.4))-.055;\n  return mix(low,high,cutoff);\n}\n\nvec3 skyBackground(vec2 uv){\n  // A deliberately cheap, high-quality fallback sky: three atmospheric bands\n  // provide depth at every camera angle, while the tiny deterministic star\n  // field and horizon glow keep the clear background from reading as a flat\n  // color. It is an environment layer, not a game/weather simulation.\n  float lower=smoothstep(0.0,0.48,uv.y);\n  float upper=smoothstep(0.42,1.0,uv.y);\n  vec3 color=mix(uSkyGround,uSkyHorizon,lower);\n  color=mix(color,uSkyZenith,upper);\n  float horizonGlow=exp(-pow((uv.y-0.48)*7.0,2.0));\n  color+=uSkyHorizon*horizonGlow*clamp(uSkyHorizonGlow,0.,1.);\n  float starMask=smoothstep(0.62,0.92,uv.y);\n  float stars=step(1.0-clamp(uSkyStarDensity,0.,.1),hash(floor(uv*vec2(180.0,100.0))))*starMask;\n  color+=vec3(0.16,0.19,0.24)*stars;\n  return max(color,vec3(0.0));\n}\n\nfloat hash3(vec3 p){\n  return fract(sin(dot(p,vec3(127.1,311.7,74.7)))*43758.5453123);\n}\n\nfloat valueNoise(vec3 p){\n  vec3 i=floor(p);\n  vec3 f=fract(p);\n  f=f*f*(3.0-2.0*f);\n  float n000=hash3(i+vec3(0,0,0));\n  float n100=hash3(i+vec3(1,0,0));\n  float n010=hash3(i+vec3(0,1,0));\n  float n110=hash3(i+vec3(1,1,0));\n  float n001=hash3(i+vec3(0,0,1));\n  float n101=hash3(i+vec3(1,0,1));\n  float n011=hash3(i+vec3(0,1,1));\n  float n111=hash3(i+vec3(1,1,1));\n  float x00=mix(n000,n100,f.x);\n  float x10=mix(n010,n110,f.x);\n  float x01=mix(n001,n101,f.x);\n  float x11=mix(n011,n111,f.x);\n  return mix(mix(x00,x10,f.y),mix(x01,x11,f.y),f.z);\n}\n\nfloat cloudNoise(vec3 p){\n  float value=0.0;\n  float amplitude=0.5;\n  for(int octave=0;octave<4;octave++){\n    value+=valueNoise(p)*amplitude;\n    p=p*2.03+vec3(17.3,11.7,7.1);\n    amplitude*=0.5;\n  }\n  return value;\n}\n\nfloat cloudDensityAt(vec3 position){\n  float height01=clamp(\n    (position.y-uCloudBaseHeight)/max(uCloudThickness,0.001),\n    0.0,1.0\n  );\n  float vertical=smoothstep(0.0,0.12,height01)*\n    (1.0-smoothstep(0.72,1.0,height01));\n  vec3 q=position*max(uCloudScale,0.00001)+\n    vec3(uCloudWind.x*uCloudPhase,0.0,uCloudWind.y*uCloudPhase);\n  float macro=cloudNoise(q*0.82);\n  float detail=cloudNoise(q*2.7+vec3(23.0,5.0,41.0));\n  float shape=mix(macro,macro*0.68+detail*0.32,clamp(uCloudDetail,0.,1.));\n  float threshold=1.0-clamp(uCloudCoverage,0.,1.);\n  float body=smoothstep(threshold,threshold+0.26,shape);\n  return body*vertical*clamp(uCloudDensity,0.,1.);\n}\n\nvec4 volumetricClouds(vec3 worldDirection){\n  if(uCloudCoverage<=0.0001 || uCloudDensity<=0.0001 || worldDirection.y<=0.001){\n    return vec4(0.0);\n  }\n  float directionY=max(worldDirection.y,0.001);\n  float startT=(uCloudBaseHeight-uCameraPosition.y)/directionY;\n  float endT=(uCloudBaseHeight+uCloudThickness-uCameraPosition.y)/directionY;\n  startT=max(startT,0.0);\n  endT=max(endT,0.0);\n  if(endT<=startT) return vec4(0.0);\n  int sampleCount=int(clamp(uCloudSampleCount,4.,24.));\n  float stepLength=(endT-startT)/float(sampleCount);\n  float jitter=(hash(gl_FragCoord.xy+vec2(uCloudPhase*0.013))-0.5)*stepLength;\n  vec3 sunDirection=normalize(-uCloudLightDirection);\n  float transmittance=1.0;\n  vec3 inScatter=vec3(0.0);\n  for(int i=0;i<24;i++){\n    if(i>=sampleCount) break;\n    float t=startT+(float(i)+0.5)*stepLength+jitter;\n    vec3 position=uCameraPosition+worldDirection*t;\n    float density=cloudDensityAt(position);\n    float opticalDepth=density*stepLength*0.0035;\n    float segmentAlpha=1.0-exp(-opticalDepth);\n    float towardLight=cloudDensityAt(position+sunDirection*90.0);\n    float lightTransmittance=exp(-towardLight*0.025);\n    float phase=0.72+0.28*pow(max(dot(-worldDirection,sunDirection),0.0),2.0);\n    vec3 ambient=uSkyHorizon*0.32;\n    vec3 direct=uCloudLightColor*\n      (0.14+0.86*clamp(uCloudLightIntensity,0.,1.5))*phase;\n    float edge=pow(1.0-clamp(density,0.,1.),3.0)*uCloudSilverLining*0.22;\n    vec3 sampleLight=(ambient+direct)*lightTransmittance+vec3(edge);\n    inScatter+=transmittance*segmentAlpha*sampleLight;\n    transmittance*=1.0-segmentAlpha;\n    if(transmittance<0.01) break;\n  }\n  return vec4(inScatter,1.0-transmittance);\n}\n\nvec3 srgbToLinear(vec3 color){\n  vec3 low=color/12.92;\n  vec3 high=pow((color+0.055)/1.055,vec3(2.4));\n  return mix(low,high,step(vec3(0.04045),color));\n}\n\nvec3 worldDirectionForUv(vec2 uv){\n  vec2 ndc=uv*2.0-1.0;\n  vec4 viewPoint=uInverseProjection*vec4(ndc,1.0,1.0);\n  return normalize(viewPoint.xyz/viewPoint.w);\n}\n\nvec3 equirectangularSky(vec2 uv){\n  vec3 worldDirection=normalize((uInverseView*vec4(worldDirectionForUv(uv),0.0)).xyz);\n  float longitude=atan(worldDirection.z,worldDirection.x)+uSkyRotation;\n  float latitude=asin(clamp(worldDirection.y,-1.0,1.0));\n  vec2 sampleUv=vec2(\n    fract(longitude/(2.0*3.14159265359)+0.5),\n    0.5-latitude/3.14159265359\n  );\n  vec3 encoded=max(texture(uSkyTexture,sampleUv).rgb,vec3(0.0));\n  vec3 linear=mix(encoded,srgbToLinear(encoded),clamp(uSkyTextureSrgb,0.,1.));\n  return linear*max(uSkyExposure,0.0);\n}\n\nvec4 applyFxaa(sampler2D tex, vec2 uv){\n  vec2 texelSize=1.0/vec2(textureSize(tex,0));\n  vec3 rgbM=texture(tex,uv).rgb;\n  vec3 rgbNW=texture(tex,uv+vec2(-texelSize.x,-texelSize.y)).rgb;\n  vec3 rgbNE=texture(tex,uv+vec2( texelSize.x,-texelSize.y)).rgb;\n  vec3 rgbSW=texture(tex,uv+vec2(-texelSize.x, texelSize.y)).rgb;\n  vec3 rgbSE=texture(tex,uv+vec2( texelSize.x, texelSize.y)).rgb;\n\n  const vec3 luma=vec3(0.299,0.587,0.114);\n  float lumaM =dot(rgbM, luma);\n  float lumaNW=dot(rgbNW,luma);\n  float lumaNE=dot(rgbNE,luma);\n  float lumaSW=dot(rgbSW,luma);\n  float lumaSE=dot(rgbSE,luma);\n\n  float lumaMin=min(lumaM,min(min(lumaNW,lumaNE),min(lumaSW,lumaSE)));\n  float lumaMax=max(lumaM,max(max(lumaNW,lumaNE),max(lumaSW,lumaSE)));\n\n  float range=lumaMax-lumaMin;\n  if(range<max(0.04,lumaMax*0.125)){\n    return vec4(rgbM,1.0);\n  }\n\n  vec2 dir=vec2(\n    -((lumaNW+lumaNE)-(lumaSW+lumaSE)),\n    ((lumaNW+lumaSW)-(lumaNE+lumaSE))\n  );\n  float dirReduce=max((lumaNW+lumaNE+lumaSW+lumaSE)*0.03125,0.0078125);\n  float rcpDirMin=1.0/(min(abs(dir.x),abs(dir.y))+dirReduce);\n  dir=min(vec2(8.0),max(vec2(-8.0),dir*rcpDirMin))*texelSize;\n\n  vec3 rgbA=0.5*(\n    texture(tex,uv+dir*(1.0/3.0-0.5)).rgb+\n    texture(tex,uv+dir*(2.0/3.0-0.5)).rgb\n  );\n  vec3 rgbB=rgbA*0.5+0.25*(\n    texture(tex,uv+dir*-0.5).rgb+\n    texture(tex,uv+dir* 0.5).rgb\n  );\n  float lumaB=dot(rgbB,luma);\n  if((lumaB<lumaMin)||(lumaB>lumaMax)){\n    return vec4(rgbA,1.0);\n  }\n  return vec4(rgbB,1.0);\n}\n\nvoid main(){\n  vec4 rawSource=texture(uTex,vUv);\n  bool isBackground=uSkyEnabled>0.5 && distance(rawSource.rgb,uClearColor)<0.004;\n  vec4 source=isBackground?rawSource:applyFxaa(uTex,vUv);\n  // Lens spectral dispersion (radial chromatic aberration towards viewport edges)\n  if(!isBackground){\n    vec2 centerOffset=vUv-vec2(0.5);\n    float distSq=dot(centerOffset,centerOffset);\n    if(distSq>0.04){\n      vec2 chromaOffset=centerOffset*distSq*0.010;\n      source.r=applyFxaa(uTex,vUv-chromaOffset).r;\n      source.b=applyFxaa(uTex,vUv+chromaOffset).b;\n    }\n  }\n  // The world pass clears untouched pixels to uClearColor. Replace only that\n  // exact background, so the sky is always active without covering geometry.\n  if(isBackground){\n    vec3 viewDirection=worldDirectionForUv(vUv);\n    vec3 worldDirection=normalize((uInverseView*vec4(viewDirection,0.0)).xyz);\n    source.rgb=uSkyTextureEnabled>0.5\n      ? equirectangularSky(vUv)\n      : skyBackground(vUv);\n    vec4 clouds=volumetricClouds(worldDirection);\n    source.rgb=source.rgb* (1.0-clouds.a)+clouds.rgb;\n  }\n  // Exposure operates in scene-linear space; tone mapping prevents HDR\n  // highlights from clipping before the selected output transfer function.\n  vec3 color=max(source.rgb,vec3(0.))*max(uExposure,0.);\n  vec3 mapped=uToneMap>3.0\n    ?agxToneMap(color)\n    :(uToneMap>1.5?acesToneMap(color):reinhardToneMap(color));\n  float toneMix=uToneMap>3.0\n    ?clamp(uToneMap-3.0,0.,1.)\n    :(uToneMap>1.5?clamp(uToneMap-1.5,0.,1.):clamp(uToneMap,0.,1.));\n  color=mix(color,mapped,toneMix);\n  float edge=distance(vUv,vec2(.5));\n  float vignette=smoothstep(.35,.78,edge);\n  color*=1.-clamp(uVignette,0.,1.)*vignette;\n  if(uOutputEncoding>.5) color=linearToSrgb(max(color,vec3(0.)));\n  // Atmospheric precipitation is submitted as depth-tested world geometry;\n  // the present pass must never paint weather over unrelated surfaces.\n  // A stable screen-space grain keeps captures reproducible for a fixed\n  // viewport while still giving the dark gothic presentation a fine film\n  // texture. It is deliberately tiny and never changes alpha.\n  color+=((hash(gl_FragCoord.xy)-.5)*.06)*max(uGrain,0.);\n  oColor=vec4(clamp(color,0.,1.),source.a);\n}\n",c:"Error handler must accept one Object or one Object and a StackTrace as arguments, and return a value of the returned future's type",k:"WebGl2Device: operation attempted while context is not ready",g:"max must be in range 0 < max \u2264 2^32, was "}
+var v={G:typeof self!="undefined"?self:globalThis,typeUniverse:{eC:new Map(),tR:{},eT:{},tPV:{},sEA:[]},mangledGlobalNames:{j:"int",r:"double",aq:"num",w:"String",y:"bool",a7:"Null",A:"List",z:"Object",aD:"Map",N:"JSObject"},mangledNames:{},types:["a7(N)","~()","aX()","aX(aG?)","y(P)","y(N)","~(~())","~(@)","y(ao)","y(w)","y(p)","a(a)","~(N)","a7(@)","a7()","~(a,a,a,a,a,a)","y(r)","a(aw)","r(r)","a7(z?)","~(w)","y(dU?)","j(j,+(aE,b7))","~(j,@)","aG(j,j,w?)","@(@)","j(j,+(aG,bb))","j(+influence,source(r,dY),+influence,source(r,dY))","a7(z,bF)","w(P)","j(D,D)","~(@,@)","~(z?,z?)","y(j)","b4(j,j,w?)","dL(aE)","aX(w{fallback:w?})","@(w)","az?()","A<az>()","d5()","r()","cn()","aX?()","y(am<w,a_>)","a_(am<w,a_>)","a_(a_,a_)","j(a4<ay>,a4<ay>)","aR(a4<ay>)","j(a4<av>,a4<av>)","aR(a4<av>)","y(aF)","j(+influence,light(r,az),+influence,light(r,az))","j(j,j)","~(a,a,a,a,a)","r(j,j)","bX(r,r,r,r)","r(a,a)","a(r,r)","y(ck)","j(aO,aO)","~(c_)","c_()","y(w,cN)","~(ba)","~(aq)","dK(aF)","@(@,w)","a7(~())","a7(@,bF)","a0(b6)","b6(j,j,w?)","~(ct)","j(@,@)","aE(j,j,w?)","cQ()","y()","z?(z?)"],interceptorsByTag:null,leafTags:null,arrayRti:Symbol("$ti"),rttc:{"2;":(a,b)=>c=>c instanceof A.F&&a.b(c.a)&&b.b(c.b),"2;influence,light":(a,b)=>c=>c instanceof A.e9&&a.b(c.a)&&b.b(c.b),"2;influence,source":(a,b)=>c=>c instanceof A.ea&&a.b(c.a)&&b.b(c.b),"2;rotation,translation":(a,b)=>c=>c instanceof A.cS&&a.b(c.a)&&b.b(c.b),"3;":(a,b,c)=>d=>d instanceof A.c8&&a.b(d.a)&&b.b(d.b)&&c.b(d.c)}}
+A.pF(v.typeUniverse,JSON.parse('{"fp":"bB","c0":"bB","bA":"bB","ra":"cA","q":{"A":["1"],"N":[],"o":["1"]},"f5":{"y":[],"J":[]},"dm":{"J":[]},"dp":{"N":[]},"bB":{"N":[]},"f4":{"dP":[]},"ii":{"q":["1"],"A":["1"],"N":[],"o":["1"]},"d2":{"Y":["1"]},"cx":{"r":[],"aq":[],"ar":["aq"]},"dl":{"r":[],"j":[],"aq":[],"ar":["aq"],"J":[]},"f6":{"r":[],"aq":[],"ar":["aq"],"J":[]},"bz":{"w":[],"ar":["w"],"mE":[],"J":[]},"cO":{"o":["2"]},"d6":{"Y":["2"]},"e_":{"L":["2"],"A":["2"],"cO":["1","2"],"o":["2"]},"d7":{"e_":["1","2"],"L":["2"],"A":["2"],"cO":["1","2"],"o":["2"],"L.E":"2","o.E":"2"},"cy":{"R":[]},"aM":{"o":["1"]},"T":{"aM":["1"],"o":["1"]},"dT":{"T":["1"],"aM":["1"],"o":["1"],"T.E":"1","o.E":"1"},"at":{"Y":["1"]},"dv":{"o":["2"],"o.E":"2"},"dw":{"Y":["2"]},"M":{"T":["2"],"aM":["2"],"o":["2"],"T.E":"2","o.E":"2"},"ab":{"o":["1"],"o.E":"1"},"Q":{"Y":["1"]},"dO":{"T":["1"],"aM":["1"],"o":["1"],"T.E":"1","o.E":"1"},"F":{"bs":[],"aT":[]},"e9":{"bs":[],"aT":[]},"ea":{"bs":[],"aT":[]},"cS":{"bs":[],"aT":[]},"c8":{"cR":[],"aT":[]},"dd":{"dV":["1","2"],"cT":["1","2"],"cz":["1","2"],"ej":["1","2"],"aD":["1","2"]},"dc":{"aD":["1","2"]},"X":{"dc":["1","2"],"aD":["1","2"]},"c3":{"o":["1"],"o.E":"1"},"c4":{"Y":["1"]},"de":{"bn":["1"],"bE":["1"],"o":["1"]},"b3":{"de":["1"],"bn":["1"],"bE":["1"],"o":["1"]},"dD":{"bo":[],"R":[]},"f7":{"R":[]},"fN":{"R":[]},"ed":{"bF":[]},"bw":{"bR":[]},"eH":{"bR":[]},"eI":{"bR":[]},"fK":{"bR":[]},"fH":{"bR":[]},"cm":{"bR":[]},"fy":{"R":[]},"bh":{"bV":["1","2"],"mv":["1","2"],"aD":["1","2"]},"bj":{"aM":["1"],"o":["1"],"o.E":"1"},"ds":{"Y":["1"]},"aZ":{"aM":["1"],"o":["1"],"o.E":"1"},"bk":{"Y":["1"]},"bi":{"aM":["am<1,2>"],"o":["am<1,2>"],"o.E":"am<1,2>"},"dr":{"Y":["am<1,2>"]},"bs":{"aT":[]},"cR":{"aT":[]},"cA":{"N":[],"J":[]},"dB":{"N":[]},"fc":{"N":[],"J":[]},"ag":{"aB":["1"],"N":[]},"dz":{"L":["r"],"ag":["r"],"A":["r"],"aB":["r"],"N":[],"o":["r"],"as":["r"]},"dA":{"L":["j"],"ag":["j"],"A":["j"],"aB":["j"],"N":[],"o":["j"],"as":["j"]},"dy":{"i_":[],"L":["r"],"ag":["r"],"A":["r"],"aB":["r"],"N":[],"o":["r"],"as":["r"],"J":[],"L.E":"r"},"fd":{"i0":[],"L":["r"],"ag":["r"],"A":["r"],"aB":["r"],"N":[],"o":["r"],"as":["r"],"J":[],"L.E":"r"},"fe":{"L":["j"],"ag":["j"],"A":["j"],"aB":["j"],"N":[],"o":["j"],"as":["j"],"J":[],"L.E":"j"},"ff":{"L":["j"],"ag":["j"],"A":["j"],"aB":["j"],"N":[],"o":["j"],"as":["j"],"J":[],"L.E":"j"},"fg":{"L":["j"],"ag":["j"],"A":["j"],"aB":["j"],"N":[],"o":["j"],"as":["j"],"J":[],"L.E":"j"},"fh":{"L":["j"],"ag":["j"],"A":["j"],"aB":["j"],"N":[],"o":["j"],"as":["j"],"J":[],"L.E":"j"},"fi":{"L":["j"],"ag":["j"],"A":["j"],"aB":["j"],"N":[],"o":["j"],"as":["j"],"J":[],"L.E":"j"},"dC":{"L":["j"],"ag":["j"],"A":["j"],"aB":["j"],"N":[],"o":["j"],"as":["j"],"J":[],"L.E":"j"},"fj":{"dU":[],"L":["j"],"ag":["j"],"A":["j"],"aB":["j"],"N":[],"o":["j"],"as":["j"],"J":[],"L.E":"j"},"h4":{"R":[]},"ee":{"bo":[],"R":[]},"bt":{"Y":["1"]},"bJ":{"o":["1"],"o.E":"1"},"aK":{"R":[]},"dZ":{"h_":["1"]},"a1":{"bS":["1"]},"en":{"n5":[]},"hg":{"en":[],"n5":[]},"e1":{"bV":["1","2"],"aD":["1","2"]},"e4":{"e1":["1","2"],"bV":["1","2"],"aD":["1","2"]},"e2":{"aM":["1"],"o":["1"],"o.E":"1"},"e3":{"Y":["1"]},"b1":{"bn":["1"],"mx":["1"],"bE":["1"],"o":["1"]},"c5":{"Y":["1"]},"bV":{"aD":["1","2"]},"cz":{"aD":["1","2"]},"dV":{"cT":["1","2"],"cz":["1","2"],"ej":["1","2"],"aD":["1","2"]},"bn":{"bE":["1"],"o":["1"]},"eb":{"bn":["1"],"bE":["1"],"o":["1"]},"dW":{"bn":["1"],"hp":["1"],"bE":["1"],"o":["1"]},"bO":{"ar":["bO"]},"r":{"aq":[],"ar":["aq"]},"j":{"aq":[],"ar":["aq"]},"A":{"o":["1"]},"aq":{"ar":["aq"]},"bE":{"o":["1"]},"w":{"ar":["w"],"mE":[]},"ew":{"R":[]},"bo":{"R":[]},"b2":{"R":[]},"cG":{"R":[]},"f0":{"R":[]},"dX":{"R":[]},"fM":{"R":[]},"cK":{"R":[]},"eJ":{"R":[]},"fl":{"R":[]},"dS":{"R":[]},"hn":{"bF":[]},"h8":{"ly":[]},"c7":{"ly":[]},"aE":{"bm":[]},"aG":{"bm":[]},"b6":{"bm":[]},"b4":{"bm":[]},"fo":{"bm":[]},"eF":{"cp":[]},"bQ":{"cp":[]},"bC":{"cp":[]},"cJ":{"cp":[]},"eT":{"oV":[]},"bH":{"aR":[]},"dJ":{"oY":[]},"fx":{"p_":[]},"ho":{"aR":[]},"hd":{"oX":[]},"h5":{"ob":[]},"fz":{"p1":[]},"ay":{"ar":["ay"]},"av":{"ar":["av"]},"e0":{"o4":[]},"bY":{"bx":[]},"co":{"bx":[]},"fE":{"bx":[]},"db":{"bx":[]},"cq":{"bx":[]},"d4":{"I":[]},"fY":{"D":[]},"eB":{"I":[]},"fZ":{"D":[]},"eN":{"I":[]},"h0":{"D":[]},"df":{"I":[]},"h2":{"D":[]},"eP":{"I":[]},"h3":{"D":[]},"f_":{"I":[]},"h7":{"D":[]},"dx":{"I":[]},"ha":{"D":[]},"eD":{"oW":[]},"dG":{"I":[]},"he":{"D":[]},"fv":{"I":[]},"hf":{"D":[]},"fC":{"I":[]},"hi":{"D":[]},"fD":{"I":[]},"hj":{"D":[]},"fG":{"I":[]},"hl":{"D":[]},"fF":{"I":[]},"hk":{"D":[]},"fQ":{"I":[]},"hq":{"D":[]},"fR":{"I":[]},"hs":{"D":[]},"hr":{"D":[]},"fU":{"I":[]},"hv":{"D":[]},"fP":{"bT":["a"],"bT.T":"a"},"f1":{"ba":[]},"eO":{"o7":[]},"bu":{"aX":[]},"fS":{"oc":[]},"of":{"A":["j"],"o":["j"]},"dU":{"A":["j"],"o":["j"]},"p8":{"A":["j"],"o":["j"]},"od":{"A":["j"],"o":["j"]},"p6":{"A":["j"],"o":["j"]},"oe":{"A":["j"],"o":["j"]},"p7":{"A":["j"],"o":["j"]},"i_":{"A":["r"],"o":["r"]},"i0":{"A":["r"],"o":["r"]}}'))
+A.pE(v.typeUniverse,JSON.parse('{"eo":2,"ag":1,"eb":1,"ek":1}'))
+var u={l:"#version 300 es\nout vec2 vUv;\nvoid main(){\n  vec2 p=vec2(float((gl_VertexID<<1)&2),float(gl_VertexID&2));\n  vUv=p;\n  gl_Position=vec4(p*2.0-1.0,0.0,1.0);\n}\n",o:"#version 300 es\nprecision highp float;\nin vec2 vUv;\nuniform sampler2D uTex;\nuniform float uExposure;\nuniform float uVignette;\nuniform float uGrain;\nuniform float uOutputEncoding;\nuniform float uToneMap;\nuniform vec3 uClearColor;\nuniform vec3 uSkyHorizon;\nuniform vec3 uSkyZenith;\nuniform vec3 uSkyGround;\nuniform float uSkyEnabled;\nuniform float uSkyHorizonGlow;\nuniform float uSkyStarDensity;\nuniform sampler2D uSkyTexture;\nuniform float uSkyTextureEnabled;\nuniform float uSkyRotation;\nuniform float uSkyExposure;\nuniform float uSkyTextureSrgb;\nuniform mat4 uInverseProjection;\nuniform mat4 uInverseView;\nuniform vec3 uCameraPosition;\nuniform float uCloudCoverage;\nuniform float uCloudDensity;\nuniform float uCloudBaseHeight;\nuniform float uCloudThickness;\nuniform float uCloudScale;\nuniform vec2 uCloudWind;\nuniform float uCloudPhase;\nuniform float uCloudDetail;\nuniform float uCloudSilverLining;\nuniform float uCloudSampleCount;\nuniform vec3 uCloudLightDirection;\nuniform vec3 uCloudLightColor;\nuniform float uCloudLightIntensity;\nout vec4 oColor;\n\nfloat hash(vec2 p){\n  return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453123);\n}\n\nvec3 reinhardToneMap(vec3 color){\n  return color/(vec3(1.)+color);\n}\n\nvec3 acesToneMap(vec3 color){\n  return clamp((color*(2.51*color+0.03))/(color*(2.43*color+0.59)+0.14),0.0,1.0);\n}\n\nvec3 agxToneMap(vec3 color){\n  const mat3 agxMat=mat3(\n    0.842479062253094,0.0423282422610123,0.0423756549057051,\n    0.0784335999999992,0.878468636469772,0.0784336,\n    0.0792237451477643,0.0791661274605434,0.879142973793104\n  );\n  const mat3 agxMatInv=mat3(\n    1.19687902425764,-0.0528968517032958,-0.0529716355080549,\n    -0.0980208811401368,1.15190312990417,-0.0980434501171241,\n    -0.0990297440797205,-0.0989611768448433,1.15107367264185\n  );\n  vec3 val=agxMat*color;\n  val=clamp(log2(max(val,vec3(1e-10)))*0.0625+0.625,0.0,1.0);\n  val=val*val*val*(val*(val*6.0-15.0)+10.0);\n  val=agxMatInv*val;\n  return pow(max(val,vec3(0.0)),vec3(2.2));\n}\n\nvec3 linearToSrgb(vec3 color){\n  vec3 cutoff=step(vec3(.0031308),color);\n  vec3 low=color*12.92;\n  vec3 high=1.055*pow(max(color,vec3(0.)),vec3(1./2.4))-.055;\n  return mix(low,high,cutoff);\n}\n\nvec3 skyBackground(vec2 uv){\n  // A deliberately cheap, high-quality fallback sky: three atmospheric bands\n  // provide depth at every camera angle, while the tiny deterministic star\n  // field and horizon glow keep the clear background from reading as a flat\n  // color. It is an environment layer, not a game/weather simulation.\n  float lower=smoothstep(0.0,0.48,uv.y);\n  float upper=smoothstep(0.42,1.0,uv.y);\n  vec3 color=mix(uSkyGround,uSkyHorizon,lower);\n  color=mix(color,uSkyZenith,upper);\n  float horizonGlow=exp(-pow((uv.y-0.48)*7.0,2.0));\n  color+=uSkyHorizon*horizonGlow*clamp(uSkyHorizonGlow,0.,1.);\n  float starMask=smoothstep(0.62,0.92,uv.y);\n  float stars=step(1.0-clamp(uSkyStarDensity,0.,.1),hash(floor(uv*vec2(180.0,100.0))))*starMask;\n  color+=vec3(0.16,0.19,0.24)*stars;\n  return max(color,vec3(0.0));\n}\n\nfloat hash3(vec3 p){\n  return fract(sin(dot(p,vec3(127.1,311.7,74.7)))*43758.5453123);\n}\n\nfloat valueNoise(vec3 p){\n  vec3 i=floor(p);\n  vec3 f=fract(p);\n  f=f*f*(3.0-2.0*f);\n  float n000=hash3(i+vec3(0,0,0));\n  float n100=hash3(i+vec3(1,0,0));\n  float n010=hash3(i+vec3(0,1,0));\n  float n110=hash3(i+vec3(1,1,0));\n  float n001=hash3(i+vec3(0,0,1));\n  float n101=hash3(i+vec3(1,0,1));\n  float n011=hash3(i+vec3(0,1,1));\n  float n111=hash3(i+vec3(1,1,1));\n  float x00=mix(n000,n100,f.x);\n  float x10=mix(n010,n110,f.x);\n  float x01=mix(n001,n101,f.x);\n  float x11=mix(n011,n111,f.x);\n  return mix(mix(x00,x10,f.y),mix(x01,x11,f.y),f.z);\n}\n\nfloat cloudNoise(vec3 p){\n  float value=0.0;\n  float amplitude=0.5;\n  for(int octave=0;octave<4;octave++){\n    value+=valueNoise(p)*amplitude;\n    p=p*2.03+vec3(17.3,11.7,7.1);\n    amplitude*=0.5;\n  }\n  return value;\n}\n\nfloat cloudDensityAt(vec3 position){\n  float height01=clamp(\n    (position.y-uCloudBaseHeight)/max(uCloudThickness,0.001),\n    0.0,1.0\n  );\n  float vertical=smoothstep(0.0,0.12,height01)*\n    (1.0-smoothstep(0.72,1.0,height01));\n  vec3 q=position*max(uCloudScale,0.00001)+\n    vec3(uCloudWind.x*uCloudPhase,0.0,uCloudWind.y*uCloudPhase);\n  float macro=cloudNoise(q*0.82);\n  float detail=cloudNoise(q*2.7+vec3(23.0,5.0,41.0));\n  float shape=mix(macro,macro*0.68+detail*0.32,clamp(uCloudDetail,0.,1.));\n  float threshold=1.0-clamp(uCloudCoverage,0.,1.);\n  float body=smoothstep(threshold,threshold+0.26,shape);\n  return body*vertical*clamp(uCloudDensity,0.,1.);\n}\n\nvec4 volumetricClouds(vec3 worldDirection){\n  if(uCloudCoverage<=0.0001 || uCloudDensity<=0.0001 || worldDirection.y<=0.001){\n    return vec4(0.0);\n  }\n  float directionY=max(worldDirection.y,0.001);\n  float startT=(uCloudBaseHeight-uCameraPosition.y)/directionY;\n  float endT=(uCloudBaseHeight+uCloudThickness-uCameraPosition.y)/directionY;\n  startT=max(startT,0.0);\n  endT=max(endT,0.0);\n  if(endT<=startT) return vec4(0.0);\n  int sampleCount=int(clamp(uCloudSampleCount,4.,24.));\n  float stepLength=(endT-startT)/float(sampleCount);\n  float jitter=(hash(gl_FragCoord.xy+vec2(uCloudPhase*0.013))-0.5)*stepLength;\n  vec3 sunDirection=normalize(-uCloudLightDirection);\n  float transmittance=1.0;\n  vec3 inScatter=vec3(0.0);\n  for(int i=0;i<24;i++){\n    if(i>=sampleCount) break;\n    float t=startT+(float(i)+0.5)*stepLength+jitter;\n    vec3 position=uCameraPosition+worldDirection*t;\n    float density=cloudDensityAt(position);\n    float opticalDepth=density*stepLength*0.0035;\n    float segmentAlpha=1.0-exp(-opticalDepth);\n    float towardLight=cloudDensityAt(position+sunDirection*90.0);\n    float lightTransmittance=exp(-towardLight*0.025);\n    float phase=0.72+0.28*pow(max(dot(-worldDirection,sunDirection),0.0),2.0);\n    vec3 ambient=uSkyHorizon*0.32;\n    vec3 direct=uCloudLightColor*\n      (0.14+0.86*clamp(uCloudLightIntensity,0.,1.5))*phase;\n    float edge=pow(1.0-clamp(density,0.,1.),3.0)*uCloudSilverLining*0.22;\n    vec3 sampleLight=(ambient+direct)*lightTransmittance+vec3(edge);\n    inScatter+=transmittance*segmentAlpha*sampleLight;\n    transmittance*=1.0-segmentAlpha;\n    if(transmittance<0.01) break;\n  }\n  return vec4(inScatter,1.0-transmittance);\n}\n\nvec3 srgbToLinear(vec3 color){\n  vec3 low=color/12.92;\n  vec3 high=pow((color+0.055)/1.055,vec3(2.4));\n  return mix(low,high,step(vec3(0.04045),color));\n}\n\nvec3 worldDirectionForUv(vec2 uv){\n  vec2 ndc=uv*2.0-1.0;\n  vec4 viewPoint=uInverseProjection*vec4(ndc,1.0,1.0);\n  return normalize(viewPoint.xyz/viewPoint.w);\n}\n\nvec3 equirectangularSky(vec2 uv){\n  vec3 worldDirection=normalize((uInverseView*vec4(worldDirectionForUv(uv),0.0)).xyz);\n  float longitude=atan(worldDirection.z,worldDirection.x)+uSkyRotation;\n  float latitude=asin(clamp(worldDirection.y,-1.0,1.0));\n  vec2 sampleUv=vec2(\n    fract(longitude/(2.0*3.14159265359)+0.5),\n    0.5-latitude/3.14159265359\n  );\n  vec3 encoded=max(texture(uSkyTexture,sampleUv).rgb,vec3(0.0));\n  vec3 linear=mix(encoded,srgbToLinear(encoded),clamp(uSkyTextureSrgb,0.,1.));\n  return linear*max(uSkyExposure,0.0);\n}\n\nvec4 applyFxaa(sampler2D tex, vec2 uv){\n  vec2 texelSize=1.0/vec2(textureSize(tex,0));\n  vec3 rgbM=texture(tex,uv).rgb;\n  vec3 rgbNW=texture(tex,uv+vec2(-texelSize.x,-texelSize.y)).rgb;\n  vec3 rgbNE=texture(tex,uv+vec2( texelSize.x,-texelSize.y)).rgb;\n  vec3 rgbSW=texture(tex,uv+vec2(-texelSize.x, texelSize.y)).rgb;\n  vec3 rgbSE=texture(tex,uv+vec2( texelSize.x, texelSize.y)).rgb;\n\n  const vec3 luma=vec3(0.299,0.587,0.114);\n  float lumaM =dot(rgbM, luma);\n  float lumaNW=dot(rgbNW,luma);\n  float lumaNE=dot(rgbNE,luma);\n  float lumaSW=dot(rgbSW,luma);\n  float lumaSE=dot(rgbSE,luma);\n\n  float lumaMin=min(lumaM,min(min(lumaNW,lumaNE),min(lumaSW,lumaSE)));\n  float lumaMax=max(lumaM,max(max(lumaNW,lumaNE),max(lumaSW,lumaSE)));\n\n  float range=lumaMax-lumaMin;\n  if(range<max(0.04,lumaMax*0.125)){\n    return vec4(rgbM,1.0);\n  }\n\n  vec2 dir=vec2(\n    -((lumaNW+lumaNE)-(lumaSW+lumaSE)),\n    ((lumaNW+lumaSW)-(lumaNE+lumaSE))\n  );\n  float dirReduce=max((lumaNW+lumaNE+lumaSW+lumaSE)*0.03125,0.0078125);\n  float rcpDirMin=1.0/(min(abs(dir.x),abs(dir.y))+dirReduce);\n  dir=min(vec2(8.0),max(vec2(-8.0),dir*rcpDirMin))*texelSize;\n\n  vec3 rgbA=0.5*(\n    texture(tex,uv+dir*(1.0/3.0-0.5)).rgb+\n    texture(tex,uv+dir*(2.0/3.0-0.5)).rgb\n  );\n  vec3 rgbB=rgbA*0.5+0.25*(\n    texture(tex,uv+dir*-0.5).rgb+\n    texture(tex,uv+dir* 0.5).rgb\n  );\n  float lumaB=dot(rgbB,luma);\n  if((lumaB<lumaMin)||(lumaB>lumaMax)){\n    return vec4(rgbA,1.0);\n  }\n  return vec4(rgbB,1.0);\n}\n\nvoid main(){\n  vec4 rawSource=texture(uTex,vUv);\n  bool isBackground=uSkyEnabled>0.5 && distance(rawSource.rgb,uClearColor)<0.004;\n  vec4 source=isBackground?rawSource:applyFxaa(uTex,vUv);\n  // Lens spectral dispersion (radial chromatic aberration towards viewport edges)\n  if(!isBackground){\n    vec2 centerOffset=vUv-vec2(0.5);\n    float distSq=dot(centerOffset,centerOffset);\n    if(distSq>0.04){\n      vec2 chromaOffset=centerOffset*distSq*0.010;\n      source.r=applyFxaa(uTex,vUv-chromaOffset).r;\n      source.b=applyFxaa(uTex,vUv+chromaOffset).b;\n    }\n  }\n  // The world pass clears untouched pixels to uClearColor. Replace only that\n  // exact background, so the sky is always active without covering geometry.\n  if(isBackground){\n    vec3 viewDirection=worldDirectionForUv(vUv);\n    vec3 worldDirection=normalize((uInverseView*vec4(viewDirection,0.0)).xyz);\n    source.rgb=uSkyTextureEnabled>0.5\n      ? equirectangularSky(vUv)\n      : skyBackground(vUv);\n    vec4 clouds=volumetricClouds(worldDirection);\n    source.rgb=source.rgb* (1.0-clouds.a)+clouds.rgb;\n  }\n  // Exposure operates in scene-linear space; tone mapping prevents HDR\n  // highlights from clipping before the selected output transfer function.\n  vec3 color=max(source.rgb,vec3(0.))*max(uExposure,0.);\n  vec3 mapped=uToneMap>3.0\n    ?agxToneMap(color)\n    :(uToneMap>1.5?acesToneMap(color):reinhardToneMap(color));\n  float toneMix=uToneMap>3.0\n    ?clamp((uToneMap-3.0)*2.0,0.,1.)\n    :(uToneMap>1.5?clamp(uToneMap-1.5,0.,1.):clamp(uToneMap,0.,1.));\n  color=mix(color,mapped,toneMix);\n  float edge=distance(vUv,vec2(.5));\n  float vignette=smoothstep(.35,.78,edge);\n  color*=1.-clamp(uVignette,0.,1.)*vignette;\n  if(uOutputEncoding>.5) color=linearToSrgb(max(color,vec3(0.)));\n  // Atmospheric precipitation is submitted as depth-tested world geometry;\n  // the present pass must never paint weather over unrelated surfaces.\n  // A stable screen-space grain keeps captures reproducible for a fixed\n  // viewport while still giving the dark gothic presentation a fine film\n  // texture. It is deliberately tiny and never changes alpha.\n  color+=((hash(gl_FragCoord.xy)-.5)*.06)*max(uGrain,0.);\n  oColor=vec4(clamp(color,0.,1.),source.a);\n}\n",c:"Error handler must accept one Object or one Object and a StackTrace as arguments, and return a value of the returned future's type",k:"WebGl2Device: operation attempted while context is not ready",g:"max must be in range 0 < max \u2264 2^32, was "}
 var t=(function rtii(){var s=A.bL
-return{v:s("aK"),g0:s("av"),fW:s("eC"),do:s("cn"),Z:s("aw"),e8:s("ar<@>"),dN:s("da"),I:s("X<w,j>"),P:s("b3<w>"),df:s("bO"),Q:s("R"),B:s("i_"),gN:s("i0"),o:s("a_"),f:s("bR"),ef:s("dj"),j:s("aX"),gL:s("b4"),cr:s("n<da>"),bM:s("n<r>"),hf:s("n<@>"),fA:s("q<ez>"),d0:s("q<aw>"),aA:s("q<dj>"),J:s("q<aX>"),b7:s("q<al>"),gk:s("q<bg>"),d9:s("q<b4>"),e9:s("q<bT<@>>"),E:s("q<A<j>>"),br:s("q<rc>"),e3:s("q<dE>"),aw:s("q<aO>"),g7:s("q<fn>"),cU:s("q<P>"),dV:s("q<bX>"),bs:s("q<bD>"),eT:s("q<cE>"),be:s("q<+(w,a)>"),cw:s("q<+influence,light(r,az)>"),gg:s("q<+influence,source(r,dY)>"),cL:s("q<I>"),u:s("q<D>"),cR:s("q<dJ>"),C:s("q<p>"),c4:s("q<b9>"),dR:s("q<aR>"),D:s("q<ba>"),aM:s("q<a3<av>>"),c1:s("q<a3<ay>>"),w:s("q<az>"),s:s("q<w>"),h:s("q<bG>"),ek:s("q<O>"),G:s("q<a>"),az:s("q<dY>"),gz:s("q<hc>"),ha:s("q<bI<a0>>"),c9:s("q<bI<b7>>"),aO:s("q<bI<b9>>"),fq:s("q<bI<bb>>"),n:s("q<r>"),gn:s("q<@>"),t:s("q<j>"),T:s("dm"),m:s("N"),cj:s("bA"),aU:s("aB<@>"),a3:s("bT<@>"),c:s("b5<a>"),fy:s("A<aw>"),_:s("A<al>"),O:s("A<P>"),dy:s("A<w>"),aH:s("A<@>"),bW:s("A<j>"),ao:s("am<w,a_>"),bS:s("aD<w,aX>"),a1:s("aD<w,P>"),fm:s("M<a,a>"),eL:s("b6"),cA:s("aE"),b:s("a7"),K:s("z"),fY:s("ay"),dz:s("dE"),eH:s("aO"),z:s("P"),eD:s("cE"),W:s("aF"),gT:s("rd"),bQ:s("+()"),ai:s("+(aE,b7)"),dU:s("+(aG,bb)"),fk:s("+influence,light(r,az)"),eS:s("+influence,source(r,dY)"),g8:s("D"),b0:s("b8<b4,b9>"),ex:s("b8<b6,a0>"),cE:s("b8<aE,b7>"),g2:s("b8<aG,bb>"),L:s("p"),Y:s("aR"),dB:s("ba"),U:s("bE<w>"),cJ:s("bE<j>"),d:s("a3<av>"),k:s("a3<ay>"),l:s("bF"),d5:s("an"),N:s("w"),bn:s("bG"),aj:s("aG"),dm:s("J"),eK:s("bo"),ak:s("c0"),am:s("dW<w>"),bw:s("fO"),a:s("a"),dO:s("a(a)"),p:s("ao"),fl:s("ab<ao>"),an:s("Q<ao>"),aQ:s("cN"),e:s("a1<@>"),cd:s("a1<~>"),hg:s("e4<z?,z?>"),cm:s("bH"),a8:s("cQ"),cK:s("hb"),V:s("el"),R:s("em"),y:s("y"),d6:s("y(ck)"),al:s("y(z)"),fg:s("y(ao)"),i:s("r"),A:s("@"),fO:s("@()"),x:s("@(z)"),q:s("@(z,bF)"),S:s("j"),eB:s("cr?"),bH:s("bS<a7>?"),du:s("q<z?>?"),bX:s("N?"),c3:s("A<bD>?"),X:s("z?"),ac:s("dF?"),bG:s("dR?"),dk:s("w?"),aD:s("dU?"),F:s("c2<@,@>?"),g:s("h9?"),fQ:s("y?"),cD:s("r?"),h6:s("j?"),cg:s("aq?"),a4:s("~(ct)?"),r:s("aq"),H:s("~"),M:s("~()")}})();(function constants(){var s=hunkHelpers.makeConstList
+return{v:s("aK"),g0:s("av"),fW:s("eC"),do:s("cn"),Z:s("aw"),e8:s("ar<@>"),dN:s("da"),I:s("X<w,j>"),P:s("b3<w>"),df:s("bO"),Q:s("R"),B:s("i_"),gN:s("i0"),o:s("a_"),f:s("bR"),ef:s("dj"),j:s("aX"),gL:s("b4"),cr:s("o<da>"),bM:s("o<r>"),hf:s("o<@>"),fA:s("q<ez>"),d0:s("q<aw>"),aA:s("q<dj>"),J:s("q<aX>"),b7:s("q<al>"),gk:s("q<bg>"),d9:s("q<b4>"),e9:s("q<bT<@>>"),E:s("q<A<j>>"),br:s("q<rb>"),e3:s("q<dE>"),aw:s("q<aO>"),g7:s("q<fn>"),cU:s("q<P>"),dV:s("q<bX>"),bs:s("q<bD>"),eT:s("q<cE>"),be:s("q<+(w,a)>"),cw:s("q<+influence,light(r,az)>"),gg:s("q<+influence,source(r,dY)>"),cL:s("q<I>"),u:s("q<D>"),cR:s("q<dJ>"),C:s("q<p>"),c4:s("q<b9>"),dR:s("q<aR>"),D:s("q<ba>"),aM:s("q<a4<av>>"),c1:s("q<a4<ay>>"),w:s("q<az>"),s:s("q<w>"),h:s("q<bG>"),ek:s("q<O>"),G:s("q<a>"),az:s("q<dY>"),gz:s("q<hc>"),ha:s("q<bI<a0>>"),c9:s("q<bI<b7>>"),aO:s("q<bI<b9>>"),fq:s("q<bI<bb>>"),n:s("q<r>"),gn:s("q<@>"),t:s("q<j>"),T:s("dm"),m:s("N"),cj:s("bA"),aU:s("aB<@>"),a3:s("bT<@>"),c:s("b5<a>"),fy:s("A<aw>"),_:s("A<al>"),O:s("A<P>"),dy:s("A<w>"),aH:s("A<@>"),bW:s("A<j>"),ao:s("am<w,a_>"),bS:s("aD<w,aX>"),a1:s("aD<w,P>"),fm:s("M<a,a>"),eL:s("b6"),cA:s("aE"),b:s("a7"),K:s("z"),fY:s("ay"),dz:s("dE"),eH:s("aO"),z:s("P"),eD:s("cE"),W:s("aF"),gT:s("rc"),bQ:s("+()"),ai:s("+(aE,b7)"),dU:s("+(aG,bb)"),fk:s("+influence,light(r,az)"),eS:s("+influence,source(r,dY)"),g8:s("D"),b0:s("b8<b4,b9>"),ex:s("b8<b6,a0>"),cE:s("b8<aE,b7>"),g2:s("b8<aG,bb>"),L:s("p"),Y:s("aR"),dB:s("ba"),U:s("bE<w>"),cJ:s("bE<j>"),d:s("a4<av>"),k:s("a4<ay>"),l:s("bF"),d5:s("an"),N:s("w"),bn:s("bG"),aj:s("aG"),dm:s("J"),eK:s("bo"),ak:s("c0"),am:s("dW<w>"),bw:s("fO"),a:s("a"),dO:s("a(a)"),p:s("ao"),fl:s("ab<ao>"),an:s("Q<ao>"),aQ:s("cN"),e:s("a1<@>"),cd:s("a1<~>"),hg:s("e4<z?,z?>"),cm:s("bH"),a8:s("cQ"),cK:s("hb"),V:s("el"),R:s("em"),y:s("y"),d6:s("y(ck)"),al:s("y(z)"),fg:s("y(ao)"),i:s("r"),A:s("@"),fO:s("@()"),x:s("@(z)"),q:s("@(z,bF)"),S:s("j"),eB:s("cr?"),bH:s("bS<a7>?"),du:s("q<z?>?"),bX:s("N?"),c3:s("A<bD>?"),X:s("z?"),ac:s("dF?"),bG:s("dR?"),dk:s("w?"),aD:s("dU?"),F:s("c2<@,@>?"),g:s("h9?"),fQ:s("y?"),cD:s("r?"),h6:s("j?"),cg:s("aq?"),a4:s("~(ct)?"),r:s("aq"),H:s("~"),M:s("~()")}})();(function constants(){var s=hunkHelpers.makeConstList
 B.co=J.f2.prototype
 B.a=J.q.prototype
 B.e=J.dl.prototype
@@ -11667,7 +11670,7 @@ B.i3=new A.jj(0,"outward")
 B.bG=new A.fE()
 B.d=new A.a(0,1,0)
 B.q=new A.a(0,-1,0)
-B.S=new A.v(1,1,1)
+B.S=new A.u(1,1,1)
 B.bH=new A.az()
 B.hB=new A.br(0,"position")
 B.hG=new A.ao(B.hB,0,3)
@@ -11723,7 +11726,7 @@ B.aH=new A.hP(1,"base")
 B.V=new A.hQ(1,"back")
 B.W=new A.hU(0,"less")
 B.hb=new A.a(0.6,-1,0.4)
-B.cy=new A.v(1,0.95,0.88)
+B.cy=new A.u(1,0.95,0.88)
 B.bV=new A.cr(B.hb,B.cy,2.4)
 B.L=new A.dg(0,"opaque")
 B.bW=new A.dg(1,"masked")
@@ -11733,12 +11736,12 @@ B.bX=new A.cs(!0,B.W,!1,!0,B.Q,B.Q,B.T,!0,B.V,!0,!1,!0,!0,!0,!0,!1)
 B.bw=new A.cl(2,"srcAlpha")
 B.bx=new A.cl(3,"oneMinusSrcAlpha")
 B.bY=new A.cs(!0,B.W,!1,!0,B.bw,B.bx,B.T,!0,B.V,!0,!1,!0,!0,!0,!0,!1)
-B.cI=new A.v(0.03,0.03,0.04)
-B.H=new A.v(0,0,0)
+B.cI=new A.u(0.03,0.03,0.04)
+B.H=new A.u(0,0,0)
 B.dj=s([],t.bs)
 B.ab=s([],t.w)
 B.dk=s([],t.az)
-B.dl=s([],A.bL("q<rf>"))
+B.dl=s([],A.bL("q<re>"))
 B.bZ=new A.eS(B.cI,B.H,0,1,null,null,B.S,0.02,0,0.7,0.35,1,12,1,1,1,1,1,1,1,0.003,B.H,0,0,B.S,0,null,B.dj,B.ab,B.dk,B.dl,null)
 B.c_=new A.a_(0,0,0)
 B.c0=new A.cu(0,"idle")
@@ -11782,36 +11785,36 @@ B.aO=new A.cw(0,"wrongKind")
 B.aP=new A.cw(1,"staleGeneration")
 B.cn=new A.cw(2,"doubleRelease")
 B.Y=new A.cw(3,"releasedResource")
-B.hT=new A.v(0.25,0.55,1)
-B.aQ=new A.v(0.02,0.03,0.05)
-B.cv=new A.v(0.06,0.08,0.12)
-B.cw=new A.v(1,0.25,0.25)
-B.cx=new A.v(0.08,0.02,0.04)
-B.hU=new A.v(0.06,0.08,0.11)
-B.cB=new A.v(0.22,0.48,0.95)
-B.cC=new A.v(0.95,0.12,0.22)
-B.hV=new A.v(0.1,0.12,0.15)
-B.cD=new A.v(0.25,0.5,1)
-B.cE=new A.v(0.04,0.05,0.07)
-B.cF=new A.v(0.04,0.08,0.16)
-B.hW=new A.v(0.05,0.07,0.1)
-B.cG=new A.v(0.92,0.94,0.97)
-B.cH=new A.v(0.12,0.15,0.2)
-B.cK=new A.v(0.92,0.35,0.25)
-B.cL=new A.v(0.1,0.85,0.45)
-B.hX=new A.v(0.92,0.94,0.96)
-B.cN=new A.v(0.18,0.42,0.98)
-B.cO=new A.v(0.2,1,0.45)
-B.hY=new A.v(0.85,0.85,0.88)
-B.cP=new A.v(0.2,0.85,1)
-B.cQ=new A.v(0.03,0.04,0.06)
-B.aR=new A.v(0.015,0.02,0.03)
-B.cR=new A.v(1,0.85,0.35)
-B.hZ=new A.v(0.12,0.14,0.18)
-B.cS=new A.v(0.98,0.12,0.22)
-B.cU=new A.v(0.1,0.88,0.42)
-B.cV=new A.v(0.7,0.8,1)
-B.i_=new A.v(0.25,0.75,1)
+B.hT=new A.u(0.25,0.55,1)
+B.aQ=new A.u(0.02,0.03,0.05)
+B.cv=new A.u(0.06,0.08,0.12)
+B.cw=new A.u(1,0.25,0.25)
+B.cx=new A.u(0.08,0.02,0.04)
+B.hU=new A.u(0.06,0.08,0.11)
+B.cB=new A.u(0.22,0.48,0.95)
+B.cC=new A.u(0.95,0.12,0.22)
+B.hV=new A.u(0.1,0.12,0.15)
+B.cD=new A.u(0.25,0.5,1)
+B.cE=new A.u(0.04,0.05,0.07)
+B.cF=new A.u(0.04,0.08,0.16)
+B.hW=new A.u(0.05,0.07,0.1)
+B.cG=new A.u(0.92,0.94,0.97)
+B.cH=new A.u(0.12,0.15,0.2)
+B.cK=new A.u(0.92,0.35,0.25)
+B.cL=new A.u(0.1,0.85,0.45)
+B.hX=new A.u(0.92,0.94,0.96)
+B.cN=new A.u(0.18,0.42,0.98)
+B.cO=new A.u(0.2,1,0.45)
+B.hY=new A.u(0.85,0.85,0.88)
+B.cP=new A.u(0.2,0.85,1)
+B.cQ=new A.u(0.03,0.04,0.06)
+B.aR=new A.u(0.015,0.02,0.03)
+B.cR=new A.u(1,0.85,0.35)
+B.hZ=new A.u(0.12,0.14,0.18)
+B.cS=new A.u(0.98,0.12,0.22)
+B.cU=new A.u(0.5,0.6,0.75)
+B.cV=new A.u(0.1,0.88,0.42)
+B.i_=new A.u(0.25,0.75,1)
 B.d9=s([0,8,4,14,12],t.t)
 B.d1=s([0,16,2,10,8],t.t)
 B.cX=s([0,12,1,17,16],t.t)
@@ -11833,7 +11836,7 @@ B.d5=s(["uNear","uFar","uLightDir","uLightColor","uShaftIntensity","uFogDensity"
 B.d7=s(["uNear","uFar","uFocusDistance","uFocusRange","uStrength"],t.s)
 B.db=s(["uViewProjection","uModel","uVertexSnapGrid","uAffineWarpStrength","uAlphaCutoff"],t.s)
 B.bn=new A.a(0,0.35,0)
-B.i6=new A.e0(A.qA())
+B.i6=new A.e0(A.qz())
 B.ct=new A.b5(0,B.bn,t.c)
 B.hp=new A.a(0,0.65,0)
 B.cs=new A.b5(2,B.hp,t.c)
@@ -11946,13 +11949,13 @@ B.b_=new A.fm(0,"bounce")
 B.b0=new A.fm(1,"kill")
 B.f=new A.a(0,0,0)
 B.eh=new A.cC(B.f,B.d,0.4,0.1,B.b_)
-B.cM=new A.v(0.2,0.05,0.02)
+B.cM=new A.u(0.2,0.05,0.02)
 B.ei=new A.aO(1,B.cM)
-B.cz=new A.v(1,1,0.8)
+B.cz=new A.u(1,1,0.8)
 B.ej=new A.aO(0,B.cz)
-B.cA=new A.v(1,0.65,0.1)
+B.cA=new A.u(1,0.65,0.1)
 B.ek=new A.aO(0.3,B.cA)
-B.cu=new A.v(0.85,0.15,0.02)
+B.cu=new A.u(0.85,0.15,0.02)
 B.el=new A.aO(0.7,B.cu)
 B.em=new A.fo(0,1,null)
 B.en=new A.bY(null,0.8)
@@ -11999,8 +12002,8 @@ B.b7=new A.cI(1,"fragment")
 B.b9=new A.cI(3,"validation")
 B.eR=new A.fB(0,"full")
 B.eS=new A.fB(2,"culled")
-B.cJ=new A.v(0.12,0.16,0.24)
-B.cT=new A.v(0.03,0.06,0.14)
+B.cJ=new A.u(0.12,0.16,0.24)
+B.cT=new A.u(0.03,0.06,0.14)
 B.eT=new A.dR("showcase_sky",null,B.cJ,B.cT,B.aR,0.12,0.005,0,1,!0,0.32,0.4,650,350,0.0012,0,0,0,0.55,0.25,12)
 B.eU=new A.aj(0,"polarNight")
 B.eV=new A.aj(1,"astronomicalDawn")
@@ -12025,18 +12028,18 @@ B.bg=new A.cM(0,"off")
 B.f9=new A.cM(2,"aces")
 B.au=new A.cM(3,"agx")
 B.A=new A.O(B.f,B.o,1)
-B.fa=A.aW("r2")
-B.fb=A.aW("r3")
+B.fa=A.aW("r1")
+B.fb=A.aW("r2")
 B.fc=A.aW("i_")
 B.fd=A.aW("i0")
-B.fe=A.aW("oe")
-B.ff=A.aW("of")
-B.fg=A.aW("og")
+B.fe=A.aW("od")
+B.ff=A.aW("oe")
+B.fg=A.aW("of")
 B.fh=A.aW("N")
 B.fi=A.aW("z")
-B.fj=A.aW("p7")
-B.fk=A.aW("p8")
-B.fl=A.aW("p9")
+B.fj=A.aW("p6")
+B.fk=A.aW("p7")
+B.fl=A.aW("p8")
 B.fm=A.aW("dU")
 B.c=new A.bq(0,"float1")
 B.N=new A.bq(1,"float2")
@@ -12122,17 +12125,17 @@ B.bp=new A.fX(0,"horizontal")
 B.hN=new A.fX(1,"vertical")
 B.bq=new A.h1(0,"horizontal")
 B.hO=new A.h1(1,"vertical")
-B.hP=new A.e0(A.qB())
+B.hP=new A.e0(A.qA())
 B.a0=new A.ec(0,"empty")
 B.hQ=new A.ec(1,"cpuReady")
 B.a1=new A.ec(4,"released")})();(function staticFields(){$.jW=null
 $.aI=A.b([],A.bL("q<z>"))
-$.mH=null
+$.mG=null
 $.mg=null
 $.mf=null
-$.nD=null
-$.ny=null
-$.nF=null
+$.nC=null
+$.nx=null
+$.nE=null
 $.ky=null
 $.kE=null
 $.m2=null
@@ -12142,33 +12145,33 @@ $.er=null
 $.es=null
 $.lU=!1
 $.U=B.C
-$.mE=5000
+$.mD=5000
 $.mp=2000})();(function lazyInitializers(){var s=hunkHelpers.lazyFinal
-s($,"r5","nK",()=>A.kA("_$dart_dartClosure"))
-s($,"r4","m6",()=>A.kA("_$dart_dartClosure_dartJSInterop"))
-s($,"rs","nV",()=>A.b([new J.f4()],A.bL("q<dP>")))
-s($,"rg","nL",()=>A.bp(A.ju({
+s($,"r4","nJ",()=>A.kA("_$dart_dartClosure"))
+s($,"r3","m6",()=>A.kA("_$dart_dartClosure_dartJSInterop"))
+s($,"rr","nU",()=>A.b([new J.f4()],A.bL("q<dP>")))
+s($,"rf","nK",()=>A.bp(A.ju({
 toString:function(){return"$receiver$"}})))
-s($,"rh","nM",()=>A.bp(A.ju({$method$:null,
+s($,"rg","nL",()=>A.bp(A.ju({$method$:null,
 toString:function(){return"$receiver$"}})))
-s($,"ri","nN",()=>A.bp(A.ju(null)))
-s($,"rj","nO",()=>A.bp(function(){var $argumentsExpr$="$arguments$"
+s($,"rh","nM",()=>A.bp(A.ju(null)))
+s($,"ri","nN",()=>A.bp(function(){var $argumentsExpr$="$arguments$"
 try{null.$method$($argumentsExpr$)}catch(r){return r.message}}()))
-s($,"rm","nR",()=>A.bp(A.ju(void 0)))
-s($,"rn","nS",()=>A.bp(function(){var $argumentsExpr$="$arguments$"
+s($,"rl","nQ",()=>A.bp(A.ju(void 0)))
+s($,"rm","nR",()=>A.bp(function(){var $argumentsExpr$="$arguments$"
 try{(void 0).$method$($argumentsExpr$)}catch(r){return r.message}}()))
-s($,"rl","nQ",()=>A.bp(A.mW(null)))
-s($,"rk","nP",()=>A.bp(function(){try{null.$method$}catch(r){return r.message}}()))
-s($,"rp","nU",()=>A.bp(A.mW(void 0)))
-s($,"ro","nT",()=>A.bp(function(){try{(void 0).$method$}catch(r){return r.message}}()))
-s($,"rq","mc",()=>A.pm())
-s($,"rr","eu",()=>A.hx(B.fi))
-s($,"r1","nJ",()=>B.ai.d9())
-s($,"ra","mb",()=>A.fk(A.b([255,255,255,255],t.t)))
-s($,"r7","m8",()=>A.fk(A.b([128,128,255,255],t.t)))
-s($,"r6","m7",()=>A.fk(A.b([0,0,0,255],t.t)))
-s($,"r8","m9",()=>A.fk(A.b([255,255,0,255],t.t)))
-s($,"r9","ma",()=>A.fk(A.b([255,255,255,255],t.t)))})();(function nativeSupport(){!function(){var s=function(a){var m={}
+s($,"rk","nP",()=>A.bp(A.mV(null)))
+s($,"rj","nO",()=>A.bp(function(){try{null.$method$}catch(r){return r.message}}()))
+s($,"ro","nT",()=>A.bp(A.mV(void 0)))
+s($,"rn","nS",()=>A.bp(function(){try{(void 0).$method$}catch(r){return r.message}}()))
+s($,"rp","mc",()=>A.pl())
+s($,"rq","eu",()=>A.hx(B.fi))
+s($,"r0","nI",()=>B.ai.d9())
+s($,"r9","mb",()=>A.fk(A.b([255,255,255,255],t.t)))
+s($,"r6","m8",()=>A.fk(A.b([128,128,255,255],t.t)))
+s($,"r5","m7",()=>A.fk(A.b([0,0,0,255],t.t)))
+s($,"r7","m9",()=>A.fk(A.b([255,255,255,255],t.t)))
+s($,"r8","ma",()=>A.fk(A.b([255,255,255,255],t.t)))})();(function nativeSupport(){!function(){var s=function(a){var m={}
 m[a]=1
 return Object.keys(hunkHelpers.convertToFastObject(m))[0]}
 v.getIsolateTag=function(a){return s("___dart_"+a+v.isolateTag)}

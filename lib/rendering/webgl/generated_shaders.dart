@@ -409,14 +409,6 @@ float diffuseBurley(float ndotl,float ndotv,float lndoth,float roughness){
   return lightScatter*viewScatter;
 }
 
-// Heitz (2014) height-correlated Smith GGX visibility: V = G / (4 * NdotV * NdotL)
-float visibilitySmithGgxCorrelated(float ndotv,float ndotl,float roughness){
-  float a2=roughness*roughness;
-  float ggxV=ndotl*sqrt(ndotv*ndotv*(1.0-a2)+a2);
-  float ggxL=ndotv*sqrt(ndotl*ndotl*(1.0-a2)+a2);
-  return 0.5/max(ggxV+ggxL,0.0001);
-}
-
 float geometrySchlick(float ndotv,float roughness){
   float k=(roughness+1.0)*(roughness+1.0)/8.0;
   return ndotv/(ndotv*(1.0-k)+k);
@@ -438,15 +430,17 @@ vec3 specularContribution(vec3 normal,vec3 viewDir,vec3 lightDir,
   vec3 lightColor,float lightIntensity,float attenuation,vec3 baseColor,
   float roughness,float metallic){
   vec3 halfDir=normalize(viewDir+lightDir);
-  float ndotv=max(dot(normal,viewDir),0.0001);
-  float ndotl=max(dot(normal,lightDir),0.0001);
+  float ndotv=max(dot(normal,viewDir),0.0);
+  float ndotl=max(dot(normal,lightDir),0.0);
   float ndoth=max(dot(normal,halfDir),0.0);
   float hdotv=max(dot(halfDir,viewDir),0.0);
   vec3 f0=mix(vec3(0.04),baseColor,metallic);
   vec3 fresnel=fresnelSchlickRoughness(hdotv,f0,roughness);
   float distribution=distributionGgx(ndoth,roughness);
-  float vis=visibilitySmithGgxCorrelated(ndotv,ndotl,roughness);
-  return distribution*vis*fresnel*lightColor*lightIntensity*attenuation*ndotl;
+  float geometry=geometrySmith(ndotv,ndotl,roughness);
+  vec3 numerator=distribution*geometry*fresnel;
+  float denominator=max(4.0*ndotv*ndotl,0.001);
+  return numerator/denominator*lightColor*lightIntensity*attenuation*ndotl;
 }
 
 float sampleShadow(vec3 projCoord,float bias){
@@ -477,7 +471,7 @@ float heightFogOpticalDepth(vec3 rayStart,vec3 rayEnd){
 }
 
 float fogFactor(float viewDepth,float worldY){
-  float distFactor=smoothstep(uFogStart,uFogEnd,viewDepth);
+  float distFactor=(uFogEnd>uFogStart&&uFogEnd>1.0)?smoothstep(uFogStart,uFogEnd,viewDepth):0.0;
   float opticalDepth=heightFogOpticalDepth(uCameraPosition,vWorldPos);
   float mediumFactor=1.-exp(-opticalDepth);
   return clamp(max(distFactor,mediumFactor),0.,1.);
@@ -720,13 +714,8 @@ void main(){
   // producing the broad plastic patches visible in low-roughness samples.
   // This split is bounded by the material metalness and lets the final
   // composite perform the intentional HDR compression once.
-  vec3 sunLightDir=normalize(uDirectionalDirection);
-  vec3 sunHalfDir=normalize(viewDir+sunLightDir);
-  float sunNdotV=max(dot(n,viewDir),0.0001);
-  float sunHdotL=max(dot(sunHalfDir,sunLightDir),0.0);
-  float burleySun=diffuseBurley(directionalNdotL,sunNdotV,sunHdotL,specRough);
   vec3 diffuseEnergy=baseColor*(1.0-metal)*
-    (ambient+direct*mix(1.0-0.25*rough,burleySun,0.65));
+    (ambient+direct*(1.0-0.25*rough));
   vec3 lit=diffuseEnergy+specular;
   // A restrained dielectric clearcoat is intentionally separate from the
   // base roughness/metalness response. It gives porcelain a broad, stable
@@ -766,16 +755,7 @@ void main(){
   lit+=envRadiance*envFresnel*reflectionWeight*ao;
   float backScatter=max(dot(-viewDir,normalize(uDirectionalDirection)),0.0);
   vec3 subsurface=baseColor*uDirectionalColor*(pow(backScatter,4.0)*(1.0-metal)*0.12*uDirectionalIntensity);
-  float wrapNdotL=max((directionalNdotL+0.35)/1.35,0.0);
-  float rimWrap=pow(clamp(1.0-coatNdotV,0.0,1.0),2.5);
-  vec3 wrapSubsurface=baseColor*uDirectionalColor*(wrapNdotL*rimWrap*(1.0-metal)*0.14*uDirectionalIntensity);
-  lit+=subsurface+wrapSubsurface;
-  // Wave crest foam glint and subsurface forward scatter for organic water bodies
-  float foamFactor=clamp(vColor.r*vColor.g*vColor.b,0.0,1.0);
-  if(foamFactor>0.04){
-    vec3 foamSheen=vec3(0.92,0.96,1.0)*uDirectionalColor*uDirectionalIntensity*0.55;
-    lit=mix(lit,lit+foamSheen,foamFactor*0.7);
-  }
+  lit+=subsurface;
   vec3 emissive=texture(uEmissiveMap,uv).rgb*uMaterialTint*uEmissiveStrength;
   lit+=emissive;
   if(uLightmapIntensity>0.0){
@@ -885,7 +865,7 @@ vec3 agxToneMap(vec3 color){
   val=clamp(log2(max(val,vec3(1e-10)))*0.0625+0.625,0.0,1.0);
   val=val*val*val*(val*(val*6.0-15.0)+10.0);
   val=agxMatInv*val;
-  return max(val,vec3(0.0));
+  return pow(max(val,vec3(0.0)),vec3(2.2));
 }
 
 vec3 linearToSrgb(vec3 color){
@@ -1104,7 +1084,7 @@ void main(){
     ?agxToneMap(color)
     :(uToneMap>1.5?acesToneMap(color):reinhardToneMap(color));
   float toneMix=uToneMap>3.0
-    ?clamp(uToneMap-3.0,0.,1.)
+    ?clamp((uToneMap-3.0)*2.0,0.,1.)
     :(uToneMap>1.5?clamp(uToneMap-1.5,0.,1.):clamp(uToneMap,0.,1.));
   color=mix(color,mapped,toneMix);
   float edge=distance(vUv,vec2(.5));

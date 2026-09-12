@@ -64,7 +64,7 @@ vec3 agxToneMap(vec3 color){
   val=clamp(log2(max(val,vec3(1e-10)))*0.0625+0.625,0.0,1.0);
   val=val*val*val*(val*(val*6.0-15.0)+10.0);
   val=agxMatInv*val;
-  return max(val,vec3(0.0));
+  return pow(max(val,vec3(0.0)),vec3(2.2));
 }
 
 vec3 linearToSrgb(vec3 color){
@@ -283,7 +283,7 @@ void main(){
     ?agxToneMap(color)
     :(uToneMap>1.5?acesToneMap(color):reinhardToneMap(color));
   float toneMix=uToneMap>3.0
-    ?clamp(uToneMap-3.0,0.,1.)
+    ?clamp((uToneMap-3.0)*2.0,0.,1.)
     :(uToneMap>1.5?clamp(uToneMap-1.5,0.,1.):clamp(uToneMap,0.,1.));
   color=mix(color,mapped,toneMix);
   float edge=distance(vUv,vec2(.5));
