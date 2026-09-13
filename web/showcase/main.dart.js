@@ -450,6 +450,9 @@
         return J.UnknownJavaScriptObject.prototype;
       return receiver;
     },
+    set$length$asx(receiver, value) {
+      return J.getInterceptor$asx(receiver).set$length(receiver, value);
+    },
     get$hashCode$(receiver) {
       return J.getInterceptor$(receiver).get$hashCode(receiver);
     },
@@ -1534,7 +1537,7 @@
       this._2 = t2;
     },
     ConstantMapView: function ConstantMapView(t0, t1) {
-      this._map = t0;
+      this._collection$_map = t0;
       this.$ti = t1;
     },
     ConstantMap: function ConstantMap() {
@@ -1615,7 +1618,7 @@
     JsLinkedHashMap: function JsLinkedHashMap(t0) {
       var _ = this;
       _.__js_helper$_length = 0;
-      _._last = _._first = _.__js_helper$_rest = _.__js_helper$_nums = _.__js_helper$_strings = null;
+      _._last = _._first = _.__js_helper$_rest = _._nums = _._strings = null;
       _._modifications = 0;
       _.$ti = t0;
     },
@@ -1626,36 +1629,36 @@
       _._previous = _._next = null;
     },
     LinkedHashMapKeysIterable: function LinkedHashMapKeysIterable(t0, t1) {
-      this.__js_helper$_map = t0;
+      this._map = t0;
       this.$ti = t1;
     },
     LinkedHashMapKeyIterator: function LinkedHashMapKeyIterator(t0, t1, t2, t3) {
       var _ = this;
-      _.__js_helper$_map = t0;
+      _._map = t0;
       _._modifications = t1;
       _._cell = t2;
       _.__js_helper$_current = null;
       _.$ti = t3;
     },
     LinkedHashMapValuesIterable: function LinkedHashMapValuesIterable(t0, t1) {
-      this.__js_helper$_map = t0;
+      this._map = t0;
       this.$ti = t1;
     },
     LinkedHashMapValueIterator: function LinkedHashMapValueIterator(t0, t1, t2, t3) {
       var _ = this;
-      _.__js_helper$_map = t0;
+      _._map = t0;
       _._modifications = t1;
       _._cell = t2;
       _.__js_helper$_current = null;
       _.$ti = t3;
     },
     LinkedHashMapEntriesIterable: function LinkedHashMapEntriesIterable(t0, t1) {
-      this.__js_helper$_map = t0;
+      this._map = t0;
       this.$ti = t1;
     },
     LinkedHashMapEntryIterator: function LinkedHashMapEntryIterator(t0, t1, t2, t3) {
       var _ = this;
-      _.__js_helper$_map = t0;
+      _._map = t0;
       _._modifications = t1;
       _._cell = t2;
       _.__js_helper$_current = null;
@@ -3781,17 +3784,17 @@
     _IdentityHashMap: function _IdentityHashMap(t0) {
       var _ = this;
       _._collection$_length = 0;
-      _._keys = _._collection$_rest = _._nums = _._strings = null;
+      _._collection$_keys = _._collection$_rest = _._collection$_nums = _._collection$_strings = null;
       _.$ti = t0;
     },
     _HashMapKeyIterable: function _HashMapKeyIterable(t0, t1) {
-      this._map = t0;
+      this._collection$_map = t0;
       this.$ti = t1;
     },
     _HashMapKeyIterator: function _HashMapKeyIterator(t0, t1, t2) {
       var _ = this;
-      _._map = t0;
-      _._keys = t1;
+      _._collection$_map = t0;
+      _._collection$_keys = t1;
       _._offset = 0;
       _._collection$_current = null;
       _.$ti = t2;
@@ -3799,7 +3802,7 @@
     _LinkedHashSet: function _LinkedHashSet(t0) {
       var _ = this;
       _._collection$_length = 0;
-      _._collection$_last = _._collection$_first = _._collection$_rest = _._nums = _._strings = null;
+      _._collection$_last = _._collection$_first = _._collection$_rest = _._collection$_nums = _._collection$_strings = null;
       _._collection$_modifications = 0;
       _.$ti = t0;
     },
@@ -4145,6 +4148,9 @@
       object6 = J.get$hashCode$(object6);
       object6 = A.SystemHash_finish(A.SystemHash_combine(A.SystemHash_combine(A.SystemHash_combine(A.SystemHash_combine(A.SystemHash_combine(A.SystemHash_combine($.$get$_hashSeed(), t1), object2), object3), object4), object5), object6));
       return object6;
+    },
+    Set_Set$unmodifiable(elements, $E) {
+      return new A.UnmodifiableSetView(A.LinkedHashSet_LinkedHashSet$of(elements, $E), $E._eval$1("UnmodifiableSetView<0>"));
     },
     DateTime: function DateTime(t0, t1, t2) {
       this._value = t0;
@@ -4641,14 +4647,16 @@
     },
     selectSpotLights_closure: function selectSpotLights_closure() {
     },
-    MaterialDefinition$(albedoTexture, alphaMode, clearcoatRoughness, clearcoatStrength, emissiveStrength, key, metallic, normalStrength, normalTexture, ormTexture, roughness, tintB, tintG, tintR, uvScaleU, uvScaleV) {
-      return new A.MaterialDefinition(key, albedoTexture, tintR, tintG, tintB, emissiveStrength, normalTexture, normalStrength, ormTexture, roughness, metallic, clearcoatStrength, clearcoatRoughness, uvScaleU, uvScaleV, alphaMode);
+    MaterialDefinition$(affineSampling, albedoColorSpace, albedoTexture, alphaCutoff, alphaMode, clearcoatRoughness, clearcoatStrength, doubleSided, emissiveStrength, emissiveTexture, key, lightmapIntensity, lightmapTexture, metallic, normalColorSpace, normalStrength, normalTexture, occlusionStrength, ormColorSpace, ormTexture, quantized, receivesShadow, roughness, tintB, tintG, tintR, uvOffsetU, uvOffsetV, uvScaleU, uvScaleV) {
+      return new A.MaterialDefinition(key, albedoTexture, albedoColorSpace, tintR, tintG, tintB, emissiveTexture, emissiveStrength, normalTexture, normalColorSpace, normalStrength, ormTexture, ormColorSpace, roughness, metallic, occlusionStrength, clearcoatStrength, clearcoatRoughness, lightmapTexture, lightmapIntensity, uvScaleU, uvScaleV, uvOffsetU, uvOffsetV, alphaMode, alphaCutoff, false, true, false, false);
     },
     MaterialDefinition_MaterialDefinition$plastic(color, key, roughness) {
-      return A.MaterialDefinition$(null, B.AlphaMode_0, 0.2, 0.3, 0, key, 0, 1, null, null, roughness, color.b, color.g, color.r, 1, 1);
+      var _null = null;
+      return A.MaterialDefinition$(false, B.MaterialMapColorSpace_0, _null, 0.5, B.AlphaMode_0, 0.2, 0.3, false, 0, _null, key, 0, _null, 0, B.MaterialMapColorSpace_1, 1, _null, 1, B.MaterialMapColorSpace_1, _null, false, true, roughness, color.b, color.g, color.r, 0, 0, 1, 1);
     },
     MaterialDefinition_MaterialDefinition$ceramic(clearcoat, color, key, roughness) {
-      return A.MaterialDefinition$(null, B.AlphaMode_0, 0.08, clearcoat, 0, key, 0, 1, null, null, roughness, color.b, color.g, color.r, 1, 1);
+      var _null = null;
+      return A.MaterialDefinition$(false, B.MaterialMapColorSpace_0, _null, 0.5, B.AlphaMode_0, 0.08, clearcoat, false, 0, _null, key, 0, _null, 0, B.MaterialMapColorSpace_1, 1, _null, 1, B.MaterialMapColorSpace_1, _null, false, true, roughness, color.b, color.g, color.r, 0, 0, 1, 1);
     },
     MaterialDefinition__validateUnit($name, value) {
       if (!isFinite(value) || value < 0 || value > 1)
@@ -4662,24 +4670,38 @@
       this.index = t0;
       this._name = t1;
     },
-    MaterialDefinition: function MaterialDefinition(t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15) {
+    MaterialDefinition: function MaterialDefinition(t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19, t20, t21, t22, t23, t24, t25, t26, t27, t28, t29) {
       var _ = this;
       _.key = t0;
       _.albedoTexture = t1;
-      _.tintR = t2;
-      _.tintG = t3;
-      _.tintB = t4;
-      _.emissiveStrength = t5;
-      _.normalTexture = t6;
-      _.normalStrength = t7;
-      _.ormTexture = t8;
-      _.roughness = t9;
-      _.metallic = t10;
-      _.clearcoatStrength = t11;
-      _.clearcoatRoughness = t12;
-      _.uvScaleU = t13;
-      _.uvScaleV = t14;
-      _.alphaMode = t15;
+      _.albedoColorSpace = t2;
+      _.tintR = t3;
+      _.tintG = t4;
+      _.tintB = t5;
+      _.emissiveTexture = t6;
+      _.emissiveStrength = t7;
+      _.normalTexture = t8;
+      _.normalColorSpace = t9;
+      _.normalStrength = t10;
+      _.ormTexture = t11;
+      _.ormColorSpace = t12;
+      _.roughness = t13;
+      _.metallic = t14;
+      _.occlusionStrength = t15;
+      _.clearcoatStrength = t16;
+      _.clearcoatRoughness = t17;
+      _.lightmapTexture = t18;
+      _.lightmapIntensity = t19;
+      _.uvScaleU = t20;
+      _.uvScaleV = t21;
+      _.uvOffsetU = t22;
+      _.uvOffsetV = t23;
+      _.alphaMode = t24;
+      _.alphaCutoff = t25;
+      _.doubleSided = t26;
+      _.receivesShadow = t27;
+      _.affineSampling = t28;
+      _.quantized = t29;
     },
     MeshData__indexValues(data) {
       $label0$0: {
@@ -4747,7 +4769,7 @@
       hasHistory = t2.contains$1(0, "vhs");
       if (hasHistory)
         resources.add$1(0, "vhsOutput");
-      return new A.OwnedResourcePlan(new A.UnmodifiableSetView(A.LinkedHashSet_LinkedHashSet$of(resources, t1), type$.UnmodifiableSetView_String), hasHistory);
+      return new A.OwnedResourcePlan(A.Set_Set$unmodifiable(resources, t1), hasHistory);
     },
     OwnedResourcePlan: function OwnedResourcePlan(t0, t1) {
       this.resources = t0;
@@ -4837,7 +4859,7 @@
       return new A.MaterialStore(new A.ResourceRegistry(new A.MaterialStore__registry_closure(), A._setArrayType([], type$.JSArray__Slot_MaterialDefinition), A._setArrayType([], type$.JSArray_int), type$.ResourceRegistry_MaterialHandle_MaterialDefinition));
     },
     MaterialStore: function MaterialStore(t0) {
-      this._material_store$_registry = t0;
+      this._registry = t0;
     },
     MaterialStore__registry_closure: function MaterialStore__registry_closure() {
     },
@@ -4929,7 +4951,7 @@
     TextureStore: function TextureStore(t0, t1, t2) {
       var _ = this;
       _._device = t0;
-      _._registry = t1;
+      _._texture_store$_registry = t1;
       _._texturesBySlot = t2;
       _.__TextureStore__fallbackLightmap_A = _.__TextureStore__fallbackEmissive_A = _.__TextureStore__fallbackOrm_A = _.__TextureStore__fallbackNormal_A = _.__TextureStore__fallbackAlbedo_A = $;
     },
@@ -5320,7 +5342,7 @@
         t7 = configuration.sampleCount;
       if (t3.installedFeatures.contains$1(0, "shadows")) {
         t8 = _this._resources;
-        t9 = t8._materials;
+        t9 = t8._scene_renderer_impl$_materials;
         t8 = t8._textures;
         featureGraph = A.buildShadowGraph(programs, t4, B.ColorEncoding_1, t3, t8.get$resolveAlbedo(), new A._extension_0__assembleSafeGraph_closure(t2), new A._extension_0__assembleSafeGraph_closure0(t2), new A._extension_0__assembleSafeGraph_closure1(_this), new A._extension_0__assembleSafeGraph_closure2(_this), new A._extension_0__assembleSafeGraph_closure3(_this), new A._extension_0__assembleSafeGraph_closure4(t2), new A._extension_0__assembleSafeGraph_closure5(t2), t8.get$resolveEmissive(), new A._extension_0__assembleSafeGraph_closure6(_this), t8.get$resolveLightmap(), t9.get$resolveForPass(), t1, t8.get$resolveNormal(), t8.get$resolveOrm(), new A._extension_0__assembleSafeGraph_closure7(t2, configuration), new A._extension_0__assembleSafeGraph_closure8(t2), new A._extension_0__assembleSafeGraph_closure9(t2), new A._extension_0__assembleSafeGraph_closure10(t2), new A._extension_0__assembleSafeGraph_closure11(t2), new A._extension_0__assembleSafeGraph_closure12(_this), new A._extension_0__assembleSafeGraph_closure13(t2), t7, t6, t5, 512);
       } else {
@@ -5461,7 +5483,7 @@
     ResourceLibraryImpl: function ResourceLibraryImpl(t0, t1, t2, t3, t4, t5) {
       var _ = this;
       _._meshes = t0;
-      _._materials = t1;
+      _._scene_renderer_impl$_materials = t1;
       _._textures = t2;
       _._meshHandles = t3;
       _._materialHandles = t4;
@@ -6823,6 +6845,79 @@
       }
       return buffer;
     },
+    ProceduralTextures_particleAtlas(height, width) {
+      var t1, buffer, halfW, halfH, rByte, gByte, bByte, t2, t3, offset, y, row, cy, t4, t5, t6, t7, t8, t9, t10, t11, x, col, cx, t12, t13, r, alpha, f, ringDist, ringNorm, d0, d1, d2, d3, a0, a1, a2, a3;
+      if (width <= 0 || height <= 0 || B.JSInt_methods.$mod(width, 2) !== 0 || B.JSInt_methods.$mod(height, 2) !== 0)
+        throw A.wrapException(A.ArgumentError$("particleAtlas dimensions must be positive even integers", null));
+      t1 = width * height * 4;
+      buffer = new Uint8Array(t1);
+      halfW = width / 2 | 0;
+      halfH = height / 2 | 0;
+      rByte = B.JSNumber_methods.round$0(B.JSInt_methods.clamp$2(1, 0, 1) * 255);
+      gByte = B.JSNumber_methods.round$0(B.JSInt_methods.clamp$2(1, 0, 1) * 255);
+      bByte = B.JSNumber_methods.round$0(B.JSInt_methods.clamp$2(1, 0, 1) * 255);
+      for (t2 = halfW - 1, t3 = halfH - 1, offset = 0, y = 0; y < height; ++y) {
+        row = B.JSInt_methods.$tdiv(y, halfH);
+        cy = (B.JSInt_methods.$mod(y, halfH) / t3 - 0.5) * 2;
+        for (t4 = row === 1, t5 = row === 0, t6 = cy * cy, t7 = cy - 0.18, t7 *= t7, t8 = cy - 0.12, t8 *= t8, t9 = cy + 0.25, t9 *= t9, t10 = -Math.abs(cy), t11 = t10 * 1.5, t10 *= 6, x = 0; x < width; ++x) {
+          col = B.JSInt_methods.$tdiv(x, halfW);
+          cx = (B.JSInt_methods.$mod(x, halfW) / t2 - 0.5) * 2;
+          t12 = cx * cx;
+          t13 = t12 + t6;
+          r = Math.sqrt(t13);
+          alpha = 0;
+          if (t5 && col === 0) {
+            if (r < 1) {
+              f = 1 - r * r;
+              alpha = B.JSNumber_methods.clamp$2(f * f, 0, 1);
+            }
+          } else if (t5 && col === 1) {
+            if (r < 1) {
+              t12 = -Math.abs(cx);
+              alpha = B.JSNumber_methods.clamp$2((Math.exp(t12 * 6) * Math.exp(t11) + Math.exp(t10) * Math.exp(t12 * 1.5) + Math.exp(-r * 4) * 0.8) * (1 - r), 0, 1);
+            }
+          } else if (t4 && col === 0) {
+            if (r < 1) {
+              ringDist = Math.abs(r - 0.55);
+              if (ringDist < 0.35) {
+                ringNorm = 1 - ringDist / 0.35;
+                alpha = B.JSNumber_methods.clamp$2(ringNorm * ringNorm, 0, 1);
+              }
+            }
+          } else if (r < 1) {
+            d0 = Math.sqrt(t13) / 0.65;
+            t13 = cx - 0.22;
+            d1 = Math.sqrt(t13 * t13 + t7) / 0.5;
+            t13 = cx + 0.25;
+            d2 = Math.sqrt(t13 * t13 + t8) / 0.45;
+            d3 = Math.sqrt(t12 + t9) / 0.48;
+            a0 = d0 < 1 ? Math.pow(1 - d0 * d0, 2) : 0;
+            a1 = d1 < 1 ? Math.pow(1 - d1 * d1, 2) : 0;
+            a2 = d2 < 1 ? Math.pow(1 - d2 * d2, 2) : 0;
+            a3 = d3 < 1 ? Math.pow(1 - d3 * d3, 2) : 0;
+            alpha = B.JSNumber_methods.clamp$2((a0 * 0.7 + a1 * 0.6 + a2 * 0.55 + a3 * 0.5) * (1 - r), 0, 1);
+          }
+          if (!(offset >= 0 && offset < t1))
+            return A.ioore(buffer, offset);
+          buffer[offset] = rByte;
+          t12 = offset + 1;
+          if (!(t12 < t1))
+            return A.ioore(buffer, t12);
+          buffer[t12] = gByte;
+          t12 = offset + 2;
+          if (!(t12 < t1))
+            return A.ioore(buffer, t12);
+          buffer[t12] = bByte;
+          t12 = offset + 3;
+          t13 = B.JSNumber_methods.round$0(alpha * 255);
+          if (!(t12 < t1))
+            return A.ioore(buffer, t12);
+          buffer[t12] = t13;
+          offset += 4;
+        }
+      }
+      return buffer;
+    },
     ProceduralTextures__sample2d(x, y) {
       var ix = B.JSNumber_methods.floor$0(x),
         iy = B.JSNumber_methods.floor$0(y),
@@ -7156,28 +7251,32 @@
       t1.validate$0();
       return t1;
     },
-    ParticleEmitter$(acceleration, alignment, blendMode, bursts, collisionPlane, colorGradient, dragCoefficient, drawMode, fadeInFraction, fadeOutFraction, gravity, material, materialRamp, maxAngularVelocity, maxEndSize, maxInitialRotation, maxLifetime, maxParticles, maxSpeed, maxStartSize, mesh, minAngularVelocity, minEndSize, minInitialRotation, minLifetime, minSpeed, minStartSize, noiseFrequency, noiseSpeed, noiseStrength, orbitalAcceleration, orbitalAxis, radialAcceleration, rate, seed, shape, sizeCurve, stretchFactor, subEmitters, transform) {
-      var t2, t3, t4, t5, t6, t7, t8, _list, __wc0_formal,
+    SubEmitter$(count, emitter, inheritVelocity, inheritVelocityFactor, trailDistance, trailInterval, trigger) {
+      return new A.SubEmitter(emitter, trigger, count, inheritVelocity, inheritVelocityFactor, trailInterval, trailDistance);
+    },
+    ParticleEmitter$(acceleration, alignment, blendMode, bursts, collisionPlane, colorGradient, dragCoefficient, drawMode, fadeInFraction, fadeOutFraction, gravity, material, materialRamp, maxAngularVelocity, maxEndSize, maxInitialRotation, maxLifetime, maxParticles, maxSpeed, maxStartSize, mesh, minAngularVelocity, minEndSize, minInitialRotation, minLifetime, minSpeed, minStartSize, noiseFrequency, noiseSpeed, noiseStrength, orbitalAcceleration, orbitalAxis, radialAcceleration, rate, seed, shape, sizeCurve, spritePlaybackMode, spriteSheet, stretchFactor, subEmitters, transform) {
+      var t2, t3, t4, t5, t6, t7, t8, t9, _list, __wc0_formal,
         t1 = $.ParticleEmitter__nextFamilyKey;
       $.ParticleEmitter__nextFamilyKey = t1 + 1;
-      t2 = maxStartSize == null ? minStartSize : maxStartSize;
-      t3 = maxEndSize == null ? minEndSize : maxEndSize;
-      t4 = bursts == null;
-      t5 = t4 ? B.List_empty : A.List_List$unmodifiable(bursts, type$.ParticleBurst);
-      t6 = subEmitters == null ? B.List_empty0 : A.List_List$unmodifiable(subEmitters, type$.SubEmitter);
-      t7 = A._setArrayType([], type$.JSArray_ParticleAttractor);
-      t4 = t4 ? A._setArrayType([], type$.JSArray_int) : A.List_List$filled(1, 0, false, type$.int);
+      t2 = shape == null ? B.PointShape_null_0 : shape;
+      t3 = maxStartSize == null ? minStartSize : maxStartSize;
+      t4 = maxEndSize == null ? minEndSize : maxEndSize;
+      t5 = bursts == null;
+      t6 = t5 ? B.List_empty : A.List_List$unmodifiable(bursts, type$.ParticleBurst);
+      t7 = subEmitters == null ? B.List_empty0 : A.List_List$unmodifiable(subEmitters, type$.SubEmitter);
+      t8 = A._setArrayType([], type$.JSArray_ParticleAttractor);
+      t5 = t5 ? A._setArrayType([], type$.JSArray_int) : A.List_List$filled(1, 0, false, type$.int);
       if (seed != null) {
-        t8 = new A._Random();
-        t8._Random$1(seed);
+        t9 = new A._Random();
+        t9._Random$1(seed);
       } else
-        t8 = B.C__JSRandom;
+        t9 = B.C__JSRandom;
       if (maxParticles > 4294967295)
         A.throwExpression(A.RangeError$range(maxParticles, 0, 4294967295, "length", null));
       _list = J.JSArray_JSArray$markFixed(new Array(maxParticles), type$._ParticleState);
       for (__wc0_formal = 0; __wc0_formal < maxParticles; ++__wc0_formal)
         _list[__wc0_formal] = new A._ParticleState();
-      t1 = new A.ParticleEmitter(mesh, material, materialRamp, drawMode, blendMode, t1, shape, transform, alignment, stretchFactor, rate, t5, minLifetime, maxLifetime, minSpeed, maxSpeed, minStartSize, t2, minEndSize, t3, sizeCurve, fadeInFraction, fadeOutFraction, colorGradient, minInitialRotation, maxInitialRotation, minAngularVelocity, maxAngularVelocity, gravity, acceleration, dragCoefficient, radialAcceleration, orbitalAcceleration, orbitalAxis, noiseStrength, noiseFrequency, noiseSpeed, t7, collisionPlane, t6, maxParticles, t8, _list, t4);
+      t1 = new A.ParticleEmitter(mesh, material, materialRamp, drawMode, blendMode, t1, spriteSheet, spritePlaybackMode, t2, transform, alignment, stretchFactor, rate, t6, minLifetime, maxLifetime, minSpeed, maxSpeed, minStartSize, t3, minEndSize, t4, sizeCurve, fadeInFraction, fadeOutFraction, colorGradient, minInitialRotation, maxInitialRotation, minAngularVelocity, maxAngularVelocity, gravity, acceleration, dragCoefficient, radialAcceleration, orbitalAcceleration, orbitalAxis, noiseStrength, noiseFrequency, noiseSpeed, t8, collisionPlane, t7, maxParticles, t9, _list, t5);
       t1.validate$0();
       return t1;
     },
@@ -7232,10 +7331,12 @@
       _.endSize = _.startSize = _.size = _.lifetime = 1;
       _.angularVelocity = _.rotation = 0;
       _.mass = 1;
-      _.trailTimer = _.materialIndex = 0;
+      _.animSequenceIndex = _.spriteTimer = _.spriteIndex = _.materialIndex = 0;
+      _.isSpriteAnimated = false;
+      _.trailTimer = 0;
       _.isAlive = false;
     },
-    ParticleEmitter: function ParticleEmitter(t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19, t20, t21, t22, t23, t24, t25, t26, t27, t28, t29, t30, t31, t32, t33, t34, t35, t36, t37, t38, t39, t40, t41, t42, t43) {
+    ParticleEmitter: function ParticleEmitter(t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19, t20, t21, t22, t23, t24, t25, t26, t27, t28, t29, t30, t31, t32, t33, t34, t35, t36, t37, t38, t39, t40, t41, t42, t43, t44, t45) {
       var _ = this;
       _.mesh = t0;
       _.material = t1;
@@ -7243,46 +7344,48 @@
       _.drawMode = t3;
       _.blendMode = t4;
       _.instanceFamilyKey = t5;
-      _.shape = t6;
-      _.transform = t7;
-      _.alignment = t8;
-      _.stretchFactor = t9;
-      _.rate = t10;
-      _.bursts = t11;
+      _.spriteSheet = t6;
+      _.spritePlaybackMode = t7;
+      _.shape = t8;
+      _.transform = t9;
+      _.alignment = t10;
+      _.stretchFactor = t11;
+      _.rate = t12;
+      _.bursts = t13;
       _.isEmitting = true;
-      _.minLifetime = t12;
-      _.maxLifetime = t13;
-      _.minSpeed = t14;
-      _.maxSpeed = t15;
-      _.minStartSize = t16;
-      _.maxStartSize = t17;
-      _.minEndSize = t18;
-      _.maxEndSize = t19;
-      _.sizeCurve = t20;
-      _.fadeInFraction = t21;
-      _.fadeOutFraction = t22;
-      _.colorGradient = t23;
-      _.minInitialRotation = t24;
-      _.maxInitialRotation = t25;
-      _.minAngularVelocity = t26;
-      _.maxAngularVelocity = t27;
-      _.gravity = t28;
-      _.acceleration = t29;
-      _.dragCoefficient = t30;
-      _.radialAcceleration = t31;
-      _.orbitalAcceleration = t32;
-      _.orbitalAxis = t33;
-      _.noiseStrength = t34;
-      _.noiseFrequency = t35;
-      _.noiseSpeed = t36;
-      _.attractors = t37;
-      _.collisionPlane = t38;
-      _.subEmitters = t39;
-      _.maxParticles = t40;
-      _._random = t41;
-      _._pool = t42;
+      _.minLifetime = t14;
+      _.maxLifetime = t15;
+      _.minSpeed = t16;
+      _.maxSpeed = t17;
+      _.minStartSize = t18;
+      _.maxStartSize = t19;
+      _.minEndSize = t20;
+      _.maxEndSize = t21;
+      _.sizeCurve = t22;
+      _.fadeInFraction = t23;
+      _.fadeOutFraction = t24;
+      _.colorGradient = t25;
+      _.minInitialRotation = t26;
+      _.maxInitialRotation = t27;
+      _.minAngularVelocity = t28;
+      _.maxAngularVelocity = t29;
+      _.gravity = t30;
+      _.acceleration = t31;
+      _.dragCoefficient = t32;
+      _.radialAcceleration = t33;
+      _.orbitalAcceleration = t34;
+      _.orbitalAxis = t35;
+      _.noiseStrength = t36;
+      _.noiseFrequency = t37;
+      _.noiseSpeed = t38;
+      _.attractors = t39;
+      _.collisionPlane = t40;
+      _.subEmitters = t41;
+      _.maxParticles = t42;
+      _._random = t43;
+      _._pool = t44;
       _._totalDied = _._totalSpawned = _._spawnDebt = _._elapsedTime = _._activeCount = 0;
-      _._burstTriggerCounts = t43;
+      _._burstTriggerCounts = t45;
     },
     _randomUnitSphere(random) {
       var z = 2 * random.nextDouble$0() - 1,
@@ -7342,6 +7445,80 @@
       _.normal = t2;
       _.mode = t3;
       _.directionMode = t4;
+    },
+    ParticleSpriteSheet_ParticleSpriteSheet$uniformGrid(animations, columns, frameNames, rows, texture) {
+      var total, colW, rowH, sprites, i, uMin, uMax, vMax, vMin, $name, t1, t2, t3, t4;
+      if (columns <= 0 || rows <= 0)
+        throw A.wrapException(A.ArgumentError$("columns and rows must be > 0", null));
+      total = columns * rows;
+      if (total <= 0 || total > total)
+        throw A.wrapException(A.ArgumentError$("frameCount must be in 1.." + total, null));
+      colW = 1 / columns;
+      rowH = 1 / rows;
+      sprites = A._setArrayType([], type$.JSArray_ParticleSprite);
+      for (i = 0; i < total; ++i) {
+        uMin = B.JSInt_methods.$mod(i, columns) * colW;
+        uMax = uMin + colW;
+        vMax = 1 - B.JSInt_methods.$tdiv(i, columns) * rowH;
+        vMin = vMax - rowH;
+        if (i < 4) {
+          if (!(i < 4))
+            return A.ioore(frameNames, i);
+          $name = frameNames[i];
+        } else
+          $name = "frame_" + i;
+        t1 = 1;
+        t1 = new A.ParticleSprite($name, i, uMin, vMin, uMax, vMax, uMax - uMin, vMax - vMin, uMin, vMin, t1, 1, B.Set_empty);
+        t1.validate$0();
+        B.JSArray_methods.add$1(sprites, t1);
+      }
+      t1 = type$.String;
+      t2 = A._setArrayType([], type$.JSArray_MaterialHandle);
+      t3 = A.List_List$unmodifiable(sprites, type$.ParticleSprite);
+      t4 = A.ConstantMap_ConstantMap$from(animations, t1, type$.SpriteAnimation);
+      t1 = new A.ParticleSpriteSheet(texture, t3, t4, A.LinkedHashMap_LinkedHashMap$_empty(t1, type$.int), A.LinkedHashMap_LinkedHashMap$_empty(t1, type$.List_int), t2);
+      t1._indexData$0();
+      t1.validate$0();
+      return t1;
+    },
+    ParticleSpritePlaybackMode: function ParticleSpritePlaybackMode(t0, t1) {
+      this.index = t0;
+      this._name = t1;
+    },
+    ParticleSprite: function ParticleSprite(t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12) {
+      var _ = this;
+      _.name = t0;
+      _.index = t1;
+      _.uMin = t2;
+      _.vMin = t3;
+      _.uMax = t4;
+      _.vMax = t5;
+      _.uvScaleU = t6;
+      _.uvScaleV = t7;
+      _.uvOffsetU = t8;
+      _.uvOffsetV = t9;
+      _.aspectRatio = t10;
+      _.weight = t11;
+      _.tags = t12;
+    },
+    SpriteAnimation: function SpriteAnimation(t0, t1, t2, t3) {
+      var _ = this;
+      _.name = t0;
+      _.frameIndices = t1;
+      _.frameRate = t2;
+      _.isLooping = t3;
+    },
+    ParticleSpriteSheet: function ParticleSpriteSheet(t0, t1, t2, t3, t4, t5) {
+      var _ = this;
+      _.texture = t0;
+      _.sprites = t1;
+      _.animations = t2;
+      _._nameToIndex = t3;
+      _._tagToIndices = t4;
+      _._materials = t5;
+      _._cumulativeWeights = null;
+    },
+    ParticleSpriteSheet__indexData_closure: function ParticleSpriteSheet__indexData_closure() {
     },
     _BloomBlurAxis: function _BloomBlurAxis(t0, t1) {
       this.index = t0;
@@ -8988,7 +9165,7 @@
     main$body() {
       var $async$goto = 0,
         $async$completer = A._makeAsyncAwaitCompleter(type$.void),
-        $async$returnValue, app, orbit, t3, toneSelect, postPresetSelect, turntableToggle, turntableGroup, satelliteNodes, cameraSelect, shakeBtn, tabButtons, switchTopic, i, btn, topic, solarSlider, solarLabel, solarPhaseBadge, solarPlayPauseBtn, solarSpeedSelect, updateSolarDisplay, applySolarTime, dofSlider, dofLabel, bloomSlider, bloomLabel, ssaoSlider, ssaoLabel, groundData, t4, groundMesh, sphereData, sphereMesh, torusData, torusMesh, capsuleData, cylinderData, coneData, cubeData, icosphereData, octahedronData, dodecahedronData, roundedBoxData, satelliteDatas, satelliteMeshes, groundAlbedoTex, gridHeights, y, t5, t6, x, isLine, t7, t8, groundNormalTex, brushedOrmTex, carbonOrmTex, hexAlbedoTex, voronoiAlbedoTex, marbleAlbedoTex, damascusOrmTex, groundMat, t9, t10, t11, t12, t13, t14, t15, t16, t17, heroMaterials, chromeTorusMat, satelliteMaterials, centerNode, matSelect, torusNode, orbitRing, angle, asteroidData, asteroidMesh, asteroidMat, asteroidTransforms, rng, dist, rot, asteroidBelt, railSpline, railPoints, conduitData, conduitMesh, buoyData, buoyMesh, buoyNode, terrainGen, terrainData, terrainMesh, terrainNode, waterSurface, waterMesh, waterNode, vesselHullData, vesselMesh, vesselNode, terrainToggle, b, particleQuadMesh, particleCubeMesh, particleSoftTex, particleSparkTex, emberMat, dustMat, snowMat, emberField, dustField, snowField, particleSelect, vfxFireMat, vfxSparkMat, vfxRocketMat, vfxWaterMat, vfxSplashMat, vfxVortexMat, vfxConfettiMat, vfxSelect, fogSelect, asteroidToggle, _box_0, t1, canvas, t2;
+        $async$returnValue, app, orbit, t3, toneSelect, postPresetSelect, turntableToggle, turntableGroup, satelliteNodes, cameraSelect, shakeBtn, tabButtons, switchTopic, i, btn, topic, solarSlider, solarLabel, solarPhaseBadge, solarPlayPauseBtn, solarSpeedSelect, updateSolarDisplay, applySolarTime, dofSlider, dofLabel, bloomSlider, bloomLabel, ssaoSlider, ssaoLabel, groundData, t4, groundMesh, sphereData, sphereMesh, torusData, torusMesh, capsuleData, cylinderData, coneData, cubeData, icosphereData, octahedronData, dodecahedronData, roundedBoxData, satelliteDatas, satelliteMeshes, groundAlbedoTex, gridHeights, y, t5, t6, x, isLine, t7, t8, groundNormalTex, brushedOrmTex, carbonOrmTex, hexAlbedoTex, voronoiAlbedoTex, marbleAlbedoTex, damascusOrmTex, groundMat, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, heroMaterials, chromeTorusMat, satelliteMaterials, centerNode, matSelect, torusNode, orbitRing, angle, asteroidData, asteroidMesh, asteroidMat, asteroidTransforms, rng, dist, rot, asteroidBelt, railSpline, railPoints, conduitData, conduitMesh, buoyData, buoyMesh, buoyNode, terrainGen, terrainData, terrainMesh, terrainNode, waterSurface, waterMesh, waterNode, vesselHullData, vesselMesh, vesselNode, terrainToggle, b, particleQuadMesh, particleCubeMesh, particleSoftTex, particleSparkTex, emberMat, dustMat, snowMat, emberField, dustField, snowField, particleSelect, vfxFireMat, vfxSparkMat, vfxRocketMat, vfxWaterMat, vfxSplashMat, vfxVortexMat, vfxConfettiMat, atlasTex, vfxSpriteSheet, vfxSpritesheetEmitter, vfxSelect, emitStarBtn, emitRingBtn, emitSmokeBtn, emitOrbBtn, emitAnimBtn, fogSelect, asteroidToggle, _box_0, t1, canvas, t2;
       var $async$main = A._wrapJsFunctionForAsync(function($async$errorCode, $async$result) {
         if ($async$errorCode === 1)
           return A._asyncRethrow($async$result, $async$completer);
@@ -9132,35 +9309,36 @@
                 voronoiAlbedoTex = app.createProceduralTexture$4$debugLabel$height$width(A.ProceduralTextures_voronoi(B.LinearColor_THW, 6, B.LinearColor_CFb, 256, 256), "voronoi_cell_albedo", 256, 256);
                 marbleAlbedoTex = app.createProceduralTexture$4$debugLabel$height$width(A.ProceduralTextures_marble(B.LinearColor_Pyq, 256, 3.5, 4.5, B.LinearColor_Qnn, 256), "marble_albedo", 256, 256);
                 damascusOrmTex = app.createProceduralTexture$4$debugLabel$height$width(A.ProceduralTextures_damascusSteelOrm(0.18, 4, 256, 18, 0.95, 256), "damascus_steel_orm", 256, 256);
-                t5 = A.MaterialDefinition$(groundAlbedoTex, B.AlphaMode_0, 0.2, 0, 0, "ground_pbr", 0.1, 1.5, groundNormalTex, null, 0.5, 1, 1, 1, 8, 8);
+                t5 = A.MaterialDefinition$(false, B.MaterialMapColorSpace_0, groundAlbedoTex, 0.5, B.AlphaMode_0, 0.2, 0, false, 0, null, "ground_pbr", 0, null, 0.1, B.MaterialMapColorSpace_1, 1.5, groundNormalTex, 1, B.MaterialMapColorSpace_1, null, false, true, 0.5, 1, 1, 1, 0, 0, 8, 8);
                 groundMat = t4.get$resources().registerMaterial$1(t5);
-                t5 = A.MaterialDefinition$(null, B.AlphaMode_0, 0.2, 0, 0, "hero_gold", 1, 1, null, null, 0.12, 0.35, 0.78, 1, 1, 1);
+                t5 = A.MaterialDefinition$(false, B.MaterialMapColorSpace_0, null, 0.5, B.AlphaMode_0, 0.2, 0, false, 0, null, "hero_gold", 0, null, 1, B.MaterialMapColorSpace_1, 1, null, 1, B.MaterialMapColorSpace_1, null, false, true, 0.12, 0.35, 0.78, 1, 0, 0, 1, 1);
                 t5 = t4.get$resources().registerMaterial$1(t5);
-                t6 = A.MaterialDefinition$(null, B.AlphaMode_0, 0.2, 0, 0, "hero_chrome", 0.98, 1, null, null, 0.05, 0.98, 0.95, 0.95, 1, 1);
+                t6 = A.MaterialDefinition$(false, B.MaterialMapColorSpace_0, null, 0.5, B.AlphaMode_0, 0.2, 0, false, 0, null, "hero_chrome", 0, null, 0.98, B.MaterialMapColorSpace_1, 1, null, 1, B.MaterialMapColorSpace_1, null, false, true, 0.05, 0.98, 0.95, 0.95, 0, 0, 1, 1);
                 t6 = t4.get$resources().registerMaterial$1(t6);
-                t7 = A.MaterialDefinition$(null, B.AlphaMode_0, 0.2, 0, 0, "hero_copper", 1, 1, null, null, 0.15, 0.54, 0.64, 0.95, 1, 1);
+                t7 = A.MaterialDefinition$(false, B.MaterialMapColorSpace_0, null, 0.5, B.AlphaMode_0, 0.2, 0, false, 0, null, "hero_copper", 0, null, 1, B.MaterialMapColorSpace_1, 1, null, 1, B.MaterialMapColorSpace_1, null, false, true, 0.15, 0.54, 0.64, 0.95, 0, 0, 1, 1);
                 t7 = t4.get$resources().registerMaterial$1(t7);
-                t8 = A.MaterialDefinition$(null, B.AlphaMode_0, 0.2, 0, 0, "hero_silver", 1, 1, null, null, 0.08, 0.91, 0.96, 0.97, 1, 1);
+                t8 = A.MaterialDefinition$(false, B.MaterialMapColorSpace_0, null, 0.5, B.AlphaMode_0, 0.2, 0, false, 0, null, "hero_silver", 0, null, 1, B.MaterialMapColorSpace_1, 1, null, 1, B.MaterialMapColorSpace_1, null, false, true, 0.08, 0.91, 0.96, 0.97, 0, 0, 1, 1);
                 t8 = t4.get$resources().registerMaterial$1(t8);
                 t9 = A.MaterialDefinition_MaterialDefinition$ceramic(0.9, B.LinearColor_JQi, "hero_ceramic", 0.18);
                 t9 = t4.get$resources().registerMaterial$1(t9);
                 t10 = A.MaterialDefinition_MaterialDefinition$plastic(B.LinearColor_U4Y, "hero_plastic", 0.22);
                 t10 = t4.get$resources().registerMaterial$1(t10);
-                t11 = A.MaterialDefinition$(null, B.AlphaMode_0, 0.2, 0, 0, "hero_iron", 0.85, 1, null, null, 0.28, 0.58, 0.57, 0.56, 1, 1);
+                t11 = A.MaterialDefinition$(false, B.MaterialMapColorSpace_0, null, 0.5, B.AlphaMode_0, 0.2, 0, false, 0, null, "hero_iron", 0, null, 0.85, B.MaterialMapColorSpace_1, 1, null, 1, B.MaterialMapColorSpace_1, null, false, true, 0.28, 0.58, 0.57, 0.56, 0, 0, 1, 1);
                 t11 = t4.get$resources().registerMaterial$1(t11);
-                t12 = A.MaterialDefinition$(null, B.AlphaMode_0, 0.2, 0, 0, "hero_brushed", 0.95, 1, null, brushedOrmTex, 0.22, 1, 0.95, 0.95, 1, 1);
+                t12 = A.MaterialDefinition$(false, B.MaterialMapColorSpace_0, null, 0.5, B.AlphaMode_0, 0.2, 0, false, 0, null, "hero_brushed", 0, null, 0.95, B.MaterialMapColorSpace_1, 1, null, 1, B.MaterialMapColorSpace_1, brushedOrmTex, false, true, 0.22, 1, 0.95, 0.95, 0, 0, 1, 1);
                 t12 = t4.get$resources().registerMaterial$1(t12);
-                t13 = A.MaterialDefinition$(null, B.AlphaMode_0, 0.2, 0, 0, "hero_carbon", 0.35, 1, null, carbonOrmTex, 0.25, 0.18, 0.15, 0.15, 1, 1);
+                t13 = A.MaterialDefinition$(false, B.MaterialMapColorSpace_0, null, 0.5, B.AlphaMode_0, 0.2, 0, false, 0, null, "hero_carbon", 0, null, 0.35, B.MaterialMapColorSpace_1, 1, null, 1, B.MaterialMapColorSpace_1, carbonOrmTex, false, true, 0.25, 0.18, 0.15, 0.15, 0, 0, 1, 1);
                 t13 = t4.get$resources().registerMaterial$1(t13);
-                t14 = A.MaterialDefinition$(null, B.AlphaMode_0, 0.2, 0.6, 0, "hero_damascus", 0.95, 1, null, damascusOrmTex, 0.18, 0.94, 0.9, 0.88, 1, 1);
+                t14 = A.MaterialDefinition$(false, B.MaterialMapColorSpace_0, null, 0.5, B.AlphaMode_0, 0.2, 0.6, false, 0, null, "hero_damascus", 0, null, 0.95, B.MaterialMapColorSpace_1, 1, null, 1, B.MaterialMapColorSpace_1, damascusOrmTex, false, true, 0.18, 0.94, 0.9, 0.88, 0, 0, 1, 1);
                 t14 = t4.get$resources().registerMaterial$1(t14);
-                t15 = A.MaterialDefinition$(marbleAlbedoTex, B.AlphaMode_0, 0.08, 0.85, 0, "hero_marble", 0.05, 1, null, null, 0.15, 1, 1, 1, 1, 1);
+                t15 = A.MaterialDefinition$(false, B.MaterialMapColorSpace_0, marbleAlbedoTex, 0.5, B.AlphaMode_0, 0.08, 0.85, false, 0, null, "hero_marble", 0, null, 0.05, B.MaterialMapColorSpace_1, 1, null, 1, B.MaterialMapColorSpace_1, null, false, true, 0.15, 1, 1, 1, 0, 0, 1, 1);
                 t15 = t4.get$resources().registerMaterial$1(t15);
-                t16 = A.MaterialDefinition$(hexAlbedoTex, B.AlphaMode_0, 0.2, 0.8, 0, "hero_hex", 0.7, 1, null, null, 0.15, 1, 1, 1, 1, 1);
+                t16 = A.MaterialDefinition$(false, B.MaterialMapColorSpace_0, hexAlbedoTex, 0.5, B.AlphaMode_0, 0.2, 0.8, false, 0, null, "hero_hex", 0, null, 0.7, B.MaterialMapColorSpace_1, 1, null, 1, B.MaterialMapColorSpace_1, null, false, true, 0.15, 1, 1, 1, 0, 0, 1, 1);
                 t16 = t4.get$resources().registerMaterial$1(t16);
-                t17 = A.MaterialDefinition$(voronoiAlbedoTex, B.AlphaMode_0, 0.2, 0.85, 0, "hero_voronoi", 0.1, 1, null, null, 0.3, 1, 1, 1, 1, 1);
-                heroMaterials = A.LinkedHashMap_LinkedHashMap$_literal(["gold", t5, "chrome", t6, "copper", t7, "silver", t8, "ceramic", t9, "plastic", t10, "iron", t11, "brushed", t12, "carbon", t13, "damascus", t14, "marble", t15, "hex", t16, "voronoi", t4.get$resources().registerMaterial$1(t17)], type$.String, type$.MaterialHandle);
-                t17 = A.MaterialDefinition$(null, B.AlphaMode_0, 0.2, 0, 0, "torus_chrome", 0.98, 1, null, null, 0.06, 0.98, 0.95, 0.95, 1, 1);
+                t17 = A.MaterialDefinition$(false, B.MaterialMapColorSpace_0, voronoiAlbedoTex, 0.5, B.AlphaMode_0, 0.2, 0.85, false, 0, null, "hero_voronoi", 0, null, 0.1, B.MaterialMapColorSpace_1, 1, null, 1, B.MaterialMapColorSpace_1, null, false, true, 0.3, 1, 1, 1, 0, 0, 1, 1);
+                t18 = type$.String;
+                heroMaterials = A.LinkedHashMap_LinkedHashMap$_literal(["gold", t5, "chrome", t6, "copper", t7, "silver", t8, "ceramic", t9, "plastic", t10, "iron", t11, "brushed", t12, "carbon", t13, "damascus", t14, "marble", t15, "hex", t16, "voronoi", t4.get$resources().registerMaterial$1(t17)], t18, type$.MaterialHandle);
+                t17 = A.MaterialDefinition$(false, B.MaterialMapColorSpace_0, null, 0.5, B.AlphaMode_0, 0.2, 0, false, 0, null, "torus_chrome", 0, null, 0.98, B.MaterialMapColorSpace_1, 1, null, 1, B.MaterialMapColorSpace_1, null, false, true, 0.06, 0.98, 0.95, 0.95, 0, 0, 1, 1);
                 chromeTorusMat = t4.get$resources().registerMaterial$1(t17);
                 t17 = A.MaterialDefinition_MaterialDefinition$plastic(B.LinearColor_vJc, "sat_emerald", 0.22);
                 t17 = t4.get$resources().registerMaterial$1(t17);
@@ -9168,15 +9346,15 @@
                 t16 = t4.get$resources().registerMaterial$1(t16);
                 t15 = A.MaterialDefinition_MaterialDefinition$plastic(B.LinearColor_WcI, "sat_sapphire", 0.2);
                 t15 = t4.get$resources().registerMaterial$1(t15);
-                t14 = A.MaterialDefinition$(null, B.AlphaMode_0, 0.2, 0, 0, "sat_copper", 1, 1, null, null, 0.2, 0.54, 0.64, 0.95, 1, 1);
+                t14 = A.MaterialDefinition$(false, B.MaterialMapColorSpace_0, null, 0.5, B.AlphaMode_0, 0.2, 0, false, 0, null, "sat_copper", 0, null, 1, B.MaterialMapColorSpace_1, 1, null, 1, B.MaterialMapColorSpace_1, null, false, true, 0.2, 0.54, 0.64, 0.95, 0, 0, 1, 1);
                 t14 = t4.get$resources().registerMaterial$1(t14);
-                t13 = A.MaterialDefinition$(null, B.AlphaMode_0, 0.2, 0, 0, "sat_gold", 1, 1, null, null, 0.14, 0.35, 0.78, 1, 1, 1);
+                t13 = A.MaterialDefinition$(false, B.MaterialMapColorSpace_0, null, 0.5, B.AlphaMode_0, 0.2, 0, false, 0, null, "sat_gold", 0, null, 1, B.MaterialMapColorSpace_1, 1, null, 1, B.MaterialMapColorSpace_1, null, false, true, 0.14, 0.35, 0.78, 1, 0, 0, 1, 1);
                 t13 = t4.get$resources().registerMaterial$1(t13);
-                t12 = A.MaterialDefinition$(null, B.AlphaMode_0, 0.2, 0, 0, "sat_chrome", 0.98, 1, null, null, 0.05, 0.98, 0.95, 0.95, 1, 1);
+                t12 = A.MaterialDefinition$(false, B.MaterialMapColorSpace_0, null, 0.5, B.AlphaMode_0, 0.2, 0, false, 0, null, "sat_chrome", 0, null, 0.98, B.MaterialMapColorSpace_1, 1, null, 1, B.MaterialMapColorSpace_1, null, false, true, 0.05, 0.98, 0.95, 0.95, 0, 0, 1, 1);
                 t12 = t4.get$resources().registerMaterial$1(t12);
-                t11 = A.MaterialDefinition$(marbleAlbedoTex, B.AlphaMode_0, 0.2, 0.8, 0, "sat_marble", 0.05, 1, null, null, 0.16, 1, 1, 1, 1, 1);
+                t11 = A.MaterialDefinition$(false, B.MaterialMapColorSpace_0, marbleAlbedoTex, 0.5, B.AlphaMode_0, 0.2, 0.8, false, 0, null, "sat_marble", 0, null, 0.05, B.MaterialMapColorSpace_1, 1, null, 1, B.MaterialMapColorSpace_1, null, false, true, 0.16, 1, 1, 1, 0, 0, 1, 1);
                 t11 = t4.get$resources().registerMaterial$1(t11);
-                t10 = A.MaterialDefinition$(null, B.AlphaMode_0, 0.2, 0, 0, "sat_damascus", 0.95, 1, null, damascusOrmTex, 0.2, 0.96, 0.92, 0.9, 1, 1);
+                t10 = A.MaterialDefinition$(false, B.MaterialMapColorSpace_0, null, 0.5, B.AlphaMode_0, 0.2, 0, false, 0, null, "sat_damascus", 0, null, 0.95, B.MaterialMapColorSpace_1, 1, null, 1, B.MaterialMapColorSpace_1, damascusOrmTex, false, true, 0.2, 0.96, 0.92, 0.9, 0, 0, 1, 1);
                 satelliteMaterials = [t17, t16, t15, t14, t13, t12, t11, t4.get$resources().registerMaterial$1(t10)];
                 t10 = app.root;
                 t10.add$5$material$mesh$meshData$name$transform(0, groundMat, groundMesh, groundData, "ground_node", new A.Transform(B.Vec3_0_m1_0, B.Quat_0_0_0_1, 1));
@@ -9198,7 +9376,7 @@
                 }
                 asteroidData = A.Primitives_cube(0.35);
                 asteroidMesh = t4.get$resources().registerMesh$2$debugLabel(asteroidData, "asteroid_mesh");
-                asteroidMat = t4.get$resources().registerMaterial$1(B.MaterialDefinition_sdk);
+                asteroidMat = t4.get$resources().registerMaterial$1(B.MaterialDefinition_uM4);
                 t5 = type$.JSArray_Transform;
                 asteroidTransforms = A._setArrayType([], t5);
                 rng = new A._Random();
@@ -9225,27 +9403,27 @@
                   B.JSArray_methods.add$1(railPoints, railSpline.sample$1(i / 120));
                 conduitData = A.Primitives_tubePath(true, 10, 0.12, railPoints);
                 conduitMesh = t4.get$resources().registerMesh$2$debugLabel(conduitData, "conduit_rail");
-                t10.add$4$material$mesh$meshData$name(0, t4.get$resources().registerMaterial$1(B.MaterialDefinition_We6), conduitMesh, conduitData, "conduit_rail_node");
+                t10.add$4$material$mesh$meshData$name(0, t4.get$resources().registerMaterial$1(B.MaterialDefinition_wGg), conduitMesh, conduitData, "conduit_rail_node");
                 t3 = A.List_List$unmodifiable(A._setArrayType([A.GerstnerWaveComponent$(0.6, B.Vec2_tKN, 2.2, 0.45, 18), A.GerstnerWaveComponent$(0.35, B.Vec2_QUS, 1.8, 0.35, 10), A.GerstnerWaveComponent$(0.18, B.Vec2_IOC, 1.4, 0.25, 5.5), A.GerstnerWaveComponent$(0.08, B.Vec2_KNU, 1.1, 0.2, 2.2)], type$.JSArray_GerstnerWaveComponent), type$.GerstnerWaveComponent);
                 buoyData = A.Primitives_icosphere(0.45, 2);
                 buoyMesh = t4.get$resources().registerMesh$2$debugLabel(buoyData, "ocean_buoy");
-                buoyNode = t10.add$5$material$mesh$meshData$name$transform(0, t4.get$resources().registerMaterial$1(B.MaterialDefinition_jND), buoyMesh, buoyData, "buoy_beacon_node", new A.Transform(B.Vec3_gg1, B.Quat_0_0_0_1, 1));
+                buoyNode = t10.add$5$material$mesh$meshData$name$transform(0, t4.get$resources().registerMaterial$1(B.MaterialDefinition_iGF), buoyMesh, buoyData, "buoy_beacon_node", new A.Transform(B.Vec3_gg1, B.Quat_0_0_0_1, 1));
                 t5 = new A.TerrainNoise(42);
                 t5.TerrainNoise$1$seed(42);
                 terrainGen = new A.TerrainGenerator(32, 32, 36, 36, 3.2, -0.6, 13.5, t5);
                 terrainData = terrainGen.generateMesh$0();
                 terrainMesh = t4.get$resources().registerMesh$2$debugLabel(terrainData, "island_terrain");
-                t5 = A.MaterialDefinition$(app.createProceduralTexture$4$debugLabel$height$width(terrainGen.generateBiomeTexture$2$height$width(256, 256), "terrain_biome_albedo", 256, 256), B.AlphaMode_0, 0.2, 0, 0, "terrain_biome_pbr", 0.05, 1, null, null, 0.85, 1, 1, 1, 1, 1);
+                t5 = A.MaterialDefinition$(false, B.MaterialMapColorSpace_0, app.createProceduralTexture$4$debugLabel$height$width(terrainGen.generateBiomeTexture$2$height$width(256, 256), "terrain_biome_albedo", 256, 256), 0.5, B.AlphaMode_0, 0.2, 0, false, 0, null, "terrain_biome_pbr", 0, null, 0.05, B.MaterialMapColorSpace_1, 1, null, 1, B.MaterialMapColorSpace_1, null, false, true, 0.85, 1, 1, 1, 0, 0, 1, 1);
                 terrainNode = t10.add$4$material$mesh$meshData$name(0, t4.get$resources().registerMaterial$1(t5), terrainMesh, terrainData, "terrain_node");
                 waterSurface = new A.WaterSurfaceMesh(38, 38, 32, 32, 0);
                 waterSurface._buildInitialMesh$0();
                 t5 = waterSurface.__WaterSurfaceMesh_mesh_F;
                 t5 === $ && A.throwLateFieldNI("mesh");
                 waterMesh = t4.get$resources().registerMesh$2$debugLabel(t5, "water_surface");
-                waterNode = t10.add$4$material$mesh$meshData$name(0, t4.get$resources().registerMaterial$1(B.MaterialDefinition_Je1), waterMesh, t5, "water_node");
+                waterNode = t10.add$4$material$mesh$meshData$name(0, t4.get$resources().registerMaterial$1(B.MaterialDefinition_5wy), waterMesh, t5, "water_node");
                 vesselHullData = A.Primitives_roundedBox(0.08, 3, 3.2, 0.45, 1.8);
                 vesselMesh = t4.get$resources().registerMesh$2$debugLabel(vesselHullData, "vessel_hull");
-                vesselNode = t10.add$4$material$mesh$meshData$name(0, t4.get$resources().registerMaterial$1(B.MaterialDefinition_pnO), vesselMesh, vesselHullData, "buoyant_vessel_node");
+                vesselNode = t10.add$4$material$mesh$meshData$name(0, t4.get$resources().registerMaterial$1(B.MaterialDefinition_3xM), vesselMesh, vesselHullData, "buoyant_vessel_node");
                 terrainToggle = A._asJSObjectQ(A._asJSObject(t1.document).querySelector("#terrain-toggle"));
                 if (t2._is(terrainToggle))
                   terrainToggle.addEventListener("change", A._functionToJS1(new A.main_closure16(terrainToggle, terrainNode, waterNode, vesselNode)));
@@ -9258,18 +9436,18 @@
                 b.addVertex$4(new A.Vec3(0.5, 0.5, 0), B.Vec3_0_0_1, B.Vec3_1_0_0, B.Vec2_1_1);
                 b.addVertex$4(new A.Vec3(-0.5, 0.5, 0), B.Vec3_0_0_1, B.Vec3_1_0_0, B.Vec2_0_1);
                 B.JSArray_methods.addAll$1(t7, A._setArrayType([0, 1, 2, 0, 2, 3], t6));
-                t6 = b.build$1(new A.Aabb(new A.Vec3(-0.5, -0.5, 0), new A.Vec3(0.5, 0.5, 0)));
-                particleQuadMesh = t4.get$resources().registerMesh$2$debugLabel(t6, "particle_quad_mesh");
-                t6 = A.Primitives_cube(0.15);
-                particleCubeMesh = t4.get$resources().registerMesh$2$debugLabel(t6, "particle_cube_mesh");
+                t7 = b.build$1(new A.Aabb(new A.Vec3(-0.5, -0.5, 0), new A.Vec3(0.5, 0.5, 0)));
+                particleQuadMesh = t4.get$resources().registerMesh$2$debugLabel(t7, "particle_quad_mesh");
+                t7 = A.Primitives_cube(0.15);
+                particleCubeMesh = t4.get$resources().registerMesh$2$debugLabel(t7, "particle_cube_mesh");
                 particleSoftTex = app.createProceduralTexture$5$debugLabel$height$width$wrap(A.ProceduralTextures_radialParticle(2, 128, 0.05, 128), "particle_soft_radial_tex", 128, 128, B.GpuTextureWrap_0);
                 particleSparkTex = app.createProceduralTexture$5$debugLabel$height$width$wrap(A.ProceduralTextures_sparkStreak(128, 64), "particle_spark_streak_tex", 128, 64, B.GpuTextureWrap_0);
-                t6 = A.MaterialDefinition$(particleSoftTex, B.AlphaMode_2, 0.2, 0, 3.5, "ember_mat", 0, 1, null, null, 0.2, 0.12, 0.55, 1, 1, 1);
-                emberMat = t4.get$resources().registerMaterial$1(t6);
-                t6 = A.MaterialDefinition$(particleSoftTex, B.AlphaMode_2, 0.2, 0, 0.8, "dust_mat", 0.1, 1, null, null, 0.4, 1, 0.88, 0.75, 1, 1);
-                dustMat = t4.get$resources().registerMaterial$1(t6);
-                t6 = A.MaterialDefinition$(particleSoftTex, B.AlphaMode_2, 0.2, 0, 0, "snow_mat", 0.1, 1, null, null, 0.8, 1, 0.98, 0.95, 1, 1);
-                snowMat = t4.get$resources().registerMaterial$1(t6);
+                t7 = A.MaterialDefinition$(false, B.MaterialMapColorSpace_0, particleSoftTex, 0.5, B.AlphaMode_2, 0.2, 0, false, 3.5, null, "ember_mat", 0, null, 0, B.MaterialMapColorSpace_1, 1, null, 1, B.MaterialMapColorSpace_1, null, false, true, 0.2, 0.12, 0.55, 1, 0, 0, 1, 1);
+                emberMat = t4.get$resources().registerMaterial$1(t7);
+                t7 = A.MaterialDefinition$(false, B.MaterialMapColorSpace_0, particleSoftTex, 0.5, B.AlphaMode_2, 0.2, 0, false, 0.8, null, "dust_mat", 0, null, 0.1, B.MaterialMapColorSpace_1, 1, null, 1, B.MaterialMapColorSpace_1, null, false, true, 0.4, 1, 0.88, 0.75, 0, 0, 1, 1);
+                dustMat = t4.get$resources().registerMaterial$1(t7);
+                t7 = A.MaterialDefinition$(false, B.MaterialMapColorSpace_0, particleSoftTex, 0.5, B.AlphaMode_2, 0.2, 0, false, 0, null, "snow_mat", 0, null, 0.1, B.MaterialMapColorSpace_1, 1, null, 1, B.MaterialMapColorSpace_1, null, false, true, 0.8, 1, 0.98, 0.95, 0, 0, 1, 1);
+                snowMat = t4.get$resources().registerMaterial$1(t7);
                 emberField = A.AtmosphericParticleField$(B.Vec3_2Sv, B.AtmosphericParticleAnchor_0, B.BlendMode_1, false, 0.55, B.Vec3_8_4_8, B.Vec3_Ce4, 5.5, emberMat, particleQuadMesh, B.Vec3_0_0_0, 48, 0.055, false, 101, B.Vec3_rHd);
                 dustField = A.AtmosphericParticleField$(B.Vec3_KWP, B.AtmosphericParticleAnchor_1, B.BlendMode_0, false, 0.8, B.Vec3_12_5_12, B.Vec3_c8b, 8, dustMat, particleQuadMesh, B.Vec3_0_0_0, 64, 0.035, true, 202, B.Vec3_wqR);
                 snowField = A.AtmosphericParticleField$(B.Vec3_4F9, B.AtmosphericParticleAnchor_1, B.BlendMode_0, false, 0.85, B.Vec3_20_10_20, B.Vec3_cV0, 7, snowMat, particleQuadMesh, B.Vec3_0_0_0, 80, 0.04, true, 303, B.Vec3_JmL);
@@ -9277,36 +9455,59 @@
                 particleSelect = A._asJSObjectQ(A._asJSObject(t1.document).querySelector("#particles-select"));
                 if (t2._is(particleSelect))
                   particleSelect.addEventListener("change", A._functionToJS1(new A.main_closure17(app, particleSelect, emberField, dustField, snowField)));
-                t5 = A.MaterialDefinition$(particleSoftTex, B.AlphaMode_2, 0.2, 0, 5.5, "vfx_fire_mat", 0, 1, null, null, 0.2, 0.08, 0.45, 1, 1, 1);
+                t5 = A.MaterialDefinition$(false, B.MaterialMapColorSpace_0, particleSoftTex, 0.5, B.AlphaMode_2, 0.2, 0, false, 5.5, null, "vfx_fire_mat", 0, null, 0, B.MaterialMapColorSpace_1, 1, null, 1, B.MaterialMapColorSpace_1, null, false, true, 0.2, 0.08, 0.45, 1, 0, 0, 1, 1);
                 vfxFireMat = t4.get$resources().registerMaterial$1(t5);
-                t5 = A.MaterialDefinition$(particleSparkTex, B.AlphaMode_2, 0.2, 0, 7, "vfx_spark_mat", 0, 1, null, null, 0.1, 0.45, 0.9, 1, 1, 1);
+                t5 = A.MaterialDefinition$(false, B.MaterialMapColorSpace_0, particleSparkTex, 0.5, B.AlphaMode_2, 0.2, 0, false, 7, null, "vfx_spark_mat", 0, null, 0, B.MaterialMapColorSpace_1, 1, null, 1, B.MaterialMapColorSpace_1, null, false, true, 0.1, 0.45, 0.9, 1, 0, 0, 1, 1);
                 vfxSparkMat = t4.get$resources().registerMaterial$1(t5);
-                t5 = A.MaterialDefinition$(particleSparkTex, B.AlphaMode_2, 0.2, 0, 6, "vfx_rocket_mat", 0, 1, null, null, 0.1, 0.08, 0.35, 1, 1, 1);
+                t5 = A.MaterialDefinition$(false, B.MaterialMapColorSpace_0, particleSparkTex, 0.5, B.AlphaMode_2, 0.2, 0, false, 6, null, "vfx_rocket_mat", 0, null, 0, B.MaterialMapColorSpace_1, 1, null, 1, B.MaterialMapColorSpace_1, null, false, true, 0.1, 0.08, 0.35, 1, 0, 0, 1, 1);
                 vfxRocketMat = t4.get$resources().registerMaterial$1(t5);
-                t5 = A.MaterialDefinition$(particleSoftTex, B.AlphaMode_2, 0.2, 0, 1, "vfx_water_mat", 0.1, 1, null, null, 0.1, 1, 0.82, 0.45, 1, 1);
+                t5 = A.MaterialDefinition$(false, B.MaterialMapColorSpace_0, particleSoftTex, 0.5, B.AlphaMode_2, 0.2, 0, false, 1, null, "vfx_water_mat", 0, null, 0.1, B.MaterialMapColorSpace_1, 1, null, 1, B.MaterialMapColorSpace_1, null, false, true, 0.1, 1, 0.82, 0.45, 0, 0, 1, 1);
                 vfxWaterMat = t4.get$resources().registerMaterial$1(t5);
-                t5 = A.MaterialDefinition$(particleSoftTex, B.AlphaMode_2, 0.2, 0, 2, "vfx_splash_mat", 0, 1, null, null, 0.3, 1, 0.96, 0.9, 1, 1);
+                t5 = A.MaterialDefinition$(false, B.MaterialMapColorSpace_0, particleSoftTex, 0.5, B.AlphaMode_2, 0.2, 0, false, 2, null, "vfx_splash_mat", 0, null, 0, B.MaterialMapColorSpace_1, 1, null, 1, B.MaterialMapColorSpace_1, null, false, true, 0.3, 1, 0.96, 0.9, 0, 0, 1, 1);
                 vfxSplashMat = t4.get$resources().registerMaterial$1(t5);
-                t5 = A.MaterialDefinition$(particleSoftTex, B.AlphaMode_2, 0.2, 0, 5.5, "vfx_vortex_mat", 0, 1, null, null, 0.2, 1, 0.25, 0.85, 1, 1);
+                t5 = A.MaterialDefinition$(false, B.MaterialMapColorSpace_0, particleSoftTex, 0.5, B.AlphaMode_2, 0.2, 0, false, 5.5, null, "vfx_vortex_mat", 0, null, 0, B.MaterialMapColorSpace_1, 1, null, 1, B.MaterialMapColorSpace_1, null, false, true, 0.2, 1, 0.25, 0.85, 0, 0, 1, 1);
                 vfxVortexMat = t4.get$resources().registerMaterial$1(t5);
-                vfxConfettiMat = t4.get$resources().registerMaterial$1(B.MaterialDefinition_N0f);
+                vfxConfettiMat = t4.get$resources().registerMaterial$1(B.MaterialDefinition_K2H);
+                atlasTex = app.createTexture$5$debugLabel$height$pixels$width$wrap("particle_atlas_tex", 256, A.ProceduralTextures_particleAtlas(256, 256), 256, B.GpuTextureWrap_0);
+                t5 = A._setArrayType(["orb", "star", "ring", "smoke"], type$.JSArray_String);
+                t6 = new A.SpriteAnimation("combustion", A.List_List$unmodifiable(A._setArrayType([0, 1, 2, 3], t6), type$.int), 8, true);
+                t6.validate$0();
+                vfxSpriteSheet = A.ParticleSpriteSheet_ParticleSpriteSheet$uniformGrid(A.LinkedHashMap_LinkedHashMap$_literal(["combustion", t6], t18, type$.SpriteAnimation), 2, t5, 2, atlasTex);
+                t5 = A.MaterialDefinition$(false, B.MaterialMapColorSpace_0, atlasTex, 0.5, B.AlphaMode_2, 0.2, 0, false, 1.5, null, "vfx_spritesheet_base", 0, null, 0, B.MaterialMapColorSpace_1, 1, null, 1, B.MaterialMapColorSpace_1, null, false, true, 1, 1, 1, 1, 0, 0, 1, 1);
+                vfxSpriteSheet.bind$2$baseMaterial(t4.get$resources(), t5);
+                vfxSpritesheetEmitter = A.ParticleEmitter$(B.Vec3_0_0_0, B.ParticleAlignment_0, B.BlendMode_0, null, null, null, 0.4, B.DrawMode_2, 0.1, 0.4, B.Vec3_O4F, vfxFireMat, null, 0, 0.2, 0, 2.2, 400, 2.2, 0.9, particleQuadMesh, 0, 0, 0, 1.2, 0.6, 0.5, 1, 1, 0.3, 0, B.Vec3_0_1_0, 0, 0, null, null, null, B.ParticleSpritePlaybackMode_3, vfxSpriteSheet, 0.1, null, new A.Transform(B.Vec3_0_0_0, B.Quat_0_0_0_1, 1));
                 vfxSelect = A._asJSObjectQ(A._asJSObject(t1.document).querySelector("#vfx-particles-select"));
                 if (t2._is(vfxSelect))
-                  vfxSelect.addEventListener("change", A._functionToJS1(new A.main_closure18(new A.main_updateVfxEmitter(app, particleQuadMesh, vfxFireMat, vfxRocketMat, vfxSparkMat, vfxVortexMat, vfxWaterMat, vfxSplashMat, snowMat, particleCubeMesh, vfxConfettiMat), vfxSelect)));
+                  vfxSelect.addEventListener("change", A._functionToJS1(new A.main_closure18(new A.main_updateVfxEmitter(app, particleQuadMesh, vfxFireMat, vfxRocketMat, vfxSparkMat, vfxVortexMat, vfxWaterMat, vfxSplashMat, snowMat, particleCubeMesh, vfxConfettiMat, vfxSpritesheetEmitter), vfxSelect)));
+                emitStarBtn = A._asJSObjectQ(A._asJSObject(t1.document).querySelector("#emit-star-btn"));
+                if (t2._is(emitStarBtn))
+                  emitStarBtn.addEventListener("click", A._functionToJS1(new A.main_closure19(vfxSpritesheetEmitter)));
+                emitRingBtn = A._asJSObjectQ(A._asJSObject(t1.document).querySelector("#emit-ring-btn"));
+                if (t2._is(emitRingBtn))
+                  emitRingBtn.addEventListener("click", A._functionToJS1(new A.main_closure20(vfxSpritesheetEmitter)));
+                emitSmokeBtn = A._asJSObjectQ(A._asJSObject(t1.document).querySelector("#emit-smoke-btn"));
+                if (t2._is(emitSmokeBtn))
+                  emitSmokeBtn.addEventListener("click", A._functionToJS1(new A.main_closure21(vfxSpritesheetEmitter)));
+                emitOrbBtn = A._asJSObjectQ(A._asJSObject(t1.document).querySelector("#emit-orb-btn"));
+                if (t2._is(emitOrbBtn))
+                  emitOrbBtn.addEventListener("click", A._functionToJS1(new A.main_closure22(vfxSpritesheetEmitter)));
+                emitAnimBtn = A._asJSObjectQ(A._asJSObject(t1.document).querySelector("#emit-anim-btn"));
+                if (t2._is(emitAnimBtn))
+                  emitAnimBtn.addEventListener("click", A._functionToJS1(new A.main_closure23(vfxSpritesheetEmitter)));
                 app.enableFog$4$color$end$heightFalloff$start(B.LinearColor_8cl, 120, 0.04, 20);
                 fogSelect = A._asJSObjectQ(A._asJSObject(t1.document).querySelector("#fog-select"));
                 if (t2._is(fogSelect))
-                  fogSelect.addEventListener("change", A._functionToJS1(new A.main_closure19(fogSelect, app)));
+                  fogSelect.addEventListener("change", A._functionToJS1(new A.main_closure24(fogSelect, app)));
                 asteroidToggle = A._asJSObjectQ(A._asJSObject(t1.document).querySelector("#asteroid-toggle"));
                 if (t2._is(asteroidToggle))
-                  asteroidToggle.addEventListener("change", A._functionToJS1(new A.main_closure20(asteroidBelt, asteroidToggle)));
+                  asteroidToggle.addEventListener("change", A._functionToJS1(new A.main_closure25(asteroidBelt, asteroidToggle)));
                 _box_0.selectedNode = null;
                 _box_0.selectionPulse = 0;
-                canvas.addEventListener("click", A._functionToJS1(new A.main_closure21(_box_0, app, A._asJSObjectQ(A._asJSObject(t1.document).querySelector("#picking-status")))));
+                canvas.addEventListener("click", A._functionToJS1(new A.main_closure26(_box_0, app, A._asJSObjectQ(A._asJSObject(t1.document).querySelector("#picking-status")))));
                 t2 = A.List_List$unmodifiable(A._setArrayType([A.Vector3Track$(B.List_OSE, centerNode), A.Vector3Track$(B.List_OSE, torusNode)], type$.JSArray_KeyframeTrack_dynamic), type$.KeyframeTrack_dynamic);
                 app.animations._active.$indexSet(0, "hero_bob", new A._ActiveClipInstance(new A.AnimationClip("hero_bob", 4, B.LoopMode_1, t2), 1));
-                app.set$onFrame(new A.main_closure22(_box_0, centerNode, torusNode, orbitRing, asteroidBelt, new A.GerstnerWaveEvaluator(t3, 0), buoyNode, waterSurface, vesselNode, new A.BuoyantVesselBody(B.Vec3_ubb, 2, 3.5), satelliteNodes, cameraSelect, dofSlider, app, solarSlider, updateSolarDisplay));
-                A._asJSObject(t1.window).addEventListener("keydown", A._functionToJS1(new A.main_closure23(_box_0, solarPlayPauseBtn, switchTopic, solarSlider, applySolarTime, cameraSelect)));
+                app.set$onFrame(new A.main_closure27(_box_0, centerNode, torusNode, orbitRing, asteroidBelt, new A.GerstnerWaveEvaluator(t3, 0), buoyNode, waterSurface, vesselNode, new A.BuoyantVesselBody(B.Vec3_ubb, 2, 3.5), satelliteNodes, cameraSelect, dofSlider, app, solarSlider, updateSolarDisplay));
+                A._asJSObject(t1.window).addEventListener("keydown", A._functionToJS1(new A.main_closure28(_box_0, solarPlayPauseBtn, switchTopic, solarSlider, applySolarTime, cameraSelect)));
                 app.start$0();
               case 1:
                 // return
@@ -9417,7 +9618,7 @@
       _.dustField = t3;
       _.snowField = t4;
     },
-    main_updateVfxEmitter: function main_updateVfxEmitter(t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10) {
+    main_updateVfxEmitter: function main_updateVfxEmitter(t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11) {
       var _ = this;
       _.app = t0;
       _.particleQuadMesh = t1;
@@ -9430,25 +9631,41 @@
       _.snowMat = t8;
       _.particleCubeMesh = t9;
       _.vfxConfettiMat = t10;
+      _.vfxSpritesheetEmitter = t11;
     },
     main_closure18: function main_closure18(t0, t1) {
       this.updateVfxEmitter = t0;
       this.vfxSelect = t1;
     },
-    main_closure19: function main_closure19(t0, t1) {
+    main_closure19: function main_closure19(t0) {
+      this.vfxSpritesheetEmitter = t0;
+    },
+    main_closure20: function main_closure20(t0) {
+      this.vfxSpritesheetEmitter = t0;
+    },
+    main_closure21: function main_closure21(t0) {
+      this.vfxSpritesheetEmitter = t0;
+    },
+    main_closure22: function main_closure22(t0) {
+      this.vfxSpritesheetEmitter = t0;
+    },
+    main_closure23: function main_closure23(t0) {
+      this.vfxSpritesheetEmitter = t0;
+    },
+    main_closure24: function main_closure24(t0, t1) {
       this.fogSelect = t0;
       this.app = t1;
     },
-    main_closure20: function main_closure20(t0, t1) {
+    main_closure25: function main_closure25(t0, t1) {
       this.asteroidBelt = t0;
       this.asteroidToggle = t1;
     },
-    main_closure21: function main_closure21(t0, t1, t2) {
+    main_closure26: function main_closure26(t0, t1, t2) {
       this._box_0 = t0;
       this.app = t1;
       this.pickingStatus = t2;
     },
-    main_closure22: function main_closure22(t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15) {
+    main_closure27: function main_closure27(t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15) {
       var _ = this;
       _._box_0 = t0;
       _.centerNode = t1;
@@ -9467,7 +9684,7 @@
       _.solarSlider = t14;
       _.updateSolarDisplay = t15;
     },
-    main_closure23: function main_closure23(t0, t1, t2, t3, t4, t5) {
+    main_closure28: function main_closure28(t0, t1, t2, t3, t4, t5) {
       var _ = this;
       _._box_0 = t0;
       _.solarPlayPauseBtn = t1;
@@ -9774,6 +9991,14 @@
     },
     get$length(receiver) {
       return receiver.length;
+    },
+    set$length(receiver, newLength) {
+      receiver.$flags & 1 && A.throwUnsupportedOperation(receiver, "set length", "change the length of");
+      if (newLength < 0)
+        throw A.wrapException(A.RangeError$range(newLength, 0, null, "newLength", null));
+      if (newLength > receiver.length)
+        A._arrayInstanceType(receiver)._precomputed1._as(null);
+      receiver.length = newLength;
     },
     $index(receiver, index) {
       if (!(index >= 0 && index < receiver.length))
@@ -10143,6 +10368,17 @@
     $index(_, index) {
       return this.$ti._rest[1]._as(J.$index$ax(this._source, index));
     },
+    $indexSet(_, index, value) {
+      var t1 = this.$ti;
+      J.$indexSet$ax(this._source, index, t1._precomputed1._as(t1._rest[1]._as(value)));
+    },
+    set$length(_, $length) {
+      J.set$length$asx(this._source, $length);
+    },
+    add$1(_, value) {
+      var t1 = this.$ti;
+      J.add$1$ax(this._source, t1._precomputed1._as(t1._rest[1]._as(value)));
+    },
     $isList: 1
   };
   A.CastList.prototype = {
@@ -10309,7 +10545,15 @@
     },
     $isIterator: 1
   };
-  A.FixedLengthListMixin.prototype = {};
+  A.FixedLengthListMixin.prototype = {
+    set$length(receiver, newLength) {
+      throw A.wrapException(A.UnsupportedError$("Cannot change the length of a fixed-length list"));
+    },
+    add$1(receiver, value) {
+      A.instanceType(receiver)._eval$1("FixedLengthListMixin.E")._as(value);
+      throw A.wrapException(A.UnsupportedError$("Cannot add to a fixed-length list"));
+    }
+  };
   A.ReversedListIterable.prototype = {
     get$length(_) {
       return J.get$length$asx(this._source);
@@ -10381,7 +10625,7 @@
     get$length(_) {
       return this._values.length;
     },
-    get$__js_helper$_keys() {
+    get$_keys() {
       var keys = this.$keys;
       if (keys == null) {
         keys = Object.keys(this._jsIndex);
@@ -10404,13 +10648,13 @@
     forEach$1(_, f) {
       var keys, values, t1, i;
       this.$ti._eval$1("~(1,2)")._as(f);
-      keys = this.get$__js_helper$_keys();
+      keys = this.get$_keys();
       values = this._values;
       for (t1 = keys.length, i = 0; i < t1; ++i)
         f.call$2(keys[i], values[i]);
     },
     get$keys() {
-      return new A._KeysOrValues(this.get$__js_helper$_keys(), this.$ti._eval$1("_KeysOrValues<1>"));
+      return new A._KeysOrValues(this.get$_keys(), this.$ti._eval$1("_KeysOrValues<1>"));
     },
     get$values() {
       return new A._KeysOrValues(this._values, this.$ti._eval$1("_KeysOrValues<2>"));
@@ -10606,12 +10850,12 @@
     containsKey$1(key) {
       var strings, nums;
       if (typeof key == "string") {
-        strings = this.__js_helper$_strings;
+        strings = this._strings;
         if (strings == null)
           return false;
         return strings[key] != null;
       } else if (typeof key == "number" && (key & 0x3fffffff) === key) {
-        nums = this.__js_helper$_nums;
+        nums = this._nums;
         if (nums == null)
           return false;
         return nums[key] != null;
@@ -10622,19 +10866,19 @@
       var rest = this.__js_helper$_rest;
       if (rest == null)
         return false;
-      return this.internalFindBucketIndex$2(this.__js_helper$_getBucket$2(rest, key), key) >= 0;
+      return this.internalFindBucketIndex$2(this._getBucket$2(rest, key), key) >= 0;
     },
     $index(_, key) {
       var strings, cell, t1, nums, _null = null;
       if (typeof key == "string") {
-        strings = this.__js_helper$_strings;
+        strings = this._strings;
         if (strings == null)
           return _null;
         cell = strings[key];
         t1 = cell == null ? _null : cell.hashMapCellValue;
         return t1;
       } else if (typeof key == "number" && (key & 0x3fffffff) === key) {
-        nums = this.__js_helper$_nums;
+        nums = this._nums;
         if (nums == null)
           return _null;
         cell = nums[key];
@@ -10648,7 +10892,7 @@
         rest = this.__js_helper$_rest;
       if (rest == null)
         return null;
-      bucket = this.__js_helper$_getBucket$2(rest, key);
+      bucket = this._getBucket$2(rest, key);
       index = this.internalFindBucketIndex$2(bucket, key);
       if (index < 0)
         return null;
@@ -10660,11 +10904,11 @@
       t1._precomputed1._as(key);
       t1._rest[1]._as(value);
       if (typeof key == "string") {
-        strings = _this.__js_helper$_strings;
-        _this._addHashTableEntry$3(strings == null ? _this.__js_helper$_strings = _this._newHashTable$0() : strings, key, value);
+        strings = _this._strings;
+        _this._addHashTableEntry$3(strings == null ? _this._strings = _this._newHashTable$0() : strings, key, value);
       } else if (typeof key == "number" && (key & 0x3fffffff) === key) {
-        nums = _this.__js_helper$_nums;
-        _this._addHashTableEntry$3(nums == null ? _this.__js_helper$_nums = _this._newHashTable$0() : nums, key, value);
+        nums = _this._nums;
+        _this._addHashTableEntry$3(nums == null ? _this._nums = _this._newHashTable$0() : nums, key, value);
       } else
         _this.internalSet$2(key, value);
     },
@@ -10704,9 +10948,9 @@
     remove$1(_, key) {
       var _this = this;
       if (typeof key == "string")
-        return _this.__js_helper$_removeHashTableEntry$2(_this.__js_helper$_strings, key);
+        return _this.__js_helper$_removeHashTableEntry$2(_this._strings, key);
       else if (typeof key == "number" && (key & 0x3fffffff) === key)
-        return _this.__js_helper$_removeHashTableEntry$2(_this.__js_helper$_nums, key);
+        return _this.__js_helper$_removeHashTableEntry$2(_this._nums, key);
       else
         return _this.internalRemove$1(key);
     },
@@ -10729,7 +10973,7 @@
     clear$0(_) {
       var _this = this;
       if (_this.__js_helper$_length > 0) {
-        _this.__js_helper$_strings = _this.__js_helper$_nums = _this.__js_helper$_rest = _this._first = _this._last = null;
+        _this._strings = _this._nums = _this.__js_helper$_rest = _this._first = _this._last = null;
         _this.__js_helper$_length = 0;
         _this._modified$0();
       }
@@ -10805,7 +11049,7 @@
     internalComputeHashCode$1(key) {
       return J.get$hashCode$(key) & 1073741823;
     },
-    __js_helper$_getBucket$2(table, key) {
+    _getBucket$2(table, key) {
       return table[this.internalComputeHashCode$1(key)];
     },
     internalFindBucketIndex$2(bucket, key) {
@@ -10832,10 +11076,10 @@
   A.LinkedHashMapCell.prototype = {};
   A.LinkedHashMapKeysIterable.prototype = {
     get$length(_) {
-      return this.__js_helper$_map.__js_helper$_length;
+      return this._map.__js_helper$_length;
     },
     get$iterator(_) {
-      var t1 = this.__js_helper$_map;
+      var t1 = this._map;
       return new A.LinkedHashMapKeyIterator(t1, t1._modifications, t1._first, this.$ti._eval$1("LinkedHashMapKeyIterator<1>"));
     }
   };
@@ -10845,7 +11089,7 @@
     },
     moveNext$0() {
       var cell, _this = this,
-        t1 = _this.__js_helper$_map;
+        t1 = _this._map;
       if (_this._modifications !== t1._modifications)
         throw A.wrapException(A.ConcurrentModificationError$(t1));
       cell = _this._cell;
@@ -10862,10 +11106,10 @@
   };
   A.LinkedHashMapValuesIterable.prototype = {
     get$length(_) {
-      return this.__js_helper$_map.__js_helper$_length;
+      return this._map.__js_helper$_length;
     },
     get$iterator(_) {
-      var t1 = this.__js_helper$_map;
+      var t1 = this._map;
       return new A.LinkedHashMapValueIterator(t1, t1._modifications, t1._first, this.$ti._eval$1("LinkedHashMapValueIterator<1>"));
     }
   };
@@ -10875,7 +11119,7 @@
     },
     moveNext$0() {
       var cell, _this = this,
-        t1 = _this.__js_helper$_map;
+        t1 = _this._map;
       if (_this._modifications !== t1._modifications)
         throw A.wrapException(A.ConcurrentModificationError$(t1));
       cell = _this._cell;
@@ -10892,10 +11136,10 @@
   };
   A.LinkedHashMapEntriesIterable.prototype = {
     get$length(_) {
-      return this.__js_helper$_map.__js_helper$_length;
+      return this._map.__js_helper$_length;
     },
     get$iterator(_) {
-      var t1 = this.__js_helper$_map;
+      var t1 = this._map;
       return new A.LinkedHashMapEntryIterator(t1, t1._modifications, t1._first, this.$ti._eval$1("LinkedHashMapEntryIterator<1,2>"));
     }
   };
@@ -10907,7 +11151,7 @@
     },
     moveNext$0() {
       var cell, _this = this,
-        t1 = _this.__js_helper$_map;
+        t1 = _this._map;
       if (_this._modifications !== t1._modifications)
         throw A.wrapException(A.ConcurrentModificationError$(t1));
       cell = _this._cell;
@@ -10926,13 +11170,13 @@
     call$1(o) {
       return this.getTag(o);
     },
-    $signature: 25
+    $signature: 26
   };
   A.initHooks_closure0.prototype = {
     call$2(o, tag) {
       return this.getUnknownTag(o, tag);
     },
-    $signature: 67
+    $signature: 68
   };
   A.initHooks_closure1.prototype = {
     call$1(tag) {
@@ -11064,6 +11308,12 @@
       A._checkValidIndex(index, receiver, receiver.length);
       return receiver[index];
     },
+    $indexSet(receiver, index, value) {
+      A._asDouble(value);
+      receiver.$flags & 2 && A.throwUnsupportedOperation(receiver);
+      A._checkValidIndex(index, receiver, receiver.length);
+      receiver[index] = value;
+    },
     setRange$3(receiver, start, end, iterable) {
       var targetLength, count, sourceLength, source;
       type$.Iterable_double._as(iterable);
@@ -11084,7 +11334,16 @@
     $isIterable: 1,
     $isList: 1
   };
-  A.NativeTypedArrayOfInt.prototype = {$isIterable: 1, $isList: 1};
+  A.NativeTypedArrayOfInt.prototype = {
+    $indexSet(receiver, index, value) {
+      A._asInt(value);
+      receiver.$flags & 2 && A.throwUnsupportedOperation(receiver);
+      A._checkValidIndex(index, receiver, receiver.length);
+      receiver[index] = value;
+    },
+    $isIterable: 1,
+    $isList: 1
+  };
   A.NativeFloat32List.prototype = {
     get$runtimeType(receiver) {
       return B.Type_Float32List_9Kz;
@@ -11217,7 +11476,7 @@
       t2 = this.span;
       t1.firstChild ? t1.removeChild(t2) : t1.appendChild(t2);
     },
-    $signature: 68
+    $signature: 69
   };
   A._AsyncRun__scheduleImmediateJsOverride_internalCallback.prototype = {
     call$0() {
@@ -11280,7 +11539,7 @@
     call$2(error, stackTrace) {
       this.bodyFunction.call$2(1, new A.ExceptionAndStackTrace(error, type$.StackTrace._as(stackTrace)));
     },
-    $signature: 69
+    $signature: 70
   };
   A._wrapJsFunctionForAsync_closure.prototype = {
     call$2(errorCode, result) {
@@ -11804,10 +12063,10 @@
     containsKey$1(key) {
       var strings, nums;
       if (typeof key == "string" && key !== "__proto__") {
-        strings = this._strings;
+        strings = this._collection$_strings;
         return strings == null ? false : strings[key] != null;
       } else if (typeof key == "number" && (key & 1073741823) === key) {
-        nums = this._nums;
+        nums = this._collection$_nums;
         return nums == null ? false : nums[key] != null;
       } else
         return this._containsKey$1(key);
@@ -11816,16 +12075,16 @@
       var rest = this._collection$_rest;
       if (rest == null)
         return false;
-      return this._findBucketIndex$2(this._getBucket$2(rest, key), key) >= 0;
+      return this._findBucketIndex$2(this._collection$_getBucket$2(rest, key), key) >= 0;
     },
     $index(_, key) {
       var strings, t1, nums;
       if (typeof key == "string" && key !== "__proto__") {
-        strings = this._strings;
+        strings = this._collection$_strings;
         t1 = strings == null ? null : A._HashMap__getTableEntry(strings, key);
         return t1;
       } else if (typeof key == "number" && (key & 1073741823) === key) {
-        nums = this._nums;
+        nums = this._collection$_nums;
         t1 = nums == null ? null : A._HashMap__getTableEntry(nums, key);
         return t1;
       } else
@@ -11836,7 +12095,7 @@
         rest = this._collection$_rest;
       if (rest == null)
         return null;
-      bucket = this._getBucket$2(rest, key);
+      bucket = this._collection$_getBucket$2(rest, key);
       index = this._findBucketIndex$2(bucket, key);
       return index < 0 ? null : bucket[index + 1];
     },
@@ -11846,11 +12105,11 @@
       t1._precomputed1._as(key);
       t1._rest[1]._as(value);
       if (typeof key == "string" && key !== "__proto__") {
-        strings = _this._strings;
-        _this._collection$_addHashTableEntry$3(strings == null ? _this._strings = A._HashMap__newHashTable() : strings, key, value);
+        strings = _this._collection$_strings;
+        _this._collection$_addHashTableEntry$3(strings == null ? _this._collection$_strings = A._HashMap__newHashTable() : strings, key, value);
       } else if (typeof key == "number" && (key & 1073741823) === key) {
-        nums = _this._nums;
-        _this._collection$_addHashTableEntry$3(nums == null ? _this._nums = A._HashMap__newHashTable() : nums, key, value);
+        nums = _this._collection$_nums;
+        _this._collection$_addHashTableEntry$3(nums == null ? _this._collection$_nums = A._HashMap__newHashTable() : nums, key, value);
       } else {
         rest = _this._collection$_rest;
         if (rest == null)
@@ -11860,7 +12119,7 @@
         if (bucket == null) {
           A._HashMap__setTableEntry(rest, hash, [key, value]);
           ++_this._collection$_length;
-          _this._keys = null;
+          _this._collection$_keys = null;
         } else {
           index = _this._findBucketIndex$2(bucket, key);
           if (index >= 0)
@@ -11868,7 +12127,7 @@
           else {
             bucket.push(key, value);
             ++_this._collection$_length;
-            _this._keys = null;
+            _this._collection$_keys = null;
           }
         }
       }
@@ -11876,9 +12135,9 @@
     remove$1(_, key) {
       var _this = this;
       if (typeof key == "string" && key !== "__proto__")
-        return _this._removeHashTableEntry$2(_this._strings, key);
+        return _this._removeHashTableEntry$2(_this._collection$_strings, key);
       else if (typeof key == "number" && (key & 1073741823) === key)
-        return _this._removeHashTableEntry$2(_this._nums, key);
+        return _this._removeHashTableEntry$2(_this._collection$_nums, key);
       else
         return _this._remove$1(key);
     },
@@ -11893,7 +12152,7 @@
       if (index < 0)
         return null;
       --_this._collection$_length;
-      _this._keys = null;
+      _this._collection$_keys = null;
       result = bucket.splice(index, 2)[1];
       if (0 === bucket.length)
         delete rest[hash];
@@ -11909,17 +12168,17 @@
         t2._as(key);
         t3 = _this.$index(0, key);
         action.call$2(key, t3 == null ? t1._as(t3) : t3);
-        if (keys !== _this._keys)
+        if (keys !== _this._collection$_keys)
           throw A.wrapException(A.ConcurrentModificationError$(_this));
       }
     },
     _computeKeys$0() {
       var strings, index, names, entries, i, nums, rest, bucket, $length, i0, _this = this,
-        result = _this._keys;
+        result = _this._collection$_keys;
       if (result != null)
         return result;
       result = A.List_List$filled(_this._collection$_length, null, false, type$.dynamic);
-      strings = _this._strings;
+      strings = _this._collection$_strings;
       index = 0;
       if (strings != null) {
         names = Object.getOwnPropertyNames(strings);
@@ -11929,7 +12188,7 @@
           ++index;
         }
       }
-      nums = _this._nums;
+      nums = _this._collection$_nums;
       if (nums != null) {
         names = Object.getOwnPropertyNames(nums);
         entries = names.length;
@@ -11951,7 +12210,7 @@
           }
         }
       }
-      return _this._keys = result;
+      return _this._collection$_keys = result;
     },
     _collection$_addHashTableEntry$3(table, key, value) {
       var t1 = this.$ti;
@@ -11959,7 +12218,7 @@
       t1._rest[1]._as(value);
       if (table[key] == null) {
         ++this._collection$_length;
-        this._keys = null;
+        this._collection$_keys = null;
       }
       A._HashMap__setTableEntry(table, key, value);
     },
@@ -11969,12 +12228,12 @@
         value = this.$ti._rest[1]._as(A._HashMap__getTableEntry(table, key));
         delete table[key];
         --this._collection$_length;
-        this._keys = null;
+        this._collection$_keys = null;
         return value;
       } else
         return null;
     },
-    _getBucket$2(table, key) {
+    _collection$_getBucket$2(table, key) {
       return table[A.objectHashCode(key) & 1073741823];
     }
   };
@@ -11994,10 +12253,10 @@
   };
   A._HashMapKeyIterable.prototype = {
     get$length(_) {
-      return this._map._collection$_length;
+      return this._collection$_map._collection$_length;
     },
     get$iterator(_) {
-      var t1 = this._map;
+      var t1 = this._collection$_map;
       return new A._HashMapKeyIterator(t1, t1._computeKeys$0(), this.$ti._eval$1("_HashMapKeyIterator<1>"));
     }
   };
@@ -12008,10 +12267,10 @@
     },
     moveNext$0() {
       var _this = this,
-        keys = _this._keys,
+        keys = _this._collection$_keys,
         offset = _this._offset,
-        t1 = _this._map;
-      if (keys !== t1._keys)
+        t1 = _this._collection$_map;
+      if (keys !== t1._collection$_keys)
         throw A.wrapException(A.ConcurrentModificationError$(t1));
       else if (offset >= keys.length) {
         _this._collection$_current = null;
@@ -12040,12 +12299,12 @@
     contains$1(_, object) {
       var strings, nums;
       if (typeof object == "string" && object !== "__proto__") {
-        strings = this._strings;
+        strings = this._collection$_strings;
         if (strings == null)
           return false;
         return type$.nullable__LinkedHashSetCell._as(strings[object]) != null;
       } else if (typeof object == "number" && (object & 1073741823) === object) {
-        nums = this._nums;
+        nums = this._collection$_nums;
         if (nums == null)
           return false;
         return type$.nullable__LinkedHashSetCell._as(nums[object]) != null;
@@ -12062,11 +12321,11 @@
       var strings, nums, _this = this;
       A._instanceType(_this)._precomputed1._as(element);
       if (typeof element == "string" && element !== "__proto__") {
-        strings = _this._strings;
-        return _this._collection$_addHashTableEntry$2(strings == null ? _this._strings = A._LinkedHashSet__newHashTable() : strings, element);
+        strings = _this._collection$_strings;
+        return _this._collection$_addHashTableEntry$2(strings == null ? _this._collection$_strings = A._LinkedHashSet__newHashTable() : strings, element);
       } else if (typeof element == "number" && (element & 1073741823) === element) {
-        nums = _this._nums;
-        return _this._collection$_addHashTableEntry$2(nums == null ? _this._nums = A._LinkedHashSet__newHashTable() : nums, element);
+        nums = _this._collection$_nums;
+        return _this._collection$_addHashTableEntry$2(nums == null ? _this._collection$_nums = A._LinkedHashSet__newHashTable() : nums, element);
       } else
         return _this._add$1(element);
     },
@@ -12090,9 +12349,9 @@
     remove$1(_, object) {
       var _this = this;
       if (typeof object == "string" && object !== "__proto__")
-        return _this._removeHashTableEntry$2(_this._strings, object);
+        return _this._removeHashTableEntry$2(_this._collection$_strings, object);
       else if (typeof object == "number" && (object & 1073741823) === object)
-        return _this._removeHashTableEntry$2(_this._nums, object);
+        return _this._removeHashTableEntry$2(_this._collection$_nums, object);
       else
         return _this._remove$1(object);
     },
@@ -12115,7 +12374,7 @@
     clear$0(_) {
       var _this = this;
       if (_this._collection$_length > 0) {
-        _this._strings = _this._nums = _this._collection$_rest = _this._collection$_first = _this._collection$_last = null;
+        _this._collection$_strings = _this._collection$_nums = _this._collection$_rest = _this._collection$_first = _this._collection$_last = null;
         _this._collection$_length = 0;
         _this._collection$_modified$0();
       }
@@ -12234,6 +12493,13 @@
       }
       return true;
     },
+    add$1(receiver, element) {
+      var t1;
+      A.instanceType(receiver)._eval$1("ListBase.E")._as(element);
+      t1 = this.get$length(receiver);
+      this.set$length(receiver, t1 + 1);
+      this.$indexSet(receiver, t1, element);
+    },
     toString$0(receiver) {
       return A.Iterable_iterableToFullString(receiver, "[", "]");
     }
@@ -12290,24 +12556,24 @@
   A._UnmodifiableMapMixin.prototype = {};
   A.MapView.prototype = {
     $index(_, key) {
-      return this._map.$index(0, key);
+      return this._collection$_map.$index(0, key);
     },
     get$length(_) {
-      return this._map.__js_helper$_length;
+      return this._collection$_map.__js_helper$_length;
     },
     get$keys() {
-      var t1 = this._map;
+      var t1 = this._collection$_map;
       return new A.LinkedHashMapKeysIterable(t1, A._instanceType(t1)._eval$1("LinkedHashMapKeysIterable<1>"));
     },
     toString$0(_) {
-      return A.MapBase_mapToString(this._map);
+      return A.MapBase_mapToString(this._collection$_map);
     },
     get$values() {
-      var t1 = this._map;
+      var t1 = this._collection$_map;
       return new A.LinkedHashMapValuesIterable(t1, A._instanceType(t1)._eval$1("LinkedHashMapValuesIterable<2>"));
     },
     get$entries() {
-      var t1 = this._map;
+      var t1 = this._collection$_map;
       return new A.LinkedHashMapEntriesIterable(t1, A._instanceType(t1)._eval$1("LinkedHashMapEntriesIterable<1,2>"));
     },
     $isMap: 1
@@ -12742,7 +13008,7 @@
       }
       return o;
     },
-    $signature: 77
+    $signature: 78
   };
   A._JSRandom.prototype = {
     nextInt$1(max) {
@@ -13489,9 +13755,16 @@
   };
   A.MaterialDefinition.prototype = {
     validate$0() {
-      var t1, t2, t3, _i, t4, $name, value, _this = this, _null = null;
-      if (_this.key.length === 0)
+      var t2, t3, _i, t4, $name, value, _this = this, _null = null,
+        t1 = _this.key;
+      if (t1.length === 0)
         throw A.wrapException(A.ArgumentError$("MaterialDefinition.key must not be empty", _null));
+      if (_this.albedoColorSpace !== B.MaterialMapColorSpace_0)
+        throw A.wrapException(A.ArgumentError$("MaterialDefinition.albedoColorSpace must be srgb: " + t1, _null));
+      if (_this.normalColorSpace !== B.MaterialMapColorSpace_1)
+        throw A.wrapException(A.ArgumentError$("MaterialDefinition.normalColorSpace must be linear: " + t1, _null));
+      if (_this.ormColorSpace !== B.MaterialMapColorSpace_1)
+        throw A.wrapException(A.ArgumentError$("MaterialDefinition.ormColorSpace must be linear: " + t1, _null));
       t1 = _this.emissiveStrength;
       if (!isFinite(t1) || t1 < 0)
         throw A.wrapException(A.ArgumentError$("MaterialDefinition.emissiveStrength must be >= 0: " + A.S(t1), _null));
@@ -13500,12 +13773,13 @@
         throw A.wrapException(A.ArgumentError$("MaterialDefinition.normalStrength must be >= 0: " + A.S(t1), _null));
       A.MaterialDefinition__validateUnit("roughness", _this.roughness);
       A.MaterialDefinition__validateUnit("metallic", _this.metallic);
-      A.MaterialDefinition__validateUnit("occlusionStrength", 1);
+      A.MaterialDefinition__validateUnit("occlusionStrength", _this.occlusionStrength);
       A.MaterialDefinition__validateUnit("clearcoatStrength", _this.clearcoatStrength);
       A.MaterialDefinition__validateUnit("clearcoatRoughness", _this.clearcoatRoughness);
-      if (!isFinite(0))
-        throw A.wrapException(A.ArgumentError$("MaterialDefinition.lightmapIntensity must be >= 0: 0", _null));
-      for (t1 = _this.uvScaleU, t2 = _this.uvScaleV, t3 = [new A._Record_2("uvScaleU", t1), new A._Record_2("uvScaleV", t2), new A._Record_2("uvOffsetU", 0), new A._Record_2("uvOffsetV", 0), new A._Record_2("tintR", _this.tintR), new A._Record_2("tintG", _this.tintG), new A._Record_2("tintB", _this.tintB)], _i = 0; _i < 7; ++_i) {
+      t1 = _this.lightmapIntensity;
+      if (!isFinite(t1))
+        throw A.wrapException(A.ArgumentError$("MaterialDefinition.lightmapIntensity must be >= 0: " + t1, _null));
+      for (t1 = _this.uvScaleU, t2 = _this.uvScaleV, t3 = [new A._Record_2("uvScaleU", t1), new A._Record_2("uvScaleV", t2), new A._Record_2("uvOffsetU", _this.uvOffsetU), new A._Record_2("uvOffsetV", _this.uvOffsetV), new A._Record_2("tintR", _this.tintR), new A._Record_2("tintG", _this.tintG), new A._Record_2("tintB", _this.tintB)], _i = 0; _i < 7; ++_i) {
         t4 = t3[_i];
         $name = t4._0;
         value = t4._1;
@@ -13514,8 +13788,9 @@
       }
       if (t1 === 0 || t2 === 0)
         throw A.wrapException(A.ArgumentError$("MaterialDefinition uv scale must not be zero", _null));
-      if (!isFinite(0.5))
-        throw A.wrapException(A.ArgumentError$("MaterialDefinition.alphaCutoff must be in (0, 1]: 0.5", _null));
+      t1 = _this.alphaCutoff;
+      if (!isFinite(t1) || t1 <= 0 || t1 > 1)
+        throw A.wrapException(A.ArgumentError$("MaterialDefinition.alphaCutoff must be in (0, 1]: " + A.S(t1), _null));
     }
   };
   A.VertexAttributeKind.prototype = {
@@ -13548,7 +13823,7 @@
     call$1(attr) {
       return type$.VertexAttributeSlot._as(attr).kind === B.VertexAttributeKind_6;
     },
-    $signature: 8
+    $signature: 9
   };
   A.MeshData.prototype = {
     validate$0() {
@@ -13633,19 +13908,19 @@
     call$1(attr) {
       return type$.VertexAttributeSlot._as(attr).kind === B.VertexAttributeKind_6;
     },
-    $signature: 8
+    $signature: 9
   };
   A.MeshData__validateFiniteSurfaceV2Tangents_closure0.prototype = {
     call$1(attr) {
       return type$.VertexAttributeSlot._as(attr).kind === B.VertexAttributeKind_1;
     },
-    $signature: 8
+    $signature: 9
   };
   A.MeshData__validateFiniteSurfaceV2Tangents_closure1.prototype = {
     call$1(value) {
       return isFinite(A._asDouble(value));
     },
-    $signature: 16
+    $signature: 15
   };
   A.DefaultSceneRendererFactory.prototype = {};
   A.OwnedResourcePlan.prototype = {
@@ -13664,7 +13939,7 @@
     call$1(resource) {
       return A._asString(resource).length === 0;
     },
-    $signature: 9
+    $signature: 10
   };
   A.PreparedResourceAssembly.prototype = {};
   A.ResourcePlanAssembler.prototype = {
@@ -13750,14 +14025,14 @@
   };
   A.MaterialStore.prototype = {
     resolveForPass$1(handle) {
-      return this._material_store$_registry.descriptorOf$1(handle);
+      return this._registry.descriptorOf$1(handle);
     }
   };
   A.MaterialStore__registry_closure.prototype = {
     call$3(slot, generation, label) {
       return new A.MaterialHandle(A._asInt(slot), A._asInt(generation), A._asStringQ(label));
     },
-    $signature: 71
+    $signature: 72
   };
   A.UploadedMesh.prototype = {};
   A.MeshStore.prototype = {
@@ -13826,7 +14101,7 @@
     call$3(slot, generation, label) {
       return new A.MeshHandle(A._asInt(slot), A._asInt(generation), A._asStringQ(label));
     },
-    $signature: 74
+    $signature: 75
   };
   A.MeshStore_liveGpuBytes_closure.prototype = {
     call$2(total, entry) {
@@ -13849,7 +14124,7 @@
     },
     finalizeMips$1(handle) {
       var texture,
-        t1 = this._registry,
+        t1 = this._texture_store$_registry,
         record = t1.descriptorOf$1(handle),
         t2 = record.descriptor;
       if (!t2.hasMips)
@@ -13862,7 +14137,7 @@
     },
     _resolve$2(handle, fallback) {
       var t1;
-      this._registry.descriptorOf$1(handle);
+      this._texture_store$_registry.descriptorOf$1(handle);
       t1 = this._texturesBySlot.$index(0, handle.slot);
       return t1 == null ? fallback : t1;
     },
@@ -13940,7 +14215,7 @@
       _this.__TextureStore__fallbackOrm_A = _this._createFallback$1($.$get$FallbackPixels_identityOrm());
       _this.__TextureStore__fallbackEmissive_A = _this._createFallback$1($.$get$FallbackPixels_blackEmissive());
       _this.__TextureStore__fallbackLightmap_A = _this._createFallback$1($.$get$FallbackPixels_neutralLightmap());
-      for (t1 = _this._registry.liveDescriptors$0(), t2 = t1.$ti, t1 = new A._SyncStarIterator(t1._outerHelper(), t2._eval$1("_SyncStarIterator<1>")), t3 = _this._texturesBySlot, t4 = _this._device, t2 = t2._precomputed1; t1.moveNext$0();) {
+      for (t1 = _this._texture_store$_registry.liveDescriptors$0(), t2 = t1.$ti, t1 = new A._SyncStarIterator(t1._outerHelper(), t2._eval$1("_SyncStarIterator<1>")), t3 = _this._texturesBySlot, t4 = _this._device, t2 = t2._precomputed1; t1.moveNext$0();) {
         t5 = t1._async$_current;
         if (t5 == null)
           t5 = t2._as(t5);
@@ -13961,7 +14236,7 @@
       }
     },
     get$liveGpuBytes() {
-      return this._registry.liveDescriptors$0().fold$1$2(0, 0, new A.TextureStore_liveGpuBytes_closure(), type$.int);
+      return this._texture_store$_registry.liveDescriptors$0().fold$1$2(0, 0, new A.TextureStore_liveGpuBytes_closure(), type$.int);
     }
   };
   A.TextureStore_closure.prototype = {
@@ -13974,7 +14249,7 @@
     call$1(pixels) {
       return type$.nullable_Uint8List._as(pixels) == null;
     },
-    $signature: 21
+    $signature: 25
   };
   A.TextureStore_liveGpuBytes_closure.prototype = {
     call$2(total, entry) {
@@ -13983,7 +14258,7 @@
       descriptor = type$.Record_2_TextureHandle_and__TextureRecord._as(entry)._1.descriptor;
       return total + descriptor.width * descriptor.height * descriptor.layers * 4;
     },
-    $signature: 26
+    $signature: 21
   };
   A.SolarPhase.prototype = {
     _enumToString$0() {
@@ -14154,13 +14429,13 @@
     call$1(w) {
       return type$.CameraWaypoint._as(w).eye;
     },
-    $signature: 17
+    $signature: 16
   };
   A.CinematicTourCameraController_closure0.prototype = {
     call$1(w) {
       return type$.CameraWaypoint._as(w).target;
     },
-    $signature: 17
+    $signature: 16
   };
   A.FlyCameraController.prototype = {
     get$forward() {
@@ -14392,13 +14667,13 @@
       var t1 = type$.ResourceUse._as(u).access;
       return t1 === B.ResourceAccess_0 || t1 === B.ResourceAccess_2;
     },
-    $signature: 10
+    $signature: 11
   };
   A.PassDeclaration_writes_closure.prototype = {
     call$1(u) {
       return type$.ResourceUse._as(u).access === B.ResourceAccess_1;
     },
-    $signature: 10
+    $signature: 11
   };
   A.GraphValidationFailureKind.prototype = {
     _enumToString$0() {
@@ -14480,7 +14755,7 @@
     _deletePrograms$1(programs) {
       var t1, t2;
       type$.Iterable_CompiledProgram._as(programs);
-      for (t1 = programs.__js_helper$_map, t1 = new A.LinkedHashMapValueIterator(t1, t1._modifications, t1._first, programs.$ti._eval$1("LinkedHashMapValueIterator<1>")), t2 = this._program_library$_device.gl; t1.moveNext$0();)
+      for (t1 = programs._map, t1 = new A.LinkedHashMapValueIterator(t1, t1._modifications, t1._first, programs.$ti._eval$1("LinkedHashMapValueIterator<1>")), t2 = this._program_library$_device.gl; t1.moveNext$0();)
         t2.deleteProgram(A._asJSObject(t1.__js_helper$_current.handle.handle));
     }
   };
@@ -14756,7 +15031,7 @@
         t2 = this.use.resource;
       return t1.name === t2.name && t1.version === t2.version;
     },
-    $signature: 10
+    $signature: 11
   };
   A.RenderGraphBuilder__checkDependencyCycles_hasCycleFrom.prototype = {
     call$1(node) {
@@ -14852,7 +15127,7 @@
       if (this._disposed)
         A.throwExpression(A.StateError$("resource library is disposed"));
       definition.validate$0();
-      handle = this._materials._material_store$_registry.declare$2$debugLabel(definition, null);
+      handle = this._scene_renderer_impl$_materials._registry.declare$2$debugLabel(definition, null);
       this._materialHandles.add$1(0, handle);
       return handle;
     },
@@ -14873,12 +15148,12 @@
         texture = t5.remove$1(0, handle.slot);
         if (texture != null)
           t6.deleteTexture(t7._as(texture.handle).handle);
-        t4._registry.release$1(handle);
+        t4._texture_store$_registry.release$1(handle);
       }
       t2 = _this._materialHandles;
       t3 = A.List_List$_of(t2, A._instanceType(t2)._precomputed1);
       t5 = t3.length;
-      t6 = _this._materials._material_store$_registry;
+      t6 = _this._scene_renderer_impl$_materials._registry;
       _i = 0;
       for (; _i < t3.length; t3.length === t5 || (0, A.throwConcurrentModificationError)(t3), ++_i)
         t6.release$1(t3[_i]);
@@ -15401,13 +15676,13 @@
       t2 = base + 2;
       B.JSArray_methods.addAll$1(t1._indices, A._setArrayType([base, base + 1, t2, base, t2, base + 3], type$.JSArray_int));
     },
-    $signature: 15
+    $signature: 17
   };
   A.Primitives_icosphere_closure.prototype = {
     call$1(v) {
       return type$.Vec3._as(v).get$normalized();
     },
-    $signature: 11
+    $signature: 8
   };
   A.Primitives_icosphere_getMidpoint.prototype = {
     call$2(p1, p2) {
@@ -15436,7 +15711,7 @@
     call$1(v) {
       return type$.Vec3._as(v).get$normalized().$mul(0, this.radius);
     },
-    $signature: 11
+    $signature: 8
   };
   A.Primitives_roundedBox_face.prototype = {
     call$6(p0, p1, p2, p3, n, t) {
@@ -15450,7 +15725,7 @@
       t2 = base + 2;
       B.JSArray_methods.addAll$1(t1._indices, A._setArrayType([base, base + 1, t2, base, t2, base + 3], type$.JSArray_int));
     },
-    $signature: 15
+    $signature: 17
   };
   A.Primitives_roundedBox_edgeStrip.prototype = {
     call$5(aStart, aEnd, nA, nB, tangent) {
@@ -16267,7 +16542,7 @@
     call$1(v) {
       return isFinite(A._asDouble(v));
     },
-    $signature: 16
+    $signature: 15
   };
   A.Quat.prototype = {
     $mul(_, o) {
@@ -16971,6 +17246,9 @@
       }
       for (t1 = _this.attractors, t2 = t1.length, _i = 0; _i < t1.length; t1.length === t2 || (0, A.throwConcurrentModificationError)(t1), ++_i)
         t1[_i].validate$0();
+      t1 = _this.spriteSheet;
+      if (t1 != null)
+        t1.validate$0();
       t1 = _this.collisionPlane;
       if (t1 != null) {
         if (t1.point.get$isFinite(0)) {
@@ -16993,19 +17271,29 @@
       if (_this.maxParticles <= 0)
         throw A.wrapException(A.ArgumentError$("ParticleEmitter.maxParticles must be > 0", _null));
     },
-    burst$3$inheritedVelocity$position(count, inheritedVelocity, position) {
+    burst$6$animationName$inheritedVelocity$position$spriteIndex$spriteName(count, animationName, inheritedVelocity, position, spriteIndex, spriteName) {
       var toSpawn, spawned, i;
       if (count <= 0)
         return 0;
       toSpawn = Math.min(count, this.maxParticles - this._activeCount);
       for (spawned = 0, i = 0; i < toSpawn; ++i) {
-        this._spawnOne$2$inheritedVelocity$positionOverride(inheritedVelocity, position);
+        this._spawnOne$5$animationNameOverride$inheritedVelocity$positionOverride$spriteIndexOverride$spriteNameOverride(animationName, inheritedVelocity, position, spriteIndex, spriteName);
         ++spawned;
       }
       return spawned;
     },
-    burst$1(count) {
-      return this.burst$3$inheritedVelocity$position(count, null, null);
+    burst$4$animationName$inheritedVelocity$position(count, animationName, inheritedVelocity, position) {
+      return this.burst$6$animationName$inheritedVelocity$position$spriteIndex$spriteName(count, animationName, inheritedVelocity, position, null, null);
+    },
+    burst$4$inheritedVelocity$position$spriteName(count, inheritedVelocity, position, spriteName) {
+      return this.burst$6$animationName$inheritedVelocity$position$spriteIndex$spriteName(count, null, inheritedVelocity, position, null, spriteName);
+    },
+    burst$2$position(count, position) {
+      var _null = null;
+      return this.burst$6$animationName$inheritedVelocity$position$spriteIndex$spriteName(count, _null, _null, position, _null, _null);
+    },
+    burst$4$animationName$spriteIndex$spriteName(count, animationName, spriteIndex, spriteName) {
+      return this.burst$6$animationName$inheritedVelocity$position$spriteIndex$spriteName(count, animationName, null, null, spriteIndex, spriteName);
     },
     update$1(dt) {
       var t1, t2, t3, t4, t5, b, burst, countTriggered, s, _this = this;
@@ -17024,7 +17312,7 @@
           if (countTriggered >= 1)
             continue;
           if (t1 >= countTriggered) {
-            _this.burst$1(burst.sampleCount$1(t5));
+            _this.burst$4$animationName$spriteIndex$spriteName(burst.sampleCount$1(t5), null, null, null);
             if (!(b < t4.length))
               return A.ioore(t4, b);
             B.JSArray_methods.$indexSet(t4, b, t4[b] + 1);
@@ -17048,8 +17336,8 @@
       for (t1 = _this.subEmitters, t2 = t1.length, s = 0; s < t2; ++s)
         t1[s].emitter.update$1(dt);
     },
-    _spawnOne$2$inheritedVelocity$positionOverride(inheritedVelocity, positionOverride) {
-      var t2, p, sample, t3, t4, t0, launchVel, s, sub, vel, _this = this,
+    _spawnOne$5$animationNameOverride$inheritedVelocity$positionOverride$spriteIndexOverride$spriteNameOverride(animationNameOverride, inheritedVelocity, positionOverride, spriteIndexOverride, spriteNameOverride) {
+      var t2, p, sample, t3, t4, t0, launchVel, sheet, idx, anim, s, sub, vel, _this = this,
         t1 = _this._activeCount;
       if (t1 >= _this.maxParticles)
         return;
@@ -17108,9 +17396,55 @@
       t2 = _this.minAngularVelocity;
       p.angularVelocity = t2 + (_this.maxAngularVelocity - t2) * t1.nextDouble$0();
       p.mass = 1;
-      s = p.materialIndex = 0;
+      p.animSequenceIndex = p.spriteTimer = 0;
+      sheet = _this.spriteSheet;
+      if (sheet != null) {
+        if (spriteNameOverride != null) {
+          idx = sheet._nameToIndex.$index(0, spriteNameOverride);
+          t1 = idx == null ? 0 : idx;
+          p.spriteIndex = B.JSInt_methods.clamp$2(t1, 0, sheet.sprites.length - 1);
+          p.isSpriteAnimated = false;
+        } else if (animationNameOverride != null) {
+          anim = sheet.animations.$index(0, animationNameOverride);
+          if (anim != null && anim.frameIndices.length !== 0) {
+            p.spriteIndex = B.JSArray_methods.get$first(anim.frameIndices);
+            p.isSpriteAnimated = true;
+          } else {
+            p.spriteIndex = 0;
+            p.isSpriteAnimated = false;
+          }
+        } else
+          switch (_this.spritePlaybackMode.index) {
+            case 0:
+              p.spriteIndex = 0;
+              p.isSpriteAnimated = false;
+              break;
+            case 1:
+            case 2:
+              p.spriteIndex = 0;
+              p.isSpriteAnimated = true;
+              break;
+            case 3:
+              p.spriteIndex = t1.nextInt$1(sheet.sprites.length);
+              p.isSpriteAnimated = false;
+              break;
+            case 4:
+              p.spriteIndex = sheet.sampleWeightedIndex$1(t1);
+              p.isSpriteAnimated = false;
+              break;
+            case 5:
+              p.spriteIndex = 0;
+              p.isSpriteAnimated = false;
+              break;
+          }
+        p.materialIndex = p.spriteIndex;
+      } else {
+        p.spriteIndex = 0;
+        p.isSpriteAnimated = false;
+        p.materialIndex = 0;
+      }
       ++_this._totalSpawned;
-      for (t1 = _this.subEmitters, t2 = t1.length; s < t2; ++s) {
+      for (t1 = _this.subEmitters, t2 = t1.length, s = 0; s < t2; ++s) {
         sub = t1[s];
         if (sub.trigger === B.SubEmitterTrigger_0) {
           if (sub.inheritVelocity) {
@@ -17118,15 +17452,16 @@
             vel = new A.Vec3(p.vx * t3, p.vy * t3, p.vz * t3);
           } else
             vel = B.Vec3_0_0_0;
-          sub.emitter.burst$3$inheritedVelocity$position(sub.count, vel, new A.Vec3(p.x, p.y, p.z));
+          sub.emitter.burst$6$animationName$inheritedVelocity$position$spriteIndex$spriteName(sub.count, null, vel, new A.Vec3(p.x, p.y, p.z), null, null);
         }
       }
     },
     _spawnOne$0() {
-      return this._spawnOne$2$inheritedVelocity$positionOverride(null, null);
+      var _null = null;
+      return this._spawnOne$5$animationNameOverride$inheritedVelocity$positionOverride$spriteIndexOverride$spriteNameOverride(_null, _null, _null, _null, _null);
     },
     _integrateParticles$1(dt) {
-      var t4, t5, t6, t7, t8, t9, t10, t11, t12, ax, ay, az, t13, t14, t15, t16, t17, t18, f, t19, t20, t21, index, p, t22, t23, tNorm, t24, rx, ry, rz, rLen, radScale, ax0, ay0, az0, tx, ty, tz, tLen, tanScale, s, absorbed, a, attr, dx, dy, dz, dist, strengthFactor, normDist, attrMag, normAxis, t25, postAbsorbed, kdx, kdy, kdz, normal, t26, sub, vel, t27, dotV, t28, t29, curveFactor, moveX, moveY, moveZ, moveDist, hasFiredTimeTrail, frac, _this = this,
+      var sheet, t4, t5, t6, t7, t8, t9, t10, t11, t12, ax, ay, az, t13, t14, t15, t16, t17, t18, f, t19, t20, t21, t22, t23, t24, index, p, t25, t26, tNorm, t27, rx, ry, rz, rLen, radScale, ax0, ay0, az0, tx, ty, tz, tLen, tanScale, s, absorbed, a, attr, dx, dy, dz, dist, strengthFactor, normDist, attrMag, normAxis, t28, postAbsorbed, kdx, kdy, kdz, normal, t29, sub, vel, t30, dotV, t31, t32, curveFactor, moveX, moveY, moveZ, moveDist, hasFiredTimeTrail, frac, _this = this, _null = null,
         t1 = _this.gravity,
         t2 = _this.acceleration,
         t3 = _this.dragCoefficient,
@@ -17135,27 +17470,27 @@
         normOrbitalAxis = _this.orbitalAxis.get$normalized(),
         plane = _this.collisionPlane;
       $label0$0:
-        for (t3 = _this.subEmitters, t4 = t3.length, t5 = _this.sizeCurve, t6 = _this.attractors, t7 = _this.noiseStrength, t8 = t7 > 0.000001, t9 = _this.orbitalAcceleration, t10 = Math.abs(t9) > 0.000001, t11 = _this.radialAcceleration, t12 = Math.abs(t11) > 0.000001, ax = t1.x + t2.x, ay = t1.y + t2.y, az = t1.z + t2.z, t2 = _this._pool, t1 = t2.length, t13 = center.x, t14 = center.y, t15 = center.z, t16 = normOrbitalAxis.y, t17 = normOrbitalAxis.z, t18 = normOrbitalAxis.x, f = _this.noiseFrequency, t19 = _this.noiseSpeed, t20 = t5 == null, t21 = plane != null, index = 0; index < _this._activeCount;) {
+        for (sheet = _this.spriteSheet, t3 = _this.subEmitters, t4 = t3.length, t5 = _this.sizeCurve, t6 = _this.attractors, t7 = _this.noiseStrength, t8 = t7 > 0.000001, t9 = _this.orbitalAcceleration, t10 = Math.abs(t9) > 0.000001, t11 = _this.radialAcceleration, t12 = Math.abs(t11) > 0.000001, ax = t1.x + t2.x, ay = t1.y + t2.y, az = t1.z + t2.z, t2 = _this._pool, t1 = t2.length, t13 = center.x, t14 = center.y, t15 = center.z, t16 = normOrbitalAxis.y, t17 = normOrbitalAxis.z, t18 = normOrbitalAxis.x, f = _this.noiseFrequency, t19 = _this.noiseSpeed, t20 = _this.spritePlaybackMode, t21 = t20 === B.ParticleSpritePlaybackMode_2, t20 = t20 === B.ParticleSpritePlaybackMode_1, t22 = sheet != null, t23 = t5 == null, t24 = plane != null, index = 0; index < _this._activeCount;) {
           if (!(index < t1))
             return A.ioore(t2, index);
           p = t2[index];
-          t22 = p.age += dt;
-          t23 = p.lifetime;
-          if (t22 >= t23) {
+          t25 = p.age += dt;
+          t26 = p.lifetime;
+          if (t25 >= t26) {
             _this._killParticleAt$1(index);
             continue $label0$0;
           }
-          tNorm = t22 / t23;
-          t22 = p.x;
-          p.prevX = t22;
-          t23 = p.y;
-          p.prevY = t23;
-          t24 = p.z;
-          p.prevZ = t24;
+          tNorm = t25 / t26;
+          t25 = p.x;
+          p.prevX = t25;
+          t26 = p.y;
+          p.prevY = t26;
+          t27 = p.z;
+          p.prevZ = t27;
           if (t12) {
-            rx = t22 - t13;
-            ry = t23 - t14;
-            rz = t24 - t15;
+            rx = t25 - t13;
+            ry = t26 - t14;
+            rz = t27 - t15;
             rLen = Math.sqrt(rx * rx + ry * ry + rz * rz);
             if (rLen > 0.00001) {
               radScale = t11 / rLen;
@@ -17188,16 +17523,16 @@
             }
           }
           if (t8) {
-            t22 = p.x;
-            t23 = p.y;
-            t24 = p.z;
+            t25 = p.x;
+            t26 = p.y;
+            t27 = p.z;
             s = t19 * _this._elapsedTime;
-            t23 *= f;
-            t24 *= f;
-            t22 *= f;
-            ax0 += (Math.sin(t23 + s) + Math.cos(t24 * 1.3 - s * 0.7)) * t7;
-            ay0 += (Math.sin(t24 + s * 1.1) + Math.cos(t22 * 1.1 - s)) * t7;
-            az0 += (Math.sin(t22 - s * 0.9) + Math.cos(t23 * 0.9 + s * 1.2)) * t7;
+            t26 *= f;
+            t27 *= f;
+            t25 *= f;
+            ax0 += (Math.sin(t26 + s) + Math.cos(t27 * 1.3 - s * 0.7)) * t7;
+            ay0 += (Math.sin(t27 + s * 1.1) + Math.cos(t25 * 1.1 - s)) * t7;
+            az0 += (Math.sin(t25 - s * 0.9) + Math.cos(t26 * 0.9 + s * 1.2)) * t7;
           }
           a = 0;
           for (;;) {
@@ -17228,7 +17563,7 @@
                   strengthFactor = 1;
                   break;
                 default:
-                  strengthFactor = null;
+                  strengthFactor = _null;
               }
               attrMag = attr.get$strength().$mul(0, strengthFactor).$div(0, dist);
               ax0 = B.JSNumber_methods.$add(ax0, dx.$mul(0, attrMag));
@@ -17255,18 +17590,18 @@
           }
           if (absorbed)
             continue $label0$0;
-          t22 = p.x;
-          t23 = p.vx;
-          p.x = t22 + (t23 * dt + 0.5 * ax0 * dt * dt);
-          t22 = p.y;
-          t24 = p.vy;
-          p.y = t22 + (t24 * dt + 0.5 * ay0 * dt * dt);
-          t22 = p.z;
-          t25 = p.vz;
-          p.z = t22 + (t25 * dt + 0.5 * az0 * dt * dt);
-          p.vx = (t23 + ax0 * dt) * dragDecay;
-          p.vy = (t24 + ay0 * dt) * dragDecay;
-          p.vz = (t25 + az0 * dt) * dragDecay;
+          t25 = p.x;
+          t26 = p.vx;
+          p.x = t25 + (t26 * dt + 0.5 * ax0 * dt * dt);
+          t25 = p.y;
+          t27 = p.vy;
+          p.y = t25 + (t27 * dt + 0.5 * ay0 * dt * dt);
+          t25 = p.z;
+          t28 = p.vz;
+          p.z = t25 + (t28 * dt + 0.5 * az0 * dt * dt);
+          p.vx = (t26 + ax0 * dt) * dragDecay;
+          p.vy = (t27 + ay0 * dt) * dragDecay;
+          p.vz = (t28 + az0 * dt) * dragDecay;
           a = 0;
           for (;;) {
             if (!(a < t6.length)) {
@@ -17288,24 +17623,24 @@
           }
           if (postAbsorbed)
             continue $label0$0;
-          if (t21) {
+          if (t24) {
             normal = plane.normal.get$normalized();
-            t22 = p.x;
-            t23 = plane.point;
-            t24 = normal.x;
-            t25 = normal.y;
-            t26 = normal.z;
-            dist = (t22 - t23.x) * t24 + (p.y - t23.y) * t25 + (p.z - t23.z) * t26;
+            t25 = p.x;
+            t26 = plane.point;
+            t27 = normal.x;
+            t28 = normal.y;
+            t29 = normal.z;
+            dist = (t25 - t26.x) * t27 + (p.y - t26.y) * t28 + (p.z - t26.z) * t29;
             if (dist <= 0) {
               for (s = 0; s < t4; ++s) {
                 sub = t3[s];
                 if (sub.trigger === B.SubEmitterTrigger_2) {
                   if (sub.inheritVelocity) {
-                    t22 = sub.inheritVelocityFactor;
-                    vel = new A.Vec3(p.vx * t22, p.vy * t22, p.vz * t22);
+                    t25 = sub.inheritVelocityFactor;
+                    vel = new A.Vec3(p.vx * t25, p.vy * t25, p.vz * t25);
                   } else
                     vel = B.Vec3_0_0_0;
-                  sub.emitter.burst$3$inheritedVelocity$position(sub.count, vel, new A.Vec3(p.x, p.y, p.z));
+                  sub.emitter.burst$6$animationName$inheritedVelocity$position$spriteIndex$spriteName(sub.count, _null, vel, new A.Vec3(p.x, p.y, p.z), _null, _null);
                 }
               }
               switch (plane.action.index) {
@@ -17313,85 +17648,94 @@
                   _this._killParticleAt$1(index);
                   continue $label0$0;
                 case 2:
-                  p.x = p.x - dist * t24;
-                  p.y = p.y - dist * t25;
-                  p.z = p.z - dist * t26;
-                  t22 = p.vx;
-                  t23 = p.vy;
-                  t27 = p.vz;
-                  dotV = t22 * t24 + t23 * t25 + t27 * t26;
-                  t24 = t22 - dotV * t24;
-                  p.vx = t24;
-                  t25 = t23 - dotV * t25;
-                  p.vy = t25;
-                  t26 = t27 - dotV * t26;
-                  p.vz = t26;
-                  t27 = 1 - plane.friction;
-                  p.vx = t24 * t27;
-                  p.vy = t25 * t27;
-                  p.vz = t26 * t27;
+                  p.x = p.x - dist * t27;
+                  p.y = p.y - dist * t28;
+                  p.z = p.z - dist * t29;
+                  t25 = p.vx;
+                  t26 = p.vy;
+                  t30 = p.vz;
+                  dotV = t25 * t27 + t26 * t28 + t30 * t29;
+                  t27 = t25 - dotV * t27;
+                  p.vx = t27;
+                  t28 = t26 - dotV * t28;
+                  p.vy = t28;
+                  t29 = t30 - dotV * t29;
+                  p.vz = t29;
+                  t30 = 1 - plane.friction;
+                  p.vx = t27 * t30;
+                  p.vy = t28 * t30;
+                  p.vz = t29 * t30;
                   break;
                 case 0:
-                  p.x = p.x - dist * t24;
-                  p.y = p.y - dist * t25;
-                  p.z = p.z - dist * t26;
-                  t22 = p.vx;
-                  t23 = p.vy;
-                  t27 = p.vz;
-                  dotV = t22 * t24 + t23 * t25 + t27 * t26;
+                  p.x = p.x - dist * t27;
+                  p.y = p.y - dist * t28;
+                  p.z = p.z - dist * t29;
+                  t25 = p.vx;
+                  t26 = p.vy;
+                  t30 = p.vz;
+                  dotV = t25 * t27 + t26 * t28 + t30 * t29;
                   if (dotV < 0) {
-                    t28 = (1 + plane.restitution) * dotV;
-                    t29 = 1 - plane.friction;
-                    p.vx = (t22 - t28 * t24) * t29;
-                    p.vy = (t23 - t28 * t25) * t29;
-                    p.vz = (t27 - t28 * t26) * t29;
+                    t31 = (1 + plane.restitution) * dotV;
+                    t32 = 1 - plane.friction;
+                    p.vx = (t25 - t31 * t27) * t32;
+                    p.vy = (t26 - t31 * t28) * t32;
+                    p.vz = (t30 - t31 * t29) * t32;
                   }
                   break;
               }
             }
           }
-          if (t20)
-            curveFactor = null;
+          if (t23)
+            curveFactor = _null;
           else {
-            t22 = B.JSNumber_methods.clamp$2(tNorm, 0, 1);
-            t22 = t5._curves$_eval.call$1(t22);
-            curveFactor = t22;
+            t25 = B.JSNumber_methods.clamp$2(tNorm, 0, 1);
+            t25 = t5._curves$_eval.call$1(t25);
+            curveFactor = t25;
           }
           if (curveFactor == null)
             curveFactor = tNorm;
-          t22 = p.startSize;
-          p.size = t22 + (p.endSize - t22) * curveFactor;
+          t25 = p.startSize;
+          p.size = t25 + (p.endSize - t25) * curveFactor;
           p.rotation = p.rotation + p.angularVelocity * dt;
           moveX = p.x - p.prevX;
           moveY = p.y - p.prevY;
           moveZ = p.z - p.prevZ;
           moveDist = Math.sqrt(moveX * moveX + moveY * moveY + moveZ * moveZ);
           p.trailTimer += dt;
-          for (t22 = moveDist > 0.000001, hasFiredTimeTrail = false, s = 0; s < t4; ++s) {
+          for (t25 = moveDist > 0.000001, hasFiredTimeTrail = false, s = 0; s < t4; ++s) {
             sub = t3[s];
             if (sub.trigger === B.SubEmitterTrigger_3) {
               if (sub.inheritVelocity) {
-                t23 = sub.inheritVelocityFactor;
-                vel = new A.Vec3(p.vx * t23, p.vy * t23, p.vz * t23);
+                t26 = sub.inheritVelocityFactor;
+                vel = new A.Vec3(p.vx * t26, p.vy * t26, p.vz * t26);
               } else
                 vel = B.Vec3_0_0_0;
-              t23 = sub.trailDistance;
-              if (t23 > 0) {
+              t26 = sub.trailDistance;
+              if (t26 > 0) {
                 p.trailDistanceAccumulator += moveDist;
-                for (t24 = sub.emitter, t25 = sub.count; t26 = p.trailDistanceAccumulator, t26 >= t23;) {
-                  t26 -= t23;
-                  p.trailDistanceAccumulator = t26;
-                  frac = t22 ? B.JSNumber_methods.clamp$2(moveDist - t26, 0, moveDist) / moveDist : 1;
-                  t24.burst$3$inheritedVelocity$position(t25, vel, new A.Vec3(p.prevX + moveX * frac, p.prevY + moveY * frac, p.prevZ + moveZ * frac));
+                for (t27 = sub.emitter, t28 = sub.count; t29 = p.trailDistanceAccumulator, t29 >= t26;) {
+                  t29 -= t26;
+                  p.trailDistanceAccumulator = t29;
+                  frac = t25 ? B.JSNumber_methods.clamp$2(moveDist - t29, 0, moveDist) / moveDist : 1;
+                  t27.burst$6$animationName$inheritedVelocity$position$spriteIndex$spriteName(t28, _null, vel, new A.Vec3(p.prevX + moveX * frac, p.prevY + moveY * frac, p.prevZ + moveZ * frac), _null, _null);
                 }
               } else if (p.trailTimer >= sub.trailInterval) {
-                sub.emitter.burst$3$inheritedVelocity$position(sub.count, vel, new A.Vec3(p.x, p.y, p.z));
+                sub.emitter.burst$6$animationName$inheritedVelocity$position$spriteIndex$spriteName(sub.count, _null, vel, new A.Vec3(p.x, p.y, p.z), _null, _null);
                 hasFiredTimeTrail = true;
               }
             }
           }
           if (hasFiredTimeTrail)
             p.trailTimer = 0;
+          if (t22) {
+            if (p.isSpriteAnimated)
+              if (t20) {
+                t25 = sheet.sprites.length;
+                p.spriteIndex = B.JSInt_methods.clamp$2(B.JSNumber_methods.floor$0(tNorm * t25), 0, t25 - 1);
+              } else if (t21)
+                p.spriteIndex = B.JSInt_methods.$mod(B.JSNumber_methods.floor$0((p.spriteTimer += dt) * 12), sheet.sprites.length);
+            p.materialIndex = p.spriteIndex;
+          }
           ++index;
         }
     },
@@ -17411,7 +17755,7 @@
             vel = new A.Vec3(dying.vx * t5, dying.vy * t5, dying.vz * t5);
           } else
             vel = B.Vec3_0_0_0;
-          sub.emitter.burst$3$inheritedVelocity$position(sub.count, vel, deathPos);
+          sub.emitter.burst$6$animationName$inheritedVelocity$position$spriteIndex$spriteName(sub.count, null, vel, deathPos, null, null);
         }
       }
       t3 = --_this._activeCount;
@@ -17442,6 +17786,10 @@
         dying.angularVelocity = last.angularVelocity;
         dying.mass = last.mass;
         dying.materialIndex = last.materialIndex;
+        dying.spriteIndex = last.spriteIndex;
+        dying.spriteTimer = last.spriteTimer;
+        dying.animSequenceIndex = last.animSequenceIndex;
+        dying.isSpriteAnimated = last.isSpriteAnimated;
         dying.trailTimer = last.trailTimer;
         dying.isAlive = last.isAlive;
       }
@@ -17452,39 +17800,55 @@
       t1.endSize = t1.startSize = t1.size = t1.lifetime = 1;
       t1.angularVelocity = t1.rotation = 0;
       t1.mass = 1;
-      t1.trailTimer = t1.materialIndex = 0;
+      t1.animSequenceIndex = t1.spriteTimer = t1.spriteIndex = t1.materialIndex = 0;
+      t1.isSpriteAnimated = false;
+      t1.trailTimer = 0;
       t1.isAlive = false;
     },
     submit$3$includeSubEmitters(encoder, frame, includeSubEmitters) {
-      var t1, frustum, cameraEye, cameraForward, defaultMat, t2, t3, t4, t5, t6, t7, t8, i, p, t9, t10, t11, t12, rotation, finalScale, t13, t14, speed, s, _this = this, submitted = 0;
+      var t1, frustum, cameraEye, cameraForward, defaultMat, t2, t3, t4, sheet, t5, t6, t7, t8, t9, t10, i, p, t11, t12, t13, t14, rotation, finalScale, t15, t16, speed, result, sIdx, activeMat, s, _this = this, submitted = 0;
       if (_this._activeCount > 0) {
         t1 = frame.camera;
         frustum = A.Frustum_Frustum$fromViewProjection(t1.viewProjection);
         cameraEye = t1.eye;
         cameraForward = t1.forward;
         defaultMat = _this.material;
-        for (t1 = _this.mesh, t2 = _this.drawMode, t3 = _this.blendMode, t4 = _this.instanceFamilyKey, t5 = _this.alignment === B.ParticleAlignment_2, t6 = _this._pool, t7 = t6.length, t8 = _this.stretchFactor, i = 0; i < _this._activeCount; ++i) {
+        for (t1 = _this.mesh, t2 = _this.drawMode, t3 = _this.blendMode, t4 = _this.instanceFamilyKey, sheet = _this.spriteSheet, t5 = _this.alignment === B.ParticleAlignment_2, t6 = _this._pool, t7 = t6.length, t8 = _this.stretchFactor, t9 = type$.MaterialHandle, t10 = sheet != null, i = 0; i < _this._activeCount; ++i) {
           if (!(i < t7))
             return A.ioore(t6, i);
           p = t6[i];
-          t9 = p.x;
-          t10 = p.y;
-          t11 = p.z;
-          t12 = p.size * 0.5;
-          if (frustum.testAabb$1(new A.Aabb(new A.Vec3(t9 - t12, t10 - t12, t11 - t12), new A.Vec3(t9 + t12, t10 + t12, t11 + t12))) === B.FrustumTest_0)
+          t11 = p.x;
+          t12 = p.y;
+          t13 = p.z;
+          t14 = p.size * 0.5;
+          if (frustum.testAabb$1(new A.Aabb(new A.Vec3(t11 - t14, t12 - t14, t13 - t14), new A.Vec3(t11 + t14, t12 + t14, t13 + t14))) === B.FrustumTest_0)
             continue;
           rotation = _this._rotationForParticle$3(p, cameraEye, cameraForward);
           finalScale = p.size;
           if (t5) {
-            t12 = p.vx;
-            t13 = p.vy;
-            t14 = p.vz;
-            speed = Math.sqrt(t12 * t12 + t13 * t13 + t14 * t14);
+            t14 = p.vx;
+            t15 = p.vy;
+            t16 = p.vz;
+            speed = Math.sqrt(t14 * t14 + t15 * t15 + t16 * t16);
             finalScale = p.size * (1 + speed * t8);
           }
           if (finalScale <= 0.000001)
             finalScale = 0.000001;
-          encoder.submit$1(new A.RetainedItemDescriptor(t1, defaultMat, new A.Transform(new A.Vec3(t9, t10, t11), rotation, finalScale), -1, t2, t3, false, false, t4));
+          if (t10 && sheet._materials.length === sheet.sprites.length) {
+            t14 = p.spriteIndex;
+            t15 = sheet._materials;
+            result = A.List_List$from(t15, false, t9);
+            result.$flags = 3;
+            sIdx = B.JSInt_methods.clamp$2(t14, 0, result.length - 1);
+            result = A.List_List$from(t15, false, t9);
+            result.$flags = 3;
+            t15 = result;
+            if (!(sIdx >= 0 && sIdx < t15.length))
+              return A.ioore(t15, sIdx);
+            activeMat = t15[sIdx];
+          } else
+            activeMat = defaultMat;
+          encoder.submit$1(new A.RetainedItemDescriptor(t1, activeMat, new A.Transform(new A.Vec3(t11, t12, t13), rotation, finalScale), -1, t2, t3, false, false, t4));
           ++submitted;
         }
       }
@@ -17804,6 +18168,154 @@
     },
     $isEmitterShape: 1
   };
+  A.ParticleSpritePlaybackMode.prototype = {
+    _enumToString$0() {
+      return "ParticleSpritePlaybackMode." + this._name;
+    }
+  };
+  A.ParticleSprite.prototype = {
+    validate$0() {
+      var t2, t3, _this = this, _null = null,
+        t1 = _this.name;
+      if (t1.length === 0)
+        throw A.wrapException(A.ArgumentError$("ParticleSprite name must not be empty", _null));
+      t2 = _this.uMin;
+      if (!isFinite(t2) || !isFinite(_this.vMin) || !isFinite(_this.uMax) || !isFinite(_this.vMax))
+        throw A.wrapException(A.ArgumentError$("ParticleSprite UV coordinates must be finite: " + t1, _null));
+      if (!(t2 < 0)) {
+        t3 = _this.uMax;
+        t3 = t3 > 1 || t2 >= t3;
+      } else
+        t3 = true;
+      if (t3)
+        throw A.wrapException(A.ArgumentError$("ParticleSprite horizontal UV range invalid: [" + A.S(t2) + ", " + A.S(_this.uMax) + "] for " + t1, _null));
+      t2 = _this.vMin;
+      if (!(t2 < 0)) {
+        t3 = _this.vMax;
+        t3 = t3 > 1 || t2 >= t3;
+      } else
+        t3 = true;
+      if (t3)
+        throw A.wrapException(A.ArgumentError$("ParticleSprite vertical UV range invalid: [" + A.S(t2) + ", " + A.S(_this.vMax) + "] for " + t1, _null));
+      t1 = _this.aspectRatio;
+      if (!isFinite(t1) || t1 <= 0)
+        throw A.wrapException(A.ArgumentError$("ParticleSprite aspectRatio must be finite and > 0", _null));
+      if (!isFinite(0.5))
+        throw A.wrapException(A.ArgumentError$("ParticleSprite anchor must be finite", _null));
+      if (!isFinite(_this.weight))
+        throw A.wrapException(A.ArgumentError$("ParticleSprite weight must be finite and >= 0", _null));
+    }
+  };
+  A.SpriteAnimation.prototype = {
+    validate$0() {
+      var t1, t2, t3, _i, _null = null;
+      if (this.name.length === 0)
+        throw A.wrapException(A.ArgumentError$("SpriteAnimation name must not be empty", _null));
+      t1 = this.frameIndices;
+      t2 = t1.length;
+      if (t2 === 0)
+        throw A.wrapException(A.ArgumentError$("SpriteAnimation must have at least one frame", _null));
+      t3 = this.frameRate;
+      if (!isFinite(t3) || t3 <= 0)
+        throw A.wrapException(A.ArgumentError$("SpriteAnimation frameRate must be finite and > 0", _null));
+      for (_i = 0; _i < t2; ++_i)
+        if (t1[_i] < 0)
+          throw A.wrapException(A.ArgumentError$("SpriteAnimation frameIndex must be >= 0", _null));
+    }
+  };
+  A.ParticleSpriteSheet.prototype = {
+    _indexData$0() {
+      var t2, t3, t4, _i, sprite, t5, t6,
+        t1 = this._nameToIndex;
+      t1.clear$0(0);
+      t2 = this._tagToIndices;
+      t2.clear$0(0);
+      for (t3 = this.sprites, t4 = t3.length, _i = 0; _i < t4; ++_i) {
+        sprite = t3[_i];
+        t5 = sprite.index;
+        t1.$indexSet(0, sprite.name, t5);
+        for (t6 = sprite.tags, t6 = t6.get$iterator(t6); t6.moveNext$0();)
+          J.add$1$ax(t2.putIfAbsent$2(t6.get$current(), new A.ParticleSpriteSheet__indexData_closure()), t5);
+      }
+    },
+    validate$0() {
+      var t1, t2, i, s, t3, t4, t5, _i, idx, _null = null;
+      if (this.texture.slot < 0)
+        throw A.wrapException(A.ArgumentError$("ParticleSpriteSheet texture handle must be valid", _null));
+      t1 = this.sprites;
+      t2 = t1.length;
+      if (t2 === 0)
+        throw A.wrapException(A.ArgumentError$("ParticleSpriteSheet must contain at least one sprite", _null));
+      for (i = 0; i < t2; ++i) {
+        s = t1[i];
+        t3 = s.index;
+        if (t3 !== i)
+          throw A.wrapException(A.ArgumentError$("Sprite index " + t3 + " does not match slot " + i, _null));
+        s.validate$0();
+      }
+      for (t1 = this.animations.get$values(), t1 = t1.get$iterator(t1); t1.moveNext$0();) {
+        t3 = t1.get$current();
+        t3.validate$0();
+        for (t4 = t3.frameIndices, t5 = t4.length, _i = 0; _i < t5; ++_i) {
+          idx = t4[_i];
+          if (idx >= t2)
+            throw A.wrapException(A.ArgumentError$("Animation " + t3.name + " references out-of-range index " + idx, _null));
+        }
+      }
+    },
+    bind$2$baseMaterial(resources, baseMaterial) {
+      var t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19, t20, t21, t22, t23, t24, t25, t26, t27, i, s, matDef, handle,
+        t1 = this._materials;
+      B.JSArray_methods.clear$0(t1);
+      for (t2 = this.sprites, t3 = t2.length, t4 = resources._scene_renderer_impl$_materials._registry, t5 = resources._materialHandles, t6 = baseMaterial.alphaCutoff, t7 = baseMaterial.alphaMode, t8 = baseMaterial.lightmapIntensity, t9 = baseMaterial.lightmapTexture, t10 = baseMaterial.clearcoatRoughness, t11 = baseMaterial.clearcoatStrength, t12 = baseMaterial.occlusionStrength, t13 = baseMaterial.metallic, t14 = baseMaterial.roughness, t15 = baseMaterial.ormColorSpace, t16 = baseMaterial.ormTexture, t17 = baseMaterial.normalStrength, t18 = baseMaterial.normalColorSpace, t19 = baseMaterial.normalTexture, t20 = baseMaterial.emissiveStrength, t21 = baseMaterial.emissiveTexture, t22 = baseMaterial.tintB, t23 = baseMaterial.tintG, t24 = baseMaterial.tintR, t25 = baseMaterial.albedoColorSpace, t26 = baseMaterial.key + "_s", t27 = this.texture, i = 0; i < t3; ++i) {
+        s = t2[i];
+        matDef = new A.MaterialDefinition(t26 + i + "_" + s.name, t27, t25, t24, t23, t22, t21, t20, t19, t18, t17, t16, t15, t14, t13, t12, t11, t10, t9, t8, s.uvScaleU, s.uvScaleV, s.uvOffsetU, s.uvOffsetV, t7, t6, false, true, false, false);
+        if (resources._disposed)
+          A.throwExpression(A.StateError$("resource library is disposed"));
+        matDef.validate$0();
+        handle = t4.declare$2$debugLabel(matDef, null);
+        t5.add$1(0, handle);
+        B.JSArray_methods.add$1(t1, handle);
+      }
+    },
+    sampleWeightedIndex$1(random) {
+      var cw, sum, i, totalWeight, roll, high, low, mid,
+        t1 = this.sprites,
+        t2 = t1.length;
+      if (t2 === 1)
+        return 0;
+      cw = this._cumulativeWeights;
+      if (cw == null || cw.length !== t2) {
+        cw = A.List_List$filled(t2, 0, false, type$.double);
+        for (sum = 0, i = 0; i < t2; ++i) {
+          sum += t1[i].weight;
+          B.JSArray_methods.$indexSet(cw, i, sum);
+        }
+        this._cumulativeWeights = cw;
+      }
+      totalWeight = B.JSArray_methods.get$last(cw);
+      if (totalWeight <= 0)
+        return random.nextInt$1(t2);
+      roll = random.nextDouble$0() * totalWeight;
+      high = t2 - 1;
+      for (t1 = cw.length, low = 0; low < high;) {
+        mid = B.JSInt_methods._shrOtherPositive$1(low + high, 1);
+        if (!(mid < t1))
+          return A.ioore(cw, mid);
+        if (cw[mid] < roll)
+          low = mid + 1;
+        else
+          high = mid;
+      }
+      return low;
+    }
+  };
+  A.ParticleSpriteSheet__indexData_closure.prototype = {
+    call$0() {
+      return A._setArrayType([], type$.JSArray_int);
+    },
+    $signature: 61
+  };
   A._BloomBlurAxis.prototype = {
     _enumToString$0() {
       return "_BloomBlurAxis." + this._name;
@@ -17960,7 +18472,7 @@
         material = this.resolveMaterial.call$1(handle),
         t1 = encoder.device;
       A.WebGl2DeviceDraw_bindTextureImpl(t1, 0, type$.GpuObject._as(this.resolveAlbedo.call$1(material.albedoTexture)));
-      A.WebGl2DeviceDraw_setUniformImpl(t1, "uAlphaCutoff", new A.UniformValue(B.UniformType_0, material.alphaMode === B.AlphaMode_1 ? 0.5 : 0));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uAlphaCutoff", new A.UniformValue(B.UniformType_0, material.alphaMode === B.AlphaMode_1 ? material.alphaCutoff : 0));
       A.WebGl2DeviceDraw_setUniformImpl(t1, "uAffineWarpStrength", new A.UniformValue(B.UniformType_0, 0));
       baseState = this.descriptor.toDrawState$0();
       A.WebGl2DeviceDraw_applyDrawStateImpl(t1, baseState);
@@ -18413,7 +18925,7 @@
         material = this.resolveMaterial.call$1(handle),
         t1 = encoder.device;
       A.WebGl2DeviceDraw_bindTextureImpl(t1, 0, type$.GpuObject._as(this.resolveAlbedo.call$1(material.albedoTexture)));
-      A.WebGl2DeviceDraw_setUniformImpl(t1, "uAlphaCutoff", new A.UniformValue(B.UniformType_0, material.alphaMode === B.AlphaMode_1 ? 0.5 : 0));
+      A.WebGl2DeviceDraw_setUniformImpl(t1, "uAlphaCutoff", new A.UniformValue(B.UniformType_0, material.alphaMode === B.AlphaMode_1 ? material.alphaCutoff : 0));
       baseState = this.descriptor.toDrawState$0();
       A.WebGl2DeviceDraw_applyDrawStateImpl(t1, baseState);
     },
@@ -18474,14 +18986,14 @@
     call$1(view) {
       return this._box_0.lastLightView = view;
     },
-    $signature: 61
+    $signature: 62
   };
   A.buildShadowGraph_closure0.prototype = {
     call$0() {
       var t1 = this._box_0.lastLightView;
       return t1 == null ? this.fallbackLightView : t1;
     },
-    $signature: 62
+    $signature: 63
   };
   A.ShadowedWorldFeature.prototype = {
     get$id() {
@@ -18736,23 +19248,23 @@
       A.WebGl2DeviceDraw_bindTextureImpl(t2, 0, t1._as(_this.resolveAlbedo.call$1(material.albedoTexture)));
       A.WebGl2DeviceDraw_bindTextureImpl(t2, 3, t1._as(_this.resolveNormal.call$1(material.normalTexture)));
       A.WebGl2DeviceDraw_bindTextureImpl(t2, 4, t1._as(_this.resolveOrm.call$1(material.ormTexture)));
-      A.WebGl2DeviceDraw_bindTextureImpl(t2, 5, t1._as(_this.resolveEmissive.call$1(null)));
-      A.WebGl2DeviceDraw_bindTextureImpl(t2, 6, t1._as(_this.resolveLightmap.call$1(null)));
-      A.WebGl2DeviceDraw_setUniformImpl(t2, "uAlphaCutoff", new A.UniformValue(B.UniformType_0, material.alphaMode === B.AlphaMode_1 ? 0.5 : 0));
+      A.WebGl2DeviceDraw_bindTextureImpl(t2, 5, t1._as(_this.resolveEmissive.call$1(material.emissiveTexture)));
+      A.WebGl2DeviceDraw_bindTextureImpl(t2, 6, t1._as(_this.resolveLightmap.call$1(material.lightmapTexture)));
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uAlphaCutoff", new A.UniformValue(B.UniformType_0, material.alphaMode === B.AlphaMode_1 ? material.alphaCutoff : 0));
       A.WebGl2DeviceDraw_setUniformImpl(t2, "uOpaqueCoverage", new A.UniformValue(B.UniformType_0, drawMode === B.DrawMode_2 ? 0 : 1));
       A.WebGl2DeviceDraw_setUniformImpl(t2, "uAffineWarpStrength", new A.UniformValue(B.UniformType_0, 0));
       t1 = type$.JSArray_double;
       A.WebGl2DeviceDraw_setUniformImpl(t2, "uMaterialTint", new A.UniformValue(B.UniformType_2, new Float32Array(A._ensureNativeList(A._setArrayType([material.tintR, material.tintG, material.tintB], t1)))));
       A.WebGl2DeviceDraw_setUniformImpl(t2, "uEmissiveStrength", new A.UniformValue(B.UniformType_0, material.emissiveStrength));
-      A.WebGl2DeviceDraw_setUniformImpl(t2, "uUvScaleOffset", new A.UniformValue(B.UniformType_3, new Float32Array(A._ensureNativeList(A._setArrayType([material.uvScaleU, material.uvScaleV, 0, 0], t1)))));
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uUvScaleOffset", new A.UniformValue(B.UniformType_3, new Float32Array(A._ensureNativeList(A._setArrayType([material.uvScaleU, material.uvScaleV, material.uvOffsetU, material.uvOffsetV], t1)))));
       A.WebGl2DeviceDraw_setUniformImpl(t2, "uNormalStrength", new A.UniformValue(B.UniformType_0, material.normalStrength * environment.normalStrengthScale));
       A.WebGl2DeviceDraw_setUniformImpl(t2, "uRoughness", new A.UniformValue(B.UniformType_0, material.roughness * environment.roughnessScale));
       A.WebGl2DeviceDraw_setUniformImpl(t2, "uMetallic", new A.UniformValue(B.UniformType_0, material.metallic * environment.metallicScale));
       A.WebGl2DeviceDraw_setUniformImpl(t2, "uSpecularScale", new A.UniformValue(B.UniformType_0, environment.specularScale));
       A.WebGl2DeviceDraw_setUniformImpl(t2, "uClearcoatStrength", new A.UniformValue(B.UniformType_0, material.clearcoatStrength));
       A.WebGl2DeviceDraw_setUniformImpl(t2, "uClearcoatRoughness", new A.UniformValue(B.UniformType_0, material.clearcoatRoughness));
-      A.WebGl2DeviceDraw_setUniformImpl(t2, "uOcclusionStrength", new A.UniformValue(B.UniformType_0, 1));
-      A.WebGl2DeviceDraw_setUniformImpl(t2, "uLightmapIntensity", new A.UniformValue(B.UniformType_0, 0));
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uOcclusionStrength", new A.UniformValue(B.UniformType_0, material.occlusionStrength));
+      A.WebGl2DeviceDraw_setUniformImpl(t2, "uLightmapIntensity", new A.UniformValue(B.UniformType_0, material.lightmapIntensity));
       A.WebGl2DeviceDraw_setUniformImpl(t2, "uReceivesShadow", new A.UniformValue(B.UniformType_0, itemReceivesShadow ? 1 : 0));
       $label0$1: {
         t1 = null;
@@ -19274,7 +19786,7 @@
       A._asString(__wc0_formal);
       return !type$._ActiveClipInstance._as(instance).update$1(this.dt);
     },
-    $signature: 63
+    $signature: 64
   };
   A.InstancedMeshNode.prototype = {
     markDirty$0() {
@@ -19522,7 +20034,7 @@
       for (t1 = node._children, t2 = t1.length, _i = 0; _i < t1.length; t1.length === t2 || (0, A.throwConcurrentModificationError)(t1), ++_i)
         this.call$1(t1[_i]);
     },
-    $signature: 64
+    $signature: 65
   };
   A.GpuBufferUsage.prototype = {
     _enumToString$0() {
@@ -19619,42 +20131,49 @@
   };
   A.FrameContext.prototype = {};
   A.PixeldartApp.prototype = {
-    createProceduralTexture$5$debugLabel$height$width$wrap(pixels, debugLabel, height, width, wrap) {
-      var t3, t4, t5, handle, record, next, t6, texture,
-        _s28_ = "resource library is disposed",
-        t1 = this.renderer,
-        t2 = t1.get$resources();
-      if (t2._disposed)
-        A.throwExpression(A.StateError$(_s28_));
-      t3 = t2._textures;
-      if (width > 0)
-        t4 = height <= 0;
-      else
-        t4 = true;
-      if (t4)
-        A.throwExpression(A.ArgumentError$("TextureStore.declare dimensions/layers must be > 0", null));
-      if (!isFinite(16))
-        A.throwExpression(A.ArgumentError$("TextureStore.declare anisotropy must be in [1, 16]: 16", null));
-      t4 = t3._registry;
-      t5 = type$.nullable_Uint8List;
-      handle = t4.declare$2$debugLabel(new A._TextureRecord(new A.GpuTextureDescriptor(width, height, 1, true, B.GpuTextureFilter_2, B.GpuTextureFilter_1, wrap, 16), A.List_List$filled(1, null, false, t5), false), debugLabel);
-      record = t4.descriptorOf$1(handle);
-      next = A.List_List$_of(record.layerPixels, t5);
-      B.JSArray_methods.$indexSet(next, 0, pixels);
-      t5 = record.descriptor;
-      t4.updateDescriptor$2(handle, new A._TextureRecord(t5, next, record.mipsFinalized));
-      t4 = t3._texturesBySlot;
-      t6 = handle.slot;
-      texture = t4.$index(0, t6);
-      if (texture == null) {
-        texture = A.WebGl2DeviceResources_createTextureImpl(t3._device, t5);
-        t4.$indexSet(0, t6, texture);
-      }
-      A.WebGl2DeviceResources_uploadTextureLayerImpl(t3._device, texture, 0, pixels);
-      t2._textureHandles.add$1(0, handle);
-      t1 = t1.get$resources();
+    createTexture$9$anisotropy$debugLabel$hasMips$height$magFilter$minFilter$pixels$width$wrap(anisotropy, debugLabel, hasMips, height, magFilter, minFilter, pixels, width, wrap) {
+      var t2, t3, t4, handle, record, next, t5, texture, _null = null,
+        t1 = this.renderer.get$resources();
       if (t1._disposed)
-        A.throwExpression(A.StateError$(_s28_));
+        A.throwExpression(A.StateError$("resource library is disposed"));
+      t2 = t1._textures;
+      if (width > 0)
+        t3 = height <= 0;
+      else
+        t3 = true;
+      if (t3)
+        A.throwExpression(A.ArgumentError$("TextureStore.declare dimensions/layers must be > 0", _null));
+      if (!isFinite(anisotropy) || anisotropy < 1 || anisotropy > 16)
+        A.throwExpression(A.ArgumentError$("TextureStore.declare anisotropy must be in [1, 16]: " + anisotropy, _null));
+      if (minFilter === B.GpuTextureFilter_2 && !hasMips)
+        A.throwExpression(A.ArgumentError$("TextureStore.declare linearMipmapLinear requires hasMips: true", _null));
+      t3 = t2._texture_store$_registry;
+      t4 = type$.nullable_Uint8List;
+      handle = t3.declare$2$debugLabel(new A._TextureRecord(new A.GpuTextureDescriptor(width, height, 1, hasMips, minFilter, magFilter, wrap, anisotropy), A.List_List$filled(1, _null, false, t4), false), debugLabel);
+      record = t3.descriptorOf$1(handle);
+      next = A.List_List$_of(record.layerPixels, t4);
+      B.JSArray_methods.$indexSet(next, 0, pixels);
+      t4 = record.descriptor;
+      t3.updateDescriptor$2(handle, new A._TextureRecord(t4, next, record.mipsFinalized));
+      t3 = t2._texturesBySlot;
+      t5 = handle.slot;
+      texture = t3.$index(0, t5);
+      if (texture == null) {
+        texture = A.WebGl2DeviceResources_createTextureImpl(t2._device, t4);
+        t3.$indexSet(0, t5, texture);
+      }
+      A.WebGl2DeviceResources_uploadTextureLayerImpl(t2._device, texture, 0, pixels);
+      t1._textureHandles.add$1(0, handle);
+      return handle;
+    },
+    createTexture$5$debugLabel$height$pixels$width$wrap(debugLabel, height, pixels, width, wrap) {
+      return this.createTexture$9$anisotropy$debugLabel$hasMips$height$magFilter$minFilter$pixels$width$wrap(1, debugLabel, false, height, B.GpuTextureFilter_1, B.GpuTextureFilter_1, pixels, width, wrap);
+    },
+    createProceduralTexture$5$debugLabel$height$width$wrap(pixels, debugLabel, height, width, wrap) {
+      var handle = this.createTexture$9$anisotropy$debugLabel$hasMips$height$magFilter$minFilter$pixels$width$wrap(16, debugLabel, true, height, B.GpuTextureFilter_1, B.GpuTextureFilter_2, pixels, width, wrap),
+        t1 = this.renderer.get$resources();
+      if (t1._disposed)
+        A.throwExpression(A.StateError$("resource library is disposed"));
       t1._textures.finalizeMips$1(handle);
       return handle;
     },
@@ -19903,7 +20422,7 @@
         t3 = p === B.QualityProfile_QualityProfileKind_0_Set_empty ? 0 : 1;
       return new A.RendererConfiguration(p, t1.pixelWidth, t1.pixelHeight, t2, t3);
     },
-    $signature: 66
+    $signature: 67
   };
   A.PixeldartApp__installListeners_closure.prototype = {
     call$1(__wc0_formal) {
@@ -20146,13 +20665,13 @@
     call$1(resource) {
       return !B.JSString_methods.startsWith$1(A._asString(resource), "sceneColor#");
     },
-    $signature: 9
+    $signature: 10
   };
   A.GpuResourcePlanAdapter__createObjects_closure0.prototype = {
     call$1(resource) {
       return B.JSString_methods.startsWith$1(A._asString(resource), "sceneColor#");
     },
-    $signature: 9
+    $signature: 10
   };
   A._SlotState.prototype = {
     _enumToString$0() {
@@ -20791,44 +21310,56 @@
   };
   A.main_updateVfxEmitter.prototype = {
     call$1(value) {
-      var t2, t3, trailSparks, t4, _this = this, _null = null,
+      var ssControls, t2, t3, trailSparks, t4, burstExplosion, _this = this, _null = null,
         t1 = _this.app._emitters;
       B.JSArray_methods.clear$0(t1);
+      ssControls = A._asJSObjectQ(A._asJSObject(init.G.document).querySelector("#spritesheet-controls"));
+      if (type$.JSObject._is(ssControls)) {
+        t2 = A._asJSObject(ssControls.style);
+        t3 = value === "spritesheet" ? "block" : "none";
+        t2.display = t3;
+      }
       switch (value) {
         case "campfire":
-          B.JSArray_methods.add$1(t1, A.ParticleEmitter$(B.Vec3_0_0_0, B.ParticleAlignment_0, B.BlendMode_1, _null, _null, A.ParticleColorGradient$(A._setArrayType([B.ParticleColorStop_XRK, B.ParticleColorStop_bNc, B.ParticleColorStop_pcl, B.ParticleColorStop_RjY], type$.JSArray_ParticleColorStop)), 0.4, B.DrawMode_2, 0.1, 0.4, new A.Vec3(0, 0.5, 0), _this.vfxFireMat, _null, 1.5, 0.1, 6.283185307179586, 1.1, 200, 2.2, 0.4, _this.particleQuadMesh, -1.5, 0.05, 0, 0.6, 1.2, 0.25, 1.5, 2, 1.2, 0, B.Vec3_0_1_0, 0, 75, 1001, new A.ConeShape(0.15, 0.15, 0.2, B.ConeEmissionMode_1), B._FuncCurve__easeInQuad, 0.1, _null, new A.Transform(B.Vec3_Mif, B.Quat_0_0_0_1, 1)));
+          B.JSArray_methods.add$1(t1, A.ParticleEmitter$(B.Vec3_0_0_0, B.ParticleAlignment_0, B.BlendMode_1, _null, _null, A.ParticleColorGradient$(A._setArrayType([B.ParticleColorStop_XRK, B.ParticleColorStop_bNc, B.ParticleColorStop_pcl, B.ParticleColorStop_RjY], type$.JSArray_ParticleColorStop)), 0.4, B.DrawMode_2, 0.1, 0.4, new A.Vec3(0, 0.5, 0), _this.vfxFireMat, _null, 1.5, 0.1, 6.283185307179586, 1.1, 200, 2.2, 0.4, _this.particleQuadMesh, -1.5, 0.05, 0, 0.6, 1.2, 0.25, 1.5, 2, 1.2, 0, B.Vec3_0_1_0, 0, 75, 1001, new A.ConeShape(0.15, 0.15, 0.2, B.ConeEmissionMode_1), B._FuncCurve__easeInQuad, B.ParticleSpritePlaybackMode_0, _null, 0.1, _null, new A.Transform(B.Vec3_Mif, B.Quat_0_0_0_1, 1)));
           break;
         case "fireworks":
           t2 = _this.particleQuadMesh;
           t3 = _this.vfxSparkMat;
-          trailSparks = A.ParticleEmitter$(B.Vec3_0_0_0, B.ParticleAlignment_0, B.BlendMode_1, _null, _null, _null, 1.5, B.DrawMode_2, 0, 0, B.Vec3_0_m3_0, t3, _null, 0, _null, 0, 0.6, 150, 0.8, _null, t2, 0, 0.01, 0, 0.3, 0.2, 0.06, 1, 1, 0, 0, B.Vec3_0_1_0, 0, 0, _null, B.PointShape_null_0, _null, 0.1, _null, B.Transform_43S);
+          trailSparks = A.ParticleEmitter$(B.Vec3_0_0_0, B.ParticleAlignment_0, B.BlendMode_1, _null, _null, _null, 1.5, B.DrawMode_2, 0, 0, B.Vec3_0_m3_0, t3, _null, 0, _null, 0, 0.6, 150, 0.8, _null, t2, 0, 0.01, 0, 0.3, 0.2, 0.06, 1, 1, 0, 0, B.Vec3_0_1_0, 0, 0, _null, B.PointShape_null_0, _null, B.ParticleSpritePlaybackMode_0, _null, 0.1, _null, B.Transform_43S);
           t4 = type$.JSArray_SubEmitter;
-          t3 = A._setArrayType([new A.SubEmitter(A.ParticleEmitter$(B.Vec3_0_0_0, B.ParticleAlignment_2, B.BlendMode_1, _null, _null, _null, 1.2, B.DrawMode_2, 0, 0, B.Vec3_7ry, t3, _null, 0, _null, 0, 0.8, 80, 4.5, _null, t2, 0, 0.01, 0, 0.4, 2, 0.05, 1, 1, 0, 0, B.Vec3_0_1_0, 0, 0, _null, B.PointShape_HFA, _null, 0.1, _null, B.Transform_43S), B.SubEmitterTrigger_2, 4, true, 0.3, 0.05, 0)], t4);
-          B.JSArray_methods.add$1(t1, A.ParticleEmitter$(B.Vec3_0_0_0, B.ParticleAlignment_1, B.BlendMode_1, B.List_ParticleBurst, _null, _null, 0.1, B.DrawMode_2, 0, 0, B.Vec3_7ry, _this.vfxRocketMat, _null, 0, _null, 0, 1.5, 10, 22, _null, t2, 0, 0.14, 0, 1.2, 18, 0.14, 1, 1, 0, 0, B.Vec3_0_1_0, 0, 0.8, _null, B.PointShape_vNF, _null, 0.1, A._setArrayType([new A.SubEmitter(trailSparks, B.SubEmitterTrigger_3, 1, true, 0.1, 0.03, 0.3), new A.SubEmitter(A.ParticleEmitter$(B.Vec3_0_0_0, B.ParticleAlignment_2, B.BlendMode_1, _null, B.ParticleCollisionPlane_H4H, _null, 2, B.DrawMode_2, 0, 0, B.Vec3_0_m6_0, _this.vfxFireMat, _null, 0, _null, 0, 1.5, 120, 14, _null, t2, 0, 0.03, 0, 0.9, 8, 0.2, 1, 1, 0, 0, B.Vec3_0_1_0, 0, 0, _null, B.C_SphereShape, _null, 0.2, t3, B.Transform_43S), B.SubEmitterTrigger_1, 80, true, 0.2, 0.05, 0)], t4), new A.Transform(B.Vec3_Mif, B.Quat_0_0_0_1, 1)));
+          t3 = A._setArrayType([A.SubEmitter$(4, A.ParticleEmitter$(B.Vec3_0_0_0, B.ParticleAlignment_2, B.BlendMode_1, _null, _null, _null, 1.2, B.DrawMode_2, 0, 0, B.Vec3_7ry, t3, _null, 0, _null, 0, 0.8, 80, 4.5, _null, t2, 0, 0.01, 0, 0.4, 2, 0.05, 1, 1, 0, 0, B.Vec3_0_1_0, 0, 0, _null, B.PointShape_HFA, _null, B.ParticleSpritePlaybackMode_0, _null, 0.1, _null, B.Transform_43S), true, 0.3, 0, 0.05, B.SubEmitterTrigger_2)], t4);
+          burstExplosion = A.ParticleEmitter$(B.Vec3_0_0_0, B.ParticleAlignment_2, B.BlendMode_1, _null, B.ParticleCollisionPlane_H4H, _null, 2, B.DrawMode_2, 0, 0, B.Vec3_0_m6_0, _this.vfxFireMat, _null, 0, _null, 0, 1.5, 120, 14, _null, t2, 0, 0.03, 0, 0.9, 8, 0.2, 1, 1, 0, 0, B.Vec3_0_1_0, 0, 0, _null, B.C_SphereShape, _null, B.ParticleSpritePlaybackMode_0, _null, 0.2, t3, B.Transform_43S);
+          B.JSArray_methods.add$1(t1, A.ParticleEmitter$(B.Vec3_0_0_0, B.ParticleAlignment_1, B.BlendMode_1, B.List_ParticleBurst, _null, _null, 0.1, B.DrawMode_2, 0, 0, B.Vec3_7ry, _this.vfxRocketMat, _null, 0, _null, 0, 1.5, 10, 22, _null, t2, 0, 0.14, 0, 1.2, 18, 0.14, 1, 1, 0, 0, B.Vec3_0_1_0, 0, 0.8, _null, B.PointShape_vNF, _null, B.ParticleSpritePlaybackMode_0, _null, 0.1, A._setArrayType([A.SubEmitter$(1, trailSparks, true, 0.1, 0.3, 0.03, B.SubEmitterTrigger_3), A.SubEmitter$(80, burstExplosion, true, 0.2, 0, 0.05, B.SubEmitterTrigger_1)], t4), new A.Transform(B.Vec3_Mif, B.Quat_0_0_0_1, 1)));
           break;
         case "sparks":
-          B.JSArray_methods.add$1(t1, A.ParticleEmitter$(B.Vec3_0_0_0, B.ParticleAlignment_2, B.BlendMode_1, _null, new A.ParticleCollisionPlane(new A.Vec3(0, -1, 0), B.Vec3_0_1_0, 0.55, 0.15, B.ParticleCollisionAction_0), _null, 0.8, B.DrawMode_2, 0, 0, B.Vec3_7ry, _this.vfxSparkMat, _null, 0, 0.03, 0, 2.2, 300, 11, 0.12, _this.particleQuadMesh, 0, 0.01, 0, 1.2, 6, 0.08, 1, 1, 0, 0, B.Vec3_0_1_0, 0, 80, 4004, new A.PointShape(B.Vec3_RBI, 0.4), _null, 0.25, _null, new A.Transform(B.Vec3_t3i, B.Quat_0_0_0_1, 1)));
+          B.JSArray_methods.add$1(t1, A.ParticleEmitter$(B.Vec3_0_0_0, B.ParticleAlignment_2, B.BlendMode_1, _null, new A.ParticleCollisionPlane(new A.Vec3(0, -1, 0), B.Vec3_0_1_0, 0.55, 0.15, B.ParticleCollisionAction_0), _null, 0.8, B.DrawMode_2, 0, 0, B.Vec3_7ry, _this.vfxSparkMat, _null, 0, 0.03, 0, 2.2, 300, 11, 0.12, _this.particleQuadMesh, 0, 0.01, 0, 1.2, 6, 0.08, 1, 1, 0, 0, B.Vec3_0_1_0, 0, 80, 4004, new A.PointShape(B.Vec3_RBI, 0.4), _null, B.ParticleSpritePlaybackMode_0, _null, 0.25, _null, new A.Transform(B.Vec3_t3i, B.Quat_0_0_0_1, 1)));
           break;
         case "vortex":
-          B.JSArray_methods.add$1(t1, A.ParticleEmitter$(B.Vec3_0_0_0, B.ParticleAlignment_0, B.BlendMode_1, _null, _null, _null, 0, B.DrawMode_2, 0, 0, B.Vec3_0_0_0, _this.vfxVortexMat, _null, 0, 0.05, 0, 2.8, 400, 3.5, 0.25, _this.particleQuadMesh, 0, 0.02, 0, 1.8, 2, 0.15, 2, 1, 0.5, 6, B.Vec3_0_1_0, -4.5, 90, 5005, new A.CircleShape(3, 2.0999999999999996, B.Vec3_0_1_0, B.CircleEmissionMode_0, B.CircleDirectionMode_3), _null, 0.1, _null, new A.Transform(B.Vec3_NIt, B.Quat_0_0_0_1, 1)));
+          B.JSArray_methods.add$1(t1, A.ParticleEmitter$(B.Vec3_0_0_0, B.ParticleAlignment_0, B.BlendMode_1, _null, _null, _null, 0, B.DrawMode_2, 0, 0, B.Vec3_0_0_0, _this.vfxVortexMat, _null, 0, 0.05, 0, 2.8, 400, 3.5, 0.25, _this.particleQuadMesh, 0, 0.02, 0, 1.8, 2, 0.15, 2, 1, 0.5, 6, B.Vec3_0_1_0, -4.5, 90, 5005, new A.CircleShape(3, 2.0999999999999996, B.Vec3_0_1_0, B.CircleEmissionMode_0, B.CircleDirectionMode_3), _null, B.ParticleSpritePlaybackMode_0, _null, 0.1, _null, new A.Transform(B.Vec3_NIt, B.Quat_0_0_0_1, 1)));
           break;
         case "fountain":
           t2 = Math.sqrt(78.48);
           t3 = Math.sqrt(78.48);
-          B.JSArray_methods.add$1(t1, A.ParticleEmitter$(B.Vec3_0_0_0, B.ParticleAlignment_1, B.BlendMode_0, _null, new A.ParticleCollisionPlane(B.Vec3_Mif, B.Vec3_0_1_0, 0.5, 0.1, B.ParticleCollisionAction_1), _null, 0.25, B.DrawMode_2, 0, 0, B.Vec3_7ry, _this.vfxWaterMat, _null, 0, 0.22, 0, 1.8, 350, t3 * 1.15, 0.14, _this.particleQuadMesh, 0, 0.16, 0, 1.4, t2, 0.08, 1, 1, 0, 0, B.Vec3_0_1_0, 0, 110, 6006, new A.ConeShape(0.1, 0.12, 0.3, B.ConeEmissionMode_1), _null, 0.1, _null, new A.Transform(B.Vec3_Mif, B.Quat_0_0_0_1, 1)));
+          B.JSArray_methods.add$1(t1, A.ParticleEmitter$(B.Vec3_0_0_0, B.ParticleAlignment_1, B.BlendMode_0, _null, new A.ParticleCollisionPlane(B.Vec3_Mif, B.Vec3_0_1_0, 0.5, 0.1, B.ParticleCollisionAction_1), _null, 0.25, B.DrawMode_2, 0, 0, B.Vec3_7ry, _this.vfxWaterMat, _null, 0, 0.22, 0, 1.8, 350, t3 * 1.15, 0.14, _this.particleQuadMesh, 0, 0.16, 0, 1.4, t2, 0.08, 1, 1, 0, 0, B.Vec3_0_1_0, 0, 110, 6006, new A.ConeShape(0.1, 0.12, 0.3, B.ConeEmissionMode_1), _null, B.ParticleSpritePlaybackMode_0, _null, 0.1, _null, new A.Transform(B.Vec3_Mif, B.Quat_0_0_0_1, 1)));
           break;
         case "rain":
           t2 = _this.particleQuadMesh;
-          B.JSArray_methods.add$1(t1, A.ParticleEmitter$(B.Vec3_0_0_0, B.ParticleAlignment_2, B.BlendMode_0, _null, new A.ParticleCollisionPlane(new A.Vec3(0, -1, 0), B.Vec3_0_1_0, 0.5, 0.1, B.ParticleCollisionAction_1), _null, 0.1, B.DrawMode_2, 0, 0, B.Vec3_7ry, _this.vfxWaterMat, _null, 0, _null, 0, 1.2, 300, 18, _null, t2, 0, 0.06, 0, 0.8, 14, 0.06, 1, 1, 0, 0, B.Vec3_0_1_0, 0, 150, _null, new A.BoxShape(B.Vec3_10_1_10, B.BoxEmissionMode_0), _null, 0.25, A._setArrayType([new A.SubEmitter(A.ParticleEmitter$(B.Vec3_0_0_0, B.ParticleAlignment_0, B.BlendMode_0, _null, _null, _null, 0.5, B.DrawMode_2, 0, 0, B.Vec3_7ry, _this.vfxSplashMat, _null, 0, _null, 0, 0.4, 200, 2.5, _null, t2, 0, 0.01, 0, 0.2, 1, 0.04, 1, 1, 0, 0, B.Vec3_0_1_0, 0, 0, _null, B.CircleShape_w94, _null, 0.1, _null, B.Transform_43S), B.SubEmitterTrigger_2, 5, false, 0.5, 0.05, 0)], type$.JSArray_SubEmitter), new A.Transform(B.Vec3_0_10_0, B.Quat_0_0_0_1, 1)));
+          B.JSArray_methods.add$1(t1, A.ParticleEmitter$(B.Vec3_0_0_0, B.ParticleAlignment_2, B.BlendMode_0, _null, new A.ParticleCollisionPlane(new A.Vec3(0, -1, 0), B.Vec3_0_1_0, 0.5, 0.1, B.ParticleCollisionAction_1), _null, 0.1, B.DrawMode_2, 0, 0, B.Vec3_7ry, _this.vfxWaterMat, _null, 0, _null, 0, 1.2, 300, 18, _null, t2, 0, 0.06, 0, 0.8, 14, 0.06, 1, 1, 0, 0, B.Vec3_0_1_0, 0, 150, _null, new A.BoxShape(B.Vec3_10_1_10, B.BoxEmissionMode_0), _null, B.ParticleSpritePlaybackMode_0, _null, 0.25, A._setArrayType([A.SubEmitter$(5, A.ParticleEmitter$(B.Vec3_0_0_0, B.ParticleAlignment_0, B.BlendMode_0, _null, _null, _null, 0.5, B.DrawMode_2, 0, 0, B.Vec3_7ry, _this.vfxSplashMat, _null, 0, _null, 0, 0.4, 200, 2.5, _null, t2, 0, 0.01, 0, 0.2, 1, 0.04, 1, 1, 0, 0, B.Vec3_0_1_0, 0, 0, _null, B.CircleShape_w94, _null, B.ParticleSpritePlaybackMode_0, _null, 0.1, _null, B.Transform_43S), false, 0.5, 0, 0.05, B.SubEmitterTrigger_2)], type$.JSArray_SubEmitter), new A.Transform(B.Vec3_0_10_0, B.Quat_0_0_0_1, 1)));
           break;
         case "blizzard":
-          B.JSArray_methods.add$1(t1, A.ParticleEmitter$(B.Vec3_10_m5_2, B.ParticleAlignment_2, B.BlendMode_0, _null, _null, _null, 0.6, B.DrawMode_2, 0, 0, B.Vec3_0_0_0, _this.snowMat, _null, 0, 0.08, 0, 3.2, 500, 8, 0.08, _this.particleQuadMesh, 0, 0.04, 0, 2, 4, 0.04, 1.2, 2.5, 2.2, 0, B.Vec3_0_1_0, 0, 160, 10101, new A.BoxShape(B.Vec3_12_1_12, B.BoxEmissionMode_0), _null, 0.12, _null, new A.Transform(B.Vec3_0_5_0, B.Quat_0_0_0_1, 1)));
+          B.JSArray_methods.add$1(t1, A.ParticleEmitter$(B.Vec3_10_m5_2, B.ParticleAlignment_2, B.BlendMode_0, _null, _null, _null, 0.6, B.DrawMode_2, 0, 0, B.Vec3_0_0_0, _this.snowMat, _null, 0, 0.08, 0, 3.2, 500, 8, 0.08, _this.particleQuadMesh, 0, 0.04, 0, 2, 4, 0.04, 1.2, 2.5, 2.2, 0, B.Vec3_0_1_0, 0, 160, 10101, new A.BoxShape(B.Vec3_12_1_12, B.BoxEmissionMode_0), _null, B.ParticleSpritePlaybackMode_0, _null, 0.12, _null, new A.Transform(B.Vec3_0_5_0, B.Quat_0_0_0_1, 1)));
           break;
         case "warp":
-          B.JSArray_methods.add$1(t1, A.ParticleEmitter$(B.Vec3_0_0_0, B.ParticleAlignment_2, B.BlendMode_1, _null, _null, _null, 0, B.DrawMode_2, 0, 0, B.Vec3_0_0_0, _this.vfxSparkMat, _null, 0, 0.14, 0, 1.2, 300, 35, 0.12, _this.particleQuadMesh, 0, 0.08, 0, 0.8, 28, 0.06, 1, 1, 0, 0, B.Vec3_0_1_0, 0, 140, 8008, new A.CircleShape(8, 0.5, B.Vec3_0_0_1, B.CircleEmissionMode_0, B.CircleDirectionMode_0), _null, 0.35, _null, new A.Transform(B.Vec3_0_2_0, B.Quat_0_0_0_1, 1)));
+          B.JSArray_methods.add$1(t1, A.ParticleEmitter$(B.Vec3_0_0_0, B.ParticleAlignment_2, B.BlendMode_1, _null, _null, _null, 0, B.DrawMode_2, 0, 0, B.Vec3_0_0_0, _this.vfxSparkMat, _null, 0, 0.14, 0, 1.2, 300, 35, 0.12, _this.particleQuadMesh, 0, 0.08, 0, 0.8, 28, 0.06, 1, 1, 0, 0, B.Vec3_0_1_0, 0, 140, 8008, new A.CircleShape(8, 0.5, B.Vec3_0_0_1, B.CircleEmissionMode_0, B.CircleDirectionMode_0), _null, B.ParticleSpritePlaybackMode_0, _null, 0.35, _null, new A.Transform(B.Vec3_0_2_0, B.Quat_0_0_0_1, 1)));
           break;
         case "confetti":
-          B.JSArray_methods.add$1(t1, A.ParticleEmitter$(B.Vec3_0_0_0, B.ParticleAlignment_3, B.BlendMode_0, _null, _null, _null, 0.85, B.DrawMode_2, 0, 0, B.Vec3_Rlz, _this.vfxConfettiMat, _null, 3, 0.2, 6.283185307179586, 5.5, 350, 1.5, 0.2, _this.particleCubeMesh, -3, 0.12, 0, 3.5, 0.5, 0.12, 1, 1.2, 1.4, 0, B.Vec3_0_1_0, 0, 60, 9009, new A.BoxShape(B.Vec3_f7w, B.BoxEmissionMode_0), _null, 0.1, _null, new A.Transform(B.Vec3_0_6_0, B.Quat_0_0_0_1, 1)));
+          B.JSArray_methods.add$1(t1, A.ParticleEmitter$(B.Vec3_0_0_0, B.ParticleAlignment_3, B.BlendMode_0, _null, _null, _null, 0.85, B.DrawMode_2, 0, 0, B.Vec3_Rlz, _this.vfxConfettiMat, _null, 3, 0.2, 6.283185307179586, 5.5, 350, 1.5, 0.2, _this.particleCubeMesh, -3, 0.12, 0, 3.5, 0.5, 0.12, 1, 1.2, 1.4, 0, B.Vec3_0_1_0, 0, 60, 9009, new A.BoxShape(B.Vec3_f7w, B.BoxEmissionMode_0), _null, B.ParticleSpritePlaybackMode_0, _null, 0.1, _null, new A.Transform(B.Vec3_0_6_0, B.Quat_0_0_0_1, 1)));
+          break;
+        case "spritesheet":
+          t2 = _this.vfxSpritesheetEmitter;
+          B.JSArray_methods.add$1(t1, t2);
+          t2.burst$2$position(16, B.Vec3_2Sv);
           break;
         case "none":
         default:
@@ -20846,8 +21377,43 @@
   };
   A.main_closure19.prototype = {
     call$1(__wc20_formal) {
-      var t1, _this = this;
       A._asJSObject(__wc20_formal);
+      this.vfxSpritesheetEmitter.burst$4$inheritedVelocity$position$spriteName(12, null, B.Vec3_2Sv, "star");
+    },
+    $signature: 0
+  };
+  A.main_closure20.prototype = {
+    call$1(__wc21_formal) {
+      A._asJSObject(__wc21_formal);
+      this.vfxSpritesheetEmitter.burst$4$inheritedVelocity$position$spriteName(4, null, B.Vec3_2Sv, "ring");
+    },
+    $signature: 0
+  };
+  A.main_closure21.prototype = {
+    call$1(__wc22_formal) {
+      A._asJSObject(__wc22_formal);
+      this.vfxSpritesheetEmitter.burst$4$inheritedVelocity$position$spriteName(10, null, B.Vec3_2Sv, "smoke");
+    },
+    $signature: 0
+  };
+  A.main_closure22.prototype = {
+    call$1(__wc23_formal) {
+      A._asJSObject(__wc23_formal);
+      this.vfxSpritesheetEmitter.burst$4$inheritedVelocity$position$spriteName(8, null, B.Vec3_2Sv, "orb");
+    },
+    $signature: 0
+  };
+  A.main_closure23.prototype = {
+    call$1(__wc24_formal) {
+      A._asJSObject(__wc24_formal);
+      this.vfxSpritesheetEmitter.burst$4$animationName$inheritedVelocity$position(16, "combustion", null, B.Vec3_2Sv);
+    },
+    $signature: 0
+  };
+  A.main_closure24.prototype = {
+    call$1(__wc25_formal) {
+      var t1, _this = this;
+      A._asJSObject(__wc25_formal);
       switch (A._asString(_this.fogSelect.value)) {
         case "on":
           _this.app.enableFog$4$color$end$heightFalloff$start(B.LinearColor_8cl, 120, 0.04, 20);
@@ -20865,16 +21431,16 @@
     },
     $signature: 0
   };
-  A.main_closure20.prototype = {
-    call$1(__wc21_formal) {
+  A.main_closure25.prototype = {
+    call$1(__wc26_formal) {
       var t1;
-      A._asJSObject(__wc21_formal);
+      A._asJSObject(__wc26_formal);
       t1 = A._asBool(this.asteroidToggle.checked) ? -1 : 0;
       this.asteroidBelt.visibilityMask = t1;
     },
     $signature: 0
   };
-  A.main_closure21.prototype = {
+  A.main_closure26.prototype = {
     call$1(e) {
       var hit, t1, selectedNode, distStr, pt, t2, t3, t4, instStr, _this = this;
       A._asJSObject(e);
@@ -20903,7 +21469,7 @@
     },
     $signature: 0
   };
-  A.main_closure22.prototype = {
+  A.main_closure27.prototype = {
     call$1(ctx) {
       var t3, disp, buoyNorm, buoyTiltAxis, tiltAngle, i, sat, satScale, _2_0, q, rawDof, dofStrength, t4, t5, t6, t7, t8, t9, t10, t11, solarTimeHours, _this = this,
         t = ctx.timeSeconds,
@@ -20994,9 +21560,9 @@
         _this.updateSolarDisplay.call$0();
       }
     },
-    $signature: 72
+    $signature: 73
   };
-  A.main_closure23.prototype = {
+  A.main_closure28.prototype = {
     call$1(e) {
       var t1, t2, activeTag, solarRunning, solarTimeHours, matSelect, _this = this;
       A._asJSObject(e);
@@ -21070,31 +21636,31 @@
       _static_1 = hunkHelpers._static_1,
       _static_0 = hunkHelpers._static_0,
       _instance_1_u = hunkHelpers._instance_1u;
-    _static_2(J, "_interceptors_JSArray__compareAny$closure", "JSArray__compareAny", 73);
+    _static_2(J, "_interceptors_JSArray__compareAny$closure", "JSArray__compareAny", 74);
     _static_1(A, "async__AsyncRun__scheduleImmediateJsOverride$closure", "_AsyncRun__scheduleImmediateJsOverride", 6);
     _static_1(A, "async__AsyncRun__scheduleImmediateWithSetImmediate$closure", "_AsyncRun__scheduleImmediateWithSetImmediate", 6);
     _static_1(A, "async__AsyncRun__scheduleImmediateWithTimer$closure", "_AsyncRun__scheduleImmediateWithTimer", 6);
     _static_0(A, "async___startMicrotaskLoop$closure", "_startMicrotaskLoop", 1);
-    _instance_1_u(A.MaterialStore.prototype, "get$resolveForPass", "resolveForPass$1", 70);
+    _instance_1_u(A.MaterialStore.prototype, "get$resolveForPass", "resolveForPass$1", 71);
     var _;
     _instance_1_u(_ = A.TextureStore.prototype, "get$resolveAlbedo", "resolveAlbedo$1", 3);
     _instance_1_u(_, "get$resolveNormal", "resolveNormal$1", 3);
     _instance_1_u(_, "get$resolveOrm", "resolveOrm$1", 3);
     _instance_1_u(_, "get$resolveEmissive", "resolveEmissive$1", 3);
     _instance_1_u(_, "get$resolveLightmap", "resolveLightmap$1", 3);
-    _static_0(A, "frame_telemetry__MutablePassStats___new_tearOff$closure", "_MutablePassStats___new_tearOff", 75);
-    _static_0(A, "graph_pass_PassDeclaration__alwaysEnabled$closure", "PassDeclaration__alwaysEnabled", 76);
+    _static_0(A, "frame_telemetry__MutablePassStats___new_tearOff$closure", "_MutablePassStats___new_tearOff", 76);
+    _static_0(A, "graph_pass_PassDeclaration__alwaysEnabled$closure", "PassDeclaration__alwaysEnabled", 77);
     _static_1(A, "curves_Curves__easeInQuad$closure", "Curves__easeInQuad", 18);
     _static_1(A, "curves_Curves__easeInOutCubic$closure", "Curves__easeInOutCubic", 18);
-    _instance_1_u(A.Mat4.prototype, "get$transformPoint", "transformPoint$1", 11);
-    _instance_1_u(A.PixeldartApp.prototype, "get$_tick", "_tick$1", 65);
+    _instance_1_u(A.Mat4.prototype, "get$transformPoint", "transformPoint$1", 8);
+    _instance_1_u(A.PixeldartApp.prototype, "get$_tick", "_tick$1", 66);
   })();
   (function inheritance() {
     var _mixin = hunkHelpers.mixin,
       _inherit = hunkHelpers.inherit,
       _inheritMany = hunkHelpers.inheritMany;
     _inherit(A.Object, null);
-    _inheritMany(A.Object, [A.JS_CONST, J.Interceptor, A.SafeToStringHook, J.ArrayIterator, A.Iterable, A.CastIterator, A.Error, A.SentinelValue, A.ListIterator, A.MappedIterator, A.WhereIterator, A.FixedLengthListMixin, A._Record, A.MapView, A.ConstantMap, A._KeysOrValuesOrElementsIterator, A.SetBase, A.TypeErrorDecoder, A.NullThrownFromJavaScriptException, A.ExceptionAndStackTrace, A._StackTrace, A.Closure, A.MapBase, A.LinkedHashMapCell, A.LinkedHashMapKeyIterator, A.LinkedHashMapValueIterator, A.LinkedHashMapEntryIterator, A.Rti, A._FunctionParameters, A._Type, A._TimerImpl, A._AsyncAwaitCompleter, A._SyncStarIterator, A.AsyncError, A._Completer, A._FutureListener, A._Future, A._AsyncCallbackEntry, A._StreamIterator, A._Zone, A._HashMapKeyIterator, A._LinkedHashSetCell, A._LinkedHashSetIterator, A.ListBase, A._UnmodifiableMapMixin, A._UnmodifiableSetMixin, A.DateTime, A._Enum, A.OutOfMemoryError, A.StackOverflowError, A._Exception, A.FormatException, A.MapEntry, A.Null, A._StringStackTrace, A.StringBuffer, A.NullRejectionException, A._JSRandom, A._Random, A.RenderCapabilities, A.QualityProfile, A.ConfigurationCoordinator, A.ConfigurationStateMachine, A.PostProcessState, A.CameraView, A.SkyboxDeclaration, A.FrameEnvironment, A.FrameInput, A.FrameSequencer, A.ResourceHandle, A.HandleException, A.ProfileAttempt, A.BootstrapResult, A.LinearColor, A.DirectionalLight, A.PointLight, A.SpotLight, A.MaterialDefinition, A.VertexAttributeSlot, A.VertexLayoutDescriptor, A.MeshData, A.DefaultSceneRendererFactory, A.OwnedResourcePlan, A.PreparedResourceAssembly, A.ResourcePlanAssembler, A.RetainedItemDescriptor, A.SurfaceMetrics, A.RendererConfiguration, A.FramePassStats, A.FrameStats, A.MaterialStore, A.UploadedMesh, A.MeshStore, A._TextureRecord, A.TextureStore, A.SolarCycleInput, A.CameraShakeEngine, A.CameraWaypoint, A.CinematicTourCameraController, A.FlyCameraController, A.OrbitCameraController, A.SmoothFollowCameraController, A.InstanceBatch, A.FeatureGraph, A.FeatureGraphResult, A.FrameQueue, A.FrameDrawTelemetry, A._MutablePassStats, A.PassDeclaration, A.GraphValidationFailure, A.ResourceRef, A.ResourceUse, A.CompiledProgram, A.ProgramLibrary, A.ProgramSource, A.RenderFeatureContext, A.PassDescriptor, A.RenderGraphBuilder, A.RenderGraph, A._ItemView, A.RenderWorldImpl, A.ResourceLibraryImpl, A._FrameExecution, A._TransientItemView, A._SafeGraphAssembly, A._PlanResources, A._FrameScene, A._SceneRendererImpl_Object__GpuTimingSupport, A._PendingGpuTiming, A._GpuTimingSupport, A.OpaqueSortKey, A.BlendedSortKey, A.SortableItem, A.CullStats, A.CullResult, A._PrimitiveMeshBuilder, A.TerrainNoise, A.TerrainGenerator, A.WaterSurfaceMesh, A.Aabb, A._FuncCurve, A.Plane, A.Frustum, A.Mat4, A.Quat, A.Ray, A.RaycastHit, A.CatmullRomSpline3D, A.Transform, A.Vec2, A.Vec3, A.BuoyantVesselBody, A.GerstnerWaveComponent, A.GerstnerWaveEvaluator, A.AtmosphericParticleKinematics, A.AtmosphericParticleField, A.ParticleBurst, A.ParticleColorStop, A.ParticleColorGradient, A.ParticleCollisionPlane, A.SubEmitter, A._ParticleState, A.ParticleEmitter, A.EmitterSpawnSample, A.PointShape, A.BoxShape, A.SphereShape, A.ConeShape, A.CircleShape, A.BloomBlurFeature, A._BloomBlurPass, A.BloomCompositeFeature, A._BloomCompositePass, A.DepthPrepassFeature, A._DepthPrepassPass, A.DofBlurFeature, A._DofBlurPass, A.DofCompositeFeature, A._DofCompositePass, A.GradeFeature, A._GradePass, A.MsaaResolveFeature, A._MsaaResolvePass, A.BoundResourceView, A.BoundPassContext, A.PipelineResourceLayout, A.PresentFeature, A._PresentPass, A.Ps1QuantizeFeature, A._Ps1QuantizePass, A.ShadowLightView, A.ShadowFeature, A._ShadowCasterPass, A.ShadowedWorldFeature, A._ShadowedWorldPass, A.SsaoOcclusionFeature, A._SsaoOcclusionPass, A.SsaoBlurFeature, A._SsaoBlurPass, A.VhsFeature, A._VhsPass, A.VolumetricLightFeature, A._VolumetricLightPass, A._VolumetricCompositePass, A.ResolvedMesh, A.WorldFeature, A._WorldPass, A.Keyframe, A.KeyframeTrack, A.AnimationClip, A._ActiveClipInstance, A.AnimationPlayer, A.SceneNode, A.GpuBufferDescriptor, A.GpuTextureDescriptor, A.GpuTargetDescriptor, A.ShaderCompileException, A.UniformValue, A.DeviceDrawCommandEncoder, A.FrameContext, A.PixeldartApp, A.PreparedGpuResourcePlan, A.GpuResourcePlanAdapter, A._Slot, A.ResourceRegistry, A.DrawStateDescriptor, A.WebGlStateCache, A._WebGpuObject, A._WebGlTexture, A._WebGlFramebuffer, A._WebGlTimerQuery, A._WebGl2Device_Object__WebGlTimerSupport, A._WebGlTimerSupport, A.WebGl2DeviceLease, A.WebGl2RendererFactory]);
+    _inheritMany(A.Object, [A.JS_CONST, J.Interceptor, A.SafeToStringHook, J.ArrayIterator, A.Iterable, A.CastIterator, A.Error, A.SentinelValue, A.ListIterator, A.MappedIterator, A.WhereIterator, A.FixedLengthListMixin, A._Record, A.MapView, A.ConstantMap, A._KeysOrValuesOrElementsIterator, A.SetBase, A.TypeErrorDecoder, A.NullThrownFromJavaScriptException, A.ExceptionAndStackTrace, A._StackTrace, A.Closure, A.MapBase, A.LinkedHashMapCell, A.LinkedHashMapKeyIterator, A.LinkedHashMapValueIterator, A.LinkedHashMapEntryIterator, A.Rti, A._FunctionParameters, A._Type, A._TimerImpl, A._AsyncAwaitCompleter, A._SyncStarIterator, A.AsyncError, A._Completer, A._FutureListener, A._Future, A._AsyncCallbackEntry, A._StreamIterator, A._Zone, A._HashMapKeyIterator, A._LinkedHashSetCell, A._LinkedHashSetIterator, A.ListBase, A._UnmodifiableMapMixin, A._UnmodifiableSetMixin, A.DateTime, A._Enum, A.OutOfMemoryError, A.StackOverflowError, A._Exception, A.FormatException, A.MapEntry, A.Null, A._StringStackTrace, A.StringBuffer, A.NullRejectionException, A._JSRandom, A._Random, A.RenderCapabilities, A.QualityProfile, A.ConfigurationCoordinator, A.ConfigurationStateMachine, A.PostProcessState, A.CameraView, A.SkyboxDeclaration, A.FrameEnvironment, A.FrameInput, A.FrameSequencer, A.ResourceHandle, A.HandleException, A.ProfileAttempt, A.BootstrapResult, A.LinearColor, A.DirectionalLight, A.PointLight, A.SpotLight, A.MaterialDefinition, A.VertexAttributeSlot, A.VertexLayoutDescriptor, A.MeshData, A.DefaultSceneRendererFactory, A.OwnedResourcePlan, A.PreparedResourceAssembly, A.ResourcePlanAssembler, A.RetainedItemDescriptor, A.SurfaceMetrics, A.RendererConfiguration, A.FramePassStats, A.FrameStats, A.MaterialStore, A.UploadedMesh, A.MeshStore, A._TextureRecord, A.TextureStore, A.SolarCycleInput, A.CameraShakeEngine, A.CameraWaypoint, A.CinematicTourCameraController, A.FlyCameraController, A.OrbitCameraController, A.SmoothFollowCameraController, A.InstanceBatch, A.FeatureGraph, A.FeatureGraphResult, A.FrameQueue, A.FrameDrawTelemetry, A._MutablePassStats, A.PassDeclaration, A.GraphValidationFailure, A.ResourceRef, A.ResourceUse, A.CompiledProgram, A.ProgramLibrary, A.ProgramSource, A.RenderFeatureContext, A.PassDescriptor, A.RenderGraphBuilder, A.RenderGraph, A._ItemView, A.RenderWorldImpl, A.ResourceLibraryImpl, A._FrameExecution, A._TransientItemView, A._SafeGraphAssembly, A._PlanResources, A._FrameScene, A._SceneRendererImpl_Object__GpuTimingSupport, A._PendingGpuTiming, A._GpuTimingSupport, A.OpaqueSortKey, A.BlendedSortKey, A.SortableItem, A.CullStats, A.CullResult, A._PrimitiveMeshBuilder, A.TerrainNoise, A.TerrainGenerator, A.WaterSurfaceMesh, A.Aabb, A._FuncCurve, A.Plane, A.Frustum, A.Mat4, A.Quat, A.Ray, A.RaycastHit, A.CatmullRomSpline3D, A.Transform, A.Vec2, A.Vec3, A.BuoyantVesselBody, A.GerstnerWaveComponent, A.GerstnerWaveEvaluator, A.AtmosphericParticleKinematics, A.AtmosphericParticleField, A.ParticleBurst, A.ParticleColorStop, A.ParticleColorGradient, A.ParticleCollisionPlane, A.SubEmitter, A._ParticleState, A.ParticleEmitter, A.EmitterSpawnSample, A.PointShape, A.BoxShape, A.SphereShape, A.ConeShape, A.CircleShape, A.ParticleSprite, A.SpriteAnimation, A.ParticleSpriteSheet, A.BloomBlurFeature, A._BloomBlurPass, A.BloomCompositeFeature, A._BloomCompositePass, A.DepthPrepassFeature, A._DepthPrepassPass, A.DofBlurFeature, A._DofBlurPass, A.DofCompositeFeature, A._DofCompositePass, A.GradeFeature, A._GradePass, A.MsaaResolveFeature, A._MsaaResolvePass, A.BoundResourceView, A.BoundPassContext, A.PipelineResourceLayout, A.PresentFeature, A._PresentPass, A.Ps1QuantizeFeature, A._Ps1QuantizePass, A.ShadowLightView, A.ShadowFeature, A._ShadowCasterPass, A.ShadowedWorldFeature, A._ShadowedWorldPass, A.SsaoOcclusionFeature, A._SsaoOcclusionPass, A.SsaoBlurFeature, A._SsaoBlurPass, A.VhsFeature, A._VhsPass, A.VolumetricLightFeature, A._VolumetricLightPass, A._VolumetricCompositePass, A.ResolvedMesh, A.WorldFeature, A._WorldPass, A.Keyframe, A.KeyframeTrack, A.AnimationClip, A._ActiveClipInstance, A.AnimationPlayer, A.SceneNode, A.GpuBufferDescriptor, A.GpuTextureDescriptor, A.GpuTargetDescriptor, A.ShaderCompileException, A.UniformValue, A.DeviceDrawCommandEncoder, A.FrameContext, A.PixeldartApp, A.PreparedGpuResourcePlan, A.GpuResourcePlanAdapter, A._Slot, A.ResourceRegistry, A.DrawStateDescriptor, A.WebGlStateCache, A._WebGpuObject, A._WebGlTexture, A._WebGlFramebuffer, A._WebGlTimerQuery, A._WebGl2Device_Object__WebGlTimerSupport, A._WebGlTimerSupport, A.WebGl2DeviceLease, A.WebGl2RendererFactory]);
     _inheritMany(J.Interceptor, [J.JSBool, J.JSNull, J.JavaScriptObject, J.JavaScriptBigInt, J.JavaScriptSymbol, J.JSNumber, J.JSString]);
     _inheritMany(J.JavaScriptObject, [J.LegacyJavaScriptObject, J.JSArray, A.NativeByteBuffer, A.NativeTypedData]);
     _inheritMany(J.LegacyJavaScriptObject, [J.PlainJavaScriptObject, J.UnknownJavaScriptObject, J.JavaScriptFunction]);
@@ -21118,7 +21684,7 @@
     _inheritMany(A.SetBase, [A.ConstantSet, A._SetBase, A._UnmodifiableSetView_SetBase__UnmodifiableSetMixin]);
     _inherit(A.ConstantStringSet, A.ConstantSet);
     _inherit(A.NullError, A.TypeError);
-    _inheritMany(A.Closure, [A.Closure0Args, A.Closure2Args, A.TearOffClosure, A.initHooks_closure, A.initHooks_closure1, A._AsyncRun__initializeScheduleImmediate_internalCallback, A._AsyncRun__initializeScheduleImmediate_closure, A._awaitOnObject_closure, A._Future__propagateToListeners_handleWhenCompleteCallback_closure, A.promiseToFuture_closure, A.promiseToFuture_closure0, A.dartify_convert, A.defaultProfileLadder_closure, A.VertexLayoutDescriptor_validate_closure, A.MeshData__validateFiniteSurfaceV2Tangents_closure, A.MeshData__validateFiniteSurfaceV2Tangents_closure0, A.MeshData__validateFiniteSurfaceV2Tangents_closure1, A.OwnedResourcePlan_validate_closure, A.MaterialStore__registry_closure, A.MeshStore_closure, A.TextureStore_closure, A.TextureStore_rehydrateAfterContextRestore_closure, A.CinematicTourCameraController_closure, A.CinematicTourCameraController_closure0, A.FeatureGraph_build_closure, A.FeatureGraph_build__closure, A.FeatureGraph_build__closure0, A.PassDeclaration_reads_closure, A.PassDeclaration_writes_closure, A.RenderGraphBuilder_build_closure, A.RenderGraphBuilder__validate_closure, A.RenderGraphBuilder__checkResolves_closure, A.RenderGraphBuilder__checkFormatAndSizeMismatch_closure, A.RenderGraphBuilder__checkDependencyCycles_hasCycleFrom, A.RenderWorldImpl__instances_closure, A._extension_0__assembleSafeGraph_resolveMesh, A._extension_0__assembleSafeGraph_resolveResource, A.SceneRendererImpl_endFrame_closure, A.SceneRendererImpl_endFrame_closure0, A.sortOpaque_closure0, A.sortBlended_closure0, A.Primitives_cube_face, A.Primitives_icosphere_closure, A.Primitives_dodecahedron_closure, A.Primitives_roundedBox_face, A.Primitives_roundedBox_edgeStrip, A.Frustum_Frustum$fromViewProjection_row, A.Mat4_isFinite_closure, A.AtmosphericParticleField_submit_closure, A.buildShadowGraph_closure, A.SceneNode_raycast_testNode, A.PixeldartApp_mount_closure, A.PixeldartApp__installListeners_closure, A.PixeldartApp__installListeners_closure0, A.PixeldartApp__installListeners_closure1, A.PixeldartApp__installListeners_closure2, A.PixeldartApp__installListeners_closure3, A.PixeldartApp__installListeners_closure4, A.PixeldartApp__installListeners_closure5, A.PixeldartApp__installListeners_closure6, A.PixeldartApp__installListeners_closure7, A.PixeldartApp__installListeners_closure8, A.GpuResourcePlanAdapter__createObjects_closure, A.GpuResourcePlanAdapter__createObjects_closure0, A.WebGl2Device_closure, A.WebGl2Device_closure0, A.main_closure, A.main_closure0, A.main_closure1, A.main_closure2, A.main_closure3, A.main_switchTopic, A.main_closure4, A.main_closure5, A.main_closure6, A.main_closure7, A.main_closure8, A.main_closure9, A.main_closure10, A.main_closure11, A.main_closure12, A.main_closure13, A.main_closure14, A.main_closure15, A.main_closure16, A.main_closure17, A.main_updateVfxEmitter, A.main_closure18, A.main_closure19, A.main_closure20, A.main_closure21, A.main_closure22, A.main_closure23]);
+    _inheritMany(A.Closure, [A.Closure0Args, A.Closure2Args, A.TearOffClosure, A.initHooks_closure, A.initHooks_closure1, A._AsyncRun__initializeScheduleImmediate_internalCallback, A._AsyncRun__initializeScheduleImmediate_closure, A._awaitOnObject_closure, A._Future__propagateToListeners_handleWhenCompleteCallback_closure, A.promiseToFuture_closure, A.promiseToFuture_closure0, A.dartify_convert, A.defaultProfileLadder_closure, A.VertexLayoutDescriptor_validate_closure, A.MeshData__validateFiniteSurfaceV2Tangents_closure, A.MeshData__validateFiniteSurfaceV2Tangents_closure0, A.MeshData__validateFiniteSurfaceV2Tangents_closure1, A.OwnedResourcePlan_validate_closure, A.MaterialStore__registry_closure, A.MeshStore_closure, A.TextureStore_closure, A.TextureStore_rehydrateAfterContextRestore_closure, A.CinematicTourCameraController_closure, A.CinematicTourCameraController_closure0, A.FeatureGraph_build_closure, A.FeatureGraph_build__closure, A.FeatureGraph_build__closure0, A.PassDeclaration_reads_closure, A.PassDeclaration_writes_closure, A.RenderGraphBuilder_build_closure, A.RenderGraphBuilder__validate_closure, A.RenderGraphBuilder__checkResolves_closure, A.RenderGraphBuilder__checkFormatAndSizeMismatch_closure, A.RenderGraphBuilder__checkDependencyCycles_hasCycleFrom, A.RenderWorldImpl__instances_closure, A._extension_0__assembleSafeGraph_resolveMesh, A._extension_0__assembleSafeGraph_resolveResource, A.SceneRendererImpl_endFrame_closure, A.SceneRendererImpl_endFrame_closure0, A.sortOpaque_closure0, A.sortBlended_closure0, A.Primitives_cube_face, A.Primitives_icosphere_closure, A.Primitives_dodecahedron_closure, A.Primitives_roundedBox_face, A.Primitives_roundedBox_edgeStrip, A.Frustum_Frustum$fromViewProjection_row, A.Mat4_isFinite_closure, A.AtmosphericParticleField_submit_closure, A.buildShadowGraph_closure, A.SceneNode_raycast_testNode, A.PixeldartApp_mount_closure, A.PixeldartApp__installListeners_closure, A.PixeldartApp__installListeners_closure0, A.PixeldartApp__installListeners_closure1, A.PixeldartApp__installListeners_closure2, A.PixeldartApp__installListeners_closure3, A.PixeldartApp__installListeners_closure4, A.PixeldartApp__installListeners_closure5, A.PixeldartApp__installListeners_closure6, A.PixeldartApp__installListeners_closure7, A.PixeldartApp__installListeners_closure8, A.GpuResourcePlanAdapter__createObjects_closure, A.GpuResourcePlanAdapter__createObjects_closure0, A.WebGl2Device_closure, A.WebGl2Device_closure0, A.main_closure, A.main_closure0, A.main_closure1, A.main_closure2, A.main_closure3, A.main_switchTopic, A.main_closure4, A.main_closure5, A.main_closure6, A.main_closure7, A.main_closure8, A.main_closure9, A.main_closure10, A.main_closure11, A.main_closure12, A.main_closure13, A.main_closure14, A.main_closure15, A.main_closure16, A.main_closure17, A.main_updateVfxEmitter, A.main_closure18, A.main_closure19, A.main_closure20, A.main_closure21, A.main_closure22, A.main_closure23, A.main_closure24, A.main_closure25, A.main_closure26, A.main_closure27, A.main_closure28]);
     _inheritMany(A.TearOffClosure, [A.StaticClosure, A.BoundClosure]);
     _inheritMany(A.MapBase, [A.JsLinkedHashMap, A._HashMap]);
     _inheritMany(A.Closure2Args, [A.initHooks_closure0, A._awaitOnObject_closure0, A._wrapJsFunctionForAsync_closure, A._Future__propagateToListeners_handleWhenCompleteCallback_closure0, A.LinkedHashMap_LinkedHashMap$from_closure, A.MapBase_mapToString_closure, A.selectSpotLights_closure, A.MeshStore_liveGpuBytes_closure, A.TextureStore_liveGpuBytes_closure, A.selectVolumetricSources_closure, A.FeatureGraph_build_closure0, A.SceneRendererImpl_endFrame_closure1, A.sortOpaque_closure, A.sortBlended_closure, A.Primitives_icosphere_getMidpoint, A.ProceduralTextures_normalFromHeight_h, A.CatmullRomSpline3D__evaluateSegment_knot, A.BuoyantVesselBody_getProbes_rotate, A.ParticleColorGradient_closure, A.KeyframeTrack_closure, A.AnimationPlayer_update_closure]);
@@ -21131,14 +21697,14 @@
     _inheritMany(A.NativeTypedArrayOfDouble, [A.NativeFloat32List, A.NativeFloat64List]);
     _inheritMany(A.NativeTypedArrayOfInt, [A.NativeInt16List, A.NativeInt32List, A.NativeInt8List, A.NativeUint16List, A.NativeUint32List, A.NativeUint8ClampedList, A.NativeUint8List]);
     _inherit(A._TypeError, A._Error);
-    _inheritMany(A.Closure0Args, [A._AsyncRun__scheduleImmediateJsOverride_internalCallback, A._AsyncRun__scheduleImmediateWithSetImmediate_internalCallback, A._TimerImpl_internalCallback, A._Future__addListener_closure, A._Future__prependListeners_closure, A._Future__chainCoreFuture_closure, A._Future__asyncCompleteWithValue_closure, A._Future__asyncCompleteErrorObject_closure, A._Future__propagateToListeners_handleWhenCompleteCallback, A._Future__propagateToListeners_handleValueCallback, A._Future__propagateToListeners_handleError, A._RootZone_bindCallbackGuarded_closure, A._rootHandleError_closure, A._extension_0__assembleSafeGraph_closure9, A._extension_0__assembleSafeGraph_closure2, A._extension_0__assembleSafeGraph_closure3, A._extension_0__assembleSafeGraph_closure8, A._extension_0__assembleSafeGraph_closure1, A._extension_0__assembleSafeGraph_closure11, A._extension_0__assembleSafeGraph_closure10, A._extension_0__assembleSafeGraph_closure7, A._extension_0__assembleSafeGraph_closure, A._extension_0__assembleSafeGraph_closure0, A._extension_0__assembleSafeGraph_closure4, A._extension_0__assembleSafeGraph_closure5, A._extension_0__assembleSafeGraph_closure6, A._extension_0__assembleSafeGraph_closure13, A._extension_0__assembleSafeGraph_closure12, A._extension_0__executeGraph_closure, A._extension_0__executeGraph_closure0, A.buildShadowGraph_closure0, A.main_updateSolarDisplay, A.main_applySolarTime]);
+    _inheritMany(A.Closure0Args, [A._AsyncRun__scheduleImmediateJsOverride_internalCallback, A._AsyncRun__scheduleImmediateWithSetImmediate_internalCallback, A._TimerImpl_internalCallback, A._Future__addListener_closure, A._Future__prependListeners_closure, A._Future__chainCoreFuture_closure, A._Future__asyncCompleteWithValue_closure, A._Future__asyncCompleteErrorObject_closure, A._Future__propagateToListeners_handleWhenCompleteCallback, A._Future__propagateToListeners_handleValueCallback, A._Future__propagateToListeners_handleError, A._RootZone_bindCallbackGuarded_closure, A._rootHandleError_closure, A._extension_0__assembleSafeGraph_closure9, A._extension_0__assembleSafeGraph_closure2, A._extension_0__assembleSafeGraph_closure3, A._extension_0__assembleSafeGraph_closure8, A._extension_0__assembleSafeGraph_closure1, A._extension_0__assembleSafeGraph_closure11, A._extension_0__assembleSafeGraph_closure10, A._extension_0__assembleSafeGraph_closure7, A._extension_0__assembleSafeGraph_closure, A._extension_0__assembleSafeGraph_closure0, A._extension_0__assembleSafeGraph_closure4, A._extension_0__assembleSafeGraph_closure5, A._extension_0__assembleSafeGraph_closure6, A._extension_0__assembleSafeGraph_closure13, A._extension_0__assembleSafeGraph_closure12, A._extension_0__executeGraph_closure, A._extension_0__executeGraph_closure0, A.ParticleSpriteSheet__indexData_closure, A.buildShadowGraph_closure0, A.main_updateSolarDisplay, A.main_applySolarTime]);
     _inherit(A._AsyncCompleter, A._Completer);
     _inherit(A._RootZone, A._Zone);
     _inherit(A._IdentityHashMap, A._HashMap);
     _inherit(A._LinkedHashSet, A._SetBase);
     _inherit(A.UnmodifiableSetView, A._UnmodifiableSetView_SetBase__UnmodifiableSetMixin);
     _inheritMany(A.ArgumentError, [A.RangeError, A.IndexError]);
-    _inheritMany(A._Enum, [A.QualityProfileKind, A.ToneMappingMode, A.HandleRejection, A.AlphaMode, A.MaterialMapColorSpace, A.VertexAttributeKind, A.DrawMode, A.BlendMode, A.ColorEncoding, A.RendererState, A.SolarPhase, A.FrameQueueState, A.GraphValidationFailureKind, A.ResourceFormat, A.GraphStage, A.ResourceAccess, A.ShadowCasterLod, A.FrustumTest, A.AtmosphericParticleAnchor, A.ParticleAlignment, A.ParticleCollisionAction, A.AttractorFalloff, A.SubEmitterTrigger, A.BoxEmissionMode, A.SphereEmissionMode, A.SphereDirectionMode, A.ConeEmissionMode, A.CircleEmissionMode, A.CircleDirectionMode, A._BloomBlurAxis, A._DofBlurAxis, A.LoopMode, A.Vector3Property, A.GpuBufferUsage, A.GpuBufferKind, A.GpuTextureFilter, A.GpuTextureWrap, A.GpuTargetAttachment, A.GpuDeviceStatus, A.ShaderCompileStage, A.UniformType, A.ClearMask, A._SlotState, A.BlendEquation, A.BlendFactor, A.CullFace, A.DepthFunc, A.StateField]);
+    _inheritMany(A._Enum, [A.QualityProfileKind, A.ToneMappingMode, A.HandleRejection, A.AlphaMode, A.MaterialMapColorSpace, A.VertexAttributeKind, A.DrawMode, A.BlendMode, A.ColorEncoding, A.RendererState, A.SolarPhase, A.FrameQueueState, A.GraphValidationFailureKind, A.ResourceFormat, A.GraphStage, A.ResourceAccess, A.ShadowCasterLod, A.FrustumTest, A.AtmosphericParticleAnchor, A.ParticleAlignment, A.ParticleCollisionAction, A.AttractorFalloff, A.SubEmitterTrigger, A.BoxEmissionMode, A.SphereEmissionMode, A.SphereDirectionMode, A.ConeEmissionMode, A.CircleEmissionMode, A.CircleDirectionMode, A.ParticleSpritePlaybackMode, A._BloomBlurAxis, A._DofBlurAxis, A.LoopMode, A.Vector3Property, A.GpuBufferUsage, A.GpuBufferKind, A.GpuTextureFilter, A.GpuTextureWrap, A.GpuTargetAttachment, A.GpuDeviceStatus, A.ShaderCompileStage, A.UniformType, A.ClearMask, A._SlotState, A.BlendEquation, A.BlendFactor, A.CullFace, A.DepthFunc, A.StateField]);
     _inheritMany(A.ResourceHandle, [A.MeshHandle, A.TextureHandle, A.MaterialHandle, A.PipelineHandle, A.InstanceId]);
     _inherit(A.SceneRendererImpl, A._SceneRendererImpl_Object__GpuTimingSupport);
     _inherit(A.Vector3Track, A.KeyframeTrack);
@@ -21159,7 +21725,7 @@
     typeUniverse: {eC: new Map(), tR: {}, eT: {}, tPV: {}, sEA: []},
     mangledGlobalNames: {int: "int", double: "double", num: "num", String: "String", bool: "bool", Null: "Null", List: "List", Object: "Object", Map: "Map", JSObject: "JSObject"},
     mangledNames: {},
-    types: ["Null(JSObject)", "~()", "GpuObject()", "GpuObject(TextureHandle?)", "bool(PassDeclaration)", "bool(JSObject)", "~(~())", "~(@)", "bool(VertexAttributeSlot)", "bool(String)", "bool(ResourceUse)", "Vec3(Vec3)", "~(JSObject)", "Null(@)", "Null()", "~(Vec3,Vec3,Vec3,Vec3,Vec3,Vec3)", "bool(double)", "Vec3(CameraWaypoint)", "double(double)", "Null(Object?)", "~(String)", "bool(Uint8List?)", "int(int,+(MeshHandle,MeshData))", "~(int,@)", "TextureHandle(int,int,String?)", "@(@)", "int(int,+(TextureHandle,_TextureRecord))", "int(+influence,source(double,VolumetricSource),+influence,source(double,VolumetricSource))", "Null(Object,StackTrace)", "String(PassDeclaration)", "int(RenderPass,RenderPass)", "~(@,@)", "~(Object?,Object?)", "bool(int)", "InstanceId(int,int,String?)", "ResolvedMesh(MeshHandle)", "GpuObject(String{fallback:String?})", "@(String)", "SpotLight?()", "List<SpotLight>()", "CameraView()", "double()", "BoundResourceView()", "GpuObject?()", "bool(MapEntry<String,FramePassStats>)", "FramePassStats(MapEntry<String,FramePassStats>)", "FramePassStats(FramePassStats,FramePassStats)", "int(SortableItem<OpaqueSortKey>,SortableItem<OpaqueSortKey>)", "RetainedItemView(SortableItem<OpaqueSortKey>)", "int(SortableItem<BlendedSortKey>,SortableItem<BlendedSortKey>)", "RetainedItemView(SortableItem<BlendedSortKey>)", "bool(QualityProfile)", "int(+influence,light(double,SpotLight),+influence,light(double,SpotLight))", "int(int,int)", "~(Vec3,Vec3,Vec3,Vec3,Vec3)", "double(int,int)", "Plane(double,double,double,double)", "double(Vec3,Vec3)", "Vec3(double,double)", "bool(AtmosphericParticleKinematics)", "int(ParticleColorStop,ParticleColorStop)", "~(ShadowLightView)", "ShadowLightView()", "bool(String,_ActiveClipInstance)", "~(SceneNode)", "~(num)", "RendererConfiguration(QualityProfile)", "@(@,String)", "Null(~())", "Null(@,StackTrace)", "MaterialDefinition(MaterialHandle)", "MaterialHandle(int,int,String?)", "~(FrameContext)", "int(@,@)", "MeshHandle(int,int,String?)", "_MutablePassStats()", "bool()", "Object?(Object?)"],
+    types: ["Null(JSObject)", "~()", "GpuObject()", "GpuObject(TextureHandle?)", "bool(PassDeclaration)", "bool(JSObject)", "~(~())", "~(@)", "Vec3(Vec3)", "bool(VertexAttributeSlot)", "bool(String)", "bool(ResourceUse)", "~(JSObject)", "Null(@)", "Null()", "bool(double)", "Vec3(CameraWaypoint)", "~(Vec3,Vec3,Vec3,Vec3,Vec3,Vec3)", "double(double)", "Null(Object?)", "~(String)", "int(int,+(TextureHandle,_TextureRecord))", "int(int,+(MeshHandle,MeshData))", "~(int,@)", "TextureHandle(int,int,String?)", "bool(Uint8List?)", "@(@)", "int(+influence,source(double,VolumetricSource),+influence,source(double,VolumetricSource))", "Null(Object,StackTrace)", "String(PassDeclaration)", "int(RenderPass,RenderPass)", "~(@,@)", "~(Object?,Object?)", "bool(int)", "InstanceId(int,int,String?)", "ResolvedMesh(MeshHandle)", "GpuObject(String{fallback:String?})", "@(String)", "SpotLight?()", "List<SpotLight>()", "CameraView()", "double()", "BoundResourceView()", "GpuObject?()", "bool(MapEntry<String,FramePassStats>)", "FramePassStats(MapEntry<String,FramePassStats>)", "FramePassStats(FramePassStats,FramePassStats)", "int(SortableItem<OpaqueSortKey>,SortableItem<OpaqueSortKey>)", "RetainedItemView(SortableItem<OpaqueSortKey>)", "int(SortableItem<BlendedSortKey>,SortableItem<BlendedSortKey>)", "RetainedItemView(SortableItem<BlendedSortKey>)", "bool(QualityProfile)", "int(+influence,light(double,SpotLight),+influence,light(double,SpotLight))", "int(int,int)", "~(Vec3,Vec3,Vec3,Vec3,Vec3)", "double(int,int)", "Plane(double,double,double,double)", "double(Vec3,Vec3)", "Vec3(double,double)", "bool(AtmosphericParticleKinematics)", "int(ParticleColorStop,ParticleColorStop)", "List<int>()", "~(ShadowLightView)", "ShadowLightView()", "bool(String,_ActiveClipInstance)", "~(SceneNode)", "~(num)", "RendererConfiguration(QualityProfile)", "@(@,String)", "Null(~())", "Null(@,StackTrace)", "MaterialDefinition(MaterialHandle)", "MaterialHandle(int,int,String?)", "~(FrameContext)", "int(@,@)", "MeshHandle(int,int,String?)", "_MutablePassStats()", "bool()", "Object?(Object?)"],
     interceptorsByTag: null,
     leafTags: null,
     arrayRti: Symbol("$ti"),
@@ -21171,7 +21737,7 @@
       "3;": (t1, t2, t3) => o => o instanceof A._Record_3 && t1._is(o._0) && t2._is(o._1) && t3._is(o._2)
     }
   };
-  A._Universe_addRules(init.typeUniverse, JSON.parse('{"PlainJavaScriptObject":"LegacyJavaScriptObject","UnknownJavaScriptObject":"LegacyJavaScriptObject","JavaScriptFunction":"LegacyJavaScriptObject","NativeArrayBuffer":"NativeByteBuffer","JSArray":{"List":["1"],"JSObject":[],"Iterable":["1"]},"JSBool":{"bool":[],"TrustedGetRuntimeType":[]},"JSNull":{"TrustedGetRuntimeType":[]},"JavaScriptObject":{"JSObject":[]},"LegacyJavaScriptObject":{"JSObject":[]},"JSArraySafeToStringHook":{"SafeToStringHook":[]},"JSUnmodifiableArray":{"JSArray":["1"],"List":["1"],"JSObject":[],"Iterable":["1"]},"ArrayIterator":{"Iterator":["1"]},"JSNumber":{"double":[],"num":[],"Comparable":["num"]},"JSInt":{"double":[],"int":[],"num":[],"Comparable":["num"],"TrustedGetRuntimeType":[]},"JSNumNotInt":{"double":[],"num":[],"Comparable":["num"],"TrustedGetRuntimeType":[]},"JSString":{"String":[],"Comparable":["String"],"Pattern":[],"TrustedGetRuntimeType":[]},"_CastIterableBase":{"Iterable":["2"]},"CastIterator":{"Iterator":["2"]},"_CastListBase":{"ListBase":["2"],"List":["2"],"_CastIterableBase":["1","2"],"Iterable":["2"]},"CastList":{"_CastListBase":["1","2"],"ListBase":["2"],"List":["2"],"_CastIterableBase":["1","2"],"Iterable":["2"],"ListBase.E":"2","Iterable.E":"2"},"LateError":{"Error":[]},"EfficientLengthIterable":{"Iterable":["1"]},"ListIterable":{"EfficientLengthIterable":["1"],"Iterable":["1"]},"SubListIterable":{"ListIterable":["1"],"EfficientLengthIterable":["1"],"Iterable":["1"],"ListIterable.E":"1","Iterable.E":"1"},"ListIterator":{"Iterator":["1"]},"MappedIterable":{"Iterable":["2"],"Iterable.E":"2"},"MappedIterator":{"Iterator":["2"]},"MappedListIterable":{"ListIterable":["2"],"EfficientLengthIterable":["2"],"Iterable":["2"],"ListIterable.E":"2","Iterable.E":"2"},"WhereIterable":{"Iterable":["1"],"Iterable.E":"1"},"WhereIterator":{"Iterator":["1"]},"ReversedListIterable":{"ListIterable":["1"],"EfficientLengthIterable":["1"],"Iterable":["1"],"ListIterable.E":"1","Iterable.E":"1"},"_Record_2":{"_Record2":[],"_Record":[]},"_Record_2_influence_light":{"_Record2":[],"_Record":[]},"_Record_2_influence_source":{"_Record2":[],"_Record":[]},"_Record_2_rotation_translation":{"_Record2":[],"_Record":[]},"_Record_3":{"_Record3":[],"_Record":[]},"ConstantMapView":{"UnmodifiableMapView":["1","2"],"_UnmodifiableMapView_MapView__UnmodifiableMapMixin":["1","2"],"MapView":["1","2"],"_UnmodifiableMapMixin":["1","2"],"Map":["1","2"]},"ConstantMap":{"Map":["1","2"]},"ConstantStringMap":{"ConstantMap":["1","2"],"Map":["1","2"]},"_KeysOrValues":{"Iterable":["1"],"Iterable.E":"1"},"_KeysOrValuesOrElementsIterator":{"Iterator":["1"]},"ConstantSet":{"SetBase":["1"],"Set":["1"],"Iterable":["1"]},"ConstantStringSet":{"ConstantSet":["1"],"SetBase":["1"],"Set":["1"],"Iterable":["1"]},"NullError":{"TypeError":[],"Error":[]},"JsNoSuchMethodError":{"Error":[]},"UnknownJsTypeError":{"Error":[]},"_StackTrace":{"StackTrace":[]},"Closure":{"Function":[]},"Closure0Args":{"Function":[]},"Closure2Args":{"Function":[]},"TearOffClosure":{"Function":[]},"StaticClosure":{"Function":[]},"BoundClosure":{"Function":[]},"RuntimeError":{"Error":[]},"JsLinkedHashMap":{"MapBase":["1","2"],"LinkedHashMap":["1","2"],"Map":["1","2"]},"LinkedHashMapKeysIterable":{"EfficientLengthIterable":["1"],"Iterable":["1"],"Iterable.E":"1"},"LinkedHashMapKeyIterator":{"Iterator":["1"]},"LinkedHashMapValuesIterable":{"EfficientLengthIterable":["1"],"Iterable":["1"],"Iterable.E":"1"},"LinkedHashMapValueIterator":{"Iterator":["1"]},"LinkedHashMapEntriesIterable":{"EfficientLengthIterable":["MapEntry<1,2>"],"Iterable":["MapEntry<1,2>"],"Iterable.E":"MapEntry<1,2>"},"LinkedHashMapEntryIterator":{"Iterator":["MapEntry<1,2>"]},"_Record2":{"_Record":[]},"_Record3":{"_Record":[]},"NativeByteBuffer":{"JSObject":[],"TrustedGetRuntimeType":[]},"NativeTypedData":{"JSObject":[]},"NativeByteData":{"JSObject":[],"TrustedGetRuntimeType":[]},"NativeTypedArray":{"JavaScriptIndexingBehavior":["1"],"JSObject":[]},"NativeTypedArrayOfDouble":{"ListBase":["double"],"NativeTypedArray":["double"],"List":["double"],"JavaScriptIndexingBehavior":["double"],"JSObject":[],"Iterable":["double"],"FixedLengthListMixin":["double"]},"NativeTypedArrayOfInt":{"ListBase":["int"],"NativeTypedArray":["int"],"List":["int"],"JavaScriptIndexingBehavior":["int"],"JSObject":[],"Iterable":["int"],"FixedLengthListMixin":["int"]},"NativeFloat32List":{"Float32List":[],"ListBase":["double"],"NativeTypedArray":["double"],"List":["double"],"JavaScriptIndexingBehavior":["double"],"JSObject":[],"Iterable":["double"],"FixedLengthListMixin":["double"],"TrustedGetRuntimeType":[],"ListBase.E":"double"},"NativeFloat64List":{"Float64List":[],"ListBase":["double"],"NativeTypedArray":["double"],"List":["double"],"JavaScriptIndexingBehavior":["double"],"JSObject":[],"Iterable":["double"],"FixedLengthListMixin":["double"],"TrustedGetRuntimeType":[],"ListBase.E":"double"},"NativeInt16List":{"ListBase":["int"],"NativeTypedArray":["int"],"List":["int"],"JavaScriptIndexingBehavior":["int"],"JSObject":[],"Iterable":["int"],"FixedLengthListMixin":["int"],"TrustedGetRuntimeType":[],"ListBase.E":"int"},"NativeInt32List":{"ListBase":["int"],"NativeTypedArray":["int"],"List":["int"],"JavaScriptIndexingBehavior":["int"],"JSObject":[],"Iterable":["int"],"FixedLengthListMixin":["int"],"TrustedGetRuntimeType":[],"ListBase.E":"int"},"NativeInt8List":{"ListBase":["int"],"NativeTypedArray":["int"],"List":["int"],"JavaScriptIndexingBehavior":["int"],"JSObject":[],"Iterable":["int"],"FixedLengthListMixin":["int"],"TrustedGetRuntimeType":[],"ListBase.E":"int"},"NativeUint16List":{"ListBase":["int"],"NativeTypedArray":["int"],"List":["int"],"JavaScriptIndexingBehavior":["int"],"JSObject":[],"Iterable":["int"],"FixedLengthListMixin":["int"],"TrustedGetRuntimeType":[],"ListBase.E":"int"},"NativeUint32List":{"ListBase":["int"],"NativeTypedArray":["int"],"List":["int"],"JavaScriptIndexingBehavior":["int"],"JSObject":[],"Iterable":["int"],"FixedLengthListMixin":["int"],"TrustedGetRuntimeType":[],"ListBase.E":"int"},"NativeUint8ClampedList":{"ListBase":["int"],"NativeTypedArray":["int"],"List":["int"],"JavaScriptIndexingBehavior":["int"],"JSObject":[],"Iterable":["int"],"FixedLengthListMixin":["int"],"TrustedGetRuntimeType":[],"ListBase.E":"int"},"NativeUint8List":{"Uint8List":[],"ListBase":["int"],"NativeTypedArray":["int"],"List":["int"],"JavaScriptIndexingBehavior":["int"],"JSObject":[],"Iterable":["int"],"FixedLengthListMixin":["int"],"TrustedGetRuntimeType":[],"ListBase.E":"int"},"_Error":{"Error":[]},"_TypeError":{"TypeError":[],"Error":[]},"_SyncStarIterator":{"Iterator":["1"]},"_SyncStarIterable":{"Iterable":["1"],"Iterable.E":"1"},"AsyncError":{"Error":[]},"_AsyncCompleter":{"_Completer":["1"]},"_Future":{"Future":["1"]},"_Zone":{"Zone":[]},"_RootZone":{"_Zone":[],"Zone":[]},"_HashMap":{"MapBase":["1","2"],"Map":["1","2"]},"_IdentityHashMap":{"_HashMap":["1","2"],"MapBase":["1","2"],"Map":["1","2"]},"_HashMapKeyIterable":{"EfficientLengthIterable":["1"],"Iterable":["1"],"Iterable.E":"1"},"_HashMapKeyIterator":{"Iterator":["1"]},"_LinkedHashSet":{"SetBase":["1"],"LinkedHashSet":["1"],"Set":["1"],"Iterable":["1"]},"_LinkedHashSetIterator":{"Iterator":["1"]},"MapBase":{"Map":["1","2"]},"MapView":{"Map":["1","2"]},"UnmodifiableMapView":{"_UnmodifiableMapView_MapView__UnmodifiableMapMixin":["1","2"],"MapView":["1","2"],"_UnmodifiableMapMixin":["1","2"],"Map":["1","2"]},"SetBase":{"Set":["1"],"Iterable":["1"]},"_SetBase":{"SetBase":["1"],"Set":["1"],"Iterable":["1"]},"UnmodifiableSetView":{"SetBase":["1"],"_UnmodifiableSetMixin":["1"],"Set":["1"],"Iterable":["1"]},"DateTime":{"Comparable":["DateTime"]},"double":{"num":[],"Comparable":["num"]},"int":{"num":[],"Comparable":["num"]},"List":{"Iterable":["1"]},"num":{"Comparable":["num"]},"Set":{"Iterable":["1"]},"String":{"Comparable":["String"],"Pattern":[]},"AssertionError":{"Error":[]},"TypeError":{"Error":[]},"ArgumentError":{"Error":[]},"RangeError":{"Error":[]},"IndexError":{"Error":[]},"UnsupportedError":{"Error":[]},"UnimplementedError":{"Error":[]},"StateError":{"Error":[]},"ConcurrentModificationError":{"Error":[]},"OutOfMemoryError":{"Error":[]},"StackOverflowError":{"Error":[]},"_StringStackTrace":{"StackTrace":[]},"_JSRandom":{"Random":[]},"_Random":{"Random":[]},"MeshHandle":{"ResourceHandle":[]},"TextureHandle":{"ResourceHandle":[]},"MaterialHandle":{"ResourceHandle":[]},"InstanceId":{"ResourceHandle":[]},"PipelineHandle":{"ResourceHandle":[]},"CinematicTourCameraController":{"CameraController":[]},"FlyCameraController":{"CameraController":[]},"OrbitCameraController":{"CameraController":[]},"SmoothFollowCameraController":{"CameraController":[]},"FrameQueue":{"RenderEncoder":[]},"_ItemView":{"RetainedItemView":[]},"RenderWorldImpl":{"RenderWorld":[]},"ResourceLibraryImpl":{"ResourceLibrary":[]},"_TransientItemView":{"RetainedItemView":[]},"_PlanResources":{"RenderPassResources":[]},"_FrameScene":{"FrameSceneData":[]},"SceneRendererImpl":{"SceneRenderer":[]},"OpaqueSortKey":{"Comparable":["OpaqueSortKey"]},"BlendedSortKey":{"Comparable":["BlendedSortKey"]},"_FuncCurve":{"Curve":[]},"PointShape":{"EmitterShape":[]},"BoxShape":{"EmitterShape":[]},"SphereShape":{"EmitterShape":[]},"ConeShape":{"EmitterShape":[]},"CircleShape":{"EmitterShape":[]},"BloomBlurFeature":{"RenderFeature":[]},"_BloomBlurPass":{"RenderPass":[]},"BloomCompositeFeature":{"RenderFeature":[]},"_BloomCompositePass":{"RenderPass":[]},"DepthPrepassFeature":{"RenderFeature":[]},"_DepthPrepassPass":{"RenderPass":[]},"DofBlurFeature":{"RenderFeature":[]},"_DofBlurPass":{"RenderPass":[]},"DofCompositeFeature":{"RenderFeature":[]},"_DofCompositePass":{"RenderPass":[]},"GradeFeature":{"RenderFeature":[]},"_GradePass":{"RenderPass":[]},"MsaaResolveFeature":{"RenderFeature":[]},"_MsaaResolvePass":{"RenderPass":[]},"BoundPassContext":{"RenderPassContext":[]},"PresentFeature":{"RenderFeature":[]},"_PresentPass":{"RenderPass":[]},"Ps1QuantizeFeature":{"RenderFeature":[]},"_Ps1QuantizePass":{"RenderPass":[]},"ShadowFeature":{"RenderFeature":[]},"_ShadowCasterPass":{"RenderPass":[]},"ShadowedWorldFeature":{"RenderFeature":[]},"_ShadowedWorldPass":{"RenderPass":[]},"SsaoOcclusionFeature":{"RenderFeature":[]},"_SsaoOcclusionPass":{"RenderPass":[]},"SsaoBlurFeature":{"RenderFeature":[]},"_SsaoBlurPass":{"RenderPass":[]},"VhsFeature":{"RenderFeature":[]},"_VhsPass":{"RenderPass":[]},"VolumetricLightFeature":{"RenderFeature":[]},"_VolumetricLightPass":{"RenderPass":[]},"_VolumetricCompositePass":{"RenderPass":[]},"WorldFeature":{"RenderFeature":[]},"_WorldPass":{"RenderPass":[]},"Vector3Track":{"KeyframeTrack":["Vec3"],"KeyframeTrack.T":"Vec3"},"InstancedMeshNode":{"SceneNode":[]},"DeviceDrawCommandEncoder":{"DrawCommandEncoder":[]},"_WebGpuObject":{"GpuObject":[]},"WebGl2Device":{"GpuDevice":[]},"Int8List":{"List":["int"],"Iterable":["int"]},"Uint8List":{"List":["int"],"Iterable":["int"]},"Uint8ClampedList":{"List":["int"],"Iterable":["int"]},"Int16List":{"List":["int"],"Iterable":["int"]},"Uint16List":{"List":["int"],"Iterable":["int"]},"Int32List":{"List":["int"],"Iterable":["int"]},"Uint32List":{"List":["int"],"Iterable":["int"]},"Float32List":{"List":["double"],"Iterable":["double"]},"Float64List":{"List":["double"],"Iterable":["double"]}}'));
+  A._Universe_addRules(init.typeUniverse, JSON.parse('{"PlainJavaScriptObject":"LegacyJavaScriptObject","UnknownJavaScriptObject":"LegacyJavaScriptObject","JavaScriptFunction":"LegacyJavaScriptObject","NativeArrayBuffer":"NativeByteBuffer","JSArray":{"List":["1"],"JSObject":[],"Iterable":["1"]},"JSBool":{"bool":[],"TrustedGetRuntimeType":[]},"JSNull":{"TrustedGetRuntimeType":[]},"JavaScriptObject":{"JSObject":[]},"LegacyJavaScriptObject":{"JSObject":[]},"JSArraySafeToStringHook":{"SafeToStringHook":[]},"JSUnmodifiableArray":{"JSArray":["1"],"List":["1"],"JSObject":[],"Iterable":["1"]},"ArrayIterator":{"Iterator":["1"]},"JSNumber":{"double":[],"num":[],"Comparable":["num"]},"JSInt":{"double":[],"int":[],"num":[],"Comparable":["num"],"TrustedGetRuntimeType":[]},"JSNumNotInt":{"double":[],"num":[],"Comparable":["num"],"TrustedGetRuntimeType":[]},"JSString":{"String":[],"Comparable":["String"],"Pattern":[],"TrustedGetRuntimeType":[]},"_CastIterableBase":{"Iterable":["2"]},"CastIterator":{"Iterator":["2"]},"_CastListBase":{"ListBase":["2"],"List":["2"],"_CastIterableBase":["1","2"],"Iterable":["2"]},"CastList":{"_CastListBase":["1","2"],"ListBase":["2"],"List":["2"],"_CastIterableBase":["1","2"],"Iterable":["2"],"ListBase.E":"2","Iterable.E":"2"},"LateError":{"Error":[]},"EfficientLengthIterable":{"Iterable":["1"]},"ListIterable":{"EfficientLengthIterable":["1"],"Iterable":["1"]},"SubListIterable":{"ListIterable":["1"],"EfficientLengthIterable":["1"],"Iterable":["1"],"ListIterable.E":"1","Iterable.E":"1"},"ListIterator":{"Iterator":["1"]},"MappedIterable":{"Iterable":["2"],"Iterable.E":"2"},"MappedIterator":{"Iterator":["2"]},"MappedListIterable":{"ListIterable":["2"],"EfficientLengthIterable":["2"],"Iterable":["2"],"ListIterable.E":"2","Iterable.E":"2"},"WhereIterable":{"Iterable":["1"],"Iterable.E":"1"},"WhereIterator":{"Iterator":["1"]},"ReversedListIterable":{"ListIterable":["1"],"EfficientLengthIterable":["1"],"Iterable":["1"],"ListIterable.E":"1","Iterable.E":"1"},"_Record_2":{"_Record2":[],"_Record":[]},"_Record_2_influence_light":{"_Record2":[],"_Record":[]},"_Record_2_influence_source":{"_Record2":[],"_Record":[]},"_Record_2_rotation_translation":{"_Record2":[],"_Record":[]},"_Record_3":{"_Record3":[],"_Record":[]},"ConstantMapView":{"UnmodifiableMapView":["1","2"],"_UnmodifiableMapView_MapView__UnmodifiableMapMixin":["1","2"],"MapView":["1","2"],"_UnmodifiableMapMixin":["1","2"],"Map":["1","2"]},"ConstantMap":{"Map":["1","2"]},"ConstantStringMap":{"ConstantMap":["1","2"],"Map":["1","2"]},"_KeysOrValues":{"Iterable":["1"],"Iterable.E":"1"},"_KeysOrValuesOrElementsIterator":{"Iterator":["1"]},"ConstantSet":{"SetBase":["1"],"Set":["1"],"Iterable":["1"]},"ConstantStringSet":{"ConstantSet":["1"],"SetBase":["1"],"Set":["1"],"Iterable":["1"]},"NullError":{"TypeError":[],"Error":[]},"JsNoSuchMethodError":{"Error":[]},"UnknownJsTypeError":{"Error":[]},"_StackTrace":{"StackTrace":[]},"Closure":{"Function":[]},"Closure0Args":{"Function":[]},"Closure2Args":{"Function":[]},"TearOffClosure":{"Function":[]},"StaticClosure":{"Function":[]},"BoundClosure":{"Function":[]},"RuntimeError":{"Error":[]},"JsLinkedHashMap":{"MapBase":["1","2"],"LinkedHashMap":["1","2"],"Map":["1","2"]},"LinkedHashMapKeysIterable":{"EfficientLengthIterable":["1"],"Iterable":["1"],"Iterable.E":"1"},"LinkedHashMapKeyIterator":{"Iterator":["1"]},"LinkedHashMapValuesIterable":{"EfficientLengthIterable":["1"],"Iterable":["1"],"Iterable.E":"1"},"LinkedHashMapValueIterator":{"Iterator":["1"]},"LinkedHashMapEntriesIterable":{"EfficientLengthIterable":["MapEntry<1,2>"],"Iterable":["MapEntry<1,2>"],"Iterable.E":"MapEntry<1,2>"},"LinkedHashMapEntryIterator":{"Iterator":["MapEntry<1,2>"]},"_Record2":{"_Record":[]},"_Record3":{"_Record":[]},"NativeByteBuffer":{"JSObject":[],"TrustedGetRuntimeType":[]},"NativeTypedData":{"JSObject":[]},"NativeByteData":{"JSObject":[],"TrustedGetRuntimeType":[]},"NativeTypedArray":{"JavaScriptIndexingBehavior":["1"],"JSObject":[]},"NativeTypedArrayOfDouble":{"ListBase":["double"],"NativeTypedArray":["double"],"List":["double"],"JavaScriptIndexingBehavior":["double"],"JSObject":[],"Iterable":["double"],"FixedLengthListMixin":["double"]},"NativeTypedArrayOfInt":{"ListBase":["int"],"NativeTypedArray":["int"],"List":["int"],"JavaScriptIndexingBehavior":["int"],"JSObject":[],"Iterable":["int"],"FixedLengthListMixin":["int"]},"NativeFloat32List":{"Float32List":[],"ListBase":["double"],"NativeTypedArray":["double"],"List":["double"],"JavaScriptIndexingBehavior":["double"],"JSObject":[],"Iterable":["double"],"FixedLengthListMixin":["double"],"TrustedGetRuntimeType":[],"ListBase.E":"double","FixedLengthListMixin.E":"double"},"NativeFloat64List":{"Float64List":[],"ListBase":["double"],"NativeTypedArray":["double"],"List":["double"],"JavaScriptIndexingBehavior":["double"],"JSObject":[],"Iterable":["double"],"FixedLengthListMixin":["double"],"TrustedGetRuntimeType":[],"ListBase.E":"double","FixedLengthListMixin.E":"double"},"NativeInt16List":{"ListBase":["int"],"NativeTypedArray":["int"],"List":["int"],"JavaScriptIndexingBehavior":["int"],"JSObject":[],"Iterable":["int"],"FixedLengthListMixin":["int"],"TrustedGetRuntimeType":[],"ListBase.E":"int","FixedLengthListMixin.E":"int"},"NativeInt32List":{"ListBase":["int"],"NativeTypedArray":["int"],"List":["int"],"JavaScriptIndexingBehavior":["int"],"JSObject":[],"Iterable":["int"],"FixedLengthListMixin":["int"],"TrustedGetRuntimeType":[],"ListBase.E":"int","FixedLengthListMixin.E":"int"},"NativeInt8List":{"ListBase":["int"],"NativeTypedArray":["int"],"List":["int"],"JavaScriptIndexingBehavior":["int"],"JSObject":[],"Iterable":["int"],"FixedLengthListMixin":["int"],"TrustedGetRuntimeType":[],"ListBase.E":"int","FixedLengthListMixin.E":"int"},"NativeUint16List":{"ListBase":["int"],"NativeTypedArray":["int"],"List":["int"],"JavaScriptIndexingBehavior":["int"],"JSObject":[],"Iterable":["int"],"FixedLengthListMixin":["int"],"TrustedGetRuntimeType":[],"ListBase.E":"int","FixedLengthListMixin.E":"int"},"NativeUint32List":{"ListBase":["int"],"NativeTypedArray":["int"],"List":["int"],"JavaScriptIndexingBehavior":["int"],"JSObject":[],"Iterable":["int"],"FixedLengthListMixin":["int"],"TrustedGetRuntimeType":[],"ListBase.E":"int","FixedLengthListMixin.E":"int"},"NativeUint8ClampedList":{"ListBase":["int"],"NativeTypedArray":["int"],"List":["int"],"JavaScriptIndexingBehavior":["int"],"JSObject":[],"Iterable":["int"],"FixedLengthListMixin":["int"],"TrustedGetRuntimeType":[],"ListBase.E":"int","FixedLengthListMixin.E":"int"},"NativeUint8List":{"Uint8List":[],"ListBase":["int"],"NativeTypedArray":["int"],"List":["int"],"JavaScriptIndexingBehavior":["int"],"JSObject":[],"Iterable":["int"],"FixedLengthListMixin":["int"],"TrustedGetRuntimeType":[],"ListBase.E":"int","FixedLengthListMixin.E":"int"},"_Error":{"Error":[]},"_TypeError":{"TypeError":[],"Error":[]},"_SyncStarIterator":{"Iterator":["1"]},"_SyncStarIterable":{"Iterable":["1"],"Iterable.E":"1"},"AsyncError":{"Error":[]},"_AsyncCompleter":{"_Completer":["1"]},"_Future":{"Future":["1"]},"_Zone":{"Zone":[]},"_RootZone":{"_Zone":[],"Zone":[]},"_HashMap":{"MapBase":["1","2"],"Map":["1","2"]},"_IdentityHashMap":{"_HashMap":["1","2"],"MapBase":["1","2"],"Map":["1","2"]},"_HashMapKeyIterable":{"EfficientLengthIterable":["1"],"Iterable":["1"],"Iterable.E":"1"},"_HashMapKeyIterator":{"Iterator":["1"]},"_LinkedHashSet":{"SetBase":["1"],"LinkedHashSet":["1"],"Set":["1"],"Iterable":["1"]},"_LinkedHashSetIterator":{"Iterator":["1"]},"MapBase":{"Map":["1","2"]},"MapView":{"Map":["1","2"]},"UnmodifiableMapView":{"_UnmodifiableMapView_MapView__UnmodifiableMapMixin":["1","2"],"MapView":["1","2"],"_UnmodifiableMapMixin":["1","2"],"Map":["1","2"]},"SetBase":{"Set":["1"],"Iterable":["1"]},"_SetBase":{"SetBase":["1"],"Set":["1"],"Iterable":["1"]},"UnmodifiableSetView":{"SetBase":["1"],"_UnmodifiableSetMixin":["1"],"Set":["1"],"Iterable":["1"]},"DateTime":{"Comparable":["DateTime"]},"double":{"num":[],"Comparable":["num"]},"int":{"num":[],"Comparable":["num"]},"List":{"Iterable":["1"]},"num":{"Comparable":["num"]},"Set":{"Iterable":["1"]},"String":{"Comparable":["String"],"Pattern":[]},"AssertionError":{"Error":[]},"TypeError":{"Error":[]},"ArgumentError":{"Error":[]},"RangeError":{"Error":[]},"IndexError":{"Error":[]},"UnsupportedError":{"Error":[]},"UnimplementedError":{"Error":[]},"StateError":{"Error":[]},"ConcurrentModificationError":{"Error":[]},"OutOfMemoryError":{"Error":[]},"StackOverflowError":{"Error":[]},"_StringStackTrace":{"StackTrace":[]},"_JSRandom":{"Random":[]},"_Random":{"Random":[]},"MeshHandle":{"ResourceHandle":[]},"TextureHandle":{"ResourceHandle":[]},"MaterialHandle":{"ResourceHandle":[]},"InstanceId":{"ResourceHandle":[]},"PipelineHandle":{"ResourceHandle":[]},"CinematicTourCameraController":{"CameraController":[]},"FlyCameraController":{"CameraController":[]},"OrbitCameraController":{"CameraController":[]},"SmoothFollowCameraController":{"CameraController":[]},"FrameQueue":{"RenderEncoder":[]},"_ItemView":{"RetainedItemView":[]},"RenderWorldImpl":{"RenderWorld":[]},"ResourceLibraryImpl":{"ResourceLibrary":[]},"_TransientItemView":{"RetainedItemView":[]},"_PlanResources":{"RenderPassResources":[]},"_FrameScene":{"FrameSceneData":[]},"SceneRendererImpl":{"SceneRenderer":[]},"OpaqueSortKey":{"Comparable":["OpaqueSortKey"]},"BlendedSortKey":{"Comparable":["BlendedSortKey"]},"_FuncCurve":{"Curve":[]},"PointShape":{"EmitterShape":[]},"BoxShape":{"EmitterShape":[]},"SphereShape":{"EmitterShape":[]},"ConeShape":{"EmitterShape":[]},"CircleShape":{"EmitterShape":[]},"BloomBlurFeature":{"RenderFeature":[]},"_BloomBlurPass":{"RenderPass":[]},"BloomCompositeFeature":{"RenderFeature":[]},"_BloomCompositePass":{"RenderPass":[]},"DepthPrepassFeature":{"RenderFeature":[]},"_DepthPrepassPass":{"RenderPass":[]},"DofBlurFeature":{"RenderFeature":[]},"_DofBlurPass":{"RenderPass":[]},"DofCompositeFeature":{"RenderFeature":[]},"_DofCompositePass":{"RenderPass":[]},"GradeFeature":{"RenderFeature":[]},"_GradePass":{"RenderPass":[]},"MsaaResolveFeature":{"RenderFeature":[]},"_MsaaResolvePass":{"RenderPass":[]},"BoundPassContext":{"RenderPassContext":[]},"PresentFeature":{"RenderFeature":[]},"_PresentPass":{"RenderPass":[]},"Ps1QuantizeFeature":{"RenderFeature":[]},"_Ps1QuantizePass":{"RenderPass":[]},"ShadowFeature":{"RenderFeature":[]},"_ShadowCasterPass":{"RenderPass":[]},"ShadowedWorldFeature":{"RenderFeature":[]},"_ShadowedWorldPass":{"RenderPass":[]},"SsaoOcclusionFeature":{"RenderFeature":[]},"_SsaoOcclusionPass":{"RenderPass":[]},"SsaoBlurFeature":{"RenderFeature":[]},"_SsaoBlurPass":{"RenderPass":[]},"VhsFeature":{"RenderFeature":[]},"_VhsPass":{"RenderPass":[]},"VolumetricLightFeature":{"RenderFeature":[]},"_VolumetricLightPass":{"RenderPass":[]},"_VolumetricCompositePass":{"RenderPass":[]},"WorldFeature":{"RenderFeature":[]},"_WorldPass":{"RenderPass":[]},"Vector3Track":{"KeyframeTrack":["Vec3"],"KeyframeTrack.T":"Vec3"},"InstancedMeshNode":{"SceneNode":[]},"DeviceDrawCommandEncoder":{"DrawCommandEncoder":[]},"_WebGpuObject":{"GpuObject":[]},"WebGl2Device":{"GpuDevice":[]},"Int8List":{"List":["int"],"Iterable":["int"]},"Uint8List":{"List":["int"],"Iterable":["int"]},"Uint8ClampedList":{"List":["int"],"Iterable":["int"]},"Int16List":{"List":["int"],"Iterable":["int"]},"Uint16List":{"List":["int"],"Iterable":["int"]},"Int32List":{"List":["int"],"Iterable":["int"]},"Uint32List":{"List":["int"],"Iterable":["int"]},"Float32List":{"List":["double"],"Iterable":["double"]},"Float64List":{"List":["double"],"Iterable":["double"]}}'));
   A._Universe_addErasedTypes(init.typeUniverse, JSON.parse('{"__CastListBase__CastIterableBase_ListMixin":2,"NativeTypedArray":1,"_SetBase":1,"_UnmodifiableSetView_SetBase__UnmodifiableSetMixin":1}'));
   var string$ = {
     _versio: "#version 300 es\nout vec2 vUv;\nvoid main(){\n  vec2 p=vec2(float((gl_VertexID<<1)&2),float(gl_VertexID&2));\n  vUv=p;\n  gl_Position=vec4(p*2.0-1.0,0.0,1.0);\n}\n",
@@ -21213,10 +21779,12 @@
       JSArray_InstanceId: findType("JSArray<InstanceId>"),
       JSArray_KeyframeTrack_dynamic: findType("JSArray<KeyframeTrack<@>>"),
       JSArray_List_int: findType("JSArray<List<int>>"),
+      JSArray_MaterialHandle: findType("JSArray<MaterialHandle>"),
       JSArray_ParticleAttractor: findType("JSArray<ParticleAttractor>"),
       JSArray_ParticleBurst: findType("JSArray<ParticleBurst>"),
       JSArray_ParticleColorStop: findType("JSArray<ParticleColorStop>"),
       JSArray_ParticleEmitter: findType("JSArray<ParticleEmitter>"),
+      JSArray_ParticleSprite: findType("JSArray<ParticleSprite>"),
       JSArray_PassDeclaration: findType("JSArray<PassDeclaration>"),
       JSArray_Plane: findType("JSArray<Plane>"),
       JSArray_PointLight: findType("JSArray<PointLight>"),
@@ -21270,6 +21838,7 @@
       OpaqueSortKey: findType("OpaqueSortKey"),
       ParticleBurst: findType("ParticleBurst"),
       ParticleColorStop: findType("ParticleColorStop"),
+      ParticleSprite: findType("ParticleSprite"),
       PassDeclaration: findType("PassDeclaration"),
       ProfileAttempt: findType("ProfileAttempt"),
       QualityProfile: findType("QualityProfile"),
@@ -21291,6 +21860,7 @@
       Set_int: findType("Set<int>"),
       SortableItem_BlendedSortKey: findType("SortableItem<BlendedSortKey>"),
       SortableItem_OpaqueSortKey: findType("SortableItem<OpaqueSortKey>"),
+      SpriteAnimation: findType("SpriteAnimation"),
       StackTrace: findType("StackTrace"),
       StateField: findType("StateField"),
       String: findType("String"),
@@ -21299,7 +21869,6 @@
       TrustedGetRuntimeType: findType("TrustedGetRuntimeType"),
       TypeError: findType("TypeError"),
       UnknownJavaScriptObject: findType("UnknownJavaScriptObject"),
-      UnmodifiableSetView_String: findType("UnmodifiableSetView<String>"),
       UploadedMesh: findType("UploadedMesh"),
       Vec3: findType("Vec3"),
       Vec3_Function_Vec3: findType("Vec3(Vec3)"),
@@ -21765,12 +22334,12 @@
     B.Map_unJqY = new A.ConstantStringMap(B.Object_ohC, [0, 1, 2, 3], type$.ConstantStringMap_String_int);
     B.MaterialMapColorSpace_0 = new A.MaterialMapColorSpace(0, "srgb");
     B.MaterialMapColorSpace_1 = new A.MaterialMapColorSpace(1, "linear");
-    B.MaterialDefinition_Je1 = new A.MaterialDefinition("water_pbr", null, 0.08, 0.35, 0.65, 0, null, 1, null, 0.08, 0.45, 0.9, 0.05, 1, 1, B.AlphaMode_0);
-    B.MaterialDefinition_N0f = new A.MaterialDefinition("vfx_confetti_mat", null, 1, 0.85, 0.2, 1, null, 1, null, 0.3, 0.2, 0, 0.2, 1, 1, B.AlphaMode_0);
-    B.MaterialDefinition_We6 = new A.MaterialDefinition("conduit_emissive_rail", null, 0.1, 0.85, 1, 1.8, null, 1, null, 0.25, 0.85, 0, 0.2, 1, 1, B.AlphaMode_0);
-    B.MaterialDefinition_jND = new A.MaterialDefinition("buoy_beacon", null, 1, 0.45, 0.1, 1.2, null, 1, null, 0.35, 0.5, 0, 0.2, 1, 1, B.AlphaMode_0);
-    B.MaterialDefinition_pnO = new A.MaterialDefinition("vessel_hull_pbr", null, 0.95, 0.95, 0.98, 0, null, 1, null, 0.25, 0.85, 0, 0.2, 1, 1, B.AlphaMode_0);
-    B.MaterialDefinition_sdk = new A.MaterialDefinition("asteroid_pbr", null, 0.28, 0.32, 0.42, 0, null, 1, null, 0.65, 0.4, 0, 0.2, 1, 1, B.AlphaMode_0);
+    B.MaterialDefinition_3xM = new A.MaterialDefinition("vessel_hull_pbr", null, B.MaterialMapColorSpace_0, 0.95, 0.95, 0.98, null, 0, null, B.MaterialMapColorSpace_1, 1, null, B.MaterialMapColorSpace_1, 0.25, 0.85, 1, 0, 0.2, null, 0, 1, 1, 0, 0, B.AlphaMode_0, 0.5, false, true, false, false);
+    B.MaterialDefinition_5wy = new A.MaterialDefinition("water_pbr", null, B.MaterialMapColorSpace_0, 0.08, 0.35, 0.65, null, 0, null, B.MaterialMapColorSpace_1, 1, null, B.MaterialMapColorSpace_1, 0.08, 0.45, 1, 0.9, 0.05, null, 0, 1, 1, 0, 0, B.AlphaMode_0, 0.5, false, true, false, false);
+    B.MaterialDefinition_K2H = new A.MaterialDefinition("vfx_confetti_mat", null, B.MaterialMapColorSpace_0, 1, 0.85, 0.2, null, 1, null, B.MaterialMapColorSpace_1, 1, null, B.MaterialMapColorSpace_1, 0.3, 0.2, 1, 0, 0.2, null, 0, 1, 1, 0, 0, B.AlphaMode_0, 0.5, false, true, false, false);
+    B.MaterialDefinition_iGF = new A.MaterialDefinition("buoy_beacon", null, B.MaterialMapColorSpace_0, 1, 0.45, 0.1, null, 1.2, null, B.MaterialMapColorSpace_1, 1, null, B.MaterialMapColorSpace_1, 0.35, 0.5, 1, 0, 0.2, null, 0, 1, 1, 0, 0, B.AlphaMode_0, 0.5, false, true, false, false);
+    B.MaterialDefinition_uM4 = new A.MaterialDefinition("asteroid_pbr", null, B.MaterialMapColorSpace_0, 0.28, 0.32, 0.42, null, 0, null, B.MaterialMapColorSpace_1, 1, null, B.MaterialMapColorSpace_1, 0.65, 0.4, 1, 0, 0.2, null, 0, 1, 1, 0, 0, B.AlphaMode_0, 0.5, false, true, false, false);
+    B.MaterialDefinition_wGg = new A.MaterialDefinition("conduit_emissive_rail", null, B.MaterialMapColorSpace_0, 0.1, 0.85, 1, null, 1.8, null, B.MaterialMapColorSpace_1, 1, null, B.MaterialMapColorSpace_1, 0.25, 0.85, 1, 0, 0.2, null, 0, 1, 1, 0, 0, B.AlphaMode_0, 0.5, false, true, false, false);
     B.ParticleAlignment_0 = new A.ParticleAlignment(0, "billboard");
     B.ParticleAlignment_1 = new A.ParticleAlignment(1, "velocityAligned");
     B.ParticleAlignment_2 = new A.ParticleAlignment(2, "velocityStretched");
@@ -21787,6 +22356,10 @@
     B.ParticleColorStop_bNc = new A.ParticleColorStop(0.3, B.LinearColor_DwK);
     B.LinearColor_7cM = new A.LinearColor(0.85, 0.15, 0.02);
     B.ParticleColorStop_pcl = new A.ParticleColorStop(0.7, B.LinearColor_7cM);
+    B.ParticleSpritePlaybackMode_0 = new A.ParticleSpritePlaybackMode(0, "staticFrame");
+    B.ParticleSpritePlaybackMode_1 = new A.ParticleSpritePlaybackMode(1, "animatedOverLifetime");
+    B.ParticleSpritePlaybackMode_2 = new A.ParticleSpritePlaybackMode(2, "loopingAnimation");
+    B.ParticleSpritePlaybackMode_3 = new A.ParticleSpritePlaybackMode(3, "random");
     B.PipelineHandle_0_1_null = new A.PipelineHandle(0, 1, null);
     B.PointShape_HFA = new A.PointShape(null, 0.8);
     B.PointShape_null_0 = new A.PointShape(null, 0);

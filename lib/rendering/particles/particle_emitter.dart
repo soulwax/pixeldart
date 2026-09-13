@@ -11,6 +11,7 @@ import '../math/quat.dart';
 import '../math/transform.dart';
 import '../math/vec.dart';
 import 'particle_shapes.dart';
+import 'particle_spritesheet.dart';
 
 /// Alignment modes for particle rendering.
 enum ParticleAlignment {
@@ -56,12 +57,24 @@ final class ParticleBurst {
   /// Interval between repeated cycles, in seconds.
   final double repeatInterval;
 
+  /// Optional named sprite to emit for this burst.
+  final String? spriteName;
+
+  /// Optional sprite frame index to emit for this burst.
+  final int? spriteIndex;
+
+  /// Optional named animation sequence to play on burst particles.
+  final String? animationName;
+
   const ParticleBurst({
     required this.time,
     required this.minCount,
     int? maxCount,
     this.cycles = 1,
     this.repeatInterval = 1.0,
+    this.spriteName,
+    this.spriteIndex,
+    this.animationName,
   }) : maxCount = maxCount ?? minCount;
 
   void validate() {
@@ -73,6 +86,9 @@ final class ParticleBurst {
     }
     if (!repeatInterval.isFinite || repeatInterval <= 0) {
       throw ArgumentError('ParticleBurst.repeatInterval must be finite and > 0');
+    }
+    if (spriteIndex != null && spriteIndex! < 0) {
+      throw ArgumentError('ParticleBurst.spriteIndex must be >= 0');
     }
   }
 
@@ -265,6 +281,15 @@ final class SubEmitter {
   /// When > 0, particles are emitted continuously along the travel path, preventing gaps at high speeds.
   final double trailDistance;
 
+  /// Optional named sprite to emit when this sub-emitter is triggered.
+  final String? spriteName;
+
+  /// Optional sprite frame index to emit when this sub-emitter is triggered.
+  final int? spriteIndex;
+
+  /// Optional named animation sequence to play on spawned sub-particles.
+  final String? animationName;
+
   const SubEmitter({
     required this.emitter,
     required this.trigger,
@@ -273,6 +298,9 @@ final class SubEmitter {
     this.inheritVelocityFactor = 0.5,
     this.trailInterval = 0.05,
     this.trailDistance = 0.0,
+    this.spriteName,
+    this.spriteIndex,
+    this.animationName,
   });
 
   void validate() {
@@ -288,6 +316,9 @@ final class SubEmitter {
     }
     if (!trailDistance.isFinite || trailDistance < 0) {
       throw ArgumentError('SubEmitter.trailDistance must be finite and >= 0');
+    }
+    if (spriteIndex != null && spriteIndex! < 0) {
+      throw ArgumentError('SubEmitter.spriteIndex must be >= 0');
     }
   }
 }
@@ -360,6 +391,10 @@ final class _ParticleState {
   double angularVelocity = 0.0;
   double mass = 1.0;
   int materialIndex = 0;
+  int spriteIndex = 0;
+  double spriteTimer = 0.0;
+  int animSequenceIndex = 0;
+  bool isSpriteAnimated = false;
   double trailTimer = 0.0;
   bool isAlive = false;
 
@@ -378,6 +413,10 @@ final class _ParticleState {
     angularVelocity = 0.0;
     mass = 1.0;
     materialIndex = 0;
+    spriteIndex = 0;
+    spriteTimer = 0.0;
+    animSequenceIndex = 0;
+    isSpriteAnimated = false;
     trailTimer = 0.0;
     isAlive = false;
   }
@@ -401,6 +440,12 @@ final class ParticleEmitter {
   final bool receivesShadow;
   final int sortTiebreakerBase;
   final int instanceFamilyKey;
+
+  // Spritesheet & Animation
+  ParticleSpriteSheet? spriteSheet;
+  ParticleSpritePlaybackMode spritePlaybackMode;
+  String? defaultSpriteName;
+  String? defaultAnimationName;
 
   // Spatial & Geometry
   EmitterShape shape;
@@ -478,6 +523,10 @@ final class ParticleEmitter {
     required this.mesh,
     required this.material,
     this.materialRamp,
+    this.spriteSheet,
+    this.spritePlaybackMode = ParticleSpritePlaybackMode.staticFrame,
+    this.defaultSpriteName,
+    this.defaultAnimationName,
     this.drawMode = DrawMode.blended,
     this.blendMode = BlendMode.alpha,
     this.castsShadow = false,
@@ -626,6 +675,15 @@ final class ParticleEmitter {
     for (final a in attractors) {
       a.validate();
     }
+    if (spriteSheet != null) {
+      spriteSheet!.validate();
+      if (defaultSpriteName != null && spriteSheet!.indexOfSprite(defaultSpriteName!) == null) {
+        throw ArgumentError('ParticleEmitter defaultSpriteName not found in spriteSheet: $defaultSpriteName');
+      }
+      if (defaultAnimationName != null && spriteSheet!.getAnimation(defaultAnimationName!) == null) {
+        throw ArgumentError('ParticleEmitter defaultAnimationName not found in spriteSheet: $defaultAnimationName');
+      }
+    }
     collisionPlane?.validate();
     colorGradient?.validate();
     if (maxParticles <= 0) {
@@ -635,13 +693,113 @@ final class ParticleEmitter {
 
   /// Triggers an immediate burst of [count] particles (clamped to remaining pool capacity).
   ///
-  /// Optionally overrides spawn position and applies inherited velocity (e.g. from parent particles).
-  int burst(int count, {Vec3? position, Vec3? inheritedVelocity}) {
+  /// Optionally overrides spawn position, applies inherited velocity, and targets a specific sprite or animation.
+  int burst(
+    int count, {
+    Vec3? position,
+    Vec3? inheritedVelocity,
+    int? spriteIndex,
+    String? spriteName,
+    String? animationName,
+  }) {
     if (count <= 0) return 0;
     var spawned = 0;
     final toSpawn = math.min(count, maxParticles - _activeCount);
     for (var i = 0; i < toSpawn; i++) {
-      _spawnOne(positionOverride: position, inheritedVelocity: inheritedVelocity);
+      _spawnOne(
+        positionOverride: position,
+        inheritedVelocity: inheritedVelocity,
+        spriteIndexOverride: spriteIndex,
+        spriteNameOverride: spriteName,
+        animationNameOverride: animationName,
+      );
+      spawned++;
+    }
+    return spawned;
+  }
+
+  /// Emits [count] particles using the sprite identified by [name].
+  int emitSprite(
+    String name, {
+    int count = 1,
+    Vec3? position,
+    Vec3? inheritedVelocity,
+  }) {
+    return burst(
+      count,
+      position: position,
+      inheritedVelocity: inheritedVelocity,
+      spriteName: name,
+    );
+  }
+
+  /// Alias for [emitSprite] to trigger a burst with a specific named sprite.
+  int burstSprite(
+    String name, {
+    int count = 1,
+    Vec3? position,
+    Vec3? inheritedVelocity,
+  }) => emitSprite(name, count: count, position: position, inheritedVelocity: inheritedVelocity);
+
+  /// Emits [count] particles using the sprite at integer [index].
+  int emitSpriteIndex(
+    int index, {
+    int count = 1,
+    Vec3? position,
+    Vec3? inheritedVelocity,
+  }) {
+    return burst(
+      count,
+      position: position,
+      inheritedVelocity: inheritedVelocity,
+      spriteIndex: index,
+    );
+  }
+
+  /// Alias for [emitSpriteIndex] to trigger a burst with a specific sprite index.
+  int burstSpriteIndex(
+    int index, {
+    int count = 1,
+    Vec3? position,
+    Vec3? inheritedVelocity,
+  }) => emitSpriteIndex(index, count: count, position: position, inheritedVelocity: inheritedVelocity);
+
+  /// Emits [count] particles executing the named [animationName] sequence.
+  int emitAnimation(
+    String animationName, {
+    int count = 1,
+    Vec3? position,
+    Vec3? inheritedVelocity,
+  }) {
+    return burst(
+      count,
+      position: position,
+      inheritedVelocity: inheritedVelocity,
+      animationName: animationName,
+    );
+  }
+
+  /// Emits [count] particles randomly sampled from sprites carrying [tag].
+  int emitSpriteWithTag(
+    String tag, {
+    int count = 1,
+    Vec3? position,
+    Vec3? inheritedVelocity,
+  }) {
+    final sheet = spriteSheet;
+    if (sheet == null) return 0;
+    final indices = sheet.indicesWithTag(tag);
+    if (indices.isEmpty) return 0;
+
+    var spawned = 0;
+    final toSpawn = math.min(count, maxParticles - _activeCount);
+    for (var i = 0; i < toSpawn; i++) {
+      final idx = indices[_random.nextInt(indices.length)];
+      _spawnOne(
+        positionOverride: position,
+        inheritedVelocity: inheritedVelocity,
+        spriteIndexOverride: idx,
+      );
       spawned++;
     }
     return spawned;
@@ -706,7 +864,12 @@ final class ParticleEmitter {
 
         final triggerTime = burst.time + countTriggered * burst.repeatInterval;
         if (activeSimTime >= triggerTime) {
-          this.burst(burst.sampleCount(_random));
+          this.burst(
+            burst.sampleCount(_random),
+            spriteName: burst.spriteName,
+            spriteIndex: burst.spriteIndex,
+            animationName: burst.animationName,
+          );
           _burstTriggerCounts[b]++;
         }
       }
@@ -733,7 +896,13 @@ final class ParticleEmitter {
     }
   }
 
-  void _spawnOne({Vec3? positionOverride, Vec3? inheritedVelocity}) {
+  void _spawnOne({
+    Vec3? positionOverride,
+    Vec3? inheritedVelocity,
+    int? spriteIndexOverride,
+    String? spriteNameOverride,
+    String? animationNameOverride,
+  }) {
     if (_activeCount >= maxParticles) return;
 
     final p = _pool[_activeCount++];
@@ -782,7 +951,59 @@ final class ParticleEmitter {
     p.rotation = _lerpDouble(minInitialRotation, maxInitialRotation, _random.nextDouble());
     p.angularVelocity = _lerpDouble(minAngularVelocity, maxAngularVelocity, _random.nextDouble());
     p.mass = 1.0;
-    p.materialIndex = 0;
+    p.spriteTimer = 0.0;
+    p.animSequenceIndex = 0;
+
+    // Spritesheet initialization
+    final sheet = spriteSheet;
+    if (sheet != null) {
+      if (spriteIndexOverride != null) {
+        p.spriteIndex = spriteIndexOverride.clamp(0, sheet.sprites.length - 1);
+        p.isSpriteAnimated = false;
+      } else if (spriteNameOverride != null) {
+        final idx = sheet.indexOfSprite(spriteNameOverride);
+        p.spriteIndex = (idx ?? 0).clamp(0, sheet.sprites.length - 1);
+        p.isSpriteAnimated = false;
+      } else if (animationNameOverride != null) {
+        final anim = sheet.getAnimation(animationNameOverride);
+        if (anim != null && anim.frameIndices.isNotEmpty) {
+          p.spriteIndex = anim.frameIndices.first;
+          p.isSpriteAnimated = true;
+        } else {
+          p.spriteIndex = 0;
+          p.isSpriteAnimated = false;
+        }
+      } else {
+        switch (spritePlaybackMode) {
+          case ParticleSpritePlaybackMode.staticFrame:
+            final defName = defaultSpriteName;
+            p.spriteIndex = defName != null ? (sheet.indexOfSprite(defName) ?? 0) : 0;
+            p.isSpriteAnimated = false;
+          case ParticleSpritePlaybackMode.animatedOverLifetime:
+          case ParticleSpritePlaybackMode.loopingAnimation:
+            final defAnim = defaultAnimationName != null ? sheet.getAnimation(defaultAnimationName!) : null;
+            p.spriteIndex = (defAnim != null && defAnim.frameIndices.isNotEmpty)
+                ? defAnim.frameIndices.first
+                : 0;
+            p.isSpriteAnimated = true;
+          case ParticleSpritePlaybackMode.random:
+            p.spriteIndex = sheet.sampleRandomIndex(_random);
+            p.isSpriteAnimated = false;
+          case ParticleSpritePlaybackMode.weightedRandom:
+            p.spriteIndex = sheet.sampleWeightedIndex(_random);
+            p.isSpriteAnimated = false;
+          case ParticleSpritePlaybackMode.manual:
+            final defName = defaultSpriteName;
+            p.spriteIndex = defName != null ? (sheet.indexOfSprite(defName) ?? 0) : 0;
+            p.isSpriteAnimated = false;
+        }
+      }
+      p.materialIndex = p.spriteIndex;
+    } else {
+      p.spriteIndex = 0;
+      p.isSpriteAnimated = false;
+      p.materialIndex = 0;
+    }
 
     _totalSpawned++;
 
@@ -793,7 +1014,14 @@ final class ParticleEmitter {
         final vel = sub.inheritVelocity
             ? Vec3(p.vx, p.vy, p.vz) * sub.inheritVelocityFactor
             : Vec3.zero;
-        sub.emitter.burst(sub.count, position: Vec3(p.x, p.y, p.z), inheritedVelocity: vel);
+        sub.emitter.burst(
+          sub.count,
+          position: Vec3(p.x, p.y, p.z),
+          inheritedVelocity: vel,
+          spriteName: sub.spriteName,
+          spriteIndex: sub.spriteIndex,
+          animationName: sub.animationName,
+        );
       }
     }
   }
@@ -973,7 +1201,14 @@ final class ParticleEmitter {
               final vel = sub.inheritVelocity
                   ? Vec3(p.vx, p.vy, p.vz) * sub.inheritVelocityFactor
                   : Vec3.zero;
-              sub.emitter.burst(sub.count, position: Vec3(p.x, p.y, p.z), inheritedVelocity: vel);
+              sub.emitter.burst(
+                sub.count,
+                position: Vec3(p.x, p.y, p.z),
+                inheritedVelocity: vel,
+                spriteName: sub.spriteName,
+                spriteIndex: sub.spriteIndex,
+                animationName: sub.animationName,
+              );
             }
           }
 
@@ -1048,10 +1283,24 @@ final class ParticleEmitter {
                 p.prevY + moveY * frac,
                 p.prevZ + moveZ * frac,
               );
-              sub.emitter.burst(sub.count, position: emitPos, inheritedVelocity: vel);
+              sub.emitter.burst(
+                sub.count,
+                position: emitPos,
+                inheritedVelocity: vel,
+                spriteName: sub.spriteName,
+                spriteIndex: sub.spriteIndex,
+                animationName: sub.animationName,
+              );
             }
           } else if (p.trailTimer >= sub.trailInterval) {
-            sub.emitter.burst(sub.count, position: Vec3(p.x, p.y, p.z), inheritedVelocity: vel);
+            sub.emitter.burst(
+              sub.count,
+              position: Vec3(p.x, p.y, p.z),
+              inheritedVelocity: vel,
+              spriteName: sub.spriteName,
+              spriteIndex: sub.spriteIndex,
+              animationName: sub.animationName,
+            );
             hasFiredTimeTrail = true;
           }
         }
@@ -1060,8 +1309,28 @@ final class ParticleEmitter {
         p.trailTimer = 0.0;
       }
 
-      // Material ramp selection
-      if (matRamp != null && matRamp.isNotEmpty) {
+      // Sprite animation and material selection
+      final sheet = spriteSheet;
+      if (sheet != null) {
+        if (p.isSpriteAnimated) {
+          final anim = defaultAnimationName != null ? sheet.getAnimation(defaultAnimationName!) : null;
+          if (spritePlaybackMode == ParticleSpritePlaybackMode.animatedOverLifetime) {
+            if (anim != null) {
+              p.spriteIndex = anim.frameIndexAtNormalizedTime(tNorm);
+            } else {
+              p.spriteIndex = (tNorm * sheet.sprites.length).floor().clamp(0, sheet.sprites.length - 1);
+            }
+          } else if (spritePlaybackMode == ParticleSpritePlaybackMode.loopingAnimation) {
+            p.spriteTimer += dt;
+            if (anim != null) {
+              p.spriteIndex = anim.frameIndexAtTime(p.spriteTimer);
+            } else {
+              p.spriteIndex = ((p.spriteTimer * 12.0).floor()) % sheet.sprites.length;
+            }
+          }
+        }
+        p.materialIndex = p.spriteIndex;
+      } else if (matRamp != null && matRamp.isNotEmpty) {
         final matIdx = (tNorm * matRamp.length).floor().clamp(0, matRamp.length - 1);
         p.materialIndex = matIdx;
       }
@@ -1081,7 +1350,14 @@ final class ParticleEmitter {
         final vel = sub.inheritVelocity
             ? Vec3(dying.vx, dying.vy, dying.vz) * sub.inheritVelocityFactor
             : Vec3.zero;
-        sub.emitter.burst(sub.count, position: deathPos, inheritedVelocity: vel);
+        sub.emitter.burst(
+          sub.count,
+          position: deathPos,
+          inheritedVelocity: vel,
+          spriteName: sub.spriteName,
+          spriteIndex: sub.spriteIndex,
+          animationName: sub.animationName,
+        );
       }
     }
 
@@ -1113,6 +1389,10 @@ final class ParticleEmitter {
       dying.angularVelocity = last.angularVelocity;
       dying.mass = last.mass;
       dying.materialIndex = last.materialIndex;
+      dying.spriteIndex = last.spriteIndex;
+      dying.spriteTimer = last.spriteTimer;
+      dying.animSequenceIndex = last.animSequenceIndex;
+      dying.isSpriteAnimated = last.isSpriteAnimated;
       dying.trailTimer = last.trailTimer;
       dying.isAlive = last.isAlive;
     }
@@ -1187,9 +1467,16 @@ final class ParticleEmitter {
         if (finalScale <= 1e-6) finalScale = 1e-6;
 
         // Select active material
-        final activeMat = (matRamp != null && matRamp.isNotEmpty)
-            ? matRamp[p.materialIndex.clamp(0, matRamp.length - 1)]
-            : defaultMat;
+        MaterialHandle activeMat;
+        final sheet = spriteSheet;
+        if (sheet != null && sheet.isBound) {
+          final sIdx = p.spriteIndex.clamp(0, sheet.materials.length - 1);
+          activeMat = sheet.materials[sIdx];
+        } else if (matRamp != null && matRamp.isNotEmpty) {
+          activeMat = matRamp[p.materialIndex.clamp(0, matRamp.length - 1)];
+        } else {
+          activeMat = defaultMat;
+        }
 
         encoder.submit(
           RetainedItemDescriptor(

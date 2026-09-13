@@ -33,6 +33,7 @@ import '../scene/animation.dart';
 import '../scene/scene_node.dart';
 import 'webgl2_renderer_factory.dart';
 export 'device_api.dart' show GpuTextureWrap, GpuTextureFilter;
+export '../particles/particle_spritesheet.dart';
 
 /// Per-frame callback context passed to host update listeners.
 final class FrameContext {
@@ -289,6 +290,16 @@ final class PixeldartApp {
       resources.finalizeTextureMips(handle);
     }
     return handle;
+  }
+
+  /// Registers and binds a [ParticleSpriteSheet] with the app's resource library,
+  /// automatically provisioning material handles for all sprite frames.
+  ParticleSpriteSheet registerSpriteSheet(
+    ParticleSpriteSheet sheet, {
+    MaterialDefinition? baseMaterial,
+  }) {
+    sheet.bind(resources, baseMaterial: baseMaterial);
+    return sheet;
   }
 
   /// Current skybox declaration configured on [environment].

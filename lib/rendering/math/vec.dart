@@ -19,6 +19,8 @@ final class Vec2 {
     return len < 1e-9 ? zero : Vec2(x / len, y / len);
   }
 
+  bool get isFinite => x.isFinite && y.isFinite;
+
   @override
   bool operator ==(Object other) =>
       other is Vec2 && x == other.x && y == other.y;

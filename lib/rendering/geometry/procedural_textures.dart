@@ -617,6 +617,97 @@ abstract final class ProceduralTextures {
     return buffer;
   }
 
+  /// Generates a 2x2 procedural particle atlas texture containing 4 distinct high-fidelity VFX sprites:
+  /// - Cell 0 (top-left): Soft luminous orb / core glow
+  /// - Cell 1 (top-right): 4-point sparkle / twinkle star
+  /// - Cell 2 (bottom-left): Expanding shockwave energy ring
+  /// - Cell 3 (bottom-right): Organic multi-lobed smoke puff
+  static Uint8List particleAtlas({
+    int width = 256,
+    int height = 256,
+    LinearColor color = const LinearColor(1.0, 1.0, 1.0),
+  }) {
+    if (width <= 0 || height <= 0 || width % 2 != 0 || height % 2 != 0) {
+      throw ArgumentError('particleAtlas dimensions must be positive even integers');
+    }
+
+    final buffer = Uint8List(width * height * 4);
+    final halfW = width ~/ 2;
+    final halfH = height ~/ 2;
+    final rByte = (color.r.clamp(0.0, 1.0) * 255.0).round();
+    final gByte = (color.g.clamp(0.0, 1.0) * 255.0).round();
+    final bByte = (color.b.clamp(0.0, 1.0) * 255.0).round();
+
+    var offset = 0;
+    for (var y = 0; y < height; y++) {
+      final row = y ~/ halfH; // 0 = top half, 1 = bottom half
+      final localY = (y % halfH) / (halfH - 1);
+      final cy = (localY - 0.5) * 2.0;
+
+      for (var x = 0; x < width; x++) {
+        final col = x ~/ halfW; // 0 = left half, 1 = right half
+        final localX = (x % halfW) / (halfW - 1);
+        final cx = (localX - 0.5) * 2.0;
+
+        final r = math.sqrt(cx * cx + cy * cy);
+        double alpha = 0.0;
+
+        if (row == 0 && col == 0) {
+          // Cell 0: Soft radial luminous orb / flame core
+          if (r < 1.0) {
+            final f = 1.0 - r * r;
+            alpha = (f * f).clamp(0.0, 1.0);
+          }
+        } else if (row == 0 && col == 1) {
+          // Cell 1: 4-point sparkle / twinkle star
+          if (r < 1.0) {
+            final ax = cx.abs();
+            final ay = cy.abs();
+            final beamH = math.exp(-ax * 6.0) * math.exp(-ay * 1.5);
+            final beamV = math.exp(-ay * 6.0) * math.exp(-ax * 1.5);
+            final core = math.exp(-r * 4.0);
+            final combined = (beamH + beamV + core * 0.8) * (1.0 - r);
+            alpha = combined.clamp(0.0, 1.0);
+          }
+        } else if (row == 1 && col == 0) {
+          // Cell 2: Expanding shockwave ring
+          if (r < 1.0) {
+            final ringDist = (r - 0.55).abs();
+            if (ringDist < 0.35) {
+              final ringNorm = 1.0 - (ringDist / 0.35);
+              alpha = (ringNorm * ringNorm).clamp(0.0, 1.0);
+            }
+          }
+        } else {
+          // Cell 3: Organic multi-lobed smoke puff
+          if (r < 1.0) {
+            // Main center puff + 3 offset lobes
+            final d0 = math.sqrt(cx * cx + cy * cy) / 0.65;
+            final d1 = math.sqrt((cx - 0.22) * (cx - 0.22) + (cy - 0.18) * (cy - 0.18)) / 0.5;
+            final d2 = math.sqrt((cx + 0.25) * (cx + 0.25) + (cy - 0.12) * (cy - 0.12)) / 0.45;
+            final d3 = math.sqrt(cx * cx + (cy + 0.25) * (cy + 0.25)) / 0.48;
+
+            final a0 = d0 < 1.0 ? math.pow(1.0 - d0 * d0, 2.0).toDouble() : 0.0;
+            final a1 = d1 < 1.0 ? math.pow(1.0 - d1 * d1, 2.0).toDouble() : 0.0;
+            final a2 = d2 < 1.0 ? math.pow(1.0 - d2 * d2, 2.0).toDouble() : 0.0;
+            final a3 = d3 < 1.0 ? math.pow(1.0 - d3 * d3, 2.0).toDouble() : 0.0;
+
+            final combined = (a0 * 0.7 + a1 * 0.6 + a2 * 0.55 + a3 * 0.5) * (1.0 - r);
+            alpha = combined.clamp(0.0, 1.0);
+          }
+        }
+
+        buffer[offset] = rByte;
+        buffer[offset + 1] = gByte;
+        buffer[offset + 2] = bByte;
+        buffer[offset + 3] = (alpha * 255.0).round();
+        offset += 4;
+      }
+    }
+
+    return buffer;
+  }
+
   static double _sample2d(double x, double y) {
     final ix = x.floor();
     final iy = y.floor();

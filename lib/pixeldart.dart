@@ -40,6 +40,7 @@ export 'rendering/particles/flow_particles.dart';
 export 'rendering/particles/particle_emitter.dart';
 export 'rendering/particles/particle_presets.dart';
 export 'rendering/particles/particle_shapes.dart';
+export 'rendering/particles/particle_spritesheet.dart';
 export 'rendering/scene/particle_emitter_node.dart';
 export 'rendering/atmosphere/volumetric_media.dart';
 export 'rendering/atmosphere/thermal_field.dart';

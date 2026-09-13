@@ -1208,11 +1208,75 @@ void main() async {
     ),
   );
 
+  // Procedural Particle Atlas & Spritesheet
+  final atlasPixels = ProceduralTextures.particleAtlas(width: 256, height: 256);
+  final atlasTex = app.createTexture(
+    width: 256,
+    height: 256,
+    pixels: atlasPixels,
+    wrap: GpuTextureWrap.clampToEdge,
+    debugLabel: 'particle_atlas_tex',
+  );
+
+  final vfxSpriteSheet = app.registerSpriteSheet(
+    ParticleSpriteSheet.uniformGrid(
+      texture: atlasTex,
+      columns: 2,
+      rows: 2,
+      frameNames: ['orb', 'star', 'ring', 'smoke'],
+      animations: {
+        'combustion': SpriteAnimation(
+          name: 'combustion',
+          frameIndices: [0, 1, 2, 3],
+          frameRate: 8.0,
+          isLooping: true,
+        ),
+      },
+    ),
+    baseMaterial: MaterialDefinition(
+      key: 'vfx_spritesheet_base',
+      albedoTexture: atlasTex,
+      alphaMode: AlphaMode.blended,
+      roughness: 1.0,
+      metallic: 0.0,
+      emissiveStrength: 1.5,
+    ),
+  );
+
+  final vfxSpritesheetEmitter = ParticleEmitter(
+    mesh: particleQuadMesh,
+    material: vfxFireMat,
+    spriteSheet: vfxSpriteSheet,
+    spritePlaybackMode: ParticleSpritePlaybackMode.random,
+    alignment: ParticleAlignment.billboard,
+    rate: 0.0,
+    maxParticles: 400,
+    minLifetime: 1.2,
+    maxLifetime: 2.2,
+    minSpeed: 0.6,
+    maxSpeed: 2.2,
+    minStartSize: 0.5,
+    maxStartSize: 0.9,
+    minEndSize: 0.0,
+    maxEndSize: 0.2,
+    fadeInFraction: 0.1,
+    fadeOutFraction: 0.4,
+    gravity: const Vec3(0, 0.4, 0),
+    dragCoefficient: 0.4,
+    noiseStrength: 0.3,
+    transform: Transform.at(const Vec3(0, 0, 0)),
+  );
+
   // Wire VFX dynamic particle emitter selector
   final vfxSelect = web.document.querySelector('#vfx-particles-select');
   if (vfxSelect is web.HTMLSelectElement) {
     void updateVfxEmitter(String value) {
       app.clearEmitters();
+      final ssControls = web.document.querySelector('#spritesheet-controls');
+      if (ssControls is web.HTMLElement) {
+        ssControls.style.display = value == 'spritesheet' ? 'block' : 'none';
+      }
+
       switch (value) {
         case 'campfire':
           app.addEmitter(
@@ -1291,6 +1355,9 @@ void main() async {
               origin: const Vec3(0, 6, 0),
             ),
           );
+        case 'spritesheet':
+          app.addEmitter(vfxSpritesheetEmitter);
+          vfxSpritesheetEmitter.burst(16, position: const Vec3(0, 0.2, 0));
         case 'none':
         default:
           break;
@@ -1300,6 +1367,57 @@ void main() async {
     vfxSelect.addEventListener(
       'change',
       ((web.Event _) => updateVfxEmitter(vfxSelect.value)).toJS,
+    );
+  }
+
+  // Wire programmatic sprite burst buttons
+  final emitStarBtn = web.document.querySelector('#emit-star-btn');
+  if (emitStarBtn is web.HTMLButtonElement) {
+    emitStarBtn.addEventListener(
+      'click',
+      ((web.Event _) {
+        vfxSpritesheetEmitter.burstSprite('star', count: 12, position: const Vec3(0, 0.2, 0));
+      }).toJS,
+    );
+  }
+
+  final emitRingBtn = web.document.querySelector('#emit-ring-btn');
+  if (emitRingBtn is web.HTMLButtonElement) {
+    emitRingBtn.addEventListener(
+      'click',
+      ((web.Event _) {
+        vfxSpritesheetEmitter.burstSprite('ring', count: 4, position: const Vec3(0, 0.2, 0));
+      }).toJS,
+    );
+  }
+
+  final emitSmokeBtn = web.document.querySelector('#emit-smoke-btn');
+  if (emitSmokeBtn is web.HTMLButtonElement) {
+    emitSmokeBtn.addEventListener(
+      'click',
+      ((web.Event _) {
+        vfxSpritesheetEmitter.burstSprite('smoke', count: 10, position: const Vec3(0, 0.2, 0));
+      }).toJS,
+    );
+  }
+
+  final emitOrbBtn = web.document.querySelector('#emit-orb-btn');
+  if (emitOrbBtn is web.HTMLButtonElement) {
+    emitOrbBtn.addEventListener(
+      'click',
+      ((web.Event _) {
+        vfxSpritesheetEmitter.burstSprite('orb', count: 8, position: const Vec3(0, 0.2, 0));
+      }).toJS,
+    );
+  }
+
+  final emitAnimBtn = web.document.querySelector('#emit-anim-btn');
+  if (emitAnimBtn is web.HTMLButtonElement) {
+    emitAnimBtn.addEventListener(
+      'click',
+      ((web.Event _) {
+        vfxSpritesheetEmitter.emitAnimation('combustion', count: 16, position: const Vec3(0, 0.2, 0));
+      }).toJS,
     );
   }
 
