@@ -14,6 +14,7 @@ export 'rendering/api/handles.dart';
 export 'rendering/api/lights.dart';
 export 'rendering/api/materials.dart';
 export 'rendering/api/mesh.dart';
+export 'rendering/webgl/device_api.dart' show GpuTextureWrap, GpuTextureFilter;
 export 'rendering/geometry/primitives.dart';
 export 'rendering/geometry/procedural_textures.dart';
 export 'rendering/geometry/terrain.dart';

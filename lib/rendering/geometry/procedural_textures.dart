@@ -518,6 +518,105 @@ abstract final class ProceduralTextures {
     return buffer;
   }
 
+  /// Generates a smooth radial particle texture with soft gaussian/quartic falloff.
+  ///
+  /// Center is dense and opaque, smoothly tapering to zero alpha at the perimeter.
+  /// Ideal for billboard particle puffs, sparks, flames, smoke plumes, and embers.
+  static Uint8List radialParticle({
+    int width = 128,
+    int height = 128,
+    double innerRadius = 0.0,
+    double falloffExponent = 2.0,
+    LinearColor centerColor = const LinearColor(1.0, 1.0, 1.0),
+    LinearColor edgeColor = const LinearColor(1.0, 1.0, 1.0),
+  }) {
+    if (width <= 0 || height <= 0) throw ArgumentError('dimensions must be > 0');
+    if (innerRadius < 0.0 || innerRadius >= 1.0) {
+      throw ArgumentError.value(innerRadius, 'innerRadius', 'must be in [0, 1)');
+    }
+    if (falloffExponent <= 0.0) {
+      throw ArgumentError.value(falloffExponent, 'falloffExponent', 'must be > 0');
+    }
+
+    final buffer = Uint8List(width * height * 4);
+    final halfW = width * 0.5;
+    final halfH = height * 0.5;
+    var offset = 0;
+
+    for (var y = 0; y < height; y++) {
+      final ny = (y + 0.5 - halfH) / halfH;
+      for (var x = 0; x < width; x++) {
+        final nx = (x + 0.5 - halfW) / halfW;
+        final dist = math.sqrt(nx * nx + ny * ny);
+
+        double alpha;
+        if (dist >= 1.0) {
+          alpha = 0.0;
+        } else if (dist <= innerRadius) {
+          alpha = 1.0;
+        } else {
+          final t = (dist - innerRadius) / (1.0 - innerRadius);
+          final f = (1.0 - t * t).clamp(0.0, 1.0);
+          alpha = math.pow(f, falloffExponent).toDouble();
+        }
+
+        final tColor = dist.clamp(0.0, 1.0);
+        final r = (centerColor.r + (edgeColor.r - centerColor.r) * tColor).clamp(0.0, 1.0);
+        final g = (centerColor.g + (edgeColor.g - centerColor.g) * tColor).clamp(0.0, 1.0);
+        final b = (centerColor.b + (edgeColor.b - centerColor.b) * tColor).clamp(0.0, 1.0);
+
+        buffer[offset] = (r * 255.0).round();
+        buffer[offset + 1] = (g * 255.0).round();
+        buffer[offset + 2] = (b * 255.0).round();
+        buffer[offset + 3] = (alpha.clamp(0.0, 1.0) * 255.0).round();
+        offset += 4;
+      }
+    }
+    return buffer;
+  }
+
+  /// Generates an elongated directional spark texture with a bright hot head and a tapering soft tail.
+  ///
+  /// Aligned along the vertical axis (head towards -Y, tail trailing +Y), matching Pixeldart's
+  /// [ParticleAlignment.velocityStretched] coordinate convention.
+  static Uint8List sparkStreak({
+    int width = 64,
+    int height = 128,
+    double coreWidth = 0.25,
+    LinearColor coreColor = const LinearColor(1.0, 1.0, 1.0),
+    LinearColor tailColor = const LinearColor(1.0, 0.6, 0.1),
+  }) {
+    if (width <= 0 || height <= 0) throw ArgumentError('dimensions must be > 0');
+    final buffer = Uint8List(width * height * 4);
+    final halfW = width * 0.5;
+    var offset = 0;
+
+    for (var y = 0; y < height; y++) {
+      final ny = y / (height - 1);
+      final lateralScale = (1.0 - ny * 0.5).clamp(0.1, 1.0);
+
+      for (var x = 0; x < width; x++) {
+        final nx = ((x + 0.5 - halfW) / halfW).abs() / lateralScale;
+
+        final longitudinal = math.exp(-ny * 2.8);
+        final lateral = (1.0 - nx).clamp(0.0, 1.0);
+        final lateralAlpha = math.pow(lateral, 2.5).toDouble();
+
+        final alpha = (longitudinal * lateralAlpha).clamp(0.0, 1.0);
+        final r = (coreColor.r + (tailColor.r - coreColor.r) * ny).clamp(0.0, 1.0);
+        final g = (coreColor.g + (tailColor.g - coreColor.g) * ny).clamp(0.0, 1.0);
+        final b = (coreColor.b + (tailColor.b - coreColor.b) * ny).clamp(0.0, 1.0);
+
+        buffer[offset] = (r * 255.0).round();
+        buffer[offset + 1] = (g * 255.0).round();
+        buffer[offset + 2] = (b * 255.0).round();
+        buffer[offset + 3] = (alpha * 255.0).round();
+        offset += 4;
+      }
+    }
+    return buffer;
+  }
+
   static double _sample2d(double x, double y) {
     final ix = x.floor();
     final iy = y.floor();

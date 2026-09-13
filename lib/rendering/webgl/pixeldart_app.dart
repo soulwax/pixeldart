@@ -32,6 +32,7 @@ import '../particles/particle_emitter.dart';
 import '../scene/animation.dart';
 import '../scene/scene_node.dart';
 import 'webgl2_renderer_factory.dart';
+export 'device_api.dart' show GpuTextureWrap, GpuTextureFilter;
 
 /// Per-frame callback context passed to host update listeners.
 final class FrameContext {

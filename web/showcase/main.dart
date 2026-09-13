@@ -992,57 +992,97 @@ void main() async {
     );
   }
 
-  // Atmospheric particle presets
-  final particleData = Primitives.cube(size: 0.08);
-  final particleMesh = app.createMesh(particleData, debugLabel: 'particle_mesh');
+  // Particle geometry meshes: billboard quad for soft volumetric sprites, cube for tumbling debris
+  final particleQuadMesh = app.createMesh(
+    Primitives.quad(width: 1.0, height: 1.0),
+    debugLabel: 'particle_quad_mesh',
+  );
+  final particleCubeMesh = app.createMesh(
+    Primitives.cube(size: 0.15),
+    debugLabel: 'particle_cube_mesh',
+  );
 
+  // Procedural soft particle textures
+  final particleSoftPixels = ProceduralTextures.radialParticle(
+    width: 128,
+    height: 128,
+    innerRadius: 0.05,
+    falloffExponent: 2.0,
+  );
+  final particleSoftTex = app.createProceduralTexture(
+    particleSoftPixels,
+    width: 128,
+    height: 128,
+    wrap: GpuTextureWrap.clampToEdge,
+    debugLabel: 'particle_soft_radial_tex',
+  );
+
+  final particleSparkPixels = ProceduralTextures.sparkStreak(
+    width: 64,
+    height: 128,
+  );
+  final particleSparkTex = app.createProceduralTexture(
+    particleSparkPixels,
+    width: 64,
+    height: 128,
+    wrap: GpuTextureWrap.clampToEdge,
+    debugLabel: 'particle_spark_streak_tex',
+  );
+
+  // Atmospheric particle materials with soft alpha falloff
   final emberMat = app.createMaterial(
-    const MaterialDefinition(
+    MaterialDefinition(
       key: 'ember_mat',
+      albedoTexture: particleSoftTex,
       tintR: 1.0,
-      tintG: 0.45,
-      tintB: 0.08,
-      emissiveStrength: 2.5,
+      tintG: 0.55,
+      tintB: 0.12,
+      emissiveStrength: 3.5,
       roughness: 0.2,
       metallic: 0.0,
+      alphaMode: AlphaMode.blended,
     ),
   );
 
   final dustMat = app.createMaterial(
-    const MaterialDefinition(
+    MaterialDefinition(
       key: 'dust_mat',
-      tintR: 0.7,
-      tintG: 0.85,
+      albedoTexture: particleSoftTex,
+      tintR: 0.75,
+      tintG: 0.88,
       tintB: 1.0,
-      emissiveStrength: 0.5,
+      emissiveStrength: 0.8,
       roughness: 0.4,
-      metallic: 0.2,
+      metallic: 0.1,
+      alphaMode: AlphaMode.blended,
     ),
   );
 
   final snowMat = app.createMaterial(
-    const MaterialDefinition(
+    MaterialDefinition(
       key: 'snow_mat',
+      albedoTexture: particleSoftTex,
       tintR: 0.95,
       tintG: 0.98,
       tintB: 1.0,
       roughness: 0.8,
       metallic: 0.1,
+      alphaMode: AlphaMode.blended,
     ),
   );
 
   final emberField = AtmosphericPresets.floatingEmbers(
-    mesh: particleMesh,
+    mesh: particleQuadMesh,
     material: emberMat,
     particleCount: 48,
   );
   final dustField = AtmosphericPresets.dustMotes(
-    mesh: particleMesh,
+    mesh: particleQuadMesh,
     material: dustMat,
     particleCount: 64,
   );
   final snowField = AtmosphericPresets.snow(
-    mesh: particleMesh,
+    mesh: particleQuadMesh,
     material: snowMat,
     particleCount: 80,
   );
@@ -1073,74 +1113,98 @@ void main() async {
 
   // Specialized materials for dynamic VFX particle systems
   final vfxFireMat = app.createMaterial(
-    const MaterialDefinition(
+    MaterialDefinition(
       key: 'vfx_fire_mat',
+      albedoTexture: particleSoftTex,
       tintR: 1.0,
-      tintG: 0.4,
-      tintB: 0.05,
-      emissiveStrength: 4.0,
+      tintG: 0.45,
+      tintB: 0.08,
+      emissiveStrength: 5.5,
       roughness: 0.2,
       metallic: 0.0,
+      alphaMode: AlphaMode.blended,
     ),
   );
 
   final vfxSparkMat = app.createMaterial(
-    const MaterialDefinition(
+    MaterialDefinition(
       key: 'vfx_spark_mat',
+      albedoTexture: particleSparkTex,
       tintR: 1.0,
-      tintG: 0.85,
-      tintB: 0.4,
-      emissiveStrength: 6.0,
+      tintG: 0.9,
+      tintB: 0.45,
+      emissiveStrength: 7.0,
       roughness: 0.1,
       metallic: 0.0,
+      alphaMode: AlphaMode.blended,
     ),
   );
 
   final vfxRocketMat = app.createMaterial(
-    const MaterialDefinition(
+    MaterialDefinition(
       key: 'vfx_rocket_mat',
+      albedoTexture: particleSparkTex,
       tintR: 1.0,
-      tintG: 0.2,
-      tintB: 0.05,
-      emissiveStrength: 5.0,
+      tintG: 0.35,
+      tintB: 0.08,
+      emissiveStrength: 6.0,
       roughness: 0.1,
       metallic: 0.0,
+      alphaMode: AlphaMode.blended,
     ),
   );
 
   final vfxWaterMat = app.createMaterial(
-    const MaterialDefinition(
+    MaterialDefinition(
       key: 'vfx_water_mat',
-      tintR: 0.4,
-      tintG: 0.8,
+      albedoTexture: particleSoftTex,
+      tintR: 0.45,
+      tintG: 0.82,
       tintB: 1.0,
-      emissiveStrength: 0.8,
+      emissiveStrength: 1.0,
       roughness: 0.1,
       metallic: 0.1,
+      alphaMode: AlphaMode.blended,
     ),
   );
 
   final vfxSplashMat = app.createMaterial(
-    const MaterialDefinition(
+    MaterialDefinition(
       key: 'vfx_splash_mat',
+      albedoTexture: particleSoftTex,
       tintR: 0.9,
-      tintG: 0.95,
+      tintG: 0.96,
       tintB: 1.0,
-      emissiveStrength: 1.5,
+      emissiveStrength: 2.0,
       roughness: 0.3,
       metallic: 0.0,
+      alphaMode: AlphaMode.blended,
     ),
   );
 
   final vfxVortexMat = app.createMaterial(
-    const MaterialDefinition(
+    MaterialDefinition(
       key: 'vfx_vortex_mat',
+      albedoTexture: particleSoftTex,
       tintR: 0.85,
       tintG: 0.25,
       tintB: 1.0,
-      emissiveStrength: 4.5,
+      emissiveStrength: 5.5,
       roughness: 0.2,
       metallic: 0.0,
+      alphaMode: AlphaMode.blended,
+    ),
+  );
+
+  final vfxConfettiMat = app.createMaterial(
+    const MaterialDefinition(
+      key: 'vfx_confetti_mat',
+      tintR: 1.0,
+      tintG: 0.85,
+      tintB: 0.2,
+      emissiveStrength: 1.0,
+      roughness: 0.3,
+      metallic: 0.2,
     ),
   );
 
@@ -1153,7 +1217,7 @@ void main() async {
         case 'campfire':
           app.addEmitter(
             ParticlePresets.campfire(
-              mesh: particleMesh,
+              mesh: particleQuadMesh,
               material: vfxFireMat,
               origin: const Vec3(0, -0.9, 0),
             ),
@@ -1161,7 +1225,7 @@ void main() async {
         case 'fireworks':
           app.addEmitter(
             ParticlePresets.fireworkRocket(
-              mesh: particleMesh,
+              mesh: particleQuadMesh,
               rocketMaterial: vfxRocketMat,
               sparkMaterial: vfxSparkMat,
               explosionMaterial: vfxFireMat,
@@ -1171,7 +1235,7 @@ void main() async {
         case 'sparks':
           app.addEmitter(
             ParticlePresets.bouncingSparks(
-              mesh: particleMesh,
+              mesh: particleQuadMesh,
               material: vfxSparkMat,
               origin: const Vec3(0, 0.6, 0),
               groundHeight: -1.0,
@@ -1180,7 +1244,7 @@ void main() async {
         case 'vortex':
           app.addEmitter(
             ParticlePresets.swirlingVortex(
-              mesh: particleMesh,
+              mesh: particleQuadMesh,
               material: vfxVortexMat,
               origin: const Vec3(0, 0.5, 0),
             ),
@@ -1188,7 +1252,7 @@ void main() async {
         case 'fountain':
           app.addEmitter(
             ParticlePresets.waterFountain(
-              mesh: particleMesh,
+              mesh: particleQuadMesh,
               material: vfxWaterMat,
               origin: const Vec3(0, -0.9, 0),
             ),
@@ -1196,7 +1260,7 @@ void main() async {
         case 'rain':
           app.addEmitter(
             ParticlePresets.rainWithSplashes(
-              mesh: particleMesh,
+              mesh: particleQuadMesh,
               rainMaterial: vfxWaterMat,
               splashMaterial: vfxSplashMat,
               origin: const Vec3(0, 10, 0),
@@ -1206,7 +1270,7 @@ void main() async {
         case 'blizzard':
           app.addEmitter(
             ParticlePresets.blizzard(
-              mesh: particleMesh,
+              mesh: particleQuadMesh,
               material: snowMat,
               origin: const Vec3(0, 5, 0),
             ),
@@ -1214,7 +1278,7 @@ void main() async {
         case 'warp':
           app.addEmitter(
             ParticlePresets.warpSpeed(
-              mesh: particleMesh,
+              mesh: particleQuadMesh,
               material: vfxSparkMat,
               origin: const Vec3(0, 2, 0),
             ),
@@ -1222,8 +1286,8 @@ void main() async {
         case 'confetti':
           app.addEmitter(
             ParticlePresets.confetti(
-              mesh: particleMesh,
-              material: vfxFireMat,
+              mesh: particleCubeMesh,
+              material: vfxConfettiMat,
               origin: const Vec3(0, 6, 0),
             ),
           );

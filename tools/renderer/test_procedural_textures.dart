@@ -8,6 +8,8 @@ void main() {
   _testNoise();
   _testNormalFromHeight();
   _testBrushedMetalOrm();
+  _testRadialParticle();
+  _testSparkStreak();
   print('Procedural textures tests passed.');
 }
 
@@ -87,6 +89,7 @@ void _testNormalFromHeight() {
   assert(a == 255);
   // Since slope is increasing to the right (+X), normal points to the left (-X), so r < 128
   assert(r < 128, 'Normal X should point left for rising slope');
+  assert(g == 128, 'Normal Y is flat across horizontal slope');
   assert(b > 128, 'Normal Z should point outwards (> 0.5)');
 }
 
@@ -110,4 +113,50 @@ void _testBrushedMetalOrm() {
     // A = 255
     assert(orm[i + 3] == 255);
   }
+}
+
+void _testRadialParticle() {
+  final tex = ProceduralTextures.radialParticle(
+    width: 64,
+    height: 64,
+    innerRadius: 0.2,
+    falloffExponent: 2.0,
+    centerColor: const LinearColor(1, 1, 1),
+    edgeColor: const LinearColor(1, 0, 0),
+  );
+  assert(tex.length == 64 * 64 * 4);
+
+  // Center pixel (32, 32) should be inner radius -> alpha 255 and center color (white)
+  final centerIdx = (32 * 64 + 32) * 4;
+  assert(tex[centerIdx] == 255);
+  assert(tex[centerIdx + 1] == 255);
+  assert(tex[centerIdx + 2] == 255);
+  assert(tex[centerIdx + 3] == 255, 'Center alpha should be 255');
+
+  // Corner pixel (0, 0) is outside unit circle -> alpha 0
+  assert(tex[3] == 0, 'Corner alpha should be 0');
+
+  // Mid-radius pixel should have intermediate alpha
+  final midIdx = (32 * 64 + 48) * 4; // dist = 16 / 32 = 0.5
+  assert(tex[midIdx + 3] > 0 && tex[midIdx + 3] < 255, 'Intermediate radius should have partial alpha');
+}
+
+void _testSparkStreak() {
+  final tex = ProceduralTextures.sparkStreak(
+    width: 32,
+    height: 64,
+  );
+  assert(tex.length == 32 * 64 * 4);
+
+  // Head at y=0, center x=16 should be hot and bright
+  final headIdx = (0 * 32 + 16) * 4;
+  assert(tex[headIdx + 3] > 200, 'Head alpha should be high');
+
+  // Tail at y=63, center x=16 should have decayed alpha
+  final tailIdx = (63 * 32 + 16) * 4;
+  assert(tex[tailIdx + 3] < tex[headIdx + 3], 'Tail alpha should be lower than head');
+
+  // Far lateral edge should be zero alpha
+  final edgeIdx = (32 * 32 + 0) * 4;
+  assert(tex[edgeIdx + 3] == 0, 'Lateral edge should have zero alpha');
 }
