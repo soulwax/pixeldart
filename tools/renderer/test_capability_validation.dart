@@ -31,5 +31,38 @@ void main() {
   if (strong != QualityProfile.clean) {
     throw StateError('strong capabilities did not select the clean graph');
   }
+
+  const softwareCaps = RenderCapabilities(
+    rendererString: 'Google SwiftShader',
+    vendorString: 'Google Inc.',
+    maxTextureSize: 4096,
+    maxTextureArrayLayers: 8,
+    maxSamples: 4,
+    maxVertexAttributes: 16,
+    maxColorAttachments: 4,
+    floatRenderTarget: true,
+  );
+  final software = selector.selectRuntimeProfile(softwareCaps);
+  if (software != QualityProfile.minimal) {
+    throw StateError(
+      'a software rasterizer reporting full feature support must still be '
+      'capped below the clean graph, got ${software.kind.name}',
+    );
+  }
+  final softwareForced = selector.selectRuntimeProfile(
+    softwareCaps,
+    forceKind: QualityProfileKind.high,
+  );
+  if (softwareForced.kind != QualityProfileKind.high) {
+    throw StateError('an explicit forceKind must override the software cap');
+  }
+  final rawNegotiation = selector.select(softwareCaps);
+  if (rawNegotiation.kind != QualityProfileKind.high) {
+    throw StateError(
+      'select() must keep reporting the raw capability bits for diagnostics '
+      'even when selectRuntimeProfile caps the executable graph',
+    );
+  }
+
   print('Renderer capability validation fixtures passed.');
 }

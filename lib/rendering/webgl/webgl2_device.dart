@@ -23,6 +23,16 @@ typedef _G = WebGL2RenderingContext;
 const _textureMaxAnisotropyExt = 34046;
 const _maxTextureMaxAnisotropyExt = 34047;
 
+// WEBGL_debug_renderer_info constants, kept local for the same reason as the
+// anisotropic pair above: not every binding exposes extension-owned enums as
+// named getters. gl.RENDERER/gl.VENDOR are masked to a generic string
+// ("WebKit WebGL") by every browser that implements fingerprint protection;
+// these UNMASKED_* pnames are the only way to see the real driver string,
+// which is what tells a software rasterizer (SwiftShader, llvmpipe, WARP)
+// apart from real hardware reporting the same WebGL2 feature bits.
+const _unmaskedRendererWebgl = 0x9246;
+const _unmaskedVendorWebgl = 0x9245;
+
 /// Wraps either a raw JS interop handle (buffer/texture/VAO/program) or a
 /// composite Dart-side record (the multi-attachment framebuffer bundle
 /// backing a render target). [handle] is deliberately `Object`, not
@@ -176,8 +186,13 @@ final class WebGl2Device with _WebGlTimerSupport implements GpuDevice {
     final halfFloatBlend = _hasExtension('EXT_color_buffer_half_float');
     final contextLoss = _hasExtension('WEBGL_lose_context');
 
-    final renderer = gl.getParameter(_G.RENDERER).dartify();
-    final vendor = gl.getParameter(_G.VENDOR).dartify();
+    final unmasked = _hasExtension('WEBGL_debug_renderer_info');
+    final renderer = unmasked
+        ? gl.getParameter(_unmaskedRendererWebgl).dartify()
+        : gl.getParameter(_G.RENDERER).dartify();
+    final vendor = unmasked
+        ? gl.getParameter(_unmaskedVendorWebgl).dartify()
+        : gl.getParameter(_G.VENDOR).dartify();
 
     return RenderCapabilities(
       webglVersion: 'WebGL2',
