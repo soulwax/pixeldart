@@ -1,0 +1,79 @@
+import '../api/handles.dart';
+import '../api/mesh.dart';
+import '../api/scene.dart';
+import '../math/bounds.dart';
+import '../webgl/resource_registry.dart';
+
+final class _ItemView implements RetainedItemView {
+  @override
+  final InstanceId id;
+  @override
+  final RetainedItemDescriptor descriptor;
+  @override
+  final Aabb worldBounds;
+
+  const _ItemView(this.id, this.descriptor, this.worldBounds);
+}
+
+/// Concrete `RenderWorld` (§5.5). Owns persistent instances through the same
+/// slot+generation discipline RV-02's `ResourceRegistry` proved for GPU
+/// resources — an `InstanceId` from a removed item is rejected forever, even
+/// if its slot is reused by a later `addItem`.
+final class RenderWorldImpl implements RenderWorld {
+  final ResourceRegistry<MeshHandle, MeshData> _meshRegistry;
+  final ResourceRegistry<InstanceId, RetainedItemDescriptor> _instances =
+      ResourceRegistry<InstanceId, RetainedItemDescriptor>(
+        (slot, generation, label) => InstanceId(slot, generation, label),
+      );
+  final Map<InstanceId, _ItemView> _itemViews = {};
+
+  RenderWorldImpl(this._meshRegistry);
+
+  Aabb _worldBoundsFor(RetainedItemDescriptor descriptor) {
+    descriptor.validate();
+    final mesh = _meshRegistry.descriptorOf(descriptor.mesh);
+    return mesh.localBounds.transformed(descriptor.transform.toMat4());
+  }
+
+  @override
+  InstanceId addItem(RetainedItemDescriptor descriptor) {
+    final bounds = _worldBoundsFor(descriptor);
+    final id = _instances.declare(descriptor);
+    _itemViews[id] = _ItemView(id, descriptor, bounds);
+    return id;
+  }
+
+  @override
+  void updateItem(InstanceId id, RetainedItemDescriptor descriptor) {
+    final bounds = _worldBoundsFor(descriptor);
+    _instances.updateDescriptor(id, descriptor);
+    _itemViews[id] = _ItemView(id, descriptor, bounds);
+  }
+
+  @override
+  void removeItem(InstanceId id) {
+    _instances.release(id);
+    _itemViews.remove(id);
+  }
+
+  @override
+  RetainedItemView itemView(InstanceId id) {
+    final cached = _itemViews[id];
+    if (cached != null) return cached;
+    final descriptor = _instances.descriptorOf(id);
+    return _ItemView(id, descriptor, _worldBoundsFor(descriptor));
+  }
+
+  @override
+  Iterable<RetainedItemView> get items => _itemViews.values;
+
+  int get liveItemCount => _instances.liveCount;
+
+  @override
+  void dispose() {
+    _itemViews.clear();
+    for (final (id, _) in _instances.liveDescriptors().toList()) {
+      _instances.release(id);
+    }
+  }
+}

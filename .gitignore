@@ -1,0 +1,8 @@
+.dart_tool/
+build/
+pubspec.lock
+web/renderer_test/main.dart.js
+web/renderer_test/main.dart.js.deps
+web/renderer_test/main.dart.js.map
+*.js.deps
+*.js.map

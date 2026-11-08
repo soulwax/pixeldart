@@ -1,0 +1,329 @@
+import '../api/handles.dart';
+import '../api/mesh.dart';
+import '../api/scene.dart';
+import '../math/bounds.dart';
+import '../math/quat.dart';
+import '../math/ray.dart';
+import '../math/transform.dart';
+import '../math/vec.dart';
+
+/// Hierarchical scene node representing an entity, group, or visual item.
+base class SceneNode {
+  final String? name;
+  Transform _localTransform;
+  Transform _worldTransform = Transform.identity;
+  bool _isDirty = true;
+  bool _worldDirty = true;
+
+  SceneNode? _parent;
+  final List<SceneNode> _children = [];
+
+  MeshHandle? mesh;
+  MaterialHandle? material;
+  Aabb? bounds;
+  MeshData? meshData;
+  int visibilityMask;
+  DrawMode drawMode;
+  BlendMode blendMode;
+  bool castsShadow;
+  bool receivesShadow;
+  int sortTiebreaker;
+  int? instanceFamilyKey;
+
+  InstanceId? _instanceId;
+
+  SceneNode({
+    this.name,
+    Transform transform = Transform.identity,
+    this.mesh,
+    this.material,
+    this.bounds,
+    this.meshData,
+    this.visibilityMask = -1,
+    this.drawMode = DrawMode.opaque,
+    this.blendMode = BlendMode.alpha,
+    this.castsShadow = true,
+    this.receivesShadow = true,
+    this.sortTiebreaker = 0,
+    this.instanceFamilyKey,
+  }) : _localTransform = transform {
+    bounds ??= meshData?.bounds;
+  }
+
+  /// Creates a grouping node with no visual mesh.
+  factory SceneNode.group({String? name, Transform transform = Transform.identity}) =>
+      SceneNode(name: name, transform: transform);
+
+  SceneNode? get parent => _parent;
+  List<SceneNode> get children => List.unmodifiable(_children);
+  InstanceId? get instanceId => _instanceId;
+
+  Transform get localTransform => _localTransform;
+  set localTransform(Transform value) {
+    _localTransform = value;
+    _markDirty();
+  }
+
+  /// Alias for [localTransform] for natural ergonomic code.
+  Transform get transform => _localTransform;
+  set transform(Transform value) => localTransform = value;
+
+  /// Local translation vector.
+  Vec3 get position => _localTransform.translation;
+  set position(Vec3 value) {
+    localTransform = Transform(
+      translation: value,
+      rotation: _localTransform.rotation,
+      scale: _localTransform.scale,
+    );
+  }
+
+  /// Local rotation quaternion.
+  Quat get rotation => _localTransform.rotation;
+  set rotation(Quat value) {
+    localTransform = Transform(
+      translation: _localTransform.translation,
+      rotation: value,
+      scale: _localTransform.scale,
+    );
+  }
+
+  /// Local uniform scale.
+  double get scale => _localTransform.scale;
+  set scale(double value) {
+    localTransform = Transform(
+      translation: _localTransform.translation,
+      rotation: _localTransform.rotation,
+      scale: value,
+    );
+  }
+
+  /// Translates node by [delta].
+  void translate(Vec3 delta) {
+    position = _localTransform.translation + delta;
+  }
+
+  /// Rotates node around a normalized [axis] by [radians].
+  void rotateAxis(Vec3 axis, double radians) {
+    final q = Quat.axisAngle(axis, radians);
+    rotation = _localTransform.rotation * q;
+  }
+
+  /// Rotates node around the X axis by [radians].
+  void rotateX(double radians) => rotateAxis(const Vec3(1, 0, 0), radians);
+
+  /// Rotates node around the Y axis by [radians].
+  void rotateY(double radians) => rotateAxis(const Vec3(0, 1, 0), radians);
+
+  /// Rotates node around the Z axis by [radians].
+  void rotateZ(double radians) => rotateAxis(const Vec3(0, 0, 1), radians);
+
+  /// Uniformly scales the node by [factor].
+  void scaleBy(double factor) {
+    scale = _localTransform.scale * factor;
+  }
+
+  /// Orients the node so its [forward] vector faces toward [target].
+  void lookAt(Vec3 target, {Vec3 forward = const Vec3(0, 0, 1)}) {
+    final dir = target - _localTransform.translation;
+    if (dir.lengthSquared > 1e-8) {
+      rotation = Quat.fromTo(forward, dir.normalized);
+    }
+  }
+
+  /// Recursively searches this subtree for a node with the given [queryName].
+  SceneNode? findByName(String queryName) {
+    if (name == queryName) return this;
+    for (final child in _children) {
+      final found = child.findByName(queryName);
+      if (found != null) return found;
+    }
+    return null;
+  }
+
+  /// Traverses this node and all its descendants in depth-first order.
+  void traverse(void Function(SceneNode node) callback) {
+    callback(this);
+    for (final child in _children) {
+      child.traverse(callback);
+    }
+  }
+
+  /// The computed world transform, resolving parent hierarchy on demand.
+  Transform get worldTransform {
+    if (_isDirty) {
+      final p = _parent;
+      _worldTransform = p != null
+          ? p.worldTransform * _localTransform
+          : _localTransform;
+      _isDirty = false;
+    }
+    return _worldTransform;
+  }
+
+  /// Marks this node and all descendants as needing transform recalculation.
+  void markDirty() {
+    if (_isDirty) return;
+    _isDirty = true;
+    _worldDirty = true;
+    for (final child in _children) {
+      child.markDirty();
+    }
+  }
+
+  void _markDirty() => markDirty();
+
+  /// Adds [child] to this node. Detaches from any prior parent first.
+  void addChild(SceneNode child) {
+    if (child._parent == this) return;
+    child.removeFromParent();
+    child._parent = this;
+    child._markDirty();
+    _children.add(child);
+  }
+
+  /// Creates a child node and attaches it to this node.
+  SceneNode add({
+    String? name,
+    Transform transform = Transform.identity,
+    MeshHandle? mesh,
+    MaterialHandle? material,
+    Aabb? bounds,
+    MeshData? meshData,
+    int visibilityMask = -1,
+    DrawMode drawMode = DrawMode.opaque,
+    BlendMode blendMode = BlendMode.alpha,
+    bool castsShadow = true,
+    bool receivesShadow = true,
+    int sortTiebreaker = 0,
+    int? instanceFamilyKey,
+  }) {
+    final child = SceneNode(
+      name: name,
+      transform: transform,
+      mesh: mesh,
+      material: material,
+      bounds: bounds,
+      meshData: meshData,
+      visibilityMask: visibilityMask,
+      drawMode: drawMode,
+      blendMode: blendMode,
+      castsShadow: castsShadow,
+      receivesShadow: receivesShadow,
+      sortTiebreaker: sortTiebreaker,
+      instanceFamilyKey: instanceFamilyKey,
+    );
+    addChild(child);
+    return child;
+  }
+
+  /// The world-space axis-aligned bounding box of this node, transformed from [bounds].
+  Aabb? get worldBounds => bounds?.transformed(worldTransform.toMat4());
+
+  /// Recursively tests this node and its descendants against [ray].
+  /// Returns the closest [RaycastHit] or `null` if no intersection occurs.
+  RaycastHit? raycast(Ray ray) {
+    RaycastHit? closest;
+
+    void testNode(SceneNode node) {
+      final b = node.worldBounds;
+      if (b != null) {
+        final dist = ray.intersectAabb(b);
+        if (dist != null) {
+          if (closest == null || dist < closest!.distance) {
+            final hitPoint = ray.at(dist);
+            final normal = (hitPoint - b.center).normalized;
+            closest = RaycastHit(
+              node: node,
+              point: hitPoint,
+              normal: normal,
+              distance: dist,
+            );
+          }
+        }
+      }
+
+      for (final child in node._children) {
+        testNode(child);
+      }
+    }
+
+    testNode(this);
+    return closest;
+  }
+
+  /// Removes [child] from this node.
+  void removeChild(SceneNode child) {
+    if (_children.remove(child)) {
+      child._parent = null;
+      child._markDirty();
+    }
+  }
+
+  /// Detaches this node from its parent, if attached.
+  void removeFromParent() {
+    _parent?.removeChild(this);
+  }
+
+  /// Synchronizes this node and all descendants to the given [world].
+  void syncToWorld(RenderWorld world) {
+    final m = mesh;
+    final mat = material;
+
+    if (m != null && mat != null) {
+      final currentId = _instanceId;
+      if (currentId == null) {
+        final desc = RetainedItemDescriptor(
+          mesh: m,
+          material: mat,
+          transform: worldTransform,
+          visibilityMask: visibilityMask,
+          drawMode: drawMode,
+          blendMode: blendMode,
+          castsShadow: castsShadow,
+          receivesShadow: receivesShadow,
+          sortTiebreaker: sortTiebreaker,
+          instanceFamilyKey: instanceFamilyKey,
+        );
+        _instanceId = world.addItem(desc);
+        _worldDirty = false;
+      } else if (_worldDirty || _isDirty) {
+        final desc = RetainedItemDescriptor(
+          mesh: m,
+          material: mat,
+          transform: worldTransform,
+          visibilityMask: visibilityMask,
+          drawMode: drawMode,
+          blendMode: blendMode,
+          castsShadow: castsShadow,
+          receivesShadow: receivesShadow,
+          sortTiebreaker: sortTiebreaker,
+          instanceFamilyKey: instanceFamilyKey,
+        );
+        world.updateItem(currentId, desc);
+        _worldDirty = false;
+      }
+    } else if (_instanceId != null) {
+      world.removeItem(_instanceId!);
+      _instanceId = null;
+      _worldDirty = true;
+    }
+
+    for (final child in _children) {
+      child.syncToWorld(world);
+    }
+  }
+
+  /// Removes this node and its descendants from [world].
+  void removeFromWorld(RenderWorld world) {
+    final currentId = _instanceId;
+    if (currentId != null) {
+      world.removeItem(currentId);
+      _instanceId = null;
+      _worldDirty = true;
+    }
+    for (final child in _children) {
+      child.removeFromWorld(world);
+    }
+  }
+}

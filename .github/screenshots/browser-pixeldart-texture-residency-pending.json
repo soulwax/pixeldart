@@ -1,0 +1,57 @@
+{
+  "captureContractVersion": 1,
+  "taskId": "R-09",
+  "purpose": "verification",
+  "surface": "renderer",
+  "state": "r09-texture-residency-pending",
+  "sourceMethod": "browser",
+  "safeArea": "full-frame",
+  "theme": "renderer-default",
+  "locale": "en",
+  "motion": "settled",
+  "quality": "safe",
+  "audience": "test",
+  "seed": null,
+  "privacyCheck": "pass",
+  "rightsStatus": "original",
+  "altText": "Pixeldart standalone renderer texture residency pending state.",
+  "notes": "Package-boundary browser evidence; not a golden gallery image.",
+  "schemaVersion": 1,
+  "renderer": "pixeldart",
+  "profile": "safe",
+  "viewport": {
+    "width": 640,
+    "height": 360
+  },
+  "sourceUrl": "http://127.0.0.1:8092/tmp/r09-web/?r09-residency=1",
+  "fixture": "standalone-r09-texture-residency",
+  "evidence": {
+    "status": "pending",
+    "handle": "3.1",
+    "frame": 18,
+    "draw": "fallback-material",
+    "resources": "live=4;created=4;deleted=0;bytes=65536",
+    "residencyAttributes": {
+      "data-r09-texture-residency-status": "pending",
+      "data-r09-texture-residency-handle": "3.1",
+      "data-r09-texture-residency-frame": "18",
+      "data-r09-texture-residency-draw": "fallback-material",
+      "data-r09-texture-residency-resources": "live=4;created=4;deleted=0;bytes=65536"
+    },
+    "webglCalls": {
+      "createTexture": 24,
+      "deleteTexture": 0,
+      "draws": 468
+    }
+  },
+  "browser": {
+    "name": "firefox",
+    "version": "153.0"
+  },
+  "capture": {
+    "scale": "css",
+    "animations": "disabled",
+    "fullPage": false
+  },
+  "screenshot": "browser-pixeldart-texture-residency-pending.png"
+}

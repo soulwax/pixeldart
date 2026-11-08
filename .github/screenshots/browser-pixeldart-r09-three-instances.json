@@ -1,0 +1,54 @@
+{
+  "captureContractVersion": 1,
+  "taskId": "V-01",
+  "purpose": "documentation",
+  "surface": "renderer",
+  "state": "r09-three-instances",
+  "sourceMethod": "browser",
+  "safeArea": "full-frame",
+  "theme": "renderer-default",
+  "locale": "en",
+  "motion": "settled",
+  "quality": "safe",
+  "audience": "documentation",
+  "seed": null,
+  "privacyCheck": "pass",
+  "rightsStatus": "original",
+  "altText": "Three shared cube instances rendered through one instanced draw.",
+  "notes": "Standalone Pixeldart WebGL2 demo capture; no house inventory or PVS data.",
+  "schemaVersion": 1,
+  "renderer": "pixeldart",
+  "profile": "safe",
+  "buildId": "eda30086b3bf-5bc0dd18493d-dirty",
+  "gameSha": "eda30086b3bf3ae25d2a207fc9861dfb87298dab",
+  "rendererSha": "5bc0dd18493d93af6c3a9b6aa463a450445fde05",
+  "projectVersion": "0.1.2.0",
+  "browser": {
+    "name": "firefox",
+    "version": "153.0"
+  },
+  "gpu": {
+    "vendor": "Intel",
+    "renderer": "Intel(R) HD Graphics, or similar",
+    "version": "WebGL 2.0"
+  },
+  "viewport": {
+    "width": 640,
+    "height": 360
+  },
+  "sourceUrl": "http://127.0.0.1:8096/tmp/r09-web/?r09-instances=1",
+  "fixture": "standalone",
+  "camera": "standalone-demo-default",
+  "simulation": {
+    "seed": null,
+    "day": null,
+    "hour": null,
+    "weather": null
+  },
+  "capture": {
+    "scale": "css",
+    "animations": "disabled",
+    "fullPage": false
+  },
+  "screenshot": "browser-pixeldart-r09-three-instances.png"
+}

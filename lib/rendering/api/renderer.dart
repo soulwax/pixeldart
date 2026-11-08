@@ -1,0 +1,103 @@
+import 'dart:typed_data';
+
+import 'capabilities.dart';
+import 'frame.dart';
+import 'handles.dart';
+import 'materials.dart';
+import 'mesh.dart';
+import 'scene.dart';
+import 'settings.dart';
+import 'stats.dart';
+import '../assets/model_binding.dart';
+import '../assets/model_definition.dart';
+import '../assets/material_residency.dart';
+import '../assets/texture_residency.dart';
+import '../webgl/device_api.dart';
+
+/// Declares, loads, and releases shared GPU-backed resources. Owned by one
+/// [SceneRenderer]; every [MeshHandle]/[TextureHandle]/[MaterialHandle] it
+/// hands out is valid only for that renderer's lifetime (§5.3).
+abstract interface class ResourceLibrary {
+  MeshHandle registerMesh(MeshData data, {String? debugLabel});
+  void releaseMesh(MeshHandle handle);
+
+  MaterialHandle registerMaterial(MaterialDefinition definition);
+  void releaseMaterial(MaterialHandle handle);
+
+  /// Resolves an authored model against this library's retained mesh/material
+  /// stores without taking ownership away from those stores.
+  ModelBinding bindModel(ModelDefinition definition);
+
+  /// [pixels] is `null` for a declared-but-not-yet-loaded texture; a
+  /// renderer substitutes a built-in fallback (§5.3) until it is set via
+  /// [updateTexturePixels].
+  TextureHandle registerTexture({
+    required int width,
+    required int height,
+    int layers = 1,
+    bool hasMips = false,
+    GpuTextureFilter minFilter = GpuTextureFilter.linear,
+    GpuTextureFilter magFilter = GpuTextureFilter.linear,
+    GpuTextureWrap wrap = GpuTextureWrap.clampToEdge,
+    double anisotropy = 1,
+    Uint8List? pixels,
+    String? debugLabel,
+  });
+  void updateTexturePixels(TextureHandle handle, Uint8List pixels);
+  void finalizeTextureMips(TextureHandle handle);
+  void releaseTexture(TextureHandle handle);
+
+  /// Probes deterministic working-set requests without taking ownership of
+  /// the referenced texture handles or creating duplicate GPU textures.
+  TextureResidencyManager get textureResidency;
+
+  /// Aggregates the existing texture planner into material-level readiness.
+  MaterialResidencyManager get materialResidency;
+
+  void dispose();
+}
+
+/// The reusable renderer API's lifecycle contract (§5.1). Construction
+/// stores dependencies but performs no fallible GPU work; [initialize] does
+/// that, and callers await it before starting their render loop.
+abstract interface class SceneRenderer {
+  RendererState get state;
+  RenderCapabilities get capabilities;
+  RendererHealth get health;
+
+  /// The last configuration committed by the renderer, including effective
+  /// allocations rather than only the user's requested profile.
+  RendererConfiguration get configuration;
+  ResourceLibrary get resources;
+
+  Future<void> initialize(
+    RendererConfiguration configuration,
+    SurfaceMetrics surface,
+  );
+
+  /// Atomically prepares a replacement feature graph between frames; never
+  /// compiles or allocates from within [beginFrame]/[endFrame].
+  Future<void> configure(RendererConfiguration configuration);
+
+  void resize(SurfaceMetrics surface);
+
+  RenderWorld createWorld();
+
+  /// Illegal before readiness, during context loss, or twice without a
+  /// matching [endFrame]/[abortFrame].
+  RenderEncoder beginFrame(RenderWorld world, FrameInput frame);
+
+  /// Closes or discards every submitted list even after an optional pass
+  /// failure, and returns immediate CPU/counter statistics.
+  FrameStats endFrame();
+
+  /// Polls the oldest delayed GPU timer sample. Unsupported/disjoint samples
+  /// are explicit statuses, never a zero-duration success.
+  GpuTimingResult pollGpuTiming();
+
+  /// Releases every borrowed encoder/list without rendering.
+  void abortFrame();
+
+  /// Idempotent.
+  void dispose();
+}
