@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math' as math;
 import 'dart:typed_data';
 
 import '../api/materials.dart';
@@ -274,9 +275,11 @@ final class GlbDecoder {
             : List<double>.filled(vertexCount * 2, 0.0);
 
         final tanAccessorIdx = attrs['TANGENT'] as int?;
-        final tangents = tanAccessorIdx != null
-            ? _readFloatAccessor(tanAccessorIdx, 4)
-            : List<double>.generate(vertexCount * 4, (idx) => idx % 4 == 0 || idx % 4 == 3 ? 1.0 : 0.0);
+        final tangents = _orthonormalTangents(
+          normals,
+          tanAccessorIdx != null ? _readFloatAccessor(tanAccessorIdx, 4) : null,
+          vertexCount,
+        );
 
         final indexAccessorIdx = primJson['indices'] as int?;
         final indices = indexAccessorIdx != null
@@ -404,6 +407,46 @@ final class GlbDecoder {
     }
 
     return root;
+  }
+
+  /// Produces a surface-v2-valid tangent per vertex.
+  ///
+  /// Authored tangents are Gram-Schmidt orthonormalized against their normal;
+  /// exporters emit degenerate ones wherever UVs collapse (common on
+  /// palette-textured assets), and surface-v2 validation rejects any tangent
+  /// that is not orthogonal. Missing or degenerate tangents fall back to +X
+  /// (or +Z when the normal is near X) projected onto the normal's plane.
+  static List<double> _orthonormalTangents(
+    List<double> normals,
+    List<double>? authored,
+    int vertexCount,
+  ) {
+    final out = List<double>.filled(vertexCount * 4, 0.0);
+    for (var v = 0; v < vertexCount; v++) {
+      final nx = normals[v * 3], ny = normals[v * 3 + 1], nz = normals[v * 3 + 2];
+      var handedness = 1.0;
+      (double, double, double)? project(double tx, double ty, double tz) {
+        final d = nx * tx + ny * ty + nz * tz;
+        tx -= nx * d;
+        ty -= ny * d;
+        tz -= nz * d;
+        final len = math.sqrt(tx * tx + ty * ty + tz * tz);
+        return len > 1e-6 ? (tx / len, ty / len, tz / len) : null;
+      }
+
+      (double, double, double)? t;
+      if (authored != null) {
+        t = project(authored[v * 4], authored[v * 4 + 1], authored[v * 4 + 2]);
+        handedness = authored[v * 4 + 3] < 0 ? -1.0 : 1.0;
+      }
+      t ??= nx.abs() > 0.9 ? project(0, 0, 1) : project(1, 0, 0);
+      final (tx, ty, tz) = t ?? (1.0, 0.0, 0.0);
+      out[v * 4] = tx;
+      out[v * 4 + 1] = ty;
+      out[v * 4 + 2] = tz;
+      out[v * 4 + 3] = handedness;
+    }
+    return out;
   }
 
   List<double> _readFloatAccessor(int accessorIndex, int componentsPerElement) {

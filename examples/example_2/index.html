@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Lantern</title>
+  <link rel="icon" href="data:,">
+  <style>
+    :root {
+      --ink: #f1e6d0;
+      --dim: #8a7f70;
+      --flame: #ffae4d;
+      --panel: rgba(8, 6, 4, 0.78);
+    }
+    html, body { margin: 0; height: 100%; background: #000; overflow: hidden; }
+    body { font-family: Georgia, "Times New Roman", serif; color: var(--ink); user-select: none; }
+    #game { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+
+    #hud {
+      position: fixed; top: 0; left: 0; right: 0;
+      display: flex; gap: 26px; align-items: baseline;
+      padding: 12px 20px; pointer-events: none;
+      font-size: 17px; letter-spacing: 0.12em; text-shadow: 0 0 8px #000;
+    }
+    #room { color: var(--flame); }
+    #hearts { color: #ff6b5a; letter-spacing: 0.25em; }
+    #motes { color: #ffd36b; }
+    #flames { margin-left: auto; letter-spacing: 0.3em; color: var(--dim); }
+
+    #toast {
+      position: fixed; left: 50%; bottom: 9%; transform: translateX(-50%);
+      font-size: 18px; letter-spacing: 0.3em; text-transform: uppercase;
+      color: var(--flame); text-shadow: 0 0 12px rgba(255, 140, 40, .6);
+      opacity: 0; transition: opacity .35s; pointer-events: none; white-space: nowrap;
+    }
+    #toast.show { opacity: 1; }
+
+    #card {
+      position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%);
+      max-width: min(600px, calc(100vw - 32px)); box-sizing: border-box;
+      padding: 28px 34px; background: var(--panel); text-align: center;
+      border: 1px solid rgba(255, 174, 77, 0.35);
+      box-shadow: 0 0 60px rgba(255, 140, 40, 0.12);
+    }
+    #card.hidden { display: none; }
+    #card-title { margin: 0 0 16px; font-size: clamp(24px, 5vw, 34px); font-weight: normal; letter-spacing: 0.22em; color: var(--flame); }
+    #card-body { margin: 0; white-space: pre-wrap; line-height: 1.6; font-size: 15px; }
+    #credit { position: fixed; right: 12px; bottom: 8px; font-size: 11px; color: var(--dim); opacity: .6; }
+    @media (max-width: 640px) {
+      #hud { flex-wrap: wrap; gap: 8px 16px; font-size: 14px; padding: 10px 16px; }
+      #toast { font-size: 14px; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="game"></canvas>
+  <div id="hud">
+    <span id="room">ROOM 1</span>
+    <span id="hearts">♥♥♥</span>
+    <span id="motes">◆ 0/5</span>
+    <span id="flames">···</span>
+  </div>
+  <div id="toast"></div>
+  <div id="card"><h1 id="card-title">LANTERN</h1><p id="card-body">kindling…</p></div>
+  <div id="credit">sounds: Kenney (CC0) · everything else procedural · renderer: pixeldart</div>
+  <script defer src="build/lantern.js"></script>
+</body>
+</html>

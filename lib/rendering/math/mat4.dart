@@ -139,8 +139,12 @@ final class Mat4 {
     required Vec3 up,
   }) {
     final f = forward.normalized;
-    final r = up.cross(f).normalized;
-    final u = f.cross(r);
+    // right = forward × up. The reverse order (up × forward) yields a
+    // mirrored, determinant -1 basis: screen-right becomes -X and every
+    // triangle's on-screen winding flips, so CCW back-face culling removes
+    // the camera-facing side of single-sided surfaces.
+    final r = f.cross(up).normalized;
+    final u = r.cross(f);
     return Mat4._(
       Float32List(16)
         ..[0] = r.x

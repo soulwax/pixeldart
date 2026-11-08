@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Pixel Rocket</title>
+  <link rel="icon" href="data:,">
+  <style>
+    :root {
+      --ink: #e9e6ff;
+      --dim: #8f88b8;
+      --accent: #ffb347;
+      --fuel: #4dffa6;
+      --danger: #ff5a5a;
+      --panel: rgba(10, 8, 22, 0.72);
+    }
+    html, body { margin: 0; height: 100%; background: #04030a; overflow: hidden; }
+    body { font-family: "Courier New", ui-monospace, monospace; color: var(--ink); user-select: none; }
+    #game { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+
+    #hud {
+      position: fixed; top: 0; left: 0; right: 0;
+      display: flex; align-items: center; gap: 28px;
+      padding: 14px 22px; pointer-events: none;
+      font-size: 15px; letter-spacing: 0.08em; text-shadow: 0 0 6px #000;
+    }
+    #score { font-size: 26px; color: var(--accent); min-width: 120px; }
+    #best, #speed { color: var(--dim); }
+    #shields { color: #7fd4ff; font-size: 20px; letter-spacing: 0.2em; }
+    #fuel { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+    #fuel-bar { width: 180px; height: 10px; border: 1px solid var(--dim); background: rgba(0,0,0,.4); }
+    #fuel-fill { height: 100%; width: 100%; background: var(--fuel); transition: width .1s linear; }
+    #fuel-fill.low { background: var(--danger); animation: pulse .5s steps(2) infinite; }
+    #boost { color: var(--dim); }
+    #boost.on { color: var(--accent); }
+    @keyframes pulse { 50% { opacity: .35; } }
+
+    #card {
+      position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%);
+      max-width: min(560px, calc(100vw - 32px)); box-sizing: border-box;
+      padding: 28px 34px; background: var(--panel);
+      border: 1px solid rgba(255, 179, 71, 0.4); text-align: center;
+      box-shadow: 0 0 40px rgba(255, 140, 40, 0.15);
+    }
+    #card.hidden { display: none; }
+    #card-title { margin: 0 0 16px; font-size: 34px; letter-spacing: 0.25em; color: var(--accent); }
+    #card-body { margin: 0; white-space: pre-wrap; line-height: 1.55; font-size: 14px; color: var(--ink); }
+    #credit { position: fixed; right: 12px; bottom: 8px; font-size: 11px; color: var(--dim); opacity: .6; }
+    @media (max-width: 640px) {
+      #hud { flex-wrap: wrap; gap: 10px 18px; font-size: 13px; padding: 10px 16px; }
+      #fuel-bar { width: 110px; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="game"></canvas>
+  <div id="hud">
+    <span id="score">0</span>
+    <span id="shields">◆◆◆</span>
+    <span id="speed">0 km/h</span>
+    <span id="best">BEST 0</span>
+    <span id="fuel"><span id="boost">BOOST</span> FUEL <span id="fuel-bar"><span id="fuel-fill" style="display:block"></span></span></span>
+  </div>
+  <div id="card"><h1 id="card-title">PIXEL ROCKET</h1><p id="card-body">loading…</p></div>
+  <div id="credit">models &amp; sounds: Kenney (CC0) · renderer: pixeldart</div>
+  <script defer src="build/pixelrocket.js"></script>
+</body>
+</html>
