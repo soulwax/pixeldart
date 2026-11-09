@@ -549,18 +549,19 @@ final class Game {
 
   void _drawTrees(SpriteBatch batch) {
     final trees = map.trees;
-    final firstColumn = WorldMap.columnAt(camera.left - tileSize);
-    final lastColumn = WorldMap.columnAt(camera.right + tileSize);
+    final firstColumn = WorldMap.columnAt(camera.left - tileSize * 2);
+    final lastColumn = WorldMap.columnAt(camera.right + tileSize * 2);
     final firstRow = WorldMap.rowAt(camera.top - tileSize);
-    final lastRow = WorldMap.rowAt(camera.bottom + tileSize * 2);
+    final lastRow = WorldMap.rowAt(camera.bottom + tileSize * 3);
     final dot = art.dot;
     for (var row = firstRow; row <= lastRow; row += 1) {
       for (var column = firstColumn; column <= lastColumn; column += 1) {
         final id = trees[WorldMap.cellOf(column, row)];
         if (id == 0) continue;
         final x = (column + 0.5) * tileSize, y = (row + 0.9) * tileSize;
+        final tree = art.trees[id - 1];
         batch.draw(dot, x, y, width: 14, height: 6, color: 0x00000060);
-        batch.draw(art.tile(id - 1), x, y, originY: 1, layer: 1);
+        batch.draw(tree, x, y, originY: 1, layer: 1);
       }
     }
   }

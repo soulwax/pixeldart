@@ -15,7 +15,6 @@ const int _hamletCount = 9;
 
 // Grass that trampling may wear down.
 const int _grass = town + 0, _grassTuft = town + 1, _grassFlower = town + 2;
-const List<int> _treeTiles = [town + 3, town + 4, town + 5, town + 15, town + 16, town + 27, town + 28];
 
 /// The landscape: ground tiles, what blocks movement, and where things are.
 ///
@@ -37,7 +36,7 @@ final class WorldMap {
   /// [solid] or [keep]: everywhere walking monsters are stopped.
   final Uint8List monsterBlock = Uint8List(mapCells);
 
-  /// Tree tile id + 1 per cell, or 0.
+  /// Index into [Art.trees] + 1 per trunk cell, or 0.
   final Uint8List trees = Uint8List(mapCells);
 
   /// Cell indices safe to scatter villagers and spawn monsters on.
@@ -71,7 +70,8 @@ final class WorldMap {
   double get height => mapRows * tileSize;
 
   static int cellOf(int column, int row) => row * mapColumns + column;
-  static int columnAt(double x) => (x / tileSize).floor().clamp(0, mapColumns - 1);
+  static int columnAt(double x) =>
+      (x / tileSize).floor().clamp(0, mapColumns - 1);
   static int rowAt(double y) => (y / tileSize).floor().clamp(0, mapRows - 1);
   int cellAt(double x, double y) => cellOf(columnAt(x), rowAt(y));
 
@@ -96,13 +96,15 @@ final class WorldMap {
       for (var column = 0; column < mapColumns; column += 1) {
         final cell = cellOf(column, row);
         final roll = rng.nextDouble();
-        tiles[cell] = roll < 0.78 ? _grass : (roll < 0.95 ? _grassTuft : _grassFlower);
+        tiles[cell] = roll < 0.78
+            ? _grass
+            : (roll < 0.95 ? _grassTuft : _grassFlower);
         final u = column / mapColumns, v = row / mapRows;
         if (lakes.at(u, v) > 0.7) {
           tiles[cell] = waterTile;
           solid[cell] = 1;
         } else if (forest.at(u, v) > 0.55 && rng.nextDouble() < 0.55) {
-          trees[cell] = _treeTiles[rng.nextInt(_treeTiles.length)] + 1;
+          trees[cell] = rng.nextInt(art.trees.length) + 1;
           solid[cell] = 1;
         }
       }
@@ -111,10 +113,15 @@ final class WorldMap {
     // The edge of the map is a treeline, so the view never shows a hard stop.
     for (var row = 0; row < mapRows; row += 1) {
       for (var column = 0; column < mapColumns; column += 1) {
-        if (column > 1 && row > 1 && column < mapColumns - 2 && row < mapRows - 2) continue;
+        if (column > 1 &&
+            row > 1 &&
+            column < mapColumns - 2 &&
+            row < mapRows - 2) {
+          continue;
+        }
         final cell = cellOf(column, row);
         tiles[cell] = _grass;
-        trees[cell] = _treeTiles[rng.nextInt(_treeTiles.length)] + 1;
+        trees[cell] = rng.nextInt(art.trees.length) + 1;
         solid[cell] = 1;
       }
     }
@@ -129,7 +136,10 @@ final class WorldMap {
     }
     ground.fill((column, row) => tiles[cellOf(column, row)]);
     deco.fill((column, row) {
-      if (tiles[cellOf(column, row)] != _grass || trees[cellOf(column, row)] != 0) return -1;
+      if (tiles[cellOf(column, row)] != _grass ||
+          trees[cellOf(column, row)] != 0) {
+        return -1;
+      }
       final roll = rng.nextDouble();
       if (roll < 0.004) return town + 29; // toadstools
       if (roll < 0.012) return town + 17; // sprouts
@@ -140,7 +150,12 @@ final class WorldMap {
   void _clearDisc(Int32List tiles, int cx, int cy, int radius) {
     for (var row = cy - radius; row <= cy + radius; row += 1) {
       for (var column = cx - radius; column <= cx + radius; column += 1) {
-        if (column < 2 || row < 2 || column >= mapColumns - 2 || row >= mapRows - 2) continue;
+        if (column < 2 ||
+            row < 2 ||
+            column >= mapColumns - 2 ||
+            row >= mapRows - 2) {
+          continue;
+        }
         final dx = column - cx, dy = row - cy;
         if (dx * dx + dy * dy > radius * radius) continue;
         final cell = cellOf(column, row);
@@ -154,10 +169,16 @@ final class WorldMap {
   void _layHamlets(Int32List tiles) {
     final spin = rng.nextDouble() * math.pi * 2;
     for (var i = 0; i < _hamletCount; i += 1) {
-      final angle = spin + i / _hamletCount * math.pi * 2 + rng.nextDouble() * 0.3;
+      final angle =
+          spin + i / _hamletCount * math.pi * 2 + rng.nextDouble() * 0.3;
       final reach = 26 + rng.nextDouble() * 16;
-      final column = (keepColumn + math.cos(angle) * reach * 1.25).round().clamp(9, mapColumns - 10);
-      final row = (keepRow + math.sin(angle) * reach * 0.9).round().clamp(9, mapRows - 10);
+      final column = (keepColumn + math.cos(angle) * reach * 1.25)
+          .round()
+          .clamp(9, mapColumns - 10);
+      final row = (keepRow + math.sin(angle) * reach * 0.9).round().clamp(
+        9,
+        mapRows - 10,
+      );
       _clearDisc(tiles, column, row, 6);
       _layTrack(tiles, column, row);
       _layHouse(tiles, column - 4, row - 3, stone: i.isEven);
@@ -246,7 +267,7 @@ final class WorldMap {
     for (var cell = 0; cell < mapCells; cell += 1) {
       if (seen[cell] == 0 && solid[cell] == 0) {
         tiles[cell] = _grass;
-        trees[cell] = _treeTiles[rng.nextInt(_treeTiles.length)] + 1;
+        trees[cell] = rng.nextInt(art.trees.length) + 1;
         solid[cell] = 1;
       }
     }
@@ -267,11 +288,17 @@ final class WorldMap {
     final cells = (radius / tileSize).ceil();
     for (var row = cy - cells; row <= cy + cells; row += 1) {
       for (var column = cx - cells; column <= cx + cells; column += 1) {
-        if (column < 0 || row < 0 || column >= mapColumns || row >= mapRows) continue;
+        if (column < 0 || row < 0 || column >= mapColumns || row >= mapRows) {
+          continue;
+        }
         final dx = (column - cx) * tileSize, dy = (row - cy) * tileSize;
         if (dx * dx + dy * dy > radius * radius) continue;
         final id = ground.tileAt(column, row);
-        final isSoil = id == _grass || id == _grassTuft || id == _grassFlower || (id >= town + 39 && id <= town + 42);
+        final isSoil =
+            id == _grass ||
+            id == _grassTuft ||
+            id == _grassFlower ||
+            (id >= town + 39 && id <= town + 42);
         if (isSoil && rng.nextDouble() < 0.7) {
           ground.setTile(column, row, dungeon + (rng.nextBool() ? 12 : 24));
         }
@@ -298,7 +325,8 @@ final class FlowField {
   final Int32List _queue = Int32List(mapCells);
   // A native bulk copy from these beats fillRange's per-element loop.
   final Uint8List _blankDir = Uint8List(mapCells)..fillRange(0, mapCells, 8);
-  final Uint16List _blankDist = Uint16List(mapCells)..fillRange(0, mapCells, 0xFFFF);
+  final Uint16List _blankDist = Uint16List(mapCells)
+    ..fillRange(0, mapCells, 0xFFFF);
   final Int16List _blankSeed = Int16List(mapCells)..fillRange(0, mapCells, -1);
   int _tail = 0;
   bool _dirty = false;
@@ -361,12 +389,14 @@ final class _Noise {
 
   double at(double u, double v) {
     final x = u * cells, y = v * cells;
-    final ix = x.floor().clamp(0, cells - 1), iy = y.floor().clamp(0, cells - 1);
+    final ix = x.floor().clamp(0, cells - 1),
+        iy = y.floor().clamp(0, cells - 1);
     final fx = x - ix, fy = y - iy;
     final sx = fx * fx * (3 - 2 * fx), sy = fy * fy * (3 - 2 * fy);
     double value(int cx, int cy) => _values[cy * (cells + 1) + cx];
     final top = value(ix, iy) + (value(ix + 1, iy) - value(ix, iy)) * sx;
-    final bottom = value(ix, iy + 1) + (value(ix + 1, iy + 1) - value(ix, iy + 1)) * sx;
+    final bottom =
+        value(ix, iy + 1) + (value(ix + 1, iy + 1) - value(ix, iy + 1)) * sx;
     return top + (bottom - top) * sy;
   }
 }

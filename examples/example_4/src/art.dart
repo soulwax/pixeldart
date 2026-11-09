@@ -23,6 +23,7 @@ final class Art {
   final TextureAtlas soft;
   final BitmapFont font;
   final List<SpriteRegion> tileset;
+  final List<SpriteRegion> trees;
 
   final SpriteRegion solid;
   final SpriteRegion chevron;
@@ -44,6 +45,7 @@ final class Art {
     required this.font,
     required this.tileset,
   }) : solid = pixels.solid!,
+       trees = [pixels['tree/amber'], pixels['tree/green']],
        chevron = pixels['chevron'],
        dot = pixels['fx/circle_05'],
        spark = pixels['fx/spark_01'],
@@ -89,11 +91,18 @@ final class Art {
     ]) {
       results.add(await SpriteLoader.loadImage(url));
     }
-    await SpriteLoader.loadFontFace('KenneyPixel', 'res/fonts/kenney_pixel.ttf');
+    await SpriteLoader.loadFontFace(
+      'KenneyPixel',
+      'res/fonts/kenney_pixel.ttf',
+    );
 
     final builder = AtlasBuilder()
       ..addGrid('town', results[0], cellWidth: 16, cellHeight: 16)
       ..addGrid('dungeon', results[1], cellWidth: 16, cellHeight: 16)
+      // These two trees use the top and middle cells of their sheet columns.
+      // The third row holds separate bushes, not another tree segment.
+      ..add('tree/amber', results[0].crop(3 * 16, 0, 16, 32))
+      ..add('tree/green', results[0].crop(4 * 16, 0, 16, 32))
       ..add('water', _waterImage())
       ..add('chevron', _chevronImage());
     for (var i = 0; i < fx.length; i += 1) {
@@ -107,7 +116,10 @@ final class Art {
       chars: _fontChars,
       pixelated: true,
     );
-    final pixels = builder.build(app.resources, debugLabel: 'procession-pixels');
+    final pixels = builder.build(
+      app.resources,
+      debugLabel: 'procession-pixels',
+    );
 
     final softBuilder = AtlasBuilder();
     for (var i = 0; i < glows.length; i += 1) {
@@ -150,7 +162,8 @@ final class Art {
     for (var y = 0; y < 16; y += 1) {
       for (var x = 0; x < 16; x += 1) {
         final at = (y * 16 + x) * 4;
-        final ripple = (y == 4 && x >= 2 && x < 7) || (y == 11 && x >= 8 && x < 14);
+        final ripple =
+            (y == 4 && x >= 2 && x < 7) || (y == 11 && x >= 8 && x < 14);
         pixels[at] = ripple ? 86 : 44;
         pixels[at + 1] = ripple ? 132 : 92;
         pixels[at + 2] = ripple ? 170 : 128;

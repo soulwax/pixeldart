@@ -29,6 +29,21 @@ python -m http.server 8765 --directory examples
 Open <http://127.0.0.1:8765/example_4/>. The game loads local image, font and
 audio files, so it needs a static server rather than `file://`.
 
+### Windows executable
+
+On Windows with the Dart and .NET SDKs installed, run from the package root:
+
+```powershell
+.\examples\example_4\build_windows.ps1
+```
+
+The result is [build/Procession.exe](build/Procession.exe), a self-contained
+Windows x64 executable with the game and its Kenney assets embedded. It opens
+the game in a desktop window and does not need a local server or a separate
+.NET installation. It uses the [Microsoft Edge WebView2 Runtime](https://learn.microsoft.com/microsoft-edge/webview2/concepts/distribution),
+which is installed on current Windows versions. On first launch, the bundled
+game files are unpacked into the current user's local application data folder.
+
 URL flags for repeatable checks:
 
 - `?autostart` starts without the title screen.
