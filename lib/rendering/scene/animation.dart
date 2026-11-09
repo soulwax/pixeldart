@@ -3,10 +3,8 @@ import '../math/quat.dart';
 import '../math/vec.dart';
 import 'scene_node.dart';
 
-/// Playback repetition mode for animation clips.
 enum LoopMode { once, loop, pingPong }
 
-/// Keyframe with timestamp [time], target [value], and optional easing [curve].
 final class Keyframe<T> {
   final double time;
   final T value;
@@ -15,7 +13,6 @@ final class Keyframe<T> {
   const Keyframe(this.time, this.value, [this.curve]);
 }
 
-/// Abstract track that animates a property on a [target] node over time.
 abstract class KeyframeTrack<T> {
   final SceneNode target;
   final List<Keyframe<T>> keyframes;
@@ -54,10 +51,8 @@ abstract class KeyframeTrack<T> {
   }
 }
 
-/// Which vector property on [SceneNode] is targeted by [Vector3Track].
 enum Vector3Property { position, scale }
 
-/// Tracks and interpolates 3D vector properties on a [SceneNode].
 final class Vector3Track extends KeyframeTrack<Vec3> {
   final Vector3Property property;
 
@@ -80,7 +75,6 @@ final class Vector3Track extends KeyframeTrack<Vec3> {
   }
 }
 
-/// Tracks and interpolates rotation quaternions using spherical slerp.
 final class RotationTrack extends KeyframeTrack<Quat> {
   RotationTrack({
     required SceneNode target,
@@ -95,7 +89,6 @@ final class RotationTrack extends KeyframeTrack<Quat> {
   }
 }
 
-/// Named collection of animation tracks running on a synchronized timeline.
 final class AnimationClip {
   final String name;
   final double duration;
@@ -113,7 +106,6 @@ final class AnimationClip {
     }
   }
 
-  /// Evaluates all tracks at timestamp [time].
   void sample(double time) {
     var t = time;
     switch (loopMode) {
@@ -154,39 +146,31 @@ final class _ActiveClipInstance {
   }
 }
 
-/// Manages and steps concurrent animation clip instances.
 final class AnimationPlayer {
   final Map<String, _ActiveClipInstance> _active = {};
 
-  /// Plays [clip] with optional [speed].
   void play(AnimationClip clip, {double speed = 1.0}) {
     _active[clip.name] = _ActiveClipInstance(clip, speed: speed);
   }
 
-  /// Pauses playback of [clipName].
   void pause(String clipName) {
     _active[clipName]?.isPaused = true;
   }
 
-  /// Resumes playback of [clipName].
   void resume(String clipName) {
     _active[clipName]?.isPaused = false;
   }
 
-  /// Stops and removes [clipName].
   void stop(String clipName) {
     _active.remove(clipName);
   }
 
-  /// Checks if [clipName] is currently active.
   bool isPlaying(String clipName) => _active.containsKey(clipName);
 
-  /// Steps all active animation clips by [dt] seconds.
   void update(double dt) {
     _active.removeWhere((_, instance) => !instance.update(dt));
   }
 
-  /// Clears all active animations.
   void clear() {
     _active.clear();
   }

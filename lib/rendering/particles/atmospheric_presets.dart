@@ -3,12 +3,7 @@ import '../api/scene.dart';
 import '../math/vec.dart';
 import 'atmospheric_particles.dart';
 
-/// Turnkey physical presets for atmospheric particle simulation.
-///
-/// Each preset configures physically consistent velocities, drag responses,
-/// spawn volumes, and blend modes for instantaneous environmental ambiance.
 abstract final class AtmosphericPresets {
-  /// Gently rising, warm drifting embers or glowing motes with additive blending.
   static AtmosphericParticleField floatingEmbers({
     required MeshHandle mesh,
     required MaterialHandle material,
@@ -39,7 +34,6 @@ abstract final class AtmosphericPresets {
     );
   }
 
-  /// Ambient floating dust motes drifting lazily through illuminated air.
   static AtmosphericParticleField dustMotes({
     required MeshHandle mesh,
     required MaterialHandle material,
@@ -70,7 +64,6 @@ abstract final class AtmosphericPresets {
     );
   }
 
-  /// Gently falling and wind-swayed crystalline snowflakes.
   static AtmosphericParticleField snow({
     required MeshHandle mesh,
     required MaterialHandle material,
@@ -101,7 +94,6 @@ abstract final class AtmosphericPresets {
     );
   }
 
-  /// Swift, streak-aligned precipitation with aerodynamic terminal velocity.
   static AtmosphericParticleField rain({
     required MeshHandle mesh,
     required MaterialHandle material,
@@ -133,7 +125,6 @@ abstract final class AtmosphericPresets {
     );
   }
 
-  /// Slow tumbling cosmic space dust and micro-meteorite motes.
   static AtmosphericParticleField cosmicDust({
     required MeshHandle mesh,
     required MaterialHandle material,

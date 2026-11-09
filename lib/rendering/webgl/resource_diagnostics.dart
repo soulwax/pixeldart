@@ -1,8 +1,3 @@
-/// Structured resource accounting (§7.5, §7.6). Tracks live/peak GPU bytes
-/// by kind separately from retained CPU-side bytes, and records optional
-/// feature failures without making them terminal. Pure bookkeeping — no GL
-/// calls — so growth-after-warmup and exact-return-to-baseline assertions
-/// (§11.2) can be unit tested against synthetic create/delete sequences.
 enum GpuResourceKind { buffer, texture, target, vertexArray }
 
 final class ResourceDiagnostics {

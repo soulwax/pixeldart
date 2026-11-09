@@ -1,4 +1,3 @@
-/// RF-06 transactional binding of a validated ModelPackage to a retained scene.
 library;
 
 import '../../assets/packages/model_package.dart';
@@ -10,8 +9,6 @@ import '../api/scene.dart';
 import '../math/transform.dart';
 import 'model_package_diagnostics.dart';
 
-/// Binds one validated CPU package to retained world items. Material slots are
-/// resolved by the host; unresolved slots are errors, never fallbacks.
 final class ModelPackageSceneBinding {
   final ValidatedModelPackage package;
   final ModelCache cache;
@@ -77,8 +74,6 @@ final class ModelPackageSceneBinding {
     _remove(oldItems, oldMeshes, oldHandoff);
   }
 
-  /// Updates visibility for every retained part without rebuilding meshes or
-  /// touching the package cache. Hosts use this when room/PVS state changes.
   void setVisibilityMask(int mask) {
     _ensureUsable();
     if (_handoff == null) {

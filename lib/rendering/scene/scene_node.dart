@@ -7,7 +7,6 @@ import '../math/ray.dart';
 import '../math/transform.dart';
 import '../math/vec.dart';
 
-/// Hierarchical scene node representing an entity, group, or visual item.
 base class SceneNode {
   final String? name;
   Transform _localTransform;
@@ -18,8 +17,6 @@ base class SceneNode {
   SceneNode? _parent;
   final List<SceneNode> _children = [];
 
-  /// Subtrees detached from this tree since its last [syncToWorld]; their
-  /// retained items are removed then unless they were re-attached.
   final List<SceneNode> _detached = [];
 
   Aabb? bounds;
@@ -73,8 +70,6 @@ base class SceneNode {
     _worldDirty = true;
   }
 
-  /// Per-view visibility bits for this node's own draw item. Not inherited;
-  /// use [visible] to hide a whole subtree.
   int get visibilityMask => _visibilityMask;
   set visibilityMask(int value) {
     if (value == _visibilityMask) return;
@@ -124,8 +119,6 @@ base class SceneNode {
     _worldDirty = true;
   }
 
-  /// Whether this node and its whole subtree are drawn. Inherited: a hidden
-  /// parent hides every descendant regardless of their own flag.
   bool get visible => _visible;
   set visible(bool value) {
     if (value == _visible) return;
@@ -133,7 +126,6 @@ base class SceneNode {
     _markWorldDirtyTree();
   }
 
-  /// True when this node and all of its ancestors are [visible].
   bool get isVisibleInHierarchy {
     for (SceneNode? n = this; n != null; n = n._parent) {
       if (!n._visible) return false;
@@ -141,15 +133,10 @@ base class SceneNode {
     return true;
   }
 
-  /// The visibility bits this node's draw items should carry: its own
-  /// [visibilityMask], or 0 while hidden through [visible].
   int get effectiveVisibilityMask => isVisibleInHierarchy ? _visibilityMask : 0;
 
-  /// Whether draw state changed since this node last synced. Subclasses that
-  /// manage their own retained items read this and call [markWorldSynced].
   bool get hasPendingWorldChanges => _worldDirty || _isDirty;
 
-  /// Marks this node's retained items as up to date (for subclasses).
   void markWorldSynced() => _worldDirty = false;
 
   void _markWorldDirtyTree() {
@@ -159,7 +146,6 @@ base class SceneNode {
     }
   }
 
-  /// Creates a grouping node with no visual mesh.
   factory SceneNode.group({String? name, Transform transform = Transform.identity}) =>
       SceneNode(name: name, transform: transform);
 
@@ -173,54 +159,40 @@ base class SceneNode {
     _markDirty();
   }
 
-  /// Alias for [localTransform] for natural ergonomic code.
   Transform get transform => _localTransform;
   set transform(Transform value) => localTransform = value;
 
-  /// Local translation vector.
   Vec3 get position => _localTransform.translation;
   set position(Vec3 value) => localTransform = _localTransform.copyWith(translation: value);
 
-  /// Local rotation quaternion.
   Quat get rotation => _localTransform.rotation;
   set rotation(Quat value) => localTransform = _localTransform.copyWith(rotation: value);
 
-  /// Local uniform scale. Prefer [visible] over scaling toward zero to hide
-  /// a node.
   double get scale => _localTransform.scale;
   set scale(double value) => localTransform = _localTransform.copyWith(scale: value);
 
-  /// Per-axis scale of this node's own geometry (see [Transform.stretch]).
-  /// Not inherited by children.
   Vec3 get stretch => _localTransform.stretch;
   set stretch(Vec3 value) => localTransform = _localTransform.copyWith(stretch: value);
 
-  /// Translates node by [delta].
   void translate(Vec3 delta) {
     position = _localTransform.translation + delta;
   }
 
-  /// Rotates node around a normalized [axis] by [radians].
   void rotateAxis(Vec3 axis, double radians) {
     final q = Quat.axisAngle(axis, radians);
     rotation = _localTransform.rotation * q;
   }
 
-  /// Rotates node around the X axis by [radians].
   void rotateX(double radians) => rotateAxis(const Vec3(1, 0, 0), radians);
 
-  /// Rotates node around the Y axis by [radians].
   void rotateY(double radians) => rotateAxis(const Vec3(0, 1, 0), radians);
 
-  /// Rotates node around the Z axis by [radians].
   void rotateZ(double radians) => rotateAxis(const Vec3(0, 0, 1), radians);
 
-  /// Uniformly scales the node by [factor].
   void scaleBy(double factor) {
     scale = _localTransform.scale * factor;
   }
 
-  /// Orients the node so its [forward] vector faces toward [target].
   void lookAt(Vec3 target, {Vec3 forward = const Vec3(0, 0, 1)}) {
     final dir = target - _localTransform.translation;
     if (dir.lengthSquared > 1e-8) {
@@ -228,7 +200,6 @@ base class SceneNode {
     }
   }
 
-  /// Recursively searches this subtree for a node with the given [queryName].
   SceneNode? findByName(String queryName) {
     if (name == queryName) return this;
     for (final child in _children) {
@@ -238,7 +209,6 @@ base class SceneNode {
     return null;
   }
 
-  /// Traverses this node and all its descendants in depth-first order.
   void traverse(void Function(SceneNode node) callback) {
     callback(this);
     for (final child in _children) {
@@ -246,7 +216,6 @@ base class SceneNode {
     }
   }
 
-  /// The computed world transform, resolving parent hierarchy on demand.
   Transform get worldTransform {
     if (_isDirty) {
       final p = _parent;
@@ -258,7 +227,6 @@ base class SceneNode {
     return _worldTransform;
   }
 
-  /// Marks this node and all descendants as needing transform recalculation.
   void markDirty() {
     if (_isDirty) return;
     _isDirty = true;
@@ -270,7 +238,6 @@ base class SceneNode {
 
   void _markDirty() => markDirty();
 
-  /// Adds [child] to this node. Detaches from any prior parent first.
   void addChild(SceneNode child) {
     if (child._parent == this) return;
     child.removeFromParent();
@@ -279,7 +246,6 @@ base class SceneNode {
     _children.add(child);
   }
 
-  /// Creates a child node and attaches it to this node.
   SceneNode add({
     String? name,
     Transform transform = Transform.identity,
@@ -314,17 +280,8 @@ base class SceneNode {
     return child;
   }
 
-  /// The world-space axis-aligned bounding box of this node, transformed from [bounds].
   Aabb? get worldBounds => bounds?.transformed(worldTransform.toMat4());
 
-  /// Recursively tests this node and its descendants against [ray].
-  /// Returns the closest [RaycastHit] or `null` if no intersection occurs.
-  ///
-  /// [where] skips nodes it rejects (their descendants are still tested),
-  /// so a game can pick only ships, say, and never the ocean's large box.
-  /// [precise] refines a bounds hit against the node's [meshData] triangles,
-  /// so a ray between a mast and a sail misses. Hidden subtrees
-  /// ([visible] false) are skipped either way.
   RaycastHit? raycast(Ray ray, {bool Function(SceneNode node)? where, bool precise = false}) {
     RaycastHit? closest;
 
@@ -357,7 +314,6 @@ base class SceneNode {
     return closest;
   }
 
-  /// Nearest triangle hit of [ray] against this node's mesh in world space.
   (double?, Vec3?) _intersectTriangles(Ray ray) {
     final data = meshData!;
     final layout = data.layout;
@@ -379,11 +335,6 @@ base class SceneNode {
     return (best, bestNormal);
   }
 
-  /// Removes [child] from this node.
-  ///
-  /// The child's retained draw items are removed at the tree root's next
-  /// [syncToWorld], unless the child has been attached somewhere by then
-  /// (re-parenting keeps its items alive and simply moves them).
   void removeChild(SceneNode child) {
     if (_children.remove(child)) {
       child._parent = null;
@@ -396,8 +347,6 @@ base class SceneNode {
     }
   }
 
-  /// Removes the retained items of subtrees detached from this tree that
-  /// are still unattached. Called at the start of [syncToWorld].
   void flushDetached(RenderWorld world) {
     if (_detached.isEmpty) return;
     for (final node in _detached) {
@@ -406,12 +355,10 @@ base class SceneNode {
     _detached.clear();
   }
 
-  /// Detaches this node from its parent, if attached.
   void removeFromParent() {
     _parent?.removeChild(this);
   }
 
-  /// Builds the retained descriptor for this node's own draw item.
   RetainedItemDescriptor describeForWorld(MeshHandle mesh, MaterialHandle material) =>
       RetainedItemDescriptor(
         mesh: mesh,
@@ -426,7 +373,6 @@ base class SceneNode {
         instanceFamilyKey: _instanceFamilyKey,
       );
 
-  /// Synchronizes this node and all descendants to the given [world].
   void syncToWorld(RenderWorld world) {
     flushDetached(world);
     final m = _mesh;
@@ -452,7 +398,6 @@ base class SceneNode {
     }
   }
 
-  /// Removes this node and its descendants from [world].
   void removeFromWorld(RenderWorld world) {
     final currentId = _instanceId;
     if (currentId != null) {

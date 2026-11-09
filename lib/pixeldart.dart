@@ -1,8 +1,3 @@
-/// Stable host facade for Pixeldart.
-///
-/// This surface contains contracts a game can safely retain across renderer
-/// implementations. Backend construction, passes, generated shaders, and
-/// concrete stores intentionally remain outside this library.
 library;
 
 export 'rendering/api/capabilities.dart';
@@ -34,6 +29,7 @@ export 'rendering/scene/animation.dart';
 export 'rendering/math/curves.dart';
 export 'rendering/math/spline.dart';
 export 'rendering/api/settings.dart';
+export 'rendering/api/shaders.dart';
 export 'rendering/api/stats.dart';
 export 'rendering/particles/atmospheric_particles.dart';
 export 'rendering/particles/atmospheric_presets.dart';

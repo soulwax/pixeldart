@@ -1,7 +1,3 @@
-/// Pure command vocabulary shared by the Pixeldart offline asset tools.
-///
-/// Parsing is deliberately side-effect free. File access, process launch and
-/// temporary-directory ownership belong to the CLI layer, not this contract.
 enum AssetToolSubcommand { init, verify, convert, package, doctor, preflight }
 
 final class AssetToolCommand {

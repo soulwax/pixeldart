@@ -6,7 +6,6 @@ import 'model_package_manifest.dart';
 import 'model_package_validator.dart';
 import '../../rendering/assets/qmesh.dart';
 
-/// Resource bounds applied before package bytes enter a decoder or cache.
 final class ModelPackageLimits {
   final int maxPayloadBytes;
   final int maxTotalBytes;
@@ -26,7 +25,6 @@ final class ModelPackageLimits {
        assert(maxPayloadCount > 0);
 }
 
-/// Source of immutable package metadata and payload bytes.
 final class ModelPackageSource {
   final ModelPackageManifest manifest;
   final Future<Uint8List> Function(String path) load;
@@ -34,7 +32,6 @@ final class ModelPackageSource {
   const ModelPackageSource({required this.manifest, required this.load});
 }
 
-/// Validates and loads a model package without allocating renderer resources.
 final class ModelPackageLoader {
   const ModelPackageLoader();
 

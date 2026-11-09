@@ -31,10 +31,6 @@ void _handleEquality() {
   }
 }
 
-/// Exercises the handle semantics RV-01 defines (§5.3) against a minimal
-/// pure in-memory reference store. The real GPU-backed registry belongs to
-/// RV-02; this proves the vocabulary — wrong kind, stale generation, double
-/// release, draw-after-release — is enforceable without a GPU context.
 void _handleInvalidationAndRehydration() {
   final store = _FakeMeshStore();
 

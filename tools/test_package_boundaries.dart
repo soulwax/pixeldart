@@ -1,6 +1,5 @@
 import 'dart:io';
 
-/// Runs the package/product boundary checks that sit outside renderer fixtures.
 void main() {
   final package = _packageDirectory();
   const scripts = [

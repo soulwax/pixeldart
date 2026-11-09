@@ -102,10 +102,6 @@ void _declareWithPixelsUploadsImmediately() {
   }
 }
 
-/// The two-phase path: a handle declared without pixels must resolve to the
-/// exact same fallback object `resolveAlbedo(null)` gives — a still-loading
-/// asset and "no asset at all" are meant to be observably identical — and
-/// only after `updatePixels` does it resolve to a distinct, real texture.
 void _declareWithoutPixelsResolvesToFallbackUntilLoaded() {
   final device = FakeGpuDevice();
   final store = TextureStore(device);
@@ -143,10 +139,6 @@ void _resolveAlbedoNullReturnsTheSameFallback() {
   }
 }
 
-/// `finalizeMips` mirrors `GpuDevice.finalizeMips`'s own contract: a real
-/// call for a texture declared `hasMips: true`, an explicit no-op for one
-/// that was not — never a StateError either way, so a caller need not
-/// branch on `hasMips` before calling it.
 void _mipsFinalizedOnlyWhenDeclaredMipped() {
   final device = FakeGpuDevice();
   final store = TextureStore(device);

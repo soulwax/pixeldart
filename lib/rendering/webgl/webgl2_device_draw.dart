@@ -30,15 +30,6 @@ extension WebGl2DeviceDraw on WebGl2Device {
     }
   }
 
-  /// §8.4 rung 2: the real MSAA resolve `bindTexture` has always required
-  /// (its multisampled-attachment error names this exact call as the fix).
-  /// `blitFramebuffer` is the only WebGL2 mechanism that can move samples
-  /// out of a multisampled renderbuffer at all — there is no shader-visible
-  /// way to read one directly. Color and depth are blitted as two separate
-  /// calls because depth must use `NEAREST` filtering unconditionally (the
-  /// GL spec disallows `LINEAR` for a depth blit) while color is free to use
-  /// either; a single combined-mask blit cannot express two different
-  /// filters for its two components.
   void resolveTargetImpl(GpuObject source, GpuObject destination) {
     _requireReady();
     final src = _asFramebuffer(source);
@@ -141,12 +132,6 @@ extension WebGl2DeviceDraw on WebGl2Device {
     gl.bindFramebuffer(_G.DRAW_FRAMEBUFFER, null);
   }
 
-  /// Binds a target's glow (COLOR_ATTACHMENT1) texture — the sampleable
-  /// counterpart to [bindTextureImpl]'s color attachment, for bloom's
-  /// "declared emissive attachment" (§8.7). Throws if [target] has no glow
-  /// attachment at all, matching [bindTextureImpl]'s existing "unrecognized
-  /// handle" strictness rather than silently falling back to something
-  /// plausible-looking.
   void bindGlowTextureImpl(int unit, GpuObject target) {
     _requireReady();
     final fb = _asFramebuffer(target);
@@ -190,12 +175,6 @@ extension WebGl2DeviceDraw on WebGl2Device {
     BlendEquation.reverseSubtract => _G.FUNC_REVERSE_SUBTRACT,
   };
 
-  /// Applies only the fields [WebGlStateCache.diff] reports changed against
-  /// the last-applied [DrawStateDescriptor] (§6.4). This is the real GL
-  /// backend for the toggles [DrawStateDescriptor] has always modeled as
-  /// data but that, before this method existed, no call site ever actually
-  /// issued — the exact shape of RV-07's two "modeled but never applied"
-  /// bugs (`DEPTH_TEST`, and now `CULL_FACE` closed by this same method).
   void applyDrawStateImpl(DrawStateDescriptor state) {
     _requireReady();
     final changed = _stateCache.diff(state);
@@ -382,14 +361,6 @@ extension WebGl2DeviceDraw on WebGl2Device {
     gl.vertexAttribDivisor(location, divisor);
   }
 
-  /// Accepts either a standalone texture ([_WebGlTexture], from
-  /// `createTexture`) or a single-sample render target ([_WebGlFramebuffer],
-  /// from `createTarget`) and samples its color attachment. A multisampled
-  /// target has no attached texture — only a renderbuffer — and cannot be
-  /// sampled directly per the WebGL2 spec; that case throws rather than
-  /// silently binding nothing, since RV-03's graph validator is supposed to
-  /// catch "direct sampling of a multisampled attachment" before this runs
-  /// and reaching this branch means that check was bypassed.
   void bindTextureImpl(int unit, GpuObject texture) {
     _requireReady();
     final handle = (texture as _WebGpuObject).handle;

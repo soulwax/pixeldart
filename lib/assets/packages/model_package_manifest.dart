@@ -2,8 +2,6 @@ import 'dart:convert';
 
 import '../importers/fbx_import_config.dart';
 
-/// Source-neutral package manifest. Source format is provenance only; runtime
-/// loaders consume this schema rather than FBX/glTF-specific records.
 final class ModelPackageManifest {
   final String schema;
   final String assetId;

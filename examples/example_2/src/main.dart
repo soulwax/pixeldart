@@ -110,7 +110,6 @@ final class Game {
   late final SceneNode portal;
   late final ParticleEmitter fire, gold, violet, smoke;
 
-  /// Lit braziers, oldest first. Its length never exceeds [_maxFlames].
   final List<Brazier> flames = [];
 
   Phase phase = Phase.title;
@@ -228,7 +227,6 @@ final class Game {
         return (app.createMesh(data, debugLabel: key), data);
       });
 
-  /// A flat disc facing the camera at depth [z].
   SceneNode _disc(SceneNode parent, double radius, MaterialHandle material, {double z = 0, Vec3 at = Vec3.zero}) {
     final (mesh, data) = _mesh(
       'disc$radius',
@@ -424,7 +422,6 @@ final class Game {
 
   // ── Rooms ───────────────────────────────────────────────────────────────
 
-  /// Finds a free spot at least [clear] from everything already placed.
   (double, double) _freeSpot(List<(double, double, double)> taken, double clear) {
     for (var attempt = 0; attempt < 200; attempt++) {
       final x = (rng.nextDouble() * 2 - 1) * (_halfW - 1.5);
@@ -668,7 +665,6 @@ final class Game {
     py = ny;
   }
 
-  /// Pushes a circle out of the arena walls and active pillars.
   (double, double) _collide(double x, double y, double r) {
     x = x.clamp(-_halfW + r, _halfW - r);
     y = y.clamp(-_halfH + r, _halfH - r);
@@ -892,8 +888,6 @@ final class Game {
     }
   }
 
-  /// One emitter per colour streams from every source at once; each source
-  /// keeps its own exact rate.
   void _emit(double dt) {
     for (final b in flames) {
       fire.emitAt(Vec3(b.x, b.y + 0.1, 0.8), 16, dt, source: b);
@@ -934,7 +928,6 @@ final class Game {
   }
 }
 
-/// DOM overlay: room / hearts / motes / flames, a toast line, and a card.
 final class Hud {
   final web.Element? _room = web.document.querySelector('#room');
   final web.Element? _hearts = web.document.querySelector('#hearts');

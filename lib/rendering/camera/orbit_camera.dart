@@ -4,7 +4,6 @@ import '../api/frame.dart';
 import '../math/vec.dart';
 import 'camera_controller.dart';
 
-/// Interactive orbit camera controller for inspecting 3D scenes.
 final class OrbitCameraController implements CameraController {
   Vec3 target;
   double distance;
@@ -48,7 +47,6 @@ final class OrbitCameraController implements CameraController {
         _targetDistance = distance,
         _targetPos = target;
 
-  /// Eye position derived from current spherical coordinates.
   @override
   Vec3 get eye {
     final cosEl = math.cos(elevationRadians);
@@ -64,20 +62,16 @@ final class OrbitCameraController implements CameraController {
         );
   }
 
-  /// Forward unit vector pointing from camera eye to target.
   @override
   Vec3 get forward => (target - eye).normalized;
 
-  /// Right unit vector in the camera's horizontal view plane.
   Vec3 get right {
     final f = forward;
     return f.cross(const Vec3(0, 1, 0)).normalized;
   }
 
-  /// Up unit vector perpendicular to forward and right.
   Vec3 get up => right.cross(forward).normalized;
 
-  /// Rotates the orbit camera by angular deltas.
   void rotate(double deltaAzimuth, double deltaElevation) {
     _targetAzimuth += deltaAzimuth;
     _targetElevation = (_targetElevation + deltaElevation).clamp(
@@ -86,7 +80,6 @@ final class OrbitCameraController implements CameraController {
     );
   }
 
-  /// Adjusts camera distance from target.
   void zoom(double deltaDistance) {
     _targetDistance = (_targetDistance + deltaDistance).clamp(
       minDistance,
@@ -94,7 +87,6 @@ final class OrbitCameraController implements CameraController {
     );
   }
 
-  /// Pans target in view-plane coordinates.
   void pan(double deltaRight, double deltaUp) {
     final r = right;
     final u = up;
@@ -102,13 +94,11 @@ final class OrbitCameraController implements CameraController {
     _targetPos = _targetPos + shift;
   }
 
-  /// Smoothly tracks or immediately snaps camera target to [newTarget].
   void trackTarget(Vec3 newTarget, {bool snap = false}) {
     _targetPos = newTarget;
     if (snap) target = newTarget;
   }
 
-  /// Advances camera state towards targets using smooth exponential decay.
   @override
   void update(double dt) {
     if (dt <= 0) return;
@@ -125,7 +115,6 @@ final class OrbitCameraController implements CameraController {
     target = target + (diffPos * t);
   }
 
-  /// Builds an authoritative [CameraView] for the given viewport aspect ratio.
   @override
   CameraView toCameraView(double aspect) {
     return CameraView.lookAt(

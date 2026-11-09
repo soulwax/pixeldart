@@ -9,9 +9,7 @@ import '../math/vec.dart';
 import 'particle_emitter.dart';
 import 'particle_shapes.dart';
 
-/// Turnkey, high-fidelity universal presets for the Pixeldart particle system.
 abstract final class ParticlePresets {
-  /// Realistic campfire / torch flames rising with turbulence and tapering scale.
   static ParticleEmitter campfire({
     required MeshHandle mesh,
     required MaterialHandle material,
@@ -66,7 +64,6 @@ abstract final class ParticlePresets {
     );
   }
 
-  /// Instantaneous high-energy explosion blast with shockwave expansion, debris, and drag.
   static ParticleEmitter explosion({
     required MeshHandle mesh,
     required MaterialHandle material,
@@ -118,7 +115,6 @@ abstract final class ParticlePresets {
     );
   }
 
-  /// Billowing smoke plume expanding continuously into ambient air.
   static ParticleEmitter smokePlume({
     required MeshHandle mesh,
     required MaterialHandle material,
@@ -165,7 +161,6 @@ abstract final class ParticlePresets {
     );
   }
 
-  /// High-speed sparks reflecting and bouncing off a ground contact plane.
   static ParticleEmitter bouncingSparks({
     required MeshHandle mesh,
     required MaterialHandle material,
@@ -209,7 +204,6 @@ abstract final class ParticlePresets {
     );
   }
 
-  /// Swirling magical vortex or portal with inward spiral acceleration.
   static ParticleEmitter swirlingVortex({
     required MeshHandle mesh,
     required MaterialHandle material,
@@ -250,7 +244,6 @@ abstract final class ParticlePresets {
     );
   }
 
-  /// Pressurized water fountain launching in a parabolic gravity arc.
   static ParticleEmitter waterFountain({
     required MeshHandle mesh,
     required MaterialHandle material,
@@ -292,7 +285,6 @@ abstract final class ParticlePresets {
     );
   }
 
-  /// Ethereal wandering fireflies drifting lazily with 3D organic turbulence.
   static ParticleEmitter fireflies({
     required MeshHandle mesh,
     required MaterialHandle material,
@@ -332,7 +324,6 @@ abstract final class ParticlePresets {
     );
   }
 
-  /// Starfield warp-speed effect streaming rapidly past the viewer.
   static ParticleEmitter warpSpeed({
     required MeshHandle mesh,
     required MaterialHandle material,
@@ -369,7 +360,6 @@ abstract final class ParticlePresets {
     );
   }
 
-  /// Celebratory tumbling confetti with aerodynamic air resistance.
   static ParticleEmitter confetti({
     required MeshHandle mesh,
     required MaterialHandle material,
@@ -411,7 +401,6 @@ abstract final class ParticlePresets {
     );
   }
 
-  /// Turbulent, wind-whipped mountain blizzard snowstorm.
   static ParticleEmitter blizzard({
     required MeshHandle mesh,
     required MaterialHandle material,
@@ -450,8 +439,6 @@ abstract final class ParticlePresets {
     );
   }
 
-  /// Multi-stage firework rocket that trails glowing sparks, bursts at apex into
-  /// a colorful explosion, and produces ground-impact bounce sparks.
   static ParticleEmitter fireworkRocket({
     required MeshHandle mesh,
     required MaterialHandle rocketMaterial,
@@ -583,7 +570,6 @@ abstract final class ParticlePresets {
     );
   }
 
-  /// Downward falling rain droplets triggering ring splashes upon ground impact.
   static ParticleEmitter rainWithSplashes({
     required MeshHandle mesh,
     required MaterialHandle rainMaterial,

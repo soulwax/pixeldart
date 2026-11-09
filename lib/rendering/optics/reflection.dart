@@ -2,7 +2,6 @@ import 'dart:math' as math;
 
 import '../math/vec.dart';
 
-/// Inputs for one physically bounded reflection decision.
 final class ReflectionInput {
   final Vec3 surfaceNormal;
   final Vec3 viewDirection;
@@ -59,8 +58,6 @@ final class ReflectionInput {
   }
 }
 
-/// A reflection result that distinguishes a real screen-space hit from a
-/// probe fallback. No hit is invented when depth history did not provide one.
 final class ReflectionResult {
   final Vec3 direction;
   final double fresnel01;
@@ -88,11 +85,6 @@ final class ReflectionResult {
   };
 }
 
-/// Deterministic reflection weighting for glossy or wet surfaces.
-///
-/// The resolver reports how much screen-space history can be trusted and when
-/// a host should blend to a probe/environment fallback. It does not invent a
-/// hit, allocate a probe, or own scene capture policy.
 final class ReflectionResolver {
   static ReflectionResult evaluate(ReflectionInput input) {
     input.validate();

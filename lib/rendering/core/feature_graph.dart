@@ -1,22 +1,11 @@
 import 'render_feature.dart';
 import 'render_graph.dart';
 
-/// Drives §5.6's declare -> validate -> create-passes sequence across a set
-/// of installed features. Passes are built only after the whole declared
-/// graph validates, so a feature can never construct an executable
-/// `RenderPass` against a resource wiring the validator already rejected —
-/// this is what makes "mandatory world/present programs build independently
-/// of optional effects" (RV-03's gate) hold at the feature level, not just
-/// the raw pass-declaration level.
 final class FeatureGraph {
   final List<RenderFeature> _installedFeatures;
 
   FeatureGraph(this._installedFeatures);
 
-  /// Runs `declare()` on every installed feature, validates the combined
-  /// graph, and — only if valid — calls `createPasses()` on each feature in
-  /// installation order. Returns the validation result and, when valid, the
-  /// concrete passes in graph (stage) order.
   FeatureGraphResult build({
     required RenderFeatureContext featureContext,
     required Set<String> availableCapabilities,

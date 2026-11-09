@@ -176,18 +176,6 @@ extension WebGl2DeviceResources on WebGl2Device {
     }
   }
 
-  /// Generates mip levels 1..N from the already-uploaded base level.
-  /// Deliberately a separate call from [uploadTextureLayerImpl] rather than
-  /// implicit after every layer upload — a multi-layer texture array must
-  /// have every layer's base level populated before mip generation is
-  /// correct, and calling this once per layer would both waste work and
-  /// generate mips from incomplete array data on all but the last call.
-  /// [createTextureImpl] allocates mip storage via `texStorage2D`/3D's
-  /// level count, but never populates levels beyond 0 on its own — omitting
-  /// this call left every non-base mip level undefined, which is exactly
-  /// the kind of gap that only shows as visibly wrong (black, or garbage)
-  /// once something actually samples a minified/mipmapped texture, never as
-  /// a WebGL error.
   void finalizeMipsImpl(GpuObject texture) {
     _requireReady();
     final tex = (texture as _WebGpuObject).handle as _WebGlTexture;

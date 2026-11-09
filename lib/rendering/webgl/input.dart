@@ -2,11 +2,6 @@ import 'dart:js_interop';
 
 import 'package:web/web.dart' as web;
 
-/// Keyboard and pointer state for a canvas, read once per frame.
-///
-/// Works on its own: construct one for a canvas, read it during the frame
-/// and call [endFrame] when the frame is done. `PixeldartApp.input` is one
-/// of these, which the app ends for you.
 final class InputState {
   final web.HTMLCanvasElement canvas;
 
@@ -38,30 +33,20 @@ final class InputState {
     web.window.addEventListener('pointercancel', _onPointerUp);
   }
 
-  /// Whether a key is held. [code] is a `KeyboardEvent.code` value such as
-  /// `KeyW`, `ArrowUp` or `Space`.
   bool isDown(String code) => _down.contains(code);
 
-  /// Whether a key went down since the last [endFrame]. Auto-repeat does
-  /// not count.
   bool wasPressed(String code) => _pressed.contains(code);
 
-  /// Whether a key came up since the last [endFrame].
   bool wasReleased(String code) => _released.contains(code);
 
-  /// Pointer position in device pixels from the canvas's top-left, the
-  /// space `Camera2D.screenToWorld` takes.
   double get pointerX => _pointerX;
   double get pointerY => _pointerY;
 
-  /// Whether a mouse button or touch is held down on the canvas.
   bool get pointerDown => _pointerId != null;
 
-  /// Whether a press or release happened since the last [endFrame].
   bool get pointerPressed => _pointerPressed;
   bool get pointerReleased => _pointerReleased;
 
-  /// Clears this frame's presses and releases.
   void endFrame() {
     if (_pressed.isNotEmpty) _pressed.clear();
     if (_released.isNotEmpty) _released.clear();
@@ -69,7 +54,6 @@ final class InputState {
     _pointerReleased = false;
   }
 
-  /// Removes every listener.
   void dispose() {
     web.window.removeEventListener('keydown', _onKeyDown);
     web.window.removeEventListener('keyup', _onKeyUp);
@@ -89,7 +73,6 @@ final class InputState {
     if (_down.remove(e.code)) _released.add(e.code);
   }
 
-  /// A key released while the window lacks focus never reports its keyup.
   void _blur(web.Event _) {
     _released.addAll(_down);
     _down.clear();

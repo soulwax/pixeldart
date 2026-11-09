@@ -24,17 +24,6 @@ final class DepthDebugProgramSource {
   );
 }
 
-/// A debug view proving `DepthPrepassResources.sceneDepth` is real,
-/// GPU-produced, sampleable depth rather than declared-but-unconsumed graph
-/// data — the plan names debug views for exactly this purpose ("expose
-/// debug views for light volume, normal, direct, ambient, and shadow
-/// factor" / "normal/material/depth debug views"). Samples the prepass
-/// depth texture, linearizes it against the camera's actual near/far
-/// (raw NDC depth is heavily non-linear and would crush almost the entire
-/// visible range near 1.0 otherwise), and writes it as grayscale into
-/// `sceneColor` — a full alternative to the shadowed-world pass, not a
-/// composite over it, so what's on screen in this mode is unambiguously
-/// "this is scene depth" with nothing else blended in to obscure it.
 final class DepthDebugFeature implements RenderFeature {
   final ProgramLibrary programLibrary;
   final String vertexSource;

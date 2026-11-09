@@ -1,7 +1,5 @@
 import 'dart:io';
 
-/// Verifies that the standalone example is self-contained and does not bundle
-/// unreviewed media. Its geometry/material samples are generated in Dart.
 void main() {
   final package = _packageDirectory();
   if (!File('${package.path}/LICENSE').existsSync()) {

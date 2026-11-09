@@ -16,7 +16,6 @@ void check(bool condition, String message) {
   if (!condition) throw StateError('model asset: $message');
 }
 
-/// Packs a glTF JSON document and binary chunk into GLB bytes.
 Uint8List _glb(Map<String, dynamic> json, Uint8List bin) {
   var jsonBytes = utf8.encode(jsonEncode(json));
   while (jsonBytes.length % 4 != 0) {
@@ -39,7 +38,6 @@ Uint8List _glb(Map<String, dynamic> json, Uint8List bin) {
   return bytes;
 }
 
-/// A one-triangle GLB whose nodes, materials and images are given.
 Uint8List _triangleGlb({
   required List<Map<String, dynamic>> nodes,
   required List<Map<String, dynamic>> materials,

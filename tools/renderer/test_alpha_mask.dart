@@ -18,22 +18,6 @@ import 'fake_gpu_device.dart';
 
 part 'test_alpha_mask_tail.dart';
 
-/// Pins §6.2's "alpha-masked geometry participates in shadow, prepass, and
-/// opaque depth-writing routes."
-///
-/// The claim worth a fixture is not that any single pass discards — a
-/// screenshot shows that — but that all three *agree*. A cutout is only
-/// correct if the world pass, the depth prepass and the shadow caster
-/// discard the same fragments: disagreement between the first two puts SSAO
-/// and DOF's CoC on a silhouette nothing shaded (the shape bug 17 had), and
-/// disagreement with the third makes a pierced panel cast a solid shadow.
-/// Agreement across passes is exactly what a browser A/B is worst at
-/// showing and what a recorded uniform sequence is best at.
-///
-/// Every assertion here runs the real feature classes against
-/// `FakeGpuDevice`, so it fails if any pass stops setting the uniform,
-/// starts computing it differently, or drops the per-draw resolution and
-/// reverts to a pass-wide constant.
 void main() {
   _everyPassAgreesOnTheCutoffOfEveryDraw();
   _onlyMaskedMaterialsCutOut();
@@ -59,9 +43,6 @@ final _fakeCamera = CameraView(
 
 const _maskTexture = TextureHandle(7, 1, 'lattice');
 
-/// The three cutoffs are deliberately all different from each other and
-/// none of them 0.5: a fixture that passed on a hardcoded default would
-/// prove nothing about the field being read.
 const _maskedMaterial = MaterialDefinition(
   key: 'masked',
   albedoTexture: _maskTexture,
@@ -167,26 +148,17 @@ final class _AlwaysAvailableResources implements RenderPassResources {
   bool isAvailable(String resourceName) => true;
 }
 
-/// One device per pass run, so a sequence read back afterwards belongs to
-/// exactly one pass and cannot accidentally concatenate two.
 final class _Run {
   final FakeGpuDevice device;
   const _Run(this.device);
 
   List<double> float1s(String name) => device.float1Sequence(name);
 
-  /// Which texture object each draw put in unit 0, in draw order. Read out
-  /// of `drawLog` rather than a typed record because `FakeGpuDevice` logs
-  /// binds as text; the ids themselves are opaque, so assertions below only
-  /// ever compare entries to each other.
   List<String> unitZeroBinds() => [
     for (final line in device.drawLog)
       if (line.startsWith('bindTexture(0, ')) line,
   ];
 
-  /// Whether each `applyDrawState` call enabled culling, in call order. The
-  /// pass-wide state applied once before the draw loop is dropped, so what
-  /// remains is one entry per draw — the per-material decision.
   List<bool> perDrawCullEnable() {
     final all = [
       for (final line in device.drawLog)
@@ -385,10 +357,6 @@ void _expect(bool condition, String what) {
   if (!condition) throw StateError(what);
 }
 
-/// The load-bearing assertion of this fixture: one scene, three passes, one
-/// cutoff sequence. Ordering matters as much as the values — a pass that
-/// resolved materials in a different order would light the right fragments
-/// and cut the wrong ones.
 void _everyPassAgreesOnTheCutoffOfEveryDraw() {
   const expected = [0.25, 0.0, 0.75];
   final scene = [
@@ -415,9 +383,6 @@ void _everyPassAgreesOnTheCutoffOfEveryDraw() {
   );
 }
 
-/// Zero is the shaders' "no cutout" sentinel, so an opaque material must
-/// produce exactly it — not a small threshold that happens to keep every
-/// texel of an opaque texture.
 void _onlyMaskedMaterialsCutOut() {
   final scene = [_item(_plainHandle), _item(_plainHandle)];
   for (final (name, sequence) in [
@@ -435,10 +400,6 @@ void _onlyMaskedMaterialsCutOut() {
   }
 }
 
-/// The prepass's uv must match the world pass's, not merely exist. Affine
-/// sampling moves where a texel lands on screen, so a prepass cutting
-/// perspective-correct holes while the world pass shades affine ones is the
-/// latent hazard the affine packet recorded — this is what closes it.
 void _prepassAffineWeightMatchesTheWorldPass() {
   final scene = [
     _item(_maskedHandle, drawMode: DrawMode.masked),
@@ -464,10 +425,6 @@ void _prepassAffineWeightMatchesTheWorldPass() {
   );
 }
 
-/// Alpha masking is the reason albedo stopped being a pass-wide binding:
-/// two materials in one frame must be able to sample different textures,
-/// or a masked surface would test the alpha of whatever the previous draw
-/// happened to leave bound.
 void _albedoIsResolvedPerMaterialNotOncePerPass() {
   final scene = [
     _item(_maskedHandle, drawMode: DrawMode.masked),

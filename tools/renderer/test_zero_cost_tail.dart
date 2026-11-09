@@ -2,16 +2,6 @@ part of 'test_zero_cost.dart';
 
 // ---- Grade / PS1 quantize / VHS: the documented non-skippers ----
 
-/// None of these three passes have ever claimed a per-frame skip (no board
-/// entry lists one), and this fixture is what makes that claim checkable
-/// rather than assumed: each draws exactly once regardless of its own
-/// weight, at both a zero and a representative nonzero value. Their
-/// zero-cost story is RP-3's build-time exclusion — never constructed at
-/// all under a profile that excludes them — not a branch inside `execute()`
-/// the way SSAO/bloom/DOF's blur stages have. A per-frame skip here would
-/// need a fallback-copy path (the same shape DOF's own composite already
-/// can't avoid), which is exactly why build-time exclusion, not a runtime
-/// branch, is the mechanism RP-3 builds instead.
 void _gradePs1VhsAlwaysDrawRegardlessOfWeight() {
   final device = FakeGpuDevice();
   final library = ProgramLibrary(device);

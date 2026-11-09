@@ -3,40 +3,21 @@ import 'lights.dart';
 
 enum AlphaMode { opaque, masked, blended }
 
-/// Colour-space contract for authored material maps. Albedo is sampled as
-/// display-referred colour; shading data must remain linear.
 enum MaterialMapColorSpace { srgb, linear }
 
-/// Authored material definition, keyed by a stable string rather than a
-/// hash (§8.2). The legacy `lib/engine/materials.dart` assigns runtime
-/// identity from a djb2-style hash of field values with no collision
-/// handling; a [ResourceLibrary] assigns the collision-safe
-/// [MaterialHandle] instead, so this type carries no derived identity of
-/// its own.
 final class MaterialDefinition {
   final String key;
   final TextureHandle? albedoTexture;
   final MaterialMapColorSpace albedoColorSpace;
   final double tintR, tintG, tintB;
-  /// Optional emissive map, multiplied with tint and [emissiveStrength].
   final TextureHandle? emissiveTexture;
 
-  /// Glow added on top of lighting: `emissiveMap × tint × emissiveStrength`.
-  /// Without an [emissiveTexture] the map is neutral white, so the strength
-  /// and tint alone make a surface glow. 0 (the default) emits nothing.
   final double emissiveStrength;
 
-  /// Tangent-space normal map. The current compatibility vertex layout does
-  /// not carry authored tangents, so the shader derives a stable TBN from
-  /// world-position/UV derivatives; surface-v2 can replace that with a
-  /// supplied tangent without changing this material contract.
   final TextureHandle? normalTexture;
   final MaterialMapColorSpace normalColorSpace;
   final double normalStrength;
 
-  /// Linear ORM map: R=occlusion, G=roughness, B=metalness. Scalar values
-  /// remain useful as deterministic fallbacks when the optional map is
-  /// absent or still loading.
   final TextureHandle? ormTexture;
   final MaterialMapColorSpace ormColorSpace;
   final double roughness;
@@ -45,21 +26,12 @@ final class MaterialDefinition {
   final double clearcoatStrength;
   final double clearcoatRoughness;
 
-  /// Optional neutral-indirect/lightmap texture sampled with UV1. Intensity
-  /// is zero by default so a missing map cannot brighten compatibility meshes.
   final TextureHandle? lightmapTexture;
   final double lightmapIntensity;
   final double uvScaleU, uvScaleV;
   final double uvOffsetU, uvOffsetV;
   final AlphaMode alphaMode;
 
-  /// Sampled albedo alpha below this value is discarded when [alphaMode] is
-  /// [AlphaMode.masked]; ignored entirely for the other two modes. Must stay
-  /// strictly positive: the three geometry passes encode "this draw has no
-  /// cutout" as a zero `uAlphaCutoff`, and the shaders branch on that
-  /// sentinel to skip the compare (and, in the prepass and shadow caster,
-  /// the albedo fetch itself), so a legitimately-zero cutoff would be
-  /// indistinguishable from an unmasked draw.
   final double alphaCutoff;
   final bool doubleSided;
   final bool receivesShadow;
@@ -99,7 +71,6 @@ final class MaterialDefinition {
     this.quantized = false,
   });
 
-  /// Creates a standard metallic material.
   factory MaterialDefinition.metal({
     String key = 'metal',
     required LinearColor color,
@@ -115,7 +86,6 @@ final class MaterialDefinition {
     clearcoatStrength: clearcoat,
   );
 
-  /// Creates a standard dielectric (non-metallic) material.
   factory MaterialDefinition.dielectric({
     String key = 'dielectric',
     required LinearColor color,
@@ -131,7 +101,6 @@ final class MaterialDefinition {
     clearcoatStrength: clearcoat,
   );
 
-  /// Physically calibrated gold preset (F0 = [1.0, 0.78, 0.35], metallic = 1.0).
   factory MaterialDefinition.gold({
     String key = 'gold',
     double roughness = 0.15,
@@ -144,7 +113,6 @@ final class MaterialDefinition {
     roughness: roughness,
   );
 
-  /// Physically calibrated silver preset (F0 = [0.97, 0.96, 0.91], metallic = 1.0).
   factory MaterialDefinition.silver({
     String key = 'silver',
     double roughness = 0.12,
@@ -157,7 +125,6 @@ final class MaterialDefinition {
     roughness: roughness,
   );
 
-  /// Physically calibrated copper preset (F0 = [0.95, 0.64, 0.54], metallic = 1.0).
   factory MaterialDefinition.copper({
     String key = 'copper',
     double roughness = 0.20,
@@ -170,7 +137,6 @@ final class MaterialDefinition {
     roughness: roughness,
   );
 
-  /// High-reflectivity chrome / mirror preset.
   factory MaterialDefinition.chrome({
     String key = 'chrome',
     double roughness = 0.05,
@@ -183,7 +149,6 @@ final class MaterialDefinition {
     roughness: roughness,
   );
 
-  /// Rough cast iron preset.
   factory MaterialDefinition.iron({
     String key = 'iron',
     double roughness = 0.40,
@@ -196,7 +161,6 @@ final class MaterialDefinition {
     roughness: roughness,
   );
 
-  /// Smooth glossy plastic preset.
   factory MaterialDefinition.plastic({
     String key = 'plastic',
     required LinearColor color,
@@ -211,7 +175,6 @@ final class MaterialDefinition {
     clearcoatStrength: 0.3,
   );
 
-  /// Glazed ceramic / porcelain preset with strong dielectric clearcoat.
   factory MaterialDefinition.ceramic({
     String key = 'ceramic',
     required LinearColor color,
@@ -228,7 +191,6 @@ final class MaterialDefinition {
     clearcoatRoughness: 0.08,
   );
 
-  /// Rough matte diffuse surface.
   factory MaterialDefinition.matte({
     String key = 'matte',
     required LinearColor color,
@@ -242,7 +204,6 @@ final class MaterialDefinition {
     roughness: roughness,
   );
 
-  /// Glowing emissive material.
   factory MaterialDefinition.emissive({
     String key = 'emissive',
     required LinearColor color,

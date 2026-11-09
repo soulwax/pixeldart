@@ -50,8 +50,6 @@ final class MaterialResidencyReport {
       results.where((result) => result.status == status).length;
 }
 
-/// Aggregates the existing texture residency planner into material-level
-/// diagnostics. It never owns or creates a texture/material resource.
 final class MaterialResidencyManager {
   final TextureResidencyManager textures;
 

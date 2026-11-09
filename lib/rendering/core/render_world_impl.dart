@@ -15,10 +15,6 @@ final class _ItemView implements RetainedItemView {
   const _ItemView(this.id, this.descriptor, this.worldBounds);
 }
 
-/// Concrete `RenderWorld` (§5.5). Owns persistent instances through the same
-/// slot+generation discipline RV-02's `ResourceRegistry` proved for GPU
-/// resources — an `InstanceId` from a removed item is rejected forever, even
-/// if its slot is reused by a later `addItem`.
 final class RenderWorldImpl implements RenderWorld {
   final ResourceRegistry<MeshHandle, MeshData> _meshRegistry;
   final ResourceRegistry<InstanceId, RetainedItemDescriptor> _instances =

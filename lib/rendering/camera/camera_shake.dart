@@ -5,30 +5,20 @@ import '../math/mat4.dart';
 import '../math/quat.dart';
 import '../math/vec.dart';
 
-/// Trauma-based procedural camera shake engine for cinematic impacts, vibrations, and rumbles.
-///
-/// Implements nonlinear trauma decay where perceived shake intensity = trauma^2,
-/// producing energetic initial impacts followed by natural, smooth settling.
 final class CameraShakeEngine {
   double _trauma = 0.0;
   double _time = 0.0;
 
-  /// Rate at which trauma decays per second.
   double decayRate;
 
-  /// Oscillation frequency in Hertz.
   double frequency;
 
-  /// Maximum rotational shake angles in radians.
   double maxPitchRadians;
   double maxYawRadians;
   double maxRollRadians;
 
-  /// Maximum translational kick in metres.
   double maxTranslation;
 
-  /// Multiplier on the rotational shake. 0 gives a translation-only shake,
-  /// which suits orthographic and 2D cameras.
   double rotationScale;
 
   CameraShakeEngine({
@@ -41,29 +31,23 @@ final class CameraShakeEngine {
     this.rotationScale = 1.0,
   });
 
-  /// Current trauma level in [0, 1].
   double get trauma => _trauma;
 
-  /// Effective shake power applied to offsets, following a quadratic power curve.
   double get shakePower => _trauma * _trauma;
 
-  /// Adds trauma to the engine, clamped to maximum 1.0.
   void addTrauma(double amount) {
     if (amount <= 0.0) return;
     _trauma = (_trauma + amount).clamp(0.0, 1.0);
   }
 
-  /// Sets absolute trauma level in [0, 1].
   void setTrauma(double value) {
     _trauma = value.clamp(0.0, 1.0);
   }
 
-  /// Clears all active trauma immediately.
   void reset() {
     _trauma = 0.0;
   }
 
-  /// Advances the simulation time and decays trauma.
   void update(double dt) {
     if (dt <= 0.0) return;
     _time += dt;
@@ -72,7 +56,6 @@ final class CameraShakeEngine {
     }
   }
 
-  /// Evaluates the current translational and rotational shake offsets.
   ({Vec3 translation, Quat rotation}) evaluate() {
     final p = shakePower;
     if (p <= 1e-6) {
@@ -105,12 +88,6 @@ final class CameraShakeEngine {
     return (translation: trans, rotation: rot);
   }
 
-  /// Perturbs [baseCamera] with the current shake state.
-  ///
-  /// The offsets are applied in the camera's own view space, on top of its
-  /// existing view matrix. Nothing is rebuilt through a look-at with a fixed
-  /// world up, so straight-down cameras and orthographic projections shake
-  /// correctly and the projection is left untouched.
   CameraView applyTo(CameraView baseCamera) {
     if (_trauma <= 1e-6) return baseCamera;
     final (:translation, :rotation) = evaluate();

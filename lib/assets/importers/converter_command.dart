@@ -1,6 +1,5 @@
 import 'fbx_import_config.dart';
 
-/// Pure description of a pinned converter invocation.
 final class ConverterCommandSpec {
   final String converterId;
   final String executable;
@@ -12,7 +11,6 @@ final class ConverterCommandSpec {
     required this.versionArguments,
   });
 
-  /// Test-only construction for process failure fixtures.
   const ConverterCommandSpec.testOnly({
     required String converterId,
     required String executable,

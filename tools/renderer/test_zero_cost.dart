@@ -24,21 +24,6 @@ import 'fake_gpu_device.dart';
 
 part 'test_zero_cost_tail.dart';
 
-/// RP-1: pins the draw-count half of §8.5/§8.7/§8.8's zero-cost-off gate,
-/// which every zero-cost-off board entry has verified by browser evidence
-/// and code review but never by an instrumented draw counter — named
-/// explicitly as missing three times over (the zero-cost-off packet, the
-/// affine-UV packet, and RP-0's own card).
-///
-/// Also pins the deliberate *complement*: grade, PS1 quantize, and VHS draw
-/// unconditionally regardless of their own weight. That is not an oversight
-/// this packet should paper over — a per-frame skip is structurally hard for
-/// exactly the reason DOF's own composite can't skip either: each is a chain
-/// link whose skipped output would leave the next read stale without a
-/// fallback-copy path this renderer does not have. Their zero-cost story is
-/// RP-3's build-time exclusion (never constructed under an excluding
-/// profile), not a per-frame branch, and this fixture documents that instead
-/// of silently proving only the passes that already do skip.
 void main() {
   _ssaoBothPassesSkipAtZeroStrength();
   _ssaoBothPassesDrawAtFullStrength();
@@ -87,11 +72,6 @@ final class _AlwaysAvailableResources implements RenderPassResources {
   bool isAvailable(String resourceName) => true;
 }
 
-/// Executes [pass] once against a fresh view map covering every name in
-/// [resourceNames] (all bound to the same throwaway target — passes read
-/// distinct *names*, not distinct physical objects, so one target reused
-/// under several names is a legitimate fixture shortcut) and returns how
-/// many real draw calls it issued.
 int _drawCountFor({
   required FakeGpuDevice device,
   required RenderPass pass,
@@ -306,10 +286,6 @@ void _bloomBlurBothAxesDrawAtFullStrength() {
   );
 }
 
-/// Bloom's composite is the strictest of the three skips: at zero strength
-/// it must not even call `bindTarget` (§8.7: it blends in place onto the
-/// exact object `shadowedWorld` already wrote, so touching the target at
-/// all is unearned work with an identical result to not touching it).
 void _bloomCompositeSkipsEntirelyAtZeroStrength() {
   final device = FakeGpuDevice();
   final (_, _, composite) = _buildBloomPasses(device);
@@ -439,12 +415,6 @@ void _dofBlurBothAxesDrawAtFullStrength() {
   );
 }
 
-/// The complement for DOF's *composite*: unlike bloom's composite, it
-/// writes a genuinely distinct target (`dofOutput`) that `present`'s
-/// downstream chain depends on, so it cannot be skipped without a fallback
-/// copy path this renderer does not have — it draws every frame regardless
-/// of `depthOfFieldStrength`, relying on its own `mix(sharp, blurred, coc)`
-/// forcing `coc` to 0 to make the *result* a no-op instead.
 void _dofCompositeAlwaysDrawsRegardlessOfStrength() {
   final device = FakeGpuDevice();
   final (_, _, composite) = _buildDofPasses(device);

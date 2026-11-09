@@ -7,8 +7,6 @@ import '../importers/obj_importer.dart';
 import 'model_package_manifest.dart';
 import 'obj_model_package_emitter.dart';
 
-/// Converts bounded glTF/GLB accessors into the same QMSH package path as OBJ.
-/// It is an offline adapter; runtime code receives only the package contract.
 final class GltfModelPackageEmitter {
   static ({ModelPackageManifest manifest, Map<String, Uint8List> payloads}) emit({
     required String assetId,

@@ -16,10 +16,6 @@ const int _hamletCount = 9;
 // Grass that trampling may wear down.
 const int _grass = town + 0, _grassTuft = town + 1, _grassFlower = town + 2;
 
-/// The landscape: ground tiles, what blocks movement, and where things are.
-///
-/// Trees are kept out of the tile layers because walkers pass in front of
-/// and behind them; the world batch y-sorts them with everyone else.
 final class WorldMap {
   final Art art;
   final math.Random rng;
@@ -27,20 +23,14 @@ final class WorldMap {
   late final TileLayer ground;
   late final TileLayer deco;
 
-  /// 1 where nothing on foot may stand.
   final Uint8List solid = Uint8List(mapCells);
 
-  /// 1 inside the keep, which monsters may not enter.
   final Uint8List keep = Uint8List(mapCells);
 
-  /// [solid] or [keep]: everywhere walking monsters are stopped.
   final Uint8List monsterBlock = Uint8List(mapCells);
 
-  /// Tall-tree index + 1, then bush index + 1 after the tall-tree range.
-  /// Zero means no blocking vegetation.
   final Uint8List trees = Uint8List(mapCells);
 
-  /// Cell indices safe to scatter villagers and spawn monsters on.
   final List<int> hamlets = [];
   final List<(double, double)> torches = [];
 
@@ -190,7 +180,6 @@ final class WorldMap {
     }
   }
 
-  /// A worn dirt track home, cut through whatever is in the way.
   void _layTrack(Int32List tiles, int fromColumn, int fromRow) {
     final dx = keepColumn - fromColumn, dy = keepRow - fromRow;
     final steps = math.max(dx.abs(), dy.abs());
@@ -246,8 +235,6 @@ final class WorldMap {
     }
   }
 
-  /// Turns walkable pockets cut off from the keep into woods, so nothing
-  /// can spawn where the procession can't reach it.
   void _closeUnreachable(Int32List tiles) {
     final seen = Uint8List(mapCells);
     final queue = Int32List(mapCells);
@@ -275,9 +262,6 @@ final class WorldMap {
     }
   }
 
-  /// Tall sprites occupy two tile rows. In thick woods, every second row of
-  /// trunks becomes low vegetation so the crowns behind it remain visible.
-  /// Solid cells stay solid; only their artwork changes.
   void _underplantDenseGroves() {
     for (var row = 0; row < mapRows; row += 1) {
       for (var column = 0; column < mapColumns; column += 1) {
@@ -288,7 +272,6 @@ final class WorldMap {
     }
   }
 
-  /// Wears grass to dirt under a foot. Only the touched chunk is rebuilt.
   void trample(double x, double y) {
     final column = columnAt(x), row = rowAt(y);
     final id = ground.tileAt(column, row);
@@ -297,7 +280,6 @@ final class WorldMap {
     }
   }
 
-  /// Burns the ground in a disc, for the flare's scar.
   void scorch(double x, double y, double radius) {
     final cx = columnAt(x), cy = rowAt(y);
     final cells = (radius / tileSize).ceil();
@@ -328,11 +310,6 @@ const List<double> _dirX = [1, -1, 0, 0, 0.7071, 0.7071, -0.7071, -0.7071, 0];
 const List<double> _dirY = [0, 0, 1, -1, 0.7071, -0.7071, 0.7071, -0.7071, 0];
 const List<int> _reverse = [1, 0, 3, 2, 7, 6, 5, 4];
 
-/// Multi-source breadth-first field: every open cell points one step toward
-/// its nearest seed, and remembers which seed that was.
-///
-/// Seeding it with every villager is what makes a swarm of thousands split
-/// up and go for whoever is closest, at a fixed cost per solve.
 final class FlowField {
   final Uint8List dir = Uint8List(mapCells);
   final Uint16List dist = Uint16List(mapCells);
@@ -354,7 +331,6 @@ final class FlowField {
     _dirty = true;
   }
 
-  /// Adds a source; ignored on a [blocked] cell.
   void seed(int cell, int id, Uint8List blocked) {
     if (blocked[cell] == 1 || seedOf[cell] != -1) return;
     seedOf[cell] = id;
@@ -392,7 +368,6 @@ final class FlowField {
   static double unitY(int direction) => _dirY[direction];
 }
 
-/// Smooth value noise on a [cells]-square lattice, sampled in 0..1.
 final class _Noise {
   final int cells;
   final Float32List _values;

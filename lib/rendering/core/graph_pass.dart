@@ -1,8 +1,5 @@
 import 'graph_resource.dart';
 
-/// One declared pass node. A feature's `declare()` call (§5.6) submits one
-/// or more of these to a `RenderGraphBuilder`; validation runs over the
-/// full declared set before any pass executes.
 final class PassDeclaration {
   final String id;
   final GraphStage stage;

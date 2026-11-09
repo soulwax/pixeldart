@@ -6,11 +6,6 @@ import 'qmesh.dart';
 
 const int currentModelDecodeVersion = 1;
 
-/// Deterministic content hash over raw source bytes, used as a cache key so
-/// re-decoding identical QMSH bytes is skippable and re-uploading identical
-/// content is detectable across a context restore (§5.4: "content-hash
-/// cache"). Not cryptographic — collision resistance sufficient for a
-/// same-session cache is the only requirement, not tamper resistance.
 String contentHashOf(Uint8List bytes) {
   var h1 = 0xcbf29ce4, h2 = 0x84222325;
   for (final b in bytes) {
@@ -35,10 +30,6 @@ final class CachedMesh {
   String get cacheKey => '$decodeVersion:$contentHash';
 }
 
-/// Decodes and deduplicates QMSH bytes exactly once per distinct content
-/// hash; a repeated decode of identical bytes returns the cached result
-/// instead of re-running the decoder, which matters for context-restore
-/// rehydration (§7.4) where the same CPU descriptor is rebuilt every time.
 final class ModelCache {
   final int decodeVersion;
   final Map<String, CachedMesh> _byKey = {};
@@ -72,9 +63,6 @@ final class ModelCache {
     return cached;
   }
 
-  /// Retains one additional logical owner of an already decoded entry.
-  /// Identity checking prevents an entry from one cache/version epoch from
-  /// accidentally extending the lifetime of a different cache record.
   CachedMesh acquire(CachedMesh cached) {
     final current = _byKey[cached.cacheKey];
     if (!identical(current, cached)) {
@@ -92,9 +80,6 @@ final class ModelCache {
     return _references[cached.cacheKey]!;
   }
 
-  /// Releases one logical owner. The decoded mesh remains cached until the
-  /// final duplicate owner releases it, preventing re-decode churn when two
-  /// model instances share one source asset.
   void release(CachedMesh cached) {
     final current = _byKey[cached.cacheKey];
     if (!identical(current, cached)) {

@@ -3,7 +3,6 @@ import 'dart:math' as math;
 import '../math/mat4.dart';
 import '../math/vec.dart';
 
-/// 2D Screen-space motion velocity vector in normalized device coordinates (NDC).
 final class ScreenVelocity {
   final double vx;
   final double vy;
@@ -13,9 +12,7 @@ final class ScreenVelocity {
   double get length => math.sqrt(vx * vx + vy * vy);
 }
 
-/// Screen-space camera motion velocity reconstruction and directional path accumulation.
 final class CameraMotionEngine {
-  /// Reconstructs 2D screen-space velocity vector from world position and projection matrices.
   static ScreenVelocity reconstructScreenVelocity({
     required Vec3 worldPosition,
     required Mat4 currentViewProj,
@@ -33,7 +30,6 @@ final class CameraMotionEngine {
     return ScreenVelocity(curNdcX - prevNdcX, curNdcY - prevNdcY);
   }
 
-  /// Evaluates directional path blur accumulation with depth-aware occlusion weighting.
   static Vec3 accumulateDirectionalMotionBlur({
     required Vec3 currentPixelColor,
     required double currentDepth,

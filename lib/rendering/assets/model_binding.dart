@@ -3,8 +3,6 @@ import 'material_store.dart';
 import 'mesh_store.dart';
 import 'model_definition.dart';
 
-/// A validated model part with its existing retained mesh/material resources
-/// resolved. This is a binding view, not a second ownership container.
 final class BoundModelPart {
   final ModelPart definition;
   final UploadedMesh mesh;
@@ -30,9 +28,6 @@ final class BoundModelPart {
   }
 }
 
-/// A model definition bound against the existing retained mesh/material
-/// stores. Rebinding after context restore creates a fresh view while all
-/// logical handles and model identity remain unchanged.
 final class ModelBinding {
   final ModelDefinition definition;
   final List<BoundModelPart> parts;
@@ -49,9 +44,6 @@ final class ModelBinding {
 }
 
 extension ModelDefinitionBinding on ModelDefinition {
-  /// Resolves every referenced handle through the existing stores. A stale or
-  /// released resource fails the bind before any draw can observe a proxy or
-  /// partially bound model.
   ModelBinding bind({
     required MeshStore meshes,
     required MaterialStore materials,

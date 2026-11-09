@@ -19,7 +19,6 @@ double _det3(Mat4 m) {
       a(2, 0) * (a(0, 1) * a(1, 2) - a(1, 1) * a(0, 2));
 }
 
-/// Projects [p] to normalized device coordinates (x, y).
 (double, double) _ndc(Mat4 viewProjection, Vec3 p) {
   final m = viewProjection;
   final x = p.x * m.at(0, 0) + p.y * m.at(1, 0) + p.z * m.at(2, 0) + m.at(3, 0);
@@ -28,7 +27,6 @@ double _det3(Mat4 m) {
   return (x / w, y / w);
 }
 
-/// Signed area of a projected triangle; positive means counter-clockwise.
 double _screenArea(Mat4 viewProjection, Vec3 a, Vec3 b, Vec3 c) {
   final (ax, ay) = _ndc(viewProjection, a);
   final (bx, by) = _ndc(viewProjection, b);
@@ -46,7 +44,6 @@ CameraView _camera(Vec3 eye, Vec3 forward, {Vec3 up = const Vec3(0, 1, 0)}) => C
   up: up,
 );
 
-/// A triangle centred on [center] whose CCW winding faces [toward].
 (Vec3, Vec3, Vec3) _facing(Vec3 center, Vec3 toward) {
   final n = toward.normalized;
   final helper = n.y.abs() > 0.9 ? const Vec3(1, 0, 0) : const Vec3(0, 1, 0);

@@ -29,13 +29,6 @@ import 'msaa_resolve.dart';
 export 'world.dart'
     show AlbedoResolver, MaterialResolver, MaterialTextureResolver;
 
-/// The main graph: `depthPrepass -> ssaoOcclusion -> ssaoBlur -> shadowCaster
-/// -> shadowedWorld -> present`, folding §8.4's shadow map (rung 3) and
-/// §8.5's SSAO (rung 5, depending on rung 4's depth prepass) into one
-/// assembly rather than two, since — unlike `buildDepthDebugGraph`, which
-/// exists purely to prove the prepass in isolation — SSAO's whole purpose
-/// is feeding `shadowedWorld`'s ambient term, so it has no standalone
-/// existence separate from the graph that actually shades geometry.
 FeatureGraph buildShadowGraph(
   ProgramLibrary programLibrary, {
   required GpuDevice device,
@@ -366,9 +359,6 @@ FeatureGraph buildShadowGraph(
   ]);
 }
 
-/// Describes the graph-owned targets for a profile before a GPU target is
-/// allocated. Excluded groups are absent, so an assembler can prove that
-/// profile changes do not leave orphan targets behind.
 final class PipelineResourcePlan {
   final Set<ResourceRef> resources;
   final bool hasHistory;

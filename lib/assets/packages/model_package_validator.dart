@@ -3,9 +3,6 @@ import 'dart:typed_data';
 import '../importers/asset_import_diagnostic.dart';
 import 'model_package_manifest.dart';
 
-/// Validates the source-neutral RF-04 manifest before any runtime resource
-/// allocation. It is deliberately separate from the legacy generated-package
-/// validator below.
 List<AssetImportDiagnostic> validateModelPackageManifest(
   ModelPackageManifest manifest,
 ) {
@@ -40,9 +37,6 @@ List<AssetImportDiagnostic> validateModelPackageManifest(
   return diagnostics;
 }
 
-/// Validates the bytes supplied alongside a source-neutral manifest. The
-/// manifest is authoritative: extra files are rejected instead of silently
-/// ignored, and every declared LOD payload must be present before decoding.
 List<AssetImportDiagnostic> validateModelPackagePayloads(
   ModelPackageManifest manifest,
   Map<String, Uint8List> payloads,
@@ -84,9 +78,6 @@ List<AssetImportDiagnostic> validateModelPackagePayloads(
   return diagnostics;
 }
 
-/// Validates the current generated-package manifest before it is copied into
-/// runtime assets. The manifest is still the legacy source packet shape; RF-04
-/// will replace it with `pixeldart-model-package-v1` records.
 List<AssetImportDiagnostic> validateGeneratedPackageManifest(
   Map<String, dynamic> manifest,
 ) {

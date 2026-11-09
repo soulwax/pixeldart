@@ -15,57 +15,39 @@ import '../math/vec.dart';
 import 'particle_shapes.dart';
 import 'particle_spritesheet.dart';
 
-/// Alignment modes for particle rendering.
 enum ParticleAlignment {
-  /// Particle quad faces camera eye (spherical billboard).
   billboard,
 
-  /// Particle rotates so its local -Y axis aligns with instantaneous velocity.
   velocityAligned,
 
-  /// Particle aligns with velocity and dynamically elongates length based on speed.
   velocityStretched,
 
-  /// Free 3D tumbling rotation determined by initial angle and angular velocity.
   axial,
 }
 
-/// Actions performed when a particle strikes a collision plane.
 enum ParticleCollisionAction {
-  /// Reflects velocity across plane normal with restitution (bounciness).
   bounce,
 
-  /// Particle dies immediately on impact.
   kill,
 
-  /// Velocity along plane normal is cancelled; particle continues sliding along surface.
   slide,
 }
 
-/// Authored burst event triggering a packet of particles at a timestamp.
 final class ParticleBurst {
-  /// Time relative to emitter duration when burst occurs, in seconds.
   final double time;
 
-  /// Minimum particle count emitted in this burst.
   final int minCount;
 
-  /// Maximum particle count emitted in this burst.
   final int maxCount;
 
-  /// Number of times this burst repeats (1 = one-shot, <= 0 = infinite).
   final int cycles;
 
-  /// Interval between repeated cycles, in seconds.
   final double repeatInterval;
 
-  /// Optional named sprite to emit for this burst.
   final String? spriteName;
 
-  /// Optional sprite frame index to emit for this burst.
   final int? spriteIndex;
 
-  /// Optional named animation sequence to play on burst particles.
   final String? animationName;
 
   const ParticleBurst({
@@ -100,7 +82,6 @@ final class ParticleBurst {
   }
 }
 
-/// One keyed color entry in a multi-stop color ramp.
 final class ParticleColorStop {
   final double t;
   final LinearColor color;
@@ -117,7 +98,6 @@ final class ParticleColorStop {
   }
 }
 
-/// Multi-stop linear color gradient over particle normalized lifetime [0, 1].
 final class ParticleColorGradient {
   final List<ParticleColorStop> stops;
 
@@ -160,20 +140,14 @@ final class ParticleColorGradient {
   }
 }
 
-/// Distance falloff curve for [ParticleAttractor] force calculation.
 enum AttractorFalloff {
-  /// Linear falloff from center to range: (1 - dist / range).
   linear,
 
-  /// Inverse-square falloff: 1 / (1 + 4 * (dist / range)^2).
   inverseSquare,
 
-  /// Constant force regardless of distance within range.
   constant,
 }
 
-/// Spatial point attractor applying distance-scaled inward or outward pull,
-/// with optional tangential vortex swirl around an axis.
 final class ParticleAttractor {
   final Vec3 position;
   final double strength;
@@ -215,7 +189,6 @@ final class ParticleAttractor {
   }
 }
 
-/// Planar collision barrier with restitution, surface friction, and contact actions.
 final class ParticleCollisionPlane {
   final Vec3 point;
   final Vec3 normal;
@@ -244,52 +217,35 @@ final class ParticleCollisionPlane {
   }
 }
 
-/// Lifecycle events that trigger emission on a [SubEmitter].
 enum SubEmitterTrigger {
-  /// Fires when a parent particle is born (e.g. muzzle flashbang, sparks on ignition).
   birth,
 
-  /// Fires when a parent particle expires or is killed (e.g. firework burst, popping bubbles, smoke puff).
   death,
 
-  /// Fires when a parent particle strikes a collision plane (e.g. water droplet splash, bouncing spark shards).
   collision,
 
-  /// Emits trailing particles continuously behind living parent particles (e.g. rocket smoke trail, ribbon dust).
   trail,
 }
 
-/// Cascading sub-emitter triggered by parent particle lifecycle and physics events.
 final class SubEmitter {
-  /// Child emitter that will be triggered.
   final ParticleEmitter emitter;
 
-  /// Lifecycle event that triggers emission.
   final SubEmitterTrigger trigger;
 
-  /// Particle count triggered per event.
   final int count;
 
-  /// Whether spawned sub-particles inherit parent particle velocity.
   final bool inheritVelocity;
 
-  /// Multiplier for inherited parent velocity.
   final double inheritVelocityFactor;
 
-  /// Interval between trail particle emissions in seconds (for [SubEmitterTrigger.trail]).
   final double trailInterval;
 
-  /// Distance threshold between trail emissions in world units (for [SubEmitterTrigger.trail]).
-  /// When > 0, particles are emitted continuously along the travel path, preventing gaps at high speeds.
   final double trailDistance;
 
-  /// Optional named sprite to emit when this sub-emitter is triggered.
   final String? spriteName;
 
-  /// Optional sprite frame index to emit when this sub-emitter is triggered.
   final int? spriteIndex;
 
-  /// Optional named animation sequence to play on spawned sub-particles.
   final String? animationName;
 
   const SubEmitter({
@@ -325,7 +281,6 @@ final class SubEmitter {
   }
 }
 
-/// Comprehensive performance and culling diagnostic telemetry.
 final class ParticleEmitterDiagnostics {
   final int activeCount;
   final int maxCapacity;
@@ -364,7 +319,6 @@ final class ParticleEmitterDiagnostics {
   }
 }
 
-/// Internal preallocated mutable record for zero-allocation simulation.
 final class _ParticleState {
   double x = 0.0;
   double y = 0.0;
@@ -424,11 +378,6 @@ final class _ParticleState {
   }
 }
 
-/// Universal, high-performance, high-fidelity particle emitter.
-///
-/// Features a preallocated particle pool for zero runtime garbage collection,
-/// instanced WebGL2 batching via [instanceFamilyKey], universal spawning shapes,
-/// comprehensive physics forces, and flexible lifetime modulators.
 final class ParticleEmitter {
   static int _nextFamilyKey = 5000;
 
@@ -476,15 +425,9 @@ final class ParticleEmitter {
 
   // Appearance & Rotation
 
-  /// Fraction of a particle's life spent fading in and out. Particles carry
-  /// no per-instance alpha (instances stream transforms only), so fades are
-  /// rendered by scaling the sprite to nothing; for soft, glowing sprites a
-  /// shrinking disc reads as a fade. See [fadeEnvelope].
   double fadeInFraction;
   double fadeOutFraction;
 
-  /// Optional visibility curve over normalised age, multiplied into the fade
-  /// envelope (and so also applied as a size scale).
   Curve? alphaCurve;
   ParticleColorGradient? colorGradient;
   double minInitialRotation;
@@ -506,7 +449,6 @@ final class ParticleEmitter {
   final List<ParticleAttractor> attractors;
   ParticleCollisionPlane? collisionPlane;
 
-  /// Accesses or modifies the primary attractor (for single-attractor ergonomics).
   ParticleAttractor? get attractor => attractors.isNotEmpty ? attractors.first : null;
   set attractor(ParticleAttractor? value) {
     attractors.clear();
@@ -604,9 +546,6 @@ final class ParticleEmitter {
     validate();
   }
 
-  /// Visibility at normalised age [t]: ramps up over [fadeInFraction], down
-  /// over [fadeOutFraction], times [alphaCurve] when set. 1 when no fade is
-  /// configured.
   double fadeEnvelope(double t) {
     final age = t.clamp(0.0, 1.0);
     var v = 1.0;
@@ -617,19 +556,14 @@ final class ParticleEmitter {
     return v;
   }
 
-  /// Number of currently active, living particles.
   int get activeCount => _activeCount;
 
-  /// Maximum particle pool capacity.
   int get capacity => maxParticles;
 
-  /// Total count of particles spawned over emitter lifetime.
   int get totalSpawned => _totalSpawned;
 
-  /// Total count of particles expired or killed.
   int get totalDied => _totalDied;
 
-  /// Current elapsed simulation time in seconds.
   double get elapsedTime => _elapsedTime;
 
   void validate() {
@@ -714,9 +648,6 @@ final class ParticleEmitter {
     }
   }
 
-  /// Triggers an immediate burst of [count] particles (clamped to remaining pool capacity).
-  ///
-  /// Optionally overrides spawn position, applies inherited velocity, and targets a specific sprite or animation.
   int burst(
     int count, {
     Vec3? position,
@@ -741,12 +672,6 @@ final class ParticleEmitter {
     return spawned;
   }
 
-  /// Continuous emission from a moving or secondary source.
-  ///
-  /// Spawns [perSecond] × [dt] particles at [position], carrying the
-  /// fractional remainder between frames per [source] key, so one emitter
-  /// can stream from many places at once (every lit torch, every thruster)
-  /// at an exact rate regardless of frame time. Returns the number spawned.
   int emitAt(Vec3 position, double perSecond, double dt, {Object? source, Vec3? inheritedVelocity}) {
     if (perSecond <= 0 || dt <= 0) return 0;
     final key = source ?? this;
@@ -756,7 +681,6 @@ final class ParticleEmitter {
     return count > 0 ? burst(count, position: position, inheritedVelocity: inheritedVelocity) : 0;
   }
 
-  /// Forgets the fractional carry of [source] (or of every source).
   void resetStream([Object? source]) =>
       source == null ? _streamCarry.clear() : _streamCarry.remove(source);
 
@@ -764,21 +688,11 @@ final class ParticleEmitter {
 
   List<MaterialHandle>? _gradientMaterials;
 
-  /// Whether [colorGradient] has been turned into per-age materials.
   bool get isColorGradientBound => _gradientMaterials != null;
 
-  /// True when a [colorGradient] is set but nothing would apply it yet: no
-  /// bound gradient, no [materialRamp] and no sprite sheet.
   bool get needsColorGradientBinding =>
       colorGradient != null && _gradientMaterials == null && materialRamp == null && spriteSheet == null;
 
-  /// Applies [colorGradient] over particle lifetime.
-  ///
-  /// Particles are drawn with per-material tint, so the gradient is sampled
-  /// into [steps] materials derived from [base] (its tint replaced by the
-  /// gradient colour; the tint also scales emission). Each particle picks
-  /// the step for its normalised age. `PixeldartApp.addEmitter` does this
-  /// automatically for materials it created.
   void bindColorGradient(ResourceLibrary resources, MaterialDefinition base, {int steps = 8}) {
     final gradient = colorGradient;
     if (gradient == null) {
@@ -794,7 +708,6 @@ final class ParticleEmitter {
     ];
   }
 
-  /// Emits [count] particles using the sprite identified by [name].
   int emitSprite(
     String name, {
     int count = 1,
@@ -809,7 +722,6 @@ final class ParticleEmitter {
     );
   }
 
-  /// Alias for [emitSprite] to trigger a burst with a specific named sprite.
   int burstSprite(
     String name, {
     int count = 1,
@@ -817,7 +729,6 @@ final class ParticleEmitter {
     Vec3? inheritedVelocity,
   }) => emitSprite(name, count: count, position: position, inheritedVelocity: inheritedVelocity);
 
-  /// Emits [count] particles using the sprite at integer [index].
   int emitSpriteIndex(
     int index, {
     int count = 1,
@@ -832,7 +743,6 @@ final class ParticleEmitter {
     );
   }
 
-  /// Alias for [emitSpriteIndex] to trigger a burst with a specific sprite index.
   int burstSpriteIndex(
     int index, {
     int count = 1,
@@ -840,7 +750,6 @@ final class ParticleEmitter {
     Vec3? inheritedVelocity,
   }) => emitSpriteIndex(index, count: count, position: position, inheritedVelocity: inheritedVelocity);
 
-  /// Emits [count] particles executing the named [animationName] sequence.
   int emitAnimation(
     String animationName, {
     int count = 1,
@@ -855,7 +764,6 @@ final class ParticleEmitter {
     );
   }
 
-  /// Emits [count] particles randomly sampled from sprites carrying [tag].
   int emitSpriteWithTag(
     String tag, {
     int count = 1,
@@ -881,7 +789,6 @@ final class ParticleEmitter {
     return spawned;
   }
 
-  /// Resets simulation state and clears active particles.
   void reset() {
     _activeCount = 0;
     _elapsedTime = 0.0;
@@ -899,7 +806,6 @@ final class ParticleEmitter {
     }
   }
 
-  /// Advances the simulation by [dt] seconds.
   void update(double dt) {
     if (!dt.isFinite || dt <= 0) return;
     validate();
@@ -1475,7 +1381,6 @@ final class ParticleEmitter {
     _pool[_activeCount].reset();
   }
 
-  /// Calculates the dynamic axis-aligned bounding box enclosing all active particles.
   Aabb computeBounds({bool includeSubEmitters = true}) {
     Aabb bounds;
     if (_activeCount == 0) {
@@ -1510,8 +1415,6 @@ final class ParticleEmitter {
     return bounds;
   }
 
-  /// Submits all active particles as frame-local transient items through [encoder].
-  /// Returns the count of particles submitted.
   int submit(RenderEncoder encoder, FrameInput frame, {bool includeSubEmitters = true}) {
     var submitted = 0;
     if (_activeCount > 0) {
@@ -1589,7 +1492,6 @@ final class ParticleEmitter {
     return submitted;
   }
 
-  /// Produces an immutable diagnostics snapshot for frame observation.
   ParticleEmitterDiagnostics diagnostics(FrameInput frame) {
     final bounds = computeBounds();
     final frustum = frame.camera.buildFrustum();

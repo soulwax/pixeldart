@@ -1,8 +1,5 @@
 import 'dart:io';
 
-/// Static guard for the PLIB-04 runtime boundary. This intentionally checks
-/// source text rather than importing browser code, so it remains runnable on
-/// the Dart VM and catches accidental reintroduction of game-specific paths.
 void main() {
   final package = _packageDirectory();
   final project = Directory('${package.path}/../..');

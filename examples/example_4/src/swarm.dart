@@ -8,7 +8,6 @@ import 'world_map.dart';
 
 const int maxMonsters = 16000;
 
-/// Stats for one kind of monster.
 final class MonsterKind {
   final int tile;
   final double speed;
@@ -31,11 +30,6 @@ const List<MonsterKind> monsterKinds = [
 const double _separationRadius = 11;
 const int _neighbourLimit = 10;
 
-/// Every monster, as flat parallel arrays.
-///
-/// Thousands of objects would mean thousands of pointer chases and a
-/// garbage collector's attention; typed arrays cost neither. Neighbours come
-/// from a uniform grid rebuilt each step in linear time.
 final class Swarm {
   final Art art;
   final math.Random rng;
@@ -63,7 +57,6 @@ final class Swarm {
     for (final k in monsterKinds) art.tile(k.tile),
   ];
 
-  /// Called once per kill, with the kind and where it fell.
   void Function(int kind, double x, double y) onKill = _noKill;
   static void _noKill(int k, double x, double y) {}
 
@@ -90,7 +83,6 @@ final class Swarm {
     kind[i] = kindIndex;
   }
 
-  /// Rebuilds the neighbour grid from current positions.
   void rebuildGrid(WorldMap map) {
     _head.setRange(0, mapCells, _blankHead);
     for (var i = 0; i < count; i += 1) {
@@ -101,8 +93,6 @@ final class Swarm {
     }
   }
 
-  /// Advances everyone one step. Separation is the expensive part, so each
-  /// monster refreshes it every other step, alternating halves of the swarm.
   void step(
     double dt,
     int tick,
@@ -199,7 +189,6 @@ final class Swarm {
     sepY[i] = pushY;
   }
 
-  /// Index of the nearest monster within [range] of a point, or -1.
   int nearest(double atX, double atY, double range) {
     final reach = (range / tileSize).ceil();
     final col = WorldMap.columnAt(atX), row = WorldMap.rowAt(atY);
@@ -228,7 +217,6 @@ final class Swarm {
     return best;
   }
 
-  /// Index of a live monster touching a circle, or -1.
   int touching(double atX, double atY, double radius) {
     final col = WorldMap.columnAt(atX), row = WorldMap.rowAt(atY);
     final r2 = radius * radius;
@@ -243,7 +231,6 @@ final class Swarm {
     return -1;
   }
 
-  /// Hurts one monster. Dead monsters stay in place until [compact].
   void hurt(int i, double damage) {
     if (health[i] <= 0) return;
     health[i] -= damage;
@@ -251,7 +238,6 @@ final class Swarm {
     if (health[i] <= 0) onKill(kind[i], x[i], y[i]);
   }
 
-  /// Hurts every monster in a circle and shoves it outward.
   void blast(double atX, double atY, double radius, double damage, {double shove = 0, double stunFor = 0}) {
     final reach = (radius / tileSize).ceil();
     final col = WorldMap.columnAt(atX), row = WorldMap.rowAt(atY);
@@ -274,8 +260,6 @@ final class Swarm {
     }
   }
 
-  /// Removes the dead by swapping in from the end. Invalidates the grid,
-  /// which [rebuildGrid] renews before the next step reads it.
   void compact() {
     var i = 0;
     while (i < count) {
@@ -302,7 +286,6 @@ final class Swarm {
     }
   }
 
-  /// Draws the swarm's shadows and bodies into the y-sorted batch.
   void draw(SpriteBatch batch, double alpha, double time, Camera2D camera) {
     final left = camera.left - 24, right = camera.right + 24;
     final top = camera.top - 24, bottom = camera.bottom + 32;

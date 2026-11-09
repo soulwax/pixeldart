@@ -1,6 +1,5 @@
 import 'dart:io';
 
-/// Keeps stable/advanced/testing facade responsibilities explicit.
 void main() {
   final package = _packageDirectory();
   final stable = File('${package.path}/lib/pixeldart.dart').readAsStringSync();

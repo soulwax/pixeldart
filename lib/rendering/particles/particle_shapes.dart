@@ -5,7 +5,6 @@ import '../math/quat.dart';
 import '../math/transform.dart';
 import '../math/vec.dart';
 
-/// One sampled spawn point and initial launch direction in world space.
 final class EmitterSpawnSample {
   final Vec3 position;
   final Vec3 direction;
@@ -22,12 +21,9 @@ final class EmitterSpawnSample {
   }
 }
 
-/// Abstract contract for spatial emitter geometry.
 abstract interface class EmitterShape {
-  /// Validates configuration parameters.
   void validate();
 
-  /// Samples one world-space position and launch direction relative to [emitterTransform].
   EmitterSpawnSample sampleSpawn(
     math.Random random,
     Transform emitterTransform,
@@ -38,8 +34,6 @@ abstract interface class EmitterShape {
 // Point Shape
 // ---------------------------------------------------------------------------
 
-/// Emits particles from a single point (with optional local offset) into a
-/// full sphere, hemisphere, or directional cone.
 final class PointShape implements EmitterShape {
   final Vec3 offset;
   final Vec3? direction;
@@ -93,7 +87,6 @@ final class PointShape implements EmitterShape {
 
 enum BoxEmissionMode { volume, surface, edges }
 
-/// Emits particles from an axis-aligned bounding volume, surface, or wire edges.
 final class BoxShape implements EmitterShape {
   final Vec3 halfExtents;
   final BoxEmissionMode mode;
@@ -190,7 +183,6 @@ final class BoxShape implements EmitterShape {
 enum SphereEmissionMode { volume, surface }
 enum SphereDirectionMode { outward, inward, random, fixed }
 
-/// Emits particles from a solid or hollow sphere, with optional hemisphere masking.
 final class SphereShape implements EmitterShape {
   final double radius;
   final double innerRadius;
@@ -264,8 +256,6 @@ final class SphereShape implements EmitterShape {
 
 enum ConeEmissionMode { apex, base, volume }
 
-/// Emits particles in a truncated or full conical volume / nozzle.
-/// The cone axis extends along the local +Y vector.
 final class ConeShape implements EmitterShape {
   final double radius;
   final double angleRadians;
@@ -342,8 +332,6 @@ final class ConeShape implements EmitterShape {
 enum CircleEmissionMode { volume, edge }
 enum CircleDirectionMode { normal, radialOutward, radialInward, tangent, random }
 
-/// Emits particles from a planar 2D disc or circular ring.
-/// Default orientation lies in the local XZ plane with normal +Y.
 final class CircleShape implements EmitterShape {
   final double radius;
   final double innerRadius;
@@ -418,7 +406,6 @@ final class CircleShape implements EmitterShape {
 
 enum LineDirectionMode { perpendicular, alongLine, random, fixed }
 
-/// Emits particles along a 3D line segment.
 final class LineShape implements EmitterShape {
   final Vec3 start;
   final Vec3 end;
@@ -479,7 +466,6 @@ final class LineShape implements EmitterShape {
 
 enum MeshEmissionMode { vertices, surface }
 
-/// Emits particles from authored vertex positions and surface normals of a [MeshData].
 final class MeshShape implements EmitterShape {
   final MeshData meshData;
   final MeshEmissionMode mode;

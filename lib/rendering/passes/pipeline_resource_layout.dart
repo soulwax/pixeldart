@@ -10,12 +10,6 @@ import 'ssao_resources.dart';
 import 'vhs_resources.dart';
 import 'volumetric_light_resources.dart';
 
-/// Configuration-scoped identities for the optional pipeline.
-///
-/// Resource names and versions remain stable so runtime resolvers and history
-/// keys do not change across a resize; only the physical extent metadata is
-/// rebuilt. Half-resolution targets round up, matching the GPU adapter's
-/// allocation rule for odd internal dimensions.
 final class PipelineResourceLayout {
   final int internalWidth;
   final int internalHeight;

@@ -1,17 +1,6 @@
 import '../api/scene.dart';
 
-/// One group of opaque items sharing an `instanceFamilyKey`, mesh, and
-/// material — the unit RV-04's instanced draw path submits as a single call
-/// (§5.5: "groups opaque compatible items into persistent instance
-/// batches"). Items without a family key each form their own
-/// single-member batch, matching individual (non-instanced) draw output —
-/// this is what makes "individual and instanced output match" provable:
-/// both paths run through the same grouping function, just with different
-/// keys.
 final class InstanceBatch {
-  /// Two mat4 arrays consume eight uniform vectors per instance; 16 keeps
-  /// the stream within WebGL2's minimum vertex-uniform budget alongside the
-  /// world matrices and lighting uniforms.
   static const int maxInstanceCount = 16;
   final RetainedItemView representative;
   final List<RetainedItemView> members;

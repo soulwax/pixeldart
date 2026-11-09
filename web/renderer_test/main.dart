@@ -34,14 +34,6 @@ late web.HTMLTextAreaElement _debugLog;
 final List<String> _debugLines = [];
 bool _lastLineWasRunningStatus = false;
 
-/// Appends a timestamped line to the right-hand debug panel rather than
-/// replacing its content, so the full session's boot/error/state history
-/// stays visible and selectable in one `<textarea>` — copy-pasteable as
-/// plain text for pasting back into a bug report, no screenshot needed.
-/// Every call replaces the previous line if (and only if) it was itself a
-/// running-status update, so the periodic per-frame status doesn't grow the
-/// log unboundedly over a long session while every other line (boot steps,
-/// errors) stays permanently in the history.
 void _setStatus(String text, {bool isRunningStatus = false}) {
   final ms = web.window.performance.now().toStringAsFixed(0);
   if (_lastLineWasRunningStatus && _debugLines.isNotEmpty) {
@@ -175,14 +167,6 @@ CameraView _buildCamera(double aspect) {
   );
 }
 
-/// Builds a unit cube in the compatibility 14-float layout: white vertex
-/// color (so the albedo texture shows unmodified) and a full 0..1 UV square
-/// repeated per face, deliberately not deduplicated so each face keeps its
-/// own per-face normal and UV origin — proves `MeshStore`'s indexed-upload
-/// path (real vertex+index buffers, real VAO, real `drawElements`) and the
-/// textured/mipmapped sampling path together, without a binary QMSH
-/// fixture, since QMSH decode itself is already pure-tested in
-/// `tools/renderer/test_qmesh.dart`.
 MeshData _buildTestCube() {
   const s = 0.6;
   final faces = <(Vec3 normal, List<Vec3> corners)>[
@@ -251,17 +235,6 @@ MeshData _buildTestCube() {
   );
 }
 
-/// A single-sided quad (one face, CCW winding as seen from `+Z` — the same
-/// front-facing convention `_buildTestCube` uses) with no matching back
-/// face at all. `CULL_FACE` was, like `DEPTH_TEST` before it, only ever
-/// modeled as `DrawStateDescriptor` data and never actually issued via a
-/// real `gl.enable`/`cullFace` call — this mesh is what a fixed test cube
-/// can't prove, since every visible face on a closed cube is a front face
-/// by construction. Spinning this quad past 90 degrees turns its back to
-/// the camera each half-rotation: with culling active, the quad disappears
-/// entirely there (no back face exists to shade); with culling inactive
-/// (the pre-fix state), the same checkerboard paints on both sides,
-/// visually indistinguishable from a real front face.
 MeshData _buildCullTestQuad() {
   const s = 0.5;
   const normal = Vec3(0, 0, 1);
@@ -303,19 +276,6 @@ MeshData _buildCullTestQuad() {
   );
 }
 
-/// RV-09 rung 6's transient billboard mesh — a single doubleSided quad
-/// (unlike `_buildCullTestQuad`, which is deliberately single-sided to
-/// prove culling) parameterized by width/height/vertex alpha. [alpha] is
-/// baked into the mesh's own `aAlpha` attribute, not `MaterialDefinition`
-/// (which has no alpha field) — the same per-vertex alpha channel every
-/// mesh in this bootstrap already carries, just set to something other
-/// than the usual `1.0` so `BlendMode.alpha` items are genuinely
-/// translucent rather than optically indistinguishable from opaque at
-/// `srcAlpha=1`. Width and height are independent (unlike `Transform`'s
-/// own uniform-only scale, §5.7) specifically so a "shaft" instance can be
-/// tall and narrow while a "mote" instance is small and roughly square,
-/// without needing non-uniform instance scale this renderer deliberately
-/// does not support.
 MeshData _buildBillboardQuad({
   required double halfWidth,
   required double halfHeight,
@@ -363,30 +323,8 @@ MeshData _buildBillboardQuad({
   );
 }
 
-/// Cells per side of the ground grid. High enough that no single triangle
-/// spans a large share of the viewport's depth range (which is what makes
-/// affine UV read as swim rather than as breakage), low enough that the
-/// artifact stays clearly visible — subdividing far enough would hide the
-/// very thing this bootstrap exists to show.
 const _groundSubdivisions = 8;
 
-/// A large flat plane beneath the scene — the shadow-receiving surface
-/// §8.4's gate ("bannister shadow across a wall/floor") requires a real
-/// receiver to demonstrate against. `castsShadow: false`,
-/// `receivesShadow: true` on its `RetainedItemDescriptor` (set at the call
-/// site) since a flat ground plane casting onto itself is degenerate.
-///
-/// Subdivided into a [_groundSubdivisions] grid rather than the two
-/// triangles it was until affine UV landed. Affine error is a per-triangle
-/// quantity — it is zero at the vertices and grows with how much depth
-/// range one triangle spans — so two triangles covering the whole viewport
-/// is the worst case that exists, and it read as "the floor's perspective
-/// is simply wrong" rather than as anything a PS1 ever displayed. Real
-/// hardware-affine content tessellated floors for exactly this reason.
-/// Subdividing keeps each triangle's depth span small, which is what turns
-/// the artifact into the characteristic swim/wobble under camera motion and
-/// gives vertex snapping enough vertices to act on. The perspective-correct
-/// path is unaffected either way; this changes only how honest the demo is.
 MeshData _buildGroundPlane() {
   const s = 3.0;
   const uvSpan = 4.0;
@@ -445,9 +383,6 @@ MeshData _buildGroundPlane() {
   );
 }
 
-/// A high-contrast procedural checkerboard, deliberately not smooth —
-/// mip-level transitions are only visible if adjacent texels disagree
-/// strongly, which a photographic or gradient texture would hide.
 Uint8List _buildCheckerboardTexture(int size) {
   final pixels = Uint8List(size * size * 4);
   for (var y = 0; y < size; y++) {
@@ -464,11 +399,6 @@ Uint8List _buildCheckerboardTexture(int size) {
   return pixels;
 }
 
-/// High-contrast payload for the standalone R-09 residency fixture. The
-/// handle is declared without pixels first (so the material samples the
-/// store's white fallback), then this payload arrives on that same handle.
-/// The deliberately different magenta/teal pattern makes the transition
-/// visible in a capture as well as in the DOM/resource evidence.
 Uint8List _buildResidencyTexture(int size) {
   final pixels = Uint8List(size * size * 4);
   for (var y = 0; y < size; y++) {
@@ -484,25 +414,6 @@ Uint8List _buildResidencyTexture(int size) {
   return pixels;
 }
 
-/// The alpha-masked demo surface: a lattice of bars with square openings
-/// punched through it, carrying three distinct alpha levels rather than a
-/// binary in/out mask — 255 inside a bar, 128 along a one-texel ramp at
-/// every opening's edge, and [_latticeOpeningAlpha] (1/255) inside the
-/// openings themselves.
-///
-/// Three levels, not two, because they are what make `alphaCutoff` a real
-/// threshold the demo can be wrong about. Against a hard 0/255 mask every
-/// cutoff in (0,1) produces the identical silhouette, so the uniform could
-/// carry any value at all and nothing on screen would notice. Here a
-/// cutoff below the opening alpha keeps the whole quad, 0.5 cuts the
-/// openings while keeping the ramp, and a cutoff above 0.502 would eat the
-/// ramp too — three visibly different results from one texture.
-///
-/// The openings are *nearly* transparent rather than exactly transparent
-/// for the same reason: it leaves room for a valid cutoff underneath them,
-/// which is what lets the demo's own A/B toggle change nothing but the
-/// threshold. Colour is uniform across the bars so that everything the eye
-/// reads as shape here is the work of the discard.
 Uint8List _buildLatticeTexture(int size) {
   const cell = 16;
   const bar = 5;
@@ -532,25 +443,10 @@ Uint8List _buildLatticeTexture(int size) {
   return pixels;
 }
 
-/// The lattice openings' own alpha, in 0..255. The two demo cutoffs below
-/// straddle it: `_maskedCutoff` is far above, `_unmaskedCutoff` just below
-/// (1/255 is ~0.0039), so the same material and the same texture produce a
-/// pierced quad or a solid one purely from the threshold.
 const _latticeOpeningAlpha = 1;
 const _maskedCutoff = 0.5;
 const _unmaskedCutoff = 0.002;
 
-/// RV-09 rung 2's demo grade LUT — an unwrapped-3D-LUT texture (`size`
-/// horizontal slices of `size`x`size`, one per blue level, exactly the
-/// layout `grade_lut.frag`'s `sampleLut` expects) encoding a classic
-/// teal-shadows/orange-highlights split-tone plus a mild contrast boost.
-/// Not tuned against any real target look — like RV-08's bloom intensity,
-/// this exists to prove the LUT pipeline samples and blends correctly, not
-/// as a final art decision. `GradeFeature` never special-cases an identity
-/// LUT at the shader level (see grade.dart's doc comment); this is simply
-/// the one LUT texture this bootstrap ever loads, and
-/// `PostProcessState.colorGradeStrength == 0` already reproduces an
-/// identity LUT's observable effect without a second texture asset.
 Uint8List _buildTealOrangeLut(int size) {
   final pixels = Uint8List(size * size * size * 4);
   final maxIndex = size - 1;
@@ -578,15 +474,6 @@ Uint8List _buildTealOrangeLut(int size) {
   return pixels;
 }
 
-/// The shadow-casting spot light, orbiting around the Y axis at a fixed
-/// radius/height and always aimed back at the scene's center — so the
-/// shadows it casts sweep visibly around the ground plane over time,
-/// making it obvious by eye whether a shadow's position genuinely tracks
-/// the light (correct) or lags/disagrees with it (the two-light bug this
-/// scene exists to keep proven fixed). Position/direction drive
-/// `ShadowLightView.fromSpotLight`'s light-space camera directly, so this
-/// is the single source of truth both the caster pass and the shadowed
-/// world pass's fragment-side comparison agree on.
 SpotLight _orbitingShadowCasterLight(double t) {
   const radius = 2.2;
   const height = 2.4;
@@ -645,9 +532,6 @@ final class _StaticFrameScene implements FrameSceneData {
   final PostProcessState postOverride;
   final List<Object> blendedItems;
 
-  /// The harness's animation clock, which is also what drives the bobbing
-  /// cube and the orbiting light, so renderer-side time uniforms stay in step
-  /// with the transforms this scene submits. Frozen fixtures pass 0.
   @override
   final double timeSeconds;
 
@@ -671,11 +555,6 @@ final class _StaticFrameScene implements FrameSceneData {
   Object get post => postOverride;
 }
 
-/// Passes that must run against the resolved (single-sample) sceneColor
-/// target rather than the multisampled one — bloom's blur/composite
-/// passes plus present, all of which read or write the target only
-/// `device.resolveTarget` (not any declared graph stage) produces, so the
-/// bootstrap itself is what enforces this split rather than the graph.
 const _postResolvePassIds = {
   'bloomBlurH',
   'bloomBlurV',
@@ -1926,11 +1805,6 @@ void _boot() {
   web.window.requestAnimationFrame(tick.toJS);
 }
 
-/// Runs one real WebGL timer-query probe and publishes its lifecycle on the
-/// canvas for browser automation. This is deliberately separate from the
-/// renderer's frame loop: a ready value is reported only when the adapter
-/// returns one, while unsupported/disjoint/pending states never receive a
-/// fabricated elapsed time.
 void _startGpuTimingProbe(WebGl2Device device, RenderCapabilities caps) {
   final canvas = device.gl.canvas as web.HTMLCanvasElement;
   void publish(GpuTimerPoll result, {int? polls}) {
@@ -2010,13 +1884,6 @@ void _startGpuTimingProbe(WebGl2Device device, RenderCapabilities caps) {
   web.window.requestAnimationFrame(poll.toJS);
 }
 
-/// Reads one small neighborhood around each authored instance center after
-/// the present pass. This is intentionally independent of the house: the
-/// standalone renderer demo's shared cube mesh/material is enough to prove
-/// that three distinct transforms reached a real WebGL draw. A non-black hit
-/// at every projected center is stronger than the DOM metadata alone, while
-/// the metadata keeps the browser report explainable when a headless adapter
-/// has no visible WebGL output.
 void _publishR09InstancePixelProof(
   web.WebGL2RenderingContext gl,
   web.HTMLCanvasElement canvas,
@@ -2062,13 +1929,6 @@ void _publishR09InstancePixelProof(
   );
 }
 
-/// Publishes the standalone renderer's shadow-pass seam for the browser
-/// A/B fixture. The direct bootstrap owns the graph execution, so it also
-/// owns the pass telemetry that the normal [SceneRendererImpl] wrapper would
-/// otherwise expose. A zero draw count is intentionally reported as
-/// `zero-pass` rather than being treated as a failed assertion: that is the
-/// truthful outcome on a profile/adapter where the shadow feature is absent
-/// or where the fixture is explicitly running its shadow-off half.
 void _publishR09ShadowProof(
   web.WebGL2RenderingContext gl,
   web.HTMLCanvasElement canvas,
@@ -2136,10 +1996,6 @@ final class _AlwaysAvailable implements RenderPassResources {
   bool isAvailable(String resourceName) => true;
 }
 
-/// A minimal `RetainedItemView` carrying the real `MeshHandle` returned by
-/// `MeshStore.upload` — the mesh resolver ignores this bootstrap's `mesh`
-/// value and always resolves `cubeHandle` directly, but a real `RenderWorld`
-/// consumer must have a resolvable handle here regardless.
 final class _TestCubeItem implements RetainedItemView {
   final MeshHandle mesh;
   final MaterialHandle material;

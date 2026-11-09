@@ -5,24 +5,16 @@ import 'camera_2d.dart';
 import 'sprite_batch.dart';
 import 'sprite_encoder.dart';
 
-/// A grid of tiles drawn from retained chunks.
-///
-/// Tiles are grouped into [chunkSize]-square [SpriteBatch]es that stay on
-/// the GPU between frames. A frame only submits the chunks in view, and
-/// [setTile] only rebuilds the chunk it touched, so a large map costs a few
-/// draw calls and no per-frame upload.
 final class TileLayer {
   final int columns;
   final int rows;
   final double tileWidth;
   final double tileHeight;
 
-  /// World position of the layer's top-left corner.
   final double originX;
   final double originY;
   final int chunkSize;
 
-  /// Tile id to region. Ids outside the list draw nothing.
   final List<SpriteRegion> tileset;
 
   final Int32List _tiles;
@@ -65,13 +57,11 @@ final class TileLayer {
   double get width => columns * tileWidth;
   double get height => rows * tileHeight;
 
-  /// The tile id at a cell, or -1 when empty or out of range.
   int tileAt(int column, int row) {
     if (column < 0 || row < 0 || column >= columns || row >= rows) return -1;
     return _tiles[row * columns + column];
   }
 
-  /// Sets a cell; -1 empties it. Takes effect on the next [drawTo].
   void setTile(int column, int row, int id) {
     if (column < 0 || row < 0 || column >= columns || row >= rows) {
       throw RangeError('TileLayer.setTile($column, $row) is out of range');
@@ -82,7 +72,6 @@ final class TileLayer {
     _dirty[(row ~/ chunkSize) * _chunkColumns + column ~/ chunkSize] = 1;
   }
 
-  /// Sets every cell from `tile(column, row)`.
   void fill(int Function(int column, int row) tile) {
     for (var row = 0; row < rows; row += 1) {
       for (var column = 0; column < columns; column += 1) {
@@ -91,7 +80,6 @@ final class TileLayer {
     }
   }
 
-  /// Draws the chunks [camera] can see. Returns how many were submitted.
   int drawTo(
     RenderEncoder encoder,
     Camera2D camera, {

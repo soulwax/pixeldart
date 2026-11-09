@@ -132,9 +132,6 @@ final class _BloomFeature implements RenderFeature {
   void dispose() {}
 }
 
-/// A misbehaving feature that declares one pass but tries to construct a
-/// different one — proves `FeatureGraph` rejects passes a feature never
-/// actually put into the graph.
 final class _RogueFeature implements RenderFeature {
   @override
   String get id => 'rogue';

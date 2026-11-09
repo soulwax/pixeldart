@@ -2,11 +2,6 @@ import 'device_api.dart';
 import '../core/frame_telemetry.dart';
 import 'state_cache.dart';
 
-/// The concrete type behind `RenderPassContext.commandEncoder` (§5.6). One
-/// encoder is bound to exactly one target for its lifetime; every call is a
-/// direct pass-through to the owning `GpuDevice`, so this type carries no
-/// GL state of its own and cannot be replayed outside the frame that
-/// created it.
 abstract interface class DrawCommandEncoder {
   void bindTarget(GpuObject? target);
   void setColorAttachmentCount(int count);
@@ -36,11 +31,6 @@ abstract interface class DrawCommandEncoder {
   });
 }
 
-/// Direct pass-through implementation over one `GpuDevice`. Contains no
-/// buffering or deferred replay — every call issues immediately, matching
-/// the "no allocation in the frame loop" requirement for steady-state
-/// submission (§7.5). `FakeGpuDevice` records these calls for pure tests;
-/// a real backend would translate them 1:1 into WebGL2 calls.
 final class DeviceDrawCommandEncoder implements DrawCommandEncoder {
   final GpuDevice device;
   final FrameDrawTelemetry? telemetry;

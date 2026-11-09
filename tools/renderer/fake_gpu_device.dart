@@ -11,12 +11,9 @@ final class _FakeGpuObject implements GpuObject {
   const _FakeGpuObject(this.id);
 }
 
-/// A deterministic in-memory `GpuDevice` proving the same lifecycle state
-/// machine a real WebGL2 backend would drive, per plan §7.4's explicit
-/// requirement that a fake device cover context loss/restore without a
-/// browser. Every create/delete call is counted so tests can assert
-/// resource-count behavior across warm-up and loss/restore cycles.
-final class FakeGpuDevice with _FakeGpuTimerSupport implements GpuDevice, GpuContextGeneration {
+final class FakeGpuDevice
+    with _FakeGpuTimerSupport
+    implements GpuDevice, GpuContextGeneration {
   @override
   final bool timerQueries;
   @override
@@ -39,6 +36,9 @@ final class FakeGpuDevice with _FakeGpuTimerSupport implements GpuDevice, GpuCon
   int vaoDeleteCalls = 0;
   int programCompileCalls = 0;
   int programDeleteCalls = 0;
+  String? lastCompiledVertexSource;
+  String? lastCompiledFragmentSource;
+  final List<({String vertex, String fragment})> compiledShaderSources = [];
 
   GpuTargetDescriptor targetDescriptor(GpuObject target) =>
       _targetDescriptors[(target as _FakeGpuObject).id]!;
@@ -54,8 +54,6 @@ final class FakeGpuDevice with _FakeGpuTimerSupport implements GpuDevice, GpuCon
 
   bool isLive(GpuObject obj) =>
       _liveObjects.contains((obj as _FakeGpuObject).id);
-
-  /// Exposes only aggregate ownership counts for steady-state fixtures; test
   /// code must not depend on the private object identities.
   int get liveObjectCount => _liveObjects.length;
   int get liveTimerCount => _timerIds.length;
@@ -108,7 +106,9 @@ final class FakeGpuDevice with _FakeGpuTimerSupport implements GpuDevice, GpuCon
   }) {
     _requireReady();
     bufferUploadCalls += 1;
-    uploadedBufferData[(buffer as _FakeGpuObject).id] = Float32List.fromList(data);
+    uploadedBufferData[(buffer as _FakeGpuObject).id] = Float32List.fromList(
+      data,
+    );
   }
 
   @override
@@ -139,9 +139,6 @@ final class FakeGpuDevice with _FakeGpuTimerSupport implements GpuDevice, GpuCon
     textureMipsFinalizedCalls += 1;
     _texturesMissingFinalizedMips.remove((texture as _FakeGpuObject).id);
   }
-
-  /// True once [createTextureMipped] has run but [finalizeMips] has not —
-  /// lets a test catch "allocated mip storage, never populated it," the
   /// exact real bug this pair of methods was added to close.
   bool hasUnfinalizedMips(GpuObject texture) =>
       _texturesMissingFinalizedMips.contains((texture as _FakeGpuObject).id);
@@ -230,11 +227,6 @@ final class FakeGpuDevice with _FakeGpuTimerSupport implements GpuDevice, GpuCon
     vaoDeleteCalls += 1;
     _delete(vao);
   }
-
-  /// Fake compilation: a source containing the literal marker `FAIL_VERTEX`
-  /// or `FAIL_FRAGMENT` simulates a stage compile error; `FAIL_LINK`
-  /// simulates a link error. Otherwise, every string in [requiredAttributes]
-  /// and [requiredUniforms] must appear as a substring of the combined
   /// source, simulating attribute/uniform validation (§7.2 step 3).
   @override
   GpuObject compileProgram({
@@ -280,6 +272,9 @@ final class FakeGpuDevice with _FakeGpuTimerSupport implements GpuDevice, GpuCon
         );
       }
     }
+    lastCompiledVertexSource = vertexSource;
+    lastCompiledFragmentSource = fragmentSource;
+    compiledShaderSources.add((vertex: vertexSource, fragment: fragmentSource));
     programCompileCalls += 1;
     return _create();
   }

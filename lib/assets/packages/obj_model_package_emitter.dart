@@ -6,11 +6,6 @@ import '../../rendering/assets/qmesh.dart';
 import 'model_package_emitter.dart';
 import 'model_package_manifest.dart';
 
-/// Emits the source-neutral package shape from a validated OBJ/MTL scene.
-///
-/// The payload is deterministic QMSH v2, not an OBJ runtime type. This lets
-/// the existing source-neutral cache decode the package without format
-/// branches.
 final class ObjModelPackageEmitter {
   static ({ModelPackageManifest manifest, Map<String, Uint8List> payloads}) emit({
     required String assetId,

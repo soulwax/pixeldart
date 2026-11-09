@@ -1,8 +1,5 @@
 enum RendererState { constructed, initializing, ready, contextLost, disposed }
 
-/// One optional-feature failure record (§7.6). Mandatory failures are
-/// terminal for the renderer and are not represented here; only optional
-/// failures degrade and get recorded.
 final class FeatureHealth {
   final String featureId;
   final String stageOrResource;
@@ -36,9 +33,6 @@ final class RendererHealth {
   static const RendererHealth healthy = RendererHealth();
 }
 
-/// Draw work issued by one graph pass during a frame. Counts are collected at
-/// the encoder's successful draw boundary, so post-processing and scene work
-/// remain distinguishable without relying on submission estimates.
 final class FramePassStats {
   final int drawCalls;
   final int trianglesSubmitted;
@@ -57,9 +51,6 @@ final class FramePassStats {
 
 enum GpuTimingStatus { unsupported, pending, ready, disjoint }
 
-/// A delayed GPU elapsed-time sample. [pending] is expected immediately
-/// after submission; [disjoint] means the adapter invalidated the sample and
-/// callers must not treat it as a zero-cost frame.
 final class GpuTimingResult {
   final int frameIndex;
   final GpuTimingStatus status;
@@ -72,15 +63,9 @@ final class GpuTimingResult {
   });
 }
 
-/// Immediate CPU/counter statistics returned by `endFrame()` (§5.1).
-/// Asynchronous GPU query results are not part of this type; they surface
-/// later in diagnostics keyed to [frameIndex].
 final class FrameStats {
   final int frameIndex;
 
-  /// Point lights submitted beyond the shader's budget
-  /// (`RuntimeLightBudget.pointLights`) and therefore not drawn this frame.
-  /// The most influential ones at the camera are kept.
   final int pointLightsDropped;
   final int drawCalls;
   final int trianglesSubmitted;

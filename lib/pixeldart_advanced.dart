@@ -1,8 +1,3 @@
-/// Advanced Pixeldart facade for hosts that own renderer policy.
-///
-/// Stable application contracts should import `pixeldart.dart`; this library
-/// exposes graph planning, capability negotiation, residency, and pass-level
-/// controls that can change as the renderer evolves.
 library;
 
 export 'rendering/rendering.dart';

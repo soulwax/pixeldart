@@ -47,9 +47,6 @@ final class DirectionalLight {
   }
 }
 
-/// Generic point light. Stable [id] lets the renderer select a
-/// capability-bounded per-draw subset by influence with a deterministic
-/// tie-breaker (§7.1) rather than depending on submission order.
 final class PointLight {
   final int id;
   final Vec3 position;
@@ -80,9 +77,6 @@ final class PointLight {
   }
 }
 
-/// Generic spot light. Also used as the sole shadow-casting approximation
-/// for a bounded point light per §7.1: v1 shadow rendering supports
-/// directional/spot projections only, never an unimplemented cube shadow.
 final class SpotLight {
   final int id;
   final Vec3 position;
@@ -123,12 +117,6 @@ final class SpotLight {
   }
 }
 
-/// Returns the capability-bounded direct practical lights for one frame.
-///
-/// Selection is independent of submission order: lights are ranked by a
-/// camera-relative influence estimate and ties resolve by stable authored ID.
-/// A selected shadow caster is excluded because the shadowed world already
-/// evaluates its direct contribution through the shadow map.
 List<SpotLight> selectSpotLights({
   required Iterable<SpotLight> lights,
   required Vec3 referencePosition,
@@ -161,13 +149,6 @@ List<SpotLight> selectSpotLights({
   return [for (final entry in ranked.take(limit)) entry.light];
 }
 
-/// Selects the point lights the world shader evaluates.
-///
-/// The shader has [RuntimeLightBudget.pointLights] slots. Lights are ranked
-/// by their influence at [referencePosition] (normally the camera), the
-/// same measure [selectSpotLights] uses, so the most relevant lights win
-/// rather than the first ones submitted. Ties fall back to the authored id,
-/// so the choice is deterministic frame to frame.
 List<PointLight> selectPointLights({
   required Iterable<PointLight> lights,
   required Vec3 referencePosition,
@@ -193,36 +174,17 @@ List<PointLight> selectPointLights({
   return [for (final entry in ranked.take(limit)) entry.light];
 }
 
-/// The light and shadow budget the shipping pipeline actually honours.
-///
-/// These are not aspirational limits. Each is a direct count of what
-/// `shaders/rendering/world/shadowed_world.frag` declares and what
-/// `passes/pipeline_resource_layout.dart` allocates. Hosts should size their
-/// own light tables and quality profiles against these constants rather than
-/// against numbers chosen independently — the mismatch between an advertised
-/// budget and this one is what RENDERER plan packet R-A5 existed to close.
-///
-/// When a packet widens the runtime (R-B2 replaces the single shadow map with
-/// an atlas), change the constant here in the same commit as the runtime, and
-/// every host that reads it follows.
 abstract final class RuntimeLightBudget {
-  /// Directional lights (sun/moon). Contributes N·L and a specular lobe.
   static const int directionalLights = 1;
 
-  /// Point lights: `uPointPosition0..3` in the shadowed world shader.
   static const int pointLights = 4;
 
-  /// Unshadowed spot lights: `uDirectSpot*0..2`, ranked by [selectSpotLights].
   static const int unshadowedSpotLights = 3;
 
-  /// Shadowed spot lights: `spotLights.first` only.
   static const int shadowedSpotLights = 1;
 
-  /// Non-directional lights the world shader can evaluate in one pass.
   static const int dynamicLights =
       pointLights + unshadowedSpotLights + shadowedSpotLights;
 
-  /// Shadow maps in the whole pipeline. There is exactly one `shadowMap`
-  /// resource; the directional light does not cast at all.
   static const int shadowMaps = shadowedSpotLights;
 }

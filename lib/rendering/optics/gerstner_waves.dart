@@ -2,7 +2,6 @@ import 'dart:math' as math;
 
 import '../math/vec.dart';
 
-/// Single directional harmonic wave component of a Gerstner ocean surface.
 final class GerstnerWaveComponent {
   final Vec2 direction;
   final double amplitude;
@@ -37,18 +36,13 @@ final class GerstnerWaveComponent {
   double get dirZ => _dirZ;
 }
 
-/// Result of evaluating buoyancy physics at a point in the ocean.
 final class BuoyancySample {
-  /// Vertical surface height at the sample location.
   final double surfaceHeight;
 
-  /// Current submerged depth (positive if below water surface, <= 0 if airborne).
   final double submersion;
 
-  /// Normalized ocean surface normal at this point.
   final Vec3 surfaceNormal;
 
-  /// Upward buoyancy force vector acting on the submerged body.
   final Vec3 force;
 
   const BuoyancySample({
@@ -61,7 +55,6 @@ final class BuoyancySample {
   bool get isSubmerged => submersion > 0.0;
 }
 
-/// Evaluates 3D trochoidal Gerstner ocean waves and physical buoyancy dynamics.
 final class GerstnerWaveEvaluator {
   final List<GerstnerWaveComponent> waves;
   final double baseHeight;
@@ -75,7 +68,6 @@ final class GerstnerWaveEvaluator {
     }
   }
 
-  /// Preset tuned for open-ocean rolling swells and surface chop.
   factory GerstnerWaveEvaluator.ocean({double baseHeight = 0.0}) {
     return GerstnerWaveEvaluator(
       baseHeight: baseHeight,
@@ -116,7 +108,6 @@ final class GerstnerWaveEvaluator {
     );
   }
 
-  /// Samples the 3D displacement vector (dx, dy, dz) at horizontal position (x, z) and time [t].
   Vec3 sampleDisplacement(double x, double z, double t) {
     var dx = 0.0;
     var dy = 0.0;
@@ -137,13 +128,11 @@ final class GerstnerWaveEvaluator {
     return Vec3(dx, dy, dz);
   }
 
-  /// Samples the true displaced 3D world surface position at (x, z) and time [t].
   Vec3 samplePosition(double x, double z, double t) {
     final disp = sampleDisplacement(x, z, t);
     return Vec3(x + disp.x, baseHeight + disp.y, z + disp.z);
   }
 
-  /// Samples vertical surface height at horizontal position (x, z) and time [t].
   double sampleHeight(double x, double z, double t) {
     var dy = 0.0;
     for (var i = 0; i < waves.length; i++) {
@@ -154,7 +143,6 @@ final class GerstnerWaveEvaluator {
     return baseHeight + dy;
   }
 
-  /// Samples the exact analytical 3D surface normal at horizontal position (x, z) and time [t].
   Vec3 sampleNormal(double x, double z, double t) {
     var nx = 0.0;
     var ny = 1.0;
@@ -178,7 +166,6 @@ final class GerstnerWaveEvaluator {
     return Vec3(nx * invLen, ny * invLen, nz * invLen);
   }
 
-  /// Evaluates physical buoyancy force for an object at [bodyPosition] in the ocean.
   BuoyancySample sampleBuoyancy({
     required Vec3 bodyPosition,
     double submergedDepth = 1.0,

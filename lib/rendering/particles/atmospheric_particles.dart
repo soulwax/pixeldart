@@ -10,14 +10,8 @@ import '../math/quat.dart';
 import '../math/transform.dart';
 import '../math/vec.dart';
 
-/// Selects whether an atmospheric field follows the viewer or occupies a
-/// fixed position in the world. The host owns this policy: a sheltered room,
-/// a courtyard, and a dust-filled tunnel can all use the same renderer path.
 enum AtmosphericParticleAnchor { world, camera }
 
-/// Host-selected particle budget after quality/profile policy is resolved.
-/// Keeping this separate from [AtmosphericParticleField] makes a capped
-/// request observable without changing the field's deterministic simulation.
 final class AtmosphericParticleBudget {
   final int requestedCount;
   final int maximumCount;
@@ -27,9 +21,6 @@ final class AtmosphericParticleBudget {
     required this.maximumCount,
   });
 
-  /// Resolves the renderer-owned atmospheric cap for an effective quality
-  /// profile. The host still chooses the requested count; Pixeldart only
-  /// supplies the bounded profile policy and reports whether it capped it.
   factory AtmosphericParticleBudget.forProfile({
     required QualityProfile profile,
     required int requestedCount,
@@ -62,12 +53,6 @@ final class AtmosphericParticleBudget {
   bool get wasCapped => effectiveCount != requestedCount;
 }
 
-/// CPU visibility accounting for one atmospheric field and one frame.
-///
-/// The render graph still owns the authoritative transient-item cull. This
-/// bounded diagnostic uses the same camera frustum and a conservative cube
-/// around each particle so a host can explain why a requested field produced
-/// fewer visible candidates without inventing a second draw path.
 final class AtmosphericParticleFrameStats {
   final int candidateCount;
   final int visibleCount;
@@ -92,9 +77,6 @@ final class AtmosphericParticleFrameStats {
   }
 }
 
-/// One renderer-owned atmospheric observation for diagnostics and developer
-/// tooling. It reports field facts only; the host remains the authority for
-/// weather meaning, impacts, and room exposure.
 final class AtmosphericParticleDiagnostics {
   final int requestedCount;
   final int effectiveCount;
@@ -132,12 +114,6 @@ final class AtmosphericParticleDiagnostics {
   }
 }
 
-/// Deterministic physical state for one atmospheric particle at a frame.
-///
-/// [spawnPosition] is the world-space birth point and [position] is the
-/// analytically integrated current point. Hosts can compare those facts with
-/// their own collision/impact surfaces without making the renderer own rooms,
-/// gameplay, or collision state.
 final class AtmosphericParticleKinematics {
   final double age;
   final Vec3 spawnPosition;
@@ -161,54 +137,28 @@ final class AtmosphericParticleKinematics {
   }
 }
 
-/// Deterministic, CPU-simulated atmospheric particles emitted through a
-/// frame-local [RenderEncoder].
-///
-/// This is intentionally renderer-neutral: it knows meshes, materials,
-/// transforms, camera snapshots, and physical motion, but not weather
-/// schedules, rooms, collisions, gameplay, or post-processing policy. A host
-/// chooses its own quality cap and may use the field for rain, snow, ash,
-/// dust, pollen, embers, or other small-scale airborne phenomena.
-///
-/// The field has no mutable simulation state. Given the same [FrameInput] and
-/// descriptor, it produces the same transforms. This keeps captures,
-/// context recovery, and frame replay deterministic while allowing the host
-/// to keep large weather volumes close to a moving camera when appropriate.
 final class AtmosphericParticleField {
   final MeshHandle mesh;
   final MaterialHandle material;
   final AtmosphericParticleAnchor anchor;
 
-  /// Origin relative to the selected [anchor].
   final Vec3 origin;
 
-  /// Half-size of the deterministic spawn volume. It must be non-negative.
   final Vec3 halfExtents;
 
-  /// Initial velocity at a particle's birth, in metres per second.
   final Vec3 initialVelocity;
 
-  /// Constant acceleration, in metres per second squared.
   final Vec3 acceleration;
 
-  /// Optional asymptotic velocity after linear air drag, in metres per
-  /// second. A host can include wind in this vector. When omitted, the field
-  /// uses the constant-acceleration model above.
   final Vec3? terminalVelocity;
 
-  /// Linear drag response in inverse seconds. A terminal velocity requires a
-  /// positive coefficient; zero keeps the legacy constant-acceleration path.
   final double dragCoefficient;
 
-  /// Lifetime before deterministic respawn, in seconds.
   final double lifetimeSeconds;
   final int particleCount;
   final int seed;
   final double particleScale;
 
-  /// When true, rotates each particle so its local downward (-Y) axis follows
-  /// the analytic velocity. This is useful for streak-like geometry such as
-  /// rain or hail; round flakes and motes should leave it disabled.
   final bool alignToVelocity;
   final DrawMode drawMode;
   final BlendMode blendMode;
@@ -285,8 +235,6 @@ final class AtmosphericParticleField {
     }
   }
 
-  /// Samples one particle transform without submitting it. Useful for host
-  /// diagnostics and deterministic tests without a GPU.
   Transform sampleTransform(FrameInput frame, int particleIndex) {
     final kinematics = sampleKinematics(frame, particleIndex);
     final rotation = alignToVelocity
@@ -299,11 +247,6 @@ final class AtmosphericParticleField {
     );
   }
 
-  /// Samples the complete deterministic physical state for one particle.
-  ///
-  /// This is intentionally a read-only bridge for host-owned impact logic:
-  /// the renderer supplies position and velocity, while the host decides
-  /// whether a surface was hit and what gameplay/audio/settling event follows.
   AtmosphericParticleKinematics sampleKinematics(
     FrameInput frame,
     int particleIndex,
@@ -343,10 +286,6 @@ final class AtmosphericParticleField {
     return kinematics;
   }
 
-  /// Returns the analytic velocity at an arbitrary particle age. With a
-  /// terminal velocity this is the linear-drag solution
-  /// `v(t)=v_terminal+(v0-v_terminal)e^(-drag*t)`; otherwise it is the
-  /// constant-acceleration solution.
   Vec3 sampleVelocityAtAge(double age) {
     validate();
     if (!age.isFinite || age < 0) {
@@ -355,18 +294,10 @@ final class AtmosphericParticleField {
     return _velocityAtAge(age);
   }
 
-  /// Emits every particle as ordinary blended transient geometry and returns
-  /// the count actually submitted. Frustum and depth rejection remain the
-  /// normal render graph's responsibility, so particle behaviour does not
-  /// fork from the rest of the world pass.
   int submit(RenderEncoder encoder, FrameInput frame) {
     return submitFiltered(encoder, frame, (_) => true);
   }
 
-  /// Submits only particles accepted by a host-owned predicate. The
-  /// predicate receives deterministic kinematics so hosts can remove a
-  /// particle after a collision or inside a warm-clearance volume without
-  /// making Pixeldart own collision, rooms, or weather semantics.
   int submitFiltered(
     RenderEncoder encoder,
     FrameInput frame,
@@ -410,9 +341,6 @@ final class AtmosphericParticleField {
     );
   }
 
-  /// Reports the conservative frustum result for the current field. The
-  /// bounds match [FrameRenderEncoder]'s fixed half-unit transient bounds,
-  /// scaled by this field's particle size.
   AtmosphericParticleFrameStats frameStats(FrameInput frame) {
     validate();
     final frustum = frame.camera.buildFrustum();
@@ -442,10 +370,6 @@ final class AtmosphericParticleField {
     return stats;
   }
 
-  /// Resolves one internally consistent diagnostic snapshot. The caller must
-  /// construct the field with the budget's effective count; rejecting a
-  /// mismatch prevents the lab from reporting an unapplied cap as rendered
-  /// geometry.
   AtmosphericParticleDiagnostics diagnostics(
     FrameInput frame, {
     required AtmosphericParticleBudget budget,

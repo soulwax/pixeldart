@@ -3,11 +3,6 @@ import 'dart:io';
 
 import 'package:pixeldart/assets/assets.dart';
 
-/// Offline evidence tool for a licensed OBJ/MTL pair.
-///
-/// Usage: `dart run .../probe_obj_source.dart model.obj model.mtl`
-/// The source remains outside the repository and no output is written beside
-/// it. The final line is a stable digest of the normalized scene record.
 void main(List<String> arguments) {
   if (arguments.length != 2) {
     stderr.writeln('usage: probe_obj_source.dart MODEL.OBJ MATERIALS.MTL');

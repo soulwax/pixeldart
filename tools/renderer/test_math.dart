@@ -126,8 +126,6 @@ double _ndcZFromViewZ(Mat4 proj, double viewZ) {
   return clipZ / clipW;
 }
 
-/// WebGL clip-space convention: NDC z in [-1, 1]. Returns positive view-space
-/// distance from the eye.
 double _linearizeDepth(double ndcZ, double near, double far) {
   return (2 * near * far) / (far + near - ndcZ * (far - near));
 }

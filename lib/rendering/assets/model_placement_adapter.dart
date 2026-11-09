@@ -1,7 +1,5 @@
 import '../math/transform.dart';
 
-/// Immutable host-owned placement facts. It carries no domain, input, or
-/// persistence semantics and is safe to rebuild from a frame snapshot.
 final class ModelPlacementDescriptor {
   final String placementId;
   final String packageAssetId;
@@ -31,9 +29,6 @@ abstract interface class PlacementBinding {
   void dispose();
 }
 
-/// Maps stable host placement IDs to renderer bindings. Replacement is
-/// prepare-first: an existing placement remains alive if the new binding
-/// cannot attach.
 final class ModelPlacementAdapter {
   final PlacementBinding Function(ModelPlacementDescriptor placement) create;
   final Map<String, PlacementBinding> _bindings = {};

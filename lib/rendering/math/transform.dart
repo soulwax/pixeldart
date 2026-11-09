@@ -2,24 +2,11 @@ import 'mat4.dart';
 import 'quat.dart';
 import 'vec.dart';
 
-/// Translation, rotation, uniform scale, and an optional geometry-local
-/// [stretch].
-///
-/// [stretch] is a per-axis scale applied to this node's own geometry before
-/// rotation and uniform [scale]. It is deliberately *not* inherited: when a
-/// parent is composed with a child the result carries the child's stretch
-/// and only the parent's rotation and uniform scale. That keeps composition
-/// closed over translation/rotation/scale (a stretched parent would
-/// otherwise shear rotated children) while still letting any leaf be a box,
-/// a beam or a slab of arbitrary proportions. Normals stay correct because
-/// both the per-item and the instanced paths transform them with
-/// `Mat4.normalMatrix()` (the inverse transpose).
 final class Transform {
   final Vec3 translation;
   final Quat rotation;
   final double scale;
 
-  /// Geometry-local per-axis scale; (1, 1, 1) when unused.
   final Vec3 stretch;
 
   const Transform({
@@ -85,8 +72,6 @@ final class Transform {
 
   Vec3 transformDir(Vec3 d) => rotation.rotate(_stretched(d) * scale);
 
-  /// Composes this parent transform with a [child] transform. The parent's
-  /// [stretch] is not inherited; the result keeps the child's.
   Transform operator *(Transform child) => Transform(
     translation: translation + rotation.rotate(child.translation * scale),
     rotation: (rotation * child.rotation).normalized,

@@ -2,34 +2,25 @@ import 'dart:math' as math;
 
 import '../math/vec.dart';
 
-/// Precomputed Rayleigh scattering coefficients for standard terrestrial atmosphere (m^-1).
-/// Wavelengths: Red (680nm), Green (550nm), Blue (440nm).
 final class PhysicalRayleighCoefficients {
   static const double r = 5.802e-6;
   static const double g = 13.558e-6;
   static const double b = 33.100e-6;
 }
 
-/// Physical Atmospheric Scattering Engine in PixelDart.
 final class SkyAtmosphericScatteringEngine {
-  /// Base Rayleigh molecular scale height (meters).
   static const double rayleighScaleHeight = 8000.0;
 
-  /// Base Mie aerosol scale height (meters).
   static const double mieScaleHeight = 1200.0;
 
-  /// Earth radius in meters used for Chapman spherical curvature.
   static const double earthRadius = 6360000.0;
 
-  /// Atmosphere top altitude in meters.
   static const double atmosphereRadius = 6420000.0;
 
-  /// Evaluates Rayleigh molecular phase function.
   static double rayleighPhase(double cosTheta) {
     return (3.0 / (16.0 * math.pi)) * (1.0 + cosTheta * cosTheta);
   }
 
-  /// Evaluates Cornette-Shanks / Henyey-Greenstein Mie aerosol phase function.
   static double miePhase(double cosTheta, [double g = 0.76]) {
     final g2 = g * g;
     final denom = math.pow(1.0 + g2 - 2.0 * g * cosTheta, 1.5);
@@ -37,7 +28,6 @@ final class SkyAtmosphericScatteringEngine {
     return (3.0 / (8.0 * math.pi)) * ((1.0 - g2) * (1.0 + cosTheta * cosTheta) / ((2.0 + g2) * denom));
   }
 
-  /// Calculates atmospheric optical airmass using Chapman spherical geometry.
   static double calculateAirmass(double zenithAngleRadians) {
     final cosZenith = math.cos(zenithAngleRadians);
     if (cosZenith >= 0.0) {
@@ -51,7 +41,6 @@ final class SkyAtmosphericScatteringEngine {
     }
   }
 
-  /// Evaluates direct solar beam spectral transmittance and chromatic reddening.
   static Vec3 evaluateSunTransmittance({
     required double sunElevationRadians,
     double turbidity = 2.0,
@@ -70,7 +59,6 @@ final class SkyAtmosphericScatteringEngine {
     );
   }
 
-  /// Evaluates in-scattered sky color for a given view direction and sun elevation.
   static Vec3 evaluateSkyRadiance({
     required Vec3 viewDirection,
     required Vec3 sunDirection,

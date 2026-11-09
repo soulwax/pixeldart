@@ -13,8 +13,6 @@ final class PromotionBundleReport {
   bool get passed => failures.isEmpty;
 }
 
-/// Final host-facing promotion decision. It composes independent gates and
-/// never hides which lane failed.
 final class PromotionBundleGate {
   const PromotionBundleGate();
 

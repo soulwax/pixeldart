@@ -8,8 +8,6 @@ export 'device_api.dart';
 export 'pixeldart_app.dart';
 export 'texture_loader.dart';
 
-/// Owns a browser WebGL device and its context listeners. Hosts retain the
-/// lease for the renderer lifetime and call [dispose] exactly once.
 final class WebGl2DeviceLease {
   final WebGl2Device device;
 
@@ -18,9 +16,6 @@ final class WebGl2DeviceLease {
   void dispose() => device.disposeListeners();
 }
 
-/// Browser adapter that keeps WebGL2 construction out of host lifecycle code.
-/// Returns `null` when the canvas cannot provide WebGL2; no fallback renderer
-/// is invented here, so the host can publish its own explicit recovery state.
 final class WebGl2RendererFactory {
   final SceneRendererFactory rendererFactory;
 

@@ -2,11 +2,6 @@ import 'dart:math' as math;
 
 import 'vec.dart';
 
-/// Centripetal Catmull-Rom 3D Spline (\alpha = 0.5).
-///
-/// Guarantees that the curve is free of cusps and self-intersections,
-/// producing smooth, natural motion trajectories for camera flight paths and
-/// tubular geometric extrusions.
 final class CatmullRomSpline3D {
   final List<Vec3> controlPoints;
   final bool closed;
@@ -23,10 +18,8 @@ final class CatmullRomSpline3D {
     _computeArcLengths();
   }
 
-  /// Total approximate arc-length of the spline in world units.
   double get totalLength => _totalLength;
 
-  /// Samples the 3D position along the spline at normalized progress [t] in [0, 1].
   Vec3 sample(double t) {
     final clampedT = closed ? (t % 1.0 + 1.0) % 1.0 : t.clamp(0.0, 1.0);
     final count = controlPoints.length;
@@ -48,7 +41,6 @@ final class CatmullRomSpline3D {
     return _evaluateSegment(p0, p1, p2, p3, localT);
   }
 
-  /// Samples the normalized tangent direction along the spline at [t] in [0, 1].
   Vec3 sampleTangent(double t) {
     const dt = 1e-4;
     final t0 = math.max(0.0, t - dt);
@@ -59,7 +51,6 @@ final class CatmullRomSpline3D {
     return delta.lengthSquared > 1e-10 ? delta.normalized : const Vec3(0, 0, 1);
   }
 
-  /// Samples position along the spline at a specific arc distance [distance] in metres.
   Vec3 sampleAtDistance(double distance) {
     if (_totalLength <= 1e-6) return controlPoints.first;
     final targetDist = closed
@@ -88,8 +79,6 @@ final class CatmullRomSpline3D {
     return sample(t);
   }
 
-  /// Normalised tangent at arc distance [distance] in metres, pairing with
-  /// [sampleAtDistance] for steady-speed motion along the curve.
   Vec3 tangentAtDistance(double distance) {
     const step = 0.05;
     final a = sampleAtDistance(distance - step);
@@ -115,7 +104,6 @@ final class CatmullRomSpline3D {
     }
   }
 
-  /// Barry and Goldman's pyramidal centripetal Catmull-Rom formulation (\alpha = 0.5)
   Vec3 _evaluateSegment(Vec3 p0, Vec3 p1, Vec3 p2, Vec3 p3, double t) {
     const alpha = 0.5;
 

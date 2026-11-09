@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-/// Pure one-version reader for moving host settings to a Pixeldart namespace.
 final class RendererSettingsMigration {
   const RendererSettingsMigration._();
 

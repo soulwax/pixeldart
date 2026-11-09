@@ -27,10 +27,6 @@ import 'shadow_resources.dart';
 import 'ssao_resources.dart';
 import 'world.dart';
 
-/// A third, independent world program (alongside `safe_world` and
-/// `textured_world`) that samples the shadow map `ShadowFeature` wrote —
-/// kept as its own feature/pass so neither already-proven world graph
-/// gains a new failure mode from this addition.
 final class ShadowedWorldProgramSource {
   static ProgramSource build({
     required String vertexSource,
@@ -758,15 +754,6 @@ final class _ShadowedWorldPass implements RenderPass {
     }
   }
 
-  /// Resolves the item's material and applies the effects RV-08 rungs 1 and
-  /// 6 prove are genuinely wired, not just modeled data: tint color
-  /// (`uMaterialTint`), `doubleSided` overriding this pass's own cull state
-  /// per-draw via `applyDrawState`, and `emissiveStrength` driving the
-  /// declared glow attachment (`oGlow` in the shader) bloom reads — a real
-  /// material-driven state change or GPU-attachment write, not merely a
-  /// color multiply, is what proves the table actually reaches the draw
-  /// path rather than sitting unconsumed the way `MaterialDefinition`/
-  /// `MaterialHandle` did before rung 1.
   void _setMaterialState(
     DrawCommandEncoder encoder,
     MaterialHandle handle,
@@ -992,7 +979,6 @@ final class _ShadowedWorldPass implements RenderPass {
   }
 }
 
-/// Indices into `_ShadowedWorldPass._lastMaterialValues`.
 abstract final class _MaterialSlot {
   static const int tintR = 0;
   static const int tintG = 1;

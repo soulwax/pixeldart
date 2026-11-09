@@ -1,6 +1,5 @@
 import 'dart:io';
 
-/// Ensures the neutral browser example does not drift into game/bootstrap code.
 void main() {
   final package = _packageDirectory();
   final source = File('${package.path}/web/minimal/main.dart').readAsStringSync();

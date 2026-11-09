@@ -3,9 +3,6 @@ import 'dart:math' as math;
 import 'mat4.dart';
 import 'vec.dart';
 
-/// Unit quaternion, x/y/z/w with w the scalar part. Rotates using the
-/// right-handed, +Y-up, canonical-forward-+Z convention frozen for
-/// `lib/rendering/**` (plan RENDERER-ELEVATION-PLAN.md §5.7).
 final class Quat {
   final double x, y, z, w;
   const Quat(this.x, this.y, this.z, this.w);
@@ -19,7 +16,6 @@ final class Quat {
     return Quat(a.x * s, a.y * s, a.z * s, math.cos(half));
   }
 
-  /// Creates a quaternion that rotates vector [v1] into vector [v2].
   factory Quat.fromTo(Vec3 v1, Vec3 v2) {
     final a = v1.normalized;
     final b = v2.normalized;
@@ -34,7 +30,6 @@ final class Quat {
     return Quat(axis.x, axis.y, axis.z, 1.0 + d).normalized;
   }
 
-  /// Spherical linear interpolation between [a] and [b] by factor [t] in [0, 1].
   static Quat slerp(Quat a, Quat b, double t) {
     var cosHalfTheta = a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w;
 

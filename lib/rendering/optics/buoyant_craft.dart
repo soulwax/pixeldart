@@ -5,7 +5,6 @@ import '../math/transform.dart';
 import '../math/vec.dart';
 import 'gerstner_waves.dart';
 
-/// Physical 4-probe buoyant vessel simulating heave, pitch, and roll on dynamic ocean waves.
 final class BuoyantVesselBody {
   Vec3 position;
   final double width;
@@ -37,7 +36,6 @@ final class BuoyantVesselBody {
     if (mass <= 0) throw ArgumentError.value(mass, 'mass', 'must be > 0');
   }
 
-  /// Calculates world coordinates of the 4 hull contact probes.
   List<Vec3> getProbes() {
     final hw = width * 0.5;
     final hl = length * 0.5;
@@ -59,7 +57,6 @@ final class BuoyantVesselBody {
     ];
   }
 
-  /// Simulates hydrodynamics for time step [dt] against [waves] at current simulation [time].
   Transform update(double dt, double time, GerstnerWaveEvaluator waves) {
     if (dt <= 0.0) return currentTransform;
 
@@ -97,7 +94,6 @@ final class BuoyantVesselBody {
     return currentTransform;
   }
 
-  /// Returns the current 6-DoF world transform representing vessel pose.
   Transform get currentTransform {
     final qYaw = Quat.axisAngle(const Vec3(0, 1, 0), yaw);
     final qPitch = Quat.axisAngle(const Vec3(1, 0, 0), pitch);

@@ -7,15 +7,6 @@ import 'depth_prepass.dart';
 import 'present.dart';
 import 'world.dart';
 
-/// A fifth graph alongside safe/textured/shadow (`buildSafeGraph`/
-/// `buildTexturedGraph`/`buildShadowGraph`): `depthPrepass -> depthDebug ->
-/// present`, exercising §8.4 rung 4's depth prepass as a standalone,
-/// directly-inspectable view. `buildShadowGraph` also runs its own real
-/// depth prepass every frame now (feeding SSAO) — this graph's copy is
-/// deliberately independent (own program ids, own pass instance) rather
-/// than reusing that one, so toggling into the debug view can never
-/// interfere with the main pipeline's already-fresh depth. Kept as its own
-/// assembly, same reasoning as every previous `build*Graph` function.
 FeatureGraph buildDepthDebugGraph(
   ProgramLibrary programLibrary, {
   required GpuDevice device,

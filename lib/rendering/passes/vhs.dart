@@ -33,22 +33,6 @@ final class VhsProgramSource {
   );
 }
 
-/// RV-09 rung 4's VHS recording-stage treatment — §6.2's final pre-present
-/// stage, reading [Ps1Resources.ps1Output] (the fully composed, graded,
-/// PS1-quantized world — §8.10's "preserve the composed world input") and
-/// writing [VhsResources.vhsOutput]. Unlike every prior post-DOF stage,
-/// this pass also reads its own output back as history one frame later
-/// (ghosting's feedback trail), which is why [resolveHistory] exists as a
-/// second, independent resolver alongside the graph-declared write — the
-/// bootstrap backs the one logical `vhsOutput` name with two physical
-/// ping-ponged targets so a single frame's history read and write are never
-/// the same GPU object.
-///
-/// §8.10's "reduced motion halves jitter and disables ghosting" is applied
-/// here, in Dart, before any uniform reaches the shader — halving
-/// `uTrackingWeight` and zeroing `uGhostWeight` at the CPU side keeps the
-/// shader itself a plain six-weight composite with no comfort branching of
-/// its own to get wrong.
 final class VhsFeature implements RenderFeature {
   final ProgramLibrary programLibrary;
   final String vertexSource;

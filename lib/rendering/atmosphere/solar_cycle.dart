@@ -4,8 +4,6 @@ import '../api/lights.dart';
 import '../math/vec.dart';
 import 'sky_atmosphere.dart';
 
-/// Solar phases derived from geometric elevation, not arbitrary clock bands.
-/// Dawn phases are used before solar noon and dusk phases after it.
 enum SolarPhase {
   polarNight,
   astronomicalDawn,
@@ -24,9 +22,6 @@ enum SolarPhase {
   polarDay,
 }
 
-/// Host-owned facts needed to resolve one continuous solar state. The
-/// renderer does not own a calendar or location; it only evaluates the
-/// supplied astronomical inputs and weather attenuation.
 final class SolarCycleInput {
   final double timeHours;
   final double solarNoonHours;
@@ -100,7 +95,6 @@ final class SolarCycleInput {
   }
 }
 
-/// Continuous renderer-facing solar and atmospheric state for one frame.
 final class SolarLightingState {
   final SolarPhase phase;
   final double timeHours;
@@ -108,11 +102,7 @@ final class SolarLightingState {
   final double sunsetHours;
   final bool hasRiseAndSet;
   final double sunElevationRadians;
-  /// Geometric twilight amount across astronomical dawn/dusk, independent of
-  /// the discrete [phase] label. This remains continuous for interpolation.
   final double twilightFactor01;
-  /// Smooth visibility of the solar disc around the apparent horizon. This is
-  /// not a binary sunrise switch; it includes a bounded refraction transition.
   final double horizonVisibility01;
   final double sunAzimuthRadians;
   final Vec3 sunDirection;
@@ -191,7 +181,6 @@ final class SolarLightingState {
   }
 }
 
-/// Deterministic solar geometry and weather attenuation evaluator.
 final class SolarCycleEngine {
   // Standard apparent sunrise/sunset elevation, including average refraction
   // and the solar disc radius. Hosts can still choose a different authored

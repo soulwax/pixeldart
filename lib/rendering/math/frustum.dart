@@ -17,9 +17,6 @@ final class Plane {
 
 enum FrustumTest { outside, intersects, inside }
 
-/// Six planes in order left, right, bottom, top, near, far, extracted from a
-/// combined view-projection matrix so CPU culling always matches the GPU's
-/// actual clip volume for the same frame.
 final class Frustum {
   final List<Plane> planes;
 

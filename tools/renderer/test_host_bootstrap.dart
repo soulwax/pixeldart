@@ -15,11 +15,6 @@ Future<void> expectThrows(Future<void> Function() body, String what) async {
   throw StateError('host bootstrap: $what should have thrown');
 }
 
-/// A renderer double that fails initialization for a chosen set of profiles.
-///
-/// The bootstrap ladder is a policy over `initialize` outcomes, so the double
-/// only needs to model that. Everything else throws, which keeps the fixture
-/// honest about what it is exercising.
 final class _LadderRenderer implements SceneRenderer {
   final Set<QualityProfileKind> failingKinds;
   final List<QualityProfileKind> attempted = [];

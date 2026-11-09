@@ -32,12 +32,6 @@ const int _surfaceVersion = 2;
 const int _compatibilityStride = 14;
 const Set<int> _surfaceStrides = {18, 20};
 
-/// Strict QMSH v1/v2 decoder (RENDERER-ELEVATION-PLAN.md §5.4, RV-06 Phase A).
-/// Validates magic, version, stride, exact byte length, finite bounds, and
-/// `vertexCount % 3 == 0` before interpreting a single vertex — a malformed
-/// file is rejected wholesale, never partially decoded. Performs no
-/// geometry interpretation beyond what the format itself declares (Q18's
-/// TODO.md contract: "It performs no geometry interpretation").
 MeshData decodeQmesh(Uint8List bytes) {
   if (bytes.length < _headerBytes) {
     throw QmeshDecodeException(

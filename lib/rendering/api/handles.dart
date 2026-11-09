@@ -1,8 +1,3 @@
-/// Stable logical resource references (§5.3). Each handle carries a
-/// resource-slot index and a generation counter; a resource store rejects
-/// wrong handle kind, stale generation, double release, and draw-after-
-/// release. Backend-only GPU handles are a separate, unexported concept
-/// that carries a device epoch and is never constructed here.
 sealed class ResourceHandle {
   final int slot;
   final int generation;
@@ -73,9 +68,6 @@ final class PipelineHandle extends ResourceHandle {
       'PipelineHandle(#$slot.$generation${_labelSuffix(debugLabel)})';
 }
 
-/// A retained scene item's stable presentation identity (§5.5). Distinct
-/// from [ResourceHandle]: it identifies a persistent instance in a
-/// [RenderWorld], not a shared GPU resource.
 final class InstanceId extends ResourceHandle {
   const InstanceId(super.slot, super.generation, [super.debugLabel]);
 
@@ -88,9 +80,6 @@ final class InstanceId extends ResourceHandle {
 
 String _labelSuffix(String? label) => label == null ? '' : ' "$label"';
 
-/// Reason a [ResourceHandle] was rejected by a logical resource store.
-/// RV-02's registry raises these; RV-01 only defines the vocabulary so pure
-/// tests can assert against it without a GPU backend.
 enum HandleRejection {
   wrongKind,
   staleGeneration,

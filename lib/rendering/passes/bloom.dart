@@ -31,14 +31,6 @@ final class BloomBlurProgramSource {
   );
 }
 
-/// §8.7's bloom blur, one pass per axis (separable 5-tap gaussian, run
-/// horizontal then vertical rather than one 2D kernel — the standard
-/// technique for keeping a wide blur radius affordable). The horizontal
-/// pass samples `sceneColor`'s glow attachment directly via
-/// `bindGlowTexture` — the "declared emissive attachment" §8.7 requires
-/// bloom to read, never inferring glow from final composited color; the
-/// vertical pass samples the horizontal pass's own output like any other
-/// color texture.
 final class BloomBlurFeature implements RenderFeature {
   final ProgramLibrary programLibrary;
   final String vertexSource;
@@ -214,13 +206,6 @@ final class BloomCompositeProgramSource {
   );
 }
 
-/// §8.7's final stage: additively blends the blurred bloom texture onto the
-/// already-resolved `sceneColor` — `blendSrc: one, blendDst: one` so this
-/// pass only ever adds light, never replaces or darkens what
-/// `shadowedWorld` already wrote. Deliberately does not clear its target
-/// (the whole point is compositing on top of existing content) and runs
-/// after the MSAA resolve, so it operates on the single-sample `sceneColor`
-/// `present` will read next, not the multisampled target.
 final class BloomCompositeFeature implements RenderFeature {
   final ProgramLibrary programLibrary;
   final String vertexSource;

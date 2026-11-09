@@ -2,8 +2,6 @@ import '../api/handles.dart';
 import '../math/bounds.dart';
 import '../math/transform.dart';
 
-/// One authored geometry range. Ranges are ordered from near to far and use
-/// half-open distance semantics: [minDistance, maxDistance).
 final class ModelLod {
   final String key;
   final double minDistance;
@@ -30,8 +28,6 @@ final class ModelLod {
   }
 }
 
-/// A named material replacement for a part. The handles remain shared GPU
-/// resources; the model definition owns only the stable slot/variant mapping.
 final class ModelMaterialVariant {
   final String key;
   final MaterialHandle material;
@@ -67,8 +63,6 @@ final class ModelPart {
     return null;
   }
 
-  /// Resolves the default material or a named shared variant. Unknown names
-  /// are rejected rather than silently falling back to the wrong surface.
   MaterialHandle materialForVariant([String? name]) {
     if (name == null || name.isEmpty) return material;
     final selected = variant(name);
@@ -78,9 +72,6 @@ final class ModelPart {
     return selected.material;
   }
 
-  /// Returns the authored LOD containing [distance], using half-open ranges.
-  /// A distance outside every authored range returns null so the caller must
-  /// choose an explicit policy instead of silently drawing the wrong detail.
   ModelLod? lodForDistance(double distance) {
     if (!distance.isFinite || distance < 0) {
       throw ArgumentError.value(
@@ -148,10 +139,6 @@ final class ModelSocket {
   const ModelSocket(this.name, this.transform);
 }
 
-/// Composes reusable mesh/material parts into one authored model (§5.4).
-/// Carries no room, examine tag, or collision rule — only geometry
-/// identity, so the same definition can back both a static prop and an
-/// instanced batch member.
 final class ModelDefinition {
   final String key;
   final List<ModelPart> parts;

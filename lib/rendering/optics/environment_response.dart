@@ -1,18 +1,8 @@
 import '../api/lights.dart';
 
-/// Resolves a bounded environment colour for glossy and wet surfaces.
-///
-/// Hosts own the sky, directional source, and any located in-scattering
-/// radiance. Pixeldart only combines those already-resolved facts into a
-/// display-safe fallback; it does not allocate probes or claim a screen-space
-/// hit. The same sky/source facts can therefore drive fog, shafts, and surface
-/// response without duplicating weather or time-of-day policy in the renderer.
 final class EnvironmentResponse {
   const EnvironmentResponse._();
 
-  /// Blends sky radiance with a bounded key-light tint and a small contribution
-  /// from located medium radiance. Values are clamped to [0, 1] because this
-  /// colour is an environment fallback, not an HDR probe payload.
   static LinearColor resolve({
     required LinearColor skyColor,
     required LinearColor keyLightColor,

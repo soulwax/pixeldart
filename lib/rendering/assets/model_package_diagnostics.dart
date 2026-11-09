@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-/// Stable, source-neutral snapshot for tooling and browser automation.
 final class ModelPackageDiagnostics {
   final String assetId;
   final String activeLod;

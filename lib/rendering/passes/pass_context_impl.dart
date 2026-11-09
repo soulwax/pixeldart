@@ -3,8 +3,6 @@ import '../core/render_feature.dart';
 import '../webgl/device_api.dart';
 import '../webgl/draw_encoder.dart';
 
-/// Backend GPU object plus the [ResourceRef] it was declared against, bound
-/// as a target/texture by the pass graph before `execute()` runs.
 final class BoundResourceView implements ResourceView {
   @override
   final ResourceRef resource;
@@ -12,10 +10,6 @@ final class BoundResourceView implements ResourceView {
   const BoundResourceView(this.resource, this.gpuObject);
 }
 
-/// Concrete `RenderPassContext` (§5.6). Scoped to exactly the resource
-/// views its owning pass declared — a lookup for anything else throws,
-/// which is the actual enforcement of "cannot reach another pass's private
-/// target," not merely documentation of intent.
 final class BoundPassContext implements RenderPassContext {
   final Map<String, BoundResourceView> views;
   final DrawCommandEncoder encoder;

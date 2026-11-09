@@ -2,16 +2,6 @@ import 'dart:typed_data';
 
 import '../api/mesh.dart';
 
-/// Deterministically deduplicates expanded (non-indexed) vertices by their
-/// exact packed float tuple, producing a real `Uint16` index buffer without
-/// interpreting or approximating any value (§5.4). Two vertices are the
-/// same only if every one of their `layout.strideFloats` values is
-/// bit-identical — this is deliberately stricter than an epsilon
-/// comparison, so it never silently merges two vertices an author meant to
-/// keep distinct (e.g. a hard edge with a duplicated position but a
-/// different normal). The resulting index width is selected from the final
-/// unique-vertex count: compact Uint16 for ordinary meshes, Uint32 when an
-/// authored mesh genuinely crosses the 65,536-vertex boundary.
 MeshData deduplicateMesh(MeshData source) {
   if (source.indices != null) {
     return source;

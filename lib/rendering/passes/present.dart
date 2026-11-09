@@ -16,9 +16,6 @@ import '../webgl/draw_encoder.dart';
 import 'pass_context_impl.dart';
 import 'safe_graph_resources.dart';
 
-/// CPU reference for the final shader's deterministic color contract. It is
-/// used by pure color-ramp fixtures; the live image path remains GLSL so the
-/// conversion runs per pixel on the GPU.
 final class PresentOutputPolicy {
   const PresentOutputPolicy._();
 
@@ -110,29 +107,6 @@ final class PresentProgramSource {
   );
 }
 
-/// §6.1's final stage: NEAREST blit of `sceneColor` to the default (canvas)
-/// framebuffer. `bindTarget(null)` targets the canvas per
-/// `DrawCommandEncoder`'s contract. [programId] defaults to `'present'` but
-/// must be overridden to a distinct value whenever two independently-built
-/// graphs share one `ProgramLibrary` and are both live in the same frame
-/// loop (as `buildShadowGraph` and `buildDepthDebugGraph` are in the
-/// renderer-test bootstrap) — `ProgramLibrary.publish` deletes the
-/// *previous* program registered under the same id once a new one compiles,
-/// so two `PresentFeature`s both defaulting to `'present'` would have the
-/// second one silently invalidate the first's already-compiled program,
-/// producing a `useProgram: Object already deleted` GL warning the moment
-/// the first graph's present pass runs again.
-///
-/// [sceneColorResource] defaults to `SafeGraphResources.sceneColor` (version
-/// 0) but must be overridden to a later version whenever a pass between the
-/// world pass and present also *writes* sceneColor — `buildShadowGraph`'s
-/// bloom composite does exactly this (§8.7), and reading the base version
-/// there would collide with the graph validator's duplicate-writer check
-/// (two passes both declaring a write to `sceneColor#0`) the moment bloom
-/// tried to declare its own write. `viewOf` only ever keys off the
-/// resource's *name*, never its version, so this override changes nothing
-/// about which real GPU object gets bound at runtime — it only changes what
-/// the declared graph honestly claims about write ordering.
 final class PresentFeature implements RenderFeature {
   final ProgramLibrary programLibrary;
   final String vertexSource;

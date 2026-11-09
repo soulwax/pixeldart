@@ -9,12 +9,6 @@ const double _cell = 4;
 const int _levels = 9;
 const List<int> _bayer = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5];
 
-/// The night: a grid of multiply rectangles over the whole view.
-///
-/// Multiply can only darken, so a soft light sprite can't cut a hole in a
-/// darkness already drawn. Each cell's brightness is summed on the CPU
-/// instead, and quantized and dithered, which suits the art; equal
-/// neighbours merge into one rectangle.
 final class NightLight {
   final Art art;
   Float32List _grid = Float32List(0);
@@ -25,7 +19,6 @@ final class NightLight {
 
   NightLight(this.art);
 
-  /// Starts a frame over [camera]'s view. [darkness] 0 is dusk, 1 midnight.
   void begin(Camera2D camera, double darkness) {
     _originX = (camera.left / _cell).floorToDouble() * _cell;
     _originY = (camera.top / _cell).floorToDouble() * _cell;
@@ -50,7 +43,6 @@ final class NightLight {
     }
   }
 
-  /// Adds a pool of light; [strength] 1 is full brightness at its centre.
   void add(double x, double y, double radius, double strength) {
     final firstColumn = math.max(0, ((x - radius - _originX) / _cell).floor());
     final lastColumn = math.min(_columns - 1, ((x + radius - _originX) / _cell).ceil());
@@ -69,7 +61,6 @@ final class NightLight {
     }
   }
 
-  /// Emits the rectangles.
   void draw(SpriteBatch batch) {
     final solid = art.solid;
     // The dither follows world cells so it doesn't crawl as the view moves.

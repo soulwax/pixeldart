@@ -7,8 +7,6 @@ import 'art.dart';
 
 const int _maxParticles = 6000;
 
-/// Short-lived sprites in flat arrays. Past the cap, new ones are dropped;
-/// nobody counts sparks in the middle of a swarm.
 final class Particles {
   final Art art;
   final math.Random rng;
@@ -53,7 +51,6 @@ final class Particles {
     _glow[i] = glow;
   }
 
-  /// A radial spray of [count] particles.
   void burst(
     SpriteRegion region,
     double x,

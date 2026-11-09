@@ -6,11 +6,6 @@ import 'present.dart';
 import 'textured_world.dart';
 import 'world.dart';
 
-/// A second graph alongside the mandatory safe graph (`buildSafeGraph`):
-/// `texturedWorld -> present`, exercising the sampler2D/mipmap path
-/// `WorldFeature` deliberately never touches. Kept as its own assembly
-/// function, not a flag on `buildSafeGraph`, so the safe graph's own
-/// already-proven correctness has no new code path through it.
 FeatureGraph buildTexturedGraph(
   ProgramLibrary programLibrary, {
   required GpuDevice device,

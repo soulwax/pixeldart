@@ -1,11 +1,5 @@
 import '../core/graph_resource.dart';
 
-/// Shared resource identities for §6.1's mandatory safe graph (`world
-/// opaque -> world transparent -> present`). One definition per resource so
-/// `WorldFeature` and `PresentFeature` always agree on name/format/size —
-/// disagreement here is exactly what RV-03's `formatOrSizeMismatch` check
-/// exists to catch, so keeping one source avoids ever triggering it by
-/// accident.
 final class SafeGraphResources {
   const SafeGraphResources._();
 

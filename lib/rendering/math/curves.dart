@@ -1,6 +1,5 @@
 import 'dart:math' as math;
 
-/// Evaluates a normalized progression in [0, 1] through an easing transfer function.
 abstract interface class Curve {
   double transform(double t);
 }
@@ -13,7 +12,6 @@ final class _FuncCurve implements Curve {
   double transform(double t) => _eval(t.clamp(0.0, 1.0));
 }
 
-/// Common animation easing curves.
 abstract final class Curves {
   static const Curve linear = _FuncCurve(_linear);
   static const Curve easeInQuad = _FuncCurve(_easeInQuad);
@@ -75,7 +73,6 @@ abstract final class Curves {
   }
 }
 
-/// Parametric cubic Bézier curve defined by control points (x1, y1) and (x2, y2).
 final class CubicBezier implements Curve {
   final double x1, y1, x2, y2;
   const CubicBezier(this.x1, this.y1, this.x2, this.y2);

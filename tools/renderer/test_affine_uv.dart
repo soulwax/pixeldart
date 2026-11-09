@@ -14,17 +14,6 @@ import 'package:pixeldart/rendering/webgl/generated_shaders.dart';
 
 import 'fake_gpu_device.dart';
 
-/// Pins the affine-UV gate: `uAffineWarpStrength` is the product of the
-/// frame's `PostProcessState.affineWarpStrength` and the drawn material's
-/// own `MaterialDefinition.affineSampling`, resolved per draw rather than
-/// once per pass. Browser evidence can show the ground's texture warping,
-/// but it cannot cheaply show that a *second* material in the same frame
-/// stayed perspective-correct — every item in the demo scene that could
-/// serve as a still control is animated. This fixture is that control.
-///
-/// The two "neither field alone turns it on" cases are the ones worth
-/// pinning: an opted-in material in a zero-weight frame, and a default
-/// material in a full-weight frame, must both come out at exactly 0.
 void main() {
   _perDrawStrengthMultipliesFrameWeightByMaterialOptIn();
   _zeroFrameWeightSuppressesEvenAnOptedInMaterial();
@@ -97,10 +86,6 @@ RetainedItemView _item(MaterialHandle material) {
   );
 }
 
-/// The recorded `uAffineWarpStrength` values, in draw order, produced by
-/// running the real `ShadowedWorldFeature` pass over [items] at
-/// [frameWarpStrength]. The pass sets one such uniform per draw, so the
-/// returned list is one entry per item.
 List<double> _warpStrengthsFor(
   List<MaterialHandle> items,
   double frameWarpStrength,

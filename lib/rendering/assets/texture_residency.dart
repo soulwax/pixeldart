@@ -1,9 +1,6 @@
 import '../api/handles.dart';
 import 'texture_store.dart';
 
-/// Stable request identity for a texture that should be present for a
-/// working-set transition. The request does not own [handle] and never
-/// releases it; ownership remains with [TextureStore]/[ResourceLibrary].
 final class TextureResidencyRequest {
   final String key;
   final TextureHandle handle;
@@ -27,7 +24,6 @@ final class TextureResidencyRequest {
 
 enum TextureResidencyStatus { resident, pending, missing, evicted }
 
-/// One deterministic result from [TextureResidencyManager.prewarm].
 final class TextureResidencyResult {
   final TextureResidencyRequest request;
   final TextureResidencyStatus status;
@@ -37,7 +33,6 @@ final class TextureResidencyResult {
   bool get isUsable => status == TextureResidencyStatus.resident;
 }
 
-/// Immutable report for one prewarm/probe pass.
 final class TextureResidencyReport {
   final List<TextureResidencyResult> results;
   final int uniqueHandleCount;
@@ -56,14 +51,6 @@ final class TextureResidencyReport {
       results.where((result) => result.status == status).length;
 }
 
-/// Deterministic, ownership-neutral prewarm/residency planner.
-///
-/// A prewarm pass only probes existing [TextureStore] handles. It never
-/// allocates a duplicate texture, performs I/O, or releases an asset. A
-/// declared handle that resolves to the store's fallback is
-/// [TextureResidencyStatus.pending];
-/// an invalid handle is [missing], unless this planner observed it resident in
-/// an earlier pass, in which case its later failure is diagnosed as [evicted].
 final class TextureResidencyManager {
   final TextureStore store;
   final Map<TextureHandle, bool> _wasResident = {};

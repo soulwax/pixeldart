@@ -1,8 +1,5 @@
 import 'package:pixeldart/pixeldart.dart';
 
-/// `worldToScreenPoint` must invert `screenPointToRay`: the ray through the
-/// projected pixel passes through the original point, for perspective and
-/// orthographic cameras alike.
 void main() {
   const width = 1280, height = 720;
   final cameras = {

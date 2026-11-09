@@ -33,15 +33,6 @@ const _maxTextureMaxAnisotropyExt = 34047;
 const _unmaskedRendererWebgl = 0x9246;
 const _unmaskedVendorWebgl = 0x9245;
 
-/// Wraps either a raw JS interop handle (buffer/texture/VAO/program) or a
-/// composite Dart-side record (the multi-attachment framebuffer bundle
-/// backing a render target). [handle] is deliberately `Object`, not
-/// `JSObject`, since a target has no single JS object identity of its own —
-/// it is several JS objects plus Dart-side width/height/sample-count
-/// bookkeeping.
-/// One linked program's uniform locations. Names the program doesn't have
-/// (declared but optimized out) are remembered separately, so a missing
-/// uniform set every frame doesn't query the context every frame.
 final class _UniformLocations {
   final Map<String, WebGLUniformLocation> found = {};
   final Set<String> missing = {};
@@ -50,8 +41,6 @@ final class _UniformLocations {
 final class _WebGpuObject implements GpuObject {
   final Object handle;
 
-  /// The context generation that created [handle]. After a restore, objects
-  /// from earlier generations are already gone with their context.
   final int generation;
 
   const _WebGpuObject(this.handle, this.generation);
@@ -102,17 +91,6 @@ final class _WebGlTimerQuery {
   _WebGlTimerQuery(this.query);
 }
 
-/// Real WebGL2 implementation of `GpuDevice` (§4.1, §7.1-7.2, §7.4), split
-/// across three files by responsibility (this coordinator, `_resources` for
-/// create/upload/delete, `_draw` for the per-frame command surface) to stay
-/// under the 350-line WebGL-device-file cap. This is the only code under
-/// `lib/rendering/webgl/**` whose calls have never run against an actual
-/// context — `tools/renderer/check_boundary.dart` confirms it is the
-/// correct place for `package:web`/`dart:js_interop`, but that only proves
-/// the import boundary, not correctness. Every method mirrors a pattern
-/// already proven in the legacy `lib/engine/gl.dart`; nothing here is
-/// speculative GL usage, but it is unexecuted GL usage until a browser
-/// session confirms it.
 final class WebGl2Device with _WebGlTimerSupport implements GpuDevice, GpuContextGeneration {
   @override
   final WebGL2RenderingContext gl;
@@ -131,15 +109,8 @@ final class WebGl2Device with _WebGlTimerSupport implements GpuDevice, GpuContex
     _boundUniforms = program == null ? null : _uniformLocations.putIfAbsent(program, _UniformLocations.new);
   }
 
-  /// The location table of [boundProgram], fetched once per bind so that
-  /// setting a uniform costs a single string lookup.
   _UniformLocations? _boundUniforms;
 
-  /// Attaches real `webglcontextlost`/`webglcontextrestored` listeners
-  /// (§7.4) on construction. `preventDefault()` on the loss event is what
-  /// stops the browser's default *permanent* context loss and allows
-  /// `webglcontextrestored` to fire at all — omitting it means a lost
-  /// context never comes back regardless of anything else this class does.
   WebGl2Device(this.gl) : _supportedExtensions = _readSupportedExtensions(gl) {
     final canvasTarget = gl.canvas as EventTarget;
     _lostListener =
@@ -175,23 +146,12 @@ final class WebGl2Device with _WebGlTimerSupport implements GpuDevice, GpuContex
     return enabled;
   }
 
-  /// Extensions requested on the current context. A restored context starts
-  /// with none enabled; their enums (timer queries, anisotropy) are invalid
-  /// until each is requested again.
   final Set<String> _enabledExtensions = {};
 
-  /// Uniform locations per linked program, filled on first use. A program's
-  /// locations never change after linking; entries go with the program.
   final Map<WebGLProgram, _UniformLocations> _uniformLocations = {};
 
-  /// Whether [object] came from a context that has since been lost. Deleting
-  /// such a handle is both pointless and a WebGL error.
   bool _isStale(GpuObject object) => (object as _WebGpuObject).generation != _contextGeneration;
 
-  /// Detaches the listeners installed in the constructor. Callers must
-  /// invoke this before dropping their last reference to a `WebGl2Device`,
-  /// matching `SceneRenderer.dispose()`'s idempotent-cleanup contract
-  /// (§5.1) once a concrete `SceneRenderer` wraps this class.
   void disposeListeners() {
     final canvasTarget = gl.canvas as EventTarget;
     final lost = _lostListener;
@@ -271,9 +231,6 @@ final class WebGl2Device with _WebGlTimerSupport implements GpuDevice, GpuContex
   double _validAnisotropyLimit(double value) =>
       value.isFinite && value >= 1 ? value : 1.0;
 
-  /// Reports the sampler negotiation retained on a texture created by this
-  /// device.  Keeping this on the backend object makes diagnostics honest:
-  /// the descriptor is only a request, whereas this is what WebGL accepted.
   AnisotropyDecision anisotropyDecisionOf(GpuObject texture) {
     final value = (texture as _WebGpuObject).handle;
     if (value is! _WebGlTexture) {

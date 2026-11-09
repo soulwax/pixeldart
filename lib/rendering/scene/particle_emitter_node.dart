@@ -6,24 +6,11 @@ import '../math/transform.dart';
 import '../particles/particle_emitter.dart';
 import 'scene_node.dart';
 
-/// Scene graph node that hosts and drives a [ParticleEmitter].
-///
-/// Handles hierarchical transformation, world-space trailing versus local-space
-/// anchoring, compound bounds reporting for frustum culling, and transient or
-/// retained world synchronization.
 final class ParticleEmitterNode extends SceneNode {
-  /// Underlying particle simulation engine.
   final ParticleEmitter emitter;
 
-  /// When `true` (standard for smoke, fire, and sparks), particles simulate in
-  /// world space so that moving the parent node leaves a physical trail behind.
-  /// When `false` (standard for auras or energy shields), particles remain
-  /// rigidly anchored to this node's local coordinate system.
   bool simulateInWorldSpace;
 
-  /// Whether this node synchronizes active particles as retained items in
-  /// [RenderWorld] during [syncToWorld]. Defaults to `false`, as particle systems
-  /// achieve peak performance via frame-local transient [submit].
   bool syncWithRetainedWorld;
 
   final List<InstanceId> _retainedIds = [];
@@ -45,10 +32,8 @@ final class ParticleEmitterNode extends SceneNode {
           instanceFamilyKey: emitter.instanceFamilyKey,
         );
 
-  /// Number of currently active particles in the hosted emitter.
   int get activeParticleCount => emitter.activeCount;
 
-  /// Total capacity of the hosted emitter.
   int get capacity => emitter.capacity;
 
   @override
@@ -59,14 +44,11 @@ final class ParticleEmitterNode extends SceneNode {
     return super.worldBounds;
   }
 
-  /// Updates the emitter transform from this node's [worldTransform] and
-  /// advances the simulation by [dt] seconds.
   void update(double dt) {
     emitter.transform = worldTransform;
     emitter.update(dt);
   }
 
-  /// Submits all active particles as frame-local transient items through [encoder].
   int submit(RenderEncoder encoder, FrameInput frame) {
     return emitter.submit(encoder, frame);
   }

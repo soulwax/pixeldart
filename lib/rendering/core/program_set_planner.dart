@@ -1,8 +1,6 @@
 import '../api/capabilities.dart';
 import 'program_source.dart';
 
-/// Deterministically maps an installed profile to the exact shader sources a
-/// renderer candidate must compile. It performs no GPU work.
 final class ProgramSetPlanner {
   const ProgramSetPlanner();
 

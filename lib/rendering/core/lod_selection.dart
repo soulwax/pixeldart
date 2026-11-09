@@ -1,12 +1,6 @@
 import '../api/handles.dart';
 import '../assets/model_definition.dart';
 
-/// The authored LOD selected for one model part at one camera distance.
-///
-/// [index] is the stable position in the validated [ModelPart.lods] list;
-/// [lod] is kept alongside it so callers do not need to search the list again.
-/// Selection is presentation state only: it never acquires or releases a
-/// mesh, material, texture, or instance resource.
 final class LodSelection {
   final int index;
   final ModelLod lod;
@@ -17,22 +11,11 @@ final class LodSelection {
   String toString() => 'LodSelection(${lod.key}#$index)';
 }
 
-/// Chooses an authored LOD deterministically, with distance hysteresis.
-///
-/// Authored ranges remain half-open (`[minDistance, maxDistance)`). When a
-/// previous selection is supplied, it is retained while the distance remains
-/// within that LOD's range expanded by [hysteresisDistance] on both sides.
-/// This makes a camera hovering around a boundary keep one result instead of
-/// repeatedly changing LOD. Gaps and distances outside the authored ranges
-/// return `null`; the caller must decide whether that means culling or another
-/// explicit fallback policy.
 final class LodSelector {
   final double hysteresisDistance;
 
   const LodSelector({this.hysteresisDistance = 0});
 
-  /// Returns the LOD for [part] at [distance], optionally retaining [previous]
-  /// while the distance is inside its hysteresis band.
   LodSelection? select(
     ModelPart part,
     double distance, {
@@ -92,12 +75,6 @@ final class LodSelector {
   }
 }
 
-/// Maintains independent hysteresis state for each instance and model part.
-///
-/// The map contains only the selected authored LOD. It deliberately does not
-/// own GPU resources, so changing a selection cannot change mesh/material
-/// ownership or instance allocation. [remove] and [clear] are explicit scene
-/// lifecycle hooks for instances that leave the retained world.
 final class InstanceLodSelector {
   final LodSelector selector;
   final Map<InstanceId, Map<ModelPart, LodSelection>> _selected = {};
@@ -126,13 +103,10 @@ final class InstanceLodSelector {
     return next;
   }
 
-  /// Drops all LOD state for one retained instance without touching its
-  /// resources. Calling this for an unknown instance is a no-op.
   void remove(InstanceId instance) {
     _selected.remove(instance);
   }
 
-  /// Drops all per-instance presentation state.
   void clear() {
     _selected.clear();
   }
@@ -142,8 +116,6 @@ final class InstanceLodSelector {
   int get trackedSelectionCount =>
       _selected.values.fold<int>(0, (total, byPart) => total + byPart.length);
 
-  /// Presentation telemetry for renderer diagnostics. These counters are
-  /// cumulative for the selector lifetime and do not own GPU resources.
   int get selectionChanges => _selectionChanges;
   int get cullEvents => _cullEvents;
 }

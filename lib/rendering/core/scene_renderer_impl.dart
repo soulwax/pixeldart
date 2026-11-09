@@ -9,6 +9,7 @@ import '../api/mesh.dart';
 import '../api/renderer.dart';
 import '../api/scene.dart';
 import '../api/settings.dart';
+import '../api/shaders.dart';
 import '../api/stats.dart';
 import '../math/bounds.dart';
 import '../assets/material_store.dart';
@@ -71,6 +72,9 @@ final class SceneRendererImpl with _GpuTimingSupport implements SceneRenderer {
   RendererConfiguration get configuration =>
       _configuration ?? (throw StateError('renderer is not initialized'));
   @override
+  Map<ShaderSlot, String> get shaderErrors =>
+      _programs?.overrideErrors ?? const {};
+  @override
   ResourceLibrary get resources =>
       _resources ?? (throw StateError('renderer is not initialized'));
   @override
@@ -81,6 +85,9 @@ final class SceneRendererImpl with _GpuTimingSupport implements SceneRenderer {
     if (_state != RendererState.constructed) {
       throw StateError('renderer can only be initialized once');
     }
+    configuration = configuration.withShaderOverrides(
+      configuration.shaderOverrides,
+    );
     configuration.validate();
     surface.validate();
     if (device.status == GpuDeviceStatus.lost) {
@@ -92,7 +99,11 @@ final class SceneRendererImpl with _GpuTimingSupport implements SceneRenderer {
       _configurations.initialize(configuration);
       _resources = ResourceLibraryImpl(device);
       _gpuResources = GpuResourcePlanAdapter(device)..initialize(configuration);
-      _programs = ProgramLibrary(device);
+      _programs = ProgramLibrary(
+        device,
+        overrides: configuration.shaderOverrides,
+        fallbackToDefaults: true,
+      );
       _configuration = configuration;
       _buildSafeGraph();
       _state = RendererState.ready;
@@ -236,8 +247,6 @@ final class SceneRendererImpl with _GpuTimingSupport implements SceneRenderer {
     _state = RendererState.disposed;
   }
 
-  /// The device's context generation when this renderer last had valid GPU
-  /// objects, or null for devices that don't count restores.
   int? _seenContextGeneration;
 
   int? get _deviceContextGeneration => switch (device) {

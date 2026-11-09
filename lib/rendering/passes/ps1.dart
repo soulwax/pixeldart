@@ -25,23 +25,6 @@ final class Ps1QuantizeProgramSource {
   );
 }
 
-/// RV-09 rung 3's PS1 quantize+dither — §6.2 places this immediately after
-/// LUT grade and before VHS (not built yet). Reads
-/// [GradeResources.gradeOutput], writes its own distinct
-/// [Ps1Resources.ps1Output], same reasoning as every prior post-DOF stage:
-/// this shader reads the pre-quantize scene as one input texture while
-/// writing a different one in the same draw call.
-///
-/// Covers only the "quantization/dither is an explicit composite" piece of
-/// §6.2's PS1 world behavior list. Vertex snapping was wired directly into
-/// `shadowed_world.vert`/`.dart` this same rung (§9's "vertex snapping...
-/// live[s] in the world vertex path", not a post-process), and affine UV
-/// joined it there in a follow-up packet — both are world-path vertex
-/// behaviors, so neither is reachable from this composite. Vertex lighting
-/// (would move `shadowedWorld`'s already browser-confirmed N·L/shadow/
-/// ambient math from per-fragment to per-vertex, changing the existing lit
-/// look even when the PS1 profile is off unless very carefully gated)
-/// remains undone — see the board packet.
 final class Ps1QuantizeFeature implements RenderFeature {
   final ProgramLibrary programLibrary;
   final String vertexSource;

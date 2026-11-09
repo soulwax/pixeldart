@@ -1,19 +1,11 @@
 import 'dart:typed_data';
 
-/// Built-in fallback pixel data (§5.3): missing optional art cannot make
-/// geometry disappear. Each is a single-texel RGBA8 payload; the backend
-/// uploads it as a 1x1 texture and samplers read it until a real asset
-/// publishes.
 final class FallbackPixels {
   static final Uint8List whiteAlbedo = Uint8List.fromList([255, 255, 255, 255]);
   static final Uint8List flatNormal = Uint8List.fromList([128, 128, 255, 255]);
-  /// Neutral (white) like ORM and lightmap: with no emissive map,
-  /// `emissiveStrength × tint` alone sets the glow. Strength 0 (the default)
-  /// still emits nothing. A black fallback made strength silently inert.
   static final Uint8List neutralEmissive = Uint8List.fromList([255, 255, 255, 255]);
   static final Uint8List whiteAo = Uint8List.fromList([255, 255, 255, 255]);
 
-  /// Neutral linear ORM: full occlusion, neutral roughness 1, neutral metal 1.
   static final Uint8List identityOrm = Uint8List.fromList([255, 255, 255, 255]);
   static final Uint8List neutralLightmap = Uint8List.fromList([
     255,

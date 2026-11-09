@@ -2,9 +2,6 @@ import 'dart:js_interop';
 
 import 'package:web/web.dart' as web;
 
-/// Small HTMLAudioElement-backed mixer: a round-robin voice pool per effect so
-/// rapid repeats overlap instead of cutting each other off, plus one looping
-/// engine voice whose rate follows the ship's speed.
 final class Sound {
   final Map<String, List<web.HTMLAudioElement>> _voices = {};
   final Map<String, int> _next = {};
@@ -46,8 +43,6 @@ final class Sound {
     voice.play().toDart.then((_) {}, onError: (Object _) {});
   }
 
-  /// Starts, stops or re-pitches the engine loop. [rate] is clamped to the
-  /// range browsers accept without complaint.
   void engine({required bool running, double rate = 1.0}) {
     final e = _engine;
     if (e == null) return;

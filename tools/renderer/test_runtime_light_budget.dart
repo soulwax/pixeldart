@@ -3,13 +3,6 @@ import 'dart:io';
 import 'package:pixeldart/rendering/passes/pipeline_resource_layout.dart';
 import 'package:pixeldart/rendering/rendering.dart';
 
-/// Pins `RuntimeLightBudget` to the two artefacts that actually define it: the
-/// shadowed world fragment shader's light uniforms, and the pipeline resource
-/// layout's shadow-map allocation.
-///
-/// RENDERER plan packet R-A5. Without this, `RuntimeLightBudget` is just
-/// another set of hand-written numbers that can drift from the runtime — which
-/// is exactly the failure it was introduced to prevent.
 void check(bool condition, String message) {
   if (!condition) throw StateError('runtime light budget: $message');
 }

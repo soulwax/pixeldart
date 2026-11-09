@@ -5,8 +5,6 @@ import '../core/render_graph.dart';
 import '../webgl/device_api.dart';
 import 'pass_context_impl.dart';
 
-/// Resolves a multisampled color/depth target into a single-sample graph
-/// version before any post pass or present shader samples it.
 final class MsaaResolveFeature implements RenderFeature {
   final GpuDevice device;
   final ResourceRef sourceResource;

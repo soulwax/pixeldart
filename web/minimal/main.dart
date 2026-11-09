@@ -4,14 +4,6 @@ import 'package:pixeldart/pixeldart_advanced.dart';
 import 'package:pixeldart/rendering/webgl/webgl2_renderer_factory.dart';
 import 'package:web/web.dart' as web;
 
-/// The smallest host that renders with Pixeldart, and the reference for what a
-/// correct integration looks like.
-///
-/// Everything fiddly here is delegated to the package rather than reimplemented:
-/// [bootstrapRenderer] owns the profile fallback ladder, [SurfaceMetrics.forCanvas]
-/// owns device-pixel-ratio arithmetic, [CameraView.look] derives its own
-/// matrices, and [FrameSequencer] owns frame and history bookkeeping. A host
-/// that copies this file gets those four right by construction.
 void main() async {
   final canvas = web.document.querySelector('#minimal-canvas');
   if (canvas is! web.HTMLCanvasElement) return;

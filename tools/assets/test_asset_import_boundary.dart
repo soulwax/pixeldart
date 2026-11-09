@@ -1,10 +1,5 @@
 import 'dart:io';
 
-/// RF-00 dependency direction gate.
-///
-/// Run from the repository root. Tooling is allowed to use `dart:io`; files
-/// under `external/pixeldart/lib` are not. The game may invoke Pixeldart, but
-/// Pixeldart must never depend on the game package.
 void main() {
   final root = Directory.current;
   final pixeldart = Directory('${root.path}/external/pixeldart');

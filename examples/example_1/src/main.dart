@@ -48,18 +48,13 @@ final class Body {
   double get radius => baseRadius * scale;
 }
 
-/// A copy of [model] re-centred on its bounds, so it spins and collides
-/// about its visual middle rather than the asset's authoring origin.
 SceneNode centred(ModelAsset model, {String? name}) {
   final c = (model.bounds.min + model.bounds.max) * 0.5;
   return SceneNode.group(name: name)..addChild(model.instantiate(transform: Transform.at(-c)));
 }
 
-/// Bounding-sphere radius of [model] at scale 1.
 double radiusOf(ModelAsset model) => (model.bounds.max - model.bounds.min).length * 0.5;
 
-/// Kenney's kits are authored unlit; the decoder turns that into a matte
-/// dielectric. Give metal parts some sheen and make crystals glow.
 MaterialDefinition kenneySurface(String name, MaterialDefinition m) => switch (name.toLowerCase()) {
   'crystal' => m.copyWith(roughness: 0.2, emissiveStrength: 2.2),
   'metal' || 'metaldark' => m.copyWith(metallic: 0.55, roughness: 0.38),
@@ -246,8 +241,6 @@ final class Game {
     );
   }
 
-  /// Engine flame: an emissive cone behind the ship. Base at the pivot, apex
-  /// trailing toward the camera; bloom turns it into a glow.
   static SceneNode _buildFlame(PixeldartApp app) {
     const length = _flameLength;
     final data = Primitives.cone(radius: 0.15, height: length, radialSegments: 14);
@@ -696,7 +689,6 @@ final class Game {
   }
 }
 
-/// DOM overlay: stats bar plus a centred message card.
 final class Hud {
   final web.Element? _score = web.document.querySelector('#score');
   final web.Element? _best = web.document.querySelector('#best');

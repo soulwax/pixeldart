@@ -4,12 +4,7 @@ import 'dart:typed_data';
 import '../api/lights.dart';
 import '../math/vec.dart';
 
-/// Pure-Dart generator for procedural PBR textures and normal maps.
-///
-/// Produces raw RGBA8 [Uint8List] pixel buffers directly usable with
-/// GPU texture registration without third-party asset loading.
 abstract final class ProceduralTextures {
-  /// Generates a standard alternating checkerboard pattern.
   static Uint8List checkerboard({
     int width = 256,
     int height = 256,
@@ -44,7 +39,6 @@ abstract final class ProceduralTextures {
     return buffer;
   }
 
-  /// Generates an architectural grid pattern with line borders and cells.
   static Uint8List grid({
     int width = 256,
     int height = 256,
@@ -79,7 +73,6 @@ abstract final class ProceduralTextures {
     return buffer;
   }
 
-  /// Generates multi-octave coherent Value/Perlin-style 2D noise in [0, 255].
   static Uint8List noise({
     int width = 256,
     int height = 256,
@@ -129,7 +122,6 @@ abstract final class ProceduralTextures {
     return buffer;
   }
 
-  /// Derives a tangent-space normal map from a grayscale height buffer using a 3x3 Sobel filter.
   static Uint8List normalFromHeight(
     Uint8List heights, {
     required int width,
@@ -174,7 +166,6 @@ abstract final class ProceduralTextures {
     return buffer;
   }
 
-  /// Generates a packed PBR ORM map (R: Occlusion, G: Roughness, B: Metallic).
   static Uint8List brushedMetalOrm({
     int width = 256,
     int height = 256,
@@ -211,7 +202,6 @@ abstract final class ProceduralTextures {
     return buffer;
   }
 
-  /// Generates a seamless Voronoi / Worley cellular distance texture (F1 Euclidean metric).
   static Uint8List voronoi({
     int width = 256,
     int height = 256,
@@ -273,7 +263,6 @@ abstract final class ProceduralTextures {
     return buffer;
   }
 
-  /// Generates a seamless hexagonal honeycomb grid texture.
   static Uint8List hexGrid({
     int width = 256,
     int height = 256,
@@ -348,8 +337,6 @@ abstract final class ProceduralTextures {
     return buffer;
   }
 
-  /// Generates a packed PBR ORM map for a 2x2 twill carbon fiber weave.
-  /// R: Ambient Occlusion, G: Roughness, B: Metallic.
   static Uint8List carbonFiberOrm({
     int width = 256,
     int height = 256,
@@ -394,7 +381,6 @@ abstract final class ProceduralTextures {
     return buffer;
   }
 
-  /// Generates a procedural marble diffuse texture with turbulent mineral veining.
   static Uint8List marble({
     int width = 256,
     int height = 256,
@@ -441,8 +427,6 @@ abstract final class ProceduralTextures {
     return buffer;
   }
 
-  /// Generates a packed PBR ORM map for folded pattern-welded Damascus steel.
-  /// R: Ambient Occlusion, G: Roughness, B: Metallic.
   static Uint8List damascusSteelOrm({
     int width = 256,
     int height = 256,
@@ -478,7 +462,6 @@ abstract final class ProceduralTextures {
     return buffer;
   }
 
-  /// Generates an emissive energy plasma texture with multi-frequency radial ripples.
   static Uint8List energyPlasma({
     int width = 256,
     int height = 256,
@@ -518,10 +501,6 @@ abstract final class ProceduralTextures {
     return buffer;
   }
 
-  /// Generates a smooth radial particle texture with soft gaussian/quartic falloff.
-  ///
-  /// Center is dense and opaque, smoothly tapering to zero alpha at the perimeter.
-  /// Ideal for billboard particle puffs, sparks, flames, smoke plumes, and embers.
   static Uint8List radialParticle({
     int width = 128,
     int height = 128,
@@ -577,10 +556,6 @@ abstract final class ProceduralTextures {
     return buffer;
   }
 
-  /// Generates an elongated directional spark texture with a bright hot head and a tapering soft tail.
-  ///
-  /// Aligned along the vertical axis (head towards -Y, tail trailing +Y), matching Pixeldart's
-  /// [ParticleAlignment.velocityStretched] coordinate convention.
   static Uint8List sparkStreak({
     int width = 64,
     int height = 128,
@@ -619,11 +594,6 @@ abstract final class ProceduralTextures {
     return buffer;
   }
 
-  /// Generates a 2x2 procedural particle atlas texture containing 4 distinct high-fidelity VFX sprites:
-  /// - Cell 0 (top-left): Soft luminous orb / core glow
-  /// - Cell 1 (top-right): 4-point sparkle / twinkle star
-  /// - Cell 2 (bottom-left): Expanding shockwave energy ring
-  /// - Cell 3 (bottom-right): Organic multi-lobed smoke puff
   static Uint8List particleAtlas({
     int width = 256,
     int height = 256,

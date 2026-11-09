@@ -1,13 +1,6 @@
 import '../api/handles.dart';
 import '../api/scene.dart';
 
-/// Deterministic ordering for one submitted draw item (§5.5). Opaque items
-/// sort by pipeline/material/mesh to maximize state-change-free batching,
-/// with [instanceId] as a stable tie-breaker so equal-key items never
-/// depend on submission or hash order. Blended items instead carry
-/// [viewSpaceDepth] and sort back-to-front — material identity never wins
-/// over depth correctness for transparency (§5.5: "never sorts transparency
-/// by material at the cost of depth correctness").
 final class OpaqueSortKey implements Comparable<OpaqueSortKey> {
   final PipelineHandle pipeline;
   final MaterialHandle material;

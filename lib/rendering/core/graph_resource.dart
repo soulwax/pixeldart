@@ -13,10 +13,6 @@ enum GraphStage {
   beforePresent,
 }
 
-/// A typed graph edge (§6.2: "Every edge is an explicit typed resource").
-/// [version] distinguishes successive writes to the same logical resource —
-/// reading and writing the same attachment version without a declared
-/// ping-pong pair is a validation failure, not merely discouraged.
 final class ResourceRef {
   final String name;
   final ResourceFormat format;
@@ -73,18 +69,11 @@ final class ResourceRef {
       '${samples > 1 ? ' x$samples' : ''})';
 }
 
-/// A resource read declared to consume the immediately preceding frame's
-/// history rather than the current frame's write, per §6.5. The graph
-/// rejects this if no valid previous-frame version exists yet (a fresh
-/// history epoch).
 final class HistoryRead {
   final String name;
   const HistoryRead(this.name);
 }
 
-/// [append] adds more drawing to an attachment version another pass already
-/// wrote, without sampling it: no version bump, and legal on a multisampled
-/// target because nothing reads the samples.
 enum ResourceAccess { read, write, historyRead, append }
 
 final class ResourceUse {

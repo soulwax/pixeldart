@@ -1,7 +1,5 @@
 import 'dart:convert';
 
-/// Evidence returned by a host browser capture. Pixel readback stays outside
-/// Pixeldart; this record makes the promotion decision deterministic.
 final class BrowserPromotionCapture {
   final String packageHash;
   final String lod;

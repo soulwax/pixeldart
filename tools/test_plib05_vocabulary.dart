@@ -1,8 +1,5 @@
 import 'dart:io';
 
-/// Regression guard for public Pixeldart vocabulary. Renderer implementation
-/// may use domain-neutral terms such as `history`; game nouns must not appear
-/// as standalone words in public library source.
 void main() {
   final package = _packageDirectory();
   final files = Directory('${package.path}/lib')

@@ -4,7 +4,6 @@ import '../api/frame.dart';
 import '../math/vec.dart';
 import 'camera_controller.dart';
 
-/// First-person / free-flight camera controller with WASD movement and mouse-look.
 final class FlyCameraController implements CameraController {
   Vec3 position;
   double yawRadians;
@@ -35,7 +34,6 @@ final class FlyCameraController implements CameraController {
   @override
   Vec3 get eye => position;
 
-  /// Forward unit vector derived from pitch and yaw.
   @override
   Vec3 get forward {
     final cosP = math.cos(pitchRadians);
@@ -45,19 +43,15 @@ final class FlyCameraController implements CameraController {
     return Vec3(sinY * cosP, sinP, -cosY * cosP).normalized;
   }
 
-  /// Right unit vector perpendicular to forward and world Up.
   Vec3 get right => forward.cross(const Vec3(0, 1, 0)).normalized;
 
-  /// Up unit vector perpendicular to right and forward.
   Vec3 get up => right.cross(forward).normalized;
 
-  /// Adds rotational look delta in radians.
   void look(double deltaYaw, double deltaPitch) {
     yawRadians += deltaYaw;
     pitchRadians = (pitchRadians - deltaPitch).clamp(-math.pi * 0.49, math.pi * 0.49);
   }
 
-  /// Sets continuous movement intent: [forward], [right], [up] in range [-1, 1].
   void setMovementIntent({double forward = 0, double right = 0, double up = 0}) {
     _moveIntent = Vec3(right, up, forward);
   }

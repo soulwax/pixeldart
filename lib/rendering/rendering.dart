@@ -14,6 +14,7 @@ export 'api/renderer.dart';
 export 'api/resource_plan.dart';
 export 'api/scene.dart';
 export 'api/settings.dart';
+export 'api/shaders.dart';
 export 'api/stats.dart';
 export 'particles/atmospheric_particles.dart';
 export 'particles/flow_particles.dart';

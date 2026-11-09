@@ -2,9 +2,6 @@ import 'dart:math' as math;
 
 import '../math/vec.dart';
 
-/// A host-resolved local source for volumetric media. This is deliberately
-/// separate from renderer light handles so a host can submit practicals,
-/// lightning, or emissive volumes without giving Pixeldart scene ownership.
 final class VolumetricSource {
   final String id;
   final Vec3 position;
@@ -40,9 +37,6 @@ final class VolumetricSource {
   }
 }
 
-/// Selects the strongest bounded volumetric sources for a capability-limited
-/// shader. Ranking is independent of submission order and ties use the
-/// authored id, so lightning/practical transitions remain deterministic.
 List<VolumetricSource> selectVolumetricSources({
   required Iterable<VolumetricSource> sources,
   required Vec3 referencePosition,
@@ -97,13 +91,9 @@ final class VolumetricSourceFieldSample {
       radiance.x * 0.2126 + radiance.y * 0.7152 + radiance.z * 0.0722;
 }
 
-/// Participating volumetric media, height fog, and in-scattering models in
-/// Pixeldart. The host supplies bounded medium/source facts; this library
-/// evaluates deterministic transport terms without owning weather state.
 final class VolumetricMediaEngine {
   static const double _epsilon = 1e-8;
 
-  /// Evaluates analytical point light in-scattering along a line segment.
   static double evaluatePointInScattering({
     required Vec3 rayOrigin,
     required Vec3 rayDirection,
@@ -184,7 +174,6 @@ final class VolumetricMediaEngine {
     return math.max(0.0, inScattering);
   }
 
-  /// Evaluates exponential height-decay fog transmittance.
   static double evaluateHeightFogTransmittance({
     required double startY,
     required double endY,
@@ -202,11 +191,6 @@ final class VolumetricMediaEngine {
     return math.exp(-opticalDepth).clamp(0.0, 1.0);
   }
 
-  /// Integrates an exponential height-density medium along a finite segment.
-  /// The density is `baseDensity * exp(-heightFalloff * y)` and the segment's
-  /// height changes linearly from [startY] to [endY]. This is exact for the
-  /// authored medium model, including a stable constant-height limit, rather
-  /// than approximating the segment with one midpoint sample.
   static double evaluateHeightFogOpticalDepth({
     required double startY,
     required double endY,
@@ -242,9 +226,6 @@ final class VolumetricMediaEngine {
     return opticalDepth;
   }
 
-  /// Integrates the same exponential medium only inside a bounded world
-  /// volume. The host supplies the volume bounds for steam, a cold room, or a
-  /// shaft of dusty light; rays that miss the volume contribute no density.
   static double evaluateBoundedHeightFogOpticalDepth({
     required Vec3 rayOrigin,
     required Vec3 rayDirection,
@@ -307,9 +288,6 @@ final class VolumetricMediaEngine {
     );
   }
 
-  /// Bounded inverse-square source attenuation for lightning and practicals.
-  /// A finite cutoff prevents distant sources from consuming unbounded light
-  /// while preserving the physically correct near-field falloff.
   static double evaluateInverseSquareAttenuation({
     required double distance,
     double referenceDistance = 1.0,
@@ -333,9 +311,6 @@ final class VolumetricMediaEngine {
     return (inverseSquare * cutoff).clamp(0.0, 1.0).toDouble();
   }
 
-  /// Resolves source radiance after inverse-square falloff and medium loss.
-  /// This is intentionally source-aware; it does not synthesize a global
-  /// white flash when a host has no source position.
   static Vec3 evaluateTransientSourceRadiance({
     required Vec3 sourcePosition,
     required Vec3 samplePosition,
@@ -368,10 +343,6 @@ final class VolumetricMediaEngine {
     return sourceColor * factor;
   }
 
-  /// Aggregates bounded in-scattering from resolved practical or transient
-  /// sources along one camera ray. Sources past their cutoff contribute zero;
-  /// empty input returns zero radiance and a zero direction rather than a
-  /// fabricated white shaft.
   static VolumetricSourceFieldSample evaluateSourceField({
     required Vec3 rayOrigin,
     required Vec3 rayDirection,

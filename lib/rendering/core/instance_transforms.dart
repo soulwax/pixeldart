@@ -6,9 +6,6 @@ import '../webgl/device_api.dart';
 import '../webgl/draw_encoder.dart';
 import 'batching.dart';
 
-/// Packs the retained transforms for an instanced draw into stable matrix
-/// uniforms. The shader selects `gl_InstanceID`; the representative model is
-/// still supplied as a deterministic fallback for non-instanced paths.
 void setInstanceTransformUniforms(
   DrawCommandEncoder encoder,
   InstanceBatch batch, {
@@ -52,10 +49,6 @@ void _copyMatrix(Float32List target, int matrixIndex, List<double> values) {
   target.setRange(matrixIndex * 16, matrixIndex * 16 + 16, values);
 }
 
-/// Reusable, zero-allocation buffer streaming manager for large-scale GPU instancing.
-/// Retains preallocated Float32List buffers for model matrices and normal matrices,
-/// allowing hundreds or thousands of instances to be packed without runtime allocations
-/// during warm frames.
 final class InstanceBufferStream {
   int _capacity;
   Float32List _modelFloats;
@@ -70,11 +63,9 @@ final class InstanceBufferStream {
   int get capacity => _capacity;
   int get activeCount => _activeCount;
 
-  /// Sub-view of the active instance model matrices (activeCount * 16 floats).
   Float32List get activeModels =>
       Float32List.sublistView(_modelFloats, 0, _activeCount * 16);
 
-  /// Sub-view of the active instance normal matrices (activeCount * 16 floats).
   Float32List get activeNormals =>
       Float32List.sublistView(_normalFloats, 0, _activeCount * 16);
 
@@ -87,7 +78,6 @@ final class InstanceBufferStream {
     _normalFloats = Float32List(newCapacity * 16);
   }
 
-  /// Packs a collection of scene item views into the instance stream.
   void packViews(List<RetainedItemView> items, {bool computeNormals = true}) {
     ensureCapacity(items.length);
     _activeCount = items.length;
@@ -101,7 +91,6 @@ final class InstanceBufferStream {
     }
   }
 
-  /// Packs transforms directly.
   void packTransforms(List<Transform> transforms, {bool computeNormals = true}) {
     ensureCapacity(transforms.length);
     _activeCount = transforms.length;
@@ -114,13 +103,11 @@ final class InstanceBufferStream {
     }
   }
 
-  /// Uploads the active instance model matrices to a GPU buffer.
   void uploadModelsToGpu(GpuDevice device, GpuObject buffer) {
     if (_activeCount == 0) return;
     device.uploadBuffer(buffer, activeModels);
   }
 
-  /// Uploads the active instance normal matrices to a GPU buffer.
   void uploadNormalsToGpu(GpuDevice device, GpuObject buffer) {
     if (_activeCount == 0) return;
     device.uploadBuffer(buffer, activeNormals);

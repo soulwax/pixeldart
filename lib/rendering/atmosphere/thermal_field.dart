@@ -2,9 +2,6 @@ import 'dart:math' as math;
 
 import '../math/vec.dart';
 
-/// Renderer-neutral heat source submitted by the host. The host owns heat
-/// transfer and the slow material-memory term; the renderer only evaluates
-/// the bounded spatial influence at the current fragment.
 final class ThermalSource {
   final String id;
   final Vec3 position;
@@ -31,9 +28,6 @@ final class ThermalSource {
   }
 }
 
-/// CPU reference for the shader's spatial thermal falloff. Keeping this
-/// equation public makes fake-device traces and host previews agree with the
-/// real fragment path instead of treating heat as a visual-only knob.
 final class ThermalFieldEngine {
   const ThermalFieldEngine._();
 

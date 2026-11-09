@@ -18,13 +18,6 @@ import 'pass_context_impl.dart';
 import 'safe_graph_resources.dart';
 import 'world.dart';
 
-/// A second, independent world program alongside the vertex-color-only
-/// safe-graph `WorldFeature` — this one samples `uAlbedo` and multiplies it
-/// against vertex color, matching `shaders/rendering/world/
-/// textured_world.vert|frag`. Deliberately kept as its own feature/pass
-/// rather than a branch inside `WorldFeature`, so the safe graph's own
-/// proven correctness is never at risk from this addition — it shares the
-/// `MeshResolver` contract but nothing else.
 final class TexturedWorldProgramSource {
   static ProgramSource build({
     required String vertexSource,

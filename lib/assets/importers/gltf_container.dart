@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-/// A bounded GLB 2.0 container. Parsing produces CPU bytes only.
 final class GlbContainer {
   final Map<String, dynamic> json;
   final Uint8List? binary;

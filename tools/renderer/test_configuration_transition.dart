@@ -42,6 +42,17 @@ void main() {
   machine.commit(diagnosticsOnly);
   require(machine.generation == 2, 'commit must advance generation');
 
+  final shaderOnly = machine.begin(
+    configuration(QualityProfile.safe).withShaderOverrides(const {
+      ShaderSlot.sprites: ShaderOverride(fragment: 'host fragment'),
+    }),
+  );
+  require(
+    shaderOnly.delta.shadersChanged && shaderOnly.delta.requiresGpuRebuild,
+    'shader override change must rebuild programs',
+  );
+  machine.abort(shaderOnly);
+
   final full = machine.begin(configuration(QualityProfile.ps1Full));
   require(
     full.delta.addedFeatures.contains(PipelineFeatures.vhs),

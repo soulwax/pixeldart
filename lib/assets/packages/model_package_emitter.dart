@@ -5,7 +5,6 @@ import '../importers/fbx_import_config.dart';
 import '../importers/gltf_normalizer.dart';
 import 'model_package_manifest.dart';
 
-/// Emits a deterministic CPU model package from normalized scene records.
 final class ModelPackageEmitter {
   static ({ModelPackageManifest manifest, Map<String, Uint8List> payloads})
   emit({

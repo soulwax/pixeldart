@@ -5,12 +5,6 @@ import '../math/ray.dart';
 import '../math/transform.dart';
 import 'scene_node.dart';
 
-/// A specialized scene graph node representing multiple instances of a shared mesh and material.
-///
-/// Automatically provisions and manages an [instanceFamilyKey] so the rendering pipeline
-/// groups all instances into batched GPU instanced draws. Provides compound bounding
-/// calculations, instance-specific raycast picking ([RaycastHit.instanceIndex]), and
-/// zero-allocation updates during steady-state warm frames.
 final class InstancedMeshNode extends SceneNode {
   static int _nextFamilyKey = 2000;
 
@@ -43,31 +37,25 @@ final class InstancedMeshNode extends SceneNode {
     }
   }
 
-  /// Number of active instances.
   int get instanceCount => _instanceTransforms.length;
 
-  /// Unmodifiable view of local instance transforms relative to this node.
   List<Transform> get instanceTransforms =>
       List.unmodifiable(_instanceTransforms);
 
-  /// Local transform of the instance at [index].
   Transform getInstanceTransform(int index) => _instanceTransforms[index];
 
-  /// Appends a new instance with the given local [transform].
   void addInstance(Transform transform) {
     _instanceTransforms.add(transform);
     _instancesDirty = true;
     markDirty();
   }
 
-  /// Updates the local transform of the instance at [index].
   void setInstanceTransform(int index, Transform transform) {
     _instanceTransforms[index] = transform;
     _instancesDirty = true;
     markDirty();
   }
 
-  /// Replaces all instance transforms with [transforms].
   void setTransforms(Iterable<Transform> transforms) {
     _instanceTransforms.clear();
     _instanceTransforms.addAll(transforms);
@@ -75,7 +63,6 @@ final class InstancedMeshNode extends SceneNode {
     markDirty();
   }
 
-  /// Clears all instances from this node.
   void clearInstances() {
     _instanceTransforms.clear();
     _instancesDirty = true;
@@ -88,7 +75,6 @@ final class InstancedMeshNode extends SceneNode {
     super.markDirty();
   }
 
-  /// Returns the world-space axis-aligned bounding box encompassing all active instances.
   @override
   Aabb? get worldBounds {
     final b = bounds ?? meshData?.bounds;
@@ -106,8 +92,6 @@ final class InstancedMeshNode extends SceneNode {
     return _cachedCompoundBounds;
   }
 
-  /// Raycasts against all instances of this node and child nodes.
-  /// Returns the closest [RaycastHit] with [RaycastHit.instanceIndex] set to the hit instance index.
   @override
   RaycastHit? raycast(Ray ray, {bool Function(SceneNode node)? where, bool precise = false}) {
     final b = bounds ?? meshData?.bounds;

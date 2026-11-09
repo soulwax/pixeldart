@@ -1,8 +1,3 @@
-/// Stable public facade for the model-package pipeline.
-///
-/// RF-00 intentionally exports empty target libraries only. Subsequent RF
-/// packets add immutable source-neutral records here without exposing FBX
-/// runtime types.
 library;
 
 export 'importers/asset_import_diagnostic.dart';

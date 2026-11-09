@@ -12,13 +12,6 @@ import 'package:pixeldart/rendering/webgl/draw_encoder.dart';
 
 import 'fake_gpu_device.dart';
 
-/// Confirms `buildSafeGraph` produces a valid two-pass §6.1 graph
-/// (`world opaque -> world transparent -> present`) whose passes actually
-/// execute a plausible draw-command sequence against a fake device. This
-/// proves the wiring — declare/validate/createPasses/execute all agree with
-/// each other — not that a real WebGL2 context accepts the shader sources
-/// or produces correct pixels, which needs a browser this environment does
-/// not have.
 void main() {
   _graphValidatesWithBothPasses();
   _configuredSceneColorExtentIsShared();

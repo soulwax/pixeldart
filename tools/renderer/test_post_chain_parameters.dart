@@ -20,11 +20,6 @@ import 'package:pixeldart/rendering/webgl/generated_shaders.dart';
 
 import 'fake_gpu_device.dart';
 
-/// RP-3: pins [PipelineFeatures] vocabulary, [QualityProfile] presets, and
-/// the parameterized input/source resources on DOF/grade/PS1/VHS that let the
-/// pipeline assembler wire alternate chain links when upstream effect groups
-/// are excluded. Each parameter must be mutation-live: changing it changes
-/// which graph resource a pass declares and reads at execute time.
 void main() {
   _pipelineFeaturesVocabulary();
   _qualityProfilePresets();

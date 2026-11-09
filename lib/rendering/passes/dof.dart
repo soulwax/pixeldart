@@ -32,15 +32,6 @@ final class DofBlurProgramSource {
   );
 }
 
-/// RV-09's DOF blur — the exact same separable 5-tap gaussian shader
-/// (`bloomBlurFragSrc`) bloom's own blur uses, since it's a generic "blur
-/// whatever's bound to uSource" kernel with no bloom-specific logic in it.
-/// Unlike bloom, DOF always samples plain color via `bindTexture`, never a
-/// glow attachment through `bindGlowTexture` — it blurs the final,
-/// already-composited scene (post-bloom), not an isolated emissive layer.
-/// Reads `BloomResources.sceneColorPostBloom` by name (the physical target
-/// bloom's composite pass already wrote in place), since a defocused
-/// background must blur what the viewer will actually see, glow included.
 final class DofBlurFeature implements RenderFeature {
   final ProgramLibrary programLibrary;
   final String vertexSource;
@@ -55,12 +46,6 @@ final class DofBlurFeature implements RenderFeature {
   final int texelWidth;
   final int texelHeight;
 
-  /// [sourceResource] defaults to `BloomResources.sceneColorPostBloom` (a
-  /// `static final`, not `const`, since it is derived via `.nextVersion()`
-  /// — hence the nullable parameter rather than a default value) but must
-  /// be overridden to `SafeGraphResources.sceneColor` whenever bloom is
-  /// excluded from the pipeline, since DOF then blurs the world pass's
-  /// resolved output directly rather than bloom's composited-in-place one.
   DofBlurFeature.horizontal({
     required this.programLibrary,
     required this.vertexSource,
@@ -218,20 +203,6 @@ final class DofCompositeProgramSource {
   );
 }
 
-/// RV-09's DOF composite: blends the sharp post-bloom scene color against
-/// [DofResources.dofBlurV] per-pixel by a circle-of-confusion derived from
-/// the scene depth prepass vs. a fixed focus distance/range. Writes
-/// [DofResources.dofOutput] — a genuinely distinct physical target from
-/// `sceneColor`, never a `nextVersion()` of it like bloom's composite is,
-/// since this shader reads the sharp scene color as one input texture while
-/// writing a *different* texture in the same draw call (reading and writing
-/// the same physical target in one draw is undefined in WebGL2, unlike
-/// bloom's additive blend which reads/writes the same object safely via
-/// blending rather than a second sampler). `uStrength` reads
-/// `PostProcessState.depthOfFieldStrength` fresh every frame via
-/// `context.frameScene.post` rather than a construction-time constant like
-/// bloom's own `strength` field — RV-09 made DOF the first pass in this
-/// renderer that must react to per-frame post-process weights.
 final class DofCompositeFeature implements RenderFeature {
   final ProgramLibrary programLibrary;
   final String vertexSource;
@@ -265,11 +236,6 @@ final class DofCompositeFeature implements RenderFeature {
     this.dofOutputResource = DofResources.dofOutput,
   });
 
-  /// `BloomResources.sceneColorPostBloom` is `static final`, not `const` (it
-  /// is derived via `.nextVersion()`), so it cannot be a default parameter
-  /// value directly — [sourceResource] defaults to `null` and this resolves
-  /// the real default at the one place both `declare()` and
-  /// `createPasses()` need it.
   ResourceRef get _resolvedSource =>
       sourceResource ?? BloomResources.sceneColorPostBloom;
 

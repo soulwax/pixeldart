@@ -20,26 +20,22 @@ const int _maxSeeds = 512;
 
 const int _boltStone = 0, _boltArrow = 1, _boltMagic = 2;
 
-/// One person: the leader, someone in the line, or a stray.
 final class Villager {
   final Role role;
   final SpriteRegion region;
   double x, y, px, py;
   double vx = 0, vy = 0;
 
-  /// Time left safe from harm, after joining or being knocked loose.
   double safe = 0;
   double cooldown;
   double wander = 0;
   bool faceLeft = false;
 
-  /// A stray survives one bite; the second is fatal.
   bool bitten = false;
 
   Villager(this.role, this.region, this.x, this.y, this.cooldown) : px = x, py = y;
 }
 
-/// The leader, their line, the strays, and everything they throw.
 final class Procession {
   final Art art;
   final WorldMap map;
@@ -53,12 +49,10 @@ final class Procession {
   final List<Villager> strays = [];
   final List<(double, double)> graves = [];
 
-  /// Added to as things happen; the game reads and resets them.
   int banked = 0;
   int lost = 0;
   int leaderHits = 0;
 
-  /// Unit steering for the leader, set before each step.
   double moveX = 0, moveY = 0;
 
   // The leader's trail. Followers stand at fixed distances back along it,
@@ -118,7 +112,6 @@ final class Procession {
     if (_pathCount < _pathSize) _pathCount += 1;
   }
 
-  /// Scatters [count] people around the hamlets.
   void spawnStrays(int count, int night) {
     final roles = <Role>[
       Role.peasant,
@@ -153,7 +146,6 @@ final class Procession {
     Role.priest => dungeon + (rng.nextBool() ? 99 : 100),
   };
 
-  /// Rebuilds the monsters' flow field from everyone who can be reached.
   void seedFlow(FlowField flow) {
     _seeded.clear();
     flow.begin();
@@ -256,7 +248,6 @@ final class Procession {
     }
   }
 
-  /// Lets everyone attack, moves shots, and settles who touched whom.
   void stepCombat(double dt, {bool leaderFights = true}) {
     if (leaderFights) _attack(leader, dt);
     for (var i = 0; i < line.length; i += 1) {
@@ -367,7 +358,6 @@ final class Procession {
     }
   }
 
-  /// Strays join when they touch the leader or anyone in the line.
   void _gather() {
     for (var i = strays.length - 1; i >= 0; i -= 1) {
       final stray = strays[i];
@@ -398,7 +388,6 @@ final class Procession {
     return false;
   }
 
-  /// People at the front of the line walk into the keep one at a time.
   void _deliver() {
     while (line.isNotEmpty && map.inKeep(line.first.x, line.first.y)) {
       final v = line.removeAt(0);
@@ -441,7 +430,6 @@ final class Procession {
     }
   }
 
-  /// The member at [index] and everyone behind them run for it.
   void _breakLine(int index) {
     final broken = line.sublist(index);
     line.length = index;
@@ -536,7 +524,6 @@ final class Procession {
     }
   }
 
-  /// Lights carried by the living: the leader, the line, and magic in flight.
   void addLights(void Function(double x, double y, double radius, double strength) add) {
     add(leader.x, leader.y - 6, 118, 1.15);
     for (var i = 0; i < line.length; i += 2) {

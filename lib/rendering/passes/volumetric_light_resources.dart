@@ -1,6 +1,5 @@
 import '../core/graph_resource.dart';
 
-/// Pipeline resource references for volumetric light shaft raymarching pass in PixelDart.
 final class VolumetricLightResources {
   const VolumetricLightResources._();
 

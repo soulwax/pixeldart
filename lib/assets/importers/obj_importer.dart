@@ -42,7 +42,6 @@ final class ObjMaterialRecord {
   };
 }
 
-/// Parses the bounded MTL subset used by the normalized asset contract.
 Map<String, ObjMaterialRecord> parseMtl(
   String source, {
   Set<String>? availableFiles,
@@ -173,13 +172,9 @@ final class ObjNormalizedScene {
     'bounds': bounds,
   };
 
-  /// Stable machine-readable representation for hashing and equivalence tests.
   String canonicalJson() => jsonEncode(toJson());
 }
 
-/// Verifies that every explicit OBJ material slot has a corresponding MTL
-/// record.  An empty slot is the format's implicit default material and is
-/// intentionally allowed.
 ObjNormalizedScene validateObjMaterialBindings(
   ObjNormalizedScene scene,
   Map<String, ObjMaterialRecord> records,

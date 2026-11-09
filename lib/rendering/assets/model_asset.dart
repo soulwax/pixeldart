@@ -8,42 +8,19 @@ import '../math/vec.dart';
 import '../scene/scene_node.dart';
 import 'glb_decoder.dart';
 
-/// Rewrites a decoded material before it is registered. Receives the
-/// authored material name (`metal`, `crystal`, ...) and its decoded
-/// definition, textures already bound.
 typedef MaterialOverride = MaterialDefinition Function(String name, MaterialDefinition authored);
 
-/// A decoded model registered once and instantiated any number of times.
-///
-/// `GlbDecoder` produces CPU data and one scene tree; a game usually wants
-/// many copies (a pool of meteors, a fleet of ships). A [ModelAsset]
-/// registers every mesh and material with the [ResourceLibrary] once, keeps
-/// the asset's node hierarchy (multi-part models place masts, wheels or
-/// turrets with node transforms), and stamps out fresh, unattached
-/// [SceneNode] trees with [instantiate].
-///
-/// Textures are supplied by the caller, one handle per glTF image (see
-/// [GlbResult.images]). `PixeldartApp.loadModel` does that in the browser,
-/// including images referenced by a relative URI.
 final class ModelAsset {
-  /// Name used for debug labels, usually the file name.
   final String name;
 
-  /// Model-space bounds of every mesh at the asset's own transforms.
   final Aabb bounds;
 
-  /// Decoder warnings (approximated scale, unresolved images).
   final List<String> warnings;
 
   final List<_TemplateNode> _nodes;
 
   ModelAsset._(this.name, this.bounds, this.warnings, this._nodes);
 
-  /// Registers [result]'s meshes and materials with [resources].
-  ///
-  /// [images] holds one texture handle per entry of [GlbResult.images]
-  /// (null where an image could not be loaded). [materialOverride] can
-  /// rewrite each material before registration.
   factory ModelAsset.fromGlb(
     GlbResult result,
     ResourceLibrary resources, {
@@ -103,8 +80,6 @@ final class ModelAsset {
     return ModelAsset._(name, bounds ?? const Aabb(Vec3.zero, Vec3.zero), result.warnings, nodes);
   }
 
-  /// Builds a new, unattached copy of the model. [transform] replaces the
-  /// root's own transform when given.
   SceneNode instantiate({String? name, Transform? transform}) {
     final built = <SceneNode>[];
     for (var i = 0; i < _nodes.length; i++) {

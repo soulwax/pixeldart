@@ -36,10 +36,6 @@ const List<List<int>> _kindsByNight = [
   [0, 1, 2, 3, 3, 4, 4, 5, 5, 6],
 ];
 
-/// Ties the map, swarm, line and renderer together.
-///
-/// Simulation runs at a fixed 60 Hz; each rendered frame steps as often as
-/// time requires and draws between the last two states.
 final class Game {
   final PixeldartApp app;
   final Art art;
@@ -207,7 +203,6 @@ final class Game {
     sound.play('crunch', minGap: 0.09);
   }
 
-  /// Handles input and steps the simulation. Runs before the frame.
   void update(double dt) {
     final clock = web.window.performance.now();
     final input = app.input;
@@ -422,8 +417,6 @@ final class Game {
     p.moveY = length > 0 ? dy / length : 0;
   }
 
-  /// `?bot`: the shortest walk to the nearest stray, home when carrying
-  /// enough or when nobody is left. For playtesting balance by the hour.
   void _runBot() {
     final p = procession;
     final v = p.leader;
@@ -481,7 +474,6 @@ final class Game {
     }
   }
 
-  /// Builds this frame's sprites and hands them to the renderer.
   void render(FrameContext ctx) {
     final clock = web.window.performance.now();
     final width = app.surface.pixelWidth, height = app.surface.pixelHeight;
@@ -608,7 +600,6 @@ final class Game {
     }
   }
 
-  /// Soft warm halos over the stepped night, on the linear texture.
   void _drawGlows(SpriteBatch batch, double lx, double ly) {
     batch.draw(
       art.halo,

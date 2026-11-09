@@ -23,10 +23,6 @@ final class VertexAttributeSlot {
   const VertexAttributeSlot(this.kind, this.floatOffset, this.floatCount);
 }
 
-/// Describes a packed interleaved vertex buffer layout. The compatibility
-/// layout mirrors the legacy engine's 14-float stride (position3, normal3,
-/// rgb+glow4, alpha1, uv+mat3) so QMSH v1 decodes losslessly (§5.4), but
-/// this type does not hardcode that stride — it is one named instance.
 final class VertexLayoutDescriptor {
   final String name;
   final int strideFloats;
@@ -51,9 +47,6 @@ final class VertexLayoutDescriptor {
     ],
   );
 
-  /// Surface-v2 compatibility layout. Tangent W is the handedness (+/-1);
-  /// UV1 is intentionally a separate opt-in descriptor so lightmap data can
-  /// be added without changing the stride of existing v2 meshes.
   static const VertexLayoutDescriptor surfaceV2 = VertexLayoutDescriptor(
     name: 'surfaceV2',
     strideFloats: 18,
@@ -116,15 +109,10 @@ final class VertexLayoutDescriptor {
   }
 }
 
-/// Renderer-neutral mesh data (§5.4). Contains no room, examine tag,
-/// collision rule, or domain meaning — that separation is what lets
-/// `lib/rendering/**` stay free of game imports.
 final class MeshData {
   final VertexLayoutDescriptor layout;
   final Float32List vertices;
 
-  /// Optional element indices. Uint16 is compact; Uint32 supports large
-  /// authored meshes whose vertex count exceeds 65,535.
   final List<int>? indices;
   final Aabb localBounds;
 

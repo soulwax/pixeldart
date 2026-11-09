@@ -31,9 +31,6 @@ final class GpuResourcePlanAdapter {
 
   GpuResourcePlanAdapter(this.device);
 
-  /// Returns the target descriptor that would be allocated for [resource].
-  /// This is pure so resize/reconfigure fixtures can verify extents without
-  /// creating GPU objects.
   GpuTargetDescriptor descriptorFor(
     String resource,
     RendererConfiguration configuration,
@@ -104,9 +101,6 @@ final class GpuResourcePlanAdapter {
     _open = null;
   }
 
-  /// Recreates current target objects after a browser context restore. The
-  /// logical ownership plan and resource names remain unchanged; only the
-  /// device-owned objects are replaced.
   void rehydrateAfterContextRestore(RendererConfiguration configuration) {
     _ensureActive();
     final current = _current;

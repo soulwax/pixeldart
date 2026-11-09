@@ -22,7 +22,6 @@ final class DrawStatistics {
 
 enum FrameQueueState { idle, active, ended, aborted }
 
-/// One queued sprite batch. Instances are pooled across frames.
 final class SpriteSubmission {
   late SpriteBatch batch;
   final Float32List viewProjection = Float32List(16);
@@ -30,18 +29,11 @@ final class SpriteSubmission {
   bool depthTest = false;
 }
 
-/// This frame's queued sprite batches, in submission order.
 abstract interface class SpriteSubmissions {
   int get spriteCount;
   SpriteSubmission spriteAt(int index);
 }
 
-/// Owns one frame's transient submission list as a persistent grow-only
-/// buffer (§7.5: reused storage, no per-frame allocation after warm-up) and
-/// implements `RenderEncoder`. `beginFrame`/`endFrame`/`abortFrame` enforce
-/// §5.1's lifecycle: a borrowed encoder is invalid after end/abort, and an
-/// abandoned (aborted) frame's submissions are discarded rather than
-/// replayed by the next frame.
 final class FrameQueue
     implements RenderEncoder, SpriteEncoder, SpriteSubmissions {
   final List<RetainedItemDescriptor> _transientItems = [];
@@ -106,9 +98,6 @@ final class FrameQueue
   @override
   SpriteSubmission spriteAt(int index) => _sprites[index];
 
-  /// Returns exactly the items submitted this frame, ignoring any stale
-  /// entries beyond [submittedThisFrame] left over from a larger prior
-  /// frame's grow-only buffer.
   List<RetainedItemDescriptor> endFrame() {
     if (_state != FrameQueueState.active) {
       throw StateError('FrameQueue.endFrame called without an active frame');
@@ -120,8 +109,6 @@ final class FrameQueue
     return submitted;
   }
 
-  /// Discards this frame's submissions entirely; a subsequent `endFrame`
-  /// read is not possible, and the next `beginFrame` starts clean.
   void abortFrame() {
     if (_state != FrameQueueState.active) {
       throw StateError('FrameQueue.abortFrame called without an active frame');

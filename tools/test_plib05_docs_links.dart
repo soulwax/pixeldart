@@ -1,6 +1,5 @@
 import 'dart:io';
 
-/// Checks relative Markdown links in the package without network access.
 void main() {
   final package = _packageDirectory();
   // README evidence intentionally points at the parent project's browser

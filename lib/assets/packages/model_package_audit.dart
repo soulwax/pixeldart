@@ -10,8 +10,6 @@ final class ModelPackageAuditReport {
       diagnostics.every((item) => item.severity != DiagnosticSeverity.error);
 }
 
-/// Strict runtime-package audit. It checks evidence and closure, not pixels or
-/// GPU state, and therefore runs identically in tools and browser boot code.
 final class ModelPackageAuditGate {
   const ModelPackageAuditGate();
 

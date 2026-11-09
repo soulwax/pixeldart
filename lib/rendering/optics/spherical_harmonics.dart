@@ -4,19 +4,12 @@ import 'dart:typed_data';
 import '../api/lights.dart';
 import '../math/vec.dart';
 
-/// 3rd-order (9 coefficient) Spherical Harmonics ($L_2$ SH) representation
-/// for diffuse ambient irradiance in Image-Based Lighting.
-///
-/// Implements the Ramamoorthi & Hanrahan (SIGGRAPH 2001) closed-form polynomial
-/// evaluation for real-time environment irradiance.
 final class SphericalHarmonicsL2 {
-  /// 9 RGB coefficients ordered [L00, L1-1, L10, L11, L2-2, L2-1, L20, L21, L22].
   final List<Vec3> coefficients;
 
   const SphericalHarmonicsL2(this.coefficients)
       : assert(coefficients.length == 9, 'L2 SH requires exactly 9 coefficients');
 
-  /// Analytical projection of a 3-band hemispherical environment (zenith, horizon, ground).
   factory SphericalHarmonicsL2.fromEnvironment({
     required LinearColor zenith,
     required LinearColor horizon,
@@ -46,7 +39,6 @@ final class SphericalHarmonicsL2 {
     ]);
   }
 
-  /// Evaluates diffuse irradiance for a surface normal vector.
   Vec3 evaluate(Vec3 normal) {
     final n = normal.normalized;
     final x = n.x, y = n.y, z = n.z;
@@ -87,7 +79,6 @@ final class SphericalHarmonicsL2 {
     );
   }
 
-  /// Serializes into a 27-float array (9 x vec3) for WebGL uniforms.
   Float32List toUniformArray() {
     final floats = Float32List(27);
     for (var i = 0; i < 9; i++) {

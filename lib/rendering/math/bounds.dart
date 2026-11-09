@@ -43,14 +43,6 @@ final class Aabb {
     Vec3(max.x, max.y, max.z),
   ];
 
-  /// Transforms all eight corners and rebuilds a world-space AABB. Correct
-  /// for any affine `model` including rotation, unlike transforming only
-  /// `min`/`max`, which RENDERER-ELEVATION-PLAN.md §2.4 flags as a live
-  /// culling-space defect in the legacy renderer.
-  ///
-  /// An affine `model` takes the per-axis extreme of each matrix term, which
-  /// is the same box without building eight points; this runs for every
-  /// moved item and transient of every frame.
   Aabb transformed(Mat4 model) {
     final m = model.m;
     if (m[3] != 0 || m[7] != 0 || m[11] != 0 || m[15] != 1) {

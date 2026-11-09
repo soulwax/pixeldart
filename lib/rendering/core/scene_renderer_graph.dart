@@ -1,6 +1,5 @@
 part of 'scene_renderer_impl.dart';
 
-/// Each pass's resource views, kept with the graph that owns them.
 final Expando<List<Map<String, BoundResourceView>>> _passViews = Expando();
 
 final class _FrameExecution {
@@ -28,6 +27,9 @@ extension on SceneRendererImpl {
     if (_activeFrame != null) {
       throw StateError('renderer.configure cannot overlap an active frame');
     }
+    configuration = configuration.withShaderOverrides(
+      configuration.shaderOverrides,
+    );
     final transition = _configurations.begin(configuration);
     if (transition.configuration.delta.isNoop) {
       _configurations.commit(transition);
@@ -39,7 +41,10 @@ extension on SceneRendererImpl {
     FeatureGraph? candidateFeatures;
     try {
       candidateResources = _gpuResources!.prepare(configuration);
-      candidatePrograms = ProgramLibrary(device);
+      candidatePrograms = ProgramLibrary(
+        device,
+        overrides: configuration.shaderOverrides,
+      );
       final candidate = _assembleSafeGraph(
         candidatePrograms,
         configuration,
@@ -52,6 +57,7 @@ extension on SceneRendererImpl {
       _featureGraph = candidate.featureGraph;
       _graph = candidate.result;
       _programs = candidatePrograms;
+      candidatePrograms.fallbackToDefaults = true;
       _configuration = configuration;
       oldFeatures?.disposeAll();
       oldPrograms?.disposeAll();
@@ -330,11 +336,7 @@ extension on SceneRendererImpl {
         ),
       );
     }
-    return _FrameExecution(
-      telemetry,
-      cull,
-      culledTriangles,
-    );
+    return _FrameExecution(telemetry, cull, culledTriangles);
   }
 
   Map<String, BoundResourceView> _viewsFor(

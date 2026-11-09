@@ -14,12 +14,6 @@ enum CullFace { front, back }
 
 enum DepthFunc { less, lessEqual, always, never }
 
-/// A complete draw-pass state descriptor (§6.4). Every pass supplies one of
-/// these; `WebGlStateCache` diffs it against the previously applied
-/// descriptor and issues only the GL calls needed to reach the new state,
-/// so a shadow, transparent, or debug pass cannot poison the next pass
-/// through leaked divisors, color masks, draw buffers, culling, or depth
-/// writes.
 final class DrawStateDescriptor {
   final bool depthTest;
   final DepthFunc depthFunc;
@@ -54,10 +48,6 @@ final class DrawStateDescriptor {
     this.scissorEnable = false,
   });
 
-  /// A per-draw override for the one field a `MaterialDefinition` is known
-  /// to need to override on top of its pass's own declared state
-  /// (`doubleSided` disabling cull per-material, not per-pass) — every
-  /// other field passes through unchanged.
   DrawStateDescriptor withCullEnable(bool value) => DrawStateDescriptor(
     depthTest: depthTest,
     depthFunc: depthFunc,
@@ -86,11 +76,6 @@ final class DrawStateDescriptor {
     blendDst: BlendFactor.oneMinusSrcAlpha,
   );
 
-  /// §8.6's "additive shafts use their own blend state" — `one`/`one`
-  /// rather than [blendedDefault]'s `srcAlpha`/`oneMinusSrcAlpha`, the same
-  /// pure-additive pair bloom's own composite pass already uses, so a
-  /// shaft only ever adds light on top of what is already there and never
-  /// darkens or replaces it.
   static const DrawStateDescriptor additiveDefault = DrawStateDescriptor(
     depthWrite: false,
     blendEnable: true,
@@ -98,11 +83,6 @@ final class DrawStateDescriptor {
     blendDst: BlendFactor.one,
   );
 
-  /// Additive with coverage: `srcAlpha`/`one`. Still only ever adds light,
-  /// but scaled by the fragment's alpha, so a soft-edged additive sprite
-  /// adds a soft disc rather than its whole quad. World draws with
-  /// `BlendMode.additive` use this; [additiveDefault] stays pure `one`/`one`
-  /// for full-screen composites whose alpha is always 1.
   static const DrawStateDescriptor additiveCoverage = DrawStateDescriptor(
     depthWrite: false,
     blendEnable: true,
@@ -126,11 +106,6 @@ enum StateField {
   scissorEnable,
 }
 
-/// Tracks the last-applied [DrawStateDescriptor] and computes the minimal
-/// set of changed fields against a new one. Contains no GL calls itself —
-/// the WebGL backend consumes [diff] and issues state-setting calls only
-/// for the returned fields, which is what makes the diff independently
-/// testable without a context.
 final class WebGlStateCache {
   DrawStateDescriptor? _applied;
 
@@ -177,9 +152,6 @@ final class WebGlStateCache {
     _applied = next;
   }
 
-  /// Forces the next [diff] to report every field, used after a pass whose
-  /// state changes were not routed through this cache (a raw-GL debug pass,
-  /// or after context restoration).
   void invalidate() {
     _applied = null;
   }

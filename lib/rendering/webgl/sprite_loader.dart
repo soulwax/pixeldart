@@ -8,8 +8,6 @@ import '../sprites/bitmap_font.dart';
 import '../sprites/sprite_batch.dart';
 import '../sprites/texture_atlas.dart';
 
-/// A font rasterized into an [AtlasBuilder], waiting for the atlas to be
-/// built so its glyphs can point at real regions.
 final class FontRaster {
   final String _prefix;
   final Map<int, double> _advances;
@@ -23,7 +21,6 @@ final class FontRaster {
     this._fallbackAdvance,
   );
 
-  /// The usable font, once [atlas] has been built from the same builder.
   BitmapFont bind(TextureAtlas atlas) {
     final glyphs = <int, BitmapGlyph>{};
     _advances.forEach((code, advance) {
@@ -38,13 +35,11 @@ final class FontRaster {
   }
 }
 
-/// Browser helpers that turn images and fonts into sprite data.
 abstract final class SpriteLoader {
   static const String _printableAscii =
       ' !"#\$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`'
       'abcdefghijklmnopqrstuvwxyz{|}~';
 
-  /// Fetches and decodes an image to RGBA8 pixels.
   static Future<SpriteImage> loadImage(String url) async {
     final done = Completer<void>();
     final img = web.HTMLImageElement();
@@ -62,19 +57,12 @@ abstract final class SpriteLoader {
     return SpriteImage(width, height, _pixels(ctx, width, height));
   }
 
-  /// Loads a font file and makes [family] available to [rasterizeFont].
   static Future<void> loadFontFace(String family, String url) async {
     final face = web.FontFace(family, 'url("$url")'.toJS);
     await face.load().toDart;
     web.document.fonts.add(face);
   }
 
-  /// Draws each of [chars] (printable ASCII by default) into [builder].
-  ///
-  /// [family] must already be available; see [loadFontFace]. [size] is in
-  /// pixels and is also the size glyphs draw at scale 1. [pixelated] cuts
-  /// antialiasing to on/off coverage and rounds advances to whole pixels,
-  /// for bitmap-style fonts. Call [FontRaster.bind] after building the atlas.
   static FontRaster rasterizeFont(
     AtlasBuilder builder, {
     required String family,

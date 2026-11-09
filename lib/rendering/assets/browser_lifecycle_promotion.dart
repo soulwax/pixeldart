@@ -1,4 +1,3 @@
-/// Required browser lifecycle scenarios for RF-10.
 const requiredBrowserScenarios = <String>{
   'disabled',
   'lod0',

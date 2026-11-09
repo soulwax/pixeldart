@@ -33,21 +33,6 @@ final class _TextureRecord {
   );
 }
 
-/// Uploads renderer-neutral pixel data to real GPU textures and tracks them
-/// under the same slot+generation `ResourceRegistry` discipline `MeshStore`
-/// and `MaterialStore` already use — RP-2's answer to `TODO.md`'s "no
-/// TextureStore" gap, which is why `MaterialDefinition.albedoTexture` has
-/// been declared since RV-08 with nothing to resolve it against.
-///
-/// Two-phase by design, not just eager upload like `MeshStore`: [declare]
-/// alone reserves a handle with no pixels yet (the async-load shape a real
-/// asset pipeline needs — fetch, then arrive), and [resolve] returns the
-/// store-owned white fallback for a still-unloaded handle rather than an
-/// undefined or garbage texture. §5.3's "missing optional art cannot make
-/// geometry disappear" governs textures the same way `FallbackPixels`
-/// already governs the backend's own built-ins; passing `pixels:` to
-/// [declare] is the synchronous convenience every caller in this codebase
-/// currently wants, layered on top of the same two-phase path.
 final class TextureStore {
   final GpuDevice _device;
   final ResourceRegistry<TextureHandle, _TextureRecord> _registry;
@@ -81,13 +66,6 @@ final class TextureStore {
     return texture;
   }
 
-  /// Reserves a texture handle. With [pixels] supplied, uploads layer 0
-  /// immediately (the synchronous path every current caller wants); without
-  /// it, the handle resolves to the fallback until [updatePixels] arrives.
-  /// [hasMips] declares intent only — [finalizeMips] must still be called
-  /// once every layer's base level is uploaded, mirroring
-  /// `GpuDevice.finalizeMips`'s own "callers upload every layer's base
-  /// level first, then call this exactly once" contract.
   TextureHandle declare({
     required int width,
     required int height,
@@ -136,12 +114,6 @@ final class TextureStore {
     return handle;
   }
 
-  /// Uploads (or replaces) one layer's pixels for an already-declared
-  /// handle. The retained CPU descriptor is updated in place — not
-  /// released-and-redeclared, which would mint a new identity and
-  /// invalidate every existing reference — so the same [handle] keeps
-  /// resolving before and after, and context-restore rehydration replays
-  /// exactly what was uploaded.
   void updatePixels(TextureHandle handle, Uint8List pixels, {int layer = 0}) {
     final record = _registry.descriptorOf(handle);
     _registry.updateDescriptor(handle, record.withLayerPixels(layer, pixels));
@@ -151,10 +123,6 @@ final class TextureStore {
     _device.uploadTextureLayer(texture, layer, pixels);
   }
 
-  /// Generates mip levels for a texture declared with `hasMips: true`. A
-  /// no-op if the handle was never declared mipped — matching
-  /// `GpuDevice.finalizeMips`'s own no-op contract for a non-mipped
-  /// texture, rather than requiring every caller to branch on it first.
   void finalizeMips(TextureHandle handle) {
     final record = _registry.descriptorOf(handle);
     if (!record.descriptor.hasMips) {
@@ -170,18 +138,10 @@ final class TextureStore {
     _registry.updateDescriptor(handle, record.withMipsFinalized());
   }
 
-  /// Validates [handle] (throwing `HandleException` for a wrong-kind,
-  /// stale-generation, or released handle, exactly like `MeshStore`) and
-  /// returns its real texture, or the fallback if nothing has been uploaded
-  /// to it yet.
   GpuObject resolve(TextureHandle handle) {
     return _resolve(handle, _fallbackAlbedo);
   }
 
-  /// Reports whether every declared layer has source pixels. A declared
-  /// handle is intentionally not considered resident merely because its
-  /// fallback texture can be resolved; presentation features use this to
-  /// preserve their authored fallback while an async image is loading.
   bool isResident(TextureHandle handle) {
     final record = _registry.descriptorOf(handle);
     return record.layerPixels.every((pixels) => pixels != null);
@@ -192,10 +152,6 @@ final class TextureStore {
     return _texturesBySlot[handle.slot] ?? fallback;
   }
 
-  /// The `AlbedoResolver` shape (`world.dart`): `null` — a material that
-  /// declared no albedo texture of its own — resolves to the fallback
-  /// exactly like an unloaded handle does, so a default material and a
-  /// still-loading one are observably identical until real pixels arrive.
   GpuObject resolveAlbedo(TextureHandle? handle) {
     if (handle == null) {
       return _fallbackAlbedo;
@@ -223,8 +179,6 @@ final class TextureStore {
     return _resolve(handle, _fallbackLightmap);
   }
 
-  /// Built-in white texture used by passes when a material has no albedo or
-  /// its declared texture has not received pixels yet.
   GpuObject get fallbackAlbedo => _fallbackAlbedo;
   GpuObject get fallbackNormal => _fallbackNormal;
   GpuObject get fallbackOrm => _fallbackOrm;
@@ -239,10 +193,6 @@ final class TextureStore {
     _registry.release(handle);
   }
 
-  /// Releases device-owned textures that are not represented by public
-  /// handles. The fallback set is created with the store and therefore must
-  /// be torn down with it; otherwise every renderer disposal leaks five
-  /// 1x1 textures even when the application registered no textures.
   void dispose() {
     for (final texture in _texturesBySlot.values) {
       _device.deleteTexture(texture);
@@ -255,12 +205,6 @@ final class TextureStore {
     _device.deleteTexture(_fallbackLightmap);
   }
 
-  /// Rebuilds every live, already-loaded texture from its retained pixel
-  /// data after a context restore (mirrors `MeshStore`'s own rehydration).
-  /// A handle that was declared but never loaded stays unloaded — there is
-  /// no pixel data to replay, and it will keep resolving to the fallback
-  /// exactly as it did before the loss, which is the correct outcome rather
-  /// than a gap.
   void rehydrateAfterContextRestore() {
     _fallbackAlbedo = _createFallbackAlbedo();
     _fallbackNormal = _createFallback(FallbackPixels.flatNormal);
@@ -289,8 +233,6 @@ final class TextureStore {
   int get createCount => _registry.createCount;
   int get deleteCount => _registry.deleteCount;
 
-  /// Estimated retained pixel payload for frame-budget diagnostics. It
-  /// excludes driver allocation overhead and the built-in 1x1 fallback.
   int get liveGpuBytes => _registry.liveDescriptors().fold<int>(0, (
     total,
     entry,

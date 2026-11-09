@@ -3,10 +3,6 @@ import 'dart:typed_data';
 import '../../rendering/assets/model_cache.dart';
 import 'model_package.dart';
 
-/// CPU residency acquired for one logical package owner.
-///
-/// Each part owns one cache reference. If acquisition fails halfway through,
-/// references already acquired by this handoff are released before rethrowing.
 final class ModelPackageCacheHandoff {
   final ModelCache cache;
   final List<CachedMesh> meshes;

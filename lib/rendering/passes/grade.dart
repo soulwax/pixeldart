@@ -25,24 +25,6 @@ final class GradeProgramSource {
   );
 }
 
-/// RV-09 rung 2's LUT grade — §6.2's pass order places this immediately
-/// after DOF and before PS1 quantize+dither/VHS, so it reads
-/// [DofResources.dofOutput] and writes its own distinct
-/// [GradeResources.gradeOutput] rather than a `nextVersion()` of an
-/// upstream name (same reasoning DOF itself already established: this
-/// shader samples the pre-grade scene as one input texture while writing a
-/// different texture, so the two can never share a physical target).
-///
-/// The LUT itself is asset-like (a texture, not a per-frame render target),
-/// resolved via [resolveLut] exactly the way `ShadowedWorldFeature` already
-/// resolves its albedo texture — it is never a declared graph resource.
-/// §5.3 names "identity LUT" as a mandatory baseline fallback; this feature
-/// does not special-case that texture at the shader level (`sampleLut` has
-/// no identity-specific branch) — an identity LUT is just a LUT texture
-/// whose texels happen to encode a passthrough, and
-/// `PostProcessState.colorGradeStrength == 0` already gives the same
-/// observable result (`mix(scene, graded, 0) == scene`) without needing a
-/// second texture asset loaded at all.
 final class GradeFeature implements RenderFeature {
   final ProgramLibrary programLibrary;
   final String vertexSource;

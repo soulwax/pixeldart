@@ -19,12 +19,6 @@ import '../webgl/draw_encoder.dart';
 import 'pass_context_impl.dart';
 import 'safe_graph_resources.dart';
 
-/// What `_WorldPass` needs to issue one draw call for a resolved mesh:
-/// its VAO plus enough shape information to choose `drawArrays` vs.
-/// `drawElements` and the correct vertex/index count. Deliberately not the
-/// full `UploadedMesh` type from `lib/rendering/assets/mesh_store.dart` —
-/// `lib/rendering/passes` does not depend on `lib/rendering/assets`, so a
-/// resolver can be backed by `MeshStore` or, in pure tests, a trivial fake.
 final class ResolvedMesh {
   final GpuObject vao;
   final bool isIndexed;
@@ -39,41 +33,14 @@ final class ResolvedMesh {
   });
 }
 
-/// Resolves a logical [MeshHandle] to its live GPU draw data. Real
-/// resolution is `MeshStore.resolve` (RV-06 Phase B) — `WorldFeature` takes
-/// this as an injected function so the pass itself has no direct dependency
-/// on that store, and a pure test can supply a trivial fake without waiting
-/// on it.
 typedef MeshResolver = ResolvedMesh Function(MeshHandle mesh);
 
-/// Resolves a logical [MaterialHandle] to its live [MaterialDefinition].
-/// Real resolution is `MaterialStore.resolve` (RV-08 rung 1) — kept as an
-/// injected function, mirroring [MeshResolver], so a pass has no direct
-/// dependency on `lib/rendering/assets` and a pure test can supply a
-/// trivial fake. Lives here rather than beside the one pass that first
-/// needed it: the depth prepass and the shadow caster both resolve
-/// materials too now, to honour §6.2's "alpha-masked geometry participates
-/// in shadow, prepass, and opaque depth-writing routes."
 typedef MaterialResolver = MaterialDefinition Function(MaterialHandle material);
 
-/// Resolves a [MaterialDefinition.albedoTexture] to the live GPU texture a
-/// draw must bind. `null` means the material authored no albedo of its own
-/// and takes the caller's fallback — the state every material in the
-/// renderer-test bootstrap was in before alpha masking needed a second
-/// texture, so a resolver that ignores its argument reproduces the previous
-/// single-texture behaviour exactly. The resolver remains an injected pass
-/// boundary even though the concrete renderer now backs it with `TextureStore`,
-/// keeping the pass independent from resource ownership and easy to fixture.
 typedef AlbedoResolver = GpuObject Function(TextureHandle? albedoTexture);
 
-/// Resolves any optional material-v2 texture slot. Keeping this separate
-/// from [AlbedoResolver] lets stores return distinct neutral fallbacks for
-/// normal, ORM, and emissive maps without changing the compatibility API.
 typedef MaterialTextureResolver = GpuObject Function(TextureHandle? texture);
 
-/// The safe-graph world program: vertex-lit, vertex-color, matches
-/// `shaders/rendering/world/safe_world.vert|frag` exactly (attribute
-/// locations, uniform names).
 final class WorldProgramSource {
   static ProgramSource build({
     required String vertexSource,
@@ -101,12 +68,6 @@ final class WorldProgramSource {
   );
 }
 
-/// §6.1's mandatory world stage: opaque then transparent, vertex color and
-/// fallback textures only, no optional targets. Declares exactly one write
-/// to `sceneColor` (opaque) followed by a read+same-target continuation for
-/// transparent geometry — the pass graph treats them as one program run
-/// across two draw batches, not two separate resource versions, since both
-/// write into the same accumulating color target within one pass.
 final class WorldFeature implements RenderFeature {
   final ProgramLibrary programLibrary;
   final String vertexSource;

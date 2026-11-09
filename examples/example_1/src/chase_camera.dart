@@ -2,15 +2,9 @@ import 'dart:math' as math;
 
 import 'package:pixeldart/pixeldart.dart';
 
-/// Third-person chase camera for a ship flying down -Z.
-///
-/// Sits behind and above [target], trails it with exponential smoothing so
-/// sharp dodges read as motion, and widens its field of view with [speed01]
-/// for a sense of velocity.
 final class ChaseCamera implements CameraController {
   Vec3 target = Vec3.zero;
 
-  /// 0 at cruise, 1 at full boost.
   double speed01 = 0;
 
   Vec3 _eye = const Vec3(0, 2, 8);
@@ -26,7 +20,6 @@ final class ChaseCamera implements CameraController {
   @override
   Vec3 get forward => (_look - _eye).normalized;
 
-  /// Jumps straight to the resting pose, e.g. on restart.
   void snap() {
     _eye = _desiredEye;
     _look = target + _lookAhead;

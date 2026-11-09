@@ -1,4 +1,5 @@
 import '../webgl/device_api.dart';
+import '../api/shaders.dart';
 import 'program_source.dart';
 
 final class CompiledProgram {
@@ -26,19 +27,25 @@ final class PreparedProgramSet {
   ProgramSetCandidateState get state => _state;
 }
 
-/// Owns every live program and drives §7.2's atomic sequence: compile,
-/// link, validate, assign samplers, publish, delete-the-old-one-only-after.
-/// A failed candidate never replaces the last known-good program (§7.2,
-/// and RV-03's gate: "invalid reload preserves the previous program").
 final class ProgramLibrary {
   final GpuDevice _device;
+  final Map<ShaderSlot, ShaderOverride> _overrides;
+  bool fallbackToDefaults;
   final Map<String, CompiledProgram> _live = {};
+  final Map<ShaderSlot, String> _overrideErrors = {};
   PreparedProgramSet? _openSet;
 
   int publishCount = 0;
   int rejectedReloadCount = 0;
 
-  ProgramLibrary(this._device);
+  ProgramLibrary(
+    this._device, {
+    Map<ShaderSlot, ShaderOverride> overrides = const {},
+    this.fallbackToDefaults = false,
+  }) : _overrides = Map.unmodifiable(overrides);
+
+  Map<ShaderSlot, String> get overrideErrors =>
+      Map.unmodifiable(_overrideErrors);
 
   CompiledProgram? programFor(String id) => _live[id];
 
@@ -55,12 +62,7 @@ final class ProgramLibrary {
         if (candidates.containsKey(source.id)) {
           throw ArgumentError('duplicate program ID: ${source.id}');
         }
-        final handle = _device.compileProgram(
-          vertexSource: source.vertexSource,
-          fragmentSource: source.fragmentSource,
-          requiredAttributes: source.requiredAttributes,
-          requiredUniforms: source.requiredUniforms,
-        );
+        final handle = _compile(source);
         candidates[source.id] = CompiledProgram(
           id: source.id,
           handle: handle,
@@ -100,10 +102,6 @@ final class ProgramLibrary {
     _openSet = null;
   }
 
-  /// Compiles [source] and, only on success, publishes it — deleting the
-  /// prior program for the same id (if any) after the new one is live. On
-  /// failure, throws and leaves any existing program for [source.id]
-  /// untouched.
   CompiledProgram publish(ProgramSource source) {
     if (_openSet != null) {
       throw StateError('cannot publish while a program set candidate is open');
@@ -111,12 +109,7 @@ final class ProgramLibrary {
     source.validate();
     final GpuObject handle;
     try {
-      handle = _device.compileProgram(
-        vertexSource: source.vertexSource,
-        fragmentSource: source.fragmentSource,
-        requiredAttributes: source.requiredAttributes,
-        requiredUniforms: source.requiredUniforms,
-      );
+      handle = _compile(source);
     } on ShaderCompileException {
       rejectedReloadCount += 1;
       rethrow;
@@ -138,11 +131,6 @@ final class ProgramLibrary {
     return compiled;
   }
 
-  /// Attempts a reload; on failure the previous program for [source.id]
-  /// (if any) remains published and callable. Returns whether the reload
-  /// succeeded, rather than throwing, since a failed compile is an expected
-  /// dev-loop outcome, not a fatal error. A malformed [source] (caught by
-  /// `validate()`) is a genuine authoring bug and still throws.
   bool tryReload(ProgramSource source) {
     source.validate();
     try {
@@ -163,12 +151,43 @@ final class ProgramLibrary {
     _live.clear();
   }
 
-  /// Drops logical program references after the device has already discarded
-  /// every GPU object during context loss. Unlike [disposeAll], this must not
-  /// call delete on stale handles from the previous device epoch.
   void resetAfterContextRestore() {
     _openSet = null;
     _live.clear();
+    _overrideErrors.clear();
+  }
+
+  GpuObject _compile(ProgramSource source) {
+    final slot = ShaderSlot.forProgramId(source.id);
+    final replacement = slot == null ? null : _overrides[slot];
+    if (replacement == null) {
+      return _device.compileProgram(
+        vertexSource: source.vertexSource,
+        fragmentSource: source.fragmentSource,
+        requiredAttributes: source.requiredAttributes,
+        requiredUniforms: source.requiredUniforms,
+      );
+    }
+    try {
+      final handle = _device.compileProgram(
+        vertexSource: replacement.vertex ?? source.vertexSource,
+        fragmentSource: replacement.fragment ?? source.fragmentSource,
+        requiredAttributes: source.requiredAttributes,
+        requiredUniforms: source.requiredUniforms,
+      );
+      _overrideErrors.remove(slot);
+      return handle;
+    } on ShaderCompileException catch (error) {
+      if (!fallbackToDefaults) rethrow;
+      rejectedReloadCount += 1;
+      _overrideErrors[slot!] = error.toString();
+      return _device.compileProgram(
+        vertexSource: source.vertexSource,
+        fragmentSource: source.fragmentSource,
+        requiredAttributes: source.requiredAttributes,
+        requiredUniforms: source.requiredUniforms,
+      );
+    }
   }
 
   void _checkOpenSet(PreparedProgramSet prepared) {

@@ -63,8 +63,6 @@ double _wrapAngle(double a) {
   return a;
 }
 
-/// A shipping lane: a spline walked by arc length, so ships move at a
-/// steady speed and drift is measured in world units.
 final class Lane {
   final CatmullRomSpline3D spline;
   Lane(this.spline);
@@ -73,14 +71,12 @@ final class Lane {
 
   Vec3 pointAt(double s) => spline.sampleAtDistance(s);
 
-  /// Heading along the sea surface (the lanes lie at y = 0).
   Vec3 tangentAt(double s) {
     final t = spline.tangentAtDistance(s);
     final flat = Vec3(t.x, 0, t.z);
     return flat.lengthSquared > 1e-9 ? flat.normalized : Vec3.unitZ;
   }
 
-  /// Points every two metres, for clearance checks.
   Iterable<Vec3> get samples sync* {
     for (var s = 0.0; s <= length; s += 2) {
       yield pointAt(s);
@@ -1088,7 +1084,6 @@ final class Tidewatch {
   }
 }
 
-/// DOM overlay: clock, weather, tallies, toast line and card.
 final class Hud {
   final web.Element? _clock = web.document.querySelector('#clock');
   final web.Element? _weather = web.document.querySelector('#weather');

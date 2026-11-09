@@ -6,7 +6,6 @@ import '../math/bounds.dart';
 import '../math/vec.dart';
 import '../optics/gerstner_waves.dart';
 
-/// Deforming dynamic water surface plane driven by [GerstnerWaveEvaluator].
 final class WaterSurfaceMesh {
   final double width;
   final double depth;
@@ -127,14 +126,6 @@ final class WaterSurfaceMesh {
     mesh.validate();
   }
 
-  /// Updates vertex buffer in-place with trochoidal wave displacement and analytical normals.
-  ///
-  /// One pass over the wave components per vertex yields both displacement
-  /// and normal from the same sin/cos pair, with no per-vertex allocation.
-  /// Along a grid row each wave's phase advances by a constant step, so the
-  /// pair is rotated forward by that step instead of re-evaluated; only row
-  /// starts call sin/cos. Results match [GerstnerWaveEvaluator.sampleDisplacement]
-  /// and [GerstnerWaveEvaluator.sampleNormal] to float precision.
   void updateWaves(double time, GerstnerWaveEvaluator waves) {
     final verts = mesh.vertices;
     final components = waves.waves;

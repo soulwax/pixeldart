@@ -7,8 +7,6 @@ import '../math/quat.dart';
 import '../math/transform.dart';
 import '../math/vec.dart';
 
-/// Generic world-space stream segment. Pixeldart does not know whether this
-/// is rain runoff, a drain, a leak, a cable spark, or a magical ribbon.
 final class FlowPath {
   final Vec3 start;
   final Vec3 end;
@@ -40,9 +38,6 @@ final class FlowPath {
   }
 }
 
-/// Frame-local deterministic particles constrained to authored paths. This
-/// keeps path physics in the host while giving every stream the same culling,
-/// blending, lifecycle, and resource path as ordinary transient geometry.
 final class FlowParticleField {
   final MeshHandle mesh;
   final MaterialHandle material;

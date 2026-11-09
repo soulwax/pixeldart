@@ -43,11 +43,8 @@ final class SpriteProgramSource {
   );
 }
 
-/// Frames a retained copy may sit unused before its GPU objects are freed.
 const int spriteEvictionFrames = 300;
 
-/// Streaming buffers per stage. Each frame writes the next one, so it does
-/// not write to a buffer the GPU may still be reading.
 const int _streamBufferCount = 3;
 const int _minStreamBytes = 64 * 1024;
 
@@ -86,9 +83,6 @@ const DrawStateDescriptor _multiplyDepth = DrawStateDescriptor(
   cullEnable: false,
 );
 
-/// A sprite VAO over one instance buffer. Instance attributes are re-pointed
-/// per run, because WebGL2 has no base-instance draw; [offset] skips the
-/// calls when a run starts where the last one was pointed.
 final class _SpriteVertices {
   final GpuObject vao;
   final GpuObject buffer;
@@ -105,11 +99,6 @@ final class _BatchEntry {
   _SpriteVertices? retained;
 }
 
-/// Draws the sprite batches queued in a frame.
-///
-/// Batches that changed since the last frame are streamed; a batch that did
-/// not change is uploaded once to a buffer of its own and redrawn from
-/// there, which is what makes a tile chunk free after its first frames.
 final class SpritesFeature implements RenderFeature {
   final ProgramLibrary programLibrary;
   final String vertexSource;
@@ -120,8 +109,6 @@ final class SpritesFeature implements RenderFeature {
   final ResourceRef sceneColorResource;
   final ColorEncoding outputEncoding;
 
-  /// Clears the glow attachment before sprites draw, for graphs whose world
-  /// pass does not write glow and would leave its clear colour there.
   final bool clearGlow;
 
   CompiledProgram? _program;
@@ -153,7 +140,6 @@ final class SpritesFeature implements RenderFeature {
     this.clearGlow = false,
   });
 
-  /// Retained batch buffers currently alive, for diagnostics and tests.
   int get retainedCount {
     var count = 0;
     for (final entry in _entries.values) {
@@ -353,8 +339,6 @@ final class SpritesFeature implements RenderFeature {
     }
   }
 
-  /// Decides how [batch] draws this frame: retained when it did not change
-  /// since the last frame it was seen, streamed otherwise.
   _BatchEntry _update(SpriteBatch batch) {
     final entry = _entries.putIfAbsent(batch, _BatchEntry.new);
     if (entry.lastFrame == _frame) return entry;
@@ -503,9 +487,6 @@ final class SpritesFeature implements RenderFeature {
   }
 }
 
-/// The second half of [SpritesFeature]: draws [SpriteStage.overlay] batches
-/// on the canvas. Installed after present, sharing the parent's program and
-/// buffers; the parent owns and frees them.
 final class SpritesOverlayFeature implements RenderFeature {
   final SpritesFeature _parent;
   SpritesOverlayFeature._(this._parent);

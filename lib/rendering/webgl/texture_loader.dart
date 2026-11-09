@@ -8,9 +8,7 @@ import '../api/handles.dart';
 import '../api/renderer.dart';
 import 'device_api.dart';
 
-/// Browser utility for asynchronous texture loading from URLs or image elements.
 abstract final class TextureLoader {
-  /// Asynchronously fetches an image from [url] and registers it with [resources].
   static Future<TextureHandle> loadFromUrl({
     required ResourceLibrary resources,
     required String url,
@@ -47,8 +45,6 @@ abstract final class TextureLoader {
     );
   }
 
-  /// Asynchronously decodes raw [bytes] (e.g. embedded PNG/JPEG in a GLB)
-  /// into a texture registered with [resources].
   static Future<TextureHandle> loadFromBytes({
     required ResourceLibrary resources,
     required Uint8List bytes,
@@ -80,7 +76,6 @@ abstract final class TextureLoader {
     }
   }
 
-  /// Extracts pixel data from an [image] element and registers it with [resources].
   static TextureHandle loadFromImage({
     required ResourceLibrary resources,
     required web.HTMLImageElement image,

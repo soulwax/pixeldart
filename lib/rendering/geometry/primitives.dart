@@ -6,9 +6,7 @@ import '../math/bounds.dart';
 import '../math/quat.dart';
 import '../math/vec.dart';
 
-/// Procedural geometry generators producing validated surface-v2 [MeshData].
 abstract final class Primitives {
-  /// Generates an axis-aligned cube centered at origin with side length [size].
   static MeshData cube({double size = 1.0, double uvScale = 1.0}) {
     if (size <= 0) throw ArgumentError.value(size, 'size', 'must be > 0');
     final h = size * 0.5;
@@ -33,7 +31,6 @@ abstract final class Primitives {
     return b.build(Aabb(Vec3(-h, -h, -h), Vec3(h, h, h)));
   }
 
-  /// Generates a subdivided plane in the XZ plane centered at origin.
   static MeshData plane({
     double width = 1.0,
     double depth = 1.0,
@@ -70,7 +67,6 @@ abstract final class Primitives {
     return b.build(Aabb(Vec3(-halfW, 0, -halfD), Vec3(halfW, 0, halfD)));
   }
 
-  /// Generates a UV sphere centered at origin.
   static MeshData sphere({double radius = 0.5, int rings = 16, int sectors = 32}) {
     if (radius <= 0) throw ArgumentError.value(radius, 'radius', 'must be > 0');
     if (rings < 2 || sectors < 3) throw ArgumentError('invalid ring or sector count');
@@ -119,7 +115,6 @@ abstract final class Primitives {
     return b.build(Aabb(rVec * -1, rVec));
   }
 
-  /// Generates a billboard quad in the XY plane facing +Z.
   static MeshData quad({double width = 1.0, double height = 1.0}) {
     if (width <= 0 || height <= 0) throw ArgumentError('dimensions must be > 0');
     final b = _PrimitiveMeshBuilder();
@@ -137,7 +132,6 @@ abstract final class Primitives {
     return b.build(Aabb(Vec3(-hw, -hh, 0), Vec3(hw, hh, 0)));
   }
 
-  /// Generates a 3D cylinder aligned along the Y-axis.
   static MeshData cylinder({
     double radius = 0.5,
     double height = 1.0,
@@ -209,7 +203,6 @@ abstract final class Primitives {
     return b.build(Aabb(Vec3(-radius, -hh, -radius), Vec3(radius, hh, radius)));
   }
 
-  /// Generates a 3D cone pointing along the +Y axis.
   static MeshData cone({
     double radius = 0.5,
     double height = 1.0,
@@ -264,7 +257,6 @@ abstract final class Primitives {
     return b.build(Aabb(Vec3(-radius, -hh, -radius), Vec3(radius, hh, radius)));
   }
 
-  /// Generates a 3D torus in the XZ plane with hole along the Y-axis.
   static MeshData torus({
     double radius = 0.8,
     double tubeRadius = 0.2,
@@ -311,7 +303,6 @@ abstract final class Primitives {
     return b.build(Aabb(Vec3(-maxR, -tubeRadius, -maxR), Vec3(maxR, tubeRadius, maxR)));
   }
 
-  /// Generates a capsule aligned along the Y-axis.
   static MeshData capsule({
     double radius = 0.3,
     double cylinderHeight = 0.6,
@@ -400,8 +391,6 @@ abstract final class Primitives {
     return b.build(Aabb(Vec3(-radius, -totalH, -radius), Vec3(radius, totalH, radius)));
   }
 
-  /// Generates a geodesic sphere (icosphere) by recursively subdividing an icosahedron.
-  /// Provides mathematically uniform vertex and triangle distribution across the sphere.
   static MeshData icosphere({double radius = 0.5, int subdivisions = 2}) {
     if (radius <= 0) throw ArgumentError.value(radius, 'radius', 'must be > 0');
     if (subdivisions < 0 || subdivisions > 5) {
@@ -482,7 +471,6 @@ abstract final class Primitives {
     return b.build(Aabb(rVec * -1, rVec));
   }
 
-  /// Generates a faceted 3D octahedron crystal centered at the origin.
   static MeshData octahedron({double radius = 0.5}) {
     if (radius <= 0) throw ArgumentError.value(radius, 'radius', 'must be > 0');
 
@@ -519,7 +507,6 @@ abstract final class Primitives {
     return b.build(Aabb(rVec * -1, rVec));
   }
 
-  /// Generates a faceted 3D regular dodecahedron with 12 pentagonal faces.
   static MeshData dodecahedron({double radius = 0.5}) {
     if (radius <= 0) throw ArgumentError.value(radius, 'radius', 'must be > 0');
 
@@ -584,8 +571,6 @@ abstract final class Primitives {
     return b.build(Aabb(rVec * -1, rVec));
   }
 
-  /// Generates a box with smooth chamfered/rounded edges and corners.
-  /// Rounded bevels catch specular edge glints for heightened realism in PBR lighting.
   static MeshData roundedBox({
     double width = 1.0,
     double height = 1.0,
@@ -733,10 +718,6 @@ abstract final class Primitives {
     return b.build(Aabb(halfSize * -1, halfSize));
   }
 
-  /// Generates a continuous 3D tubular conduit or cable extruded along an arbitrary [spine] curve.
-  ///
-  /// Employs a Parallel Transport Frame (Bishop Frame) along the spine to eliminate twists
-  /// and abrupt 180-degree Frenet flips across inflection points.
   static MeshData tubePath({
     required List<Vec3> spine,
     double radius = 0.15,

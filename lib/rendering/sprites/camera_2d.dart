@@ -3,43 +3,26 @@ import 'dart:typed_data';
 
 import '../math/vec.dart';
 
-/// How a [Camera2D] maps its design size onto a viewport.
 enum ViewFit {
-  /// One world unit is one device pixel and the design size is ignored,
-  /// for tools and UI laid out in pixels.
   pixels,
 
-  /// The whole design area stays visible; the axis with spare room shows
-  /// more world. Pixels-per-unit may be fractional.
   contain,
 
-  /// Like [contain], but pixels-per-unit is a whole number, so pixel art
-  /// stays crisp at every window size.
   integer,
 }
 
-/// A 2D view: position, zoom and rotation over a design-sized area.
-///
-/// Plain data with no renderer, canvas or frame-loop dependency. World +Y is
-/// down, matching images, tilemaps and pointer coordinates. Call [setViewport]
-/// when the drawing surface changes size, then read [viewProjection].
 final class Camera2D {
-  /// World point at the centre of the view.
   double x;
   double y;
 
-  /// Magnification; 2 shows half as much world.
   double zoom;
 
-  /// Clockwise rotation of the view, in radians.
   double rotation;
 
   final double designWidth;
   final double designHeight;
   final ViewFit fit;
 
-  /// Rounds the view origin to whole device pixels when building the matrix,
-  /// so tiles never shimmer. [x] and [y] keep their precise values.
   bool snapToPixels;
 
   int _viewportWidth = 1;
@@ -65,14 +48,11 @@ final class Camera2D {
   int get viewportWidth => _viewportWidth;
   int get viewportHeight => _viewportHeight;
 
-  /// Device pixels covered by one world unit at the current zoom.
   double get pixelsPerUnit => _basePixelsPerUnit * zoom;
 
-  /// World units visible across the viewport, ignoring rotation.
   double get viewWidth => _viewportWidth / pixelsPerUnit;
   double get viewHeight => _viewportHeight / pixelsPerUnit;
 
-  /// Sets the drawing-surface size in device pixels.
   void setViewport(int width, int height) {
     _viewportWidth = math.max(1, width);
     _viewportHeight = math.max(1, height);
@@ -87,7 +67,6 @@ final class Camera2D {
     };
   }
 
-  /// Half extents of the world-aligned box that contains the rotated view.
   double get _halfBoundsX {
     final c = math.cos(rotation).abs(), s = math.sin(rotation).abs();
     return (viewWidth * c + viewHeight * s) / 2;
@@ -98,14 +77,11 @@ final class Camera2D {
     return (viewWidth * s + viewHeight * c) / 2;
   }
 
-  /// World-aligned bounds of everything the view can show.
   double get left => x - _halfBoundsX;
   double get right => x + _halfBoundsX;
   double get top => y - _halfBoundsY;
   double get bottom => y + _halfBoundsY;
 
-  /// Column-major world-to-clip matrix. The returned list is reused, so
-  /// copy it to keep a value across changes to the camera.
   Float32List get viewProjection {
     var cx = x, cy = y;
     final ppu = pixelsPerUnit;
@@ -129,7 +105,6 @@ final class Camera2D {
     return m;
   }
 
-  /// World position under a viewport point given in device pixels.
   Vec2 screenToWorld(double screenX, double screenY) {
     final ppu = pixelsPerUnit;
     final dx = (screenX - _viewportWidth / 2) / ppu;
@@ -138,7 +113,6 @@ final class Camera2D {
     return Vec2(x + c * dx - s * dy, y + s * dx + c * dy);
   }
 
-  /// Viewport position, in device pixels, of a world point.
   Vec2 worldToScreen(double worldX, double worldY) {
     final ppu = pixelsPerUnit;
     final dx = worldX - x, dy = worldY - y;

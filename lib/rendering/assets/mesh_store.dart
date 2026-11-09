@@ -5,15 +5,6 @@ import '../api/mesh.dart';
 import '../webgl/device_api.dart';
 import '../webgl/resource_registry.dart';
 
-/// Maps a [VertexAttributeKind] to the shader attribute location it must
-/// bind to. Fixed by the compatibility vertex contract (§5.4/§5.7), not
-/// derived per-mesh — every compatibility-layout mesh in the safe graph
-/// uses the same five locations `safe_world.vert`/`textured_world.vert`
-/// declare. `uv0` and `legacyMaterialEffect` both map to location 4
-/// deliberately: the shaders declare one `vec3 aUvMat` there (u, v, mat
-/// packed together), not two separate attributes — see
-/// `_skipRedundantUvMatBind`, which is what actually enforces that only one
-/// `vertexAttribPointer` call happens for this shared location.
 int _shaderLocationFor(VertexAttributeKind kind) => switch (kind) {
   VertexAttributeKind.position => 0,
   VertexAttributeKind.normal => 1,
@@ -29,12 +20,6 @@ int _shaderLocationFor(VertexAttributeKind kind) => switch (kind) {
   ),
 };
 
-/// The real component count a shader attribute at [location] must read,
-/// which can span more floats than [firstSlot] alone declares when a later
-/// slot shares the same location (today: `uv0`'s 2 floats plus
-/// `legacyMaterialEffect`'s 1 float = the shader's `vec3 aUvMat`). Sums
-/// every slot in [layout] mapped to [location], not just [firstSlot], so
-/// this stays correct if the layout gains a third co-located slot later.
 int _componentCountAtLocation(
   VertexLayoutDescriptor layout,
   int location,
@@ -69,12 +54,6 @@ final class UploadedMesh {
   bool get isIndexed => indexBuffer != null;
 }
 
-/// Uploads renderer-neutral [MeshData] to real GPU buffers/VAO and tracks
-/// them under RV-02's slot+generation `ResourceRegistry` discipline (RV-06
-/// Phase B: "upload the decoded model through MeshStore"). One CPU
-/// [MeshData] descriptor is kept per live handle so a context-restore
-/// rehydration path can rebuild every GPU object without re-decoding the
-/// source QMSH bytes.
 final class MeshStore {
   final GpuDevice _device;
   final ResourceRegistry<MeshHandle, MeshData> _registry;
@@ -181,9 +160,6 @@ final class MeshStore {
     _registry.release(handle);
   }
 
-  /// Rebuilds every live upload from its retained CPU descriptor after a
-  /// context restore (§7.4 step 5). Logical `MeshHandle`s remain stable;
-  /// only the GPU-side objects change.
   void rehydrateAfterContextRestore() {
     for (final (handle, mesh) in _registry.liveDescriptors()) {
       _uploadsBySlot[handle.slot] = _uploadToGpu(mesh);
@@ -192,9 +168,6 @@ final class MeshStore {
 
   int get liveCount => _registry.liveCount;
 
-  /// Bytes retained for the current logical mesh set. This is the uploaded
-  /// vertex/index payload estimate used by frame-budget diagnostics; driver
-  /// allocator overhead is intentionally outside this API.
   int get liveGpuBytes => _registry.liveDescriptors().fold<int>(
     0,
     (total, entry) =>
@@ -214,7 +187,5 @@ final class MeshStore {
   static int _indexByteLengthOrZero(List<int>? indices) =>
       indices == null ? 0 : _indexByteLength(indices);
 
-  /// Internal scene-world validation seam. The renderer owns both stores and
-  /// worlds; callers still receive only the public handle/resource API.
   ResourceRegistry<MeshHandle, MeshData> get registry => _registry;
 }

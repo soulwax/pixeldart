@@ -10,6 +10,7 @@ final class ConfigurationDelta {
   final Set<String> removedResources;
   final bool renderTargetsChanged;
   final bool resourceTablesChanged;
+  final bool shadersChanged;
   final bool diagnosticLevelChanged;
 
   const ConfigurationDelta({
@@ -19,6 +20,7 @@ final class ConfigurationDelta {
     required this.removedResources,
     required this.renderTargetsChanged,
     required this.resourceTablesChanged,
+    this.shadersChanged = false,
     required this.diagnosticLevelChanged,
   });
 
@@ -28,7 +30,8 @@ final class ConfigurationDelta {
       addedResources.isNotEmpty ||
       removedResources.isNotEmpty ||
       renderTargetsChanged ||
-      resourceTablesChanged;
+      resourceTablesChanged ||
+      shadersChanged;
 
   bool get isNoop => !requiresGpuRebuild && !diagnosticLevelChanged;
 }
@@ -188,6 +191,16 @@ ConfigurationDelta _delta(
     removedResources: Set.unmodifiable(removedResources),
     renderTargetsChanged: renderTargetsChanged,
     resourceTablesChanged: resourceTablesChanged,
+    shadersChanged: !_sameShaders(before, after),
     diagnosticLevelChanged: before.diagnosticLevel != after.diagnosticLevel,
   );
+}
+
+bool _sameShaders(RendererConfiguration before, RendererConfiguration after) {
+  final a = before.shaderOverrides, b = after.shaderOverrides;
+  if (a.length != b.length) return false;
+  for (final entry in a.entries) {
+    if (b[entry.key] != entry.value) return false;
+  }
+  return true;
 }

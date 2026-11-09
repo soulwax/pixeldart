@@ -1,8 +1,5 @@
 import '../api/stats.dart';
 
-/// Mutable, frame-local draw accounting. A pass records only after the
-/// backend draw call succeeds, so diagnostics describe work actually handed
-/// to the device rather than work that was merely planned.
 final class FrameDrawTelemetry {
   final Map<String, _MutablePassStats> _passes = {};
   String? _activePass;

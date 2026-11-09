@@ -1,8 +1,5 @@
 import 'dart:io';
 
-/// Compiles a tiny package that depends on Pixeldart by path, without the game
-/// package in its dependency graph. Runtime lifecycle coverage lives in
-/// [test_plib03_downstream_host.dart]; this check proves the install boundary.
 void main() {
   final package = _packageDirectory();
   final host = Directory.systemTemp.createTempSync('pixeldart-plib01-');

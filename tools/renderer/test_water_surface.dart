@@ -80,9 +80,6 @@ void _testWaveUpdate() {
   }
 }
 
-/// The fused per-vertex loop must agree with the evaluator's own sampling,
-/// which buoyancy and picking use. The large grid checks that the per-row
-/// phase rotation doesn't drift over long rows.
 void _testMatchesEvaluator() {
   final ocean = GerstnerWaveEvaluator.ocean();
   for (final (size, subdivisions) in [(30.0, 12), (520.0, 112)]) {

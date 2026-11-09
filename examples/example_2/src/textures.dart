@@ -3,9 +3,6 @@ import 'dart:typed_data';
 
 import 'package:pixeldart/pixeldart.dart';
 
-/// An albedo map plus a height map, both RGBA8/Uint8 at [size]×[size]. The
-/// height feeds [ProceduralTextures.normalFromHeight] so a flat 2D floor
-/// picks up per-pixel relief under the point lights.
 final class SurfaceMaps {
   final int size;
   final Uint8List albedo;
@@ -16,8 +13,6 @@ final class SurfaceMaps {
       ProceduralTextures.normalFromHeight(heights, width: size, height: size, strength: strength);
 }
 
-/// Seamlessly tiling flagstones: a wrapped Voronoi diagram whose cell borders
-/// become sunken mortar and whose cells get individual tint and grain.
 SurfaceMaps flagstones({int size = 256, int cells = 11, int seed = 7}) {
   final rng = math.Random(seed);
   final px = List.generate(cells, (_) => rng.nextDouble());
@@ -70,7 +65,6 @@ SurfaceMaps flagstones({int size = 256, int cells = 11, int seed = 7}) {
   return SurfaceMaps(size, albedo, heights);
 }
 
-/// Running-bond bricks for walls and pillars.
 SurfaceMaps bricks({int size = 128, int rows = 8, int cols = 4, int seed = 3}) {
   final rng = math.Random(seed);
   final tints = List.generate(rows * cols * 2, (_) => 0.75 + rng.nextDouble() * 0.4);

@@ -1,9 +1,5 @@
 import 'dart:convert';
 
-/// Immutable settings for one deterministic offline FBX import.
-///
-/// The FBX name is deliberately confined to this offline importer library;
-/// runtime package and rendering APIs remain source-neutral.
 final class FbxImportConfig {
   final String schema;
   final String assetId;
@@ -184,7 +180,6 @@ final class FbxImportConfig {
   );
 }
 
-/// Small dependency-free SHA-256 implementation shared by offline records.
 final class Sha256 {
   static const _k = <int>[
     0x428a2f98,

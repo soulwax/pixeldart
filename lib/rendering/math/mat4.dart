@@ -3,9 +3,6 @@ import 'dart:typed_data';
 
 import 'vec.dart';
 
-/// Column-major 4x4, index `m[column * 4 + row]`. Matches WebGL's
-/// `mat4 * vec4` column-vector convention: `(a * b).transformPoint(p) ==
-/// a.transformPoint(b.transformPoint(p))`.
 final class Mat4 {
   final Float32List m;
 
@@ -28,9 +25,6 @@ final class Mat4 {
     return Mat4._(Float32List.fromList(values));
   }
 
-  /// Translation × rotation (unit quaternion `qx, qy, qz, qw`) × per-axis
-  /// scale, written straight into one buffer. This is the per-draw model
-  /// matrix, so it avoids composing intermediate matrices.
   factory Mat4.compose({
     double tx = 0,
     double ty = 0,
@@ -122,8 +116,6 @@ final class Mat4 {
     );
   }
 
-  /// Right-handed perspective matching WebGL's [-1, 1] clip-space depth
-  /// convention. `fovYRadians` is the full vertical field of view.
   factory Mat4.perspective({
     required double fovYRadians,
     required double aspect,
@@ -142,8 +134,6 @@ final class Mat4 {
     );
   }
 
-  /// Right-handed orthographic projection matching WebGL's [-1, 1] clip-space
-  /// depth convention.
   factory Mat4.orthographic({
     required double left,
     required double right,
@@ -167,8 +157,6 @@ final class Mat4 {
     );
   }
 
-  /// Right-handed look-at. `forward` need not be normalized; `up` must not
-  /// be parallel to `forward`.
   factory Mat4.lookAt({
     required Vec3 eye,
     required Vec3 forward,
@@ -204,8 +192,6 @@ final class Mat4 {
 
   double at(int column, int row) => m[column * 4 + row];
 
-  /// `this * other`: column-vector application order, so
-  /// `(a * b).transformPoint(p) == a.transformPoint(b.transformPoint(p))`.
   Mat4 operator *(Mat4 other) {
     final result = Float32List(16);
     for (var column = 0; column < 4; column++) {
@@ -239,10 +225,6 @@ final class Mat4 {
       m[4] * (m[1] * m[10] - m[9] * m[2]) +
       m[8] * (m[1] * m[6] - m[5] * m[2]);
 
-  /// Inverse of the upper-left 3x3, for building the normal matrix. Throws
-  /// if the block is singular (non-finite or near-zero determinant) rather
-  /// than silently returning identity, since a silent fallback would light
-  /// a degenerate transform as if it were rigid.
   Mat4 inverse3x3() {
     final det = determinant3x3;
     if (!det.isFinite || det.abs() < 1e-12) {
@@ -264,16 +246,6 @@ final class Mat4 {
     return Mat4._(r);
   }
 
-  /// Transpose of `inverse3x3`, the correct matrix for transforming normals
-  /// under non-rigid transforms. Rigid transforms (rotation + uniform
-  /// scale) make this equal `inverse3x3` up to a scalar, but callers must
-  /// not special-case that; always route normals through this method.
-  ///
-  /// A near-singular block (a node scaled toward zero to hide or pop it)
-  /// does not throw: the cofactor matrix equals det · (M⁻¹)ᵀ, the same
-  /// normal transform up to a scalar, and needs no division. It is rescaled
-  /// to unit magnitude; shaders normalise normals anyway. Only a block with
-  /// no finite cofactors at all still throws.
   Mat4 normalMatrix() {
     final det = determinant3x3;
     if (!det.isFinite || det.abs() < 1e-12) return _cofactorNormalMatrix(det);
@@ -288,8 +260,6 @@ final class Mat4 {
     return Mat4._(r);
   }
 
-  /// Cofactors of the upper 3x3, column-major: entry [col * 3 + row] is
-  /// cofactor(row, col). cofactor(M) = det · (M⁻¹)ᵀ.
   List<double> _cofactors3x3() => <double>[
       m[5] * m[10] - m[6] * m[9],
       m[6] * m[8] - m[4] * m[10],
@@ -327,11 +297,6 @@ final class Mat4 {
     return Mat4._(r);
   }
 
-  /// General inverse for camera and clip-space transforms. The renderer keeps
-  /// this operation on the matrix type so a pass can reconstruct a world ray
-  /// from the exact projection supplied by its host instead of guessing a
-  /// field of view or aspect ratio. Singular matrices fail loudly; returning
-  /// identity here would turn invalid camera data into plausible lighting.
   Mat4 inverse() {
     final augmented = List<Float64List>.generate(
       4,

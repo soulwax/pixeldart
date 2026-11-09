@@ -5,14 +5,9 @@ import '../api/renderer.dart';
 import '../webgl/device_api.dart' show GpuTextureFilter, GpuTextureWrap;
 import 'sprite_batch.dart';
 
-/// Named [SpriteRegion]s, usually all on one texture.
-///
-/// Look regions up once and keep them: the map is for loading, not for
-/// every sprite of every frame.
 final class TextureAtlas {
   final Map<String, SpriteRegion> regions;
 
-  /// A white region on the atlas's own texture, when it has one.
   final SpriteRegion? solid;
 
   const TextureAtlas(this.regions, {this.solid});
@@ -25,7 +20,6 @@ final class TextureAtlas {
         'no such region (${regions.length} regions in atlas)',
       ));
 
-  /// Regions named `prefix/0`, `prefix/1`, ... in index order.
   List<SpriteRegion> sequence(String prefix) {
     final out = <SpriteRegion>[];
     while (true) {
@@ -35,11 +29,6 @@ final class TextureAtlas {
     }
   }
 
-  /// Cuts a uniform sheet into regions named `0`, `1`, ... in reading order.
-  ///
-  /// [spacing] and [margin] are in pixels. [inset] pulls each edge inward by
-  /// that many pixels, which keeps filtered or rounded sampling off the
-  /// neighbouring cell on a sheet that has no padding.
   factory TextureAtlas.grid({
     required TextureHandle texture,
     required int textureWidth,
@@ -80,7 +69,6 @@ final class TextureAtlas {
   }
 }
 
-/// Decoded RGBA8 pixels, straight alpha, top row first.
 final class SpriteImage {
   final int width;
   final int height;
@@ -94,7 +82,6 @@ final class SpriteImage {
     }
   }
 
-  /// Copies a sub-rectangle.
   SpriteImage crop(int x, int y, int w, int h) {
     final out = Uint8List(w * h * 4);
     for (var row = 0; row < h; row += 1) {
@@ -105,19 +92,12 @@ final class SpriteImage {
   }
 }
 
-/// Packs separate images into a single texture, so a whole game's sprites
-/// can share one draw call.
-///
-/// Pure Dart over decoded pixels; browser hosts get those from
-/// `SpriteLoader`. Each image gets a one-pixel extruded border, which stops
-/// tiles from picking up their neighbours at any zoom.
 final class AtlasBuilder {
   static const int _border = 1;
 
   final List<(String, SpriteImage)> _images = [];
   final Set<String> _names = {};
 
-  /// Queues [image] under [name].
   void add(String name, SpriteImage image) {
     if (!_names.add(name)) {
       throw ArgumentError.value(name, 'name', 'already added');
@@ -125,7 +105,6 @@ final class AtlasBuilder {
     _images.add((name, image));
   }
 
-  /// Queues each cell of a uniform sheet as `prefix/0`, `prefix/1`, ...
   void addGrid(
     String prefix,
     SpriteImage sheet, {
@@ -150,10 +129,6 @@ final class AtlasBuilder {
     }
   }
 
-  /// Packs everything and registers the texture with [resources].
-  ///
-  /// Use [GpuTextureFilter.nearest] for pixel art. Throws when the images
-  /// do not fit a [maxSize]-square page.
   TextureAtlas build(
     ResourceLibrary resources, {
     GpuTextureFilter filter = GpuTextureFilter.nearest,
@@ -187,7 +162,6 @@ final class AtlasBuilder {
     }, solid: region(page.solid));
   }
 
-  /// The packing step alone, without any GPU work.
   AtlasPage pack({int maxSize = 4096}) {
     const solidName = '\u0000solid';
     final solidPixels = Uint8List(4 * 4 * 4)..fillRange(0, 64, 255);
@@ -245,7 +219,6 @@ final class AtlasBuilder {
     return placements;
   }
 
-  /// Copies [image] to the page and repeats its edge pixels into the border.
   static void _blit(
     Uint8List page,
     int size,
@@ -266,8 +239,6 @@ final class AtlasBuilder {
     }
   }
 
-  /// Gives fully transparent pixels their opaque neighbours' colour, so
-  /// linear filtering doesn't fringe sprite edges with black.
   static void _bleedColor(AtlasPage page) {
     final size = page.size;
     final pixels = page.pixels;
@@ -303,13 +274,11 @@ final class AtlasBuilder {
   }
 }
 
-/// Where one image landed on an [AtlasPage], in pixels.
 final class AtlasPlacement {
   final int x, y, width, height;
   const AtlasPlacement(this.x, this.y, this.width, this.height);
 }
 
-/// One packed RGBA8 page and where each image landed.
 final class AtlasPage {
   final int size;
   final Uint8List pixels;

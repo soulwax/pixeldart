@@ -10,32 +10,23 @@ import '../math/transform.dart';
 import '../math/vec.dart';
 import '../scene/scene_node.dart';
 
-/// A primitive decoded from a glTF 2.0 binary asset.
 final class GlbPrimitive {
   final MeshData mesh;
   final int materialIndex;
   const GlbPrimitive({required this.mesh, required this.materialIndex});
 }
 
-/// A decoded glTF mesh containing one or more primitives.
 final class GlbMesh {
   final String name;
   final List<GlbPrimitive> primitives;
   const GlbMesh({required this.name, required this.primitives});
 }
 
-/// An image referenced by a glTF asset, one per entry of its `images` array.
-///
-/// Embedded images (a bufferView or a base64 `data:` URI) carry their
-/// [bytes]. External images carry a relative [uri] and empty [bytes]; the
-/// host resolves the URI against the asset's own location (see
-/// `PixeldartApp.loadModel`).
 final class GlbImage {
   final String name;
   final String mimeType;
   final Uint8List bytes;
 
-  /// Relative URI of an external image, or null when embedded.
   final String? uri;
 
   const GlbImage({
@@ -48,11 +39,6 @@ final class GlbImage {
   bool get isExternal => uri != null;
 }
 
-/// Texture slot references associated with a decoded glTF material.
-///
-/// Each index is a glTF *texture* index (into the asset's `textures`
-/// array), not an image index. Resolve it to an image with
-/// [GlbResult.imageForTexture].
 final class GlbMaterialTextures {
   final int? albedoTextureIndex;
   final int? normalTextureIndex;
@@ -66,23 +52,18 @@ final class GlbMaterialTextures {
   });
 }
 
-/// Result of decoding a GLB asset, containing CPU meshes, materials, and a scene hierarchy.
 final class GlbResult {
   final SceneNode rootNode;
   final List<MeshData> meshes;
   final List<MaterialDefinition> materials;
 
-  /// One entry per glTF image, index-aligned with the asset's `images`.
   final List<GlbImage> images;
   final List<GlbMaterialTextures> materialTextures;
 
-  /// For each glTF texture, the index of its source image (or null).
   final List<int?> textureImages;
 
-  /// Material index of every node in [rootNode]'s tree that carries a mesh.
   final Map<SceneNode, int> nodeMaterials;
 
-  /// Things the decoder approximated or could not represent.
   final List<String> warnings;
 
   const GlbResult({
@@ -96,7 +77,6 @@ final class GlbResult {
     this.warnings = const [],
   });
 
-  /// The image a glTF texture index samples, or null.
   int? imageForTexture(int? textureIndex) {
     if (textureIndex == null || textureIndex < 0 || textureIndex >= textureImages.length) {
       return null;
@@ -104,19 +84,15 @@ final class GlbResult {
     return textureImages[textureIndex];
   }
 
-  /// The material index of a decoded mesh node.
   int materialOf(SceneNode node) => nodeMaterials[node] ?? 0;
 }
 
-/// Pure Dart GLB 2.0 decoder converting glTF buffers into Pixeldart `MeshData`,
-/// `MaterialDefinition`, and `SceneNode` hierarchies.
 final class GlbDecoder {
   final Map<String, dynamic> _json;
   final ByteData _bin;
 
   GlbDecoder._(this._json, Uint8List binary) : _bin = ByteData.sublistView(binary);
 
-  /// Decodes GLB bytes into a complete [GlbResult].
   static GlbResult decode(Uint8List bytes) {
     if (bytes.length < 12) {
       throw const FormatException('GLB header is truncated');
@@ -522,8 +498,6 @@ final class GlbDecoder {
     return root;
   }
 
-  /// Splits a column-major glTF node matrix into translation, rotation and
-  /// per-axis scale (reflections fold into a negative X scale).
   static (Vec3, Quat, Vec3) _decomposeMatrix(List<double> m) {
     final translation = Vec3(m[12], m[13], m[14]);
     var c0 = Vec3(m[0], m[1], m[2]);
@@ -570,13 +544,6 @@ final class GlbDecoder {
     return (translation, Quat(qx, qy, qz, qw).normalized, Vec3(sx.abs(), sy, sz));
   }
 
-  /// Produces a surface-v2-valid tangent per vertex.
-  ///
-  /// Authored tangents are Gram-Schmidt orthonormalized against their normal;
-  /// exporters emit degenerate ones wherever UVs collapse (common on
-  /// palette-textured assets), and surface-v2 validation rejects any tangent
-  /// that is not orthogonal. Missing or degenerate tangents fall back to +X
-  /// (or +Z when the normal is near X) projected onto the normal's plane.
   static List<double> _orthonormalTangents(
     List<double> normals,
     List<double>? authored,

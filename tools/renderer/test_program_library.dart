@@ -1,11 +1,14 @@
 import 'package:pixeldart/rendering/core/program_library.dart';
 import 'package:pixeldart/rendering/core/program_source.dart';
+import 'package:pixeldart/rendering/api/shaders.dart';
 
 import 'fake_gpu_device.dart';
 
 void main() {
   _invalidReloadPreservesPreviousProgram();
   _noProgramLeakAcross25Reloads();
+  _hostOverrideUsesDefaultVertex();
+  _invalidStartupOverrideUsesDefault();
   print('Renderer program library fixtures passed.');
 }
 
@@ -20,6 +23,50 @@ ProgramSource _worldProgramSource({String vertexOverride = _validVertex}) =>
       attributeLocations: const {'aPosition': 0},
       requiredUniforms: const ['uViewProjection'],
     );
+
+ProgramSource _spriteProgramSource() => const ProgramSource(
+  id: 'sprites',
+  vertexSource: _validVertex,
+  fragmentSource: _validFragment,
+  attributeLocations: {'aPosition': 0},
+  requiredUniforms: ['uViewProjection'],
+);
+
+void _hostOverrideUsesDefaultVertex() {
+  final device = FakeGpuDevice();
+  final library = ProgramLibrary(
+    device,
+    overrides: const {
+      ShaderSlot.sprites: ShaderOverride(fragment: 'out oColor; // HOST'),
+    },
+  );
+  library.publish(_spriteProgramSource());
+  if (device.lastCompiledVertexSource != _validVertex ||
+      device.lastCompiledFragmentSource != 'out oColor; // HOST') {
+    throw StateError('host fragment did not replace the sprite default');
+  }
+  library.disposeAll();
+  if (device.liveObjectCount != 0) {
+    throw StateError('overridden program was not released');
+  }
+}
+
+void _invalidStartupOverrideUsesDefault() {
+  final device = FakeGpuDevice();
+  final library = ProgramLibrary(
+    device,
+    overrides: const {
+      ShaderSlot.sprites: ShaderOverride(fragment: 'FAIL_FRAGMENT'),
+    },
+    fallbackToDefaults: true,
+  );
+  library.publish(_spriteProgramSource());
+  if (device.lastCompiledFragmentSource != _validFragment ||
+      !library.overrideErrors.containsKey(ShaderSlot.sprites)) {
+    throw StateError('invalid override did not report and use default');
+  }
+  library.disposeAll();
+}
 
 void _invalidReloadPreservesPreviousProgram() {
   final device = FakeGpuDevice();

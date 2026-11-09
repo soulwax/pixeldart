@@ -1,6 +1,5 @@
 import 'dart:typed_data';
 
-/// Hard limits used before any accessor or material work is attempted.
 final class GltfValidationLimits {
   final int maxBuffers;
   final int maxBufferViews;
@@ -17,10 +16,6 @@ final class GltfValidationLimits {
   });
 }
 
-/// Validates the structural glTF subset before normalization.
-///
-/// This is deliberately document-only: URI fetching, filesystem access, and
-/// GPU allocation belong to the host/tool boundary, never this library.
 void validateGltfDocument(
   Map<String, dynamic> document, {
   int? binaryLength,
@@ -105,8 +100,6 @@ void validateGltfDocument(
   }
 }
 
-/// Decodes one glTF accessor from the already bounded GLB BIN chunk.
-/// No GPU types or browser APIs are involved.
 final class GltfAccessorDecoder {
   final Map<String, dynamic> document;
   final Uint8List binary;

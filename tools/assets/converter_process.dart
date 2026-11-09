@@ -5,9 +5,6 @@ import 'package:pixeldart/assets/importers/converter_command.dart';
 import 'package:pixeldart/assets/importers/converter_invocation.dart';
 import 'package:pixeldart/assets/importers/fbx_import_config.dart';
 
-/// In-memory process evidence for one converter probe and invocation.
-/// stdout/stderr are available to the caller for local troubleshooting but are
-/// never included in [ConverterInvocationResult.toJson].
 final class ConverterProcessReport {
   final ConverterInvocationResult evidence;
   final String stdout;

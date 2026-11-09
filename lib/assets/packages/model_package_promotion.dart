@@ -21,7 +21,6 @@ final class ModelPackagePromotionReport {
   );
 }
 
-/// Runtime promotion gate. It never copies files or allocates GPU resources.
 final class ModelPackagePromotionGate {
   const ModelPackagePromotionGate();
 

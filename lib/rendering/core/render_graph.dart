@@ -1,9 +1,6 @@
 import 'graph_pass.dart';
 import 'graph_resource.dart';
 
-/// Declares a graph before any pass runs. All nine invalid cases in plan
-/// §6.2 are checked over the full declared set, not discovered mid-frame —
-/// "Graph validation fails before rendering."
 final class RenderGraphBuilder {
   final List<PassDeclaration> _passes = [];
   final Set<String> _declaredHistoryResources = {};
@@ -346,9 +343,6 @@ final class RenderGraphBuilder {
   }
 }
 
-/// A validated (or rejected) graph. [failures] is empty only when every
-/// §6.2 check passed; callers must check [isValid] before treating
-/// [orderedPasses] as safe to execute.
 final class RenderGraph {
   final List<PassDeclaration> orderedPasses;
   final List<GraphValidationFailure> failures;

@@ -10,11 +10,9 @@ const int _dim = 0xA8A08CFF;
 const int _flame = 0xFFB65AFF;
 const int _panel = 0x0A0812C8;
 
-/// Everything on top of the world, drawn after all post-processing.
 final class Hud {
   final Game game;
 
-  /// Same design size as the world view, so text scales with the art.
   final Camera2D camera = Camera2D(
     designWidth: 400,
     designHeight: 225,
@@ -33,7 +31,6 @@ final class Hud {
   double get _w => camera.viewWidth;
   double get _h => camera.viewHeight;
 
-  /// The flare control accepts pointer coordinates in canvas device pixels.
   bool flareButtonHit(double screenX, double screenY) {
     final point = camera.screenToWorld(screenX, screenY);
     return point.x >= _w - 46 &&
@@ -186,7 +183,6 @@ final class Hud {
     }
   }
 
-  /// An arrow at the edge of the view toward anything out of sight.
   void _pointer(SpriteBatch batch, double x, double y, int color) {
     final world = game.camera;
     if (x > world.left && x < world.right && y > world.top && y < world.bottom) {

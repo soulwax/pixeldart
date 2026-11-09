@@ -5,7 +5,6 @@ import '../math/spline.dart';
 import '../math/vec.dart';
 import 'camera_controller.dart';
 
-/// Single control waypoint along a cinematic camera drone flight path.
 final class CameraWaypoint {
   final Vec3 eye;
   final Vec3 target;
@@ -18,7 +17,6 @@ final class CameraWaypoint {
   });
 }
 
-/// Cinematic automated drone tour camera controller navigating along centripetal 3D splines.
 final class CinematicTourCameraController implements CameraController {
   final List<CameraWaypoint> waypoints;
   final bool loop;
@@ -68,39 +66,29 @@ final class CinematicTourCameraController implements CameraController {
     _evaluateAtProgress(0.0);
   }
 
-  /// Current normalized flight tour progress in [0, 1].
   double get progress => _progress;
 
-  /// Current eye position in world space.
   @override
   Vec3 get eye => _currentEye;
 
-  /// Current look target focus point in world space.
   Vec3 get target => _currentTarget;
 
-  /// Instantaneous distance from camera eye to look target (for dynamic Depth of Field auto-focus).
   double get focusDistance => (_currentTarget - _currentEye).length;
 
-  /// Current field of view in radians.
   double get fovYRadians => _currentFov;
 
-  /// Normalized camera forward viewing direction.
   @override
   Vec3 get forward {
     final diff = _currentTarget - _currentEye;
     return diff.lengthSquared > 1e-6 ? diff.normalized : const Vec3(0, 0, -1);
   }
 
-  /// Pauses automated flight animation.
   void pause() => isPlaying = false;
 
-  /// Resumes automated flight animation.
   void play() => isPlaying = true;
 
-  /// Resets flight progress to the beginning.
   void reset() => seek(0.0);
 
-  /// Seeks to an explicit normalized progress [t] in [0, 1].
   void seek(double t) {
     if (loop) {
       _progress = (t % 1.0 + 1.0) % 1.0;
@@ -139,7 +127,6 @@ final class CinematicTourCameraController implements CameraController {
     _currentFov = fov0 + (fov1 - fov0) * frac;
   }
 
-  /// Advances flight progress by [dt] seconds.
   @override
   void update(double dt) {
     if (!isPlaying || dt <= 0) return;
@@ -160,7 +147,6 @@ final class CinematicTourCameraController implements CameraController {
     _evaluateAtProgress(_progress);
   }
 
-  /// Constructs an authoritative [CameraView] for the active flight pose.
   @override
   CameraView toCameraView(double aspect) {
     return CameraView.lookAt(

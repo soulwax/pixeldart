@@ -1,7 +1,3 @@
-/// Named GLSL source plus the binding metadata a program needs before it
-/// can be trusted to draw (§7.2). Attribute locations and sampler unit
-/// assignments are explicit and fixed per program, never left to driver
-/// allocation order.
 final class ProgramSource {
   final String id;
   final String vertexSource;

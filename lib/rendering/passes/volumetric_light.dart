@@ -19,9 +19,6 @@ import 'volumetric_light_resources.dart';
 final class VolumetricLightProgramSource {
   static const int maxSources = 4;
 
-  /// Optional source uniforms understood by the stock volumetric shader.
-  /// They are intentionally not required so hosts may provide a directional-
-  /// only shader while still receiving the stable base pass contract.
   static List<String> get sourceUniforms => [
     'uVolumetricSourceCount',
     for (var i = 0; i < maxSources; i++) ...[
@@ -77,7 +74,6 @@ final class VolumetricCompositeProgramSource {
   );
 }
 
-/// Volumetric Light Shaft and atmospheric in-scattering pass in PixelDart.
 final class VolumetricLightFeature implements RenderFeature {
   final ProgramLibrary programLibrary;
   final String vertexSource;

@@ -3,16 +3,12 @@ import 'dart:typed_data';
 
 import '../api/handles.dart';
 
-/// A rectangle of a texture, in pixels and packed UVs.
 final class SpriteRegion {
-  /// `null` draws the renderer's white texture, for flat-coloured shapes.
   final TextureHandle? texture;
 
-  /// Size in pixels; also the default drawn size in world units.
   final double width;
   final double height;
 
-  /// Top-left and bottom-right UVs as `u | v << 16`, 16 bits each.
   final int uv0;
   final int uv1;
 
@@ -27,8 +23,6 @@ final class SpriteRegion {
   }) : uv0 = _packUv(u0, v0),
        uv1 = _packUv(u1, v1);
 
-  /// A 1×1 white region for rectangles and lines. Drawing it binds the white
-  /// texture, which ends a batch run; `TextureAtlas.solid` does not.
   static final SpriteRegion white = SpriteRegion(
     texture: null,
     width: 1,
@@ -44,45 +38,24 @@ final class SpriteRegion {
       (v.clamp(0.0, 1.0) * 65535).round() << 16;
 }
 
-/// How a batch orders its sprites before drawing.
 enum SpriteSort {
-  /// Draw in submission order.
   none,
 
-  /// By `layer`, keeping submission order within a layer.
   layer,
 
-  /// By `layer`, then by `y`, so sprites lower on screen draw in front.
   layerThenY,
 }
 
-/// How a run of sprites combines with what is already drawn.
 enum SpriteBlend {
-  /// Normal transparency; each sprite's `additive` amount fades it toward
-  /// light-adding, inside the same draw call.
   alpha,
 
-  /// Multiplies the destination, for darkness maps and tinted shadows.
   multiply,
 }
 
-/// Packs 8-bit channels as the `0xRRGGBBAA` value sprite colours use.
 int rgba(int r, int g, int b, [int a = 255]) =>
     (r & 255) << 24 | (g & 255) << 16 | (b & 255) << 8 | (a & 255);
 
-/// A list of sprites to draw, held as flat GPU-ready records.
-///
-/// Fill it with [draw], then hand it to `encoder.drawSprites`. A batch is
-/// plain data the host owns: no GPU objects, no frame-loop dependency.
-/// Refill per frame with [clear], or keep the contents to have the renderer
-/// reuse its uploaded copy until the batch next changes (see [version]).
-///
-/// After warm-up, drawing allocates nothing.
 final class SpriteBatch {
-  /// Bytes per sprite record.
-  ///
-  /// `f32 ax, ay, bx, by, tx, ty, z; u16 u0, v0, u1, v1;
-  /// u8 r, g, b, a; u8 additive, glow, flash, 0`.
   static const int recordBytes = 44;
   static const int _words = recordBytes ~/ 4;
 
@@ -100,7 +73,6 @@ final class SpriteBatch {
   int _version = 0;
   bool _prepared = true;
 
-  /// `texture, blend, first, count` per run; valid after [prepare].
   Int32List _runs = Int32List(64);
   int _runCount = 0;
 
@@ -115,7 +87,6 @@ final class SpriteBatch {
   bool _cullEnabled = false;
   double _cullLeft = 0, _cullTop = 0, _cullRight = 0, _cullBottom = 0;
 
-  /// Sprites skipped by the cull rectangle since the last [clear].
   int culled = 0;
 
   SpriteBatch({
@@ -130,14 +101,11 @@ final class SpriteBatch {
     _uints = _floats.buffer.asUint32List();
   }
 
-  /// Sprites currently in the batch.
   int get length => _length;
   bool get isEmpty => _length == 0;
 
-  /// Changes whenever the contents change; renderers re-upload on a change.
   int get version => _version;
 
-  /// Removes every sprite, keeping the storage.
   void clear() {
     if (_length == 0 && _textures.isEmpty) return;
     _length = 0;
@@ -146,8 +114,6 @@ final class SpriteBatch {
     _touch();
   }
 
-  /// Skips later [draw]s wholly outside this rectangle, before they cost
-  /// any upload or fill. The test is conservative for rotated sprites.
   void setCullRect(double left, double top, double right, double bottom) {
     _cullEnabled = true;
     _cullLeft = left;
@@ -191,16 +157,6 @@ final class SpriteBatch {
     return textures.length - 1;
   }
 
-  /// Adds one sprite at ([x], [y]), placed by its origin.
-  ///
-  /// [width]/[height] default to the region's size. [originX]/[originY] are
-  /// fractions of the sprite (0.5 is the centre) and also the pivot for
-  /// [rotation] (radians, clockwise on screen). [color] is `0xRRGGBBAA` and
-  /// multiplies the texture.
-  ///
-  /// [additive] (0..1) moves the sprite from covering to adding light;
-  /// [glow] (0..1) feeds bloom; [flash] (0..1) replaces the texture's colour
-  /// with [color], keeping its shape, for hit flashes and silhouettes.
   void draw(
     SpriteRegion region,
     double x,
@@ -292,9 +248,6 @@ final class SpriteBatch {
 
   static int _unit8(double v) => (v.clamp(0.0, 1.0) * 255).round();
 
-  /// Adds a filled axis-aligned rectangle with its top-left at ([x], [y]).
-  /// [region] defaults to [SpriteRegion.white]; pass `TextureAtlas.solid` to
-  /// stay in the atlas's draw call.
   void drawRect(
     double x,
     double y,
@@ -323,7 +276,6 @@ final class SpriteBatch {
     blend: blend,
   );
 
-  /// Adds a line of [thickness] world units. See [drawRect] for [region].
   void drawLine(
     double x0,
     double y0,
@@ -355,8 +307,6 @@ final class SpriteBatch {
     );
   }
 
-  /// Sorts per [sort] and builds the draw runs. Idempotent until the next
-  /// change; the renderer calls it, and hosts need not.
   void prepare() {
     if (_prepared) return;
     _prepared = true;
@@ -364,13 +314,10 @@ final class SpriteBatch {
     _buildRuns();
   }
 
-  /// The record storage. Only the first [length] records are meaningful.
   Float32List get records => _floats;
 
-  /// Number of draw runs; valid after [prepare].
   int get runCount => _runCount;
 
-  /// The texture of run [i], or null for the white texture.
   TextureHandle? runTexture(int i) => _textures[_runs[i * 3] >> 1];
   SpriteBlend runBlend(int i) =>
       _runs[i * 3] & 1 == 1 ? SpriteBlend.multiply : SpriteBlend.alpha;
@@ -395,9 +342,6 @@ final class SpriteBatch {
     }
   }
 
-  /// Stable radix sort over layer and the exact stored float32 Y coordinate.
-  /// Float bits are mapped to unsigned order, avoiding the depth collisions
-  /// that a quantized Y key would create on a large map.
   void _sortRecords() {
     final n = _length;
     final capacity = _sortY.length;

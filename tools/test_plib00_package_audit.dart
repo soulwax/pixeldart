@@ -1,8 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 
-/// PLIB-00 is deliberately an audit, not a migration. It freezes the current
-/// package boundary so later facade work can be reviewed against facts.
 void main() {
   // Run from the package itself (standalone checkout) or from a host
   // project that vendors it under external/pixeldart.

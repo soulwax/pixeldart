@@ -1,13 +1,10 @@
 import 'sprite_batch.dart';
 
-/// One character of a [BitmapFont].
 final class BitmapGlyph {
   final SpriteRegion region;
 
-  /// Pen movement after this glyph, in font pixels.
   final double advance;
 
-  /// Offset of the region's top-left from the pen, in font pixels.
   final double offsetX;
   final double offsetY;
 
@@ -19,15 +16,10 @@ final class BitmapGlyph {
   });
 }
 
-/// Text drawn from atlas regions, so it shares a batch with sprites.
-///
-/// Plain data: build one from any sheet, or rasterize a browser font with
-/// `SpriteLoader.rasterizeFont`.
 final class BitmapFont {
   final Map<int, BitmapGlyph> glyphs;
   final double lineHeight;
 
-  /// Advance for characters the font lacks.
   final double fallbackAdvance;
 
   const BitmapFont({
@@ -36,7 +28,6 @@ final class BitmapFont {
     this.fallbackAdvance = 0,
   });
 
-  /// Width of the longest line of [text] at [scale].
   double measure(String text, {double scale = 1}) {
     var longest = 0.0, line = 0.0;
     for (var i = 0; i < text.length; i += 1) {
@@ -51,10 +42,6 @@ final class BitmapFont {
     return (line > longest ? line : longest) * scale;
   }
 
-  /// Adds [text] with its first line's top at [y].
-  ///
-  /// [alignX] positions each line about [x]: 0 is left-aligned, 0.5 centred,
-  /// 1 right-aligned.
   void draw(
     SpriteBatch batch,
     String text,

@@ -14,19 +14,6 @@ final class _TransientItemView implements RetainedItemView {
   const _TransientItemView(this.id, this.descriptor, this.worldBounds);
 }
 
-/// RV-09 rung 6's generic transient submission: a concrete implementation
-/// of `RenderEncoder` (§5.5) for frame-local shafts, motes, breath, rain,
-/// and debug geometry — the same [RetainedItemDescriptor] persistent items
-/// already use, so a transient item reaches the exact same draw path
-/// (`ShadowedWorldFeature._drawBatch`) with no separate rendering code of
-/// its own. `submit()` wraps each descriptor in a minimal `RetainedItemView`
-/// (a fixed-radius bounds around the item's own transform translation,
-/// since no mesh-local-bounds resolver is available at submission time —
-/// adequate for this proof; a production caller with real mesh data would
-/// compute tighter bounds). [clear] must be called once per frame, before
-/// any `submit()` calls that frame — `RenderEncoder`'s own contract
-/// ("borrowed for one frame; invalid after `endFrame()`/`abortFrame()`")
-/// is enforced by the same small runtime state machine as [FrameQueue].
 enum FrameRenderEncoderState { idle, active, ended, aborted }
 
 final class FrameRenderEncoder implements RenderEncoder {
@@ -47,7 +34,6 @@ final class FrameRenderEncoder implements RenderEncoder {
     _state = FrameRenderEncoderState.active;
   }
 
-  /// Backwards-compatible spelling for the original bootstrap caller.
   void clear() => beginFrame();
 
   @override

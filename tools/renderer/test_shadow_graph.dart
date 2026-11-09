@@ -8,17 +8,6 @@ import 'package:pixeldart/rendering/webgl/device_api.dart';
 
 import 'fake_gpu_device.dart';
 
-/// Confirms `buildShadowGraph` (the main pipeline: depthPrepass ->
-/// ssaoOcclusion -> ssaoBlur -> shadowCaster -> shadowedWorld -> bloomBlurH
-/// -> bloomBlurV -> bloomComposite -> dofBlurH -> dofBlurV -> dofComposite ->
-/// grade -> ps1Quantize -> vhs -> present) declares a graph the validator
-/// actually accepts. This is a pure structural check, not a
-/// rendering one — it exists specifically because a duplicate-writer /
-/// dependency-cycle bug in bloom's resource-version declarations reached
-/// the browser once already (bloomComposite declared a write to the exact
-/// same sceneColor#0 version shadowedWorld already writes) before any pure
-/// test caught it; this fixture is what should have caught it the first
-/// time.
 void main() {
   _graphValidatesWithAllFifteenPasses();
   _configuredGraphCarriesEveryResourceExtent();

@@ -2,8 +2,6 @@ import 'dart:js_interop';
 
 import 'package:web/web.dart' as web;
 
-/// A round-robin voice pool per effect, rate-limited so a swarm dying at
-/// once is one crunch and not a hundred.
 final class Sound {
   final Map<String, List<web.HTMLAudioElement>> _voices = {};
   final Map<String, int> _next = {};

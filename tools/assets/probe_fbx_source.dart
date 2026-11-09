@@ -5,8 +5,6 @@ import 'package:pixeldart/assets/assets.dart';
 
 import 'converter_process.dart';
 
-/// Runs one explicit, offline FBX conversion and validates the resulting GLB
-/// through the same bounded path used by all other source formats.
 Future<void> main(List<String> arguments) async {
   if (arguments.length != 2) {
     stderr.writeln('usage: probe_fbx_source.dart SOURCE.FBX OUTPUT.GLB');

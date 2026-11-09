@@ -5,81 +5,55 @@ import '../api/materials.dart';
 import '../api/renderer.dart';
 import '../math/vec.dart';
 
-/// Playback modes for spritesheet particle animation.
 enum ParticleSpritePlaybackMode {
-  /// Particle remains on the frame assigned at birth.
   staticFrame,
 
-  /// Sprite frames advance proportionally across the particle's normalized lifetime [0, 1].
   animatedOverLifetime,
 
-  /// Sprite frames loop continuously at the animation's configured frame rate.
   loopingAnimation,
 
-  /// Particle randomly samples a uniform frame from the spritesheet upon birth.
   random,
 
-  /// Particle samples a frame weighted by [ParticleSprite.weight] upon birth.
   weightedRandom,
 
-  /// Particle sprite is assigned manually and never changed automatically.
   manual,
 }
 
-/// Metadata describing a single sprite frame within a [ParticleSpriteSheet].
 final class ParticleSprite {
-  /// Human-readable unique identifier for this sprite (e.g. 'flame_01', 'spark', 'coin').
   final String name;
 
-  /// Zero-based index within the spritesheet.
   final int index;
 
-  /// Minimum horizontal UV coordinate [0, 1].
   final double uMin;
 
-  /// Minimum vertical UV coordinate [0, 1].
   final double vMin;
 
-  /// Maximum horizontal UV coordinate [0, 1].
   final double uMax;
 
-  /// Maximum vertical UV coordinate [0, 1].
   final double vMax;
 
-  /// Derived horizontal UV scale matching the shader uniform `uUvScaleOffset.x`.
   final double uvScaleU;
 
-  /// Derived vertical UV scale matching the shader uniform `uUvScaleOffset.y`.
   final double uvScaleV;
 
-  /// Derived horizontal UV offset matching the shader uniform `uUvScaleOffset.z`.
   final double uvOffsetU;
 
-  /// Derived vertical UV offset matching the shader uniform `uUvScaleOffset.w`.
   final double uvOffsetV;
 
-  /// Authored pixel width, if known.
   final int? pixelWidth;
 
-  /// Authored pixel height, if known.
   final int? pixelHeight;
 
-  /// Width-to-height aspect ratio (width / height). Defaults to 1.0 for square sprites.
   final double aspectRatio;
 
-  /// Normalized pivot anchor point. Default is center (0.5, 0.5).
   final Vec2 anchor;
 
-  /// Probability weight when randomly sampling frames. Default is 1.0.
   final double weight;
 
-  /// Optional classification or query tags (e.g. {'fire', 'small'}).
   final Set<String> tags;
 
-  /// Optional arbitrary user-defined metadata.
   final Map<String, dynamic>? customData;
 
-  /// Cached GPU material handle once bound via [ParticleSpriteSheet.bind].
   MaterialHandle? materialHandle;
 
   ParticleSprite({
@@ -135,18 +109,13 @@ final class ParticleSprite {
   }
 }
 
-/// Named sequence of sprite frame indices forming an animated sequence.
 final class SpriteAnimation {
-  /// Unique name for this animation (e.g. 'burn', 'explode', 'spin').
   final String name;
 
-  /// Ordered frame indices referencing sprites in the owning [ParticleSpriteSheet].
   final List<int> frameIndices;
 
-  /// Playback speed in frames per second.
   final double frameRate;
 
-  /// Whether the animation loops continuously or holds on the final frame.
   final bool isLooping;
 
   SpriteAnimation({
@@ -169,13 +138,10 @@ final class SpriteAnimation {
     }
   }
 
-  /// Total duration of one cycle in seconds.
   double get duration => frameIndices.length / frameRate;
 
-  /// Total frame count in the sequence.
   int get frameCount => frameIndices.length;
 
-  /// Returns the sprite index corresponding to elapsed time in seconds.
   int frameIndexAtTime(double timeSeconds) {
     if (frameIndices.length == 1) return frameIndices.first;
     final totalFrames = (timeSeconds * frameRate).floor();
@@ -188,7 +154,6 @@ final class SpriteAnimation {
     }
   }
 
-  /// Returns the sprite index corresponding to normalized lifetime [0, 1].
   int frameIndexAtNormalizedTime(double t) {
     if (frameIndices.length == 1) return frameIndices.first;
     final clamped = t.clamp(0.0, 0.999999);
@@ -197,16 +162,11 @@ final class SpriteAnimation {
   }
 }
 
-/// An authored or procedurally generated spritesheet containing multiple sub-sprite frames
-/// and optional animation sequences.
 final class ParticleSpriteSheet {
-  /// The underlying GPU texture containing the sprite frames.
   final TextureHandle texture;
 
-  /// The list of all sprite definitions indexed by frame index.
   final List<ParticleSprite> sprites;
 
-  /// Named animation sequences defined for this sheet.
   final Map<String, SpriteAnimation> animations;
 
   final Map<String, int> _nameToIndex = {};
@@ -224,10 +184,6 @@ final class ParticleSpriteSheet {
     validate();
   }
 
-  /// Constructs a uniform grid spritesheet with [columns] and [rows].
-  ///
-  /// When [originTopLeft] is true (default for 2D spritesheets), row 0 is mapped
-  /// to the top of the image texture.
   factory ParticleSpriteSheet.uniformGrid({
     required TextureHandle texture,
     required int columns,
@@ -299,7 +255,6 @@ final class ParticleSpriteSheet {
     );
   }
 
-  /// Parses a spritesheet from JSON metadata (e.g. TexturePacker format or custom Pixeldart JSON).
   factory ParticleSpriteSheet.fromJson(
     Map<String, dynamic> json, {
     required TextureHandle texture,
@@ -454,11 +409,6 @@ final class ParticleSpriteSheet {
     }
   }
 
-  /// Registers materials for each sprite frame using [resources].
-  ///
-  /// If [baseMaterial] is provided, its shading parameters (tint, alpha mode, roughness,
-  /// emissive strength, etc.) are cloned and updated with each frame's exact UV scale and offset.
-  /// If omitted, a standard blended unlit particle material is used.
   void bind(ResourceLibrary resources, {MaterialDefinition? baseMaterial}) {
     _materials.clear();
     final base = baseMaterial ??
@@ -486,19 +436,15 @@ final class ParticleSpriteSheet {
     }
   }
 
-  /// Whether material handles have been bound for all sprite frames.
   bool get isBound => _materials.length == sprites.length;
 
-  /// Returns the registered material handles for all sprite frames.
   List<MaterialHandle> get materials => List.unmodifiable(_materials);
 
-  /// Looks up a sprite definition by unique [name].
   ParticleSprite? getSprite(String name) {
     final idx = _nameToIndex[name];
     return idx != null ? sprites[idx] : null;
   }
 
-  /// Returns the sprite definition at integer [index].
   ParticleSprite getSpriteByIndex(int index) {
     if (index < 0 || index >= sprites.length) {
       throw RangeError.index(index, sprites, 'sprites');
@@ -506,21 +452,16 @@ final class ParticleSpriteSheet {
     return sprites[index];
   }
 
-  /// Looks up the integer frame index for a given sprite [name].
   int? indexOfSprite(String name) => _nameToIndex[name];
 
-  /// Looks up a named animation sequence.
   SpriteAnimation? getAnimation(String name) => animations[name];
 
-  /// Returns all frame indices matching the specified [tag].
   List<int> indicesWithTag(String tag) => _tagToIndices[tag] ?? const [];
 
-  /// Samples a uniformly random sprite index.
   int sampleRandomIndex(math.Random random) {
     return random.nextInt(sprites.length);
   }
 
-  /// Samples a sprite index weighted by each sprite's [ParticleSprite.weight].
   int sampleWeightedIndex(math.Random random) {
     if (sprites.length == 1) return 0;
 
@@ -553,7 +494,6 @@ final class ParticleSpriteSheet {
   }
 }
 
-/// Fluent builder for constructing [ParticleSpriteSheet] instances programmatically.
 final class ParticleSpriteSheetBuilder {
   final List<ParticleSprite> _sprites = [];
   final Map<String, SpriteAnimation> _animations = {};

@@ -1,6 +1,5 @@
 import 'dart:io';
 
-/// Checks the file set that a publication candidate would contain.
 void main() {
   final package = _packageDirectory();
   final forbidden = <String>[];

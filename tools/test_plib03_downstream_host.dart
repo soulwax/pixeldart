@@ -9,9 +9,6 @@ void require(bool condition, String message) {
   if (!condition) throw StateError(message);
 }
 
-/// A downstream-style host: no game imports, assets, browser DOM, or internal
-/// renderer paths. The fake device is fixture-owned and stands in for a host
-/// backend adapter.
 Future<void> main() async {
   final device = FakeGpuDevice();
   final renderer = const advanced.DefaultSceneRendererFactory().create(device);

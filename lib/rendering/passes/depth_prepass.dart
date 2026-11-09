@@ -40,25 +40,6 @@ final class DepthPrepassProgramSource {
   );
 }
 
-/// §8.4 rung 4: "sampleable single-sample scene-depth prepass, required
-/// when SSAO or depth-aware transparency is installed, includes opaque +
-/// alpha-masked depth." Renders every opaque/alpha-masked item from the
-/// *main* camera (unlike `ShadowFeature`'s light-space camera) into a
-/// depth-only target so a later pass — SSAO (rung 5) in the real
-/// pipeline, a standalone debug view in `buildDepthDebugGraph` — can
-/// sample real scene depth before the (possibly multisampled) world pass
-/// has even run. Kept as its own feature, same "new capability, new
-/// feature" discipline as every prior packet. [programId] defaults to
-/// `'depthPrepass'` but must be overridden to a distinct value whenever two
-/// independently-built graphs each construct their own `DepthPrepassFeature`
-/// against one shared `ProgramLibrary` — `buildShadowGraph` (the real,
-/// SSAO-feeding prepass) and `buildDepthDebugGraph` (a standalone proof of
-/// the same capability) both do exactly this in the renderer-test
-/// bootstrap, and without distinct ids the second graph's `.build()` would
-/// silently delete the first's already-compiled program via
-/// `ProgramLibrary.publish`'s "delete the previous program under this id"
-/// step — the same bug class `PresentFeature.programId` exists to prevent,
-/// just discovered a second time here.
 final class DepthPrepassFeature implements RenderFeature {
   final ProgramLibrary programLibrary;
   final String vertexSource;
@@ -168,19 +149,6 @@ final class _DepthPrepassPass implements RenderPass {
     }
   }
 
-  /// The alpha-cutout half of "must match shadowedWorld exactly", alongside
-  /// the vertex snap above. All three values are computed from the material
-  /// by the identical expressions `_ShadowedWorldPass._setMaterialState`
-  /// uses, so a masked surface discards the same fragments in both passes,
-  /// an affine-sampled one recovers the same uv, and a double-sided one
-  /// keeps the same faces — a divergence in any of them would leave SSAO
-  /// occluding against a silhouette nothing ever shaded.
-  ///
-  /// [MaterialDefinition.doubleSided] was the last of the three to be
-  /// wired, and its absence was the same defect the shadow caster had: this
-  /// pass culled back faces unconditionally while the world pass did not,
-  /// so a double-sided surface seen from behind wrote no depth and the AO
-  /// texels behind it were computed against whatever lay further away.
   void _setMaterialState(
     DrawCommandEncoder encoder,
     MaterialHandle handle,

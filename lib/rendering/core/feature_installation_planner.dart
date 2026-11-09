@@ -1,8 +1,6 @@
 import '../api/capabilities.dart';
 import 'render_feature.dart';
 
-/// Pure profile-to-feature installation planning. Feature construction is
-/// supplied by the caller; this class only enforces deterministic membership.
 final class FeatureInstallationPlanner {
   const FeatureInstallationPlanner();
 

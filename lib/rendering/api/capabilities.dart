@@ -30,7 +30,6 @@ final class RenderCapabilities {
     this.contextLossExtension = false,
   });
 
-  /// Capability floor for the mandatory safe graph and pure fallback tests.
   static const RenderCapabilities safeMinimum = RenderCapabilities(
     maxTextureSize: 2048,
     maxTextureArrayLayers: 1,
@@ -58,9 +57,6 @@ final class RenderCapabilities {
       capabilityFromMap(value);
 }
 
-/// Effect groups installed by the pipeline assembler.
-/// three passes (blur H/V + composite), `ssao` covers two, `dof` covers
-/// the internal pass count implementing it.
 final class PipelineFeatures {
   const PipelineFeatures._();
 
@@ -163,21 +159,11 @@ final class QualityProfile {
     {},
   );
 
-  /// Shadows only — the cheapest profile `buildMainPipeline` can build
-  /// (distinct from `safe`, which is `buildSafeGraph`'s own separate,
-  /// shadow-free assembly). `shadows` is installed by every
-  /// `buildMainPipeline` profile regardless of what a caller's own set
-  /// contains: `ShadowedWorldFeature` hard-requires the caster to have run
-  /// (`resolveLightView` throws otherwise), so the two are one unit in
-  /// this assembler, not two independently excludable groups.
   static const QualityProfile minimal = QualityProfile(
     QualityProfileKind.standard,
     {PipelineFeatures.shadows},
   );
 
-  /// Every effect group except PS1's own quantize/dither and VHS — the
-  /// established clean look. Participating media is exposed separately by
-  /// [cinematic] so hosts can opt into its extra ray-march cost.
   static const QualityProfile clean = QualityProfile(QualityProfileKind.high, {
     PipelineFeatures.shadows,
     PipelineFeatures.ssao,
@@ -186,17 +172,11 @@ final class QualityProfile {
     PipelineFeatures.grade,
   });
 
-  /// A 2D pipeline: no world lighting, no shadow or depth targets, only
-  /// bloom over the scene. Pair with [PipelineFeatures]-free [safe] when
-  /// bloom isn't wanted either.
   static const QualityProfile flat2d = QualityProfile(
     QualityProfileKind.standard,
     {PipelineFeatures.bloom},
   );
 
-  /// Clean cinematic lighting plus the bounded, depth-aware participating
-  /// media path. Kept separate from [clean] so hosts can opt into the extra
-  /// ray-march cost without changing the established runtime default.
   static const QualityProfile cinematic = QualityProfile(
     QualityProfileKind.high,
     {
@@ -209,9 +189,6 @@ final class QualityProfile {
     },
   );
 
-  /// The established stylized pipeline — every post effect, but without the
-  /// optional cinematic media feature. `test_shadow_graph.dart` pins its
-  /// exact 15-pass order.
   static const QualityProfile ps1Full =
       QualityProfile(QualityProfileKind.shipping, {
         PipelineFeatures.shadows,

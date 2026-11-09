@@ -10,11 +10,6 @@ import 'effects.dart';
 import 'handles.dart';
 import 'lights.dart';
 
-/// Authoritative per-frame camera snapshot. Built by the caller's adapter
-/// from its live camera's actual projection; the renderer never guesses a
-/// FOV or reconstructs a different one (§5.2). Culling, depth
-/// reconstruction, SSAO, fog, and the world shader all read this same
-/// snapshot so they cannot disagree within one frame.
 final class CameraView {
   final Mat4 view;
   final Mat4 projection;
@@ -25,18 +20,12 @@ final class CameraView {
   final double far;
   final double aspect;
 
-  /// Inverse projection used by screen-space passes to reconstruct the exact
-  /// camera ray authored by the host. It is derived once from [projection]
-  /// and cached for the lifetime of this immutable camera snapshot.
   late final Mat4 inverseProjection = projection.inverse();
 
-  /// Inverse view used to reconstruct world rays for presentation effects.
   late final Mat4 inverseView = view.inverse();
 
-  /// Inverse view-projection used to unproject screen points into world space.
   late final Mat4 inverseViewProjection = viewProjection.inverse();
 
-  /// Constructs a world-space [Ray] passing through the given screen/viewport pixel coordinates.
   Ray screenPointToRay(
     double screenX,
     double screenY,
@@ -59,10 +48,6 @@ final class CameraView {
     return Ray(origin: orthographic ? nearPoint : eye, direction: dir);
   }
 
-  /// Projects a world-space [point] to viewport pixel coordinates, the
-  /// inverse of [screenPointToRay]: (0, 0) is the top-left corner. Returns
-  /// `null` for points behind the camera. Points off-screen still project,
-  /// outside `0..viewportWidth` / `0..viewportHeight`.
   Vec2? worldToScreenPoint(
     Vec3 point,
     int viewportWidth,
@@ -93,16 +78,6 @@ final class CameraView {
     required this.aspect,
   });
 
-  /// Builds a camera from a world-space eye and look direction.
-  ///
-  /// Prefer this over the raw constructor. Every derived field —
-  /// [view], [projection], [viewProjection], [aspect] — is computed here from
-  /// the one set of inputs a host actually has, so the snapshot cannot
-  /// disagree with itself. The raw constructor is retained for hosts that own
-  /// an unusual projection (oblique frustum, reversed-Z, an external camera
-  /// rig) and must supply matrices directly.
-  ///
-  /// `up` defaults to +Y and must not be parallel to the look direction.
   factory CameraView.look({
     required Vec3 eye,
     required Vec3 forward,
@@ -147,12 +122,6 @@ final class CameraView {
     )..validate();
   }
 
-  /// Builds an orthographic camera: parallel projection of a box
-  /// [halfWidth] × [halfHeight] around the view axis, from [near] to [far].
-  ///
-  /// The same derived-and-validated contract as [CameraView.look]. Use it for
-  /// 2D games, top-down maps, isometric views and UI overlays in world space.
-  /// [aspect] is recorded for consumers; the box itself sets the shape.
   factory CameraView.orthographic({
     required Vec3 eye,
     required Vec3 forward,
@@ -197,10 +166,6 @@ final class CameraView {
     )..validate();
   }
 
-  /// Builds a camera that looks from [eye] at [target].
-  ///
-  /// The same guarantees as [CameraView.look]; this is the form to reach for
-  /// when the host tracks a look-at point rather than a direction.
   factory CameraView.lookAt({
     required Vec3 eye,
     required Vec3 target,
@@ -227,12 +192,6 @@ final class CameraView {
     );
   }
 
-  /// Builds a camera from matrices a host already owns, deriving the rest.
-  ///
-  /// [viewProjection] is computed, and [eye] and [forward] are recovered from
-  /// the inverse of [view], so a host that has matrices but no separate camera
-  /// state cannot introduce a mismatch between them. [aspect] is read from the
-  /// projection unless given explicitly.
   factory CameraView.fromMatrices({
     required Mat4 view,
     required Mat4 projection,
@@ -320,9 +279,6 @@ final class CameraView {
   }
 }
 
-/// Game-owned skybox declaration consumed by the renderer's presentation
-/// pass. The game chooses the asset identity and atmospheric colors; Pixeldart
-/// owns how the declaration becomes pixels.
 final class SkyboxDeclaration {
   final String assetId;
   final TextureHandle? texture;
@@ -335,9 +291,6 @@ final class SkyboxDeclaration {
   final double exposure;
   final bool textureIsSrgb;
 
-  /// Bounded procedural cloud shell controls. The host supplies coverage,
-  /// density, altitude, wind, and phase; Pixeldart owns the ray-marched sky
-  /// presentation and can reduce samples without changing scene geometry.
   final double cloudCoverage;
   final double cloudDensity;
   final double cloudBaseHeight;
@@ -420,10 +373,6 @@ final class SkyboxDeclaration {
     cloudSampleCount: cloudSampleCount ?? this.cloudSampleCount,
   );
 
-  /// Rejects invalid values, naming every offending field and its range.
-  ///
-  /// [cloudSampleCount] only matters while clouds are drawn, so it is only
-  /// checked when [cloudCoverage] > 0 (the present pass clamps it anyway).
   void validate() {
     final problems = <String>[];
     void range(String name, double v, double lo, double hi, {bool loOpen = false}) {
@@ -460,8 +409,6 @@ final class SkyboxDeclaration {
   }
 }
 
-/// Neutral scene environment values only — no application-domain semantics
-/// state (§5.2).
 final class FrameEnvironment {
   final LinearColor clearColor;
   final LinearColor fogColor;
@@ -470,44 +417,28 @@ final class FrameEnvironment {
   final double? fogHeightFalloff;
   final double? fogDensity;
 
-  /// Neutral participating-medium controls. Hosts can map rain, mist, smoke,
-  /// or clear air into these values without making the renderer own weather.
   final LinearColor volumetricAlbedo;
   final double volumetricHeightFalloff;
 
-  /// Additional near-field particulate density for dust, steam, or fine
-  /// airborne debris. Zero is an exact no-dust path.
   final double volumetricDustDensity;
   final double volumetricAnisotropy;
   final double volumetricJitter;
   final double volumetricIntensity;
 
-  /// Bounded raymarch sample count. Profiles and developer settings may lower
-  /// it for a cheaper preview or raise it for clean shafts and long fog paths.
   final int volumetricSampleCount;
 
-  /// Shadow-filter footprint in shadow-map texels. Zero is a hard comparison;
-  /// larger values widen the deterministic PCF kernel for broad cloud light.
   final double shadowFilterRadius;
 
-  /// Global lighting multipliers resolved by the host. These are frame facts
-  /// so a host can expose them as live controls without rebuilding the graph.
   final double ambientLightScale;
   final double directLightScale;
 
-  /// Global material response multipliers for the high/shadowed world path.
-  /// Authored material descriptors remain unchanged while the lab can inspect
-  /// the renderer's BRDF response interactively.
   final double normalStrengthScale;
   final double roughnessScale;
   final double metallicScale;
   final double specularScale;
 
-  /// Receiver-plane shadow bias in normalized light-space depth units.
   final double shadowBias;
 
-  /// Bounded environment reflection fallback for glossy and wet surfaces.
-  /// Confidence distinguishes a real probe/history hit from this fallback.
   final LinearColor reflectionColor;
   final double reflectionIntensity;
   final double reflectionConfidence;
@@ -517,11 +448,8 @@ final class FrameEnvironment {
   final List<PointLight> pointLights;
   final List<SpotLight> spotLights;
 
-  /// Host-resolved practical or transient sources for participating media.
-  /// The volumetric pass applies its own deterministic capability limit.
   final List<VolumetricSource> volumetricSources;
 
-  /// Bounded warm-object fields used for spatial material thaw/dissolution.
   final List<ThermalSource> thermalSources;
   final SkyboxDeclaration? skybox;
 
@@ -743,9 +671,6 @@ final class FrameEnvironment {
   }
 }
 
-/// Everything a renderer needs for exactly one frame. [historyEpoch] is the
-/// caller's sole public history-invalidation authority (§5.2); there is no
-/// second reset method.
 final class FrameInput {
   final CameraView camera;
   final FrameEnvironment environment;

@@ -7,7 +7,6 @@ import '../math/mat4.dart';
 import '../math/vec.dart';
 import '../passes/shadow.dart';
 
-/// Single cascade slice representing one level of detail for directional shadows.
 final class ShadowCascade {
   final int index;
   final double nearDistance;
@@ -24,17 +23,9 @@ final class ShadowCascade {
   });
 }
 
-/// Computes Cascaded Shadow Map (CSM) split distances and light-space projections.
-///
-/// Uses the Practical Split Scheme (Zhang et al.) blending logarithmic and uniform
-/// distributions to achieve high resolution near the camera while maintaining
-/// continuous coverage into the distance.
 final class CascadeSplitCalculator {
   const CascadeSplitCalculator._();
 
-  /// Calculates cascade split distances between [near] and [far].
-  ///
-  /// [lambda] balances logarithmic (1.0) and uniform (0.0) spacing.
   static List<double> computeDistances({
     required double near,
     required double far,
@@ -58,7 +49,6 @@ final class CascadeSplitCalculator {
     return distances;
   }
 
-  /// Builds [ShadowCascade] slices for a [camera] and [directionalLight].
   static List<ShadowCascade> buildCascades({
     required CameraView camera,
     required DirectionalLight directionalLight,

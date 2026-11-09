@@ -1,12 +1,5 @@
 part of 'test_alpha_mask.dart';
 
-/// `doubleSided` is the third thing the three passes have to agree about,
-/// alongside the cutoff and the affine weight. Disagreement here is not a
-/// subtle shading difference: the world pass shades a surface from both
-/// sides while the prepass writes no depth for it and the caster casts no
-/// shadow, for exactly the half of the view or the light's travel that sees
-/// its back face. Both were real omissions — each of those two passes
-/// applied its own cull state once and never varied it.
 void _everyPassAgreesOnWhichFacesExist() {
   final scene = [
     _item(_doubleSidedHandle, drawMode: DrawMode.masked),
@@ -35,12 +28,6 @@ void _everyPassAgreesOnWhichFacesExist() {
   }
 }
 
-/// Bug 18. Only a blended draw writes real transparency; opaque and masked
-/// draws write coverage, which is 1. The value reaches the canvas through
-/// `present.frag`, so getting it wrong makes solid geometry see-through —
-/// and it is invisible until some material samples a texture that actually
-/// has transparent texels, which is why this went unnoticed until masking
-/// introduced the first such texture.
 void _onlyBlendedDrawsWriteRealTransparency() {
   _expectDoubles(
     _runWorldPass(
@@ -54,11 +41,6 @@ void _onlyBlendedDrawsWriteRealTransparency() {
   );
 }
 
-/// `AlphaMode.blended` carries an `alphaCutoff` like every other material —
-/// the field has a default and nothing stops an author setting it — and it
-/// must be ignored. A blended surface that also discarded would lose its
-/// soft edges to a hard cut, which is the failure a naive
-/// `alphaCutoff > 0` test would produce.
 void _blendedMaterialsNeverCutOut() {
   _expectDoubles(
     _runWorldPass(const [], [
@@ -69,11 +51,6 @@ void _blendedMaterialsNeverCutOut() {
   );
 }
 
-/// The hero route submits one daylight direction plus a bounded set of
-/// practical point lights. Keep this contract visible in a CPU fixture: the
-/// world pass must upload the frame lighting once, zero unused slots, and
-/// resolve shadow reception per retained item rather than treating the pass
-/// as globally shadowed.
 void _heroLightingUniformsAndReceiversArePerFrameAndPerDraw() {
   const environment = FrameEnvironment(
     directionalLight: DirectionalLight(

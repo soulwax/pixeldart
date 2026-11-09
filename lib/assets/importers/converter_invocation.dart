@@ -1,7 +1,5 @@
 import 'asset_import_diagnostic.dart';
 
-/// Bounded evidence returned by an offline converter process.
-/// Raw stdout/stderr is intentionally excluded from persisted reports.
 final class ConverterInvocationResult {
   final String converterId;
   final String requestedVersion;

@@ -2,12 +2,6 @@ import '../api/handles.dart';
 import '../api/materials.dart';
 import '../webgl/resource_registry.dart';
 
-/// Owns registered [MaterialDefinition]s under the same slot+generation
-/// [ResourceRegistry] discipline as [MeshStore] (RV-08 rung 1: "stable
-/// material keys/table"). Unlike a mesh or texture, a material has no GPU
-/// object of its own to create/delete — it is pure CPU-side data a draw
-/// pass resolves once per draw into tint/alpha-mode/texture-handle
-/// decisions, so this store never touches a `GpuDevice` at all.
 final class MaterialStore {
   final ResourceRegistry<MaterialHandle, MaterialDefinition> _registry =
       ResourceRegistry<MaterialHandle, MaterialDefinition>(
@@ -22,8 +16,6 @@ final class MaterialStore {
   MaterialDefinition resolve(MaterialHandle handle) =>
       _registry.descriptorOf(handle);
 
-  /// Resolves a material for a concrete render feature without exposing the
-  /// registry itself across the assets/passes boundary.
   MaterialDefinition resolveForPass(MaterialHandle handle) =>
       _registry.descriptorOf(handle);
 

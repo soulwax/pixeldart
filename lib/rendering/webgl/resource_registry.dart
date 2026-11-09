@@ -3,13 +3,6 @@ import 'device_api.dart';
 
 enum _SlotState { empty, cpuReady, gpuReady, failedOptional, released }
 
-/// One logical resource slot. Its [generation] is bumped every time the
-/// slot is reused after release, so a stale handle referencing an earlier
-/// generation is rejected forever, even if the slot index is recycled
-/// (§5.3). [gpuObject] and [gpuEpoch] track the backend object created for
-/// the current device epoch; after context restoration [gpuObject] is
-/// rebuilt while [generation] and the slot index stay stable, so retained
-/// scene references keep working (§7.4).
 final class _Slot<D> {
   int generation = 0;
   _SlotState state = _SlotState.empty;
@@ -19,12 +12,6 @@ final class _Slot<D> {
   String? debugLabel;
 }
 
-/// A stable logical resource store for one resource kind, keyed by
-/// [ResourceHandle] subtype [H]. Construction/rehydration and
-/// GPU-object lifetime are separated: CPU descriptors survive context loss
-/// and drive rebuild; only [gpuObject] is invalidated per-epoch (§5.3,
-/// §7.4). This class holds no `package:web` dependency — it is exercised in
-/// pure tests via a fake `GpuObject`.
 final class ResourceRegistry<H extends ResourceHandle, D> {
   final H Function(int slot, int generation, String? label) _makeHandle;
   final List<_Slot<D>> _slots = [];
@@ -80,18 +67,11 @@ final class ResourceRegistry<H extends ResourceHandle, D> {
     return _slots[handle.slot].cpuDescriptor as D;
   }
 
-  /// Replaces the CPU descriptor in place without bumping generation or
-  /// touching GPU attachment state — the correct primitive for "update this
-  /// still-live logical resource," as distinct from release-then-declare
-  /// (which mints a new identity and would invalidate every existing
-  /// reference to [handle]).
   void updateDescriptor(H handle, D descriptor) {
     _checkLive(handle);
     _slots[handle.slot].cpuDescriptor = descriptor;
   }
 
-  /// Attaches (or reattaches after restoration) the backend object for the
-  /// current device epoch. Marks the slot GPU-ready.
   void attachGpuObject(H handle, GpuObject gpuObject, int deviceEpoch) {
     _checkLive(handle);
     final slot = _slots[handle.slot];
@@ -105,10 +85,6 @@ final class ResourceRegistry<H extends ResourceHandle, D> {
     _slots[handle.slot].state = _SlotState.failedOptional;
   }
 
-  /// Returns the live backend object only if it was attached for
-  /// [currentDeviceEpoch]; a stale pre-restoration object is never handed
-  /// back, matching §7.4 ("only private raw GPU handles from the old device
-  /// epoch are rejected").
   GpuObject? liveGpuObject(H handle, int currentDeviceEpoch) {
     _checkLive(handle);
     final slot = _slots[handle.slot];
@@ -135,8 +111,6 @@ final class ResourceRegistry<H extends ResourceHandle, D> {
     _deleteCount += 1;
   }
 
-  /// Every live handle's CPU descriptor, for restoration rebuild (§7.4 step
-  /// 5: "rebuild registered meshes/materials/textures").
   Iterable<(H, D)> liveDescriptors() sync* {
     for (var i = 0; i < _slots.length; i++) {
       final slot = _slots[i];
@@ -150,9 +124,6 @@ final class ResourceRegistry<H extends ResourceHandle, D> {
     }
   }
 
-  /// Invalidates every attached GPU object without releasing logical slots,
-  /// called on context loss so subsequent `liveGpuObject` calls correctly
-  /// return null until restoration reattaches them.
   void invalidateGpuObjects() {
     for (final slot in _slots) {
       slot.gpuObject = null;

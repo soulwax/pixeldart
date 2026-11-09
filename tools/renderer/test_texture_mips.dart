@@ -4,9 +4,6 @@ import 'package:pixeldart/rendering/webgl/device_api.dart';
 
 import 'fake_gpu_device.dart';
 
-/// Proves the mip-generation contract: `createTexture(hasMips: true)` alone
-/// does not populate mip levels — the real bug found and fixed this pass —
-/// and `finalizeMips` is required after every layer's base level upload.
 void main() {
   _nonMippedTextureNeverFlaggedUnfinalized();
   _mippedTextureRequiresFinalizeMips();

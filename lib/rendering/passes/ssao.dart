@@ -34,26 +34,6 @@ final class SsaoOcclusionProgramSource {
   );
 }
 
-/// §8.5's SSAO kernel pass: half-resolution, samples
-/// `DepthPrepassResources.sceneDepth` alone (no G-buffer normal — normals
-/// are reconstructed from depth via screen-space derivatives in the
-/// shader, per this rung's deliberate scope decision to defer prepass MRT
-/// until something needs a directly-written normal), rotates a small fixed
-/// kernel per-pixel from a deterministic ("pinned") hash rather than
-/// per-frame randomness, and outputs raw (unblurred, deliberately noisy)
-/// occlusion to `SsaoResources.ssaoRaw`. Never sampled by a world pass
-/// directly — only `SsaoBlurFeature`'s output is (§8.5: blur "rather than
-/// smearing across silhouettes").
-///
-/// §8.5's own gate: "is skipped at zero frame strength... has a white
-/// neutral fallback." Strength is read fresh every frame from
-/// `PostProcessState.ssaoStrength` (previously a construction-time
-/// constant nothing ever varied — SSAO did not consume its own weight
-/// field at all before this fix, the same "designed but not read" gap
-/// bloom/DOF/grade/PS1/VHS were each in before their own rungs) rather
-/// than issuing the 8-tap kernel every frame regardless: at `<= 0`,
-/// `_SsaoOcclusionPass.execute()` clears straight to white (`ao == 1`,
-/// no occlusion) and returns before the expensive draw.
 final class SsaoOcclusionFeature implements RenderFeature {
   final ProgramLibrary programLibrary;
   final String vertexSource;
@@ -192,19 +172,6 @@ final class SsaoBlurProgramSource {
   );
 }
 
-/// §8.5's depth-aware bilateral blur — the only stage a world pass may
-/// sample AO from. Kept as its own `RenderFeature` rather than folded into
-/// the occlusion pass so each half of the pipeline can be independently
-/// disabled/profiled later, matching every other multi-stage pipeline in
-/// this renderer (shadow caster vs. shadowed world, depth prepass vs. depth
-/// debug).
-///
-/// Reads the same `PostProcessState.ssaoStrength` the occlusion pass does
-/// and mirrors its zero-strength skip: blurring the occlusion pass's own
-/// white fallback would still be white, just at the depth-aware blur's
-/// full per-pixel cost for no different result, so this pass short-
-/// circuits to the identical white clear independently rather than relying
-/// on the occlusion pass's output alone.
 final class SsaoBlurFeature implements RenderFeature {
   final ProgramLibrary programLibrary;
   final String vertexSource;

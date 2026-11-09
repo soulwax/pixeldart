@@ -2,7 +2,6 @@ import 'dart:math' as math;
 
 import '../math/vec.dart';
 
-/// Single optical ghost element in the multi-lens barrel train.
 final class LensElement {
   final double axisPosition;
   final double scale;
@@ -17,9 +16,7 @@ final class LensElement {
   });
 }
 
-/// Cinematic lens flare, anamorphic bloom streak, and bokeh aperture evaluator in PixelDart.
 final class CinematicLensOpticsEngine {
-  /// Default 6-element internal lens barrel prescription.
   static const List<LensElement> barrelPrescription = [
     LensElement(
       axisPosition: -0.8,
@@ -59,7 +56,6 @@ final class CinematicLensOpticsEngine {
     ),
   ];
 
-  /// Evaluates 1D anamorphic streak kernel weight at normalized coordinate x.
   static double evaluateAnamorphicStreakWeight(double x, [double streakWidth = 0.35]) {
     final dist = x.abs();
     if (dist > streakWidth) return 0.0;
@@ -67,7 +63,6 @@ final class CinematicLensOpticsEngine {
     return math.exp(-4.0 * norm * norm);
   }
 
-  /// Evaluates regular n-gon polygonal bokeh aperture mask at radius r and angle theta.
   static double evaluatePolygonalBokehWeight({
     required double r,
     required double theta,

@@ -23,10 +23,6 @@ import 'pass_context_impl.dart';
 import 'shadow_resources.dart';
 import 'world.dart';
 
-/// The light-space view-projection a shadow caster pass rendered from and a
-/// shadowed world pass must sample against — computed once per frame from
-/// the caster's own [SpotLight] fields (§8.4: "tight near/far from light
-/// bounds"), not authored separately, so the two passes cannot disagree.
 final class ShadowLightView {
   final Mat4 viewProjection;
   const ShadowLightView(this.viewProjection);
@@ -49,7 +45,6 @@ final class ShadowLightView {
     return ShadowLightView(projection * view);
   }
 
-  /// Builds an orthographic light-space projection tightly encompassing [bounds].
   factory ShadowLightView.fromDirectionalLight({
     required DirectionalLight light,
     required Aabb bounds,
@@ -91,13 +86,6 @@ final class ShadowCasterProgramSource {
   );
 }
 
-/// §8.4's shadow-caster depth pass: renders every `castsShadow` item from
-/// the light's own view into a depth-only target ([ShadowResources.shadowMap]),
-/// writing no color at all. A shadowed world pass (`shadowed_world.dart`)
-/// reads the resulting depth texture back to attenuate direct light — kept
-/// as its own `RenderFeature` rather than folded into `WorldFeature`, so the
-/// already-proven safe/textured graphs stay untouched by this addition,
-/// matching the session's established "new capability, new feature" pattern.
 final class ShadowFeature implements RenderFeature {
   final ProgramLibrary programLibrary;
   final String vertexSource;
@@ -228,19 +216,6 @@ final class _ShadowCasterPass implements RenderPass {
     }
   }
 
-  /// §6.2's "alpha-masked geometry participates in shadow ... routes": the
-  /// caster resolves the material for the same reason the world pass does,
-  /// so a lattice casts a lattice rather than the solid shadow of its
-  /// bounding quad. No affine weight is threaded here — see
-  /// shadow_caster.vert for why light space has no equivalent warp.
-  ///
-  /// [MaterialDefinition.doubleSided] is honoured for the same reason the
-  /// world pass honours it, and the omission was a real defect: this pass
-  /// applied its own `cullEnable: true` state once and never varied it, so
-  /// a single-faced double-sided surface cast nothing at all for whichever
-  /// half of a light's travel it happened to face away from. Its shadow
-  /// blinked out and back as the caster orbited. A surface the world pass
-  /// agrees to shade from both sides must occlude from both sides too.
   void _setMaterialState(DrawCommandEncoder encoder, MaterialHandle handle) {
     final material = resolveMaterial(handle);
     encoder.bindTexture(0, resolveAlbedo(material.albedoTexture));
@@ -328,10 +303,6 @@ final class _ShadowCasterPass implements RenderPass {
   ShadowCasterLod _lodFor(RetainedItemView item, SpotLight light) =>
       resolveCasterLod?.call(item, light) ?? ShadowCasterLod.full;
 
-  /// An instanced batch cannot change geometry or instance count per member
-  /// without splitting the retained batch. Skip it only when every member
-  /// that is authored as a caster is culled; otherwise draw the conservative
-  /// full batch and let the host wire a future reduced-mesh path.
   ShadowCasterLod _uniformBatchLod(InstanceBatch batch, SpotLight light) {
     final resolver = resolveCasterLod;
     if (resolver == null) return ShadowCasterLod.full;

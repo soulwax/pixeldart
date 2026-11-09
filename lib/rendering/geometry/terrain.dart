@@ -5,7 +5,6 @@ import '../api/mesh.dart';
 import '../math/bounds.dart';
 import '../math/vec.dart';
 
-/// Coherent gradient noise generator for procedural terrain synthesis.
 final class TerrainNoise {
   final int seed;
   late final Uint8List _p;
@@ -35,7 +34,6 @@ final class TerrainNoise {
     return ((h & 1) != 0 ? -u : u) + ((h & 2) != 0 ? -2.0 * v : 2.0 * v);
   }
 
-  /// Evaluates 2D Perlin gradient noise in [-1, 1].
   double eval2D(double x, double y) {
     final xi = x.floor() & 255;
     final yi = y.floor() & 255;
@@ -56,7 +54,6 @@ final class TerrainNoise {
     return (_lerp(x1, x2, v) * 0.45).clamp(-1.0, 1.0);
   }
 
-  /// Multi-octave fractional Brownian motion (fBm) in [0, 1].
   double fbm(
     double x,
     double y, {
@@ -80,7 +77,6 @@ final class TerrainNoise {
     return maxAmp > 0.0 ? total / maxAmp : 0.0;
   }
 
-  /// Ridged multifractal noise producing sharp mountain peaks and ravines.
   double ridged(
     double x,
     double y, {
@@ -108,7 +104,6 @@ final class TerrainNoise {
   }
 }
 
-/// Procedural fractal terrain mesh and elevation querying engine.
 final class TerrainGenerator {
   final double width;
   final double depth;
@@ -136,7 +131,6 @@ final class TerrainGenerator {
     if (islandRadius <= 0) throw ArgumentError.value(islandRadius, 'islandRadius', 'must be > 0');
   }
 
-  /// Evaluates continuous terrain elevation at world coordinates ([x], [z]).
   double sampleHeight(double x, double z) {
     final r = math.sqrt(x * x + z * z);
     final radialRatio = (r / islandRadius).clamp(0.0, 1.0);
@@ -150,7 +144,6 @@ final class TerrainGenerator {
     return baseHeight + rawElevation * maxHeight * falloff;
   }
 
-  /// Evaluates continuous 3D surface normal at world coordinates ([x], [z]).
   Vec3 sampleNormal(double x, double z) {
     const eps = 0.05;
     final hL = sampleHeight(x - eps, z);
@@ -166,13 +159,11 @@ final class TerrainGenerator {
     return len > 1e-6 ? Vec3(nx / len, ny / len, nz / len) : const Vec3(0, 1, 0);
   }
 
-  /// Evaluates surface slope angle in radians [0, pi/2] at world coordinates ([x], [z]).
   double sampleSlope(double x, double z) {
     final n = sampleNormal(x, z);
     return math.acos(n.y.clamp(0.0, 1.0));
   }
 
-  /// Generates a validated surface-v2 [MeshData] representation of the terrain.
   MeshData generateMesh() {
     final vertexFloats = <double>[];
     final indices = <int>[];
@@ -249,7 +240,6 @@ final class TerrainGenerator {
     return mesh;
   }
 
-  /// Synthesizes an RGBA biome texture based on terrain elevation and slope angle.
   Uint8List generateBiomeTexture({int width = 256, int height = 256}) {
     final bytes = Uint8List(width * height * 4);
     final terrainW = this.width;

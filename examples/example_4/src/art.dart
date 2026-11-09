@@ -3,21 +3,16 @@ import 'dart:typed_data';
 import 'package:pixeldart/pixeldart.dart';
 import 'package:pixeldart/rendering/webgl/pixeldart_app.dart';
 
-/// Tile id in [Art.tileset] of a Tiny Town cell. Plain ids are town ids.
 const int town = 0;
 
-/// Offset of Tiny Dungeon cells in [Art.tileset].
 const int dungeon = 132;
 
-/// The generated water tile's id in [Art.tileset].
 const int waterTile = 264;
 
 const String _fontChars =
     ' !"#%&\'()*+,-./0123456789:;<=>?'
     'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
 
-/// Everything drawn, packed into two textures: one nearest-filtered for the
-/// pixel art, one linear for the large soft glows.
 final class Art {
   final TextureAtlas pixels;
   final TextureAtlas soft;
@@ -145,7 +140,6 @@ final class Art {
     );
   }
 
-  /// A right-pointing triangle for the HUD's off-screen markers.
   static SpriteImage _chevronImage() {
     const size = 11;
     final pixels = Uint8List(size * size * 4);
@@ -158,7 +152,6 @@ final class Art {
     return SpriteImage(size, size, pixels);
   }
 
-  /// Neither Tiny pack has water, so this tile is painted in their palette.
   static SpriteImage _waterImage() {
     final pixels = Uint8List(16 * 16 * 4);
     for (var y = 0; y < 16; y += 1) {

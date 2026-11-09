@@ -5,45 +5,29 @@ import '../math/vec.dart';
 import '../scene/scene_node.dart';
 import 'camera_controller.dart';
 
-/// Smooth third-person chase camera controller tracking a target [SceneNode] or world position.
-///
-/// Features critically damped movement interpolation, look-ahead focus,
-/// and mouse orbit adjustment around the tracked target.
 final class SmoothFollowCameraController implements CameraController {
-  /// The scene node to track. When null, tracks [targetPosition].
   SceneNode? targetNode;
 
-  /// Fallback target position when [targetNode] is null.
   Vec3 targetPosition;
 
-  /// Local offset added to the target position (e.g. eye level above feet).
   Vec3 targetOffset;
 
-  /// Trailing distance behind the target in metres.
   double distance;
 
-  /// Vertical camera elevation above the target in metres.
   double height;
 
-  /// Damping factor for camera movement. Higher values track more tightly.
   double positionDamping;
 
-  /// Damping factor for camera look orientation.
   double rotationDamping;
 
-  /// Vertical field of view in radians.
   double fovYRadians;
 
-  /// Near clipping plane distance.
   double near;
 
-  /// Far clipping plane distance.
   double far;
 
-  /// User azimuth rotation offset in radians around target.
   double azimuthOffset = 0.0;
 
-  /// User elevation angle in radians (-pi/3 to +pi/3).
   double elevationOffset = 0.25;
 
   Vec3 _currentEye;
@@ -74,7 +58,6 @@ final class SmoothFollowCameraController implements CameraController {
     return diff.lengthSquared > 1e-8 ? diff.normalized : const Vec3(0, 0, -1);
   }
 
-  /// Adjusts camera orbit around the target via mouse drag delta.
   void orbit(double deltaAzimuth, double deltaElevation) {
     azimuthOffset += deltaAzimuth;
     elevationOffset = (elevationOffset + deltaElevation).clamp(
@@ -83,7 +66,6 @@ final class SmoothFollowCameraController implements CameraController {
     );
   }
 
-  /// Adjusts trailing distance via wheel delta.
   void zoom(double deltaDistance) {
     distance = (distance + deltaDistance).clamp(1.5, 40.0);
   }

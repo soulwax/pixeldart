@@ -18,6 +18,7 @@ import '../api/mesh.dart';
 import '../api/renderer.dart';
 import '../api/scene.dart';
 import '../api/settings.dart';
+import '../api/shaders.dart';
 import '../api/stats.dart';
 import '../atmosphere/solar_cycle.dart';
 import '../camera/camera_controller.dart';
@@ -41,7 +42,6 @@ export '../particles/particle_spritesheet.dart';
 export 'input.dart';
 export 'sprite_loader.dart';
 
-/// Per-frame callback context passed to host update listeners.
 final class FrameContext {
   final double timeSeconds;
   final double deltaTime;
@@ -68,7 +68,6 @@ final class FrameContext {
   });
 }
 
-/// High-level declarative application harness for browser 3D rendering.
 final class PixeldartApp {
   final web.HTMLCanvasElement canvas;
   final SceneRenderer renderer;
@@ -84,71 +83,66 @@ final class PixeldartApp {
   PostProcessState post = const PostProcessState();
   bool showStats = false;
 
+  Map<ShaderSlot, String> get shaderErrors => renderer.shaderErrors;
+
+  Future<void> setShader(ShaderSlot slot, ShaderOverride? replacement) {
+    final next = {...renderer.configuration.shaderOverrides};
+    if (replacement == null) {
+      next.remove(slot);
+    } else {
+      next[slot] = replacement;
+    }
+    return renderer.configure(renderer.configuration.withShaderOverrides(next));
+  }
+
   SurfaceMetrics _surface;
   CameraController? cameraController;
   OrbitCameraController? get orbitCamera =>
       cameraController is OrbitCameraController
-          ? cameraController as OrbitCameraController
-          : null;
-  FlyCameraController? get flyCamera =>
-      cameraController is FlyCameraController
-          ? cameraController as FlyCameraController
-          : null;
+      ? cameraController as OrbitCameraController
+      : null;
+  FlyCameraController? get flyCamera => cameraController is FlyCameraController
+      ? cameraController as FlyCameraController
+      : null;
   SmoothFollowCameraController? get followCamera =>
       cameraController is SmoothFollowCameraController
-          ? cameraController as SmoothFollowCameraController
-          : null;
+      ? cameraController as SmoothFollowCameraController
+      : null;
 
-  /// Active procedural camera shake engine.
   final CameraShakeEngine shakeEngine = CameraShakeEngine();
 
-  /// Current evaluated astronomical solar state, if solar time is active.
   SolarLightingState? currentSolarState;
   final Set<String> _pressedKeys = {};
 
-  /// Keyboard and pointer state; presses and releases last until the end of
-  /// the frame they are first seen in.
   final InputState input;
 
-  /// Active animation player for scene timelines and tweens.
   final AnimationPlayer animations = AnimationPlayer();
 
-  /// Plays [clip] using the internal [animations] player.
   void playAnimation(AnimationClip clip, {double speed = 1.0}) {
     animations.play(clip, speed: speed);
   }
 
   final List<AtmosphericParticleField> _particleFields = [];
 
-  /// Unmodifiable view of registered atmospheric particle fields.
   List<AtmosphericParticleField> get particleFields =>
       List.unmodifiable(_particleFields);
 
-  /// Registers an atmospheric particle field for automatic per-frame rendering.
   void addParticleField(AtmosphericParticleField field) {
     _particleFields.add(field);
   }
 
-  /// Removes an atmospheric particle field.
   void removeParticleField(AtmosphericParticleField field) {
     _particleFields.remove(field);
   }
 
-  /// Clears all registered atmospheric particle fields.
   void clearParticleFields() {
     _particleFields.clear();
   }
 
   final List<ParticleEmitter> _emitters = [];
 
-  /// Unmodifiable view of registered dynamic particle emitters.
   List<ParticleEmitter> get emitters => List.unmodifiable(_emitters);
 
-  /// Registers a dynamic particle emitter for automatic simulation and rendering.
-  ///
-  /// An emitter with a `colorGradient` and nothing yet applying it has the
-  /// gradient bound here when its material was created through
-  /// [createMaterial] (or [createParticleMaterial]).
   void addEmitter(ParticleEmitter emitter) {
     if (emitter.needsColorGradientBinding) {
       final base = _materialDefinitions[emitter.material];
@@ -157,30 +151,20 @@ final class PixeldartApp {
     _emitters.add(emitter);
   }
 
-  /// Removes a registered dynamic particle emitter.
   void removeEmitter(ParticleEmitter emitter) {
     _emitters.remove(emitter);
   }
 
-  /// Clears all registered particle emitters.
   void clearEmitters() {
     _emitters.clear();
   }
 
   void Function(FrameContext ctx)? onFrame;
 
-  /// Runs at the start of each frame, before animations, particle emitters
-  /// and the scene sync, so changes made here (moving an emitter, spawning
-  /// particles) land in the same frame. [onFrame] runs after them.
   void Function(double timeSeconds, double deltaTime)? onBeforeFrame;
 
-  /// Called when anything in a frame throws. The frame is aborted and the
-  /// loop keeps running. When unset, each distinct error is printed once.
   void Function(Object error, StackTrace stack)? onError;
 
-  /// Called for a primary-button click or tap on the canvas that did not
-  /// drag (moved less than 6 CSS pixels), with window client coordinates.
-  /// Orbit and follow cameras still rotate on drags.
   void Function(double clientX, double clientY)? onTap;
 
   final Set<String> _reportedErrors = {};
@@ -212,29 +196,18 @@ final class PixeldartApp {
     required this._followCanvasSize,
   }) : input = InputState(canvas);
 
-  /// Highest device pixel ratio the backing store follows (from [mount]).
   final double maxDevicePixelRatio;
   double _rawDevicePixelRatio = 1;
 
-  /// Set when the canvas's CSS box may have changed. Reading `clientWidth`
-  /// forces a synchronous layout whenever the page has pending DOM changes
-  /// (a HUD updating its text every frame), so the size is only re-read
-  /// after a `ResizeObserver` or window resize says it changed.
   bool _cssSizeDirty = true;
 
-  /// Whether the internal resolution tracks the canvas. A host that supplies
-  /// its own configuration owns that policy.
   final bool _followCanvasSize;
 
-  /// Frame time at which a pending internal-resolution change applies.
   double? _internalResizeDue;
 
-  /// Mounts Pixeldart onto [canvas], performing bootstrap and sizing.
-  ///
-  /// Unless [configBuilder] is given, the internal resolution follows the
-  /// canvas: a resize applies once the size has held still for a moment.
   static Future<PixeldartApp?> mount(
     web.HTMLCanvasElement canvas, {
+    Map<ShaderSlot, ShaderOverride> shaders = const {},
     QualityProfile requestedProfile = QualityProfile.clean,
     double maxDevicePixelRatio = 2.0,
     RendererConfiguration Function(QualityProfile)? configBuilder,
@@ -251,19 +224,23 @@ final class PixeldartApp {
             internalHeight: surface.pixelHeight,
             sampleCount: p.kind == QualityProfileKind.high ? 2 : 1,
             shadowMapCount: p == QualityProfile.safe ? 0 : 1,
+            shaderOverrides: shaders,
           )
-        : (p, _) => configBuilder(p),
+        : (p, _) {
+            final configuration = configBuilder(p);
+            return configuration.withShaderOverrides({
+              ...configuration.shaderOverrides,
+              ...shaders,
+            });
+          },
     followCanvasSize: configBuilder == null,
     showStats: showStats,
     enableOrbitControls: enableOrbitControls,
   );
 
-  /// Mounts a renderer set up for sprites: no 3D lighting passes, authored
-  /// colours reach the screen unchanged, and the internal resolution follows
-  /// the canvas. [bloom] adds a bloom pass; sprites opt in per-draw with
-  /// `glow`, and `post.bloomStrength` sets the amount.
   static Future<PixeldartApp?> mount2d(
     web.HTMLCanvasElement canvas, {
+    Map<ShaderSlot, ShaderOverride> shaders = const {},
     bool bloom = false,
     double maxDevicePixelRatio = 2,
     LinearColor clearColor = const LinearColor(0, 0, 0),
@@ -279,6 +256,7 @@ final class PixeldartApp {
         internalWidth: surface.pixelWidth,
         internalHeight: surface.pixelHeight,
         outputEncoding: ColorEncoding.linear,
+        shaderOverrides: shaders,
       ),
       followCanvasSize: true,
       showStats: false,
@@ -357,13 +335,18 @@ final class PixeldartApp {
     return handle;
   }
 
-  /// A soft, glowing sprite material for particle emitters (see
-  /// [ParticleMaterials.soft]).
   MaterialHandle createParticleMaterial({
     required String key,
     LinearColor color = const LinearColor(1, 1, 1),
     double glow = 2,
-  }) => createMaterial(ParticleMaterials.softDefinition(resources, key: key, color: color, glow: glow));
+  }) => createMaterial(
+    ParticleMaterials.softDefinition(
+      resources,
+      key: key,
+      color: color,
+      glow: glow,
+    ),
+  );
   TextureHandle createTexture({
     required int width,
     required int height,
@@ -375,22 +358,19 @@ final class PixeldartApp {
     double anisotropy = 1,
     Uint8List? pixels,
     String? debugLabel,
-  }) =>
-      renderer.resources.registerTexture(
-        width: width,
-        height: height,
-        layers: layers,
-        hasMips: hasMips,
-        minFilter: minFilter,
-        magFilter: magFilter,
-        wrap: wrap,
-        anisotropy: anisotropy,
-        pixels: pixels,
-        debugLabel: debugLabel,
-      );
+  }) => renderer.resources.registerTexture(
+    width: width,
+    height: height,
+    layers: layers,
+    hasMips: hasMips,
+    minFilter: minFilter,
+    magFilter: magFilter,
+    wrap: wrap,
+    anisotropy: anisotropy,
+    pixels: pixels,
+    debugLabel: debugLabel,
+  );
 
-  /// Registers raw RGBA8 pixel data (from [ProceduralTextures] or custom source)
-  /// as a GPU texture handle with optional mipmaps and anisotropic filtering.
   TextureHandle createProceduralTexture(
     Uint8List pixels, {
     required int width,
@@ -419,8 +399,6 @@ final class PixeldartApp {
     return handle;
   }
 
-  /// Registers and binds a [ParticleSpriteSheet] with the app's resource library,
-  /// automatically provisioning material handles for all sprite frames.
   ParticleSpriteSheet registerSpriteSheet(
     ParticleSpriteSheet sheet, {
     MaterialDefinition? baseMaterial,
@@ -429,20 +407,16 @@ final class PixeldartApp {
     return sheet;
   }
 
-  /// Current skybox declaration configured on [environment].
   SkyboxDeclaration? get skybox => environment.skybox;
 
-  /// Sets or clears the skybox declaration on [environment].
   set skybox(SkyboxDeclaration? value) {
     environment = environment.copyWith(skybox: value);
   }
 
-  /// Sets the skybox declaration on [environment].
   void setSkybox(SkyboxDeclaration? skybox) {
     this.skybox = skybox;
   }
 
-  /// The camera the next frame will render with (before shake).
   CameraView currentCamera() {
     final aspect = _surface.pixelWidth / _surface.pixelHeight;
     final camCtrl = cameraController;
@@ -458,31 +432,30 @@ final class PixeldartApp {
           );
   }
 
-  /// The world-space ray under window client coordinates, or null outside
-  /// the canvas. Pair with `Ray.intersectGround` to aim at a floor or sea.
   Ray? screenRay(double clientX, double clientY) {
     final rect = canvas.getBoundingClientRect();
     final x = clientX - rect.left;
     final y = clientY - rect.top;
     if (x < 0 || x > rect.width || y < 0 || y > rect.height) return null;
-    return currentCamera().screenPointToRay(x, y, rect.width.toInt(), rect.height.toInt());
+    return currentCamera().screenPointToRay(
+      x,
+      y,
+      rect.width.toInt(),
+      rect.height.toInt(),
+    );
   }
 
-  /// Where world-space [point] appears on the page, in window client
-  /// coordinates (the same space as mouse events and [pick]); `null` when it
-  /// is behind the camera. Use it to place DOM labels over scene objects.
   Vec2? worldToClient(Vec3 point) {
     final rect = canvas.getBoundingClientRect();
     if (rect.width <= 0 || rect.height <= 0) return null;
-    final p = currentCamera().worldToScreenPoint(point, rect.width.toInt(), rect.height.toInt());
+    final p = currentCamera().worldToScreenPoint(
+      point,
+      rect.width.toInt(),
+      rect.height.toInt(),
+    );
     return p == null ? null : Vec2(p.x + rect.left, p.y + rect.top);
   }
 
-  /// Raycasts against the scene hierarchy using client window coordinates [clientX], [clientY].
-  /// Returns the closest [RaycastHit], or `null` if nothing was hit.
-  ///
-  /// [where] limits the candidates (e.g. only ships); [precise] tests mesh
-  /// triangles after the bounds hit. See [SceneNode.raycast].
   RaycastHit? pick(
     double clientX,
     double clientY, {
@@ -490,10 +463,11 @@ final class PixeldartApp {
     bool precise = false,
   }) {
     final ray = screenRay(clientX, clientY);
-    return ray == null ? null : scene.raycast(ray, where: where, precise: precise);
+    return ray == null
+        ? null
+        : scene.raycast(ray, where: where, precise: precise);
   }
 
-  /// Sets the active camera controller to orbit controls around [target].
   OrbitCameraController useOrbitCamera({
     Vec3 target = const Vec3(0, 0, 0),
     double distance = 5.0,
@@ -503,7 +477,6 @@ final class PixeldartApp {
     return ctrl;
   }
 
-  /// Sets the active camera controller to first-person fly controls at [position].
   FlyCameraController useFlyCamera({
     Vec3 position = const Vec3(0, 1.8, 5),
     double moveSpeed = 8.0,
@@ -513,7 +486,6 @@ final class PixeldartApp {
     return ctrl;
   }
 
-  /// Sets the active camera controller to third-person smooth follow controls tracking [target].
   SmoothFollowCameraController useFollowCamera({
     SceneNode? target,
     Vec3 targetPosition = Vec3.zero,
@@ -534,8 +506,6 @@ final class PixeldartApp {
     return ctrl;
   }
 
-  /// Sets the active camera controller to an orthographic 2D/top-down view.
-  /// See [OrthoCameraController] for following, fitting and clamping.
   OrthoCameraController useOrthoCamera({
     SceneNode? target,
     Vec3 targetPosition = Vec3.zero,
@@ -556,7 +526,6 @@ final class PixeldartApp {
     return ctrl;
   }
 
-  /// Sets the active camera controller to an automated cinematic tour along [waypoints].
   CinematicTourCameraController useCinematicTour({
     required List<CameraWaypoint> waypoints,
     double duration = 20.0,
@@ -575,16 +544,11 @@ final class PixeldartApp {
     return ctrl;
   }
 
-  /// Triggers a procedural trauma-based camera shake with [trauma] in [0, 1].
-  ///
-  /// [rotation] scales the rotational part (0 for a translation-only shake,
-  /// which suits orthographic and 2D views); it stays set for later shakes.
   void shakeCamera({double trauma = 0.5, double? rotation}) {
     if (rotation != null) shakeEngine.rotationScale = rotation;
     shakeEngine.addTrauma(trauma);
   }
 
-  /// Evaluates and applies astronomical solar lighting and skybox colors for [timeHours] (0 to 24).
   void setSolarTime(
     double timeHours, {
     double latitudeRadians = 0.65,
@@ -644,10 +608,6 @@ final class PixeldartApp {
     if (coherentHorizon) matchHorizonToFog();
   }
 
-  /// Makes the sky's horizon and ground, and the clear colour, equal to the
-  /// current fog colour. Fogged geometry fades to the fog colour at range;
-  /// without this its far edge shows as a seam against a different sky.
-  /// Call after changing fog (`setSolarTime(coherentHorizon: true)` does).
   void matchHorizonToFog() {
     final fog = environment.fogColor;
     final sky = environment.skybox;
@@ -657,53 +617,42 @@ final class PixeldartApp {
     );
   }
 
-  /// Convenience helper to adjust exposure.
   void setExposure(double value) {
     post = post.copyWith(exposure: value);
   }
 
-  /// Convenience helper to adjust vignette strength.
   void setVignette(double strength) {
     post = post.copyWith(vignette: strength);
   }
 
-  /// Convenience helper to adjust film grain strength.
   void setGrain(double strength) {
     post = post.copyWith(grain: strength);
   }
 
-  /// Convenience helper to adjust or enable bloom post-processing.
   void enableBloom({double strength = 0.30}) {
     post = post.copyWith(bloomStrength: strength);
   }
 
-  /// Convenience helper to adjust or enable screen-space ambient occlusion.
   void enableSsao({double strength = 0.75}) {
     post = post.copyWith(ssaoStrength: strength);
   }
 
-  /// Convenience helper to set bloom strength.
   void setBloom(double strength) => enableBloom(strength: strength);
 
-  /// Convenience helper to set SSAO strength.
   void setSsao(double strength) => enableSsao(strength: strength);
 
-  /// Configures Depth of Field post-processing blur.
   void setDepthOfField({double strength = 0.70}) {
     post = post.copyWith(depthOfFieldStrength: strength);
   }
 
-  /// Disables Depth of Field post-processing.
   void disableDepthOfField() {
     post = post.copyWith(depthOfFieldStrength: 0.0);
   }
 
-  /// Convenience helper to change tone mapping mode.
   void setToneMapping(ToneMappingMode mode) {
     post = post.copyWith(toneMapping: mode);
   }
 
-  /// Configures linear distance fog with optional exponential height falloff.
   void enableFog({
     LinearColor color = const LinearColor(0.04, 0.05, 0.07),
     double start = 5.0,
@@ -720,7 +669,6 @@ final class PixeldartApp {
     );
   }
 
-  /// Disables distance and height fog.
   void disableFog() {
     environment = environment.copyWith(
       fogStart: 10000.0,
@@ -730,7 +678,6 @@ final class PixeldartApp {
     );
   }
 
-  /// Configures volumetric participating medium and light shafts.
   void enableVolumetricFog({
     LinearColor albedo = LinearColor.white,
     double intensity = 1.0,
@@ -750,24 +697,25 @@ final class PixeldartApp {
       volumetricHeightFalloff: heightFalloff,
       volumetricDustDensity: dustDensity,
       volumetricAnisotropy: anisotropy,
-      volumetricSampleCount: (sampleCount < floor ? floor : sampleCount).clamp(4, 24),
+      volumetricSampleCount: (sampleCount < floor ? floor : sampleCount).clamp(
+        4,
+        24,
+      ),
       volumetricJitter: jitter.clamp(0.0, 0.5),
     );
   }
 
-  /// Decodes GLB bytes synchronously (geometry and basic material parameters),
-  /// attaches one copy to the scene hierarchy, and returns its root [SceneNode].
-  /// Textures are not loaded; use [loadModel] for a textured, reusable asset.
   SceneNode loadGlb(Uint8List bytes) {
-    final asset = ModelAsset.fromGlb(GlbDecoder.decode(bytes), resources, name: 'glb');
+    final asset = ModelAsset.fromGlb(
+      GlbDecoder.decode(bytes),
+      resources,
+      name: 'glb',
+    );
     final node = asset.instantiate();
     scene.addChild(node);
     return node;
   }
 
-  /// Decodes GLB bytes with their embedded textures, attaches one copy to
-  /// the scene, and returns its root. External image URIs cannot be
-  /// resolved from bytes alone; use [loadModel] for those.
   Future<SceneNode> loadGlbAsync(Uint8List bytes) async {
     final asset = await _modelFromBytes(bytes, name: 'glb', baseUrl: null);
     final node = asset.instantiate();
@@ -775,23 +723,12 @@ final class PixeldartApp {
     return node;
   }
 
-  /// Asynchronously fetches a GLB file from [url], decodes meshes and textures,
-  /// and attaches one textured copy to the scene.
   Future<SceneNode> loadGlbFromUrl(String url) async {
     final node = (await loadModel(url)).instantiate();
     scene.addChild(node);
     return node;
   }
 
-  /// Loads a GLB as a reusable [ModelAsset]: meshes and materials are
-  /// registered once and [ModelAsset.instantiate] stamps out copies.
-  ///
-  /// Embedded and `data:` images load from the file; external images (such
-  /// as a kit's shared `Textures/colormap.png`) resolve relative to [url]
-  /// and load once per URL across models. [textureFilter] picks sampling for
-  /// every texture of the model: [GpuTextureFilter.nearest] (no mipmaps) for
-  /// palette atlases and pixel art. [materialOverride] can rewrite each
-  /// material before registration.
   Future<ModelAsset> loadModel(
     String url, {
     MaterialOverride? materialOverride,
@@ -832,7 +769,9 @@ final class PixeldartApp {
             mimeType: image.mimeType,
             debugLabel: '$name/${image.name}',
             generateMips: !nearest,
-            minFilter: nearest ? GpuTextureFilter.nearest : GpuTextureFilter.linearMipmapLinear,
+            minFilter: nearest
+                ? GpuTextureFilter.nearest
+                : GpuTextureFilter.linearMipmapLinear,
             magFilter: textureFilter,
           );
         } else if (image.isExternal && baseUrl != null) {
@@ -844,13 +783,20 @@ final class PixeldartApp {
               url: resolved,
               generateMips: !nearest,
               wrap: GpuTextureWrap.repeat,
-              minFilter: nearest ? GpuTextureFilter.nearest : GpuTextureFilter.linearMipmapLinear,
+              minFilter: nearest
+                  ? GpuTextureFilter.nearest
+                  : GpuTextureFilter.linearMipmapLinear,
               magFilter: textureFilter,
             ),
           );
         }
       } catch (error, stack) {
-        _report(StateError('loadModel($name): image "${image.name}" failed to load: $error'), stack);
+        _report(
+          StateError(
+            'loadModel($name): image "${image.name}" failed to load: $error',
+          ),
+          stack,
+        );
       }
       images.add(handle);
     }
@@ -872,7 +818,9 @@ final class PixeldartApp {
       }).toJS,
     );
     web.ResizeObserver(
-      ((JSArray<web.ResizeObserverEntry> _, web.ResizeObserver _) => _cssSizeDirty = true).toJS,
+      ((JSArray<web.ResizeObserverEntry> _, web.ResizeObserver _) =>
+              _cssSizeDirty = true)
+          .toJS,
     ).observe(canvas);
     canvas.addEventListener(
       'webglcontextlost',
@@ -923,10 +871,7 @@ final class PixeldartApp {
             if (_activeButton == 0 && !e.shiftKey) {
               ctrl.rotate(dx * 0.006, dy * 0.006);
             } else {
-              ctrl.pan(
-                -dx * 0.003 * ctrl.distance,
-                dy * 0.003 * ctrl.distance,
-              );
+              ctrl.pan(-dx * 0.003 * ctrl.distance, dy * 0.003 * ctrl.distance);
             }
           } else if (ctrl is FlyCameraController) {
             ctrl.look(dx * ctrl.lookSpeed, dy * ctrl.lookSpeed);
@@ -999,12 +944,24 @@ final class PixeldartApp {
       var fwd = 0.0;
       var rgt = 0.0;
       var up = 0.0;
-      if (_pressedKeys.contains('keyw') || _pressedKeys.contains('arrowup')) fwd += 1.0;
-      if (_pressedKeys.contains('keys') || _pressedKeys.contains('arrowdown')) fwd -= 1.0;
-      if (_pressedKeys.contains('keya') || _pressedKeys.contains('arrowleft')) rgt -= 1.0;
-      if (_pressedKeys.contains('keyd') || _pressedKeys.contains('arrowright')) rgt += 1.0;
-      if (_pressedKeys.contains('space') || _pressedKeys.contains('keye')) up += 1.0;
-      if (_pressedKeys.contains('shiftleft') || _pressedKeys.contains('keyq')) up -= 1.0;
+      if (_pressedKeys.contains('keyw') || _pressedKeys.contains('arrowup')) {
+        fwd += 1.0;
+      }
+      if (_pressedKeys.contains('keys') || _pressedKeys.contains('arrowdown')) {
+        fwd -= 1.0;
+      }
+      if (_pressedKeys.contains('keya') || _pressedKeys.contains('arrowleft')) {
+        rgt -= 1.0;
+      }
+      if (_pressedKeys.contains('keyd') || _pressedKeys.contains('arrowright')) {
+        rgt += 1.0;
+      }
+      if (_pressedKeys.contains('space') || _pressedKeys.contains('keye')) {
+        up += 1.0;
+      }
+      if (_pressedKeys.contains('shiftleft') || _pressedKeys.contains('keyq')) {
+        up -= 1.0;
+      }
       ctrl.setMovementIntent(forward: fwd, right: rgt, up: up);
     }
   }
@@ -1018,7 +975,9 @@ final class PixeldartApp {
     _cssSizeDirty = false;
     final cssW = canvas.clientWidth > 0 ? canvas.clientWidth : canvas.width;
     final cssH = canvas.clientHeight > 0 ? canvas.clientHeight : canvas.height;
-    if (cssW == _surface.cssWidth && cssH == _surface.cssHeight && dpr == _rawDevicePixelRatio) {
+    if (cssW == _surface.cssWidth &&
+        cssH == _surface.cssHeight &&
+        dpr == _rawDevicePixelRatio) {
       return;
     }
     _rawDevicePixelRatio = dpr;
@@ -1066,13 +1025,13 @@ final class PixeldartApp {
             lightTableCapacity: c.lightTableCapacity,
             textureArrayLayerCapacity: c.textureArrayLayerCapacity,
             diagnosticLevel: c.diagnosticLevel,
+            shaderOverrides: c.shaderOverrides,
           ),
         )
         .catchError(_report);
     sequencer.invalidateHistory('internal resolution changed');
   }
 
-  /// Starts the requestAnimationFrame render loop.
   void start() {
     if (_running) return;
     _running = true;
@@ -1080,7 +1039,6 @@ final class PixeldartApp {
     _rafHandle = web.window.requestAnimationFrame(_tick.toJS);
   }
 
-  /// Stops the render loop.
   void stop() {
     _running = false;
     final handle = _rafHandle;
@@ -1093,7 +1051,9 @@ final class PixeldartApp {
   void _tick(num timeMs) {
     if (!_running) return;
     final timeSeconds = timeMs / 1000.0;
-    final dt = _lastTimeSeconds > 0 ? timeSeconds - _lastTimeSeconds : 1.0 / 60.0;
+    final dt = _lastTimeSeconds > 0
+        ? timeSeconds - _lastTimeSeconds
+        : 1.0 / 60.0;
     _lastTimeSeconds = timeSeconds;
 
     try {

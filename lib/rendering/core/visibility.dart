@@ -19,10 +19,6 @@ final class CullResult {
   const CullResult(this.visible, this.stats);
 }
 
-/// Frustum-culls transformed world bounds and applies the caller-provided
-/// visibility mask (§5.5). Rejects non-finite bounds rather than passing
-/// them through, since a NaN/inf AABB can neither be culled correctly nor
-/// safely rendered.
 CullResult cullItems({
   required Iterable<RetainedItemView> items,
   required Frustum frustum,

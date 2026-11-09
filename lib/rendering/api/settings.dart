@@ -1,8 +1,6 @@
 import 'capabilities.dart';
+import 'shaders.dart';
 
-/// Distinguishes CSS logical size, drawing-buffer pixel size, DPR, and
-/// surface visibility (§7.3). `resize()` accepts 1x1 and defers a
-/// zero-sized hidden surface rather than creating a zero-sized target.
 final class SurfaceMetrics {
   final int cssWidth;
   final int cssHeight;
@@ -20,19 +18,6 @@ final class SurfaceMetrics {
     this.visible = true,
   });
 
-  /// Builds metrics from a CSS-pixel size and a device pixel ratio.
-  ///
-  /// The backing-store size is derived rather than supplied, which is the
-  /// point: the four-field constructor invites `pixelWidth: cssWidth`, and
-  /// that renders at 1x on every HiDPI display while reporting success. Pass
-  /// the canvas's CSS size and `window.devicePixelRatio` and the backing store
-  /// follows automatically.
-  ///
-  /// [maxDevicePixelRatio] caps the backing store on very high-density
-  /// displays, where a literal 3x buffer costs 9x the fill for little visible
-  /// gain. The cap applies to allocation only; the reported
-  /// [devicePixelRatio] is the capped value actually used, so a host reading
-  /// it back sees what was allocated.
   factory SurfaceMetrics.forCanvas({
     required int cssWidth,
     required int cssHeight,
@@ -65,10 +50,6 @@ final class SurfaceMetrics {
     )..validate();
   }
 
-  /// A 1:1 surface where CSS pixels and backing-store pixels coincide.
-  ///
-  /// The right choice for offscreen rendering, tests, and capture harnesses
-  /// that have a pixel budget and no display to match.
   factory SurfaceMetrics.pixels({
     required int width,
     required int height,
@@ -81,30 +62,21 @@ final class SurfaceMetrics {
     visible: visible,
   )..validate();
 
-  /// This surface at a new CSS size, keeping the ratio and visibility.
-  ///
-  /// The shape a resize handler wants: one call, no chance of updating the CSS
-  /// size and forgetting the backing store.
-  ///
-  /// Pass the browser's current [devicePixelRatio] (and the host's cap) when
-  /// it may have changed: dragging a window to another monitor or zooming
-  /// the page changes it without resizing the CSS box. Without it the
-  /// surface keeps its current ratio.
   SurfaceMetrics resized({
     required int cssWidth,
     required int cssHeight,
     double? devicePixelRatio,
     double maxDevicePixelRatio = 2,
-  }) =>
-      SurfaceMetrics.forCanvas(
-        cssWidth: cssWidth,
-        cssHeight: cssHeight,
-        devicePixelRatio: devicePixelRatio ?? this.devicePixelRatio,
-        maxDevicePixelRatio: devicePixelRatio == null ? this.devicePixelRatio : maxDevicePixelRatio,
-        visible: visible,
-      );
+  }) => SurfaceMetrics.forCanvas(
+    cssWidth: cssWidth,
+    cssHeight: cssHeight,
+    devicePixelRatio: devicePixelRatio ?? this.devicePixelRatio,
+    maxDevicePixelRatio: devicePixelRatio == null
+        ? this.devicePixelRatio
+        : maxDevicePixelRatio,
+    visible: visible,
+  );
 
-  /// This surface with a new visibility, for hosts pausing on tab blur.
   SurfaceMetrics withVisibility(bool nextVisible) => SurfaceMetrics(
     cssWidth: cssWidth,
     cssHeight: cssHeight,
@@ -141,9 +113,6 @@ enum ColorEncoding { linear, srgb }
 
 enum DiagnosticLevel { off, errorsOnly, full }
 
-/// Values that may require programs or targets (§5.1). Changing this is an
-/// explicit asynchronous transition outside a frame via `configure()`;
-/// per-frame weights in [PostProcessState] never trigger a graph rebuild.
 final class RendererConfiguration {
   final QualityProfile profile;
   final int internalWidth;
@@ -157,6 +126,8 @@ final class RendererConfiguration {
   final int textureArrayLayerCapacity;
   final DiagnosticLevel diagnosticLevel;
 
+  final Map<ShaderSlot, ShaderOverride> shaderOverrides;
+
   const RendererConfiguration({
     required this.profile,
     required this.internalWidth,
@@ -169,6 +140,7 @@ final class RendererConfiguration {
     this.lightTableCapacity = 4,
     this.textureArrayLayerCapacity = 1,
     this.diagnosticLevel = DiagnosticLevel.errorsOnly,
+    this.shaderOverrides = const {},
   });
 
   Map<String, Object> toMap() => {
@@ -183,10 +155,26 @@ final class RendererConfiguration {
     'lightTableCapacity': lightTableCapacity,
     'textureArrayLayerCapacity': textureArrayLayerCapacity,
     'diagnosticLevel': diagnosticLevel.name,
+    'shaderOverrides': [for (final slot in shaderOverrides.keys) slot.name],
   };
 
-  /// The mandatory safe graph configuration (§6.1): `world opaque -> world
-  /// transparent -> present`, no optional targets, no temporal history.
+  RendererConfiguration withShaderOverrides(
+    Map<ShaderSlot, ShaderOverride> overrides,
+  ) => RendererConfiguration(
+    profile: profile,
+    internalWidth: internalWidth,
+    internalHeight: internalHeight,
+    sampleCount: sampleCount,
+    outputEncoding: outputEncoding,
+    shadowMapCount: shadowMapCount,
+    shadowMapSize: shadowMapSize,
+    materialTableCapacity: materialTableCapacity,
+    lightTableCapacity: lightTableCapacity,
+    textureArrayLayerCapacity: textureArrayLayerCapacity,
+    diagnosticLevel: diagnosticLevel,
+    shaderOverrides: Map.unmodifiable(overrides),
+  );
+
   static const RendererConfiguration safe = RendererConfiguration(
     profile: QualityProfile.safe,
     internalWidth: 384,
@@ -196,6 +184,9 @@ final class RendererConfiguration {
 
   void validate() {
     profile.validate();
+    for (final override in shaderOverrides.values) {
+      override.validate();
+    }
     if (internalWidth <= 0 || internalHeight <= 0) {
       throw ArgumentError(
         'RendererConfiguration internal resolution must be > 0: '

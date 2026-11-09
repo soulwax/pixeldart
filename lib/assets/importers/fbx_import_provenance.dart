@@ -2,7 +2,6 @@ library;
 
 import 'asset_import_diagnostic.dart';
 
-/// The bounded result of inspecting an FBX source before conversion.
 final class FbxPreflightResult {
   final String sourcePath;
   final int sourceBytes;
@@ -42,7 +41,6 @@ final class FbxPreflightResult {
   };
 }
 
-/// Immutable source-file provenance used by offline import reports.
 final class SourceProvenance {
   final String sourceFormat;
   final String? licenseId;

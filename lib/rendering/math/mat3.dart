@@ -2,7 +2,6 @@ import 'dart:typed_data';
 
 import 'vec.dart';
 
-/// Column-major 3x3, index `m[column * 3 + row]`.
 final class Mat3 {
   final Float32List m;
 

@@ -1,7 +1,5 @@
 import 'dart:io';
 
-/// Lightweight package-content hygiene gate. It runs without network access
-/// and catches accidental host/private material before a release dry-run.
 void main() {
   final package = _packageDirectory();
   final violations = <String>[];
