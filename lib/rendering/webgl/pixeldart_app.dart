@@ -381,6 +381,10 @@ final class PixeldartApp {
     debugLabel: debugLabel,
   );
 
+  /// Requested and effective anisotropic filtering for a texture handle.
+  AnisotropyDecision textureAnisotropy(TextureHandle handle) =>
+      resources.anisotropyOf(handle);
+
   TextureHandle createProceduralTexture(
     Uint8List pixels, {
     required int width,

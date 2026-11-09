@@ -37,6 +37,25 @@ extension on SceneRendererImpl {
       _allocated = configuration.withSampleCount(_msaa.effective);
       return;
     }
+    if (transition.configuration.delta.isShaderOnly) {
+      PreparedShaderOverrides? candidate;
+      try {
+        candidate = _programs!.prepareOverrides(configuration.shaderOverrides);
+        _configurations.commit(transition);
+        _programs!.commitOverrides(candidate);
+        _configuration = configuration;
+        _allocated = configuration.withSampleCount(_msaa.effective);
+        return;
+      } catch (_) {
+        if (transition.state == CoordinatedTransitionState.open) {
+          _configurations.rollback(transition);
+        }
+        if (candidate?.state == ProgramSetCandidateState.prepared) {
+          _programs!.rollbackOverrides(candidate!);
+        }
+        rethrow;
+      }
+    }
     PreparedGpuResourcePlan? candidateResources;
     ProgramLibrary? candidatePrograms;
     FeatureGraph? candidateFeatures;

@@ -64,6 +64,12 @@ Future<void> main() async {
   final custom = _base.withShaderOverrides(const {
     ShaderSlot.sprites: ShaderOverride(fragment: '$spriteFragSrc\n// HOST'),
   });
+  final compiles = device.programCompileCalls;
+  final deletes = device.programDeleteCalls;
+  final targets = device.targetCreateCalls;
+  final buffers = device.bufferCreateCalls;
+  final vaos = device.vaoCreateCalls;
+  final textures = device.textureCreateCalls;
   await renderer.configure(custom);
   _check(
     renderer.configuration.shaderOverrides.containsKey(ShaderSlot.sprites),
@@ -74,6 +80,15 @@ Future<void> main() async {
       (source) => source.fragment.contains('// HOST'),
     ),
     'configured renderer did not compile the host shader',
+  );
+  _check(
+    device.programCompileCalls == compiles + 1 &&
+        device.programDeleteCalls == deletes + 1 &&
+        device.targetCreateCalls == targets &&
+        device.bufferCreateCalls == buffers &&
+        device.vaoCreateCalls == vaos &&
+        device.textureCreateCalls == textures,
+    'shader-only change recompiled other passes or recreated GPU resources',
   );
   device.compiledShaderSources.clear();
   device.simulateContextLoss();

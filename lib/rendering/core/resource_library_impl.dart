@@ -111,6 +111,12 @@ final class ResourceLibraryImpl implements ResourceLibrary {
   }
 
   @override
+  AnisotropyDecision anisotropyOf(TextureHandle handle) {
+    _ensureActive();
+    return _textures.anisotropyOf(handle);
+  }
+
+  @override
   void releaseTexture(TextureHandle handle) {
     _ensureActive();
     _textures.release(handle);

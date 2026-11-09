@@ -34,6 +34,17 @@ final class ConfigurationDelta {
       shadersChanged;
 
   bool get isNoop => !requiresGpuRebuild && !diagnosticLevelChanged;
+
+  /// Shader source is the only change that affects GPU resources. Diagnostic
+  /// level may change alongside it without rebuilding the graph.
+  bool get isShaderOnly =>
+      shadersChanged &&
+      addedFeatures.isEmpty &&
+      removedFeatures.isEmpty &&
+      addedResources.isEmpty &&
+      removedResources.isEmpty &&
+      !renderTargetsChanged &&
+      !resourceTablesChanged;
 }
 
 final class ConfigurationTransaction {

@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:pixeldart/rendering/api/handles.dart';
 import 'package:pixeldart/rendering/assets/texture_store.dart';
+import 'package:pixeldart/rendering/core/scene_renderer_impl.dart';
 import 'package:pixeldart/rendering/webgl/device_api.dart';
 
 import 'fake_gpu_device.dart';
@@ -14,6 +15,8 @@ void main() {
   _releaseDeletesTextureAndInvalidatesHandle();
   _rehydrateReuploadsLoadedTexturesAndSkipsUnloadedOnes();
   _anisotropyNegotiationIsDeterministic();
+  _handleAnisotropyTracksCapabilities();
+  _resourceLibraryExposesHandleSampling();
   _handleRejectionVocabulary();
   print('Renderer texture store fixtures passed.');
 }
@@ -79,6 +82,67 @@ void _anisotropyNegotiationIsDeterministic() {
       throw StateError('invalid anisotropy request $invalid must be rejected');
     }
   }
+}
+
+void _handleAnisotropyTracksCapabilities() {
+  final device = FakeGpuDevice(anisotropicFiltering: true, maxAnisotropy: 4);
+  final store = TextureStore(device);
+  final handle = store.declare(
+    width: 4,
+    height: 4,
+    hasMips: true,
+    minFilter: GpuTextureFilter.linearMipmapLinear,
+    anisotropy: 8,
+  );
+  final creates = device.textureCreateCalls;
+  final initial = store.anisotropyOf(handle);
+  if (initial.requested != 8 ||
+      initial.effective != 4 ||
+      !initial.usedFallback ||
+      device.textureCreateCalls != creates) {
+    throw StateError(
+      'handle query must report the clamped value without GPU work',
+    );
+  }
+
+  device.maxAnisotropy = 2;
+  device.simulateContextLoss();
+  device.simulateContextRestore();
+  store.rehydrateAfterContextRestore();
+  if (store.anisotropyOf(handle).effective != 2) {
+    throw StateError('restored adapter limit was not reflected by the handle');
+  }
+
+  device.anisotropicFiltering = false;
+  device.simulateContextLoss();
+  device.simulateContextRestore();
+  store.rehydrateAfterContextRestore();
+  if (store.anisotropyOf(handle).effective != 1) {
+    throw StateError('missing extension did not fall back to 1x after restore');
+  }
+
+  store.release(handle);
+  var rejected = false;
+  try {
+    store.anisotropyOf(handle);
+  } on HandleException {
+    rejected = true;
+  }
+  if (!rejected) {
+    throw StateError('released texture still reported sampling');
+  }
+  store.dispose();
+}
+
+void _resourceLibraryExposesHandleSampling() {
+  final device = FakeGpuDevice(anisotropicFiltering: true, maxAnisotropy: 8);
+  final resources = ResourceLibraryImpl(device);
+  final handle = resources.registerTexture(width: 4, height: 4, anisotropy: 16);
+  final sampling = resources.anisotropyOf(handle);
+  if (sampling.requested != 16 || sampling.effective != 8) {
+    throw StateError('public resource API did not report handle sampling');
+  }
+  resources.dispose();
 }
 
 Uint8List _onePixel() => Uint8List.fromList([10, 20, 30, 255]);

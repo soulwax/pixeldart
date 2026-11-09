@@ -19,6 +19,8 @@ final class FakeGpuDevice
   @override
   final bool disjointTimer;
   int maxSamples;
+  bool anisotropicFiltering;
+  double maxAnisotropy;
 
   /// Multisampled targets above this count fail as an incomplete
   /// framebuffer would, even though [maxSamples] advertises them.
@@ -27,6 +29,8 @@ final class FakeGpuDevice
     this.timerQueries = true,
     this.disjointTimer = false,
     this.maxSamples = 4,
+    this.anisotropicFiltering = false,
+    this.maxAnisotropy = 1,
     this.incompleteAboveSamples,
   });
   GpuDeviceStatus _status = GpuDeviceStatus.ready;
@@ -85,6 +89,8 @@ final class FakeGpuDevice
     maxSamples: maxSamples,
     maxVertexAttributes: 16,
     maxColorAttachments: 4,
+    anisotropicFiltering: anisotropicFiltering,
+    maxAnisotropy: maxAnisotropy,
     floatRenderTarget: true,
     contextLossExtension: true,
     disjointTimerQuery: timerQueries,

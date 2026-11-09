@@ -39,6 +39,7 @@ abstract interface class ResourceLibrary {
   });
   void updateTexturePixels(TextureHandle handle, Uint8List pixels);
   void finalizeTextureMips(TextureHandle handle);
+  AnisotropyDecision anisotropyOf(TextureHandle handle);
   void releaseTexture(TextureHandle handle);
 
   TextureResidencyManager get textureResidency;

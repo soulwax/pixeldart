@@ -45,6 +45,7 @@ export 'core/shadow_caster_lod.dart';
 export 'passes/volumetric_light.dart';
 export 'passes/volumetric_light_resources.dart';
 export 'webgl/capability_selection.dart';
+export 'webgl/device_api.dart' show AnisotropyDecision;
 export 'math/bounds.dart';
 export 'math/frustum.dart';
 export 'math/mat3.dart';

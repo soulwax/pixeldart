@@ -659,6 +659,14 @@ observable instead of silently overstating quality.
 `RenderCapabilities.maxAnisotropy` reports the backend limit used during this
 negotiation, while the authoring cap remains 16×.
 
+After creating or loading a texture, inspect its negotiated value through
+`renderer.resources.anisotropyOf(textureHandle)` or
+`app.textureAnisotropy(textureHandle)`. The result includes `requested`,
+`effective`, `maxSupported`, `extensionAvailable`, and `usedFallback`.
+The query uses cached capabilities and works before pixels arrive. It updates
+after context restoration if the adapter's limit changes; released handles
+are rejected. For pixel art, request `GpuTextureFilter.nearest` and 1×.
+
 ```dart
 final material = renderer.resources.registerMaterial(
   const MaterialDefinition(
@@ -930,7 +938,9 @@ the selected profile compile or draw.
 For a live change between frames, call
 `await app.setShader(ShaderSlot.sprites, ShaderOverride(fragment: nextSource))`.
 Pass `null` as the replacement to restore the default. A rejected live change
-keeps the previous graph; a rejected startup override uses the default and is
+keeps the previous graph. A shader-only change compiles only affected programs
+and retains pass objects, render targets, buffers and textures. A rejected
+startup override uses the default and is
 listed in `app.shaderErrors`. Low-level hosts pass the same map through
 `RendererConfiguration(shaderOverrides: ...)` and inspect
 `renderer.shaderErrors`. Overrides keep the built-in pass layout; custom

@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import '../api/capabilities.dart';
 import '../api/handles.dart';
 import '../webgl/device_api.dart';
 import '../webgl/fallback_resources.dart';
@@ -36,6 +37,7 @@ final class _TextureRecord {
 final class TextureStore {
   final GpuDevice _device;
   final ResourceRegistry<TextureHandle, _TextureRecord> _registry;
+  late RenderCapabilities _capabilities;
   final Map<int, GpuObject> _texturesBySlot = {};
   late GpuObject _fallbackAlbedo;
   late GpuObject _fallbackNormal;
@@ -47,6 +49,7 @@ final class TextureStore {
     : _registry = ResourceRegistry<TextureHandle, _TextureRecord>(
         (slot, generation, label) => TextureHandle(slot, generation, label),
       ) {
+    _capabilities = _device.queryCapabilities();
     _fallbackAlbedo = _createFallbackAlbedo();
     _fallbackNormal = _createFallback(FallbackPixels.flatNormal);
     _fallbackOrm = _createFallback(FallbackPixels.identityOrm);
@@ -147,6 +150,17 @@ final class TextureStore {
     return record.layerPixels.every((pixels) => pixels != null);
   }
 
+  /// Negotiated sampling for a declared handle, even before pixels arrive.
+  /// This reads cached capabilities and never calls the GPU.
+  AnisotropyDecision anisotropyOf(TextureHandle handle) {
+    final requested = _registry.descriptorOf(handle).descriptor.anisotropy;
+    return AnisotropyDecision.resolve(
+      requested: requested,
+      extensionAvailable: _capabilities.anisotropicFiltering,
+      maxSupported: _capabilities.maxAnisotropy,
+    );
+  }
+
   GpuObject _resolve(TextureHandle handle, GpuObject fallback) {
     _registry.descriptorOf(handle);
     return _texturesBySlot[handle.slot] ?? fallback;
@@ -206,6 +220,7 @@ final class TextureStore {
   }
 
   void rehydrateAfterContextRestore() {
+    _capabilities = _device.queryCapabilities();
     _fallbackAlbedo = _createFallbackAlbedo();
     _fallbackNormal = _createFallback(FallbackPixels.flatNormal);
     _fallbackOrm = _createFallback(FallbackPixels.identityOrm);

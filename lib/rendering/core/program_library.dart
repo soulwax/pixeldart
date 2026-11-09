@@ -4,11 +4,11 @@ import 'program_source.dart';
 
 final class CompiledProgram {
   final String id;
-  final GpuObject handle;
+  GpuObject handle;
   final Map<String, int> attributeLocations;
   final Map<String, int> samplerUnits;
 
-  const CompiledProgram({
+  CompiledProgram({
     required this.id,
     required this.handle,
     required this.attributeLocations,
@@ -20,20 +20,33 @@ enum ProgramSetCandidateState { prepared, committed, rolledBack }
 
 final class PreparedProgramSet {
   final Map<String, CompiledProgram> programs;
+  final Map<String, ProgramSource> sources;
   ProgramSetCandidateState _state = ProgramSetCandidateState.prepared;
 
-  PreparedProgramSet(this.programs);
+  PreparedProgramSet(this.programs, [this.sources = const {}]);
+
+  ProgramSetCandidateState get state => _state;
+}
+
+final class PreparedShaderOverrides {
+  final Map<ShaderSlot, ShaderOverride> overrides;
+  final Map<String, GpuObject> replacements;
+  ProgramSetCandidateState _state = ProgramSetCandidateState.prepared;
+
+  PreparedShaderOverrides(this.overrides, this.replacements);
 
   ProgramSetCandidateState get state => _state;
 }
 
 final class ProgramLibrary {
   final GpuDevice _device;
-  final Map<ShaderSlot, ShaderOverride> _overrides;
+  Map<ShaderSlot, ShaderOverride> _overrides;
   bool fallbackToDefaults;
   final Map<String, CompiledProgram> _live = {};
+  final Map<String, ProgramSource> _sources = {};
   final Map<ShaderSlot, String> _overrideErrors = {};
   PreparedProgramSet? _openSet;
+  PreparedShaderOverrides? _openOverrides;
 
   int publishCount = 0;
   int rejectedReloadCount = 0;
@@ -52,10 +65,11 @@ final class ProgramLibrary {
   Iterable<CompiledProgram> get allPrograms => _live.values;
 
   PreparedProgramSet prepareSet(Iterable<ProgramSource> sources) {
-    if (_openSet != null) {
+    if (_openSet != null || _openOverrides != null) {
       throw StateError('program set candidate is already open');
     }
     final candidates = <String, CompiledProgram>{};
+    final candidateSources = <String, ProgramSource>{};
     try {
       for (final source in sources) {
         source.validate();
@@ -69,6 +83,7 @@ final class ProgramLibrary {
           attributeLocations: source.attributeLocations,
           samplerUnits: source.samplerUnits,
         );
+        candidateSources[source.id] = source;
       }
     } on ShaderCompileException {
       rejectedReloadCount += 1;
@@ -78,7 +93,10 @@ final class ProgramLibrary {
       _deletePrograms(candidates.values);
       rethrow;
     }
-    final prepared = PreparedProgramSet(Map.unmodifiable(candidates));
+    final prepared = PreparedProgramSet(
+      Map.unmodifiable(candidates),
+      Map.unmodifiable(candidateSources),
+    );
     _openSet = prepared;
     return prepared;
   }
@@ -89,6 +107,9 @@ final class ProgramLibrary {
     _live
       ..clear()
       ..addAll(prepared.programs);
+    _sources
+      ..clear()
+      ..addAll(prepared.sources);
     _openSet = null;
     prepared._state = ProgramSetCandidateState.committed;
     publishCount += prepared.programs.length;
@@ -103,7 +124,7 @@ final class ProgramLibrary {
   }
 
   CompiledProgram publish(ProgramSource source) {
-    if (_openSet != null) {
+    if (_openSet != null || _openOverrides != null) {
       throw StateError('cannot publish while a program set candidate is open');
     }
     source.validate();
@@ -124,6 +145,7 @@ final class ProgramLibrary {
 
     final previous = _live[source.id];
     _live[source.id] = compiled;
+    _sources[source.id] = source;
     publishCount += 1;
     if (previous != null) {
       _device.deleteProgram(previous.handle);
@@ -141,7 +163,76 @@ final class ProgramLibrary {
     }
   }
 
+  /// Compile only installed slots whose overrides changed. The live program
+  /// objects stay in place so render passes can keep their references.
+  PreparedShaderOverrides prepareOverrides(
+    Map<ShaderSlot, ShaderOverride> overrides,
+  ) {
+    if (_openSet != null || _openOverrides != null) {
+      throw StateError('program candidate is already open');
+    }
+    for (final replacement in overrides.values) {
+      replacement.validate();
+    }
+    final snapshot = Map<ShaderSlot, ShaderOverride>.unmodifiable(overrides);
+    final candidates = <String, GpuObject>{};
+    try {
+      for (final source in _sources.values) {
+        final slot = ShaderSlot.forProgramId(source.id);
+        if (slot == null || _overrides[slot] == snapshot[slot]) continue;
+        candidates[source.id] = _compile(
+          source,
+          overrides: snapshot,
+          allowFallback: false,
+        );
+      }
+    } on ShaderCompileException {
+      rejectedReloadCount += 1;
+      _deleteHandles(candidates.values);
+      rethrow;
+    } catch (_) {
+      _deleteHandles(candidates.values);
+      rethrow;
+    }
+    return _openOverrides = PreparedShaderOverrides(
+      snapshot,
+      Map.unmodifiable(candidates),
+    );
+  }
+
+  void commitOverrides(PreparedShaderOverrides prepared) {
+    _checkOpenOverrides(prepared);
+    final retired = <GpuObject>[];
+    for (final entry in prepared.replacements.entries) {
+      final live = _live[entry.key]!;
+      retired.add(live.handle);
+      live.handle = entry.value;
+    }
+    for (final slot in ShaderSlot.values) {
+      if (_overrides[slot] != prepared.overrides[slot]) {
+        _overrideErrors.remove(slot);
+      }
+    }
+    _overrides = prepared.overrides;
+    _openOverrides = null;
+    prepared._state = ProgramSetCandidateState.committed;
+    publishCount += prepared.replacements.length;
+    _deleteHandles(retired);
+  }
+
+  void rollbackOverrides(PreparedShaderOverrides prepared) {
+    _checkOpenOverrides(prepared);
+    _deleteHandles(prepared.replacements.values);
+    _openOverrides = null;
+    prepared._state = ProgramSetCandidateState.rolledBack;
+  }
+
   void disposeAll() {
+    if (_openOverrides != null) {
+      _deleteHandles(_openOverrides!.replacements.values);
+      _openOverrides!._state = ProgramSetCandidateState.rolledBack;
+      _openOverrides = null;
+    }
     if (_openSet != null) {
       _deletePrograms(_openSet!.programs.values);
       _openSet!._state = ProgramSetCandidateState.rolledBack;
@@ -149,17 +240,24 @@ final class ProgramLibrary {
     }
     _deletePrograms(_live.values);
     _live.clear();
+    _sources.clear();
   }
 
   void resetAfterContextRestore() {
     _openSet = null;
+    _openOverrides = null;
     _live.clear();
+    _sources.clear();
     _overrideErrors.clear();
   }
 
-  GpuObject _compile(ProgramSource source) {
+  GpuObject _compile(
+    ProgramSource source, {
+    Map<ShaderSlot, ShaderOverride>? overrides,
+    bool? allowFallback,
+  }) {
     final slot = ShaderSlot.forProgramId(source.id);
-    final replacement = slot == null ? null : _overrides[slot];
+    final replacement = slot == null ? null : (overrides ?? _overrides)[slot];
     if (replacement == null) {
       return _device.compileProgram(
         vertexSource: source.vertexSource,
@@ -186,7 +284,7 @@ final class ProgramLibrary {
       _overrideErrors.remove(slot);
       return handle;
     } on ShaderCompileException catch (error) {
-      if (!fallbackToDefaults) rethrow;
+      if (!(allowFallback ?? fallbackToDefaults)) rethrow;
       rejectedReloadCount += 1;
       _overrideErrors[slot!] = error.toString();
       return _device.compileProgram(
@@ -406,9 +504,22 @@ final class ProgramLibrary {
     }
   }
 
+  void _checkOpenOverrides(PreparedShaderOverrides prepared) {
+    if (!identical(_openOverrides, prepared) ||
+        prepared.state != ProgramSetCandidateState.prepared) {
+      throw StateError('shader override candidate is not open');
+    }
+  }
+
   void _deletePrograms(Iterable<CompiledProgram> programs) {
     for (final program in programs) {
       _device.deleteProgram(program.handle);
+    }
+  }
+
+  void _deleteHandles(Iterable<GpuObject> handles) {
+    for (final handle in handles) {
+      _device.deleteProgram(handle);
     }
   }
 }

@@ -48,8 +48,10 @@ void main() {
     }),
   );
   require(
-    shaderOnly.delta.shadersChanged && shaderOnly.delta.requiresGpuRebuild,
-    'shader override change must rebuild programs',
+    shaderOnly.delta.shadersChanged &&
+        shaderOnly.delta.requiresGpuRebuild &&
+        shaderOnly.delta.isShaderOnly,
+    'shader override change must rebuild only the changed programs',
   );
   machine.abort(shaderOnly);
 
@@ -80,6 +82,7 @@ void main() {
     full.delta.requiresGpuRebuild,
     'feature change must rebuild GPU state',
   );
+  require(!full.delta.isShaderOnly, 'feature change took shader-only path');
   expectStateError(
     () => machine.begin(configuration(QualityProfile.clean)),
     'overlapping transitions must be rejected',

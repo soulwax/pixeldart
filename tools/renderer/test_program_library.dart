@@ -16,6 +16,8 @@ void main() {
   _fragmentOutputContract();
   _stageInterfaceContract();
   _realProgramInterfaces();
+  _overrideChangeKeepsProgramReference();
+  _partialOverrideFailureReleasesCandidates();
   print('Renderer program library fixtures passed.');
 }
 
@@ -282,6 +284,86 @@ void _realProgramInterfaces() {
   );
   if (device.programCompileCalls != 2) {
     throw StateError('authored world/present shader contracts were rejected');
+  }
+  library.disposeAll();
+}
+
+void _overrideChangeKeepsProgramReference() {
+  final device = FakeGpuDevice();
+  final library = ProgramLibrary(device);
+  final sprite = library.publish(_spriteProgramSource());
+  final world = library.publish(_worldProgramSource());
+  final oldHandle = sprite.handle;
+  final worldHandle = world.handle;
+  final compiles = device.programCompileCalls;
+  final candidate = library.prepareOverrides(const {
+    ShaderSlot.sprites: ShaderOverride(fragment: 'out vec4 oColor; // HOST'),
+  });
+  if (device.programCompileCalls != compiles + 1 ||
+      sprite.handle != oldHandle ||
+      world.handle != worldHandle) {
+    throw StateError('shader preparation changed live programs');
+  }
+  library.commitOverrides(candidate);
+  if (!identical(library.programFor('sprites'), sprite) ||
+      sprite.handle == oldHandle ||
+      world.handle != worldHandle ||
+      device.isLive(oldHandle) ||
+      !device.isLive(sprite.handle)) {
+    throw StateError('shader commit did not update the pass-owned reference');
+  }
+  final committedHandle = sprite.handle;
+  try {
+    library.prepareOverrides(const {
+      ShaderSlot.sprites: ShaderOverride(fragment: 'out vec3 oColor;'),
+    });
+    throw StateError('invalid shader change was prepared');
+  } on ShaderCompileException catch (error) {
+    if (error.stage != ShaderCompileStage.validation ||
+        sprite.handle != committedHandle) {
+      throw StateError('failed shader preparation disturbed the live program');
+    }
+  }
+  final restoreDefault = library.prepareOverrides(const {});
+  library.rollbackOverrides(restoreDefault);
+  if (sprite.handle != committedHandle || !device.isLive(committedHandle)) {
+    throw StateError('rolling back a valid shader candidate disturbed live');
+  }
+  library.disposeAll();
+  if (device.liveObjectCount != 0) {
+    throw StateError('shader reload leaked a program');
+  }
+}
+
+void _partialOverrideFailureReleasesCandidates() {
+  final device = FakeGpuDevice();
+  final library = ProgramLibrary(device);
+  final sprite = library.publish(_spriteProgramSource());
+  final present = library.publish(
+    const ProgramSource(
+      id: 'present',
+      vertexSource: _validVertex,
+      fragmentSource: _validFragment,
+      attributeLocations: {'aPosition': 0},
+      requiredUniforms: ['uViewProjection'],
+    ),
+  );
+  final live = device.liveObjectCount;
+  final spriteHandle = sprite.handle;
+  final presentHandle = present.handle;
+  try {
+    library.prepareOverrides(const {
+      ShaderSlot.sprites: ShaderOverride(fragment: 'out vec4 oColor; // NEW'),
+      ShaderSlot.present: ShaderOverride(fragment: 'out vec3 oColor;'),
+    });
+    throw StateError('partially invalid program set was accepted');
+  } on ShaderCompileException catch (error) {
+    if (error.stage != ShaderCompileStage.validation ||
+        sprite.handle != spriteHandle ||
+        present.handle != presentHandle ||
+        device.liveObjectCount != live) {
+      throw StateError('partial override failure leaked or changed a program');
+    }
   }
   library.disposeAll();
 }
