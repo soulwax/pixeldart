@@ -6,6 +6,7 @@ mixin _WebGlTimerSupport {
 
   WebGL2RenderingContext get gl;
   bool get _timerExtensionAvailable;
+  int get contextGeneration;
   void _requireReady();
 
   GpuObject? beginGpuTimer() {
@@ -13,7 +14,7 @@ mixin _WebGlTimerSupport {
     final query = _timerExtensionAvailable ? gl.createQuery() : null;
     if (query == null) return null;
     gl.beginQuery(_timeElapsedExt, query);
-    return _WebGpuObject(_WebGlTimerQuery(query));
+    return _WebGpuObject(_WebGlTimerQuery(query), contextGeneration);
   }
 
   void endGpuTimer(GpuObject query) {
@@ -45,6 +46,8 @@ mixin _WebGlTimerSupport {
   }
 
   void deleteGpuTimer(GpuObject query) {
+    // A query from a lost context died with it.
+    if ((query as _WebGpuObject).generation != contextGeneration) return;
     gl.deleteQuery(_timerQuery(query).query);
   }
 

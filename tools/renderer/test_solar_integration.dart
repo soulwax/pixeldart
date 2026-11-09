@@ -1,4 +1,3 @@
-import 'dart:math' as math;
 import 'package:pixeldart/pixeldart.dart';
 
 void main() {

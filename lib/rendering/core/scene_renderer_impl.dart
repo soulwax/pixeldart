@@ -93,6 +93,7 @@ final class SceneRendererImpl with _GpuTimingSupport implements SceneRenderer {
       _configuration = configuration;
       _buildSafeGraph();
       _state = RendererState.ready;
+      _markContextSeen();
     } catch (_) {
       _programs?.disposeAll();
       _gpuResources?.dispose();
@@ -232,7 +233,32 @@ final class SceneRendererImpl with _GpuTimingSupport implements SceneRenderer {
     _state = RendererState.disposed;
   }
 
+  /// The device's context generation when this renderer last had valid GPU
+  /// objects, or null for devices that don't count restores.
+  int? _seenContextGeneration;
+
+  int? get _deviceContextGeneration => switch (device) {
+    GpuContextGeneration(:final contextGeneration) => contextGeneration,
+    _ => null,
+  };
+
+  void _markContextSeen() => _seenContextGeneration = _deviceContextGeneration;
+
   void _recoverIfNeeded() {
+    // A loss and restore that both happened between frames leaves the device
+    // "ready" while every GPU object belongs to the dead context. Hosts that
+    // skip frames while lost (PixeldartApp does) never trigger the loss path
+    // below, so detect the restore by its generation instead.
+    final seen = _seenContextGeneration;
+    final current = _deviceContextGeneration;
+    if (_state == RendererState.ready &&
+        seen != null &&
+        current != null &&
+        current != seen &&
+        device.status != GpuDeviceStatus.lost) {
+      _discardGpuTimings();
+      _state = RendererState.contextLost;
+    }
     if (_state != RendererState.contextLost) return;
     if (device.status == GpuDeviceStatus.lost) {
       throw StateError('renderer context remains lost');
@@ -242,6 +268,7 @@ final class SceneRendererImpl with _GpuTimingSupport implements SceneRenderer {
     _programs!.resetAfterContextRestore();
     _buildSafeGraph();
     _state = RendererState.ready;
+    _markContextSeen();
   }
 
   void _ensureReady() {

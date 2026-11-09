@@ -34,6 +34,13 @@ void main() {
     'Pixeldart runtime contains source-specific symbols: $forbidden',
   );
 
+  // The source-specific references live in the host game; a standalone
+  // checkout has none to audit.
+  if (!Directory('${projectRoot.path}/lib').existsSync()) {
+    stdout.writeln('RF11 package audit passed; no host project at ${projectRoot.path}, host audit skipped.');
+    return;
+  }
+
   final rootFiles = [
     ...dartFiles('${projectRoot.path}/lib'),
     ...dartFiles('${projectRoot.path}/web'),

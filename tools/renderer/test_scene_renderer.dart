@@ -321,6 +321,21 @@ Future<void> main() async {
   renderer.endFrame();
   require(renderer.state == RendererState.ready, 'restore did not rehydrate');
 
+  // A loss and restore that both happen between frames: the host never
+  // attempts a frame while lost (PixeldartApp skips them), so only the
+  // device's context generation reveals that every GPU object is gone.
+  // Without the check the next frame draws with dead objects, which the
+  // fake rejects and a browser renders as a black frame.
+  device.simulateContextLoss();
+  device.simulateContextRestore();
+  final unobserved = renderer.beginFrame(world, frame);
+  unobserved.submit(RetainedItemDescriptor(mesh: mesh, material: material));
+  renderer.endFrame();
+  require(
+    renderer.state == RendererState.ready,
+    'an unobserved loss/restore must still rehydrate',
+  );
+
   renderer.dispose();
   renderer.dispose();
   require(

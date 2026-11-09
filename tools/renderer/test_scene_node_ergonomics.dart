@@ -32,6 +32,7 @@ void _testSceneNodeErgonomics() {
   final head = body.add(name: 'head');
   final leftArm = body.add(name: 'arm_left');
   final rightArm = body.add(name: 'arm_right');
+  assert(root.findByName('arm_left') == leftArm, 'nested lookup by name');
 
   // Fluent translation
   body.translate(const Vec3(0, 2, 0));

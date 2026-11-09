@@ -475,8 +475,16 @@ final class ParticleEmitter {
   Curve? sizeCurve;
 
   // Appearance & Rotation
+
+  /// Fraction of a particle's life spent fading in and out. Particles carry
+  /// no per-instance alpha (instances stream transforms only), so fades are
+  /// rendered by scaling the sprite to nothing; for soft, glowing sprites a
+  /// shrinking disc reads as a fade. See [fadeEnvelope].
   double fadeInFraction;
   double fadeOutFraction;
+
+  /// Optional visibility curve over normalised age, multiplied into the fade
+  /// envelope (and so also applied as a size scale).
   Curve? alphaCurve;
   ParticleColorGradient? colorGradient;
   double minInitialRotation;
@@ -594,6 +602,19 @@ final class ParticleEmitter {
         _random = seed != null ? math.Random(seed) : math.Random(),
         _pool = List<_ParticleState>.generate(maxParticles, (_) => _ParticleState(), growable: false) {
     validate();
+  }
+
+  /// Visibility at normalised age [t]: ramps up over [fadeInFraction], down
+  /// over [fadeOutFraction], times [alphaCurve] when set. 1 when no fade is
+  /// configured.
+  double fadeEnvelope(double t) {
+    final age = t.clamp(0.0, 1.0);
+    var v = 1.0;
+    if (fadeInFraction > 0 && age < fadeInFraction) v *= age / fadeInFraction;
+    if (fadeOutFraction > 0 && age > 1 - fadeOutFraction) v *= (1 - age) / fadeOutFraction;
+    final curve = alphaCurve;
+    if (curve != null) v *= curve.transform(age).clamp(0.0, 1.0);
+    return v;
   }
 
   /// Number of currently active, living particles.
@@ -1520,7 +1541,8 @@ final class ParticleEmitter {
           final speed = math.sqrt(p.vx * p.vx + p.vy * p.vy + p.vz * p.vz);
           finalScale = p.size * (1.0 + speed * stretchFactor);
         }
-        if (finalScale <= 1e-6) finalScale = 1e-6;
+        finalScale *= fadeEnvelope(p.lifetime > 0 ? p.age / p.lifetime : 1.0);
+        if (finalScale <= 1e-6) continue;
 
         // Select active material
         MaterialHandle activeMat;

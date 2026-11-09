@@ -9,7 +9,8 @@ void check(bool condition, String message) {
 void expectThrows(void Function() body, String what) {
   try {
     body();
-  } on ArgumentError {
+  } catch (e) {
+    if (e is! ArgumentError) rethrow;
     return;
   }
   throw StateError('surface metrics: $what should have thrown');
@@ -65,6 +66,17 @@ void main() {
   check(resized.pixelWidth == 2048, 'resized must keep the device pixel ratio');
   check(resized.cssWidth == 1024, 'resized must take the new css width');
   check(resized.devicePixelRatio == 2, 'resized must keep the dpr');
+
+  // A ratio change (window moved to another monitor, page zoom) without a
+  // CSS resize must reach the backing store, within the host's cap.
+  final lowDpi = SurfaceMetrics.forCanvas(cssWidth: 800, cssHeight: 600, devicePixelRatio: 1);
+  final movedToRetina = lowDpi.resized(cssWidth: 800, cssHeight: 600, devicePixelRatio: 2);
+  check(movedToRetina.pixelWidth == 1600 && movedToRetina.pixelHeight == 1200,
+      'a new device pixel ratio must grow the backing store, got ${movedToRetina.pixelWidth}');
+  final cappedMove = lowDpi.resized(cssWidth: 800, cssHeight: 600, devicePixelRatio: 3, maxDevicePixelRatio: 2);
+  check(cappedMove.devicePixelRatio == 2 && cappedMove.pixelWidth == 1600, 'the host cap must still apply');
+  final zoomedOut = hidpi.resized(cssWidth: 1024, cssHeight: 768, devicePixelRatio: 1);
+  check(zoomedOut.pixelWidth == 1024, 'a lower ratio must shrink the backing store');
 
   // Visibility toggling preserves allocation, for hosts pausing on tab blur.
   final hidden = hidpi.withVisibility(false);

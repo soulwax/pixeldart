@@ -4,11 +4,14 @@ import 'dart:io';
 /// PLIB-00 is deliberately an audit, not a migration. It freezes the current
 /// package boundary so later facade work can be reviewed against facts.
 void main() {
-  final root = Directory.current.path.endsWith('/external/pixeldart')
-      ? Directory.current.absolute
-      : Directory('external/pixeldart').absolute;
-  if (!root.existsSync()) {
-    throw StateError('Pixeldart package root was not found');
+  // Run from the package itself (standalone checkout) or from a host
+  // project that vendors it under external/pixeldart.
+  final cwd = Directory.current.absolute;
+  final root = File('${cwd.path}/lib/pixeldart.dart').existsSync()
+      ? cwd
+      : Directory('${cwd.path}/external/pixeldart').absolute;
+  if (!File('${root.path}/lib/pixeldart.dart').existsSync()) {
+    throw StateError('Pixeldart package root was not found from ${cwd.path}');
   }
   final packageFiles = _dartFiles(Directory('${root.path}/lib'));
   final packageText = <String, String>{

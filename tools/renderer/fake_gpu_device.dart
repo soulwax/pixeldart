@@ -16,7 +16,7 @@ final class _FakeGpuObject implements GpuObject {
 /// requirement that a fake device cover context loss/restore without a
 /// browser. Every create/delete call is counted so tests can assert
 /// resource-count behavior across warm-up and loss/restore cycles.
-final class FakeGpuDevice with _FakeGpuTimerSupport implements GpuDevice {
+final class FakeGpuDevice with _FakeGpuTimerSupport implements GpuDevice, GpuContextGeneration {
   @override
   final bool timerQueries;
   @override
@@ -299,7 +299,13 @@ final class FakeGpuDevice with _FakeGpuTimerSupport implements GpuDevice {
   @override
   void simulateContextRestore() {
     _status = GpuDeviceStatus.ready;
+    _contextGeneration++;
   }
+
+  int _contextGeneration = 0;
+
+  @override
+  int get contextGeneration => _contextGeneration;
 
   GpuObject? _boundTarget;
   GpuObject? _boundProgram;

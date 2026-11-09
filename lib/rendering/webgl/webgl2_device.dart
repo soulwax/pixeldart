@@ -41,7 +41,12 @@ const _unmaskedVendorWebgl = 0x9245;
 /// bookkeeping.
 final class _WebGpuObject implements GpuObject {
   final Object handle;
-  const _WebGpuObject(this.handle);
+
+  /// The context generation that created [handle]. After a restore, objects
+  /// from earlier generations are already gone with their context.
+  final int generation;
+
+  const _WebGpuObject(this.handle, this.generation);
 }
 
 final class _WebGlTexture {
@@ -100,7 +105,7 @@ final class _WebGlTimerQuery {
 /// already proven in the legacy `lib/engine/gl.dart`; nothing here is
 /// speculative GL usage, but it is unexecuted GL usage until a browser
 /// session confirms it.
-final class WebGl2Device with _WebGlTimerSupport implements GpuDevice {
+final class WebGl2Device with _WebGlTimerSupport implements GpuDevice, GpuContextGeneration {
   @override
   final WebGL2RenderingContext gl;
   GpuDeviceStatus _status = GpuDeviceStatus.ready;
@@ -131,6 +136,10 @@ final class WebGl2Device with _WebGlTimerSupport implements GpuDevice {
     _restoredListener =
         ((JSAny? e) {
           _status = GpuDeviceStatus.ready;
+          _contextGeneration++;
+          for (final name in _enabledExtensions) {
+            gl.getExtension(name);
+          }
         }).toJS as EventListener;
     canvasTarget.addEventListener('webglcontextlost', _lostListener);
     canvasTarget.addEventListener('webglcontextrestored', _restoredListener);
@@ -144,8 +153,19 @@ final class WebGl2Device with _WebGlTimerSupport implements GpuDevice {
 
   bool _hasExtension(String name) {
     if (!_supportedExtensions.contains(name)) return false;
-    return gl.getExtension(name) != null;
+    final enabled = gl.getExtension(name) != null;
+    if (enabled) _enabledExtensions.add(name);
+    return enabled;
   }
+
+  /// Extensions requested on the current context. A restored context starts
+  /// with none enabled; their enums (timer queries, anisotropy) are invalid
+  /// until each is requested again.
+  final Set<String> _enabledExtensions = {};
+
+  /// Whether [object] came from a context that has since been lost. Deleting
+  /// such a handle is both pointless and a WebGL error.
+  bool _isStale(GpuObject object) => (object as _WebGpuObject).generation != _contextGeneration;
 
   /// Detaches the listeners installed in the constructor. Callers must
   /// invoke this before dropping their last reference to a `WebGl2Device`,
@@ -167,6 +187,11 @@ final class WebGl2Device with _WebGlTimerSupport implements GpuDevice {
 
   @override
   GpuDeviceStatus get status => _status;
+
+  int _contextGeneration = 0;
+
+  @override
+  int get contextGeneration => _contextGeneration;
 
   @override
   RenderCapabilities queryCapabilities() {
@@ -257,7 +282,9 @@ final class WebGl2Device with _WebGlTimerSupport implements GpuDevice {
   }) => uploadBufferImpl(buffer, data, dstByteOffset: dstByteOffset);
 
   @override
-  void deleteBuffer(GpuObject buffer) => deleteBufferImpl(buffer);
+  void deleteBuffer(GpuObject buffer) {
+    if (!_isStale(buffer)) deleteBufferImpl(buffer);
+  }
 
   @override
   GpuObject createTexture(GpuTextureDescriptor descriptor) =>
@@ -271,14 +298,18 @@ final class WebGl2Device with _WebGlTimerSupport implements GpuDevice {
   void finalizeMips(GpuObject texture) => finalizeMipsImpl(texture);
 
   @override
-  void deleteTexture(GpuObject texture) => deleteTextureImpl(texture);
+  void deleteTexture(GpuObject texture) {
+    if (!_isStale(texture)) deleteTextureImpl(texture);
+  }
 
   @override
   GpuObject createTarget(GpuTargetDescriptor descriptor) =>
       createTargetImpl(descriptor);
 
   @override
-  void deleteTarget(GpuObject target) => deleteTargetImpl(target);
+  void deleteTarget(GpuObject target) {
+    if (!_isStale(target)) deleteTargetImpl(target);
+  }
 
   @override
   void resolveTarget(GpuObject source, GpuObject destination) =>
@@ -288,7 +319,9 @@ final class WebGl2Device with _WebGlTimerSupport implements GpuDevice {
   GpuObject createVertexArray() => createVertexArrayImpl();
 
   @override
-  void deleteVertexArray(GpuObject vao) => deleteVertexArrayImpl(vao);
+  void deleteVertexArray(GpuObject vao) {
+    if (!_isStale(vao)) deleteVertexArrayImpl(vao);
+  }
 
   @override
   GpuObject compileProgram({
@@ -304,7 +337,9 @@ final class WebGl2Device with _WebGlTimerSupport implements GpuDevice {
   );
 
   @override
-  void deleteProgram(GpuObject program) => deleteProgramImpl(program);
+  void deleteProgram(GpuObject program) {
+    if (!_isStale(program)) deleteProgramImpl(program);
+  }
 
   @override
   void simulateContextLoss() {

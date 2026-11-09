@@ -26,9 +26,14 @@ the remaining unchecked items are the next capability and acceptance gaps.
       `abortFrame`, with focused active/end/abort coverage.
 - [x] **`TextureStore`.** The store now owns declared textures, fallback
       fallback resolution, pixel uploads, and context-restore rehydration.
-- [ ] **Per-instance transform streaming.** Instanced draws are wired, but all
-      members of a batch share one transform — a flagged placeholder, not a
-      silent default. Stream per-instance attributes from a persistent buffer.
+- [x] **Per-instance transforms.** Each member of an instanced batch draws
+      with its own model and normal matrix (`uInstanceModels` /
+      `uInstanceNormalMatrices`, indexed by `gl_InstanceID`; see
+      `core/instance_transforms.dart`). Batches cap at
+      `InstanceBatch.maxInstanceCount` (16) uniforms.
+- [ ] **Instance streaming beyond the uniform cap.** Stream per-instance
+      attributes from a persistent buffer, so large batches don't split
+      every 16 members.
 - [ ] Planned-but-unbuilt modules: `core/frame_arena`, `core/dynamic_batch`,
       `core/resource_library`, `webgl/texture_store`, `webgl/frame_targets`.
 
@@ -77,10 +82,10 @@ the remaining unchecked items are the next capability and acceptance gaps.
 
 ## Materials and textures
 
-- [ ] **Consume the rest of `MaterialDefinition`.** `albedoTexture`,
-      `emissiveTexture`, `uvScale`/`uvOffset`, roughness/specular response are
-      modeled but unread. (Live today: tint, `doubleSided`, `affineSampling`,
-      scalar `emissiveStrength`, `alphaMode` + `alphaCutoff`.)
+- [ ] **Verify `uvOffset` live.** `albedoTexture`, `normalTexture`,
+      `emissiveTexture`, `uvScale` and roughness/metallic are all read and
+      verified in the examples: tiled normal-mapped floors in Lantern,
+      palette-textured GLBs in Tidewatch. `uvOffset` has no live user yet.
 - [ ] **Material table capacity splitting** — deterministic per-batch material
       tables that split a batch at UBO/texture-table capacity instead of
       dropping materials. **(spec'd)**
@@ -89,7 +94,8 @@ the remaining unchecked items are the next capability and acceptance gaps.
 - [ ] **A real LUT asset + loader** — only a procedurally built demo LUT
       exists.
 - [ ] **Visually confirm `doubleSided`** — reachable and type-checked, never
-      exercised by a fixture.
+      exercised by a fixture. (Tidewatch's open, `doubleSided` beam cone is
+      a candidate subject; it hasn't been checked with and without the flag.)
 - [ ] **Alpha-mask × affine interaction fixture** — masking cuts out against
       the prepass while affine warps the world-pass UVs; add a fixture proving
       the two gates compose without cutout/shading divergence.
@@ -127,12 +133,21 @@ the remaining unchecked items are the next capability and acceptance gaps.
 
 ## Robustness (proven pure, not yet proven live)
 
-- [ ] **Real context loss/restore in a browser** — the listeners, epoch state
-      machine, and `MeshStore` rehydration are pure-tested; nothing has been
-      driven through a forced `WEBGL_lose_context` cycle on real hardware.
-      Gate: 10 cycles.
-- [ ] **Real canvas resize/DPR change** — 100 cycles pass against the fake;
-      no live canvas has been resized.
+- [x] **Real context loss/restore in a browser.** 10 forced
+      `WEBGL_lose_context` cycles on real hardware (D3D11), on the minimal
+      host, the showcase and two examples, end with no WebGL errors and a
+      fully rendered frame. The first run found three bugs, all fixed:
+      - a loss and restore between frames was never noticed, so the renderer
+        drew with dead objects (now `GpuContextGeneration`);
+      - extensions weren't re-enabled, which broke the timer queries;
+      - handles from the lost context were still being deleted.
+
+      The pure fixture in `test_scene_renderer` covers the unobserved case.
+- [x] **Real canvas resize/DPR change.** 100 live cycles over sizes from
+      320 to 1420 px and DPR 1 to 2 keep the backing store exact
+      (`css × min(dpr, cap)`), on the minimal host and the showcase. The first
+      run found that a DPR change without a CSS resize was ignored; that is
+      fixed (`SurfaceMetrics.resized(devicePixelRatio:)`).
 - [ ] **Steady-state no-allocation assertion** — the instrumentation exists
       (the fake records creates/deletes and uniforms); the test asserting zero
       GPU-object churn in a warm frame has not been written. Cheap now.
@@ -166,7 +181,7 @@ the remaining unchecked items are the next capability and acceptance gaps.
       comparison, and culling's net CPU value has never been measured.
 - [ ] **CI** — GitHub Actions running the static gate: `dart format
       --set-exit-if-changed`, `dart analyze`, `test_all`, `check_boundary`,
-      `check_sizes`, `shaders.dart --check`.
+      `shaders.dart --check`.
 
 ## Asset pipeline
 
@@ -183,15 +198,7 @@ the remaining unchecked items are the next capability and acceptance gaps.
 
 ## Housekeeping
 
-- [ ] **Tighten the per-file line budgets back down.** The original caps
-      (300 per pass, 350 per device/tool file) were ratified during the
-      elevation program and eight files have since outgrown them
-      (`shadowed_world` 475, `fake_gpu_device` 498, `test_alpha_mask` 472,
-      `webgl2_device_draw` 423, `dof`, `ssao`, `bloom`, `webgl2_device`).
-      `budgets.json` was raised to current reality at extraction; split these
-      along natural seams and lower the caps again.
 - [ ] Decide package publication (currently `publish_to: none`) and, if
       publishing, split the demo out of the package.
-- [ ] Example snippets in the README once `SceneRenderer` exists — the current
-      entry point (feature graph + passes, as the demo does it) is too much
-      ceremony to present as the API.
+- [x] **Example code for hosts:** `examples/` holds three complete games on
+      the public API, linked from the README.

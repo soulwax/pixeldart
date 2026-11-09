@@ -1,6 +1,5 @@
 import 'dart:typed_data';
 import 'package:pixeldart/rendering/api/handles.dart';
-import 'package:pixeldart/rendering/api/materials.dart';
 import 'package:pixeldart/rendering/api/mesh.dart';
 import 'package:pixeldart/rendering/api/scene.dart';
 import 'package:pixeldart/rendering/core/render_world_impl.dart';

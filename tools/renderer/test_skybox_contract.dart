@@ -1,6 +1,6 @@
-import '../../lib/rendering/api/frame.dart';
-import '../../lib/rendering/api/lights.dart';
-import '../../lib/rendering/passes/present.dart';
+import 'package:pixeldart/rendering/api/frame.dart';
+import 'package:pixeldart/rendering/api/lights.dart';
+import 'package:pixeldart/rendering/passes/present.dart';
 
 void fail(String message) => throw StateError('skybox contract: $message');
 
@@ -28,7 +28,8 @@ void main() {
       exposure: 0,
     ).validate();
     fail('zero exposure was accepted');
-  } on ArgumentError {
+  } catch (e) {
+    if (e is! ArgumentError) rethrow;
     // Expected: an image-backed sky must not silently erase its exposure.
   }
 
@@ -41,7 +42,8 @@ void main() {
       cloudCoverage: 1.1,
     ).validate();
     fail('cloud coverage above one was accepted');
-  } on ArgumentError {
+  } catch (e) {
+    if (e is! ArgumentError) rethrow;
     // Expected: cloud coverage is a bounded medium input.
   }
 
@@ -54,7 +56,8 @@ void main() {
       cloudWindX: 1001,
     ).validate();
     fail('unbounded cloud wind was accepted');
-  } on ArgumentError {
+  } catch (e) {
+    if (e is! ArgumentError) rethrow;
     // Expected: cloud advection is bounded before reaching the shader.
   }
 

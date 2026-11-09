@@ -35,6 +35,7 @@ void main() async {
 
   // One call for the CSS size, the backing-store size, and the ratio between
   // them. Sizing the canvas from its own metrics keeps the two in step.
+  var lastDevicePixelRatio = web.window.devicePixelRatio.toDouble();
   var surface = SurfaceMetrics.forCanvas(
     cssWidth: canvas.clientWidth > 0 ? canvas.clientWidth : canvas.width,
     cssHeight: canvas.clientHeight > 0 ? canvas.clientHeight : canvas.height,
@@ -120,8 +121,20 @@ void main() async {
     final cssHeight = canvas.clientHeight > 0
         ? canvas.clientHeight
         : canvas.height;
-    if (cssWidth == surface.cssWidth && cssHeight == surface.cssHeight) return;
-    surface = surface.resized(cssWidth: cssWidth, cssHeight: cssHeight);
+    // The ratio changes without a CSS resize when the window moves to
+    // another monitor or the page is zoomed.
+    final dpr = web.window.devicePixelRatio.toDouble();
+    if (cssWidth == surface.cssWidth &&
+        cssHeight == surface.cssHeight &&
+        dpr == lastDevicePixelRatio) {
+      return;
+    }
+    lastDevicePixelRatio = dpr;
+    surface = surface.resized(
+      cssWidth: cssWidth,
+      cssHeight: cssHeight,
+      devicePixelRatio: dpr,
+    );
     canvas.width = surface.pixelWidth;
     canvas.height = surface.pixelHeight;
     try {

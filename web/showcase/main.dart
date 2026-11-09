@@ -146,7 +146,8 @@ void main() async {
           final tourWaypoints = [
             const CameraWaypoint(eye: Vec3(0, 4.5, 11.0), target: Vec3(0, 0.5, 0), fovYRadians: 1.05),
             const CameraWaypoint(eye: Vec3(8.0, 3.2, 5.5), target: Vec3(1.0, 0.8, 0), fovYRadians: 0.95),
-            const CameraWaypoint(eye: Vec3(7.0, 2.2, -4.5), target: Vec3(5.5, 0.2, -5.5), fovYRadians: 1.05),
+            // Out over the ocean diorama behind the stage.
+            const CameraWaypoint(eye: Vec3(9.0, 7.0, -14.0), target: Vec3(0, -1.0, -40.0), fovYRadians: 1.05),
             const CameraWaypoint(eye: Vec3(3.5, 4.2, -7.5), target: Vec3(0, 0.5, 0), fovYRadians: 1.15),
             const CameraWaypoint(eye: Vec3(-6.5, 2.8, -5.0), target: Vec3(-0.5, 0.5, 0), fovYRadians: 0.90),
             const CameraWaypoint(eye: Vec3(-8.5, 4.0, 2.0), target: Vec3(0, 0.5, 0.5), fovYRadians: 1.00),
@@ -863,8 +864,21 @@ void main() async {
     name: 'conduit_rail_node',
   );
 
+  // Ocean diorama: island, sea, beacon buoy and research vessel share one
+  // group placed behind the hero stage. Everything inside works in the
+  // group's local space, so the wave mesh, the buoy sampling and the hull
+  // physics all agree on where the water is. (The island once sat on top
+  // of the hero exhibit, unnoticed while single-sided terrain and water
+  // were culled by a mirrored view matrix.)
+  final oceanDiorama = app.scene.add(
+    name: 'ocean_diorama',
+    transform: Transform.at(const Vec3(0, -1.0, -40)),
+  );
+
   // Dynamic ocean wave simulation and physical buoyant beacon
   final oceanEvaluator = GerstnerWaveEvaluator.ocean(baseHeight: 0.0);
+  // Out at sea, clear of the island (radius 13.5).
+  const buoyAnchor = (x: 15.5, z: 3.0);
   final buoyData = Primitives.icosphere(radius: 0.45, subdivisions: 2);
   final buoyMesh = app.createMesh(buoyData, debugLabel: 'ocean_buoy');
   final buoyMat = app.createMaterial(
@@ -878,11 +892,11 @@ void main() async {
       metallic: 0.5,
     ),
   );
-  final buoyNode = app.scene.add(
+  final buoyNode = oceanDiorama.add(
     mesh: buoyMesh,
     meshData: buoyData,
     material: buoyMat,
-    transform: Transform.at(const Vec3(5.2, 0.0, 5.2)),
+    transform: Transform.at(Vec3(buoyAnchor.x, 0.0, buoyAnchor.z)),
     name: 'buoy_beacon_node',
   );
 
@@ -913,7 +927,7 @@ void main() async {
       metallic: 0.05,
     ),
   );
-  final terrainNode = app.scene.add(
+  oceanDiorama.add(
     mesh: terrainMesh,
     meshData: terrainData,
     material: terrainMat,
@@ -941,7 +955,7 @@ void main() async {
       clearcoatRoughness: 0.05,
     ),
   );
-  final waterNode = app.scene.add(
+  oceanDiorama.add(
     mesh: waterMesh,
     meshData: waterSurface.mesh,
     material: waterMat,
@@ -950,7 +964,7 @@ void main() async {
 
   // 4-probe buoyant research vessel
   final vesselBody = BuoyantVesselBody(
-    position: const Vec3(5.5, 0.0, -5.5),
+    position: const Vec3(-14.5, 0.0, 7.0),
     width: 2.0,
     length: 3.5,
   );
@@ -971,7 +985,7 @@ void main() async {
       metallic: 0.85,
     ),
   );
-  final vesselNode = app.scene.add(
+  final vesselNode = oceanDiorama.add(
     mesh: vesselMesh,
     meshData: vesselHullData,
     material: vesselMat,
@@ -984,10 +998,8 @@ void main() async {
     terrainToggle.addEventListener(
       'change',
       ((web.Event _) {
-        final show = terrainToggle.checked;
-        terrainNode.visibilityMask = show ? -1 : 0;
-        waterNode.visibilityMask = show ? -1 : 0;
-        vesselNode.visibilityMask = show ? -1 : 0;
+        // Visibility is inherited: hiding the group hides the whole diorama.
+        oceanDiorama.visible = terrainToggle.checked;
       }).toJS,
     );
   }
@@ -1558,8 +1570,8 @@ void main() async {
     asteroidBelt.rotateY(0.12 * dt);
 
     // Animate buoyant beacon responding to dynamic Gerstner ocean waves
-    final buoyPos = oceanEvaluator.samplePosition(5.2, 5.2, t);
-    final buoyNorm = oceanEvaluator.sampleNormal(5.2, 5.2, t);
+    final buoyPos = oceanEvaluator.samplePosition(buoyAnchor.x, buoyAnchor.z, t);
+    final buoyNorm = oceanEvaluator.sampleNormal(buoyAnchor.x, buoyAnchor.z, t);
     buoyNode.position = buoyPos + const Vec3(0, 0.4, 0);
     final buoyTiltAxis = const Vec3(0, 1, 0).cross(buoyNorm);
     if (buoyTiltAxis.lengthSquared > 1e-6) {

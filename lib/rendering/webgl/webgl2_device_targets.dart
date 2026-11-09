@@ -192,6 +192,7 @@ extension WebGl2DeviceTargets on WebGl2Device {
         height: descriptor.height,
         samples: descriptor.samples,
       ),
+      contextGeneration,
     );
   }
 
@@ -235,7 +236,7 @@ extension WebGl2DeviceTargets on WebGl2Device {
     if (vao == null) {
       throw StateError('WebGl2Device: gl.createVertexArray() returned null');
     }
-    return _WebGpuObject(vao);
+    return _WebGpuObject(vao, contextGeneration);
   }
 
   void deleteVertexArrayImpl(GpuObject vao) {
@@ -334,7 +335,7 @@ extension WebGl2DeviceTargets on WebGl2Device {
 
     gl.deleteShader(vertexShader);
     gl.deleteShader(fragmentShader);
-    return _WebGpuObject(program);
+    return _WebGpuObject(program, contextGeneration);
   }
 
   void deleteProgramImpl(GpuObject program) {

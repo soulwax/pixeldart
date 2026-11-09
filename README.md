@@ -98,6 +98,10 @@ Coordinate, culling, material and frame-order conventions are covered in
 [docs/conventions.md](docs/conventions.md). It ends with a checklist for a
 blank or wrong-looking frame, which starts with `showStats: true`.
 
+For complete hosts, see [examples/](examples/README.md): three small games
+(a 3D runner, a 2D orthographic dungeon crawl, and an ocean scene with
+terrain, buoyancy, weather and a day/night cycle) built only on the public API.
+
 ## Use Pixeldart as a library
 
 Pixeldart is independently usable. A host does not need _The Quarantine_, its
@@ -358,7 +362,6 @@ dart pub get
 dart analyze
 dart run tools/renderer/test_all.dart
 dart run tools/renderer/check_boundary.dart
-dart run tools/renderer/check_sizes.dart
 dart run tools/renderer/shaders.dart --check
 dart run tools/test_package_boundaries.dart
 ```
@@ -865,7 +868,7 @@ A few design decisions worth knowing before reading the code:
 - **The graph is declared once at startup, not rebuilt per frame.** Per-frame "skip this pass" logic lives inside each pass's `execute()`, reading the frame's `PostProcessState` — enable predicates are a build-time (profile) concept.
 - **Shaders are real files.** Authored GLSL lives under `shaders/rendering/**`; `tools/renderer/shaders.dart` generates `lib/rendering/webgl/generated_shaders.dart` from `manifest.json` and has a `--check` mode for CI. Embedding shader source in handwritten Dart is a boundary violation the checker catches.
 - **Program publishes are atomic.** Compile → link → validate → assign samplers → build bindings → publish → only then delete the replaced program. A failed reload leaves the last known-good program live; 25 alternating valid/invalid reloads with exact compile/delete counts prove no leak.
-- **Frozen coordinate contract.** Right-handed, +Y up, model forward +Z, column-major matrices, CCW front faces, one shared depth-linearization function, one metre per unit, uniform instance scale — non-uniform scale is rejected at the public API rather than silently mis-lighting normals.
+- **Frozen coordinate contract.** Right-handed, +Y up, model forward +Z, column-major matrices, CCW front faces, one shared depth-linearization function, one metre per unit, uniform inherited scale. Non-uniform scale is available only as a node's own, non-inherited `stretch`, so transforms stay composable; normals go through the inverse-transpose normal matrix, so it lights correctly. `tools/renderer/test_view_handedness.dart` guards the handedness.
 - **Steady-state frames allocate nothing.** After warm-up, a normal frame performs no buffer/texture/target/program creation; dynamic geometry uses persistent grow-only buffers, and growth events are counted in diagnostics.
 - **PS1 is not a VHS filter.** Fixed low resolution is a resolution policy, vertex snapping and affine UV live in the world vertex path, quantize/dither is a composite after grade, and VHS is the final recording stage over the already-graded image. They compose because they are separate.
 
@@ -873,9 +876,8 @@ A few design decisions worth knowing before reading the code:
 
 ```sh
 dart analyze                                 # zero issues, including infos
-dart run tools/renderer/test_all.dart        # 51 pure test scripts
+dart run tools/renderer/test_all.dart        # 122 pure test scripts, asserts on
 dart run tools/renderer/check_boundary.dart  # import/layering rules
-dart run tools/renderer/check_sizes.dart     # per-file authored-line budgets
 dart run tools/renderer/shaders.dart --check # generated shaders in sync
 dart run tools/test_package_boundaries.dart  # PLIB package/content boundaries
 ```

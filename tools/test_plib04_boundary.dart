@@ -6,7 +6,11 @@ import 'dart:io';
 void main() {
   final package = _packageDirectory();
   final project = Directory('${package.path}/../..');
-  final browserHost = File('${project.path}/web/main.dart').readAsStringSync();
+  // The browser host only exists when Pixeldart is vendored into a game;
+  // a standalone checkout has no host to audit.
+  final hostFile = File('${project.path}/web/main.dart');
+  final browserHost = hostFile.existsSync() ? hostFile.readAsStringSync() : '';
+  if (!hostFile.existsSync()) print('PLIB-04: no host project at ${project.path}; host audit skipped.');
   final advanced = File('${package.path}/lib/pixeldart_advanced.dart').readAsStringSync();
   final testing = File('${package.path}/lib/pixeldart_testing.dart').readAsStringSync();
 

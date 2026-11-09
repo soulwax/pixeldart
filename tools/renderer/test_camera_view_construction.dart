@@ -10,7 +10,8 @@ void check(bool condition, String message) {
 void expectThrows(void Function() body, String what) {
   try {
     body();
-  } on ArgumentError {
+  } catch (e) {
+    if (e is! ArgumentError) rethrow;
     return;
   }
   throw StateError('camera view construction: $what should have thrown');

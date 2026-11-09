@@ -202,7 +202,12 @@ final class PixeldartApp {
     required this.world,
     required this.sequencer,
     required this._surface,
+    required this.maxDevicePixelRatio,
   });
+
+  /// Highest device pixel ratio the backing store follows (from [mount]).
+  final double maxDevicePixelRatio;
+  double _rawDevicePixelRatio = 1;
 
   /// Mounts Pixeldart onto [canvas], performing bootstrap and sizing.
   static Future<PixeldartApp?> mount(
@@ -251,7 +256,8 @@ final class PixeldartApp {
       world: world,
       sequencer: sequencer,
       surface: surface,
-    );
+      maxDevicePixelRatio: maxDevicePixelRatio,
+    ).._rawDevicePixelRatio = web.window.devicePixelRatio.toDouble();
 
     if (enableOrbitControls) {
       app.cameraController = OrbitCameraController();
@@ -909,15 +915,27 @@ final class PixeldartApp {
   void _resize() {
     final cssW = canvas.clientWidth > 0 ? canvas.clientWidth : canvas.width;
     final cssH = canvas.clientHeight > 0 ? canvas.clientHeight : canvas.height;
-    if (cssW == _surface.cssWidth && cssH == _surface.cssHeight) return;
-
-    _surface = _surface.resized(cssWidth: cssW, cssHeight: cssH);
+    // The ratio changes without a CSS resize when the window moves to
+    // another monitor or the page is zoomed, so it is checked every frame.
+    final dpr = web.window.devicePixelRatio.toDouble();
+    if (cssW == _surface.cssWidth && cssH == _surface.cssHeight && dpr == _rawDevicePixelRatio) {
+      return;
+    }
+    _rawDevicePixelRatio = dpr;
+    _surface = _surface.resized(
+      cssWidth: cssW,
+      cssHeight: cssH,
+      devicePixelRatio: dpr,
+      maxDevicePixelRatio: maxDevicePixelRatio,
+    );
     canvas.width = _surface.pixelWidth;
     canvas.height = _surface.pixelHeight;
     try {
       renderer.resize(_surface);
       sequencer.invalidateHistory('surface resized');
-    } catch (_) {}
+    } catch (error, stack) {
+      _report(error, stack);
+    }
   }
 
   /// Starts the requestAnimationFrame render loop.

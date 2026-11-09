@@ -26,7 +26,7 @@ extension WebGl2DeviceResources on WebGl2Device {
       descriptor.byteLength.toJS,
       _glUsage(descriptor.usage),
     );
-    return _WebGpuObject(buffer);
+    return _WebGpuObject(buffer, contextGeneration);
   }
 
   void uploadBufferImpl(
@@ -125,6 +125,7 @@ extension WebGl2DeviceResources on WebGl2Device {
         hasMips: descriptor.hasMips,
         anisotropy: anisotropy,
       ),
+      contextGeneration,
     );
   }
 

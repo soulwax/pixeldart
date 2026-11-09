@@ -2,7 +2,6 @@ import 'dart:typed_data';
 
 import 'package:pixeldart/assets/assets.dart';
 import 'package:pixeldart/rendering/rendering.dart';
-import 'package:pixeldart/rendering/assets/model_cache.dart';
 
 import 'fake_gpu_device.dart';
 

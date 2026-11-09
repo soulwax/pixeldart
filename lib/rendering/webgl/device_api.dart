@@ -159,6 +159,17 @@ final class ShaderCompileException implements Exception {
 /// the same lifecycle state machine without a browser, which plan §7.4
 /// requires explicitly rather than treats as a stopgap: "a fake device
 /// lifecycle always covers the same state machine."
+/// Optional capability of a [GpuDevice]: counts context restores.
+///
+/// A context can be lost and restored between two frames (a short GPU reset,
+/// a forced `WEBGL_lose_context` cycle). A renderer that only checks
+/// [GpuDevice.status] at frame time never sees that loss and keeps using GPU
+/// objects from the dead context. Comparing generations catches it.
+abstract interface class GpuContextGeneration {
+  /// Increments every time the context is restored.
+  int get contextGeneration;
+}
+
 abstract interface class GpuDevice {
   GpuDeviceStatus get status;
   RenderCapabilities queryCapabilities();

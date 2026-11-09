@@ -85,12 +85,22 @@ final class SurfaceMetrics {
   ///
   /// The shape a resize handler wants: one call, no chance of updating the CSS
   /// size and forgetting the backing store.
-  SurfaceMetrics resized({required int cssWidth, required int cssHeight}) =>
+  ///
+  /// Pass the browser's current [devicePixelRatio] (and the host's cap) when
+  /// it may have changed: dragging a window to another monitor or zooming
+  /// the page changes it without resizing the CSS box. Without it the
+  /// surface keeps its current ratio.
+  SurfaceMetrics resized({
+    required int cssWidth,
+    required int cssHeight,
+    double? devicePixelRatio,
+    double maxDevicePixelRatio = 2,
+  }) =>
       SurfaceMetrics.forCanvas(
         cssWidth: cssWidth,
         cssHeight: cssHeight,
-        devicePixelRatio: devicePixelRatio,
-        maxDevicePixelRatio: devicePixelRatio,
+        devicePixelRatio: devicePixelRatio ?? this.devicePixelRatio,
+        maxDevicePixelRatio: devicePixelRatio == null ? this.devicePixelRatio : maxDevicePixelRatio,
         visible: visible,
       );
 

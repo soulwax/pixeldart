@@ -13,7 +13,9 @@ void main() {
 Directory _packageDirectory() {
   final cwd = Directory.current;
   if (File('${cwd.path}/pubspec.yaml').existsSync() &&
-      File('${cwd.path}/lib/pixeldart.dart').existsSync()) return cwd;
+      File('${cwd.path}/lib/pixeldart.dart').existsSync()) {
+    return cwd;
+  }
   final nested = Directory('${cwd.path}/external/pixeldart');
   if (File('${nested.path}/pubspec.yaml').existsSync()) return nested;
   throw StateError('cannot locate external/pixeldart package directory');

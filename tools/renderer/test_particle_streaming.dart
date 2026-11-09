@@ -96,5 +96,35 @@ void main() {
     check(a.alphaMode == AlphaMode.blended && a.emissiveStrength == 3, 'soft material is blended and glows');
   }
 
+  // 4. Fades apply: invisible at birth and death, full size mid-life. (They
+  //    were validated but never applied.)
+  {
+    final emitter = ParticleEmitter(
+      mesh: mesh,
+      material: const MaterialHandle(9, 1, 'f'),
+      minLifetime: 1,
+      maxLifetime: 1,
+      minStartSize: 1,
+      minEndSize: 1,
+      fadeInFraction: 0.25,
+      fadeOutFraction: 0.25,
+      alphaCurve: Curves.linear,
+    );
+    check(emitter.fadeEnvelope(0) == 0, 'invisible at birth');
+    check(emitter.fadeEnvelope(1) == 0, 'invisible at death');
+    check((emitter.fadeEnvelope(0.125) - 0.5 * 0.125).abs() < 1e-9, 'half way through the fade-in, times the curve');
+    check((emitter.fadeEnvelope(0.5) - 0.5).abs() < 1e-9, 'mid-life only the curve applies');
+
+    emitter.burst(1, position: Vec3.zero);
+    final born = _CollectingEncoder();
+    emitter.submit(born, _frame());
+    check(born.items.isEmpty, 'a fully faded particle is not drawn');
+    emitter.update(0.5);
+    final mid = _CollectingEncoder();
+    emitter.submit(mid, _frame());
+    check(mid.items.length == 1 && (mid.items.single.transform.scale - 0.5).abs() < 1e-6,
+        'mid-life scale is size × envelope, got ${mid.items.map((i) => i.transform.scale)}');
+  }
+
   stdout.writeln('Particle streaming fixtures passed.');
 }
