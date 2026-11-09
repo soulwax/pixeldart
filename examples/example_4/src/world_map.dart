@@ -36,7 +36,8 @@ final class WorldMap {
   /// [solid] or [keep]: everywhere walking monsters are stopped.
   final Uint8List monsterBlock = Uint8List(mapCells);
 
-  /// Index into [Art.trees] + 1 per trunk cell, or 0.
+  /// Tall-tree index + 1, then bush index + 1 after the tall-tree range.
+  /// Zero means no blocking vegetation.
   final Uint8List trees = Uint8List(mapCells);
 
   /// Cell indices safe to scatter villagers and spawn monsters on.
@@ -130,6 +131,7 @@ final class WorldMap {
     _layHamlets(tiles);
     _layKeep(tiles);
     _closeUnreachable(tiles);
+    _underplantDenseGroves();
 
     for (var i = 0; i < mapCells; i += 1) {
       monsterBlock[i] = solid[i] | keep[i];
@@ -269,6 +271,19 @@ final class WorldMap {
         tiles[cell] = _grass;
         trees[cell] = rng.nextInt(art.trees.length) + 1;
         solid[cell] = 1;
+      }
+    }
+  }
+
+  /// Tall sprites occupy two tile rows. In thick woods, every second row of
+  /// trunks becomes low vegetation so the crowns behind it remain visible.
+  /// Solid cells stay solid; only their artwork changes.
+  void _underplantDenseGroves() {
+    for (var row = 0; row < mapRows; row += 1) {
+      for (var column = 0; column < mapColumns; column += 1) {
+        final cell = cellOf(column, row);
+        if (trees[cell] == 0 || (row + column ~/ 3).isEven) continue;
+        trees[cell] = art.trees.length + rng.nextInt(art.bushes.length) + 1;
       }
     }
   }

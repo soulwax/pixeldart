@@ -24,6 +24,7 @@ final class Art {
   final BitmapFont font;
   final List<SpriteRegion> tileset;
   final List<SpriteRegion> trees;
+  final List<SpriteRegion> bushes;
 
   final SpriteRegion solid;
   final SpriteRegion chevron;
@@ -46,6 +47,7 @@ final class Art {
     required this.tileset,
   }) : solid = pixels.solid!,
        trees = [pixels['tree/amber'], pixels['tree/green']],
+       bushes = [pixels['town/27'], pixels['town/28']],
        chevron = pixels['chevron'],
        dot = pixels['fx/circle_05'],
        spark = pixels['fx/spark_01'],

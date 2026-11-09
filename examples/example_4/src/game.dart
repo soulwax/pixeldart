@@ -559,7 +559,9 @@ final class Game {
         final id = trees[WorldMap.cellOf(column, row)];
         if (id == 0) continue;
         final x = (column + 0.5) * tileSize, y = (row + 0.9) * tileSize;
-        final tree = art.trees[id - 1];
+        final tree = id <= art.trees.length
+            ? art.trees[id - 1]
+            : art.bushes[id - art.trees.length - 1];
         batch.draw(dot, x, y, width: 14, height: 6, color: 0x00000060);
         batch.draw(tree, x, y, originY: 1, layer: 1);
       }
