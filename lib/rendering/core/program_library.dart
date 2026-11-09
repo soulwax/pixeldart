@@ -169,6 +169,13 @@ final class ProgramLibrary {
       );
     }
     try {
+      if (replacement.fragment != null) {
+        _validateFragmentOutputs(
+          source.id,
+          source.fragmentSource,
+          replacement.fragment!,
+        );
+      }
       final handle = _device.compileProgram(
         vertexSource: replacement.vertex ?? source.vertexSource,
         fragmentSource: replacement.fragment ?? source.fragmentSource,
@@ -188,6 +195,102 @@ final class ProgramLibrary {
         requiredUniforms: source.requiredUniforms,
       );
     }
+  }
+
+  // The render graph owns attachment locations. A compilable host fragment
+  // shader may still write the wrong target, so check its declared outputs
+  // against the default pass before asking the GPU to compile it.
+  void _validateFragmentOutputs(
+    String programId,
+    String defaultSource,
+    String replacementSource,
+  ) {
+    final expected = _fragmentOutputs(defaultSource, programId);
+    final actual = _fragmentOutputs(replacementSource, programId);
+    if (expected.length != actual.length ||
+        expected.keys.any(
+          (location) => expected[location] != actual[location],
+        )) {
+      throw ShaderCompileException(
+        ShaderCompileStage.validation,
+        '$programId fragment outputs must match the default attachment '
+        'locations and types: expected $expected, got $actual',
+      );
+    }
+  }
+
+  Map<int, String> _fragmentOutputs(String source, String programId) {
+    final withoutComments = source
+        .replaceAll(RegExp(r'/\*[\s\S]*?\*/'), '')
+        .replaceAll(RegExp(r'//[^\r\n]*'), '')
+        .replaceAll(RegExp(r'^\s*#.*$', multiLine: true), '');
+    // Ignore function bodies so `out` parameters and local statements cannot
+    // be mistaken for fragment attachment declarations.
+    final topLevel = StringBuffer();
+    var braceDepth = 0;
+    for (final codeUnit in withoutComments.codeUnits) {
+      if (codeUnit == 123) {
+        if (braceDepth == 0) topLevel.write(';');
+        braceDepth++;
+      } else if (codeUnit == 125) {
+        braceDepth--;
+        if (braceDepth == 0) topLevel.write(';');
+      } else if (braceDepth == 0) {
+        topLevel.writeCharCode(codeUnit);
+      }
+      if (braceDepth < 0) {
+        throw ShaderCompileException(
+          ShaderCompileStage.validation,
+          '$programId has unbalanced fragment shader braces',
+        );
+      }
+    }
+    if (braceDepth != 0) {
+      throw ShaderCompileException(
+        ShaderCompileStage.validation,
+        '$programId has unbalanced fragment shader braces',
+      );
+    }
+    final declarationPattern = RegExp(
+      r'^(?:layout\s*\(\s*location\s*=\s*(\d+)\s*\)\s*)?'
+      r'out\s+(?:(?:lowp|mediump|highp)\s+)?'
+      r'(float|vec[234]|int|ivec[234]|uint|uvec[234])\s+'
+      r'[A-Za-z_]\w*$',
+    );
+    final declarations = <RegExpMatch>[];
+    for (final statement in topLevel.toString().split(';')) {
+      final trimmed = statement.trim();
+      final declaration = declarationPattern.firstMatch(trimmed);
+      if (declaration != null) {
+        declarations.add(declaration);
+      } else if (RegExp(
+        r'^(?:layout\s*\([^)]*\)\s*)?out\b',
+      ).hasMatch(trimmed)) {
+        throw ShaderCompileException(
+          ShaderCompileStage.validation,
+          '$programId has an unsupported fragment output declaration',
+        );
+      }
+    }
+    final outputs = <int, String>{};
+    for (final declaration in declarations) {
+      final explicit = declaration.group(1);
+      if (declarations.length > 1 && explicit == null) {
+        throw ShaderCompileException(
+          ShaderCompileStage.validation,
+          '$programId must declare locations for all fragment outputs',
+        );
+      }
+      final location = explicit == null ? 0 : int.parse(explicit);
+      if (outputs.containsKey(location)) {
+        throw ShaderCompileException(
+          ShaderCompileStage.validation,
+          '$programId declares fragment output location $location twice',
+        );
+      }
+      outputs[location] = declaration.group(2)!;
+    }
+    return outputs;
   }
 
   void _checkOpenSet(PreparedProgramSet prepared) {

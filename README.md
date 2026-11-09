@@ -921,8 +921,11 @@ loads or embeds. It must keep the sprite pass's inputs (`vUv`, `vColor`,
 `vParams`), engine uniforms (`uTex`, `uLinearize`, `uMultiply`), and
 `oColor`/`oGlow` outputs. The default vertex stage supplies the inputs. Other
 slots follow their pass's `ProgramSource` binding contract and authored GLSL
-under `shaders/rendering/`. Only slots installed by the selected profile
-compile or draw.
+under `shaders/rendering/`. The [slot contract](docs/shader_overrides.md)
+lists every default stage, vertex input, sampler unit and attachment output,
+with links to the exact uniform and varying declarations. Fragment overrides
+must preserve the pass's output locations and types. Only slots installed by
+the selected profile compile or draw.
 
 For a live change between frames, call
 `await app.setShader(ShaderSlot.sprites, ShaderOverride(fragment: nextSource))`.

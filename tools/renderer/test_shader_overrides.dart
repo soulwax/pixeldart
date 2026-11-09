@@ -25,7 +25,7 @@ Future<void> main() async {
   try {
     await renderer.configure(
       _base.withShaderOverrides(const {
-        ShaderSlot.sprites: ShaderOverride(fragment: 'FAIL_FRAGMENT'),
+        ShaderSlot.sprites: ShaderOverride(fragment: 'out vec4 oColor;'),
       }),
     );
   } on ShaderCompileException {
@@ -48,7 +48,9 @@ Future<void> main() async {
     'valid shader override was not committed',
   );
   _check(
-    device.compiledShaderSources.any((source) => source.fragment.contains('// HOST')),
+    device.compiledShaderSources.any(
+      (source) => source.fragment.contains('// HOST'),
+    ),
     'configured renderer did not compile the host shader',
   );
   device.compiledShaderSources.clear();
@@ -76,7 +78,9 @@ Future<void> main() async {
   );
   renderer.endFrame();
   _check(
-    device.compiledShaderSources.any((source) => source.fragment.contains('// HOST')),
+    device.compiledShaderSources.any(
+      (source) => source.fragment.contains('// HOST'),
+    ),
     'context restoration did not compile the host shader again',
   );
   _check(renderer.shaderErrors.isEmpty, 'override failed after restore');

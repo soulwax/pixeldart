@@ -24,14 +24,16 @@ void main() {
       }
       final path = target.split('#').first;
       if (path.isEmpty) continue;
-      final resolved = File.fromUri(Uri.file(file.parent.path).resolve(path));
+      final resolved = File.fromUri(file.parent.uri.resolve(path));
       if (!resolved.existsSync() && !Directory(resolved.path).existsSync()) {
         broken.add('${file.path}:$target');
       }
     }
   }
   if (broken.isNotEmpty) {
-    throw StateError('PLIB-05 broken documentation links: ${broken.join(', ')}');
+    throw StateError(
+      'PLIB-05 broken documentation links: ${broken.join(', ')}',
+    );
   }
   print('PLIB-05 documentation links passed.');
 }
