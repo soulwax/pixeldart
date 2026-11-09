@@ -133,7 +133,10 @@ final class ShaderBindingTable {
   void sync(Map<ShaderTarget, ShaderOverride> overrides) {
     // Registered sprite shaders are added and released one at a time.
     _slots.removeWhere(
-      (target, _) => target is! ShaderHandle && !overrides.containsKey(target),
+      (target, _) =>
+          target is! ShaderHandle &&
+          target is! WorldShaderHandle &&
+          !overrides.containsKey(target),
     );
     for (final entry in overrides.entries) {
       if (_slots[entry.key]?.override == entry.value) continue;

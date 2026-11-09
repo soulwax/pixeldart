@@ -83,6 +83,17 @@ abstract interface class SceneRenderer {
   /// Frees a registered shader. Draws still naming it use the default.
   void releaseSpriteShader(ShaderHandle handle);
 
+  /// Compiles a world shader for the active profile's world contract.
+  /// Materials select it with `MaterialDefinition(worldShader: handle)`.
+  /// Invalid sources throw [ShaderCompileException].
+  WorldShaderHandle registerWorldShader(
+    ShaderOverride shader, {
+    String? debugLabel,
+  });
+
+  /// Frees a world shader. Materials still naming it use the built-in shader.
+  void releaseWorldShader(WorldShaderHandle handle);
+
   ResourceLibrary get resources;
 
   Future<void> initialize(

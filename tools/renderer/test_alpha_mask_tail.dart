@@ -35,7 +35,7 @@ void _onlyBlendedDrawsWriteRealTransparency() {
       [_item(_blendedHandle, drawMode: DrawMode.blended)],
       1,
     ).float1s('uOpaqueCoverage'),
-    [1, 1, 0],
+    [1, 0],
     'opaque and masked draws must write full coverage; only blended draws '
     'may write a texel alpha through to the target',
   );
@@ -101,60 +101,41 @@ void _heroLightingUniformsAndReceiversArePerFrameAndPerDraw() {
     directSpots,
     768,
   );
-  _expectDoubles(
-    run.float1s('uDirectionalIntensity'),
-    [0.7],
-    'directional daylight must be uploaded once per frame',
-  );
-  _expectDoubles(
-    run.float1s('uPointIntensity0'),
-    [0.4],
-    'the first practical light must occupy point slot 0',
-  );
-  _expectDoubles(
-    run.float1s('uPointIntensity1'),
-    [0.2],
-    'the second practical light must occupy point slot 1',
-  );
-  _expectDoubles(
-    run.float1s('uPointIntensity2'),
-    [0],
-    'unused point slots must be explicitly disabled',
-  );
-  _expectDoubles(
-    run.float1s('uPointIntensity3'),
-    [0],
-    'all unused point slots must be explicitly disabled',
-  );
-  _expectDoubles(
-    run.float1s('uSpotEnabled'),
-    [0],
-    'a frame without a selected shadow spot must disable spot contribution',
-  );
-  _expectDoubles(
-    run.float1s('uDirectSpotIntensity0'),
-    [0.9],
-    'the first direct spot must upload its authored intensity',
-  );
-  _expectDoubles(
-    run.float1s('uDirectSpotIntensity1'),
-    [0.35],
-    'the second direct spot must upload its authored intensity',
-  );
-  _expectDoubles(
-    run.float1s('uDirectSpotIntensity2'),
-    [0],
-    'unused direct spot slots must be explicitly disabled',
-  );
+  _expectDoubles(run.float1s('uDirectionalIntensity'), [
+    0.7,
+  ], 'directional daylight must be uploaded once per frame');
+  _expectDoubles(run.float1s('uPointIntensity0'), [
+    0.4,
+  ], 'the first practical light must occupy point slot 0');
+  _expectDoubles(run.float1s('uPointIntensity1'), [
+    0.2,
+  ], 'the second practical light must occupy point slot 1');
+  _expectDoubles(run.float1s('uPointIntensity2'), [
+    0,
+  ], 'unused point slots must be explicitly disabled');
+  _expectDoubles(run.float1s('uPointIntensity3'), [
+    0,
+  ], 'all unused point slots must be explicitly disabled');
+  _expectDoubles(run.float1s('uSpotEnabled'), [
+    0,
+  ], 'a frame without a selected shadow spot must disable spot contribution');
+  _expectDoubles(run.float1s('uDirectSpotIntensity0'), [
+    0.9,
+  ], 'the first direct spot must upload its authored intensity');
+  _expectDoubles(run.float1s('uDirectSpotIntensity1'), [
+    0.35,
+  ], 'the second direct spot must upload its authored intensity');
+  _expectDoubles(run.float1s('uDirectSpotIntensity2'), [
+    0,
+  ], 'unused direct spot slots must be explicitly disabled');
   final shadowTexel = run.device.float2Sequence('uShadowMapTexelSize').single;
   _expect(
     (shadowTexel[0] - 1 / 768).abs() < 1e-9 &&
         (shadowTexel[1] - 1 / 768).abs() < 1e-9,
     'shadow texel size must follow configured shadow-map dimensions',
   );
-  _expectDoubles(
-    run.float1s('uReceivesShadow'),
-    [1, 0],
-    'shadow reception must follow each retained item descriptor',
-  );
+  _expectDoubles(run.float1s('uReceivesShadow'), [
+    1,
+    0,
+  ], 'shadow reception must follow each retained item descriptor');
 }

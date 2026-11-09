@@ -103,23 +103,18 @@ List<double> _warpStrengthsFor(
     ),
     resolveMaterial: (handle) =>
         handle == _affineHandle ? _affineMaterial : _plainMaterial,
-    resolveAlbedo: (handle) => device.createTexture(
-      const GpuTextureDescriptor(width: 4, height: 4),
-    ),
-    resolveShadowMap: () => device.createTexture(
-      const GpuTextureDescriptor(width: 4, height: 4),
-    ),
+    resolveAlbedo: (handle) =>
+        device.createTexture(const GpuTextureDescriptor(width: 4, height: 4)),
+    resolveShadowMap: () =>
+        device.createTexture(const GpuTextureDescriptor(width: 4, height: 4)),
     resolveLightView: () => ShadowLightView(Mat4.identity()),
     resolveCasterLight: () => null,
-    resolveSsaoBlurred: () => device.createTexture(
-      const GpuTextureDescriptor(width: 4, height: 4),
-    ),
+    resolveSsaoBlurred: () =>
+        device.createTexture(const GpuTextureDescriptor(width: 4, height: 4)),
     sceneColorWidth: 384,
     sceneColorHeight: 216,
   );
-  final pass = feature
-      .createPasses(_AlwaysAvailableResources())
-      .single;
+  final pass = feature.createPasses(_AlwaysAvailableResources()).single;
 
   final sceneColorTarget = device.createTarget(
     const GpuTargetDescriptor(width: 384, height: 216),
@@ -140,10 +135,9 @@ List<double> _warpStrengthsFor(
       ),
     },
     encoder: DeviceDrawCommandEncoder(device),
-    frameScene: _FakeFrameScene(
-      [for (final handle in items) _item(handle)],
-      PostProcessState(affineWarpStrength: frameWarpStrength),
-    ),
+    frameScene: _FakeFrameScene([
+      for (final handle in items) _item(handle),
+    ], PostProcessState(affineWarpStrength: frameWarpStrength)),
   );
 
   pass.execute(context);
@@ -167,25 +161,21 @@ void _expect(List<double> actual, List<double> expected, String what) {
 }
 
 void _perDrawStrengthMultipliesFrameWeightByMaterialOptIn() {
-  _expect(
-    _warpStrengthsFor([_affineHandle, _plainHandle, _affineHandle], 1),
-    [1, 0, 1],
-    'two materials in one frame must resolve independently',
-  );
+  _expect(_warpStrengthsFor([_affineHandle, _plainHandle, _affineHandle], 1), [
+    1,
+    0,
+    1,
+  ], 'two materials in one frame must resolve independently');
 }
 
 void _zeroFrameWeightSuppressesEvenAnOptedInMaterial() {
-  _expect(
-    _warpStrengthsFor([_affineHandle, _affineHandle], 0),
-    [0, 0],
-    'affineSampling alone must not warp when the frame weight is 0',
-  );
+  _expect(_warpStrengthsFor([_affineHandle, _affineHandle], 0), [
+    0,
+  ], 'affineSampling alone must not warp when the frame weight is 0');
 }
 
 void _defaultMaterialsNeverWarpAtAnyFrameWeight() {
-  _expect(
-    _warpStrengthsFor([_plainHandle, _plainHandle], 1),
-    [0, 0],
-    'a default material must stay perspective-correct at full frame weight',
-  );
+  _expect(_warpStrengthsFor([_plainHandle, _plainHandle], 1), [
+    0,
+  ], 'a default material must stay perspective-correct at full frame weight');
 }

@@ -81,6 +81,7 @@ extension on SceneRendererImpl {
       final oldFeatures = _featureGraph, oldPrograms = _programs;
       _featureGraph = candidate.featureGraph;
       _sprites = candidate.sprites;
+      _worldShaderPrograms = candidate.worldShaderPrograms;
       _graph = candidate.result;
       _programs = candidatePrograms;
       candidatePrograms.fallbackToDefaults = true;
@@ -116,6 +117,7 @@ extension on SceneRendererImpl {
     );
     _featureGraph = assembled.featureGraph;
     _sprites = assembled.sprites;
+    _worldShaderPrograms = assembled.worldShaderPrograms;
     _graph = assembled.result;
   }
 
@@ -147,6 +149,8 @@ extension on SceneRendererImpl {
 
     final hasBloom = configuration.profile.installs(PipelineFeatures.bloom);
     final hasShadows = configuration.profile.installs(PipelineFeatures.shadows);
+    final hasSsao = configuration.profile.installs(PipelineFeatures.ssao);
+    final worldShaderPrograms = <WorldShaderHandle, CompiledProgram>{};
     final sprites = SpritesFeature(
       programLibrary: programs,
       device: device,
@@ -196,8 +200,11 @@ extension on SceneRendererImpl {
             resolveCamera: () => _activeFrame!.camera,
             resolveSsaoRaw: () =>
                 resolveResource('ssaoRaw', fallback: 'sceneColor'),
-            resolveSsaoBlurred: () =>
-                resolveResource('ssaoBlurred', fallback: 'sceneColor'),
+            // Sampling the scene-color target while drawing into it is a GL
+            // feedback loop. White is also the neutral AO value (1.0).
+            resolveSsaoBlurred: () => hasSsao
+                ? resolveResource('ssaoBlurred')
+                : _resources!.textures.fallbackAlbedo,
             sceneColorWidth: configuration.internalWidth,
             sceneColorHeight: configuration.internalHeight,
             shadowMapSize: configuration.shadowMapSize,
@@ -222,6 +229,8 @@ extension on SceneRendererImpl {
             resolveTime: () => _activeFrame!.timeSeconds,
             profile: configuration.profile,
             sprites: sprites,
+            worldShaders: _worldShaders,
+            worldShaderPrograms: worldShaderPrograms,
             postEffects: configuration.postEffects,
           )
         : buildSafeGraph(
@@ -233,6 +242,9 @@ extension on SceneRendererImpl {
             sampleCount: configuration.sampleCount,
             outputEncoding: configuration.outputEncoding,
             sprites: sprites,
+            resolveMaterial: _resources!.materials.resolveForPass,
+            worldShaders: _worldShaders,
+            worldShaderPrograms: worldShaderPrograms,
             postEffects: configuration.postEffects,
             bloom: hasBloom,
             resolveResolvedSceneColor: () => resolveResource(
@@ -261,7 +273,12 @@ extension on SceneRendererImpl {
         'safe renderer graph is invalid: ${result.graph.failures}',
       );
     }
-    return _SafeGraphAssembly(featureGraph, result, sprites);
+    return _SafeGraphAssembly(
+      featureGraph,
+      result,
+      sprites,
+      worldShaderPrograms,
+    );
   }
 
   _FrameExecution _executeGraph(
@@ -428,8 +445,14 @@ final class _SafeGraphAssembly {
   final FeatureGraph featureGraph;
   final FeatureGraphResult result;
   final SpritesFeature sprites;
+  final Map<WorldShaderHandle, CompiledProgram> worldShaderPrograms;
 
-  const _SafeGraphAssembly(this.featureGraph, this.result, this.sprites);
+  const _SafeGraphAssembly(
+    this.featureGraph,
+    this.result,
+    this.sprites,
+    this.worldShaderPrograms,
+  );
 }
 
 final class _PlanResources implements RenderPassResources {

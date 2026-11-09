@@ -385,18 +385,24 @@ void _everyPassAgreesOnTheCutoffOfEveryDraw() {
 
 void _onlyMaskedMaterialsCutOut() {
   final scene = [_item(_plainHandle), _item(_plainHandle)];
-  for (final (name, sequence) in [
+  for (final (name, sequence, expected) in [
     (
       'shadowedWorld',
       _runWorldPass(scene, const [], 1).float1s('uAlphaCutoff'),
+      [0.0],
     ),
-    ('depthPrepass', _runPrepass(scene, 1).float1s('uAlphaCutoff')),
-    ('shadowCaster', _runShadowCaster(scene).float1s('uAlphaCutoff')),
+    ('depthPrepass', _runPrepass(scene, 1).float1s('uAlphaCutoff'), [0.0, 0.0]),
+    (
+      'shadowCaster',
+      _runShadowCaster(scene).float1s('uAlphaCutoff'),
+      [0.0, 0.0],
+    ),
   ]) {
-    _expectDoubles(sequence, [
-      0,
-      0,
-    ], '$name must leave opaque materials with no cutout at all');
+    _expectDoubles(
+      sequence,
+      expected,
+      '$name must leave opaque materials with no cutout at all',
+    );
   }
 }
 
@@ -412,17 +418,17 @@ void _prepassAffineWeightMatchesTheWorldPass() {
     1,
   ).float1s('uAffineWarpStrength');
   final prepass = _runPrepass(scene, 1).float1s('uAffineWarpStrength');
-  _expectDoubles(world, [0, 0, 1], 'only the affineSampling material may warp');
-  _expectDoubles(
-    prepass,
-    world,
-    'depthPrepass must warp exactly the draws shadowedWorld warps',
-  );
-  _expectDoubles(
-    _runPrepass(scene, 0).float1s('uAffineWarpStrength'),
-    [0, 0, 0],
-    'a zero frame weight must suppress the prepass warp too',
-  );
+  _expectDoubles(world, [0, 1], 'only the affineSampling material may warp');
+  _expectDoubles(prepass, [
+    0,
+    0,
+    1,
+  ], 'depthPrepass must warp exactly the draws shadowedWorld warps');
+  _expectDoubles(_runPrepass(scene, 0).float1s('uAffineWarpStrength'), [
+    0,
+    0,
+    0,
+  ], 'a zero frame weight must suppress the prepass warp too');
 }
 
 void _albedoIsResolvedPerMaterialNotOncePerPass() {

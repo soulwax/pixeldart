@@ -29,6 +29,8 @@ import '../passes/safe_graph_resources.dart';
 import '../passes/shadow_graph.dart';
 import '../passes/sprites.dart';
 import '../passes/world.dart';
+import '../passes/shadowed_world.dart';
+import '../webgl/generated_shaders.dart';
 import 'batching.dart';
 import 'feature_graph.dart';
 import 'frame_telemetry.dart';
@@ -65,6 +67,8 @@ final class SceneRendererImpl with _GpuTimingSupport implements SceneRenderer {
   MsaaStatus _msaa = const MsaaStatus.off();
   final ShaderBindingTable _shaderBindings = ShaderBindingTable();
   final Map<ShaderHandle, ShaderOverride> _spriteShaders = {};
+  final Map<WorldShaderHandle, ShaderOverride> _worldShaders = {};
+  Map<WorldShaderHandle, CompiledProgram> _worldShaderPrograms = {};
   SpritesFeature? _sprites;
   int _nextShaderId = 1;
   FrameInput? _activeFrame;
@@ -137,6 +141,52 @@ final class SceneRendererImpl with _GpuTimingSupport implements SceneRenderer {
   void releaseSpriteShader(ShaderHandle handle) {
     if (_spriteShaders.remove(handle) == null) return;
     _sprites?.releaseShader(handle);
+    _shaderBindings.remove(handle);
+  }
+
+  @override
+  WorldShaderHandle registerWorldShader(
+    ShaderOverride shader, {
+    String? debugLabel,
+  }) {
+    _ensureReady();
+    if (_activeFrame != null) {
+      throw StateError('registerWorldShader requires no active frame');
+    }
+    shader.validate();
+    final shadowed = _allocated!.profile.installs(PipelineFeatures.shadows);
+    final contract = shadowed
+        ? ShaderSlot.shadowedWorld
+        : ShaderSlot.safeWorld;
+    final handle = WorldShaderHandle(_nextShaderId++, contract, debugLabel);
+    final source = shadowed
+        ? ShadowedWorldProgramSource.build(
+            vertexSource: shadowedWorldVertSrc,
+            fragmentSource: shadowedWorldFragSrc,
+            id: 'shadowedWorld#${handle.id}',
+          )
+        : WorldProgramSource.build(
+            vertexSource: safeWorldVertSrc,
+            fragmentSource: safeWorldFragSrc,
+            id: 'safeWorld#${handle.id}',
+          );
+    final compiled = _programs!.publishVariant(
+      source: source,
+      target: handle,
+      variant: shader,
+      allowFallback: false,
+    );
+    _worldShaders[handle] = shader;
+    _worldShaderPrograms[handle] = compiled;
+    _shaderBindings.add(handle, shader);
+    return handle;
+  }
+
+  @override
+  void releaseWorldShader(WorldShaderHandle handle) {
+    if (_worldShaders.remove(handle) == null) return;
+    _worldShaderPrograms.remove(handle);
+    _programs?.releaseVariant(handle);
     _shaderBindings.remove(handle);
   }
 
@@ -322,6 +372,8 @@ final class SceneRendererImpl with _GpuTimingSupport implements SceneRenderer {
     _featureGraph = null;
     _sprites = null;
     _spriteShaders.clear();
+    _worldShaders.clear();
+    _worldShaderPrograms.clear();
     _graph = null;
     _programs = null;
     _gpuResources = null;

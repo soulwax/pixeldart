@@ -32,6 +32,7 @@
 
 - VHS could not run through `SceneRenderer`. The graph was built with `hasValidPreviousFrame: false`, so any profile with VHS (`ps1Full`) failed to initialize with `invalidHistoryRead`. Beyond that, the pass sampled `vhsOutput` as history while rendering into it, a WebGL feedback loop that drops the draw. VHS now ping-pongs between `vhsOutput` and a new `vhsHistory` target. It ghosts nothing on its first draw, or on the first draw after a bypass, instead of echoing a cleared or stale frame. The fake test device now rejects any draw that samples its own render target.
 - Full-screen features never freed their empty vertex arrays, so every graph rebuild (each canvas resize) leaked a few. Bloom, DOF, SSAO, grade, PS1, VHS and depth debug now release them on dispose.
+- The minimal shadowed profile sampled the scene-color target as its missing SSAO input while drawing into that target. The shadowed-world pass now samples neutral white when SSAO is disabled, avoiding a WebGL feedback loop.
 
 ### Added
 
@@ -67,6 +68,7 @@
 ### Changed
 
 - Adjacent sprite batches with the same projection now upload the view-projection matrix once per shader program run.
+- Shadowed-world draws now cache alpha cutoff, opaque coverage and affine warp strength across adjacent materials and draw modes, avoiding redundant uniform uploads.
 - Performance (main-thread busy time, 6 s of play):
   - Pixel Rocket: 43% → 24%.
   - Lantern: 17% → 10%.

@@ -7,6 +7,7 @@ import '../api/handles.dart';
 import '../api/lights.dart';
 import '../api/materials.dart';
 import '../api/scene.dart';
+import '../api/shaders.dart';
 import '../core/batching.dart';
 import '../core/graph_pass.dart';
 import '../core/graph_resource.dart';
@@ -21,6 +22,7 @@ import '../webgl/device_api.dart';
 import '../webgl/draw_encoder.dart';
 import '../webgl/state_cache.dart';
 import 'pass_context_impl.dart';
+import 'frame_uniform_capture.dart';
 import 'safe_graph_resources.dart';
 import 'shadow.dart';
 import 'shadow_resources.dart';
@@ -31,8 +33,9 @@ final class ShadowedWorldProgramSource {
   static ProgramSource build({
     required String vertexSource,
     required String fragmentSource,
+    String id = 'shadowedWorld',
   }) => ProgramSource(
-    id: 'shadowedWorld',
+    id: id,
     vertexSource: vertexSource,
     fragmentSource: fragmentSource,
     attributeLocations: const {
@@ -168,6 +171,8 @@ final class ShadowedWorldFeature implements RenderFeature {
   final String fragmentSource;
   final MeshResolver resolveMesh;
   final MaterialResolver resolveMaterial;
+  final Map<WorldShaderHandle, ShaderOverride> registeredShaders;
+  final Map<WorldShaderHandle, CompiledProgram> shaderPrograms;
   final AlbedoResolver resolveAlbedo;
   final MaterialTextureResolver? resolveNormal;
   final MaterialTextureResolver? resolveOrm;
@@ -193,6 +198,8 @@ final class ShadowedWorldFeature implements RenderFeature {
     required this.fragmentSource,
     required this.resolveMesh,
     required this.resolveMaterial,
+    this.registeredShaders = const {},
+    Map<WorldShaderHandle, CompiledProgram>? shaderPrograms,
     required this.resolveAlbedo,
     this.resolveNormal,
     this.resolveOrm,
@@ -211,7 +218,7 @@ final class ShadowedWorldFeature implements RenderFeature {
     this.shadowMapResource = ShadowResources.shadowMap,
     this.ssaoResource = SsaoResources.ssaoBlurred,
     this.sceneColorResource = SafeGraphResources.sceneColor,
-  });
+  }) : shaderPrograms = shaderPrograms ?? {};
 
   @override
   String get id => 'shadowedWorld';
@@ -239,6 +246,19 @@ final class ShadowedWorldFeature implements RenderFeature {
         fragmentSource: fragmentSource,
       ),
     );
+    for (final entry in registeredShaders.entries) {
+      if (entry.key.contract != ShaderSlot.shadowedWorld) continue;
+      shaderPrograms[entry.key] = programLibrary.publishVariant(
+        source: ShadowedWorldProgramSource.build(
+          vertexSource: vertexSource,
+          fragmentSource: fragmentSource,
+          id: 'shadowedWorld#${entry.key.id}',
+        ),
+        target: entry.key,
+        variant: entry.value,
+        allowFallback: true,
+      );
+    }
     return [
       _ShadowedWorldPass(
         descriptor: PassDescriptor(
@@ -253,6 +273,7 @@ final class ShadowedWorldFeature implements RenderFeature {
         program: program,
         resolveMesh: resolveMesh,
         resolveMaterial: resolveMaterial,
+        shaderPrograms: shaderPrograms,
         resolveAlbedo: resolveAlbedo,
         resolveNormal: resolveNormal,
         resolveOrm: resolveOrm,
@@ -281,6 +302,7 @@ final class _ShadowedWorldPass implements RenderPass {
   final CompiledProgram program;
   final MeshResolver resolveMesh;
   final MaterialResolver resolveMaterial;
+  final Map<WorldShaderHandle, CompiledProgram> shaderPrograms;
   final AlbedoResolver resolveAlbedo;
   final MaterialTextureResolver? resolveNormal;
   final MaterialTextureResolver? resolveOrm;
@@ -321,6 +343,7 @@ final class _ShadowedWorldPass implements RenderPass {
     required this.program,
     required this.resolveMesh,
     required this.resolveMaterial,
+    required this.shaderPrograms,
     required this.resolveAlbedo,
     required this.resolveNormal,
     required this.resolveOrm,
@@ -341,7 +364,11 @@ final class _ShadowedWorldPass implements RenderPass {
   void execute(RenderPassContext context) {
     final view =
         context.viewOf(SafeGraphResources.sceneColor.name) as BoundResourceView;
-    final encoder = context.commandEncoder as DrawCommandEncoder;
+    final rawEncoder = context.commandEncoder as DrawCommandEncoder;
+    final capture = shaderPrograms.isEmpty
+        ? null
+        : FrameUniformCapture(rawEncoder);
+    final encoder = capture ?? rawEncoder;
     final camera = context.frameScene.camera as CameraView;
     final environment = context.frameScene.environment as FrameEnvironment;
     final post = context.frameScene.post as PostProcessState;
@@ -677,11 +704,39 @@ final class _ShadowedWorldPass implements RenderPass {
       );
     }
 
-    for (final batch in context.frameScene.opaqueBatches) {
+    capture?.finish();
+    if (capture == null) {
+      for (final batch in context.frameScene.opaqueBatches) {
+        _drawBatch(encoder, batch, post.affineWarpStrength, environment);
+      }
+      for (final item in context.frameScene.blendedItemsBackToFront) {
+        _drawBatch(encoder, item, post.affineWarpStrength, environment);
+      }
+      return;
+    }
+    var boundProgram = program;
+    void draw(Object batch) {
+      final materialHandle = batch is InstanceBatch
+          ? batch.representative.descriptor.material
+          : (batch as RetainedItemView).descriptor.material;
+      final shader = resolveMaterial(materialHandle).worldShader;
+      final selected = shader == null
+          ? program
+          : shaderPrograms[shader] ?? program;
+      if (!identical(selected, boundProgram)) {
+        encoder.useProgram(selected.handle);
+        capture.replay();
+        _lastMaterialValues.fillRange(0, _MaterialSlot.count, double.nan);
+        _lastUseInstances = null;
+        boundProgram = selected;
+      }
       _drawBatch(encoder, batch, post.affineWarpStrength, environment);
     }
+    for (final batch in context.frameScene.opaqueBatches) {
+      draw(batch);
+    }
     for (final item in context.frameScene.blendedItemsBackToFront) {
-      _drawBatch(encoder, item, post.affineWarpStrength, environment);
+      draw(item);
     }
   }
 
@@ -796,11 +851,11 @@ final class _ShadowedWorldPass implements RenderPass {
     // (§8.6's "masked materials stay in depth-writing opaque order", which
     // the switch below already implements by sharing the opaque branch),
     // while whether a surface has holes in it is a property of the surface.
-    encoder.setUniform(
+    _setMaterialFloat(
+      encoder,
+      _MaterialSlot.alphaCutoff,
       'uAlphaCutoff',
-      UniformValue.float1(
-        material.alphaMode == AlphaMode.masked ? material.alphaCutoff : 0,
-      ),
+      material.alphaMode == AlphaMode.masked ? material.alphaCutoff : 0,
     );
     // Bug 18's general fix. Only a blended draw writes real transparency
     // into the target; opaque and masked draws write coverage, which is
@@ -809,9 +864,11 @@ final class _ShadowedWorldPass implements RenderPass {
     // looks like — an opaque item sampling an alpha-carrying texture is the
     // exact case that was broken, and its material says nothing about
     // blending. See shadowed_world.frag for what the wrong value did.
-    encoder.setUniform(
+    _setMaterialFloat(
+      encoder,
+      _MaterialSlot.opaqueCoverage,
       'uOpaqueCoverage',
-      UniformValue.float1(drawMode == DrawMode.blended ? 0 : 1),
+      drawMode == DrawMode.blended ? 0 : 1,
     );
     // Affine UV needs both halves to agree: the frame's PS1 weight says how
     // strongly the profile is applied at all, and the material's own
@@ -822,9 +879,11 @@ final class _ShadowedWorldPass implements RenderPass {
     // unaffected as a default material, so neither field alone can turn the
     // effect on. This is set per draw, unlike uVertexSnapGrid's once-per-
     // frame set, because only this one varies per material.
-    encoder.setUniform(
+    _setMaterialFloat(
+      encoder,
+      _MaterialSlot.affineWarpStrength,
       'uAffineWarpStrength',
-      UniformValue.float1(material.affineSampling ? affineWarpStrength : 0),
+      material.affineSampling ? affineWarpStrength : 0,
     );
     final last = _lastMaterialValues;
     if (last[_MaterialSlot.tintR] != material.tintR ||
@@ -995,5 +1054,8 @@ abstract final class _MaterialSlot {
   static const int occlusionStrength = 14;
   static const int lightmapIntensity = 15;
   static const int receivesShadow = 16;
-  static const int count = 17;
+  static const int alphaCutoff = 17;
+  static const int opaqueCoverage = 18;
+  static const int affineWarpStrength = 19;
+  static const int count = 20;
 }

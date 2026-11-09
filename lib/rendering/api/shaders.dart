@@ -35,6 +35,29 @@ final class ShaderHandle implements ShaderTarget {
   int get hashCode => id.hashCode;
 }
 
+/// A material shader compiled for one world pipeline contract.
+///
+/// A handle registered under a different profile uses the built-in world
+/// shader until that profile's world pipeline is active again.
+final class WorldShaderHandle implements ShaderTarget {
+  final int id;
+  @override
+  final ShaderSlot contract;
+  final String? debugLabel;
+
+  const WorldShaderHandle(this.id, this.contract, [this.debugLabel]);
+
+  @override
+  String get label => 'world shader ${debugLabel ?? id}';
+
+  @override
+  bool operator ==(Object other) =>
+      other is WorldShaderHandle && other.id == id;
+
+  @override
+  int get hashCode => id.hashCode;
+}
+
 /// A host post-process stage, named by its key in
 /// `RendererConfiguration.postEffects`.
 final class PostEffect implements ShaderTarget {

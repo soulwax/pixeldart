@@ -67,6 +67,8 @@ FeatureGraph buildShadowGraph(
   required double Function() resolveTime,
   QualityProfile profile = QualityProfile.ps1Full,
   SpritesFeature? sprites,
+  Map<WorldShaderHandle, ShaderOverride> worldShaders = const {},
+  Map<WorldShaderHandle, CompiledProgram>? worldShaderPrograms,
   Map<String, ShaderOverride> postEffects = const {},
 }) {
   if (!profile.installs(PipelineFeatures.shadows)) {
@@ -177,6 +179,8 @@ FeatureGraph buildShadowGraph(
     shadowMapResource: layout.shadowMap,
     ssaoResource: layout.ssaoBlurred,
     sceneColorResource: layout.sceneColor,
+    registeredShaders: worldShaders,
+    shaderPrograms: worldShaderPrograms,
   );
   final volumetric = hasVolumetric
       ? VolumetricLightFeature(

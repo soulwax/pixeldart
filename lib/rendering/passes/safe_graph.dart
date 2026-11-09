@@ -25,6 +25,9 @@ FeatureGraph buildSafeGraph(
   int sampleCount = 1,
   ColorEncoding outputEncoding = ColorEncoding.srgb,
   SpritesFeature? sprites,
+  MaterialResolver? resolveMaterial,
+  Map<WorldShaderHandle, ShaderOverride> worldShaders = const {},
+  Map<WorldShaderHandle, CompiledProgram>? worldShaderPrograms,
   bool bloom = false,
   GpuObject Function()? resolveResolvedSceneColor,
   GpuObject Function()? resolveBloomBlurH,
@@ -50,6 +53,9 @@ FeatureGraph buildSafeGraph(
     vertexSource: safeWorldVertSrc,
     fragmentSource: safeWorldFragSrc,
     resolveMesh: resolveMesh,
+    resolveMaterial: resolveMaterial,
+    registeredShaders: worldShaders,
+    shaderPrograms: worldShaderPrograms,
     sceneColorResource: sceneColor,
   );
   var postResource = sampleCount > 1 ? resolvedSceneColor : sceneColor;

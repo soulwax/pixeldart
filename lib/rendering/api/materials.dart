@@ -1,5 +1,6 @@
 import 'handles.dart';
 import 'lights.dart';
+import 'shaders.dart';
 
 enum AlphaMode { opaque, masked, blended }
 
@@ -7,6 +8,8 @@ enum MaterialMapColorSpace { srgb, linear }
 
 final class MaterialDefinition {
   final String key;
+  /// A registered world shader for this material, or the built-in default.
+  final WorldShaderHandle? worldShader;
   final TextureHandle? albedoTexture;
   final MaterialMapColorSpace albedoColorSpace;
   final double tintR, tintG, tintB;
@@ -40,6 +43,7 @@ final class MaterialDefinition {
 
   const MaterialDefinition({
     required this.key,
+    this.worldShader,
     this.albedoTexture,
     this.albedoColorSpace = MaterialMapColorSpace.srgb,
     this.tintR = 1,
@@ -220,6 +224,7 @@ final class MaterialDefinition {
 
   MaterialDefinition copyWith({
     String? key,
+    WorldShaderHandle? worldShader,
     TextureHandle? albedoTexture,
     MaterialMapColorSpace? albedoColorSpace,
     double? tintR,
@@ -251,6 +256,7 @@ final class MaterialDefinition {
     bool? quantized,
   }) => MaterialDefinition(
     key: key ?? this.key,
+    worldShader: worldShader ?? this.worldShader,
     albedoTexture: albedoTexture ?? this.albedoTexture,
     albedoColorSpace: albedoColorSpace ?? this.albedoColorSpace,
     tintR: tintR ?? this.tintR,

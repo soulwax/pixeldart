@@ -4,6 +4,7 @@ import '../api/frame.dart';
 import '../api/handles.dart';
 import '../api/materials.dart';
 import '../api/scene.dart';
+import '../api/shaders.dart';
 import '../core/batching.dart';
 import '../core/graph_pass.dart';
 import '../core/graph_resource.dart';
@@ -17,6 +18,7 @@ import '../math/vec.dart';
 import '../webgl/device_api.dart';
 import '../webgl/draw_encoder.dart';
 import 'pass_context_impl.dart';
+import 'frame_uniform_capture.dart';
 import 'safe_graph_resources.dart';
 
 final class ResolvedMesh {
@@ -45,8 +47,9 @@ final class WorldProgramSource {
   static ProgramSource build({
     required String vertexSource,
     required String fragmentSource,
+    String id = 'safeWorld',
   }) => ProgramSource(
-    id: 'safeWorld',
+    id: id,
     vertexSource: vertexSource,
     fragmentSource: fragmentSource,
     attributeLocations: const {
@@ -73,6 +76,9 @@ final class WorldFeature implements RenderFeature {
   final String vertexSource;
   final String fragmentSource;
   final MeshResolver resolveMesh;
+  final MaterialResolver? resolveMaterial;
+  final Map<WorldShaderHandle, ShaderOverride> registeredShaders;
+  final Map<WorldShaderHandle, CompiledProgram> shaderPrograms;
   final ResourceRef sceneColorResource;
 
   WorldFeature({
@@ -80,8 +86,11 @@ final class WorldFeature implements RenderFeature {
     required this.vertexSource,
     required this.fragmentSource,
     required this.resolveMesh,
+    this.resolveMaterial,
+    this.registeredShaders = const {},
+    Map<WorldShaderHandle, CompiledProgram>? shaderPrograms,
     this.sceneColorResource = SafeGraphResources.sceneColor,
-  });
+  }) : shaderPrograms = shaderPrograms ?? {};
 
   @override
   String get id => 'world';
@@ -105,6 +114,19 @@ final class WorldFeature implements RenderFeature {
         fragmentSource: fragmentSource,
       ),
     );
+    for (final entry in registeredShaders.entries) {
+      if (entry.key.contract != ShaderSlot.safeWorld) continue;
+      shaderPrograms[entry.key] = programLibrary.publishVariant(
+        source: WorldProgramSource.build(
+          vertexSource: vertexSource,
+          fragmentSource: fragmentSource,
+          id: 'safeWorld#${entry.key.id}',
+        ),
+        target: entry.key,
+        variant: entry.value,
+        allowFallback: true,
+      );
+    }
     return [
       _WorldPass(
         descriptor: PassDescriptor(
@@ -114,6 +136,8 @@ final class WorldFeature implements RenderFeature {
         ),
         program: program,
         resolveMesh: resolveMesh,
+        resolveMaterial: resolveMaterial,
+        shaderPrograms: shaderPrograms,
         sceneColorResourceName: sceneColorResource.name,
       ),
     ];
@@ -128,19 +152,27 @@ final class _WorldPass implements RenderPass {
   final PassDescriptor descriptor;
   final CompiledProgram program;
   final MeshResolver resolveMesh;
+  final MaterialResolver? resolveMaterial;
+  final Map<WorldShaderHandle, CompiledProgram> shaderPrograms;
   final String sceneColorResourceName;
 
-  const _WorldPass({
+  _WorldPass({
     required this.descriptor,
     required this.program,
     required this.resolveMesh,
+    required this.resolveMaterial,
+    required this.shaderPrograms,
     required this.sceneColorResourceName,
   });
 
   @override
   void execute(RenderPassContext context) {
     final view = context.viewOf(sceneColorResourceName) as BoundResourceView;
-    final encoder = context.commandEncoder as DrawCommandEncoder;
+    final rawEncoder = context.commandEncoder as DrawCommandEncoder;
+    final capture = shaderPrograms.isEmpty
+        ? null
+        : FrameUniformCapture(rawEncoder);
+    final encoder = capture ?? rawEncoder;
     final camera = context.frameScene.camera as CameraView;
     final environment = context.frameScene.environment as FrameEnvironment;
 
@@ -187,11 +219,37 @@ final class _WorldPass implements RenderPass {
       UniformValue.float1(environment.directLightScale),
     );
 
-    for (final batch in context.frameScene.opaqueBatches) {
+    capture?.finish();
+    if (capture == null) {
+      for (final batch in context.frameScene.opaqueBatches) {
+        _drawBatch(encoder, batch);
+      }
+      for (final item in context.frameScene.blendedItemsBackToFront) {
+        _drawBatch(encoder, item);
+      }
+      return;
+    }
+    var boundProgram = program;
+    void draw(Object batch) {
+      final materialHandle = batch is InstanceBatch
+          ? batch.representative.descriptor.material
+          : (batch as RetainedItemView).descriptor.material;
+      final shader = resolveMaterial?.call(materialHandle).worldShader;
+      final selected = shader == null
+          ? program
+          : shaderPrograms[shader] ?? program;
+      if (!identical(selected, boundProgram)) {
+        encoder.useProgram(selected.handle);
+        capture.replay();
+        boundProgram = selected;
+      }
       _drawBatch(encoder, batch);
     }
+    for (final batch in context.frameScene.opaqueBatches) {
+      draw(batch);
+    }
     for (final item in context.frameScene.blendedItemsBackToFront) {
-      _drawBatch(encoder, item);
+      draw(item);
     }
   }
 

@@ -97,7 +97,8 @@ final class PixeldartApp {
   }
 
   /// Sets a uniform declared by [target]'s shader: a [ShaderSlot], a
-  /// [ShaderHandle] or a [PostEffect]. Cheap enough to call every frame: it
+  /// [ShaderHandle], [WorldShaderHandle] or a [PostEffect]. Cheap enough to
+  /// call every frame: it
   /// never recompiles, and an unchanged value does nothing.
   void setShaderUniform(
     ShaderTarget target,
@@ -121,6 +122,16 @@ final class PixeldartApp {
 
   void releaseSpriteShader(ShaderHandle handle) =>
       renderer.releaseSpriteShader(handle);
+
+  /// Compiles a shader for world materials under the active profile's
+  /// `safeWorld` or `shadowedWorld` contract.
+  WorldShaderHandle createWorldShader(
+    ShaderOverride shader, {
+    String? debugLabel,
+  }) => renderer.registerWorldShader(shader, debugLabel: debugLabel);
+
+  void releaseWorldShader(WorldShaderHandle handle) =>
+      renderer.releaseWorldShader(handle);
 
   /// Replaces the host post-process stack between frames. Stages run in map
   /// order, after the built-in stages. An empty map costs nothing.
