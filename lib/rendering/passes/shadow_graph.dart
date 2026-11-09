@@ -46,6 +46,7 @@ FeatureGraph buildShadowGraph(
   required SpotLight? Function() resolveCasterLight,
   ShadowCasterLodResolver? resolveCasterLod,
   ShadowCasterMeshResolver? resolveCasterMesh,
+  int Function()? resolveContentRevision,
   List<SpotLight> Function()? resolveDirectSpotLights,
   required GpuObject Function() resolveSceneDepth,
   required CameraView Function() resolveCamera,
@@ -152,6 +153,7 @@ FeatureGraph buildShadowGraph(
     resolveCasterLight: resolveCasterLight,
     resolveCasterLod: resolveCasterLod,
     resolveCasterMesh: resolveCasterMesh,
+    resolveContentRevision: resolveContentRevision,
     onLightViewComputed: (view) => lastLightView = view,
     shadowMapResource: layout.shadowMap,
   );

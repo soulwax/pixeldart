@@ -180,6 +180,7 @@ extension on SceneRendererImpl {
             resolveEmissive: _resources!.textures.resolveEmissive,
             resolveLightmap: _resources!.textures.resolveLightmap,
             resolveShadowMap: () => resolveResource('shadowMap'),
+            resolveContentRevision: () => _resources!.textures.revision,
             resolveCasterLight: () {
               final lights = _activeFrame?.environment.spotLights;
               return lights == null || lights.isEmpty ? null : lights.first;

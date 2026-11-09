@@ -38,6 +38,12 @@
 
 ### Added
 
+- Browser renderer lab starter: URL-selected built-in and overridden `present`
+  shaders, in-frame pixel readback, and a Node/CDP runner that rejects
+  GL/JavaScript errors and unknown/software adapters. Verified on Edge 157 with
+  Intel Iris Xe / D3D11: built-in RGBA `0,14,104,255` versus overridden
+  `64,128,191,255` for `vec4(0.25, 0.5, 0.75, 1)`.
+
 - **Models:** `ModelAsset` and `PixeldartApp.loadModel`: load a model once, instantiate it many times, keep its hierarchy, resolve external textures (with optional nearest filtering), and override materials. `GlbResult` gains `nodeMaterials`, `textureImages` and `warnings`.
 - **Cameras:**
   - `CameraView.orthographic` and `OrthoCameraController` / `app.useOrthoCamera` (follow, `fitBounds`, `clampBounds`).
@@ -85,6 +91,7 @@
 
 - Zero-cost post chain: DOF composite, LUT grade, PS1 quantize and VHS no longer draw a full-screen pass when their settings make them an identity. That covers DOF strength 0, grade strength 0, 8-bit quantization without dither, and all VHS weights 0 after reduced motion. A per-graph `PostChain` forwards the stage's input, so the next stage and present sample it directly. The default `clean` profile, with DOF and grade off, saves two full-screen passes per frame. Covered by `test_post_chain`.
 - Shader overrides may ignore engine attributes and uniforms. They were rejected as "missing required" when a host shader didn't use one, including when the driver stripped a declared but unused input.
+- Static shadow caching: the shadow pass skips its redraw when nothing the light sees has changed. It records the light, every caster's mesh, material, LOD and transform, the texture content revision and the shadow-map target, and compares them exactly with the previous frame's, with no hashing and no allocation in a steady scene. A static scene, or one where only the camera, light colour or intensity changes, renders its shadow map once. Verified on D3D11: a cached frame is byte-identical to a redrawn one. Covered by `test_shadow_cache`.
 - The MSAA resolve target holds only what later passes read. It has color always, glow only when bloom is installed, and never depth, since no pass after the resolve depth-tests or samples it. The resolve blits only attachments both sides own. Before this, every MSAA frame copied depth (and glow without bloom) into storage nobody read. At 1080p that is up to about 16 MiB of memory and two full-screen blits per frame. 1× still allocates no multisample storage and runs no resolve.
 
 - `SkyboxDeclaration.validate` names every invalid field. `cloudSampleCount` is only checked while clouds are drawn.

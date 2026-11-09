@@ -570,6 +570,17 @@ const _postResolvePassIds = {
 
 const _instanceProbeFamilyKey = 901;
 
+const _shaderLabPresentA = '''#version 300 es
+precision highp float;
+layout(location=0) out vec4 oColor;
+void main() { oColor = vec4(0.25, 0.5, 0.75, 1.0); }
+''';
+const _shaderLabPresentB = '''#version 300 es
+precision highp float;
+layout(location=0) out vec4 oColor;
+void main() { oColor = vec4(0.75, 0.25, 0.125, 1.0); }
+''';
+
 void main() {
   _debugLog =
       web.document.getElementById('debug-log') as web.HTMLTextAreaElement;
@@ -595,6 +606,15 @@ void _boot() {
   );
   final r09ShadowDisabled = web.window.location.search.contains(
     'r09-shadow-off',
+  );
+  final shaderLabPresent = web.window.location.search.contains(
+    'shader-lab=present',
+  );
+  final shaderLabDefault = web.window.location.search.contains(
+    'shader-lab=default',
+  );
+  final shaderLabReload = web.window.location.search.contains(
+    'shader-lab=reload',
   );
   final modelShowcase = web.window.location.search.contains('showcase=model');
   // The canvas fills #viewport via CSS (width/height: 100%); its backing
@@ -635,7 +655,16 @@ void _boot() {
     'building safe graph…',
   );
 
-  final programLibrary = ProgramLibrary(device);
+  final programLibrary = ProgramLibrary(
+    device,
+    overrides: shaderLabPresent || shaderLabReload
+        ? const {
+            ShaderSlot.present: ShaderOverride(
+              fragment: _shaderLabPresentA,
+            ),
+          }
+        : const {},
+  );
 
   // Real RV-06 Phase B path: renderer-neutral MeshData -> MeshStore.upload
   // -> real GPU vertex+index buffers and a real VAO, resolved back to a
@@ -1325,6 +1354,11 @@ void _boot() {
   }
 
   var frame = 0;
+  final shaderReloadPixels = <String>[];
+  CompiledProgram? shaderReloadProgram;
+  GpuObject? shaderReloadHandle;
+  var shaderReloadCommitted = false;
+  var shaderReloadRejected = false;
   void tick(num highResTime) {
     frame += 1;
     // Freeze the dedicated residency fixture so its pending/resident
@@ -1776,6 +1810,14 @@ void _boot() {
     }
 
     if (frame == 1) {
+      if (shaderLabPresent || shaderLabDefault) {
+        _publishShaderLabPresentProof(
+          device.gl,
+          canvas,
+          programLibrary,
+          expectOverride: shaderLabPresent,
+        );
+      }
       _publishR09InstancePixelProof(device.gl, canvas, camera, [
         spinningCube,
         instanceProbeCube,
@@ -1787,6 +1829,59 @@ void _boot() {
           canvas,
           frameTelemetry,
           disabled: r09ShadowDisabled,
+        );
+      }
+    }
+
+    if (shaderLabReload && frame <= 3) {
+      final pixel = _shaderLabCenterPixel(device.gl);
+      shaderReloadPixels.add(pixel.join(','));
+      final live = programLibrary.programFor('present')!;
+      if (frame == 1) {
+        shaderReloadProgram = live;
+        shaderReloadHandle = live.handle;
+        final candidate = programLibrary.prepareOverrides(const {
+          ShaderSlot.present: ShaderOverride(fragment: _shaderLabPresentB),
+        });
+        programLibrary.commitOverrides(candidate);
+        shaderReloadCommitted =
+            identical(programLibrary.programFor('present'), live) &&
+            live.handle != shaderReloadHandle &&
+            live.isHostOverride;
+        shaderReloadHandle = live.handle;
+      } else if (frame == 2) {
+        try {
+          programLibrary.prepareOverrides(const {
+            ShaderSlot.present: ShaderOverride(
+              fragment: 'layout(location=0) out vec3 oColor;',
+            ),
+          });
+        } on ShaderCompileException catch (error) {
+          shaderReloadRejected =
+              error.stage == ShaderCompileStage.validation &&
+              identical(programLibrary.programFor('present'), shaderReloadProgram) &&
+              live.handle == shaderReloadHandle;
+        }
+      } else {
+        final error = device.gl.getError();
+        final pass =
+            shaderReloadCommitted &&
+            shaderReloadRejected &&
+            shaderReloadPixels[0] == '64,128,191,255' &&
+            shaderReloadPixels[1] == '191,64,32,255' &&
+            shaderReloadPixels[2] == shaderReloadPixels[1] &&
+            identical(live, shaderReloadProgram) &&
+            live.handle == shaderReloadHandle &&
+            error == web.WebGL2RenderingContext.NO_ERROR;
+        canvas
+          ..setAttribute('data-shader-lab-mode', 'reload')
+          ..setAttribute('data-shader-lab-status', pass ? 'pass' : 'fail')
+          ..setAttribute('data-shader-lab-pixel', shaderReloadPixels.last)
+          ..setAttribute('data-shader-lab-steps', shaderReloadPixels.join(';'))
+          ..setAttribute('data-shader-lab-gl-error', '$error');
+        _setStatus(
+          'shader lab reload: ${pass ? 'PASS' : 'FAIL'}; '
+          '${shaderReloadPixels.join(' → ')}; GL error $error',
         );
       }
     }
@@ -1803,6 +1898,52 @@ void _boot() {
   }
 
   web.window.requestAnimationFrame(tick.toJS);
+}
+
+Uint8List _shaderLabCenterPixel(web.WebGL2RenderingContext gl) {
+  final pixel = Uint8List(4);
+  gl.readPixels(
+    gl.drawingBufferWidth ~/ 2,
+    gl.drawingBufferHeight ~/ 2,
+    1,
+    1,
+    web.WebGL2RenderingContext.RGBA,
+    web.WebGL2RenderingContext.UNSIGNED_BYTE,
+    pixel.toJS,
+  );
+  return pixel;
+}
+
+void _publishShaderLabPresentProof(
+  web.WebGL2RenderingContext gl,
+  web.HTMLCanvasElement canvas,
+  ProgramLibrary programs, {
+  required bool expectOverride,
+}) {
+  final pixel = _shaderLabCenterPixel(gl);
+  final error = gl.getError();
+  final colorMatches =
+      (pixel[0] - 64).abs() <= 2 &&
+      (pixel[1] - 128).abs() <= 2 &&
+      (pixel[2] - 191).abs() <= 2 &&
+      pixel[3] == 255;
+  final pass =
+      (!expectOverride || colorMatches) &&
+      error == web.WebGL2RenderingContext.NO_ERROR &&
+      programs.programFor('present')?.isHostOverride == expectOverride;
+  canvas
+    ..setAttribute('data-shader-lab-status', pass ? 'pass' : 'fail')
+    ..setAttribute(
+      'data-shader-lab-mode',
+      expectOverride ? 'present' : 'default',
+    )
+    ..setAttribute('data-shader-lab-pixel', pixel.join(','))
+    ..setAttribute('data-shader-lab-gl-error', '$error');
+  _setStatus(
+    'shader lab ${expectOverride ? 'present' : 'default'}: '
+    '${pass ? 'PASS' : 'FAIL'}; '
+    'center RGBA ${pixel.join(',')}; GL error $error',
+  );
 }
 
 void _startGpuTimingProbe(WebGl2Device device, RenderCapabilities caps) {

@@ -65,6 +65,7 @@ final class TextureStore {
     final texture = _device.createTexture(
       const GpuTextureDescriptor(width: 1, height: 1),
     );
+    _revision += 1;
     _device.uploadTextureLayer(texture, 0, pixels);
     return texture;
   }
@@ -111,6 +112,7 @@ final class TextureStore {
     final texture = _texturesBySlot[handle.slot] ??= _device.createTexture(
       record.descriptor,
     );
+    _revision += 1;
     _device.uploadTextureLayer(texture, layer, pixels);
   }
 
@@ -125,6 +127,7 @@ final class TextureStore {
         'TextureStore.finalizeMips: no pixels uploaded yet for $handle',
       );
     }
+    _revision += 1;
     _device.finalizeMips(texture);
     _registry.updateDescriptor(handle, record.withMipsFinalized());
   }
@@ -188,6 +191,7 @@ final class TextureStore {
   GpuObject get fallbackLightmap => _fallbackLightmap;
 
   void release(TextureHandle handle) {
+    _revision += 1;
     final texture = _texturesBySlot.remove(handle.slot);
     if (texture != null) {
       _device.deleteTexture(texture);
@@ -222,15 +226,22 @@ final class TextureStore {
       for (var layer = 0; layer < record.layerPixels.length; layer++) {
         final pixels = record.layerPixels[layer];
         if (pixels != null) {
+          _revision += 1;
           _device.uploadTextureLayer(texture, layer, pixels);
         }
       }
       if (record.mipsFinalized) {
+        _revision += 1;
         _device.finalizeMips(texture);
       }
       _texturesBySlot[handle.slot] = texture;
     }
   }
+
+  /// Bumped whenever any texture's contents change, so caches built from
+  /// sampled textures (the shadow map) know to rebuild.
+  int get revision => _revision;
+  int _revision = 0;
 
   int get liveCount => _registry.liveCount;
   int get createCount => _registry.createCount;

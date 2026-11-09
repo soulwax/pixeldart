@@ -931,15 +931,20 @@ final app = await PixeldartApp.mount2d(
 ```
 
 `mySpriteFragmentGlsl` is a complete GLSL ES 3.0 source string that the host
-loads or embeds. It must keep the sprite pass's inputs (`vUv`, `vColor`,
-`vParams`), engine uniforms (`uTex`, `uLinearize`, `uMultiply`), and
-`oColor`/`oGlow` outputs. The default vertex stage supplies the inputs. Other
+loads or embeds. It may omit inputs and uniforms it does not use. Inputs and
+engine uniforms it does declare must keep their default types, while its
+`oColor`/`oGlow` outputs must keep the pass's attachment locations and types.
+The default vertex stage supplies any declared inputs. Other
 slots follow their pass's `ProgramSource` binding contract and authored GLSL
 under `shaders/rendering/`. The [slot contract](docs/shader_overrides.md)
 lists every default stage, vertex input, sampler unit and attachment output,
 with links to the exact uniform and varying declarations. Fragment overrides
 must preserve the pass's output locations and types. Only slots installed by
 the selected profile compile or draw.
+
+The first [browser renderer lab](docs/browser_renderer_lab.md) fixture checks a
+full `present` fragment override with in-frame pixel readback and GL error
+reporting on a hardware adapter.
 
 For a live change between frames, call
 `await app.setShader(ShaderSlot.sprites, ShaderOverride(fragment: nextSource))`.
