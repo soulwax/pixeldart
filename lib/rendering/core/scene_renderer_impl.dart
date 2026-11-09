@@ -37,6 +37,7 @@ import 'graph_resource.dart';
 import 'program_library.dart';
 import 'render_feature.dart';
 import 'render_world_impl.dart';
+import 'shader_bindings.dart';
 import 'sort_key.dart';
 import 'visibility.dart';
 part 'scene_renderer_graph.dart';
@@ -62,6 +63,10 @@ final class SceneRendererImpl with _GpuTimingSupport implements SceneRenderer {
   // graph are actually built from.
   RendererConfiguration? _allocated;
   MsaaStatus _msaa = const MsaaStatus.off();
+  final ShaderBindingTable _shaderBindings = ShaderBindingTable();
+  final Map<ShaderHandle, ShaderOverride> _spriteShaders = {};
+  SpritesFeature? _sprites;
+  int _nextShaderId = 1;
   FrameInput? _activeFrame;
   RenderWorldImpl? _activeWorld;
   SceneRendererImpl(this.device);
@@ -79,8 +84,69 @@ final class SceneRendererImpl with _GpuTimingSupport implements SceneRenderer {
   @override
   MsaaStatus get msaa => _msaa;
   @override
-  Map<ShaderSlot, String> get shaderErrors =>
+  Map<ShaderTarget, String> get shaderErrors =>
       _programs?.overrideErrors ?? const {};
+  @override
+  void setShaderUniform(ShaderTarget target, String name, ShaderUniform value) {
+    if (!_shaderBindings.hasUniform(target, name)) {
+      _rejectEngineName(target, name);
+    }
+    _shaderBindings.setUniform(target, name, value);
+  }
+
+  @override
+  void setShaderTexture(
+    ShaderTarget target,
+    String name,
+    TextureHandle texture,
+  ) {
+    if (!_shaderBindings.hasTexture(target, name)) {
+      _rejectEngineName(target, name);
+    }
+    _shaderBindings.setTexture(target, name, texture);
+  }
+
+  // The pass sets its own uniforms after the host's, so a value bound to an
+  // engine name would silently never apply.
+  void _rejectEngineName(ShaderTarget target, String name) {
+    final programs =
+        _programs ?? (throw StateError('renderer is not initialized'));
+    if (programs.isEngineUniform(target, name)) {
+      throw ArgumentError(
+        '${target.label} uniform "$name" is set by the renderer; '
+        'give the host value another name',
+      );
+    }
+  }
+
+  @override
+  ShaderHandle registerSpriteShader(
+    ShaderOverride shader, {
+    String? debugLabel,
+  }) {
+    _ensureReady();
+    shader.validate();
+    final handle = ShaderHandle(_nextShaderId++, debugLabel);
+    _sprites!.publishShader(handle, shader);
+    _spriteShaders[handle] = shader;
+    _shaderBindings.add(handle, shader);
+    return handle;
+  }
+
+  @override
+  void releaseSpriteShader(ShaderHandle handle) {
+    if (_spriteShaders.remove(handle) == null) return;
+    _sprites?.releaseShader(handle);
+    _shaderBindings.remove(handle);
+  }
+
+  void _syncShaderBindings(RendererConfiguration configuration) =>
+      _shaderBindings.sync(<ShaderTarget, ShaderOverride>{
+        ...configuration.shaderOverrides,
+        for (final entry in configuration.postEffects.entries)
+          PostEffect(entry.key): entry.value,
+      });
+
   @override
   ResourceLibrary get resources =>
       _resources ?? (throw StateError('renderer is not initialized'));
@@ -118,6 +184,7 @@ final class SceneRendererImpl with _GpuTimingSupport implements SceneRenderer {
       _configuration = configuration;
       _allocated = allocation.configuration;
       _msaa = allocation.msaa;
+      _syncShaderBindings(configuration);
       _buildSafeGraph();
       _state = RendererState.ready;
       _markContextSeen();
@@ -253,6 +320,8 @@ final class SceneRendererImpl with _GpuTimingSupport implements SceneRenderer {
     _resources?.dispose();
     _resources = null;
     _featureGraph = null;
+    _sprites = null;
+    _spriteShaders.clear();
     _graph = null;
     _programs = null;
     _gpuResources = null;

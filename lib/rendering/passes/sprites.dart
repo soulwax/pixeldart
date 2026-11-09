@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import '../api/handles.dart';
 import '../api/settings.dart';
+import '../api/shaders.dart';
 import '../core/frame_queue.dart';
 import '../core/graph_pass.dart';
 import '../core/graph_resource.dart';
@@ -21,8 +22,9 @@ final class SpriteProgramSource {
   static ProgramSource build({
     required String vertexSource,
     required String fragmentSource,
+    String id = 'sprites',
   }) => ProgramSource(
-    id: 'sprites',
+    id: id,
     vertexSource: vertexSource,
     fragmentSource: fragmentSource,
     attributeLocations: const {
@@ -111,6 +113,10 @@ final class SpritesFeature implements RenderFeature {
 
   final bool clearGlow;
 
+  /// Registered per-draw shaders to build along with this feature's passes.
+  final Map<ShaderHandle, ShaderOverride> registeredShaders;
+
+  final Map<ShaderHandle, CompiledProgram> _shaderPrograms = {};
   CompiledProgram? _program;
   GpuObject? _quad;
   final Map<SpriteBatch, _BatchEntry> _entries = {};
@@ -138,7 +144,33 @@ final class SpritesFeature implements RenderFeature {
     required this.sceneColorResource,
     this.outputEncoding = ColorEncoding.srgb,
     this.clearGlow = false,
+    this.registeredShaders = const {},
   });
+
+  /// Compiles [shader] for draws that select [handle]. With [allowFallback],
+  /// a failure draws with the built-in sprite shader and is reported through
+  /// `shaderErrors`; without it the failure is thrown.
+  void publishShader(
+    ShaderHandle handle,
+    ShaderOverride shader, {
+    bool allowFallback = false,
+  }) {
+    _shaderPrograms[handle] = programLibrary.publishVariant(
+      source: SpriteProgramSource.build(
+        vertexSource: spriteVertSrc,
+        fragmentSource: spriteFragSrc,
+        id: 'sprites#${handle.id}',
+      ),
+      target: handle,
+      variant: shader,
+      allowFallback: allowFallback,
+    );
+  }
+
+  void releaseShader(ShaderHandle handle) {
+    _shaderPrograms.remove(handle);
+    programLibrary.releaseVariant(handle);
+  }
 
   int get retainedCount {
     var count = 0;
@@ -171,6 +203,11 @@ final class SpritesFeature implements RenderFeature {
         vertexSource: vertexSource,
         fragmentSource: fragmentSource,
       ),
+    );
+    // A shader that compiled once must not be able to block a resize or a
+    // context restore.
+    registeredShaders.forEach(
+      (handle, shader) => publishShader(handle, shader, allowFallback: true),
     );
     final quad = device.createBuffer(
       const GpuBufferDescriptor(
@@ -279,9 +316,7 @@ final class SpritesFeature implements RenderFeature {
       }
     }
 
-    encoder.useProgram(_program!.handle);
-    encoder.setUniform('uTex', const UniformValue.sampler(0));
-    encoder.setUniform('uLinearize', UniformValue.float1(linearize ? 1 : 0));
+    CompiledProgram? boundProgram;
     GpuObject? boundTexture;
     DrawStateDescriptor? boundState;
     var multiply = -1;
@@ -289,6 +324,21 @@ final class SpritesFeature implements RenderFeature {
     for (var i = 0; i < count; i += 1) {
       final submission = submissions.spriteAt(i);
       if (submission.stage != stage) continue;
+      final selected = submission.shader;
+      final program = selected == null
+          ? _program!
+          : _shaderPrograms[selected] ?? _program!;
+      if (!identical(program, boundProgram)) {
+        // Uniforms belong to the program, so a switch sets them again.
+        encoder.useProgram(program.handle);
+        encoder.setUniform('uTex', const UniformValue.sampler(0));
+        encoder.setUniform(
+          'uLinearize',
+          UniformValue.float1(linearize ? 1 : 0),
+        );
+        boundProgram = program;
+        multiply = -1;
+      }
       final batch = submission.batch;
       final vertices = offsets[i] < 0 ? _entries[batch]!.retained! : stream!;
       final base = offsets[i] < 0 ? 0 : offsets[i];

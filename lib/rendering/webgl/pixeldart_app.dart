@@ -84,7 +84,7 @@ final class PixeldartApp {
   PostProcessState post = const PostProcessState();
   bool showStats = false;
 
-  Map<ShaderSlot, String> get shaderErrors => renderer.shaderErrors;
+  Map<ShaderTarget, String> get shaderErrors => renderer.shaderErrors;
 
   Future<void> setShader(ShaderSlot slot, ShaderOverride? replacement) {
     final next = {...renderer.configuration.shaderOverrides};
@@ -94,6 +94,50 @@ final class PixeldartApp {
       next[slot] = replacement;
     }
     return renderer.configure(renderer.configuration.withShaderOverrides(next));
+  }
+
+  /// Sets a uniform declared by [target]'s shader: a [ShaderSlot], a
+  /// [ShaderHandle] or a [PostEffect]. Cheap enough to call every frame: it
+  /// never recompiles, and an unchanged value does nothing.
+  void setShaderUniform(
+    ShaderTarget target,
+    String name,
+    ShaderUniform value,
+  ) => renderer.setShaderUniform(target, name, value);
+
+  /// Points a `sampler2D` declared by [target]'s shader at [texture].
+  void setShaderTexture(
+    ShaderTarget target,
+    String name,
+    TextureHandle texture,
+  ) => renderer.setShaderTexture(target, name, texture);
+
+  /// Compiles a sprite shader for `drawSprites(shader:)`. Throws
+  /// `ShaderCompileException` if it does not compile.
+  ShaderHandle createSpriteShader(
+    ShaderOverride shader, {
+    String? debugLabel,
+  }) => renderer.registerSpriteShader(shader, debugLabel: debugLabel);
+
+  void releaseSpriteShader(ShaderHandle handle) =>
+      renderer.releaseSpriteShader(handle);
+
+  /// Replaces the host post-process stack between frames. Stages run in map
+  /// order, after the built-in stages. An empty map costs nothing.
+  Future<void> setPostEffects(Map<String, ShaderOverride> effects) =>
+      renderer.configure(
+        renderer.configuration.copyWith(postEffects: Map.unmodifiable(effects)),
+      );
+
+  /// Fetches GLSL source, for building a [ShaderOverride] from a shader file.
+  static Future<String> loadShaderSource(String url) async {
+    final response = await web.window.fetch(url.toJS).toDart;
+    if (!response.ok) {
+      throw StateError(
+        'loadShaderSource: failed to fetch $url (${response.status})',
+      );
+    }
+    return (await response.text().toDart).toDart;
   }
 
   /// The sample count in use, the one requested, and why they differ.
@@ -218,6 +262,7 @@ final class PixeldartApp {
   static Future<PixeldartApp?> mount(
     web.HTMLCanvasElement canvas, {
     Map<ShaderSlot, ShaderOverride> shaders = const {},
+    Map<String, ShaderOverride> postEffects = const {},
     QualityProfile requestedProfile = QualityProfile.clean,
     double maxDevicePixelRatio = 2.0,
     RendererConfiguration Function(QualityProfile)? configBuilder,
@@ -235,13 +280,20 @@ final class PixeldartApp {
             sampleCount: p.kind == QualityProfileKind.high ? 2 : 1,
             shadowMapCount: p == QualityProfile.safe ? 0 : 1,
             shaderOverrides: shaders,
+            postEffects: postEffects,
           )
         : (p, _) {
             final configuration = configBuilder(p);
-            return configuration.withShaderOverrides({
-              ...configuration.shaderOverrides,
-              ...shaders,
-            });
+            return configuration.copyWith(
+              shaderOverrides: Map.unmodifiable({
+                ...configuration.shaderOverrides,
+                ...shaders,
+              }),
+              postEffects: Map.unmodifiable({
+                ...configuration.postEffects,
+                ...postEffects,
+              }),
+            );
           },
     followCanvasSize: configBuilder == null,
     showStats: showStats,
@@ -251,6 +303,7 @@ final class PixeldartApp {
   static Future<PixeldartApp?> mount2d(
     web.HTMLCanvasElement canvas, {
     Map<ShaderSlot, ShaderOverride> shaders = const {},
+    Map<String, ShaderOverride> postEffects = const {},
     bool bloom = false,
     double maxDevicePixelRatio = 2,
     LinearColor clearColor = const LinearColor(0, 0, 0),
@@ -267,6 +320,7 @@ final class PixeldartApp {
         internalHeight: surface.pixelHeight,
         outputEncoding: ColorEncoding.linear,
         shaderOverrides: shaders,
+        postEffects: postEffects,
       ),
       followCanvasSize: true,
       showStats: false,
@@ -1028,19 +1082,9 @@ final class PixeldartApp {
     }
     renderer
         .configure(
-          RendererConfiguration(
-            profile: c.profile,
+          c.copyWith(
             internalWidth: _surface.pixelWidth,
             internalHeight: _surface.pixelHeight,
-            sampleCount: c.sampleCount,
-            outputEncoding: c.outputEncoding,
-            shadowMapCount: c.shadowMapCount,
-            shadowMapSize: c.shadowMapSize,
-            materialTableCapacity: c.materialTableCapacity,
-            lightTableCapacity: c.lightTableCapacity,
-            textureArrayLayerCapacity: c.textureArrayLayerCapacity,
-            diagnosticLevel: c.diagnosticLevel,
-            shaderOverrides: c.shaderOverrides,
           ),
         )
         .catchError(_report);

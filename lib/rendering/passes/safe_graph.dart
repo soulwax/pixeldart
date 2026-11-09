@@ -3,8 +3,11 @@ import '../core/graph_resource.dart';
 import '../core/program_library.dart';
 import '../core/render_feature.dart';
 import '../api/settings.dart';
+import '../api/shaders.dart';
 import '../webgl/device_api.dart';
 import '../webgl/generated_shaders.dart';
+import 'host_post.dart';
+import 'post_chain.dart';
 import 'present.dart';
 import 'safe_graph_resources.dart';
 import 'bloom.dart';
@@ -26,6 +29,7 @@ FeatureGraph buildSafeGraph(
   GpuObject Function()? resolveResolvedSceneColor,
   GpuObject Function()? resolveBloomBlurH,
   GpuObject Function()? resolveBloomBlurV,
+  Map<String, ShaderOverride> postEffects = const {},
 }) {
   final sceneColor = ResourceRef(
     name: SafeGraphResources.sceneColor.name,
@@ -93,6 +97,17 @@ FeatureGraph buildSafeGraph(
     ]);
     postResource = layout.sceneColorPostBloom;
   }
+  final chain = PostChain();
+  postResource = appendPostEffects(
+    postFeatures,
+    programLibrary: programLibrary,
+    device: device,
+    effects: postEffects,
+    input: postResource,
+    width: internalWidth,
+    height: internalHeight,
+    chain: chain,
+  );
   final present = PresentFeature(
     programLibrary: programLibrary,
     vertexSource: presentVertSrc,
@@ -100,6 +115,7 @@ FeatureGraph buildSafeGraph(
     device: device,
     sceneColorResource: postResource,
     outputEncoding: outputEncoding,
+    chain: chain,
   );
   final resolve = sampleCount > 1
       ? MsaaResolveFeature(

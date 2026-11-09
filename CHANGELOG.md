@@ -31,6 +31,7 @@
 - `doubleSided` back faces were lit with the front face's normal, so they shaded as if facing away from the viewer. The normal (including the normal-mapped one) is now reversed on back faces.
 
 - VHS could not run through `SceneRenderer`. The graph was built with `hasValidPreviousFrame: false`, so any profile with VHS (`ps1Full`) failed to initialize with `invalidHistoryRead`. Beyond that, the pass sampled `vhsOutput` as history while rendering into it, a WebGL feedback loop that drops the draw. VHS now ping-pongs between `vhsOutput` and a new `vhsHistory` target. It ghosts nothing on its first draw, or on the first draw after a bypass, instead of echoing a cleared or stale frame. The fake test device now rejects any draw that samples its own render target.
+- Full-screen features never freed their empty vertex arrays, so every graph rebuild (each canvas resize) leaked a few. Bloom, DOF, SSAO, grade, PS1, VHS and depth debug now release them on dispose.
 
 ### Added
 
@@ -50,6 +51,16 @@
 - **Sky:** `SkyboxDeclaration.copyWith`, `setSolarTime(coherentHorizon:)` and `app.matchHorizonToFog()`.
 - **Fog:** `enableVolumetricFog(jitter:)`.
 - **Docs:** `docs/conventions.md`; `examples/`, three games built on the public API.
+- **Host shaders:**
+  - `ShaderOverride.effect` writes a post effect for `grade`, `ps1Quantize`, `vhs` or `dofComposite` as one GLSL function. Compile errors report the snippet's own line numbers.
+  - `ShaderUniform` and `ShaderOverride(uniforms:, textures:)` give overrides typed values with no GL handles. `app.setShaderUniform` and `app.setShaderTexture` change them live without recompiling, and live values survive resizes, graph rebuilds and context restores. Uniforms are uploaded only when they change.
+  - `pdTime` and `pdResolution` are filled automatically in any override that declares them.
+  - `PixeldartApp.loadShaderSource` fetches GLSL from a URL.
+  - `RendererConfiguration.postEffects`, `mount(postEffects:)`, `mount2d(postEffects:)` and `app.setPostEffects` add host post-process stages before present on any profile.
+  - `app.createSpriteShader` registers a sprite shader, selected per draw with `drawSprites(shader:)`. `ShaderOverride.effect` also works on `sprites`.
+  - `setShaderUniform` and `setShaderTexture` accept any `ShaderTarget`: a `ShaderSlot`, `ShaderHandle` or `PostEffect`. `shaderErrors` is keyed the same way.
+  - `RendererConfiguration.copyWith`.
+  - With no override active, none of this adds work to a frame.
 - **MSAA:** `sampleCount` is now a request. The renderer clamps it to `RenderCapabilities.maxSamples`, and steps down (halving to 1×) when a multisampled framebuffer is incomplete. It negotiates again after a context restore. `renderer.msaa` / `app.msaa` report the requested and effective counts and a `MsaaFallbackReason`; `renderer.configuration` keeps the request. `app.setSampleCount(n)` changes it between frames; `RendererConfiguration.withSampleCount` copies a configuration.
 
 ### Changed
@@ -66,6 +77,7 @@
   - `PixeldartApp` re-reads the canvas size only after a `ResizeObserver` reports a change, instead of forcing layout every frame.
 
 - Zero-cost post chain: DOF composite, LUT grade, PS1 quantize and VHS no longer draw a full-screen pass when their settings make them an identity. That covers DOF strength 0, grade strength 0, 8-bit quantization without dither, and all VHS weights 0 after reduced motion. A per-graph `PostChain` forwards the stage's input, so the next stage and present sample it directly. The default `clean` profile, with DOF and grade off, saves two full-screen passes per frame. Covered by `test_post_chain`.
+- Shader overrides may ignore engine attributes and uniforms. They were rejected as "missing required" when a host shader didn't use one, including when the driver stripped a declared but unused input.
 - The MSAA resolve target holds only what later passes read. It has color always, glow only when bloom is installed, and never depth, since no pass after the resolve depth-tests or samples it. The resolve blits only attachments both sides own. Before this, every MSAA frame copied depth (and glow without bloom) into storage nobody read. At 1080p that is up to about 16 MiB of memory and two full-screen blits per frame. 1× still allocates no multisample storage and runs no resolve.
 
 - `SkyboxDeclaration.validate` names every invalid field. `cloudSampleCount` is only checked while clouds are drawn.

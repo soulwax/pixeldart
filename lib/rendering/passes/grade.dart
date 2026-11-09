@@ -9,6 +9,7 @@ import '../webgl/device_api.dart';
 import '../webgl/draw_encoder.dart';
 import 'dof_resources.dart';
 import 'grade_resources.dart';
+import 'empty_vao_owner.dart';
 import 'pass_context_impl.dart';
 import 'post_chain.dart';
 
@@ -26,10 +27,11 @@ final class GradeProgramSource {
   );
 }
 
-final class GradeFeature implements RenderFeature {
+final class GradeFeature with EmptyVaoOwner implements RenderFeature {
   final ProgramLibrary programLibrary;
   final String vertexSource;
   final String fragmentSource;
+  @override
   final GpuDevice device;
   final GpuObject Function() resolveLut;
   final double lutSize;
@@ -74,7 +76,7 @@ final class GradeFeature implements RenderFeature {
         fragmentSource: fragmentSource,
       ),
     );
-    final emptyVao = device.createVertexArray();
+    final emptyVao = createEmptyVao();
     return [
       _GradePass(
         descriptor: PassDescriptor(
@@ -100,7 +102,7 @@ final class GradeFeature implements RenderFeature {
   }
 
   @override
-  void dispose() {}
+  void dispose() => releaseEmptyVaos();
 }
 
 final class _GradePass implements RenderPass {
@@ -136,7 +138,9 @@ final class _GradePass implements RenderPass {
         ? sceneView.gpuObject
         : chain.source(inputResource, sceneView.gpuObject);
     // mix(scene, graded, 0) is the scene itself.
-    if (chain != null && post.colorGradeStrength == 0) {
+    if (chain != null &&
+        !program.isHostOverride &&
+        post.colorGradeStrength == 0) {
       chain.bypass(outputResource, input);
       return;
     }

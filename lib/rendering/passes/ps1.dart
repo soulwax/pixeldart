@@ -8,6 +8,7 @@ import '../core/render_graph.dart';
 import '../webgl/device_api.dart';
 import '../webgl/draw_encoder.dart';
 import 'grade_resources.dart';
+import 'empty_vao_owner.dart';
 import 'pass_context_impl.dart';
 import 'post_chain.dart';
 import 'ps1_resources.dart';
@@ -26,10 +27,11 @@ final class Ps1QuantizeProgramSource {
   );
 }
 
-final class Ps1QuantizeFeature implements RenderFeature {
+final class Ps1QuantizeFeature with EmptyVaoOwner implements RenderFeature {
   final ProgramLibrary programLibrary;
   final String vertexSource;
   final String fragmentSource;
+  @override
   final GpuDevice device;
   final ResourceRef inputResource;
   final ResourceRef outputResource;
@@ -70,7 +72,7 @@ final class Ps1QuantizeFeature implements RenderFeature {
         fragmentSource: fragmentSource,
       ),
     );
-    final emptyVao = device.createVertexArray();
+    final emptyVao = createEmptyVao();
     return [
       _Ps1QuantizePass(
         descriptor: PassDescriptor(
@@ -94,7 +96,7 @@ final class Ps1QuantizeFeature implements RenderFeature {
   }
 
   @override
-  void dispose() {}
+  void dispose() => releaseEmptyVaos();
 }
 
 final class _Ps1QuantizePass implements RenderPass {
@@ -128,6 +130,7 @@ final class _Ps1QuantizePass implements RenderPass {
     // 8-bit quantization of an RGBA8 source with no dither offset rounds
     // every texel back to itself (see ps1_quantize.frag).
     if (chain != null &&
+        !program.isHostOverride &&
         post.quantizationBits == 8 &&
         post.ditherStrength == 0) {
       chain.bypass(outputResource, input);

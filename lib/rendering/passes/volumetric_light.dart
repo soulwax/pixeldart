@@ -13,6 +13,7 @@ import '../webgl/device_api.dart';
 import '../webgl/draw_encoder.dart';
 import '../webgl/state_cache.dart';
 import '../math/vec.dart';
+import 'empty_vao_owner.dart';
 import 'pass_context_impl.dart';
 import 'volumetric_light_resources.dart';
 
@@ -74,11 +75,12 @@ final class VolumetricCompositeProgramSource {
   );
 }
 
-final class VolumetricLightFeature implements RenderFeature {
+final class VolumetricLightFeature with EmptyVaoOwner implements RenderFeature {
   final ProgramLibrary programLibrary;
   final String vertexSource;
   final String fragmentSource;
   final String? compositeFragmentSource;
+  @override
   final GpuDevice device;
   final GpuObject Function() resolveSceneDepth;
   final CameraView Function() resolveCamera;
@@ -86,7 +88,6 @@ final class VolumetricLightFeature implements RenderFeature {
   final ResourceRef sceneDepthResource;
   final ResourceRef? sceneColorResource;
   final ResourceRef? sceneColorOutputResource;
-  final List<GpuObject> _emptyVaos = [];
 
   VolumetricLightFeature({
     required this.programLibrary,
@@ -145,8 +146,7 @@ final class VolumetricLightFeature implements RenderFeature {
         fragmentSource: fragmentSource,
       ),
     );
-    final emptyVao = device.createVertexArray();
-    _emptyVaos.add(emptyVao);
+    final emptyVao = createEmptyVao();
     final passes = <RenderPass>[
       _VolumetricLightPass(
         descriptor: PassDescriptor(
@@ -179,8 +179,7 @@ final class VolumetricLightFeature implements RenderFeature {
           fragmentSource: compositeSource,
         ),
       );
-      final compositeVao = device.createVertexArray();
-      _emptyVaos.add(compositeVao);
+      final compositeVao = createEmptyVao();
       passes.add(
         _VolumetricCompositePass(
           descriptor: PassDescriptor(
@@ -207,12 +206,7 @@ final class VolumetricLightFeature implements RenderFeature {
   }
 
   @override
-  void dispose() {
-    for (final vao in _emptyVaos) {
-      device.deleteVertexArray(vao);
-    }
-    _emptyVaos.clear();
-  }
+  void dispose() => releaseEmptyVaos();
 }
 
 final class _VolumetricLightPass implements RenderPass {

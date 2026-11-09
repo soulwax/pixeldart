@@ -190,7 +190,8 @@ ConfigurationDelta _delta(
       before.sampleCount != after.sampleCount ||
       before.outputEncoding != after.outputEncoding ||
       before.shadowMapCount != after.shadowMapCount ||
-      before.shadowMapSize != after.shadowMapSize;
+      before.shadowMapSize != after.shadowMapSize ||
+      !_samePostEffects(before, after);
   final resourceTablesChanged =
       before.materialTableCapacity != after.materialTableCapacity ||
       before.lightTableCapacity != after.lightTableCapacity ||
@@ -205,6 +206,20 @@ ConfigurationDelta _delta(
     shadersChanged: !_sameShaders(before, after),
     diagnosticLevelChanged: before.diagnosticLevel != after.diagnosticLevel,
   );
+}
+
+// Post effects are graph stages, and their order matters.
+bool _samePostEffects(
+  RendererConfiguration before,
+  RendererConfiguration after,
+) {
+  final a = before.postEffects.entries.toList();
+  final b = after.postEffects.entries.toList();
+  if (a.length != b.length) return false;
+  for (var i = 0; i < a.length; i += 1) {
+    if (a[i].key != b[i].key || a[i].value != b[i].value) return false;
+  }
+  return true;
 }
 
 bool _sameShaders(RendererConfiguration before, RendererConfiguration after) {

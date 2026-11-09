@@ -943,9 +943,30 @@ and retains pass objects, render targets, buffers and textures. A rejected
 startup override uses the default and is
 listed in `app.shaderErrors`. Low-level hosts pass the same map through
 `RendererConfiguration(shaderOverrides: ...)` and inspect
-`renderer.shaderErrors`. Overrides keep the built-in pass layout; custom
-uniforms, extra textures, per-draw shader choice and new graph passes remain
-separate work in [PLAN.md](../PLAN.md).
+`renderer.shaderErrors`.
+
+A post effect can be a single function, with its own uniforms updated live:
+
+```dart
+final app = await PixeldartApp.mount(canvas, shaders: {
+  ShaderSlot.grade: ShaderOverride.effect('''
+    vec4 effect(vec4 color, vec2 uv) {
+      return vec4(color.rgb * uTint, color.a);
+    }
+  ''', uniforms: {'uTint': ShaderUniform.vec3(1, 0.8, 0.6)}),
+});
+
+app!.setShaderUniform(ShaderSlot.grade, 'uTint', ShaderUniform.vec3(0.6, 0.8, 1));
+```
+
+`app.setShaderTexture` binds a `TextureHandle` to a declared sampler, and any
+override can declare `pdTime` and `pdResolution`.
+
+`postEffects` adds your own stages before present on any profile, including
+`mount2d`. `app.createSpriteShader` registers a sprite shader that a single
+draw selects with `drawSprites(batch, camera, shader: handle)`. The
+[slot contract](docs/shader_overrides.md) has the details. Choosing a shader
+per world material remains separate work in [PLAN.md](../PLAN.md).
 
 ## Testing
 

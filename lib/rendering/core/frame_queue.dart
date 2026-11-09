@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import '../api/scene.dart';
+import '../api/shaders.dart';
 import '../sprites/sprite_batch.dart';
 import '../sprites/sprite_encoder.dart';
 
@@ -27,6 +28,7 @@ final class SpriteSubmission {
   final Float32List viewProjection = Float32List(16);
   SpriteStage stage = SpriteStage.world;
   bool depthTest = false;
+  ShaderHandle? shader;
 }
 
 abstract interface class SpriteSubmissions {
@@ -76,9 +78,12 @@ final class FrameQueue
     required Float32List viewProjection,
     SpriteStage stage = SpriteStage.world,
     bool depthTest = false,
+    ShaderHandle? shader,
   }) {
     if (_state != FrameQueueState.active) {
-      throw StateError('FrameQueue.submitSprites called outside an active frame');
+      throw StateError(
+        'FrameQueue.submitSprites called outside an active frame',
+      );
     }
     if (viewProjection.length != 16) {
       throw ArgumentError('viewProjection must have 16 elements');
@@ -88,7 +93,8 @@ final class FrameQueue
     final submission = _sprites[_spriteCount++]
       ..batch = batch
       ..stage = stage
-      ..depthTest = depthTest;
+      ..depthTest = depthTest
+      ..shader = shader;
     submission.viewProjection.setAll(0, viewProjection);
   }
 

@@ -10,6 +10,8 @@
     "world/shadowed_world.frag": "shadowedWorldFragSrc",
     "post/present.vert": "presentVertSrc",
     "post/present.frag": "presentFragSrc",
+    "post/host_effect.frag": "hostEffectFragSrc",
+    "sprites/sprite_effect.frag": "spriteEffectFragSrc",
     "depth/depth_prepass.vert": "depthPrepassVertSrc",
     "depth/depth_prepass.frag": "depthPrepassFragSrc",
     "post/depth_debug.frag": "depthDebugFragSrc",

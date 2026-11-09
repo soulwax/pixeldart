@@ -60,7 +60,29 @@ abstract interface class SceneRenderer {
 
   MsaaStatus get msaa;
 
-  Map<ShaderSlot, String> get shaderErrors;
+  Map<ShaderTarget, String> get shaderErrors;
+
+  /// Sets a uniform declared by [target]'s shader. Takes effect at the next
+  /// draw, never recompiles, and survives resizes and context restores.
+  void setShaderUniform(ShaderTarget target, String name, ShaderUniform value);
+
+  /// Points a `sampler2D` declared by [target]'s shader at [texture].
+  void setShaderTexture(
+    ShaderTarget target,
+    String name,
+    TextureHandle texture,
+  );
+
+  /// Compiles a sprite shader that individual draws can select with
+  /// `drawSprites(shader:)`. Throws `ShaderCompileException` if it is invalid.
+  ShaderHandle registerSpriteShader(
+    ShaderOverride shader, {
+    String? debugLabel,
+  });
+
+  /// Frees a registered shader. Draws still naming it use the default.
+  void releaseSpriteShader(ShaderHandle handle);
+
   ResourceLibrary get resources;
 
   Future<void> initialize(

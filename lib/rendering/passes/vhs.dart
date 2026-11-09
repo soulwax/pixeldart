@@ -7,6 +7,7 @@ import '../core/render_feature.dart';
 import '../core/render_graph.dart';
 import '../webgl/device_api.dart';
 import '../webgl/draw_encoder.dart';
+import 'empty_vao_owner.dart';
 import 'pass_context_impl.dart';
 import 'post_chain.dart';
 import 'ps1_resources.dart';
@@ -34,10 +35,11 @@ final class VhsProgramSource {
   );
 }
 
-final class VhsFeature implements RenderFeature {
+final class VhsFeature with EmptyVaoOwner implements RenderFeature {
   final ProgramLibrary programLibrary;
   final String vertexSource;
   final String fragmentSource;
+  @override
   final GpuDevice device;
   final GpuObject Function() resolveHistory;
   final double Function() resolveTime;
@@ -91,7 +93,7 @@ final class VhsFeature implements RenderFeature {
         fragmentSource: fragmentSource,
       ),
     );
-    final emptyVao = device.createVertexArray();
+    final emptyVao = createEmptyVao();
     return [
       _VhsPass(
         descriptor: PassDescriptor(
@@ -119,7 +121,7 @@ final class VhsFeature implements RenderFeature {
   }
 
   @override
-  void dispose() {}
+  void dispose() => releaseEmptyVaos();
 }
 
 final class _VhsPass implements RenderPass {
@@ -171,6 +173,7 @@ final class _VhsPass implements RenderPass {
     // Every effect is a mix or offset scaled by its weight, so all-zero
     // weights reproduce the input exactly.
     if (chain != null &&
+        !program.isHostOverride &&
         post.vhsChromaWeight == 0 &&
         trackingWeight == 0 &&
         post.vhsNoiseWeight == 0 &&

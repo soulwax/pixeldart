@@ -128,6 +128,11 @@ final class RendererConfiguration {
 
   final Map<ShaderSlot, ShaderOverride> shaderOverrides;
 
+  /// Host post-process stages, in order, after every built-in stage and
+  /// before present. Each one is a [ShaderOverride.effect] or a full fragment
+  /// stage. Works on every profile, and costs nothing when empty.
+  final Map<String, ShaderOverride> postEffects;
+
   const RendererConfiguration({
     required this.profile,
     required this.internalWidth,
@@ -141,6 +146,7 @@ final class RendererConfiguration {
     this.textureArrayLayerCapacity = 1,
     this.diagnosticLevel = DiagnosticLevel.errorsOnly,
     this.shaderOverrides = const {},
+    this.postEffects = const {},
   });
 
   Map<String, Object> toMap() => {
@@ -156,39 +162,46 @@ final class RendererConfiguration {
     'textureArrayLayerCapacity': textureArrayLayerCapacity,
     'diagnosticLevel': diagnosticLevel.name,
     'shaderOverrides': [for (final slot in shaderOverrides.keys) slot.name],
+    'postEffects': postEffects.keys.toList(),
   };
+
+  RendererConfiguration copyWith({
+    QualityProfile? profile,
+    int? internalWidth,
+    int? internalHeight,
+    int? sampleCount,
+    ColorEncoding? outputEncoding,
+    int? shadowMapCount,
+    int? shadowMapSize,
+    int? materialTableCapacity,
+    int? lightTableCapacity,
+    int? textureArrayLayerCapacity,
+    DiagnosticLevel? diagnosticLevel,
+    Map<ShaderSlot, ShaderOverride>? shaderOverrides,
+    Map<String, ShaderOverride>? postEffects,
+  }) => RendererConfiguration(
+    profile: profile ?? this.profile,
+    internalWidth: internalWidth ?? this.internalWidth,
+    internalHeight: internalHeight ?? this.internalHeight,
+    sampleCount: sampleCount ?? this.sampleCount,
+    outputEncoding: outputEncoding ?? this.outputEncoding,
+    shadowMapCount: shadowMapCount ?? this.shadowMapCount,
+    shadowMapSize: shadowMapSize ?? this.shadowMapSize,
+    materialTableCapacity: materialTableCapacity ?? this.materialTableCapacity,
+    lightTableCapacity: lightTableCapacity ?? this.lightTableCapacity,
+    textureArrayLayerCapacity:
+        textureArrayLayerCapacity ?? this.textureArrayLayerCapacity,
+    diagnosticLevel: diagnosticLevel ?? this.diagnosticLevel,
+    shaderOverrides: shaderOverrides ?? this.shaderOverrides,
+    postEffects: postEffects ?? this.postEffects,
+  );
 
   RendererConfiguration withShaderOverrides(
     Map<ShaderSlot, ShaderOverride> overrides,
-  ) => RendererConfiguration(
-    profile: profile,
-    internalWidth: internalWidth,
-    internalHeight: internalHeight,
-    sampleCount: sampleCount,
-    outputEncoding: outputEncoding,
-    shadowMapCount: shadowMapCount,
-    shadowMapSize: shadowMapSize,
-    materialTableCapacity: materialTableCapacity,
-    lightTableCapacity: lightTableCapacity,
-    textureArrayLayerCapacity: textureArrayLayerCapacity,
-    diagnosticLevel: diagnosticLevel,
-    shaderOverrides: Map.unmodifiable(overrides),
-  );
+  ) => copyWith(shaderOverrides: Map.unmodifiable(overrides));
 
-  RendererConfiguration withSampleCount(int samples) => RendererConfiguration(
-    profile: profile,
-    internalWidth: internalWidth,
-    internalHeight: internalHeight,
-    sampleCount: samples,
-    outputEncoding: outputEncoding,
-    shadowMapCount: shadowMapCount,
-    shadowMapSize: shadowMapSize,
-    materialTableCapacity: materialTableCapacity,
-    lightTableCapacity: lightTableCapacity,
-    textureArrayLayerCapacity: textureArrayLayerCapacity,
-    diagnosticLevel: diagnosticLevel,
-    shaderOverrides: shaderOverrides,
-  );
+  RendererConfiguration withSampleCount(int samples) =>
+      copyWith(sampleCount: samples);
 
   static const RendererConfiguration safe = RendererConfiguration(
     profile: QualityProfile.safe,
@@ -201,6 +214,14 @@ final class RendererConfiguration {
     profile.validate();
     for (final override in shaderOverrides.values) {
       override.validate();
+    }
+    for (final entry in postEffects.entries) {
+      entry.value.validate();
+      if (entry.value.vertex != null) {
+        throw ArgumentError(
+          'post effect "${entry.key}" must not replace the vertex stage',
+        );
+      }
     }
     if (internalWidth <= 0 || internalHeight <= 0) {
       throw ArgumentError(

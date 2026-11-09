@@ -7,6 +7,7 @@ import '../core/render_graph.dart';
 import '../webgl/device_api.dart';
 import '../webgl/draw_encoder.dart';
 import 'depth_resources.dart';
+import 'empty_vao_owner.dart';
 import 'pass_context_impl.dart';
 import 'safe_graph_resources.dart';
 
@@ -24,10 +25,11 @@ final class DepthDebugProgramSource {
   );
 }
 
-final class DepthDebugFeature implements RenderFeature {
+final class DepthDebugFeature with EmptyVaoOwner implements RenderFeature {
   final ProgramLibrary programLibrary;
   final String vertexSource;
   final String fragmentSource;
+  @override
   final GpuDevice device;
   final GpuObject Function() resolveSceneDepth;
   final double near;
@@ -76,7 +78,7 @@ final class DepthDebugFeature implements RenderFeature {
         fragmentSource: fragmentSource,
       ),
     );
-    final emptyVao = device.createVertexArray();
+    final emptyVao = createEmptyVao();
     return [
       _DepthDebugPass(
         descriptor: PassDescriptor(
@@ -107,7 +109,7 @@ final class DepthDebugFeature implements RenderFeature {
   }
 
   @override
-  void dispose() {}
+  void dispose() => releaseEmptyVaos();
 }
 
 final class _DepthDebugPass implements RenderPass {

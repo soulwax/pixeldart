@@ -11,6 +11,7 @@ import '../webgl/device_api.dart';
 import '../webgl/draw_encoder.dart';
 import '../webgl/state_cache.dart';
 import 'bloom_resources.dart';
+import 'empty_vao_owner.dart';
 import 'pass_context_impl.dart';
 import 'safe_graph_resources.dart';
 
@@ -31,10 +32,11 @@ final class BloomBlurProgramSource {
   );
 }
 
-final class BloomBlurFeature implements RenderFeature {
+final class BloomBlurFeature with EmptyVaoOwner implements RenderFeature {
   final ProgramLibrary programLibrary;
   final String vertexSource;
   final String fragmentSource;
+  @override
   final GpuDevice device;
   final String programId;
   final String passId;
@@ -110,7 +112,7 @@ final class BloomBlurFeature implements RenderFeature {
         programId: programId,
       ),
     );
-    final emptyVao = device.createVertexArray();
+    final emptyVao = createEmptyVao();
     final texelStep = _axis == _BloomBlurAxis.horizontal
         ? Float32List.fromList([1.0 / texelWidth, 0.0])
         : Float32List.fromList([0.0, 1.0 / texelHeight]);
@@ -138,7 +140,7 @@ final class BloomBlurFeature implements RenderFeature {
   }
 
   @override
-  void dispose() {}
+  void dispose() => releaseEmptyVaos();
 }
 
 final class _BloomBlurPass implements RenderPass {
@@ -206,10 +208,11 @@ final class BloomCompositeProgramSource {
   );
 }
 
-final class BloomCompositeFeature implements RenderFeature {
+final class BloomCompositeFeature with EmptyVaoOwner implements RenderFeature {
   final ProgramLibrary programLibrary;
   final String vertexSource;
   final String fragmentSource;
+  @override
   final GpuDevice device;
   final GpuObject Function() resolveBloom;
   final ResourceRef bloomResource;
@@ -256,7 +259,7 @@ final class BloomCompositeFeature implements RenderFeature {
         fragmentSource: fragmentSource,
       ),
     );
-    final emptyVao = device.createVertexArray();
+    final emptyVao = createEmptyVao();
     return [
       _BloomCompositePass(
         descriptor: PassDescriptor(
@@ -282,7 +285,7 @@ final class BloomCompositeFeature implements RenderFeature {
   }
 
   @override
-  void dispose() {}
+  void dispose() => releaseEmptyVaos();
 }
 
 final class _BloomCompositePass implements RenderPass {

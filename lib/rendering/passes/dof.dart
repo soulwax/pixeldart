@@ -13,6 +13,7 @@ import '../webgl/draw_encoder.dart';
 import 'bloom_resources.dart';
 import 'depth_resources.dart';
 import 'dof_resources.dart';
+import 'empty_vao_owner.dart';
 import 'pass_context_impl.dart';
 import 'post_chain.dart';
 
@@ -33,10 +34,11 @@ final class DofBlurProgramSource {
   );
 }
 
-final class DofBlurFeature implements RenderFeature {
+final class DofBlurFeature with EmptyVaoOwner implements RenderFeature {
   final ProgramLibrary programLibrary;
   final String vertexSource;
   final String fragmentSource;
+  @override
   final GpuDevice device;
   final String programId;
   final String passId;
@@ -109,7 +111,7 @@ final class DofBlurFeature implements RenderFeature {
         programId: programId,
       ),
     );
-    final emptyVao = device.createVertexArray();
+    final emptyVao = createEmptyVao();
     final texelStep = _axis == _DofBlurAxis.horizontal
         ? Float32List.fromList([1.0 / texelWidth, 0.0])
         : Float32List.fromList([0.0, 1.0 / texelHeight]);
@@ -136,7 +138,7 @@ final class DofBlurFeature implements RenderFeature {
   }
 
   @override
-  void dispose() {}
+  void dispose() => releaseEmptyVaos();
 }
 
 final class _DofBlurPass implements RenderPass {
@@ -204,10 +206,11 @@ final class DofCompositeProgramSource {
   );
 }
 
-final class DofCompositeFeature implements RenderFeature {
+final class DofCompositeFeature with EmptyVaoOwner implements RenderFeature {
   final ProgramLibrary programLibrary;
   final String vertexSource;
   final String fragmentSource;
+  @override
   final GpuDevice device;
   final GpuObject Function() resolveSharp;
   final GpuObject Function() resolveBlurred;
@@ -269,7 +272,7 @@ final class DofCompositeFeature implements RenderFeature {
         fragmentSource: fragmentSource,
       ),
     );
-    final emptyVao = device.createVertexArray();
+    final emptyVao = createEmptyVao();
     return [
       _DofCompositePass(
         descriptor: PassDescriptor(
@@ -300,7 +303,7 @@ final class DofCompositeFeature implements RenderFeature {
   }
 
   @override
-  void dispose() {}
+  void dispose() => releaseEmptyVaos();
 }
 
 final class _DofCompositePass implements RenderPass {
@@ -336,7 +339,9 @@ final class _DofCompositePass implements RenderPass {
     final post = context.frameScene.post as PostProcessState;
     final chain = this.chain;
     // dof_composite.frag copies the sharp input below this strength.
-    if (chain != null && post.depthOfFieldStrength <= 0.0001) {
+    if (chain != null &&
+        !program.isHostOverride &&
+        post.depthOfFieldStrength <= 0.0001) {
       chain.bypass(outputResource, resolveSharp());
       return;
     }

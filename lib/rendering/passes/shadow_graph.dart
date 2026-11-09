@@ -1,6 +1,7 @@
 import '../api/frame.dart';
 import '../api/lights.dart';
 import '../api/settings.dart';
+import '../api/shaders.dart';
 import '../api/capabilities.dart';
 import '../core/feature_graph.dart';
 import '../core/graph_resource.dart';
@@ -25,6 +26,7 @@ import 'volumetric_light.dart';
 import 'world.dart';
 import 'pipeline_resource_layout.dart';
 import 'msaa_resolve.dart';
+import 'host_post.dart';
 import 'post_chain.dart';
 
 export 'world.dart'
@@ -65,6 +67,7 @@ FeatureGraph buildShadowGraph(
   required double Function() resolveTime,
   QualityProfile profile = QualityProfile.ps1Full,
   SpritesFeature? sprites,
+  Map<String, ShaderOverride> postEffects = const {},
 }) {
   if (!profile.installs(PipelineFeatures.shadows)) {
     throw ArgumentError.value(
@@ -346,6 +349,16 @@ FeatureGraph buildShadowGraph(
     );
     postResource = layout.vhsOutput;
   }
+  postResource = appendPostEffects(
+    postFeatures,
+    programLibrary: programLibrary,
+    device: device,
+    effects: postEffects,
+    input: postResource,
+    width: sceneColorWidth,
+    height: sceneColorHeight,
+    chain: chain,
+  );
   final present = PresentFeature(
     programLibrary: programLibrary,
     vertexSource: presentVertSrc,

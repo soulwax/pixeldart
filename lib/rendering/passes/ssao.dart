@@ -10,6 +10,7 @@ import '../core/render_feature.dart';
 import '../core/render_graph.dart';
 import '../webgl/device_api.dart';
 import '../webgl/draw_encoder.dart';
+import 'empty_vao_owner.dart';
 import 'pass_context_impl.dart';
 import 'ssao_resources.dart';
 
@@ -34,10 +35,11 @@ final class SsaoOcclusionProgramSource {
   );
 }
 
-final class SsaoOcclusionFeature implements RenderFeature {
+final class SsaoOcclusionFeature with EmptyVaoOwner implements RenderFeature {
   final ProgramLibrary programLibrary;
   final String vertexSource;
   final String fragmentSource;
+  @override
   final GpuDevice device;
   final GpuObject Function() resolveSceneDepth;
   final CameraView Function() resolveCamera;
@@ -77,7 +79,7 @@ final class SsaoOcclusionFeature implements RenderFeature {
         fragmentSource: fragmentSource,
       ),
     );
-    final emptyVao = device.createVertexArray();
+    final emptyVao = createEmptyVao();
     return [
       _SsaoOcclusionPass(
         descriptor: PassDescriptor(
@@ -98,7 +100,7 @@ final class SsaoOcclusionFeature implements RenderFeature {
   }
 
   @override
-  void dispose() {}
+  void dispose() => releaseEmptyVaos();
 }
 
 final class _SsaoOcclusionPass implements RenderPass {
@@ -172,10 +174,11 @@ final class SsaoBlurProgramSource {
   );
 }
 
-final class SsaoBlurFeature implements RenderFeature {
+final class SsaoBlurFeature with EmptyVaoOwner implements RenderFeature {
   final ProgramLibrary programLibrary;
   final String vertexSource;
   final String fragmentSource;
+  @override
   final GpuDevice device;
   final GpuObject Function() resolveSsaoRaw;
   final GpuObject Function() resolveSceneDepth;
@@ -224,7 +227,7 @@ final class SsaoBlurFeature implements RenderFeature {
         fragmentSource: fragmentSource,
       ),
     );
-    final emptyVao = device.createVertexArray();
+    final emptyVao = createEmptyVao();
     return [
       _SsaoBlurPass(
         descriptor: PassDescriptor(
@@ -250,7 +253,7 @@ final class SsaoBlurFeature implements RenderFeature {
   }
 
   @override
-  void dispose() {}
+  void dispose() => releaseEmptyVaos();
 }
 
 final class _SsaoBlurPass implements RenderPass {

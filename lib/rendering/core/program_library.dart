@@ -1,6 +1,7 @@
 import '../webgl/device_api.dart';
 import '../api/shaders.dart';
 import 'program_source.dart';
+import 'shader_bindings.dart';
 
 final class CompiledProgram {
   final String id;
@@ -8,11 +9,17 @@ final class CompiledProgram {
   final Map<String, int> attributeLocations;
   final Map<String, int> samplerUnits;
 
+  /// Whether [handle] was built from a host override. A pass may only skip
+  /// itself on the built-in shader's identity weights when this is false,
+  /// since a host shader is free to ignore those weights.
+  bool isHostOverride;
+
   CompiledProgram({
     required this.id,
     required this.handle,
     required this.attributeLocations,
     required this.samplerUnits,
+    this.isHostOverride = false,
   });
 }
 
@@ -44,7 +51,9 @@ final class ProgramLibrary {
   bool fallbackToDefaults;
   final Map<String, CompiledProgram> _live = {};
   final Map<String, ProgramSource> _sources = {};
-  final Map<ShaderSlot, String> _overrideErrors = {};
+  final Map<ShaderTarget, String> _overrideErrors = {};
+  final Map<GpuObject, ShaderTarget> _overrideHandles = {};
+  final Map<ShaderTarget, ProgramSource> _variantSources = {};
   PreparedProgramSet? _openSet;
   PreparedShaderOverrides? _openOverrides;
 
@@ -57,10 +66,56 @@ final class ProgramLibrary {
     this.fallbackToDefaults = false,
   }) : _overrides = Map.unmodifiable(overrides);
 
-  Map<ShaderSlot, String> get overrideErrors =>
+  Map<ShaderTarget, String> get overrideErrors =>
       Map.unmodifiable(_overrideErrors);
 
   CompiledProgram? programFor(String id) => _live[id];
+
+  /// The target [handle] was built for, or null for a built-in program.
+  ShaderTarget? targetOfOverride(GpuObject handle) => _overrideHandles[handle];
+
+  bool get hasActiveOverrides => _overrideHandles.isNotEmpty;
+
+  /// Whether the built-in shader behind [target] declares uniform [name],
+  /// making it the renderer's to set. False when nothing is installed there.
+  bool isEngineUniform(ShaderTarget target, String name) {
+    final source = target is ShaderSlot
+        ? _sources[target.name]
+        : _variantSources[target];
+    return source != null && _engineUniforms(source).contains(name);
+  }
+
+  /// Compiles a host shader that is not one of the built-in slots. [source]
+  /// is its default program and sets the contract it is validated against;
+  /// with [allowFallback] a failure compiles the default and is recorded.
+  CompiledProgram publishVariant({
+    required ProgramSource source,
+    required ShaderTarget target,
+    required ShaderOverride variant,
+    required bool allowFallback,
+  }) {
+    source.validate();
+    final handle = _compileOverride(source, target, variant, allowFallback);
+    final compiled = CompiledProgram(
+      id: source.id,
+      handle: handle,
+      attributeLocations: source.attributeLocations,
+      samplerUnits: source.samplerUnits,
+      isHostOverride: _overrideHandles.containsKey(handle),
+    );
+    _live[source.id] = compiled;
+    _variantSources[target] = source;
+    publishCount += 1;
+    return compiled;
+  }
+
+  void releaseVariant(ShaderTarget target) {
+    final source = _variantSources.remove(target);
+    _overrideErrors.remove(target);
+    if (source == null) return;
+    final program = _live.remove(source.id);
+    if (program != null) _deletePrograms([program]);
+  }
 
   Iterable<CompiledProgram> get allPrograms => _live.values;
 
@@ -82,6 +137,7 @@ final class ProgramLibrary {
           handle: handle,
           attributeLocations: source.attributeLocations,
           samplerUnits: source.samplerUnits,
+          isHostOverride: _overrideHandles.containsKey(handle),
         );
         candidateSources[source.id] = source;
       }
@@ -141,6 +197,7 @@ final class ProgramLibrary {
       handle: handle,
       attributeLocations: source.attributeLocations,
       samplerUnits: source.samplerUnits,
+      isHostOverride: _overrideHandles.containsKey(handle),
     );
 
     final previous = _live[source.id];
@@ -148,6 +205,7 @@ final class ProgramLibrary {
     _sources[source.id] = source;
     publishCount += 1;
     if (previous != null) {
+      _overrideHandles.remove(previous.handle);
       _device.deleteProgram(previous.handle);
     }
     return compiled;
@@ -180,6 +238,15 @@ final class ProgramLibrary {
       for (final source in _sources.values) {
         final slot = ShaderSlot.forProgramId(source.id);
         if (slot == null || _overrides[slot] == snapshot[slot]) continue;
+        final next = snapshot[slot];
+        // Only bound values changed: they are checked, but the program is
+        // still the right one.
+        if (next != null &&
+            _live[source.id]!.isHostOverride &&
+            (_overrides[slot]?.sameStages(next) ?? false)) {
+          _validateOverride(source, slot, next);
+          continue;
+        }
         candidates[source.id] = _compile(
           source,
           overrides: snapshot,
@@ -207,6 +274,7 @@ final class ProgramLibrary {
       final live = _live[entry.key]!;
       retired.add(live.handle);
       live.handle = entry.value;
+      live.isHostOverride = _overrideHandles.containsKey(entry.value);
     }
     for (final slot in ShaderSlot.values) {
       if (_overrides[slot] != prepared.overrides[slot]) {
@@ -249,6 +317,8 @@ final class ProgramLibrary {
     _live.clear();
     _sources.clear();
     _overrideErrors.clear();
+    _overrideHandles.clear();
+    _variantSources.clear();
   }
 
   GpuObject _compile(
@@ -266,27 +336,40 @@ final class ProgramLibrary {
         requiredUniforms: source.requiredUniforms,
       );
     }
+    return _compileOverride(
+      source,
+      slot!,
+      replacement,
+      allowFallback ?? fallbackToDefaults,
+    );
+  }
+
+  GpuObject _compileOverride(
+    ProgramSource source,
+    ShaderTarget target,
+    ShaderOverride replacement,
+    bool allowFallback,
+  ) {
+    final contract = target.contract;
     try {
-      _validateStageInterface(source, replacement);
-      if (replacement.fragment != null) {
-        _validateFragmentOutputs(
-          source.id,
-          source.fragmentSource,
-          replacement.fragment!,
-        );
-      }
+      _validateOverride(source, contract, replacement);
+      // A host shader may ignore any engine input, and drivers strip what it
+      // ignores. Setting a stripped uniform is a no-op, so the required lists
+      // apply to the built-in sources only.
       final handle = _device.compileProgram(
         vertexSource: replacement.vertex ?? source.vertexSource,
-        fragmentSource: replacement.fragment ?? source.fragmentSource,
-        requiredAttributes: source.requiredAttributes,
-        requiredUniforms: source.requiredUniforms,
+        fragmentSource:
+            replacement.fragmentFor(contract) ?? source.fragmentSource,
+        requiredAttributes: const [],
+        requiredUniforms: const [],
       );
-      _overrideErrors.remove(slot);
+      _overrideErrors.remove(target);
+      _overrideHandles[handle] = target;
       return handle;
     } on ShaderCompileException catch (error) {
-      if (!(allowFallback ?? fallbackToDefaults)) rethrow;
+      if (!allowFallback) rethrow;
       rejectedReloadCount += 1;
-      _overrideErrors[slot!] = error.toString();
+      _overrideErrors[target] = error.toString();
       return _device.compileProgram(
         vertexSource: source.vertexSource,
         fragmentSource: source.fragmentSource,
@@ -296,27 +379,107 @@ final class ProgramLibrary {
     }
   }
 
-  void _validateStageInterface(
+  void _validateOverride(
     ProgramSource source,
+    ShaderSlot slot,
     ShaderOverride replacement,
   ) {
-    final defaultVertex = _stageDeclarations(source.vertexSource, source.id);
-    final defaultFragment = _stageDeclarations(
-      source.fragmentSource,
-      source.id,
-    );
-    final vertex = replacement.vertex == null
+    if (replacement.effect != null && slot.effectInput == null) {
+      final supported = ShaderSlot.values
+          .where((candidate) => candidate.effectInput != null)
+          .map((candidate) => candidate.name);
+      throw ShaderCompileException(
+        ShaderCompileStage.validation,
+        '${source.id} has no single color input for ShaderOverride.effect; '
+        'it works on ${supported.join(', ')}. Use a full fragment stage here',
+      );
+    }
+    final fragmentSource = replacement.fragmentFor(slot);
+    _validateStageInterface(source, replacement.vertex, fragmentSource);
+    if (fragmentSource != null) {
+      _validateFragmentOutputs(
+        source.id,
+        source.fragmentSource,
+        fragmentSource,
+      );
+    }
+    _validateHostBindings(source, slot, replacement);
+  }
+
+  Set<String> _engineUniforms(ProgramSource source) => {
+    for (final stage in [source.vertexSource, source.fragmentSource])
+      for (final declaration in stageDeclarations(stage, source.id))
+        if (declaration.qualifier == 'uniform') declaration.name,
+  };
+
+  void _validateHostBindings(
+    ProgramSource source,
+    ShaderSlot slot,
+    ShaderOverride replacement,
+  ) {
+    final engine = _engineUniforms(source);
+    final declared = declaredUniforms(slot, replacement);
+    void check(String name, String type) {
+      if (engine.contains(name)) {
+        throw ShaderCompileException(
+          ShaderCompileStage.validation,
+          '${source.id} uniform $name is set by the renderer; '
+          'give the host value another name',
+        );
+      }
+      final actual = declared[name];
+      if (actual == null) {
+        throw ShaderCompileException(
+          ShaderCompileStage.validation,
+          '${source.id} binds $name but its shader declares no such uniform',
+        );
+      }
+      if (actual != type) {
+        throw ShaderCompileException(
+          ShaderCompileStage.validation,
+          '${source.id} uniform $name is $actual in the shader, not $type',
+        );
+      }
+    }
+
+    replacement.uniforms.forEach((name, value) => check(name, value.glslType));
+    for (final name in replacement.textures.keys) {
+      check(name, 'sampler2D');
+    }
+    for (final (name, type) in const [
+      (ShaderOverride.timeUniform, 'float'),
+      (ShaderOverride.resolutionUniform, 'vec2'),
+    ]) {
+      final actual = declared[name];
+      if (actual != null && actual != type) {
+        throw ShaderCompileException(
+          ShaderCompileStage.validation,
+          '${source.id} must declare $name as $type, not $actual',
+        );
+      }
+    }
+  }
+
+  void _validateStageInterface(
+    ProgramSource source,
+    String? vertexSource,
+    String? fragmentSource,
+  ) {
+    final defaultVertex = stageDeclarations(source.vertexSource, source.id);
+    final defaultFragment = stageDeclarations(source.fragmentSource, source.id);
+    final vertex = vertexSource == null
         ? defaultVertex
-        : _stageDeclarations(replacement.vertex!, source.id);
-    final fragment = replacement.fragment == null
+        : stageDeclarations(vertexSource, source.id);
+    final fragment = fragmentSource == null
         ? defaultFragment
-        : _stageDeclarations(replacement.fragment!, source.id);
+        : stageDeclarations(fragmentSource, source.id);
 
     for (final attribute in source.attributeLocations.entries) {
       final original = _declarationFor(defaultVertex, 'in', attribute.key);
       final supplied = _declarationFor(vertex, 'in', attribute.key);
+      // An attribute the host leaves out is simply unused.
+      if (supplied == null) continue;
       if (original == null ||
-          supplied == null ||
           supplied.type != original.type ||
           supplied.location != attribute.value) {
         throw ShaderCompileException(
@@ -356,8 +519,8 @@ final class ProgramLibrary {
     }
   }
 
-  _ShaderDeclaration? _declarationFor(
-    List<_ShaderDeclaration> declarations,
+  ShaderDeclaration? _declarationFor(
+    List<ShaderDeclaration> declarations,
     String qualifier,
     String name,
   ) {
@@ -367,30 +530,6 @@ final class ProgramLibrary {
       }
     }
     return null;
-  }
-
-  List<_ShaderDeclaration> _stageDeclarations(String source, String programId) {
-    final pattern = RegExp(
-      r'^(?:layout\s*\(\s*location\s*=\s*(\d+)\s*\)\s*)?'
-      r'(in|out|uniform)\s+(?:(?:lowp|mediump|highp)\s+)?'
-      r'([A-Za-z_]\w*)\s+([A-Za-z_]\w*)'
-      r'(?:\s*\[\s*(\d+)\s*\])?$',
-    );
-    final declarations = <_ShaderDeclaration>[];
-    for (final statement in _topLevelStatements(source, programId)) {
-      final match = pattern.firstMatch(statement);
-      if (match == null) continue;
-      final arrayLength = match.group(5);
-      declarations.add((
-        qualifier: match.group(2)!,
-        type: arrayLength == null
-            ? match.group(3)!
-            : '${match.group(3)}[$arrayLength]',
-        name: match.group(4)!,
-        location: match.group(1) == null ? null : int.parse(match.group(1)!),
-      ));
-    }
-    return declarations;
   }
 
   // The render graph owns attachment locations. A compilable host fragment
@@ -423,7 +562,7 @@ final class ProgramLibrary {
       r'[A-Za-z_]\w*$',
     );
     final declarations = <RegExpMatch>[];
-    for (final trimmed in _topLevelStatements(source, programId)) {
+    for (final trimmed in topLevelStatements(source, programId)) {
       final declaration = declarationPattern.firstMatch(trimmed);
       if (declaration != null) {
         declarations.add(declaration);
@@ -457,46 +596,6 @@ final class ProgramLibrary {
     return outputs;
   }
 
-  List<String> _topLevelStatements(String source, String programId) {
-    final withoutComments = source
-        .replaceAll(RegExp(r'/\*[\s\S]*?\*/'), '')
-        .replaceAll(RegExp(r'//[^\r\n]*'), '')
-        .replaceAll(RegExp(r'^\s*#.*$', multiLine: true), '');
-    // Ignore function bodies so parameters and local statements cannot be
-    // mistaken for stage interface declarations.
-    final topLevel = StringBuffer();
-    var braceDepth = 0;
-    for (final codeUnit in withoutComments.codeUnits) {
-      if (codeUnit == 123) {
-        if (braceDepth == 0) topLevel.write(';');
-        braceDepth++;
-      } else if (codeUnit == 125) {
-        braceDepth--;
-        if (braceDepth == 0) topLevel.write(';');
-      } else if (braceDepth == 0) {
-        topLevel.writeCharCode(codeUnit);
-      }
-      if (braceDepth < 0) {
-        throw ShaderCompileException(
-          ShaderCompileStage.validation,
-          '$programId has unbalanced shader source braces',
-        );
-      }
-    }
-    if (braceDepth != 0) {
-      throw ShaderCompileException(
-        ShaderCompileStage.validation,
-        '$programId has unbalanced shader source braces',
-      );
-    }
-    return topLevel
-        .toString()
-        .split(';')
-        .map((statement) => statement.trim())
-        .where((statement) => statement.isNotEmpty)
-        .toList();
-  }
-
   void _checkOpenSet(PreparedProgramSet prepared) {
     if (!identical(_openSet, prepared) ||
         prepared.state != ProgramSetCandidateState.prepared) {
@@ -513,20 +612,15 @@ final class ProgramLibrary {
 
   void _deletePrograms(Iterable<CompiledProgram> programs) {
     for (final program in programs) {
+      _overrideHandles.remove(program.handle);
       _device.deleteProgram(program.handle);
     }
   }
 
   void _deleteHandles(Iterable<GpuObject> handles) {
     for (final handle in handles) {
+      _overrideHandles.remove(handle);
       _device.deleteProgram(handle);
     }
   }
 }
-
-typedef _ShaderDeclaration = ({
-  String qualifier,
-  String type,
-  String name,
-  int? location,
-});

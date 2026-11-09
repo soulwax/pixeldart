@@ -34,7 +34,15 @@ abstract interface class DrawCommandEncoder {
 final class DeviceDrawCommandEncoder implements DrawCommandEncoder {
   final GpuDevice device;
   final FrameDrawTelemetry? telemetry;
-  const DeviceDrawCommandEncoder(this.device, {this.telemetry});
+
+  /// Runs right after a program is bound. Null, and free, unless a host
+  /// shader override is active.
+  final void Function(GpuObject program)? onUseProgram;
+  const DeviceDrawCommandEncoder(
+    this.device, {
+    this.telemetry,
+    this.onUseProgram,
+  });
 
   @override
   void bindTarget(GpuObject? target) => device.bindTarget(target);
@@ -57,7 +65,10 @@ final class DeviceDrawCommandEncoder implements DrawCommandEncoder {
   }) => device.clear(mask, r: r, g: g, b: b, a: a);
 
   @override
-  void useProgram(GpuObject program) => device.useProgram(program);
+  void useProgram(GpuObject program) {
+    device.useProgram(program);
+    onUseProgram?.call(program);
+  }
 
   @override
   void setUniform(String name, UniformValue value) =>

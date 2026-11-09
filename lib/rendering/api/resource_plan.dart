@@ -54,6 +54,9 @@ final class OwnedResourcePlan {
     }
     if (profile.installs(PipelineFeatures.grade)) resources.add('gradeOutput');
     if (profile.installs(PipelineFeatures.ps1)) resources.add('ps1Output');
+    for (var i = 0; i < configuration.postEffects.length; i += 1) {
+      resources.add('hostPost$i');
+    }
     final hasHistory = profile.installs(PipelineFeatures.vhs);
     // VHS ping-pongs two targets so its ghost never samples the target it
     // renders into.

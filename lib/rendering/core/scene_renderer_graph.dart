@@ -43,6 +43,7 @@ extension on SceneRendererImpl {
         candidate = _programs!.prepareOverrides(configuration.shaderOverrides);
         _configurations.commit(transition);
         _programs!.commitOverrides(candidate);
+        _syncShaderBindings(configuration);
         _configuration = configuration;
         _allocated = configuration.withSampleCount(_msaa.effective);
         return;
@@ -79,9 +80,11 @@ extension on SceneRendererImpl {
       _gpuResources!.commit(prepared);
       final oldFeatures = _featureGraph, oldPrograms = _programs;
       _featureGraph = candidate.featureGraph;
+      _sprites = candidate.sprites;
       _graph = candidate.result;
       _programs = candidatePrograms;
       candidatePrograms.fallbackToDefaults = true;
+      _syncShaderBindings(configuration);
       _configuration = configuration;
       _allocated = allocation.configuration;
       _msaa = allocation.msaa;
@@ -112,6 +115,7 @@ extension on SceneRendererImpl {
       _gpuResources!.current.logical.plan.resources,
     );
     _featureGraph = assembled.featureGraph;
+    _sprites = assembled.sprites;
     _graph = assembled.result;
   }
 
@@ -158,6 +162,7 @@ extension on SceneRendererImpl {
       outputEncoding: configuration.outputEncoding,
       // The safe world pass has no glow output, so its clear stays there.
       clearGlow: hasBloom && !hasShadows,
+      registeredShaders: _spriteShaders,
     );
     final featureGraph = hasShadows
         ? buildShadowGraph(
@@ -217,6 +222,7 @@ extension on SceneRendererImpl {
             resolveTime: () => _activeFrame!.timeSeconds,
             profile: configuration.profile,
             sprites: sprites,
+            postEffects: configuration.postEffects,
           )
         : buildSafeGraph(
             programs,
@@ -227,6 +233,7 @@ extension on SceneRendererImpl {
             sampleCount: configuration.sampleCount,
             outputEncoding: configuration.outputEncoding,
             sprites: sprites,
+            postEffects: configuration.postEffects,
             bloom: hasBloom,
             resolveResolvedSceneColor: () => resolveResource(
               configuration.sampleCount > 1 ? 'sceneColor#1' : 'sceneColor',
@@ -254,7 +261,7 @@ extension on SceneRendererImpl {
         'safe renderer graph is invalid: ${result.graph.failures}',
       );
     }
-    return _SafeGraphAssembly(featureGraph, result);
+    return _SafeGraphAssembly(featureGraph, result, sprites);
   }
 
   _FrameExecution _executeGraph(
@@ -343,7 +350,11 @@ extension on SceneRendererImpl {
       timeSeconds: frame.timeSeconds,
       post: frame.post,
     );
-    final encoder = DeviceDrawCommandEncoder(device, telemetry: telemetry);
+    final encoder = DeviceDrawCommandEncoder(
+      device,
+      telemetry: telemetry,
+      onUseProgram: _programs!.hasActiveOverrides ? _applyShaderBindings : null,
+    );
     final declaration = frame.environment.skybox;
     final skyboxHandle = declaration?.texture;
     final skyboxTexture =
@@ -369,6 +380,21 @@ extension on SceneRendererImpl {
       );
     }
     return _FrameExecution(telemetry, cull, culledTriangles);
+  }
+
+  void _applyShaderBindings(GpuObject program) {
+    final slot = _programs!.targetOfOverride(program);
+    if (slot == null) return;
+    final allocated = _allocated!;
+    _shaderBindings.apply(
+      slot,
+      program,
+      device,
+      timeSeconds: _activeFrame!.timeSeconds,
+      width: allocated.internalWidth,
+      height: allocated.internalHeight,
+      resolveTexture: _resources!.textures.resolve,
+    );
   }
 
   Map<String, BoundResourceView> _viewsFor(
@@ -401,8 +427,9 @@ extension on SceneRendererImpl {
 final class _SafeGraphAssembly {
   final FeatureGraph featureGraph;
   final FeatureGraphResult result;
+  final SpritesFeature sprites;
 
-  const _SafeGraphAssembly(this.featureGraph, this.result);
+  const _SafeGraphAssembly(this.featureGraph, this.result, this.sprites);
 }
 
 final class _PlanResources implements RenderPassResources {
