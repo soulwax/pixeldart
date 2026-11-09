@@ -354,6 +354,11 @@ void main(){
     map.xy*=uNormalStrength;
     n=normalize(mat3(t,b,n)*normalize(map));
   }
+  // A double-sided surface seen from behind is the same sheet facing the
+  // other way: negate the finished (normal-mapped) front normal, so a bump
+  // on the front reads as a dent from behind. Single-sided materials cull
+  // back faces, so this only affects double-sided ones.
+  if(!gl_FrontFacing) n=-n;
   vec3 orm=texture(uOrmMap,uv).rgb;
   float normalVariance=0.0;
   if(uNormalStrength>0.0){

@@ -28,6 +28,7 @@
   - Stars drew as square blocks fixed to the screen. They are now small round points, fixed to the sky.
 - Night fog: `SolarCycleEngine` built the fog colour from the sun's transmittance even below the horizon, so night fog, and any horizon matched to it, was a bright mauve. It now fades through twilight to a dark haze.
 - Environment reflections used the raw ambient colour without its intensity, so dark scenes still reflected a bright sky.
+- `doubleSided` back faces were lit with the front face's normal, so they shaded as if facing away from the viewer. The normal (including the normal-mapped one) is now reversed on back faces.
 
 ### Added
 

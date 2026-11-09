@@ -11,7 +11,9 @@ uniform float uAmbientLightScale;
 uniform float uDirectLightScale;
 out vec4 oColor;
 void main(){
-  vec3 n=normalize(vNormal);
+  // A double-sided surface seen from behind faces the other way; single-
+  // sided materials cull back faces, so this only affects double-sided ones.
+  vec3 n=normalize(vNormal)*(gl_FrontFacing?1.0:-1.0);
   float ndotl=max(dot(n,normalize(uLightDir)),0.0);
   vec4 tex=texture(uAlbedo,vUv);
   vec3 lit=vColor.rgb*tex.rgb*clamp(uAmbientColor*uAmbientIntensity*uAmbientLightScale+

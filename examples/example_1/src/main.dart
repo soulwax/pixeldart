@@ -285,7 +285,7 @@ final class Game {
 
     final blast = ParticleEmitter(
       mesh: quad,
-      material: glow('fx_blast', 1.0, 0.6, 0.2, 7.0),
+      material: glow('fx_blast', 1.0, 0.42, 0.1, 2.4),
       shape: const SphereShape(radius: 0.4, directionMode: SphereDirectionMode.outward),
       minLifetime: 0.5,
       maxLifetime: 1.1,

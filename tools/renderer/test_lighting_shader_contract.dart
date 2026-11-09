@@ -21,6 +21,17 @@ void main() {
       throw StateError('shadowed-world shader lost lighting term: $term');
     }
   }
+  // Double-sided back faces shade with the reversed normal; without it they
+  // light as if facing away (verified live: 119 vs 173 on a matte quad).
+  // Environment reflections scale ambient by its intensity, like diffuse.
+  if (!shadowedWorldFragSrc.contains('if(!gl_FrontFacing) n=-n;') ||
+      !safeWorldFragSrc.contains('gl_FrontFacing?1.0:-1.0') ||
+      !texturedWorldFragSrc.contains('gl_FrontFacing?1.0:-1.0')) {
+    throw StateError('world shaders must reverse the normal on back faces');
+  }
+  if (!shadowedWorldFragSrc.contains('envAmbient=uAmbientColor*uAmbientIntensity*uAmbientLightScale')) {
+    throw StateError('environment reflection must scale ambient by its intensity');
+  }
   const wetnessTerms = <String>[
     'uniform float uRainWetness;',
     'smoothstep(2.0,18.0,max(vViewDepth,0.0))',

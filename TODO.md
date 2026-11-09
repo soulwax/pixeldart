@@ -82,10 +82,11 @@ the remaining unchecked items are the next capability and acceptance gaps.
 
 ## Materials and textures
 
-- [ ] **Verify `uvOffset` live.** `albedoTexture`, `normalTexture`,
-      `emissiveTexture`, `uvScale` and roughness/metallic are all read and
-      verified in the examples: tiled normal-mapped floors in Lantern,
-      palette-textured GLBs in Tidewatch. `uvOffset` has no live user yet.
+- [x] **Verify `uvOffset` live.** On real hardware (D3D11), shifting U by
+      half a repeat swaps the halves of a 2×2 nearest-filtered checker
+      exactly. The other material slots are verified in the examples:
+      tiled normal-mapped floors in Lantern and palette-textured GLBs in
+      Tidewatch.
 - [ ] **Material table capacity splitting** — deterministic per-batch material
       tables that split a batch at UBO/texture-table capacity instead of
       dropping materials. **(spec'd)**
@@ -93,9 +94,13 @@ the remaining unchecked items are the next capability and acceptance gaps.
       aggregation, layer-order validation, or catalog.
 - [ ] **A real LUT asset + loader** — only a procedurally built demo LUT
       exists.
-- [ ] **Visually confirm `doubleSided`** — reachable and type-checked, never
-      exercised by a fixture. (Tidewatch's open, `doubleSided` beam cone is
-      a candidate subject; it hasn't been checked with and without the flag.)
+- [x] **Visually confirm `doubleSided`.** Live, on D3D11, with a quad turned
+      away from the camera: the single-sided one is culled and the
+      double-sided one draws. The check found a bug, now fixed: back faces
+      were lit with the front normal, so a matte back face rendered at 119
+      against the front's 173. The world shaders now reverse the normal on
+      back faces (normal map included), giving 172 vs 173.
+      `test_lighting_shader_contract` guards the fix.
 - [ ] **Alpha-mask × affine interaction fixture** — masking cuts out against
       the prepass while affine warps the world-pass UVs; add a fixture proving
       the two gates compose without cutout/shading divergence.
