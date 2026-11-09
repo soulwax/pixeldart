@@ -714,7 +714,7 @@ final class _ShadowedWorldPass implements RenderPass {
       }
       return;
     }
-    var boundProgram = program;
+    CompiledProgram? boundProgram;
     void draw(Object batch) {
       final materialHandle = batch is InstanceBatch
           ? batch.representative.descriptor.material
@@ -732,6 +732,7 @@ final class _ShadowedWorldPass implements RenderPass {
       }
       _drawBatch(encoder, batch, post.affineWarpStrength, environment);
     }
+
     for (final batch in context.frameScene.opaqueBatches) {
       draw(batch);
     }

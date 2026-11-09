@@ -8,6 +8,7 @@ enum MaterialMapColorSpace { srgb, linear }
 
 final class MaterialDefinition {
   final String key;
+
   /// A registered world shader for this material, or the built-in default.
   final WorldShaderHandle? worldShader;
   final TextureHandle? albedoTexture;

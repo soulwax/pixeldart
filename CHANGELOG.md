@@ -60,6 +60,7 @@
   - `PixeldartApp.loadShaderSource` fetches GLSL from a URL.
   - `RendererConfiguration.postEffects`, `mount(postEffects:)`, `mount2d(postEffects:)` and `app.setPostEffects` add host post-process stages before present on any profile.
   - `app.createSpriteShader` registers a sprite shader, selected per draw with `drawSprites(shader:)`. `ShaderOverride.effect` also works on `sprites`.
+  - `app.createWorldShader` registers a shader for the active world profile. `MaterialDefinition(worldShader:)` selects it per material; frame uniforms are restored on program switches and sent only to programs that draw. Resizes and context restores recompile it, and other profiles use their own default.
   - `setShaderUniform` and `setShaderTexture` accept any `ShaderTarget`: a `ShaderSlot`, `ShaderHandle` or `PostEffect`. `shaderErrors` is keyed the same way.
   - `RendererConfiguration.copyWith`.
   - With no override active, none of this adds work to a frame.

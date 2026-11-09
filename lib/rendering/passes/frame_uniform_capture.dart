@@ -2,8 +2,9 @@ import '../webgl/device_api.dart';
 import '../webgl/draw_encoder.dart';
 import '../webgl/state_cache.dart';
 
-/// Captures a pass's frame uniforms once so another program in that pass can
-/// receive the same values. Only world passes with material shaders use this.
+/// Captures a pass's frame uniforms once so each selected program can receive
+/// the same values. The world passes defer uploads until the first draw, so an
+/// unused default program incurs no uniform calls.
 final class FrameUniformCapture implements DrawCommandEncoder {
   final DrawCommandEncoder _encoder;
   final List<({String name, UniformValue value})> _uniforms = [];
@@ -21,7 +22,10 @@ final class FrameUniformCapture implements DrawCommandEncoder {
 
   @override
   void setUniform(String name, UniformValue value) {
-    if (_capturing) _uniforms.add((name: name, value: value));
+    if (_capturing) {
+      _uniforms.add((name: name, value: value));
+      return;
+    }
     _encoder.setUniform(name, value);
   }
 
@@ -46,7 +50,10 @@ final class FrameUniformCapture implements DrawCommandEncoder {
   }) => _encoder.clear(mask, r: r, g: g, b: b, a: a);
 
   @override
-  void useProgram(GpuObject program) => _encoder.useProgram(program);
+  void useProgram(GpuObject program) {
+    if (_capturing) return;
+    _encoder.useProgram(program);
+  }
 
   @override
   void bindVertexArray(GpuObject vao) => _encoder.bindVertexArray(vao);

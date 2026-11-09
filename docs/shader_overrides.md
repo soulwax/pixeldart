@@ -87,10 +87,35 @@ throws `ShaderCompileException` if the shader is invalid. Registered shaders
 survive resizes and context restores; `app.releaseSpriteShader(handle)` frees
 one, and draws still naming it use the default.
 
+## Choosing a world shader per material
+
+Register a full vertex or fragment override while the intended quality
+profile is active, then put its handle on a material:
+
+```dart
+final foliage = app.createWorldShader(ShaderOverride(
+  fragment: await PixeldartApp.loadShaderSource('shaders/foliage.frag'),
+  uniforms: {'uWind': ShaderUniform.float(0)},
+));
+final leaves = MaterialDefinition(key: 'leaves', worldShader: foliage);
+app.setShaderUniform(foliage, 'uWind', ShaderUniform.float(0.4));
+```
+
+The shader follows the active profile's `safeWorld` or `shadowedWorld` slot
+contract; provide a full
+GLSL stage, since world slots have no single color input for
+`ShaderOverride.effect`. The renderer preserves opaque sorting and instance
+batching, and sends frame and material uniforms again after a program switch.
+The built-in shader remains the default for other materials. A material whose
+handle belongs to the other world profile, or whose shader was released, uses
+that profile's default. The registered shader and live host values return when
+the original profile is restored. `releaseWorldShader(handle)` frees it.
+
 ## Host uniforms and textures
 
 `setShaderUniform` and `setShaderTexture` take a `ShaderSlot`, a registered
-`ShaderHandle` or a `PostEffect`. An override can bind its own values:
+`ShaderHandle`, `WorldShaderHandle` or a `PostEffect`. An override can bind its
+own values:
 
 - `ShaderUniform.float`, `.vec2`, `.vec3`, `.vec4`, `.int`, `.mat4` and `.color`
   supply starting values through `uniforms:`. `.mat4` takes a `Mat4` and

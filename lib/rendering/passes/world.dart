@@ -229,7 +229,7 @@ final class _WorldPass implements RenderPass {
       }
       return;
     }
-    var boundProgram = program;
+    CompiledProgram? boundProgram;
     void draw(Object batch) {
       final materialHandle = batch is InstanceBatch
           ? batch.representative.descriptor.material
@@ -245,6 +245,7 @@ final class _WorldPass implements RenderPass {
       }
       _drawBatch(encoder, batch);
     }
+
     for (final batch in context.frameScene.opaqueBatches) {
       draw(batch);
     }

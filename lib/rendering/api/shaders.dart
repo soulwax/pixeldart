@@ -37,8 +37,8 @@ final class ShaderHandle implements ShaderTarget {
 
 /// A material shader compiled for one world pipeline contract.
 ///
-/// A handle registered under a different profile uses the built-in world
-/// shader until that profile's world pipeline is active again.
+/// A handle registered under the other world contract uses the built-in
+/// shader until its `safeWorld` or `shadowedWorld` pipeline is active again.
 final class WorldShaderHandle implements ShaderTarget {
   final int id;
   @override

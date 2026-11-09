@@ -10,12 +10,13 @@ void require(bool condition, String message) {
   if (!condition) throw StateError('world shader targets: $message');
 }
 
-RendererConfiguration config(QualityProfile profile) => RendererConfiguration(
-  profile: profile,
-  internalWidth: 64,
-  internalHeight: 64,
-  shadowMapCount: profile.installs(PipelineFeatures.shadows) ? 1 : 0,
-);
+RendererConfiguration config(QualityProfile profile, {int width = 64}) =>
+    RendererConfiguration(
+      profile: profile,
+      internalWidth: width,
+      internalHeight: 64,
+      shadowMapCount: profile.installs(PipelineFeatures.shadows) ? 1 : 0,
+    );
 
 ShaderOverride tintedWorldShader(ShaderSlot slot) {
   final source = slot == ShaderSlot.safeWorld
@@ -49,10 +50,7 @@ final class Host {
       MeshData(
         layout: VertexLayoutDescriptor.compatibility14,
         vertices: Float32List(42),
-        localBounds: const Aabb(
-          Vec3(-0.2, -0.2, -0.2),
-          Vec3(0.2, 0.2, 0.2),
-        ),
+        localBounds: const Aabb(Vec3(-0.2, -0.2, -0.2), Vec3(0.2, 0.2, 0.2)),
       ),
     );
     plain = renderer.resources.registerMaterial(
@@ -71,7 +69,11 @@ final class Host {
     );
   }
 
-  FrameStats draw({bool switchPrograms = true, bool useShader = true}) {
+  FrameStats draw({
+    bool switchPrograms = true,
+    bool useShader = true,
+    bool allTinted = false,
+  }) {
     device.uniformLog.clear();
     device.drawLog.clear();
     final encoder = renderer.beginFrame(
@@ -96,19 +98,21 @@ final class Host {
       ),
     );
     if (switchPrograms) {
-      encoder.submit(RetainedItemDescriptor(mesh: mesh, material: plain));
+      encoder.submit(
+        RetainedItemDescriptor(
+          mesh: mesh,
+          material: allTinted ? tinted : plain,
+        ),
+      );
     }
     encoder.submit(
-      RetainedItemDescriptor(
-        mesh: mesh,
-        material: useShader ? tinted : plain,
-      ),
+      RetainedItemDescriptor(mesh: mesh, material: useShader ? tinted : plain),
     );
     if (switchPrograms) {
       encoder.submit(
         RetainedItemDescriptor(
           mesh: mesh,
-          material: plain,
+          material: allTinted ? tinted : plain,
           drawMode: DrawMode.blended,
         ),
       );
@@ -130,15 +134,35 @@ final class Host {
 Future<void> testProfile(QualityProfile profile) async {
   final host = Host();
   await host.start(profile);
+  final liveBeforeBadShader = host.device.liveObjectCount;
+  var rejected = false;
+  try {
+    host.renderer.registerWorldShader(
+      const ShaderOverride(fragment: 'FAIL_FRAGMENT'),
+    );
+  } on ShaderCompileException {
+    rejected = true;
+  }
+  require(rejected, 'invalid world shader was accepted');
+  require(
+    host.device.liveObjectCount == liveBeforeBadShader,
+    'invalid world shader leaked a GPU program',
+  );
   final baseCompiles = host.device.programCompileCalls;
   require(host.draw().drawCalls == 3, 'all world draws must run');
   require(host.sent('uGain').single.value == 0.5, 'host uniform missing');
   final firstFrameProjectionUploads = host.sent('uViewProjection').length;
   host.draw(useShader: false);
+  final defaultOnlyProjectionUploads = host.sent('uViewProjection').length;
   require(
-    firstFrameProjectionUploads == host.sent('uViewProjection').length + 2,
+    firstFrameProjectionUploads == defaultOnlyProjectionUploads + 2,
     'frame projection must be restored at both program switches: '
-    '$firstFrameProjectionUploads vs ${host.sent('uViewProjection').length}',
+    '$firstFrameProjectionUploads vs $defaultOnlyProjectionUploads',
+  );
+  host.draw(allTinted: true);
+  require(
+    host.sent('uViewProjection').length == defaultOnlyProjectionUploads,
+    'custom-only draws must not initialize the unused default program',
   );
   host.renderer.setShaderUniform(
     host.shader,
@@ -157,6 +181,10 @@ Future<void> testProfile(QualityProfile profile) async {
   host.draw(switchPrograms: false);
   require(host.sent('uGain').single.value == 0.25, 'restore lost live value');
 
+  await host.renderer.configure(config(profile, width: 128));
+  host.draw(switchPrograms: false);
+  require(host.sent('uGain').single.value == 0.25, 'resize lost live value');
+
   final otherProfile = profile.installs(PipelineFeatures.shadows)
       ? QualityProfile.safe
       : QualityProfile.minimal;
@@ -165,7 +193,10 @@ Future<void> testProfile(QualityProfile profile) async {
   require(host.sent('uGain').isEmpty, 'wrong-profile shader must fall back');
   await host.renderer.configure(config(profile));
   host.draw(switchPrograms: false);
-  require(host.sent('uGain').single.value == 0.25, 'profile return lost shader');
+  require(
+    host.sent('uGain').single.value == 0.25,
+    'profile return lost shader',
+  );
 
   host.renderer.releaseWorldShader(host.shader);
   host.draw(switchPrograms: false);

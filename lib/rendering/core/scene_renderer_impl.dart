@@ -155,9 +155,7 @@ final class SceneRendererImpl with _GpuTimingSupport implements SceneRenderer {
     }
     shader.validate();
     final shadowed = _allocated!.profile.installs(PipelineFeatures.shadows);
-    final contract = shadowed
-        ? ShaderSlot.shadowedWorld
-        : ShaderSlot.safeWorld;
+    final contract = shadowed ? ShaderSlot.shadowedWorld : ShaderSlot.safeWorld;
     final handle = WorldShaderHandle(_nextShaderId++, contract, debugLabel);
     final source = shadowed
         ? ShadowedWorldProgramSource.build(
