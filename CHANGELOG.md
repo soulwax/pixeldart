@@ -34,6 +34,7 @@
 - Full-screen features never freed their empty vertex arrays, so every graph rebuild (each canvas resize) leaked a few. Bloom, DOF, SSAO, grade, PS1, VHS and depth debug now release them on dispose.
 - The minimal shadowed profile sampled the scene-color target as its missing SSAO input while drawing into that target. The shadowed-world pass now samples neutral white when SSAO is disabled, avoiding a WebGL feedback loop.
 - A second graph sharing a `ProgramLibrary` could replace and delete the first graph's live program when pass IDs collided. Pass registration and shader variants now reject duplicate IDs before compiling; deliberate reloads still replace programs.
+- Non-power-of-two textures requested one mip level too many from WebGL immutable storage. Mip counts now halve dimensions with integer truncation. Texture descriptors also reject invalid magnification mip filters and minification mip filters without mip storage before GPU allocation.
 
 ### Added
 

@@ -86,6 +86,38 @@ final class GpuTextureDescriptor {
     this.wrap = GpuTextureWrap.clampToEdge,
     this.anisotropy = 1,
   });
+
+  /// Immutable storage levels, including the base image. Dimensions halve
+  /// with integer truncation, as required by WebGL texture storage.
+  int get mipLevelCount {
+    if (!hasMips) return 1;
+    var size = width > height ? width : height;
+    var levels = 1;
+    while (size > 1) {
+      size ~/= 2;
+      levels += 1;
+    }
+    return levels;
+  }
+
+  void validate() {
+    if (width <= 0 || height <= 0 || layers <= 0) {
+      throw ArgumentError('texture dimensions and layers must be > 0');
+    }
+    if (magFilter == GpuTextureFilter.linearMipmapLinear) {
+      throw ArgumentError(
+        'texture magFilter must be nearest or linear; mip filters only work for minFilter',
+      );
+    }
+    if (minFilter == GpuTextureFilter.linearMipmapLinear && !hasMips) {
+      throw ArgumentError(
+        'texture minFilter linearMipmapLinear requires hasMips: true',
+      );
+    }
+    if (!anisotropy.isFinite || anisotropy < 1 || anisotropy > 16) {
+      throw ArgumentError('texture anisotropy must be finite and in [1, 16]');
+    }
+  }
 }
 
 enum GpuTargetAttachment { color, colorAndGlow, colorDepthGlow, depthOnly }

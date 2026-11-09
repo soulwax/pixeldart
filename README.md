@@ -647,7 +647,7 @@ disappear. ORM is sampled in linear space as **R = occlusion, G = roughness,
 B = metalness**. UV scale/offset and alpha mode are applied consistently by
 the world, depth-prepass, and shadow-caster routes. Optional UV1 lightmaps use
 a neutral white fallback and explicit per-material intensity; sampler
-declarations reject impossible mip/aniso combinations before GPU allocation.
+descriptors reject invalid filter and mip combinations before GPU allocation.
 
 Anisotropy is a request, not a promise. On WebGL2, `WebGl2Device` negotiates
 `EXT_texture_filter_anisotropic`, clamps to the extension's reported limit
@@ -666,6 +666,12 @@ After creating or loading a texture, inspect its negotiated value through
 The query uses cached capabilities and works before pixels arrive. It updates
 after context restoration if the adapter's limit changes; released handles
 are rejected. For pixel art, request `GpuTextureFilter.nearest` and 1×.
+For oblique textured surfaces, use `hasMips: true`,
+`minFilter: GpuTextureFilter.linearMipmapLinear`,
+`magFilter: GpuTextureFilter.linear`, and request anisotropy as needed.
+The magnification filter accepts only `nearest` or `linear`; a mip filter
+requires mips on the minification side. Non-power-of-two images allocate the
+correct number of mip levels.
 
 ```dart
 final material = renderer.resources.registerMaterial(

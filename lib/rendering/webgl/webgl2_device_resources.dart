@@ -55,25 +55,16 @@ extension WebGl2DeviceResources on WebGl2Device {
     GpuTextureWrap.repeat => _G.REPEAT,
   };
 
-  int _mipLevels(int w, int h) {
-    var levels = 1;
-    for (var size = w > h ? w : h; size > 1; size = (size + 1) ~/ 2) {
-      levels++;
-    }
-    return levels;
-  }
-
   GpuObject createTextureImpl(GpuTextureDescriptor descriptor) {
     _requireReady();
+    descriptor.validate();
     final texture = gl.createTexture();
     if (texture == null) {
       throw StateError('WebGl2Device: gl.createTexture() returned null');
     }
     final target = descriptor.layers > 1 ? _G.TEXTURE_2D_ARRAY : _G.TEXTURE_2D;
     gl.bindTexture(target, texture);
-    final levels = descriptor.hasMips
-        ? _mipLevels(descriptor.width, descriptor.height)
-        : 1;
+    final levels = descriptor.mipLevelCount;
     if (descriptor.layers > 1) {
       gl.texStorage3D(
         target,

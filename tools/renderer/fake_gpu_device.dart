@@ -144,6 +144,7 @@ final class FakeGpuDevice
   @override
   GpuObject createTexture(GpuTextureDescriptor descriptor) {
     _requireReady();
+    descriptor.validate();
     textureCreateCalls += 1;
     return _create();
   }

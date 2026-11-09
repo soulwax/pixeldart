@@ -81,19 +81,6 @@ final class TextureStore {
     Uint8List? pixels,
     String? debugLabel,
   }) {
-    if (width <= 0 || height <= 0 || layers <= 0) {
-      throw ArgumentError('TextureStore.declare dimensions/layers must be > 0');
-    }
-    if (!anisotropy.isFinite || anisotropy < 1 || anisotropy > 16) {
-      throw ArgumentError(
-        'TextureStore.declare anisotropy must be in [1, 16]: $anisotropy',
-      );
-    }
-    if (minFilter == GpuTextureFilter.linearMipmapLinear && !hasMips) {
-      throw ArgumentError(
-        'TextureStore.declare linearMipmapLinear requires hasMips: true',
-      );
-    }
     final descriptor = GpuTextureDescriptor(
       width: width,
       height: height,
@@ -104,6 +91,7 @@ final class TextureStore {
       magFilter: magFilter,
       anisotropy: anisotropy,
     );
+    descriptor.validate();
     final handle = _registry.declare(
       _TextureRecord(
         descriptor: descriptor,
