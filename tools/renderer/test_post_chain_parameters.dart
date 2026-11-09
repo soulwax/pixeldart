@@ -294,7 +294,7 @@ void _dofSourceResourceIsConfigurable() {
   }
 
   final customComposite = DofCompositeFeature(
-    programLibrary: library,
+    programLibrary: ProgramLibrary(device),
     vertexSource: presentVertSrc,
     fragmentSource: dofCompositeFragSrc,
     device: device,
@@ -334,7 +334,7 @@ void _gradeInputResourceIsConfigurable() {
   }
 
   final customFeature = GradeFeature(
-    programLibrary: library,
+    programLibrary: ProgramLibrary(device),
     vertexSource: presentVertSrc,
     fragmentSource: gradeLutFragSrc,
     device: device,
@@ -374,7 +374,7 @@ void _ps1InputResourceIsConfigurable() {
   }
 
   final customFeature = Ps1QuantizeFeature(
-    programLibrary: library,
+    programLibrary: ProgramLibrary(device),
     vertexSource: presentVertSrc,
     fragmentSource: ps1QuantizeFragSrc,
     device: device,
@@ -418,7 +418,7 @@ void _vhsInputResourceIsConfigurable() {
   }
 
   final customFeature = VhsFeature(
-    programLibrary: library,
+    programLibrary: ProgramLibrary(device),
     vertexSource: presentVertSrc,
     fragmentSource: vhsFragSrc,
     device: device,

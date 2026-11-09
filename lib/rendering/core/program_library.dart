@@ -222,7 +222,6 @@ final class ProgramLibrary {
   /// earlier pass holding a deleted GPU handle, so reject it before compiling.
   /// Use [publish] or [tryReload] for an intentional replacement.
   CompiledProgram publishNew(ProgramSource source) {
-    source.validate();
     _requireUnusedId(source.id);
     return publish(source);
   }

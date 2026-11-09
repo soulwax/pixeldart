@@ -31,8 +31,9 @@ void _duplicateRegistrationPreservesLivePrograms() {
   try {
     library.publishNew(_spriteProgramSource());
     throw StateError('duplicate pass program ID was accepted');
-  } on StateError catch (error) {
-    if (!error.message.toString().contains('program ID is already installed')) {
+  } catch (error) {
+    if (error is! StateError ||
+        !error.message.toString().contains('program ID is already installed')) {
       rethrow;
     }
   }
@@ -45,8 +46,9 @@ void _duplicateRegistrationPreservesLivePrograms() {
       allowFallback: false,
     );
     throw StateError('variant replaced a pass-owned program');
-  } on StateError catch (error) {
-    if (!error.message.toString().contains('program ID is already installed')) {
+  } catch (error) {
+    if (error is! StateError ||
+        !error.message.toString().contains('program ID is already installed')) {
       rethrow;
     }
   }

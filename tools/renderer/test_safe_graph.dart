@@ -19,7 +19,55 @@ void main() {
   _worldPassClearsAndDrawsBeforePresent();
   _presentPassBindsCanvasAndSamplesSceneColor();
   _instancedBatchIssuesOneInstancedDrawCall();
+  _sharedProgramLibraryRejectsSecondGraph();
   print('Renderer safe-graph fixtures passed.');
+}
+
+void _sharedProgramLibraryRejectsSecondGraph() {
+  final device = FakeGpuDevice();
+  final library = ProgramLibrary(device);
+  FeatureGraph newGraph() => buildSafeGraph(
+    library,
+    device: device,
+    resolveMesh: (mesh) => ResolvedMesh(
+      vao: device.createVertexArray(),
+      isIndexed: false,
+      drawCount: 3,
+    ),
+  );
+  FeatureGraphResult build(FeatureGraph graph) => graph.build(
+    featureContext: const RenderFeatureContext(
+      capabilities: RenderCapabilities.safeMinimum,
+      profile: QualityProfile.safe,
+    ),
+    availableCapabilities: const {},
+    hasValidPreviousFrame: false,
+    resources: _AlwaysAvailableResources(),
+  );
+
+  final first = newGraph();
+  final result = build(first);
+  if (!result.isValid) throw StateError('first graph did not validate');
+  final world = library.programFor('safeWorld')!;
+  final handle = world.handle;
+  final compiles = device.programCompileCalls;
+  try {
+    build(newGraph());
+    throw StateError('second graph replaced the first graph program');
+  } catch (error) {
+    if (error is! StateError ||
+        !error.message.toString().contains('program ID is already installed')) {
+      rethrow;
+    }
+  }
+  if (world.handle != handle ||
+      !device.isLive(handle) ||
+      device.programCompileCalls != compiles ||
+      device.programDeleteCalls != 0) {
+    throw StateError('second graph disturbed the first graph program');
+  }
+  first.disposeAll();
+  library.disposeAll();
 }
 
 void _configuredMsaaGraphOwnsResolvePass() {
