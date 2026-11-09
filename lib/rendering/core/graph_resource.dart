@@ -82,7 +82,10 @@ final class HistoryRead {
   const HistoryRead(this.name);
 }
 
-enum ResourceAccess { read, write, historyRead }
+/// [append] adds more drawing to an attachment version another pass already
+/// wrote, without sampling it: no version bump, and legal on a multisampled
+/// target because nothing reads the samples.
+enum ResourceAccess { read, write, historyRead, append }
 
 final class ResourceUse {
   final ResourceRef resource;

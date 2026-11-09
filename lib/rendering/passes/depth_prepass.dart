@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 
 import '../api/effects.dart';
 import '../api/frame.dart';
@@ -270,12 +269,12 @@ final class _DepthPrepassPass implements RenderPass {
   ) {
     encoder.setUniform(
       'uViewProjection',
-      UniformValue.mat4(Float32List.fromList(camera.viewProjection.m)),
+      UniformValue.mat4(camera.viewProjection.m),
     );
     final model = transform.toMat4();
     encoder.setUniform(
       'uModel',
-      UniformValue.mat4(Float32List.fromList(model.m)),
+      UniformValue.mat4(model.m),
     );
   }
 }

@@ -391,6 +391,15 @@ final class WebGl2Device with _WebGlTimerSupport implements GpuDevice, GpuContex
   void applyDrawState(DrawStateDescriptor state) => applyDrawStateImpl(state);
 
   @override
+  void clearColorAttachment(
+    int index, {
+    double r = 0,
+    double g = 0,
+    double b = 0,
+    double a = 0,
+  }) => clearColorAttachmentImpl(index, r: r, g: g, b: b, a: a);
+
+  @override
   void clear(
     ClearMask mask, {
     double r = 0,
@@ -418,11 +427,13 @@ final class WebGl2Device with _WebGlTimerSupport implements GpuDevice, GpuContex
     required int componentCount,
     required int strideBytes,
     required int offsetBytes,
+    GpuAttribFormat format = GpuAttribFormat.float,
   }) => vertexAttribPointerImpl(
     location: location,
     componentCount: componentCount,
     strideBytes: strideBytes,
     offsetBytes: offsetBytes,
+    format: format,
   );
 
   @override

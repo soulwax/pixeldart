@@ -7,6 +7,7 @@ enum BlendFactor {
   oneMinusSrcAlpha,
   dstAlpha,
   oneMinusDstAlpha,
+  srcColor,
 }
 
 enum CullFace { front, back }

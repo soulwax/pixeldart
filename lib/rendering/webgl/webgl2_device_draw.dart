@@ -181,6 +181,7 @@ extension WebGl2DeviceDraw on WebGl2Device {
     BlendFactor.oneMinusSrcAlpha => _G.ONE_MINUS_SRC_ALPHA,
     BlendFactor.dstAlpha => _G.DST_ALPHA,
     BlendFactor.oneMinusDstAlpha => _G.ONE_MINUS_DST_ALPHA,
+    BlendFactor.srcColor => _G.SRC_COLOR,
   };
 
   int _glBlendEquation(BlendEquation eq) => switch (eq) {
@@ -278,6 +279,17 @@ extension WebGl2DeviceDraw on WebGl2Device {
     gl.clear(_glClearBits(mask));
   }
 
+  void clearColorAttachmentImpl(
+    int index, {
+    double r = 0,
+    double g = 0,
+    double b = 0,
+    double a = 0,
+  }) {
+    _requireReady();
+    gl.clearBufferfv(_G.COLOR, index, Float32List.fromList([r, g, b, a]).toJS);
+  }
+
   void useProgramImpl(GpuObject program) {
     _requireReady();
     final handle = (program as _WebGpuObject).handle as WebGLProgram;
@@ -343,13 +355,18 @@ extension WebGl2DeviceDraw on WebGl2Device {
     required int componentCount,
     required int strideBytes,
     required int offsetBytes,
+    GpuAttribFormat format = GpuAttribFormat.float,
   }) {
     _requireReady();
     gl.vertexAttribPointer(
       location,
       componentCount,
-      _G.FLOAT,
-      false,
+      switch (format) {
+        GpuAttribFormat.float => _G.FLOAT,
+        GpuAttribFormat.unorm16 => _G.UNSIGNED_SHORT,
+        GpuAttribFormat.unorm8 => _G.UNSIGNED_BYTE,
+      },
+      format != GpuAttribFormat.float,
       strideBytes,
       offsetBytes,
     );

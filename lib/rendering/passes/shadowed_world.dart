@@ -300,7 +300,26 @@ final class _ShadowedWorldPass implements RenderPass {
   final int shadowMapWidth;
   final int shadowMapHeight;
 
-  const _ShadowedWorldPass({
+  // What this execution has already sent, so a run of draws only pays for
+  // what differs from the draw before it. Uniforms belong to the program
+  // and bindings to the texture units, so the record starts over with each
+  // execution rather than trusting anything earlier in the frame.
+  final Float64List _lastMaterialValues = Float64List(_MaterialSlot.count);
+  final List<GpuObject?> _lastTextures = List.filled(7, null);
+  bool? _lastUseInstances;
+
+  // One object per distinct state, instead of a new descriptor per draw.
+  late final DrawStateDescriptor _passState = descriptor.toDrawState();
+  late final DrawStateDescriptor _passStateTwoSided = _passState
+      .withCullEnable(false);
+  static final DrawStateDescriptor _alphaTwoSided = DrawStateDescriptor
+      .blendedDefault
+      .withCullEnable(false);
+  static final DrawStateDescriptor _additiveTwoSided = DrawStateDescriptor
+      .additiveCoverage
+      .withCullEnable(false);
+
+  _ShadowedWorldPass({
     required this.descriptor,
     required this.program,
     required this.resolveMesh,
@@ -331,8 +350,12 @@ final class _ShadowedWorldPass implements RenderPass {
     final post = context.frameScene.post as PostProcessState;
     final lightView = resolveLightView();
 
+    _lastMaterialValues.fillRange(0, _MaterialSlot.count, double.nan);
+    _lastTextures.fillRange(0, _lastTextures.length, null);
+    _lastUseInstances = null;
+
     encoder.bindTarget(view.gpuObject);
-    encoder.applyDrawState(descriptor.toDrawState());
+    encoder.applyDrawState(_passState);
     encoder.clear(
       ClearMask.colorAndDepth,
       r: environment.clearColor.r,
@@ -672,7 +695,10 @@ final class _ShadowedWorldPass implements RenderPass {
     FrameEnvironment environment,
   ) {
     if (batch is RetainedItemView) {
-      disableInstanceTransformUniforms(encoder);
+      if (_lastUseInstances != false) {
+        disableInstanceTransformUniforms(encoder);
+        _lastUseInstances = false;
+      }
       _setModelUniforms(encoder, batch.descriptor.transform);
       _setMaterialState(
         encoder,
@@ -698,6 +724,7 @@ final class _ShadowedWorldPass implements RenderPass {
       final representative = batch.representative;
       _setModelUniforms(encoder, representative.descriptor.transform);
       setInstanceTransformUniforms(encoder, batch);
+      _lastUseInstances = true;
       _setMaterialState(
         encoder,
         representative.descriptor.material,
@@ -750,17 +777,24 @@ final class _ShadowedWorldPass implements RenderPass {
     FrameEnvironment environment,
   ) {
     final material = resolveMaterial(handle);
-    encoder.bindTexture(0, resolveAlbedo(material.albedoTexture));
-    encoder.bindTexture(
+    _bindMaterialTexture(encoder, 0, resolveAlbedo(material.albedoTexture));
+    _bindMaterialTexture(
+      encoder,
       3,
       (resolveNormal ?? resolveAlbedo)(material.normalTexture),
     );
-    encoder.bindTexture(4, (resolveOrm ?? resolveAlbedo)(material.ormTexture));
-    encoder.bindTexture(
+    _bindMaterialTexture(
+      encoder,
+      4,
+      (resolveOrm ?? resolveAlbedo)(material.ormTexture),
+    );
+    _bindMaterialTexture(
+      encoder,
       5,
       (resolveEmissive ?? resolveAlbedo)(material.emissiveTexture),
     );
-    encoder.bindTexture(
+    _bindMaterialTexture(
+      encoder,
       6,
       (resolveLightmap ?? resolveAlbedo)(material.lightmapTexture),
     );
@@ -804,66 +838,103 @@ final class _ShadowedWorldPass implements RenderPass {
       'uAffineWarpStrength',
       UniformValue.float1(material.affineSampling ? affineWarpStrength : 0),
     );
-    encoder.setUniform(
-      'uMaterialTint',
-      UniformValue.float3(
-        Float32List.fromList([material.tintR, material.tintG, material.tintB]),
-      ),
-    );
-    encoder.setUniform(
+    final last = _lastMaterialValues;
+    if (last[_MaterialSlot.tintR] != material.tintR ||
+        last[_MaterialSlot.tintG] != material.tintG ||
+        last[_MaterialSlot.tintB] != material.tintB) {
+      last[_MaterialSlot.tintR] = material.tintR;
+      last[_MaterialSlot.tintG] = material.tintG;
+      last[_MaterialSlot.tintB] = material.tintB;
+      encoder.setUniform(
+        'uMaterialTint',
+        UniformValue.float3(
+          Float32List.fromList([
+            material.tintR,
+            material.tintG,
+            material.tintB,
+          ]),
+        ),
+      );
+    }
+    _setMaterialFloat(
+      encoder,
+      _MaterialSlot.emissiveStrength,
       'uEmissiveStrength',
-      UniformValue.float1(material.emissiveStrength),
+      material.emissiveStrength,
     );
-    encoder.setUniform(
-      'uUvScaleOffset',
-      UniformValue.float4(
-        Float32List.fromList([
-          material.uvScaleU,
-          material.uvScaleV,
-          material.uvOffsetU,
-          material.uvOffsetV,
-        ]),
-      ),
-    );
-    encoder.setUniform(
+    if (last[_MaterialSlot.uvScaleU] != material.uvScaleU ||
+        last[_MaterialSlot.uvScaleV] != material.uvScaleV ||
+        last[_MaterialSlot.uvOffsetU] != material.uvOffsetU ||
+        last[_MaterialSlot.uvOffsetV] != material.uvOffsetV) {
+      last[_MaterialSlot.uvScaleU] = material.uvScaleU;
+      last[_MaterialSlot.uvScaleV] = material.uvScaleV;
+      last[_MaterialSlot.uvOffsetU] = material.uvOffsetU;
+      last[_MaterialSlot.uvOffsetV] = material.uvOffsetV;
+      encoder.setUniform(
+        'uUvScaleOffset',
+        UniformValue.float4(
+          Float32List.fromList([
+            material.uvScaleU,
+            material.uvScaleV,
+            material.uvOffsetU,
+            material.uvOffsetV,
+          ]),
+        ),
+      );
+    }
+    _setMaterialFloat(
+      encoder,
+      _MaterialSlot.normalStrength,
       'uNormalStrength',
-      UniformValue.float1(
-        material.normalStrength * environment.normalStrengthScale,
-      ),
+      material.normalStrength * environment.normalStrengthScale,
     );
-    encoder.setUniform(
+    _setMaterialFloat(
+      encoder,
+      _MaterialSlot.roughness,
       'uRoughness',
-      UniformValue.float1(material.roughness * environment.roughnessScale),
+      material.roughness * environment.roughnessScale,
     );
-    encoder.setUniform(
+    _setMaterialFloat(
+      encoder,
+      _MaterialSlot.metallic,
       'uMetallic',
-      UniformValue.float1(material.metallic * environment.metallicScale),
+      material.metallic * environment.metallicScale,
     );
-    encoder.setUniform(
+    _setMaterialFloat(
+      encoder,
+      _MaterialSlot.specularScale,
       'uSpecularScale',
-      UniformValue.float1(environment.specularScale),
+      environment.specularScale,
     );
-    encoder.setUniform(
+    _setMaterialFloat(
+      encoder,
+      _MaterialSlot.clearcoatStrength,
       'uClearcoatStrength',
-      UniformValue.float1(material.clearcoatStrength),
+      material.clearcoatStrength,
     );
-    encoder.setUniform(
+    _setMaterialFloat(
+      encoder,
+      _MaterialSlot.clearcoatRoughness,
       'uClearcoatRoughness',
-      UniformValue.float1(material.clearcoatRoughness),
+      material.clearcoatRoughness,
     );
-    encoder.setUniform(
+    _setMaterialFloat(
+      encoder,
+      _MaterialSlot.occlusionStrength,
       'uOcclusionStrength',
-      UniformValue.float1(material.occlusionStrength),
+      material.occlusionStrength,
     );
-    encoder.setUniform(
+    _setMaterialFloat(
+      encoder,
+      _MaterialSlot.lightmapIntensity,
       'uLightmapIntensity',
-      UniformValue.float1(material.lightmapIntensity),
+      material.lightmapIntensity,
     );
-    encoder.setUniform(
+    _setMaterialFloat(
+      encoder,
+      _MaterialSlot.receivesShadow,
       'uReceivesShadow',
-      UniformValue.float1(
-        material.receivesShadow && itemReceivesShadow ? 1 : 0,
-      ),
+      material.receivesShadow && itemReceivesShadow ? 1 : 0,
     );
     // RV-09 rung 6: opaque/masked items keep this pass's own declared
     // (depth-writing, non-blended) state; DrawMode.blended items override
@@ -873,27 +944,72 @@ final class _ShadowedWorldPass implements RenderPass {
     // purpose. §6.2's "sorts blended back-to-front" is the caller's job
     // (frameScene.blendedItemsBackToFront's own ordering); this method
     // only ever picks *how* to blend, not the draw order.
-    final baseState = switch (drawMode) {
+    final twoSided = material.doubleSided;
+    final state = switch (drawMode) {
       DrawMode.blended => switch (blendMode) {
-        BlendMode.alpha => DrawStateDescriptor.blendedDefault,
-        BlendMode.additive => DrawStateDescriptor.additiveCoverage,
+        BlendMode.alpha =>
+          twoSided ? _alphaTwoSided : DrawStateDescriptor.blendedDefault,
+        BlendMode.additive =>
+          twoSided ? _additiveTwoSided : DrawStateDescriptor.additiveCoverage,
       },
-      DrawMode.opaque || DrawMode.masked => descriptor.toDrawState(),
+      DrawMode.opaque ||
+      DrawMode.masked => twoSided ? _passStateTwoSided : _passState,
     };
-    encoder.applyDrawState(
-      material.doubleSided ? baseState.withCullEnable(false) : baseState,
-    );
+    encoder.applyDrawState(state);
+  }
+
+  void _setMaterialFloat(
+    DrawCommandEncoder encoder,
+    int slot,
+    String name,
+    double value,
+  ) {
+    if (_lastMaterialValues[slot] == value) return;
+    _lastMaterialValues[slot] = value;
+    encoder.setUniform(name, UniformValue.float1(value));
+  }
+
+  void _bindMaterialTexture(
+    DrawCommandEncoder encoder,
+    int unit,
+    GpuObject texture,
+  ) {
+    if (identical(_lastTextures[unit], texture)) return;
+    _lastTextures[unit] = texture;
+    encoder.bindTexture(unit, texture);
   }
 
   void _setModelUniforms(DrawCommandEncoder encoder, Transform transform) {
     final model = transform.toMat4();
     encoder.setUniform(
       'uModel',
-      UniformValue.mat4(Float32List.fromList(model.m)),
+      UniformValue.mat4(model.m),
     );
     encoder.setUniform(
       'uNormalMatrix',
-      UniformValue.mat4(Float32List.fromList(model.normalMatrix().m)),
+      UniformValue.mat4(model.normalMatrix().m),
     );
   }
+}
+
+/// Indices into `_ShadowedWorldPass._lastMaterialValues`.
+abstract final class _MaterialSlot {
+  static const int tintR = 0;
+  static const int tintG = 1;
+  static const int tintB = 2;
+  static const int emissiveStrength = 3;
+  static const int uvScaleU = 4;
+  static const int uvScaleV = 5;
+  static const int uvOffsetU = 6;
+  static const int uvOffsetV = 7;
+  static const int normalStrength = 8;
+  static const int roughness = 9;
+  static const int metallic = 10;
+  static const int specularScale = 11;
+  static const int clearcoatStrength = 12;
+  static const int clearcoatRoughness = 13;
+  static const int occlusionStrength = 14;
+  static const int lightmapIntensity = 15;
+  static const int receivesShadow = 16;
+  static const int count = 17;
 }

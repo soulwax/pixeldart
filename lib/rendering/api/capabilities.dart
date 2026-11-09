@@ -186,6 +186,14 @@ final class QualityProfile {
     PipelineFeatures.grade,
   });
 
+  /// A 2D pipeline: no world lighting, no shadow or depth targets, only
+  /// bloom over the scene. Pair with [PipelineFeatures]-free [safe] when
+  /// bloom isn't wanted either.
+  static const QualityProfile flat2d = QualityProfile(
+    QualityProfileKind.standard,
+    {PipelineFeatures.bloom},
+  );
+
   /// Clean cinematic lighting plus the bounded, depth-aware participating
   /// media path. Kept separate from [clean] so hosts can opt into the extra
   /// ray-march cost without changing the established runtime default.

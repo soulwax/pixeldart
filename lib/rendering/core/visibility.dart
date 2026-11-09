@@ -29,11 +29,12 @@ CullResult cullItems({
   required int visibilityMask,
 }) {
   final visible = <RetainedItemView>[];
-  var candidates = 0;
   var culled = 0;
+  final list = items is List<RetainedItemView> ? items : items.toList();
+  final candidates = list.length;
 
-  for (final item in items) {
-    candidates += 1;
+  for (var i = 0; i < candidates; i += 1) {
+    final item = list[i];
     if ((item.descriptor.visibilityMask & visibilityMask) == 0) {
       culled += 1;
       continue;

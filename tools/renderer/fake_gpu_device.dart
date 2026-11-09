@@ -421,11 +421,25 @@ final class FakeGpuDevice with _FakeGpuTimerSupport implements GpuDevice, GpuCon
     required int componentCount,
     required int strideBytes,
     required int offsetBytes,
+    GpuAttribFormat format = GpuAttribFormat.float,
   }) {
     _requireReady();
+    final suffix = format == GpuAttribFormat.float ? '' : ', ${format.name}';
     drawLog.add(
-      'vertexAttribPointer($location, $componentCount, $strideBytes, $offsetBytes)',
+      'vertexAttribPointer($location, $componentCount, $strideBytes, $offsetBytes$suffix)',
     );
+  }
+
+  @override
+  void clearColorAttachment(
+    int index, {
+    double r = 0,
+    double g = 0,
+    double b = 0,
+    double a = 0,
+  }) {
+    _requireReady();
+    drawLog.add('clearColorAttachment($index)');
   }
 
   @override

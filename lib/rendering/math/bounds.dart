@@ -47,8 +47,53 @@ final class Aabb {
   /// for any affine `model` including rotation, unlike transforming only
   /// `min`/`max`, which RENDERER-ELEVATION-PLAN.md §2.4 flags as a live
   /// culling-space defect in the legacy renderer.
-  Aabb transformed(Mat4 model) =>
-      Aabb.fromPoints(corners.map(model.transformPoint));
+  ///
+  /// An affine `model` takes the per-axis extreme of each matrix term, which
+  /// is the same box without building eight points; this runs for every
+  /// moved item and transient of every frame.
+  Aabb transformed(Mat4 model) {
+    final m = model.m;
+    if (m[3] != 0 || m[7] != 0 || m[11] != 0 || m[15] != 1) {
+      return Aabb.fromPoints(corners.map(model.transformPoint));
+    }
+    final lo = min, hi = max;
+    var loX = m[12], hiX = m[12];
+    var loY = m[13], hiY = m[13];
+    var loZ = m[14], hiZ = m[14];
+    void axis(int column, double from, double to) {
+      var a = m[column] * from, b = m[column] * to;
+      if (a < b) {
+        loX += a;
+        hiX += b;
+      } else {
+        loX += b;
+        hiX += a;
+      }
+      a = m[column + 1] * from;
+      b = m[column + 1] * to;
+      if (a < b) {
+        loY += a;
+        hiY += b;
+      } else {
+        loY += b;
+        hiY += a;
+      }
+      a = m[column + 2] * from;
+      b = m[column + 2] * to;
+      if (a < b) {
+        loZ += a;
+        hiZ += b;
+      } else {
+        loZ += b;
+        hiZ += a;
+      }
+    }
+
+    axis(0, lo.x, hi.x);
+    axis(4, lo.y, hi.y);
+    axis(8, lo.z, hi.z);
+    return Aabb(Vec3(loX, loY, loZ), Vec3(hiX, hiY, hiZ));
+  }
 
   Aabb union(Aabb other) =>
       Aabb(Vec3.min(min, other.min), Vec3.max(max, other.max));

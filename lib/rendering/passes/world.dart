@@ -284,11 +284,11 @@ final class _WorldPass implements RenderPass {
     final model = transform.toMat4();
     encoder.setUniform(
       'uModel',
-      UniformValue.mat4(Float32List.fromList(model.m)),
+      UniformValue.mat4(model.m),
     );
     encoder.setUniform(
       'uNormalMatrix',
-      UniformValue.mat4(Float32List.fromList(model.normalMatrix().m)),
+      UniformValue.mat4(model.normalMatrix().m),
     );
   }
 }

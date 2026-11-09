@@ -44,6 +44,7 @@ final class RenderGraphBuilder {
 
     final writers = _collectWriters(enabledPasses, failures);
     _checkReadBeforeWrite(enabledPasses, writers, failures);
+    _checkAppends(enabledPasses, writers, failures);
     _checkUnversionedReadWrite(enabledPasses, failures);
     _checkFormatAndSizeMismatch(enabledPasses, writers, failures);
     _checkDependencyCycles(enabledPasses, failures);
@@ -207,6 +208,29 @@ final class RenderGraphBuilder {
               GraphValidationFailureKind.readBeforeWrite,
               pass.id,
               'reads ${use.resource} before writer ${writer.id} runs',
+            ),
+          );
+        }
+      }
+    }
+  }
+
+  void _checkAppends(
+    List<PassDeclaration> passes,
+    Map<String, PassDeclaration> writerOf,
+    List<GraphValidationFailure> failures,
+  ) {
+    for (var i = 0; i < passes.length; i++) {
+      final pass = passes[i];
+      for (final use in pass.uses) {
+        if (use.access != ResourceAccess.append) continue;
+        final writer = writerOf['${use.resource.name}#${use.resource.version}'];
+        if (writer == null || passes.indexOf(writer) > i) {
+          failures.add(
+            GraphValidationFailure(
+              GraphValidationFailureKind.readBeforeWrite,
+              pass.id,
+              'appends to ${use.resource} before any pass writes it',
             ),
           );
         }

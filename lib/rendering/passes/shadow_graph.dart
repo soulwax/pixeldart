@@ -18,6 +18,7 @@ import 'present.dart';
 import 'ps1.dart';
 import 'shadow.dart';
 import 'shadowed_world.dart';
+import 'sprites.dart';
 import 'ssao.dart';
 import 'vhs.dart';
 import 'volumetric_light.dart';
@@ -68,6 +69,7 @@ FeatureGraph buildShadowGraph(
   required GpuObject Function() resolveVhsHistory,
   required double Function() resolveTime,
   QualityProfile profile = QualityProfile.ps1Full,
+  SpritesFeature? sprites,
 }) {
   if (!profile.installs(PipelineFeatures.shadows)) {
     throw ArgumentError.value(
@@ -355,10 +357,12 @@ FeatureGraph buildShadowGraph(
     if (hasSsao) ssaoBlur,
       shadow,
       shadowedWorld,
+      if (sprites != null) sprites,
       if (msaaResolve != null) msaaResolve,
       if (volumetric != null) volumetric,
     ...postFeatures,
     present,
+    if (sprites != null) sprites.overlay,
   ]);
 }
 

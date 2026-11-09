@@ -23,5 +23,7 @@
     "vhs/vhs.frag": "vhsFragSrc"
     ,"volumetric/volumetric_light.frag": "volumetricLightFragSrc"
     ,"volumetric/volumetric_composite.frag": "volumetricCompositeFragSrc"
+    ,"sprites/sprite.vert": "spriteVertSrc"
+    ,"sprites/sprite.frag": "spriteFragSrc"
   }
 }

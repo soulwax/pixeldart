@@ -1885,3 +1885,67 @@ void main() {
   oColor = vec4(light * max(uVolumetricStrength, 0.0), 1.0);
 }
 ''';
+
+const String spriteVertSrc = '''
+#version 300 es
+precision highp float;
+layout(location=0) in vec2 aCorner;
+layout(location=1) in vec4 aAxes;
+layout(location=2) in vec3 aOrigin;
+layout(location=3) in vec4 aUv;
+layout(location=4) in vec4 aColor;
+layout(location=5) in vec4 aParams;
+uniform mat4 uViewProjection;
+out vec2 vUv;
+out vec4 vColor;
+out vec3 vParams;
+
+void main(){
+  vec2 world=aOrigin.xy+aAxes.xy*aCorner.x+aAxes.zw*aCorner.y;
+  vUv=mix(aUv.xy,aUv.zw,aCorner);
+  vColor=aColor;
+  vParams=aParams.xyz;
+  gl_Position=uViewProjection*vec4(world,aOrigin.z,1.);
+}
+''';
+
+const String spriteFragSrc = '''
+#version 300 es
+precision highp float;
+in vec2 vUv;
+in vec4 vColor;
+in vec3 vParams;
+uniform sampler2D uTex;
+uniform float uLinearize;
+uniform float uMultiply;
+layout(location=0) out vec4 oColor;
+layout(location=1) out vec4 oGlow;
+
+vec3 srgbToLinear(vec3 c){
+  vec3 cutoff=step(vec3(.04045),c);
+  vec3 low=c/12.92;
+  vec3 high=pow((c+.055)/1.055,vec3(2.4));
+  return mix(low,high,cutoff);
+}
+
+void main(){
+  vec4 tex=texture(uTex,vUv);
+  float additive=vParams.x;
+  float glow=vParams.y;
+  float flash=vParams.z;
+  vec3 rgb=mix(tex.rgb*vColor.rgb,vColor.rgb,flash);
+  float a=tex.a*vColor.a;
+  if(uLinearize>.5) rgb=srgbToLinear(rgb);
+  if(uMultiply>.5){
+    // Blended as dst*src: full coverage multiplies, no coverage leaves dst.
+    oColor=vec4(mix(vec3(1.),rgb,a),1.);
+    oGlow=oColor;
+    return;
+  }
+  // Premultiplied: output alpha 0 adds light, 1 covers what is behind.
+  vec3 premultiplied=rgb*a;
+  float coverage=a*(1.-additive);
+  oColor=vec4(premultiplied,coverage);
+  oGlow=vec4(premultiplied*glow,coverage);
+}
+''';

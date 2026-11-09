@@ -38,6 +38,8 @@ import '../scene/scene_node.dart';
 import 'webgl2_renderer_factory.dart';
 export 'device_api.dart' show GpuTextureWrap, GpuTextureFilter;
 export '../particles/particle_spritesheet.dart';
+export 'input.dart';
+export 'sprite_loader.dart';
 
 /// Per-frame callback context passed to host update listeners.
 final class FrameContext {
@@ -103,6 +105,10 @@ final class PixeldartApp {
   /// Current evaluated astronomical solar state, if solar time is active.
   SolarLightingState? currentSolarState;
   final Set<String> _pressedKeys = {};
+
+  /// Keyboard and pointer state; presses and releases last until the end of
+  /// the frame they are first seen in.
+  final InputState input;
 
   /// Active animation player for scene timelines and tweens.
   final AnimationPlayer animations = AnimationPlayer();
@@ -203,7 +209,8 @@ final class PixeldartApp {
     required this.sequencer,
     required this._surface,
     required this.maxDevicePixelRatio,
-  });
+    required this._followCanvasSize,
+  }) : input = InputState(canvas);
 
   /// Highest device pixel ratio the backing store follows (from [mount]).
   final double maxDevicePixelRatio;
@@ -215,7 +222,17 @@ final class PixeldartApp {
   /// after a `ResizeObserver` or window resize says it changed.
   bool _cssSizeDirty = true;
 
+  /// Whether the internal resolution tracks the canvas. A host that supplies
+  /// its own configuration owns that policy.
+  final bool _followCanvasSize;
+
+  /// Frame time at which a pending internal-resolution change applies.
+  double? _internalResizeDue;
+
   /// Mounts Pixeldart onto [canvas], performing bootstrap and sizing.
+  ///
+  /// Unless [configBuilder] is given, the internal resolution follows the
+  /// canvas: a resize applies once the size has held still for a moment.
   static Future<PixeldartApp?> mount(
     web.HTMLCanvasElement canvas, {
     QualityProfile requestedProfile = QualityProfile.clean,
@@ -223,6 +240,68 @@ final class PixeldartApp {
     RendererConfiguration Function(QualityProfile)? configBuilder,
     bool showStats = false,
     bool enableOrbitControls = true,
+  }) => _mount(
+    canvas,
+    ladder: defaultProfileLadder(requestedProfile),
+    maxDevicePixelRatio: maxDevicePixelRatio,
+    configurationFor: configBuilder == null
+        ? (p, surface) => RendererConfiguration(
+            profile: p,
+            internalWidth: surface.pixelWidth,
+            internalHeight: surface.pixelHeight,
+            sampleCount: p.kind == QualityProfileKind.high ? 2 : 1,
+            shadowMapCount: p == QualityProfile.safe ? 0 : 1,
+          )
+        : (p, _) => configBuilder(p),
+    followCanvasSize: configBuilder == null,
+    showStats: showStats,
+    enableOrbitControls: enableOrbitControls,
+  );
+
+  /// Mounts a renderer set up for sprites: no 3D lighting passes, authored
+  /// colours reach the screen unchanged, and the internal resolution follows
+  /// the canvas. [bloom] adds a bloom pass; sprites opt in per-draw with
+  /// `glow`, and `post.bloomStrength` sets the amount.
+  static Future<PixeldartApp?> mount2d(
+    web.HTMLCanvasElement canvas, {
+    bool bloom = false,
+    double maxDevicePixelRatio = 2,
+    LinearColor clearColor = const LinearColor(0, 0, 0),
+  }) async {
+    final app = await _mount(
+      canvas,
+      ladder: bloom
+          ? const [QualityProfile.flat2d, QualityProfile.safe]
+          : const [QualityProfile.safe],
+      maxDevicePixelRatio: maxDevicePixelRatio,
+      configurationFor: (p, surface) => RendererConfiguration(
+        profile: p,
+        internalWidth: surface.pixelWidth,
+        internalHeight: surface.pixelHeight,
+        outputEncoding: ColorEncoding.linear,
+      ),
+      followCanvasSize: true,
+      showStats: false,
+      enableOrbitControls: false,
+    );
+    if (app == null) return null;
+    app.post = PostProcessState(
+      bloomStrength: bloom ? 0.35 : 0,
+      toneMapping: ToneMappingMode.off,
+    );
+    app.environment = FrameEnvironment(clearColor: clearColor);
+    return app;
+  }
+
+  static Future<PixeldartApp?> _mount(
+    web.HTMLCanvasElement canvas, {
+    required List<QualityProfile> ladder,
+    required double maxDevicePixelRatio,
+    required RendererConfiguration Function(QualityProfile, SurfaceMetrics)
+    configurationFor,
+    required bool followCanvasSize,
+    required bool showStats,
+    required bool enableOrbitControls,
   }) async {
     final renderer = const WebGl2RendererFactory().create(canvas);
     if (renderer == null) return null;
@@ -241,16 +320,8 @@ final class PixeldartApp {
     await bootstrapRenderer(
       renderer: renderer,
       surface: surface,
-      ladder: defaultProfileLadder(requestedProfile),
-      configurationFor:
-          configBuilder ??
-          (p) => RendererConfiguration(
-            profile: p,
-            internalWidth: surface.pixelWidth,
-            internalHeight: surface.pixelHeight,
-            sampleCount: p.kind == QualityProfileKind.high ? 2 : 1,
-            shadowMapCount: p == QualityProfile.safe ? 0 : 1,
-          ),
+      ladder: ladder,
+      configurationFor: (p) => configurationFor(p, surface),
     );
 
     final world = renderer.createWorld();
@@ -263,6 +334,7 @@ final class PixeldartApp {
       sequencer: sequencer,
       surface: surface,
       maxDevicePixelRatio: maxDevicePixelRatio,
+      followCanvasSize: followCanvasSize,
     ).._rawDevicePixelRatio = web.window.devicePixelRatio.toDouble();
 
     if (enableOrbitControls) {
@@ -964,6 +1036,40 @@ final class PixeldartApp {
     } catch (error, stack) {
       _report(error, stack);
     }
+    // Rebuilding the targets per resize event would stutter through a window
+    // drag, so wait for the size to settle; until then present stretches.
+    if (_followCanvasSize && !_surface.isZeroSized) {
+      _internalResizeDue = _lastTimeSeconds + 0.15;
+    }
+  }
+
+  void _applyInternalResize(double timeSeconds) {
+    final due = _internalResizeDue;
+    if (due == null || timeSeconds < due) return;
+    _internalResizeDue = null;
+    final c = renderer.configuration;
+    if (c.internalWidth == _surface.pixelWidth &&
+        c.internalHeight == _surface.pixelHeight) {
+      return;
+    }
+    renderer
+        .configure(
+          RendererConfiguration(
+            profile: c.profile,
+            internalWidth: _surface.pixelWidth,
+            internalHeight: _surface.pixelHeight,
+            sampleCount: c.sampleCount,
+            outputEncoding: c.outputEncoding,
+            shadowMapCount: c.shadowMapCount,
+            shadowMapSize: c.shadowMapSize,
+            materialTableCapacity: c.materialTableCapacity,
+            lightTableCapacity: c.lightTableCapacity,
+            textureArrayLayerCapacity: c.textureArrayLayerCapacity,
+            diagnosticLevel: c.diagnosticLevel,
+          ),
+        )
+        .catchError(_report);
+    sequencer.invalidateHistory('internal resolution changed');
   }
 
   /// Starts the requestAnimationFrame render loop.
@@ -1002,6 +1108,7 @@ final class PixeldartApp {
       }
       _report(error, stack);
     }
+    input.endFrame();
 
     // Always schedule the next frame, whatever happened in this one.
     if (_running) _rafHandle = web.window.requestAnimationFrame(_tick.toJS);
@@ -1024,6 +1131,7 @@ final class PixeldartApp {
   void _frame(double timeSeconds, double dt) {
     _resize();
     if (_contextLost || renderer.state == RendererState.contextLost) return;
+    _applyInternalResize(timeSeconds);
 
     onBeforeFrame?.call(timeSeconds, dt);
 
@@ -1133,6 +1241,7 @@ final class PixeldartApp {
 
   void dispose() {
     stop();
+    input.dispose();
     _statsElement?.remove();
     _statsElement = null;
     root.removeFromWorld(world);

@@ -17,6 +17,10 @@ enum GpuBufferKind { vertex, indices }
 
 enum GpuTextureFilter { nearest, linear, linearMipmapLinear }
 
+/// How a vertex attribute's components are stored in its buffer. The normalized
+/// integer formats read as 0..1 in the shader.
+enum GpuAttribFormat { float, unorm16, unorm8 }
+
 enum GpuTextureWrap { clampToEdge, repeat }
 
 /// The result of negotiating a texture's requested anisotropy with a
@@ -263,6 +267,15 @@ abstract interface class GpuDevice {
   /// existed). Call once per pass, after `bindTarget`.
   void applyDrawState(DrawStateDescriptor state);
   void clear(ClearMask mask, {double r, double g, double b, double a});
+
+  /// Clears one color attachment of the bound target, leaving the others.
+  void clearColorAttachment(
+    int index, {
+    double r,
+    double g,
+    double b,
+    double a,
+  });
   void useProgram(GpuObject program);
   void setUniform(String name, UniformValue value);
   void bindVertexArray(GpuObject vao);
@@ -285,6 +298,7 @@ abstract interface class GpuDevice {
     required int componentCount,
     required int strideBytes,
     required int offsetBytes,
+    GpuAttribFormat format = GpuAttribFormat.float,
   });
   void enableVertexAttribArray(int location);
   void vertexAttribDivisor(int location, int divisor);

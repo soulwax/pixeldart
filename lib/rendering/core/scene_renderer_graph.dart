@@ -1,5 +1,8 @@
 part of 'scene_renderer_impl.dart';
 
+/// Each pass's resource views, kept with the graph that owns them.
+final Expando<List<Map<String, BoundResourceView>>> _passViews = Expando();
+
 final class _FrameExecution {
   final FrameDrawTelemetry telemetry;
   final CullResult cull;
@@ -106,8 +109,25 @@ extension on SceneRendererImpl {
       throw StateError('resource is not in configured graph: $name');
     }
 
-    final featureGraph =
-        configuration.profile.installs(PipelineFeatures.shadows)
+    final hasBloom = configuration.profile.installs(PipelineFeatures.bloom);
+    final hasShadows = configuration.profile.installs(PipelineFeatures.shadows);
+    final sprites = SpritesFeature(
+      programLibrary: programs,
+      device: device,
+      submissions: _frames,
+      resolveTexture: _resources!.textures.resolveAlbedo,
+      sceneColorResource: ResourceRef(
+        name: SafeGraphResources.sceneColor.name,
+        format: SafeGraphResources.sceneColor.format,
+        width: configuration.internalWidth,
+        height: configuration.internalHeight,
+        samples: configuration.sampleCount,
+      ),
+      outputEncoding: configuration.outputEncoding,
+      // The safe world pass has no glow output, so its clear stays there.
+      clearGlow: hasBloom && !hasShadows,
+    );
+    final featureGraph = hasShadows
         ? buildShadowGraph(
             programs,
             device: device,
@@ -162,6 +182,7 @@ extension on SceneRendererImpl {
                 resolveResource('vhsOutput', fallback: 'sceneColor'),
             resolveTime: () => _activeFrame!.timeSeconds,
             profile: configuration.profile,
+            sprites: sprites,
           )
         : buildSafeGraph(
             programs,
@@ -171,6 +192,15 @@ extension on SceneRendererImpl {
             internalHeight: configuration.internalHeight,
             sampleCount: configuration.sampleCount,
             outputEncoding: configuration.outputEncoding,
+            sprites: sprites,
+            bloom: hasBloom,
+            resolveResolvedSceneColor: () => resolveResource(
+              configuration.sampleCount > 1 ? 'sceneColor#1' : 'sceneColor',
+            ),
+            resolveBloomBlurH: () =>
+                resolveResource('bloomBlurH', fallback: 'sceneColor'),
+            resolveBloomBlurV: () =>
+                resolveResource('bloomBlurV', fallback: 'sceneColor'),
           );
     final result = featureGraph.build(
       featureContext: RenderFeatureContext(
@@ -219,18 +249,22 @@ extension on SceneRendererImpl {
       frustum: frame.camera.buildFrustum(),
       visibilityMask: frame.visibilityMask,
     );
-    var candidateTriangles = 0;
-    for (final item in allItems) {
-      candidateTriangles += _triangleCount(item.descriptor.mesh);
-    }
-    var visibleTriangles = 0;
-    for (final item in cull.visible) {
-      visibleTriangles += _triangleCount(item.descriptor.mesh);
-    }
+    // cull.visible is a subsequence of allItems, so one walk finds the items
+    // it dropped without resolving a mesh for every item that was kept.
     final visible = cull.visible;
+    var culledTriangles = 0;
+    var nextVisible = 0;
+    for (final item in allItems) {
+      if (nextVisible < visible.length &&
+          identical(visible[nextVisible], item)) {
+        nextVisible += 1;
+      } else {
+        culledTriangles += _triangleCount(item.descriptor.mesh);
+      }
+    }
     final telemetry = FrameDrawTelemetry()..beginPass('cull');
     telemetry.recordCull(
-      triangles: candidateTriangles - visibleTriangles,
+      triangles: culledTriangles,
       instances: cull.stats.culled,
     );
     final opaque = <SortableItem<OpaqueSortKey>>[];
@@ -272,43 +306,56 @@ extension on SceneRendererImpl {
       post: frame.post,
     );
     final encoder = DeviceDrawCommandEncoder(device, telemetry: telemetry);
-    for (final pass in graph.passes) {
+    final declaration = frame.environment.skybox;
+    final skyboxHandle = declaration?.texture;
+    final skyboxTexture =
+        skyboxHandle == null || !_resources!.textures.isResident(skyboxHandle)
+        ? null
+        : _resources!.textures.resolve(skyboxHandle);
+    // A graph is rebuilt whenever its GPU objects change (configure and
+    // context restore both do), so its views can be kept with it.
+    final passViews = _passViews[graph] ??= [
+      for (final pass in graph.passes) _viewsFor(pass, resources),
+    ];
+    final passes = graph.passes;
+    for (var i = 0; i < passes.length; i += 1) {
+      final pass = passes[i];
       telemetry.beginPass(pass.descriptor.id);
-      final views = <String, BoundResourceView>{};
-      for (final use in pass.descriptor.uses) {
-        final resource = use.resource;
-        final view = BoundResourceView(
-          use.resource,
-          resources.current.objectFor(
-            resource.version == 0
-                ? resource.name
-                : '${resource.name}#${resource.version}',
-          ),
-        );
-        views['${resource.name}#${resource.version}'] = view;
-        views.putIfAbsent(resource.name, () => view);
-      }
       pass.execute(
         BoundPassContext(
-          views: views,
+          views: passViews[i],
           encoder: encoder,
           frameScene: scene,
-          skyboxTexture: () {
-            final declaration = frame.environment.skybox;
-            final handle = declaration?.texture;
-            if (handle == null || !_resources!.textures.isResident(handle)) {
-              return null;
-            }
-            return _resources!.textures.resolve(handle);
-          }(),
+          skyboxTexture: skyboxTexture,
         ),
       );
     }
     return _FrameExecution(
       telemetry,
       cull,
-      candidateTriangles - visibleTriangles,
+      culledTriangles,
     );
+  }
+
+  Map<String, BoundResourceView> _viewsFor(
+    RenderPass pass,
+    GpuResourcePlanAdapter resources,
+  ) {
+    final views = <String, BoundResourceView>{};
+    for (final use in pass.descriptor.uses) {
+      final resource = use.resource;
+      final view = BoundResourceView(
+        use.resource,
+        resources.current.objectFor(
+          resource.version == 0
+              ? resource.name
+              : '${resource.name}#${resource.version}',
+        ),
+      );
+      views['${resource.name}#${resource.version}'] = view;
+      views.putIfAbsent(resource.name, () => view);
+    }
+    return views;
   }
 
   int _triangleCount(MeshHandle handle) {

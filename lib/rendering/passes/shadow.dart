@@ -1,5 +1,4 @@
 import 'dart:math' as math;
-import 'dart:typed_data';
 
 import '../api/handles.dart';
 import '../api/lights.dart';
@@ -360,11 +359,11 @@ final class _ShadowCasterPass implements RenderPass {
     final model = transform.toMat4();
     encoder.setUniform(
       'uModel',
-      UniformValue.mat4(Float32List.fromList(model.m)),
+      UniformValue.mat4(model.m),
     );
     encoder.setUniform(
       'uLightViewProjection',
-      UniformValue.mat4(Float32List.fromList(lightView.viewProjection.m)),
+      UniformValue.mat4(lightView.viewProjection.m),
     );
   }
 }

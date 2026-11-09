@@ -98,9 +98,9 @@ Coordinate, culling, material and frame-order conventions are covered in
 [docs/conventions.md](docs/conventions.md). It ends with a checklist for a
 blank or wrong-looking frame, which starts with `showStats: true`.
 
-For complete hosts, see [examples/](examples/README.md): three small games
-(a 3D runner, a 2D orthographic dungeon crawl, and an ocean scene with
-terrain, buoyancy, weather and a day/night cycle) built only on the public API.
+For complete hosts, see [examples/](examples/README.md): four games covering
+a 3D runner, an orthographic dungeon crawl, an ocean scene, and a pure-2D
+sprite game. Each keeps its gameplay in the host and uses the public renderer API.
 
 ## Use Pixeldart as a library
 
@@ -112,6 +112,33 @@ submit retained scene resources plus immutable frame facts. Import
 backend policy such as capability negotiation, residency, or pass planning.
 Browser hosts additionally bind the WebGL2 adapter at their platform edge;
 that adapter is intentionally not loaded by VM-only hosts.
+
+For a sprite-only browser host, `mount2d` selects the 2D render path. The host
+owns its frame loop callback and sprite data; the renderer handles submission:
+
+```dart
+import 'package:pixeldart/pixeldart.dart';
+import 'package:pixeldart/rendering/webgl/pixeldart_app.dart';
+import 'package:web/web.dart' as web;
+
+Future<void> main() async {
+  final canvas = web.document.querySelector('#game') as web.HTMLCanvasElement;
+  final app = await PixeldartApp.mount2d(canvas);
+  if (app == null) return; // WebGL2 is unavailable.
+  final camera = Camera2D(designWidth: 400, designHeight: 225);
+  final sprites = SpriteBatch();
+  app.onFrame = (frame) {
+    camera.setViewport(app.surface.pixelWidth, app.surface.pixelHeight);
+    sprites.clear();
+    sprites.drawRect(20, 20, 48, 48, color: 0xFF8040FF);
+    frame.encoder.drawSprites(sprites, camera);
+  };
+  app.start();
+}
+```
+
+[Procession](examples/example_4/) shows asset atlases, bitmap text, tile
+layers, sorting, lighting and input in a complete 2D host.
 
 The stable facade contains contracts, handles, math, model packages, and
 diagnostics. It does not expose game types or require browser globals. WebGL
