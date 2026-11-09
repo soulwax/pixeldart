@@ -209,6 +209,12 @@ final class PixeldartApp {
   final double maxDevicePixelRatio;
   double _rawDevicePixelRatio = 1;
 
+  /// Set when the canvas's CSS box may have changed. Reading `clientWidth`
+  /// forces a synchronous layout whenever the page has pending DOM changes
+  /// (a HUD updating its text every frame), so the size is only re-read
+  /// after a `ResizeObserver` or window resize says it changed.
+  bool _cssSizeDirty = true;
+
   /// Mounts Pixeldart onto [canvas], performing bootstrap and sizing.
   static Future<PixeldartApp?> mount(
     web.HTMLCanvasElement canvas, {
@@ -388,6 +394,16 @@ final class PixeldartApp {
     final y = clientY - rect.top;
     if (x < 0 || x > rect.width || y < 0 || y > rect.height) return null;
     return currentCamera().screenPointToRay(x, y, rect.width.toInt(), rect.height.toInt());
+  }
+
+  /// Where world-space [point] appears on the page, in window client
+  /// coordinates (the same space as mouse events and [pick]); `null` when it
+  /// is behind the camera. Use it to place DOM labels over scene objects.
+  Vec2? worldToClient(Vec3 point) {
+    final rect = canvas.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) return null;
+    final p = currentCamera().worldToScreenPoint(point, rect.width.toInt(), rect.height.toInt());
+    return p == null ? null : Vec2(p.x + rect.left, p.y + rect.top);
   }
 
   /// Raycasts against the scene hierarchy using client window coordinates [clientX], [clientY].
@@ -776,7 +792,16 @@ final class PixeldartApp {
   }
 
   void _installListeners() {
-    web.window.addEventListener('resize', ((web.Event _) => _resize()).toJS);
+    web.window.addEventListener(
+      'resize',
+      ((web.Event _) {
+        _cssSizeDirty = true;
+        _resize();
+      }).toJS,
+    );
+    web.ResizeObserver(
+      ((JSArray<web.ResizeObserverEntry> _, web.ResizeObserver _) => _cssSizeDirty = true).toJS,
+    ).observe(canvas);
     canvas.addEventListener(
       'webglcontextlost',
       ((web.Event e) {
@@ -913,11 +938,14 @@ final class PixeldartApp {
   }
 
   void _resize() {
+    // The ratio changes without a CSS resize when the window moves to
+    // another monitor or the page is zoomed, so it is checked every frame;
+    // reading it doesn't force layout.
+    final dpr = web.window.devicePixelRatio.toDouble();
+    if (!_cssSizeDirty && dpr == _rawDevicePixelRatio) return;
+    _cssSizeDirty = false;
     final cssW = canvas.clientWidth > 0 ? canvas.clientWidth : canvas.width;
     final cssH = canvas.clientHeight > 0 ? canvas.clientHeight : canvas.height;
-    // The ratio changes without a CSS resize when the window moves to
-    // another monitor or the page is zoomed, so it is checked every frame.
-    final dpr = web.window.devicePixelRatio.toDouble();
     if (cssW == _surface.cssWidth && cssH == _surface.cssHeight && dpr == _rawDevicePixelRatio) {
       return;
     }

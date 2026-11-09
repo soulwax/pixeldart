@@ -59,6 +59,29 @@ final class CameraView {
     return Ray(origin: orthographic ? nearPoint : eye, direction: dir);
   }
 
+  /// Projects a world-space [point] to viewport pixel coordinates, the
+  /// inverse of [screenPointToRay]: (0, 0) is the top-left corner. Returns
+  /// `null` for points behind the camera. Points off-screen still project,
+  /// outside `0..viewportWidth` / `0..viewportHeight`.
+  Vec2? worldToScreenPoint(
+    Vec3 point,
+    int viewportWidth,
+    int viewportHeight,
+  ) {
+    if (viewportWidth <= 0 || viewportHeight <= 0) {
+      throw ArgumentError('Viewport dimensions must be > 0');
+    }
+    final m = viewProjection.m;
+    final x = m[0] * point.x + m[4] * point.y + m[8] * point.z + m[12];
+    final y = m[1] * point.x + m[5] * point.y + m[9] * point.z + m[13];
+    final w = m[3] * point.x + m[7] * point.y + m[11] * point.z + m[15];
+    if (w <= 1e-9) return null;
+    return Vec2(
+      (x / w * 0.5 + 0.5) * viewportWidth,
+      (0.5 - y / w * 0.5) * viewportHeight,
+    );
+  }
+
   CameraView({
     required this.view,
     required this.projection,

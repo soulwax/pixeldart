@@ -28,6 +28,42 @@ final class Mat4 {
     return Mat4._(Float32List.fromList(values));
   }
 
+  /// Translation × rotation (unit quaternion `qx, qy, qz, qw`) × per-axis
+  /// scale, written straight into one buffer. This is the per-draw model
+  /// matrix, so it avoids composing intermediate matrices.
+  factory Mat4.compose({
+    double tx = 0,
+    double ty = 0,
+    double tz = 0,
+    double qx = 0,
+    double qy = 0,
+    double qz = 0,
+    double qw = 1,
+    double sx = 1,
+    double sy = 1,
+    double sz = 1,
+  }) {
+    final xx = qx * qx, yy = qy * qy, zz = qz * qz;
+    final xy = qx * qy, xz = qx * qz, yz = qy * qz;
+    final wx = qw * qx, wy = qw * qy, wz = qw * qz;
+    return Mat4._(
+      Float32List(16)
+        ..[0] = (1 - 2 * (yy + zz)) * sx
+        ..[1] = 2 * (xy + wz) * sx
+        ..[2] = 2 * (xz - wy) * sx
+        ..[4] = 2 * (xy - wz) * sy
+        ..[5] = (1 - 2 * (xx + zz)) * sy
+        ..[6] = 2 * (yz + wx) * sy
+        ..[8] = 2 * (xz + wy) * sz
+        ..[9] = 2 * (yz - wx) * sz
+        ..[10] = (1 - 2 * (xx + yy)) * sz
+        ..[12] = tx
+        ..[13] = ty
+        ..[14] = tz
+        ..[15] = 1,
+    );
+  }
+
   factory Mat4.translation(Vec3 t) => Mat4._(
     Float32List(16)
       ..[0] = 1

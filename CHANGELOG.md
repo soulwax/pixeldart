@@ -23,6 +23,11 @@
 - `roundedBox` emitted zero-area triangles.
 - `radialParticle`'s colour ramp ignored `innerRadius`.
 - `test_all` ran without `--enable-asserts`, so 31 assert-based fixtures checked nothing.
+- Sky:
+  - The fallback sky's bands followed the screen, not the horizon. A camera looking down painted zenith colour over fully fogged geometry, which left a hard band where the fog was almost complete. The bands now follow the view direction, so a matched horizon meets the fog without a seam.
+  - Stars drew as square blocks fixed to the screen. They are now small round points, fixed to the sky.
+- Night fog: `SolarCycleEngine` built the fog colour from the sun's transmittance even below the horizon, so night fog, and any horizon matched to it, was a bright mauve. It now fades through twilight to a dark haze.
+- Environment reflections used the raw ambient colour without its intensity, so dark scenes still reflected a bright sky.
 
 ### Added
 
@@ -36,6 +41,7 @@
   - `Transform.stretch` / `SceneNode.stretch` (non-inherited, non-uniform geometry scale) and `Transform.copyWith`.
 - **App:** `app.onBeforeFrame`, `app.onError`, `app.onTap`, `app.screenRay`, `app.currentCamera()`, `app.pick(where:, precise:)`, and `SceneNode.raycast(where:, precise:)`.
 - **Math:** `Ray.intersectGround` and `CatmullRomSpline3D.tangentAtDistance`.
+- **Screen space:** `CameraView.worldToScreenPoint` and `app.worldToClient`, the inverse of `screenPointToRay` / `screenRay`, for placing DOM labels over scene objects.
 - **Particles:** `ParticleEmitter.emitAt` (exact-rate streaming from many sources), `bindColorGradient` and `fadeEnvelope`. `ParticleMaterials.soft` and `app.createParticleMaterial`.
 - **Lights:** `selectPointLights` ranks point lights by influence when more than four are submitted; `FrameStats.pointLightsDropped`.
 - **Sky:** `SkyboxDeclaration.copyWith`, `setSolarTime(coherentHorizon:)` and `app.matchHorizonToFog()`.
@@ -43,6 +49,17 @@
 - **Docs:** `docs/conventions.md`; `examples/`, three games built on the public API.
 
 ### Changed
+
+- Performance (main-thread busy time, 6 s of play):
+  - Pixel Rocket: 43% → 24%.
+  - Lantern: 17% → 10%.
+  - Tidewatch: 68% → 23%.
+
+  How:
+  - Uniform locations are cached per program. They had been looked up by name on every set, which was a third of frame CPU.
+  - `WaterSurfaceMesh.updateWaves` evaluates displacement and normal in one pass and rotates each wave's phase along a grid row instead of calling sin/cos per vertex.
+  - `Transform.toMat4` writes one buffer (`Mat4.compose`).
+  - `PixeldartApp` re-reads the canvas size only after a `ResizeObserver` reports a change, instead of forcing layout every frame.
 
 - `SkyboxDeclaration.validate` names every invalid field. `cloudSampleCount` is only checked while clouds are drawn.
 - The GLB decoder no longer stores material indices in `SceneNode.sortTiebreaker`.

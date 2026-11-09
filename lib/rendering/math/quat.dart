@@ -95,29 +95,7 @@ final class Quat {
     return v + (uv * (2 * w)) + (uuv * 2);
   }
 
-  Mat4 toMat4() {
-    final xx = x * x, yy = y * y, zz = z * z;
-    final xy = x * y, xz = x * z, yz = y * z;
-    final wx = w * x, wy = w * y, wz = w * z;
-    return Mat4.fromColumnMajor([
-      1 - 2 * (yy + zz),
-      2 * (xy + wz),
-      2 * (xz - wy),
-      0,
-      2 * (xy - wz),
-      1 - 2 * (xx + zz),
-      2 * (yz + wx),
-      0,
-      2 * (xz + wy),
-      2 * (yz - wx),
-      1 - 2 * (xx + yy),
-      0,
-      0,
-      0,
-      0,
-      1,
-    ]);
-  }
+  Mat4 toMat4() => Mat4.compose(qx: x, qy: y, qz: z, qw: w);
 
   bool get isFinite => x.isFinite && y.isFinite && z.isFinite && w.isFinite;
 

@@ -291,8 +291,19 @@ extension WebGl2DeviceDraw on WebGl2Device {
     if (program == null) {
       throw StateError('WebGl2Device.setUniform called with no bound program');
     }
-    final location = gl.getUniformLocation(program, name);
-    if (location == null) return;
+    // Locations are fixed once a program links; looking them up by string
+    // on every set was a third of all frame CPU time.
+    final locations = _boundUniforms!;
+    var location = locations.found[name];
+    if (location == null) {
+      if (locations.missing.contains(name)) return;
+      location = gl.getUniformLocation(program, name);
+      if (location == null) {
+        locations.missing.add(name);
+        return;
+      }
+      locations.found[name] = location;
+    }
     switch (value.type) {
       case UniformType.float1:
         gl.uniform1f(location, value.value as double);

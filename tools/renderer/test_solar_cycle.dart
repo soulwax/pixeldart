@@ -23,6 +23,28 @@ void main() {
         clearAtNoon.horizonVisibility01 > 0,
     'solar noon must produce an above-horizon direct source',
   );
+  // Night fog is what a matched horizon shows across the whole sky; it must
+  // be a dark haze, not the sun's below-horizon transmittance.
+  final midnight = SolarCycleEngine.evaluate(
+    const SolarCycleInput(
+      timeHours: 0,
+      latitudeRadians: 52 * math.pi / 180,
+      solarDeclinationRadians: 0,
+    ),
+  );
+  final nightFog = midnight.fogColor;
+  _require(
+    midnight.twilightFactor01 == 0 &&
+        nightFog.r < 0.02 &&
+        nightFog.g < 0.02 &&
+        nightFog.b < 0.04 &&
+        nightFog.b > nightFog.r,
+    'night fog must be a dark, cool haze, got $nightFog',
+  );
+  _require(
+    clearAtNoon.fogColor.g > nightFog.g * 5,
+    'day fog must be much brighter than night fog',
+  );
 
   final dawn = SolarCycleEngine.evaluate(
     const SolarCycleInput(

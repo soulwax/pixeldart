@@ -284,11 +284,25 @@ final class SolarCycleEngine {
     final fogDensity = input.baseFogDensity *
         (1.0 + input.relativeHumidity01 * 1.6 + input.precipitation01 * 4.0 +
             input.cloudCover01 * 0.8);
-    final fog = LinearColor(
+    // Air scatters what the sky lights it with: daylight fog from the sun's
+    // transmittance, fading through twilight to a dark night haze. Below the
+    // horizon the transmittance no longer reaches the air, so using it there
+    // left night fog (and every horizon matched to it) a bright mauve.
+    final dayFog = LinearColor(
       0.035 + transmittance.x * 0.18 + input.cloudCover01 * 0.10,
       0.045 + transmittance.y * 0.20 + input.cloudCover01 * 0.12,
       0.070 + transmittance.z * 0.24 + input.cloudCover01 * 0.16 +
           twilightFactor * 0.018,
+    );
+    final nightFog = LinearColor(
+      0.008 + input.cloudCover01 * 0.006,
+      0.011 + input.cloudCover01 * 0.007,
+      0.022 + input.cloudCover01 * 0.010,
+    );
+    final fog = LinearColor(
+      nightFog.r + (dayFog.r - nightFog.r) * twilightFactor,
+      nightFog.g + (dayFog.g - nightFog.g) * twilightFactor,
+      nightFog.b + (dayFog.b - nightFog.b) * twilightFactor,
     );
     final state = SolarLightingState(
       phase: phase,

@@ -876,7 +876,7 @@ A few design decisions worth knowing before reading the code:
 
 ```sh
 dart analyze                                 # zero issues, including infos
-dart run tools/renderer/test_all.dart        # 122 pure test scripts, asserts on
+dart run tools/renderer/test_all.dart        # 123 pure test scripts, asserts on
 dart run tools/renderer/check_boundary.dart  # import/layering rules
 dart run tools/renderer/shaders.dart --check # generated shaders in sync
 dart run tools/test_package_boundaries.dart  # PLIB package/content boundaries

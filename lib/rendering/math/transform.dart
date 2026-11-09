@@ -66,29 +66,18 @@ final class Transform {
     }
   }
 
-  Mat4 toMat4() {
-    final r = rotation.toMat4();
-    final sx = scale * stretch.x, sy = scale * stretch.y, sz = scale * stretch.z;
-    final m = Mat4.fromColumnMajor([
-      r.m[0] * sx,
-      r.m[1] * sx,
-      r.m[2] * sx,
-      0,
-      r.m[4] * sy,
-      r.m[5] * sy,
-      r.m[6] * sy,
-      0,
-      r.m[8] * sz,
-      r.m[9] * sz,
-      r.m[10] * sz,
-      0,
-      translation.x,
-      translation.y,
-      translation.z,
-      1,
-    ]);
-    return m;
-  }
+  Mat4 toMat4() => Mat4.compose(
+    tx: translation.x,
+    ty: translation.y,
+    tz: translation.z,
+    qx: rotation.x,
+    qy: rotation.y,
+    qz: rotation.z,
+    qw: rotation.w,
+    sx: scale * stretch.x,
+    sy: scale * stretch.y,
+    sz: scale * stretch.z,
+  );
 
   Vec3 _stretched(Vec3 v) => Vec3(v.x * stretch.x, v.y * stretch.y, v.z * stretch.z);
 

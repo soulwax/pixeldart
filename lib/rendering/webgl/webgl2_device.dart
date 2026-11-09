@@ -39,6 +39,14 @@ const _unmaskedVendorWebgl = 0x9245;
 /// `JSObject`, since a target has no single JS object identity of its own —
 /// it is several JS objects plus Dart-side width/height/sample-count
 /// bookkeeping.
+/// One linked program's uniform locations. Names the program doesn't have
+/// (declared but optimized out) are remembered separately, so a missing
+/// uniform set every frame doesn't query the context every frame.
+final class _UniformLocations {
+  final Map<String, WebGLUniformLocation> found = {};
+  final Set<String> missing = {};
+}
+
 final class _WebGpuObject implements GpuObject {
   final Object handle;
 
@@ -118,7 +126,14 @@ final class WebGl2Device with _WebGlTimerSupport implements GpuDevice, GpuContex
   bool _timerExtensionAvailable = false;
 
   WebGLProgram? get boundProgram => _boundProgram;
-  void setBoundProgram(WebGLProgram? program) => _boundProgram = program;
+  void setBoundProgram(WebGLProgram? program) {
+    _boundProgram = program;
+    _boundUniforms = program == null ? null : _uniformLocations.putIfAbsent(program, _UniformLocations.new);
+  }
+
+  /// The location table of [boundProgram], fetched once per bind so that
+  /// setting a uniform costs a single string lookup.
+  _UniformLocations? _boundUniforms;
 
   /// Attaches real `webglcontextlost`/`webglcontextrestored` listeners
   /// (§7.4) on construction. `preventDefault()` on the loss event is what
@@ -137,6 +152,8 @@ final class WebGl2Device with _WebGlTimerSupport implements GpuDevice, GpuContex
         ((JSAny? e) {
           _status = GpuDeviceStatus.ready;
           _contextGeneration++;
+          _uniformLocations.clear();
+          setBoundProgram(null);
           for (final name in _enabledExtensions) {
             gl.getExtension(name);
           }
@@ -162,6 +179,10 @@ final class WebGl2Device with _WebGlTimerSupport implements GpuDevice, GpuContex
   /// with none enabled; their enums (timer queries, anisotropy) are invalid
   /// until each is requested again.
   final Set<String> _enabledExtensions = {};
+
+  /// Uniform locations per linked program, filled on first use. A program's
+  /// locations never change after linking; entries go with the program.
+  final Map<WebGLProgram, _UniformLocations> _uniformLocations = {};
 
   /// Whether [object] came from a context that has since been lost. Deleting
   /// such a handle is both pointless and a WebGL error.
@@ -338,6 +359,9 @@ final class WebGl2Device with _WebGlTimerSupport implements GpuDevice, GpuContex
 
   @override
   void deleteProgram(GpuObject program) {
+    final handle = (program as _WebGpuObject).handle;
+    _uniformLocations.remove(handle);
+    if (identical(handle, _boundProgram)) setBoundProgram(null);
     if (!_isStale(program)) deleteProgramImpl(program);
   }
 

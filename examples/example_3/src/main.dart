@@ -709,7 +709,11 @@ final class Tidewatch {
     hud.card(
       'THE HARBOUR CLOSES',
       'The reef took $_wrecksAllowed ships.\n\n'
-          'You brought $home home through $nights night${nights == 1 ? '' : 's'}.\n\n'
+          '${switch ((home, nights)) {
+            (0, _) => 'No ship made it home.',
+            (_, 0) => 'You brought $home home before the first dawn.',
+            _ => 'You brought $home home through $nights night${nights == 1 ? '' : 's'}.',
+          }}\n\n'
           'Press SPACE to keep the light again',
     );
   }

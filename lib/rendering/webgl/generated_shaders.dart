@@ -748,7 +748,10 @@ void main(){
     0.0,1.0);
   vec3 reflectDir=reflect(-viewDir,n);
   float refUp=clamp(reflectDir.y*0.5+0.5,0.0,1.0);
-  vec3 envRadiance=mix(uAmbientColor*0.35,mix(uAmbientColor,uReflectionColor,refUp),refUp);
+  // Ambient radiance is colour × intensity, as in the diffuse term above;
+  // the raw colour made dark scenes (night) reflect a bright sky.
+  vec3 envAmbient=uAmbientColor*uAmbientIntensity*uAmbientLightScale;
+  vec3 envRadiance=mix(envAmbient*0.35,mix(envAmbient,uReflectionColor,refUp),refUp);
   vec3 sunReflectDir=normalize(uDirectionalDirection);
   float sunRdotL=max(dot(reflectDir,sunReflectDir),0.0);
   envRadiance+=uDirectionalColor*pow(sunRdotL,mix(32.0,4.0,specRough))*(1.0-specRough)*0.4;
@@ -878,20 +881,33 @@ vec3 linearToSrgb(vec3 color){
   return mix(low,high,cutoff);
 }
 
-vec3 skyBackground(vec2 uv){
+vec3 skyBackground(vec3 direction){
   // A deliberately cheap, high-quality fallback sky: three atmospheric bands
   // provide depth at every camera angle, while the tiny deterministic star
   // field and horizon glow keep the clear background from reading as a flat
   // color. It is an environment layer, not a game/weather simulation.
-  float lower=smoothstep(0.0,0.48,uv.y);
-  float upper=smoothstep(0.42,1.0,uv.y);
-  vec3 color=mix(uSkyGround,uSkyHorizon,lower);
-  color=mix(color,uSkyZenith,upper);
-  float horizonGlow=exp(-pow((uv.y-0.48)*7.0,2.0));
+  //
+  // The bands follow the real horizon (the view direction), not the screen.
+  // Below the horizon is ground, which a matched horizon makes equal to the
+  // fog, so fully fogged geometry and the sky beside it meet without a seam;
+  // a screen-space gradient painted zenith colour wherever a downward camera
+  // saw past the fog.
+  float elevation=clamp(direction.y,-1.,1.);
+  vec3 color=mix(uSkyHorizon,uSkyGround,smoothstep(0.0,-0.2,elevation));
+  color=mix(color,uSkyZenith,smoothstep(0.0,0.6,elevation));
+  float horizonGlow=exp(-pow(elevation*9.0,2.0));
   color+=uSkyHorizon*horizonGlow*clamp(uSkyHorizonGlow,0.,1.);
-  float starMask=smoothstep(0.62,0.92,uv.y);
-  float stars=step(1.0-clamp(uSkyStarDensity,0.,.1),hash(floor(uv*vec2(180.0,100.0))))*starMask;
-  color+=vec3(0.16,0.19,0.24)*stars;
+  // Stars sit on a sky-fixed grid (about two cells per degree), so they stay
+  // put as the camera turns. Each lit cell holds one small round star at a
+  // jittered spot with its own brightness.
+  float starMask=smoothstep(0.04,0.3,elevation);
+  vec2 cell=vec2(atan(direction.z,direction.x),asin(elevation))*(360.0/3.14159265359);
+  vec2 id=floor(cell);
+  float seed=hash(id);
+  vec2 offset=vec2(hash(id+vec2(17.0,3.0)),hash(id+vec2(5.0,29.0)))*0.5+0.25;
+  float point=1.0-smoothstep(0.08,0.22,length(fract(cell)-offset));
+  float stars=step(1.0-clamp(uSkyStarDensity,0.,.1),seed)*point*starMask;
+  color+=vec3(0.16,0.19,0.24)*stars*(0.6+0.9*hash(id+vec2(41.0,11.0)));
   return max(color,vec3(0.0));
 }
 
@@ -1076,7 +1092,7 @@ void main(){
     vec3 worldDirection=normalize((uInverseView*vec4(viewDirection,0.0)).xyz);
     source.rgb=uSkyTextureEnabled>0.5
       ? equirectangularSky(vUv)
-      : skyBackground(vUv);
+      : skyBackground(worldDirection);
     vec4 clouds=volumetricClouds(worldDirection);
     source.rgb=source.rgb* (1.0-clouds.a)+clouds.rgb;
   }

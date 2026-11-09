@@ -4,6 +4,7 @@ import 'package:pixeldart/rendering/optics/gerstner_waves.dart';
 void main() {
   _testGridConstruction();
   _testWaveUpdate();
+  _testMatchesEvaluator();
   _testInvalidArguments();
   print('Water surface mesh tests passed.');
 }
@@ -76,6 +77,42 @@ void _testWaveUpdate() {
     assert(cr >= 0.35 - eps && cr <= 1.0 + eps);
     assert(cg >= 0.65 - eps && cg <= 1.0 + eps);
     assert(cb >= 0.90 - eps && cb <= 1.0 + eps);
+  }
+}
+
+/// The fused per-vertex loop must agree with the evaluator's own sampling,
+/// which buoyancy and picking use. The large grid checks that the per-row
+/// phase rotation doesn't drift over long rows.
+void _testMatchesEvaluator() {
+  final ocean = GerstnerWaveEvaluator.ocean();
+  for (final (size, subdivisions) in [(30.0, 12), (520.0, 112)]) {
+    for (final time in [0.0, 1.7, 42.3, 900.5]) {
+      final water = WaterSurfaceMesh(
+        width: size,
+        depth: size * 0.8,
+        subdivisionsX: subdivisions,
+        subdivisionsZ: subdivisions - 2,
+        baseHeight: 0.25,
+      );
+      final verts = water.mesh.vertices;
+      final rest = [
+        for (var v = 0; v < water.vertexCount; v++) (verts[v * 18], verts[v * 18 + 2]),
+      ];
+      water.updateWaves(time, ocean);
+      for (var v = 0; v < water.vertexCount; v++) {
+        final (rx, rz) = rest[v];
+        final d = ocean.sampleDisplacement(rx, rz, time);
+        final n = ocean.sampleNormal(rx, rz, time);
+        final i = v * 18;
+        final at = 'vertex $v, size $size, t=$time';
+        assert((verts[i] - (rx + d.x)).abs() < 1e-3, 'x at $at');
+        assert((verts[i + 1] - (0.25 + d.y)).abs() < 1e-3, 'y at $at');
+        assert((verts[i + 2] - (rz + d.z)).abs() < 1e-3, 'z at $at');
+        assert((verts[i + 3] - n.x).abs() < 1e-3, 'nx at $at');
+        assert((verts[i + 4] - n.y).abs() < 1e-3, 'ny at $at');
+        assert((verts[i + 5] - n.z).abs() < 1e-3, 'nz at $at');
+      }
+    }
   }
 }
 

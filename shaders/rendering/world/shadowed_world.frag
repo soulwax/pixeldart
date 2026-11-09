@@ -531,7 +531,10 @@ void main(){
     0.0,1.0);
   vec3 reflectDir=reflect(-viewDir,n);
   float refUp=clamp(reflectDir.y*0.5+0.5,0.0,1.0);
-  vec3 envRadiance=mix(uAmbientColor*0.35,mix(uAmbientColor,uReflectionColor,refUp),refUp);
+  // Ambient radiance is colour × intensity, as in the diffuse term above;
+  // the raw colour made dark scenes (night) reflect a bright sky.
+  vec3 envAmbient=uAmbientColor*uAmbientIntensity*uAmbientLightScale;
+  vec3 envRadiance=mix(envAmbient*0.35,mix(envAmbient,uReflectionColor,refUp),refUp);
   vec3 sunReflectDir=normalize(uDirectionalDirection);
   float sunRdotL=max(dot(reflectDir,sunReflectDir),0.0);
   envRadiance+=uDirectionalColor*pow(sunRdotL,mix(32.0,4.0,specRough))*(1.0-specRough)*0.4;
