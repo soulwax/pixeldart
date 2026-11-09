@@ -146,7 +146,7 @@ final class PresentFeature implements RenderFeature {
 
   @override
   Iterable<RenderPass> createPasses(RenderPassResources resources) {
-    final program = programLibrary.publish(
+    final program = programLibrary.publishNew(
       PresentProgramSource.build(
         vertexSource: vertexSource,
         fragmentSource: fragmentSource,

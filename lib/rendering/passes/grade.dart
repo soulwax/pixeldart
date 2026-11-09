@@ -70,7 +70,7 @@ final class GradeFeature with EmptyVaoOwner implements RenderFeature {
 
   @override
   Iterable<RenderPass> createPasses(RenderPassResources resources) {
-    final program = programLibrary.publish(
+    final program = programLibrary.publishNew(
       GradeProgramSource.build(
         vertexSource: vertexSource,
         fragmentSource: fragmentSource,

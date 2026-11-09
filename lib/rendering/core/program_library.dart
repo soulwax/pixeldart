@@ -94,7 +94,14 @@ final class ProgramLibrary {
     required ShaderOverride variant,
     required bool allowFallback,
   }) {
+    if (_openSet != null || _openOverrides != null) {
+      throw StateError('cannot publish while a program candidate is open');
+    }
     source.validate();
+    _requireUnusedId(source.id);
+    if (_variantSources.containsKey(target)) {
+      throw StateError('shader target is already registered: ${target.label}');
+    }
     final handle = _compileOverride(source, target, variant, allowFallback);
     final compiled = CompiledProgram(
       id: source.id,
@@ -209,6 +216,21 @@ final class ProgramLibrary {
       _device.deleteProgram(previous.handle);
     }
     return compiled;
+  }
+
+  /// Installs a pass-owned program once. A duplicate ID would leave the
+  /// earlier pass holding a deleted GPU handle, so reject it before compiling.
+  /// Use [publish] or [tryReload] for an intentional replacement.
+  CompiledProgram publishNew(ProgramSource source) {
+    source.validate();
+    _requireUnusedId(source.id);
+    return publish(source);
+  }
+
+  void _requireUnusedId(String id) {
+    if (_live.containsKey(id)) {
+      throw StateError('program ID is already installed: $id');
+    }
   }
 
   bool tryReload(ProgramSource source) {

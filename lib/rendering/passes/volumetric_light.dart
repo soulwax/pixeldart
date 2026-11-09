@@ -140,7 +140,7 @@ final class VolumetricLightFeature with EmptyVaoOwner implements RenderFeature {
 
   @override
   Iterable<RenderPass> createPasses(RenderPassResources resources) {
-    final program = programLibrary.publish(
+    final program = programLibrary.publishNew(
       VolumetricLightProgramSource.build(
         vertexSource: vertexSource,
         fragmentSource: fragmentSource,
@@ -173,7 +173,7 @@ final class VolumetricLightFeature with EmptyVaoOwner implements RenderFeature {
     if (compositeSource != null &&
         sceneColor != null &&
         sceneColorOutput != null) {
-      final compositeProgram = programLibrary.publish(
+      final compositeProgram = programLibrary.publishNew(
         VolumetricCompositeProgramSource.build(
           vertexSource: vertexSource,
           fragmentSource: compositeSource,

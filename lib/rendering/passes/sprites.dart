@@ -198,7 +198,7 @@ final class SpritesFeature implements RenderFeature {
 
   @override
   Iterable<RenderPass> createPasses(RenderPassResources resources) {
-    _program = programLibrary.publish(
+    _program = programLibrary.publishNew(
       SpriteProgramSource.build(
         vertexSource: vertexSource,
         fragmentSource: fragmentSource,

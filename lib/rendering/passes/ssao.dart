@@ -73,7 +73,7 @@ final class SsaoOcclusionFeature with EmptyVaoOwner implements RenderFeature {
 
   @override
   Iterable<RenderPass> createPasses(RenderPassResources resources) {
-    final program = programLibrary.publish(
+    final program = programLibrary.publishNew(
       SsaoOcclusionProgramSource.build(
         vertexSource: vertexSource,
         fragmentSource: fragmentSource,
@@ -221,7 +221,7 @@ final class SsaoBlurFeature with EmptyVaoOwner implements RenderFeature {
 
   @override
   Iterable<RenderPass> createPasses(RenderPassResources resources) {
-    final program = programLibrary.publish(
+    final program = programLibrary.publishNew(
       SsaoBlurProgramSource.build(
         vertexSource: vertexSource,
         fragmentSource: fragmentSource,

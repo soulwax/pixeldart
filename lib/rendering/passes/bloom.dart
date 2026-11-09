@@ -105,7 +105,7 @@ final class BloomBlurFeature with EmptyVaoOwner implements RenderFeature {
 
   @override
   Iterable<RenderPass> createPasses(RenderPassResources resources) {
-    final program = programLibrary.publish(
+    final program = programLibrary.publishNew(
       BloomBlurProgramSource.build(
         vertexSource: vertexSource,
         fragmentSource: fragmentSource,
@@ -253,7 +253,7 @@ final class BloomCompositeFeature with EmptyVaoOwner implements RenderFeature {
 
   @override
   Iterable<RenderPass> createPasses(RenderPassResources resources) {
-    final program = programLibrary.publish(
+    final program = programLibrary.publishNew(
       BloomCompositeProgramSource.build(
         vertexSource: vertexSource,
         fragmentSource: fragmentSource,

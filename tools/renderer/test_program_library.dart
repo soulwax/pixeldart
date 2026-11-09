@@ -18,7 +18,48 @@ void main() {
   _realProgramInterfaces();
   _overrideChangeKeepsProgramReference();
   _partialOverrideFailureReleasesCandidates();
+  _duplicateRegistrationPreservesLivePrograms();
   print('Renderer program library fixtures passed.');
+}
+
+void _duplicateRegistrationPreservesLivePrograms() {
+  final device = FakeGpuDevice();
+  final library = ProgramLibrary(device);
+  final first = library.publishNew(_spriteProgramSource());
+  final liveHandle = first.handle;
+  final compiles = device.programCompileCalls;
+  try {
+    library.publishNew(_spriteProgramSource());
+    throw StateError('duplicate pass program ID was accepted');
+  } on StateError catch (error) {
+    if (!error.message.toString().contains('program ID is already installed')) {
+      rethrow;
+    }
+  }
+  const shader = ShaderHandle(1);
+  try {
+    library.publishVariant(
+      source: _spriteProgramSource(),
+      target: shader,
+      variant: const ShaderOverride(fragment: _validFragment),
+      allowFallback: false,
+    );
+    throw StateError('variant replaced a pass-owned program');
+  } on StateError catch (error) {
+    if (!error.message.toString().contains('program ID is already installed')) {
+      rethrow;
+    }
+  }
+  if (!identical(library.programFor('sprites'), first) ||
+      first.handle != liveHandle ||
+      device.programCompileCalls != compiles ||
+      device.programDeleteCalls != 0) {
+    throw StateError('duplicate registration disturbed a live program');
+  }
+  library.disposeAll();
+  if (device.liveObjectCount != 0) {
+    throw StateError('duplicate registration leaked a program');
+  }
 }
 
 const _validVertex =

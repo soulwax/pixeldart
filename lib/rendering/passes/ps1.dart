@@ -66,7 +66,7 @@ final class Ps1QuantizeFeature with EmptyVaoOwner implements RenderFeature {
 
   @override
   Iterable<RenderPass> createPasses(RenderPassResources resources) {
-    final program = programLibrary.publish(
+    final program = programLibrary.publishNew(
       Ps1QuantizeProgramSource.build(
         vertexSource: vertexSource,
         fragmentSource: fragmentSource,

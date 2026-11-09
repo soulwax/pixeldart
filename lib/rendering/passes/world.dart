@@ -108,7 +108,7 @@ final class WorldFeature implements RenderFeature {
 
   @override
   Iterable<RenderPass> createPasses(RenderPassResources resources) {
-    final program = programLibrary.publish(
+    final program = programLibrary.publishNew(
       WorldProgramSource.build(
         vertexSource: vertexSource,
         fragmentSource: fragmentSource,

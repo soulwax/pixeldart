@@ -240,7 +240,7 @@ final class ShadowedWorldFeature implements RenderFeature {
 
   @override
   Iterable<RenderPass> createPasses(RenderPassResources resources) {
-    final program = programLibrary.publish(
+    final program = programLibrary.publishNew(
       ShadowedWorldProgramSource.build(
         vertexSource: vertexSource,
         fragmentSource: fragmentSource,

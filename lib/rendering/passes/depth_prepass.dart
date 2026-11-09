@@ -76,7 +76,7 @@ final class DepthPrepassFeature implements RenderFeature {
 
   @override
   Iterable<RenderPass> createPasses(RenderPassResources resources) {
-    final program = programLibrary.publish(
+    final program = programLibrary.publishNew(
       DepthPrepassProgramSource.build(
         vertexSource: vertexSource,
         fragmentSource: fragmentSource,

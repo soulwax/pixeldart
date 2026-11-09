@@ -87,7 +87,7 @@ final class VhsFeature with EmptyVaoOwner implements RenderFeature {
 
   @override
   Iterable<RenderPass> createPasses(RenderPassResources resources) {
-    final program = programLibrary.publish(
+    final program = programLibrary.publishNew(
       VhsProgramSource.build(
         vertexSource: vertexSource,
         fragmentSource: fragmentSource,

@@ -83,7 +83,7 @@ final class TexturedWorldFeature implements RenderFeature {
 
   @override
   Iterable<RenderPass> createPasses(RenderPassResources resources) {
-    final program = programLibrary.publish(
+    final program = programLibrary.publishNew(
       TexturedWorldProgramSource.build(
         vertexSource: vertexSource,
         fragmentSource: fragmentSource,

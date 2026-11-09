@@ -72,7 +72,7 @@ final class DepthDebugFeature with EmptyVaoOwner implements RenderFeature {
 
   @override
   Iterable<RenderPass> createPasses(RenderPassResources resources) {
-    final program = programLibrary.publish(
+    final program = programLibrary.publishNew(
       DepthDebugProgramSource.build(
         vertexSource: vertexSource,
         fragmentSource: fragmentSource,

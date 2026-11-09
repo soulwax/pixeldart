@@ -129,7 +129,7 @@ final class ShadowFeature implements RenderFeature {
 
   @override
   Iterable<RenderPass> createPasses(RenderPassResources resources) {
-    final program = programLibrary.publish(
+    final program = programLibrary.publishNew(
       ShadowCasterProgramSource.build(
         vertexSource: vertexSource,
         fragmentSource: fragmentSource,

@@ -104,7 +104,7 @@ final class DofBlurFeature with EmptyVaoOwner implements RenderFeature {
 
   @override
   Iterable<RenderPass> createPasses(RenderPassResources resources) {
-    final program = programLibrary.publish(
+    final program = programLibrary.publishNew(
       DofBlurProgramSource.build(
         vertexSource: vertexSource,
         fragmentSource: fragmentSource,
@@ -266,7 +266,7 @@ final class DofCompositeFeature with EmptyVaoOwner implements RenderFeature {
 
   @override
   Iterable<RenderPass> createPasses(RenderPassResources resources) {
-    final program = programLibrary.publish(
+    final program = programLibrary.publishNew(
       DofCompositeProgramSource.build(
         vertexSource: vertexSource,
         fragmentSource: fragmentSource,
