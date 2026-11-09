@@ -10,6 +10,7 @@ import '../webgl/draw_encoder.dart';
 import 'dof_resources.dart';
 import 'grade_resources.dart';
 import 'pass_context_impl.dart';
+import 'post_chain.dart';
 
 final class GradeProgramSource {
   static ProgramSource build({
@@ -34,6 +35,7 @@ final class GradeFeature implements RenderFeature {
   final double lutSize;
   final ResourceRef inputResource;
   final ResourceRef outputResource;
+  final PostChain? chain;
 
   GradeFeature({
     required this.programLibrary,
@@ -44,6 +46,7 @@ final class GradeFeature implements RenderFeature {
     this.lutSize = 16,
     this.inputResource = DofResources.dofOutput,
     this.outputResource = GradeResources.gradeOutput,
+    this.chain,
   });
 
   @override
@@ -91,6 +94,7 @@ final class GradeFeature implements RenderFeature {
         lutSize: lutSize,
         inputResource: inputResource,
         outputResource: outputResource,
+        chain: chain,
       ),
     ];
   }
@@ -108,6 +112,7 @@ final class _GradePass implements RenderPass {
   final double lutSize;
   final ResourceRef inputResource;
   final ResourceRef outputResource;
+  final PostChain? chain;
 
   const _GradePass({
     required this.descriptor,
@@ -117,6 +122,7 @@ final class _GradePass implements RenderPass {
     required this.lutSize,
     required this.inputResource,
     required this.outputResource,
+    this.chain,
   });
 
   @override
@@ -125,11 +131,20 @@ final class _GradePass implements RenderPass {
     final outputView = context.viewOf(outputResource.name) as BoundResourceView;
     final encoder = context.commandEncoder as DrawCommandEncoder;
     final post = context.frameScene.post as PostProcessState;
+    final chain = this.chain;
+    final input = chain == null
+        ? sceneView.gpuObject
+        : chain.source(inputResource, sceneView.gpuObject);
+    // mix(scene, graded, 0) is the scene itself.
+    if (chain != null && post.colorGradeStrength == 0) {
+      chain.bypass(outputResource, input);
+      return;
+    }
 
     encoder.bindTarget(outputView.gpuObject);
     encoder.applyDrawState(descriptor.toDrawState());
     encoder.useProgram(program.handle);
-    encoder.bindTexture(0, sceneView.gpuObject);
+    encoder.bindTexture(0, input);
     encoder.setUniform('uScene', const UniformValue.sampler(0));
     encoder.bindTexture(1, resolveLut());
     encoder.setUniform('uLut', const UniformValue.sampler(1));
@@ -140,5 +155,6 @@ final class _GradePass implements RenderPass {
     );
     encoder.bindVertexArray(emptyVao);
     encoder.drawArrays(first: 0, count: 3);
+    chain?.produced(outputResource, outputView.gpuObject);
   }
 }

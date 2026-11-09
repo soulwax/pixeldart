@@ -14,6 +14,7 @@ import '../core/render_graph.dart';
 import '../webgl/device_api.dart';
 import '../webgl/draw_encoder.dart';
 import 'pass_context_impl.dart';
+import 'post_chain.dart';
 import 'safe_graph_resources.dart';
 
 final class PresentOutputPolicy {
@@ -115,6 +116,7 @@ final class PresentFeature implements RenderFeature {
   final String programId;
   final ResourceRef sceneColorResource;
   final ColorEncoding outputEncoding;
+  final PostChain? chain;
   GpuObject? _emptyVao;
 
   PresentFeature({
@@ -125,6 +127,7 @@ final class PresentFeature implements RenderFeature {
     this.programId = 'present',
     this.sceneColorResource = SafeGraphResources.sceneColor,
     this.outputEncoding = ColorEncoding.srgb,
+    this.chain,
   });
 
   @override
@@ -170,6 +173,7 @@ final class PresentFeature implements RenderFeature {
         emptyVao: emptyVao,
         sceneColorResource: sceneColorResource,
         outputEncoding: outputEncoding,
+        chain: chain,
       ),
     ];
   }
@@ -191,6 +195,7 @@ final class _PresentPass implements RenderPass {
   final GpuObject emptyVao;
   final ResourceRef sceneColorResource;
   final ColorEncoding outputEncoding;
+  final PostChain? chain;
 
   const _PresentPass({
     required this.descriptor,
@@ -198,19 +203,22 @@ final class _PresentPass implements RenderPass {
     required this.emptyVao,
     required this.sceneColorResource,
     required this.outputEncoding,
+    this.chain,
   });
 
   @override
   void execute(RenderPassContext context) {
-    final source =
+    final view =
         context.viewOfResource(sceneColorResource) as BoundResourceView;
+    final source =
+        chain?.source(sceneColorResource, view.gpuObject) ?? view.gpuObject;
     final encoder = context.commandEncoder as DrawCommandEncoder;
 
     encoder.bindTarget(null);
     encoder.applyDrawState(descriptor.toDrawState());
     encoder.useProgram(program.handle);
     encoder.bindVertexArray(emptyVao);
-    encoder.bindTexture(0, source.gpuObject);
+    encoder.bindTexture(0, source);
     final skyboxTexture = context is BoundPassContext
         ? context.skyboxTexture
         : null;
@@ -229,7 +237,9 @@ final class _PresentPass implements RenderPass {
     );
     encoder.setUniform(
       'uToneMap',
-      UniformValue.float1(PresentOutputPolicy.toneMapUniformFor(post.toneMapping)),
+      UniformValue.float1(
+        PresentOutputPolicy.toneMapUniformFor(post.toneMapping),
+      ),
     );
     final clear = environment.clearColor;
     final skybox = environment.skybox;
@@ -341,7 +351,9 @@ final class _PresentPass implements RenderPass {
       )
       ..setUniform(
         'uCloudSampleCount',
-        UniformValue.float1((skybox?.cloudSampleCount ?? 4).clamp(4, 24).toDouble()),
+        UniformValue.float1(
+          (skybox?.cloudSampleCount ?? 4).clamp(4, 24).toDouble(),
+        ),
       )
       ..setUniform(
         'uCloudLightDirection',

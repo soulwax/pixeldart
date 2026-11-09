@@ -402,8 +402,14 @@ final class FakeGpuDevice
     _requireReady();
     _requireLive(program);
     _boundProgram = program;
+    _sampledSinceUseProgram.clear();
     drawLog.add('useProgram(${(program as _FakeGpuObject).id})');
   }
+
+  // Textures bound for the current program's draws. WebGL rejects a draw
+  // that samples the framebuffer it renders into; only bindings made after
+  // useProgram are counted, so stale units from earlier passes don't trip it.
+  final Map<int, GpuObject> _sampledSinceUseProgram = {};
 
   @override
   void setUniform(String name, UniformValue value) {
@@ -494,6 +500,7 @@ final class FakeGpuDevice
   void bindTexture(int unit, GpuObject texture) {
     _requireReady();
     _requireLive(texture);
+    _sampledSinceUseProgram[unit] = texture;
     drawLog.add('bindTexture($unit, ${(texture as _FakeGpuObject).id})');
   }
 
@@ -501,6 +508,7 @@ final class FakeGpuDevice
   void bindGlowTexture(int unit, GpuObject target) {
     _requireReady();
     _requireLive(target);
+    _sampledSinceUseProgram[unit] = target;
     drawLog.add('bindGlowTexture($unit, ${(target as _FakeGpuObject).id})');
   }
 
@@ -591,6 +599,13 @@ final class FakeGpuDevice
     }
     if (_boundVao == null) {
       throw StateError('FakeGpuDevice: draw call with no bound vertex array');
+    }
+    final target = _boundTarget;
+    if (target != null && _sampledSinceUseProgram.containsValue(target)) {
+      throw StateError(
+        'FakeGpuDevice: feedback loop: draw samples its own render target '
+        '${(target as _FakeGpuObject).id}',
+      );
     }
   }
 }

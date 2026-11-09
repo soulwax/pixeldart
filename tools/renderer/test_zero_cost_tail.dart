@@ -1,6 +1,8 @@
 part of 'test_zero_cost.dart';
 
-// ---- Grade / PS1 quantize / VHS: the documented non-skippers ----
+// ---- Grade / PS1 quantize / VHS without a PostChain ----
+// Standalone, nothing can route around them, so they always draw. Inside a
+// renderer graph they skip at identity weights; see test_post_chain.
 
 void _gradePs1VhsAlwaysDrawRegardlessOfWeight() {
   final device = FakeGpuDevice();

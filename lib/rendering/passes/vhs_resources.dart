@@ -9,4 +9,12 @@ final class VhsResources {
     width: 384,
     height: 216,
   );
+
+  /// vhsOutput's ping-pong partner: last frame's VHS result.
+  static const ResourceRef vhsHistory = ResourceRef(
+    name: 'vhsHistory',
+    format: ResourceFormat.rgba8,
+    width: 384,
+    height: 216,
+  );
 }

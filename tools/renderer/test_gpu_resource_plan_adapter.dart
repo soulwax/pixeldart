@@ -70,7 +70,7 @@ void main() {
   );
   adapter.rollback(full);
   require(
-    device.targetDeleteCalls == 14,
+    device.targetDeleteCalls == 15,
     'rollback did not delete candidate targets',
   );
   require(
@@ -84,14 +84,14 @@ void main() {
 
   final committed = adapter.prepare(configuration(QualityProfile.ps1Full));
   adapter.commit(committed);
-  require(device.targetDeleteCalls == 16, 'commit did not retire old targets');
+  require(device.targetDeleteCalls == 17, 'commit did not retire old targets');
   require(
     adapter.current.objectFor('vhsOutput') == committed.objectFor('vhsOutput'),
     'commit lost target',
   );
   adapter.dispose();
   require(
-    device.targetDeleteCalls == 30,
+    device.targetDeleteCalls == 32,
     'dispose did not retire current targets',
   );
   print('Renderer GPU resource-plan adapter fixtures passed.');

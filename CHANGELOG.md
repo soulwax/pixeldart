@@ -30,6 +30,8 @@
 - Environment reflections used the raw ambient colour without its intensity, so dark scenes still reflected a bright sky.
 - `doubleSided` back faces were lit with the front face's normal, so they shaded as if facing away from the viewer. The normal (including the normal-mapped one) is now reversed on back faces.
 
+- VHS could not run through `SceneRenderer`. The graph was built with `hasValidPreviousFrame: false`, so any profile with VHS (`ps1Full`) failed to initialize with `invalidHistoryRead`. Beyond that, the pass sampled `vhsOutput` as history while rendering into it, a WebGL feedback loop that drops the draw. VHS now ping-pongs between `vhsOutput` and a new `vhsHistory` target. It ghosts nothing on its first draw, or on the first draw after a bypass, instead of echoing a cleared or stale frame. The fake test device now rejects any draw that samples its own render target.
+
 ### Added
 
 - **Models:** `ModelAsset` and `PixeldartApp.loadModel`: load a model once, instantiate it many times, keep its hierarchy, resolve external textures (with optional nearest filtering), and override materials. `GlbResult` gains `nodeMaterials`, `textureImages` and `warnings`.
@@ -63,6 +65,7 @@
   - `Transform.toMat4` writes one buffer (`Mat4.compose`).
   - `PixeldartApp` re-reads the canvas size only after a `ResizeObserver` reports a change, instead of forcing layout every frame.
 
+- Zero-cost post chain: DOF composite, LUT grade, PS1 quantize and VHS no longer draw a full-screen pass when their settings make them an identity. That covers DOF strength 0, grade strength 0, 8-bit quantization without dither, and all VHS weights 0 after reduced motion. A per-graph `PostChain` forwards the stage's input, so the next stage and present sample it directly. The default `clean` profile, with DOF and grade off, saves two full-screen passes per frame. Covered by `test_post_chain`.
 - The MSAA resolve target holds only what later passes read. It has color always, glow only when bloom is installed, and never depth, since no pass after the resolve depth-tests or samples it. The resolve blits only attachments both sides own. Before this, every MSAA frame copied depth (and glow without bloom) into storage nobody read. At 1080p that is up to about 16 MiB of memory and two full-screen blits per frame. 1× still allocates no multisample storage and runs no resolve.
 
 - `SkyboxDeclaration.validate` names every invalid field. `cloudSampleCount` is only checked while clouds are drawn.

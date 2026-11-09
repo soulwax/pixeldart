@@ -232,10 +232,7 @@ final class _TexturedWorldPass implements RenderPass {
 
   void _setModelUniforms(DrawCommandEncoder encoder, Transform transform) {
     final model = transform.toMat4();
-    encoder.setUniform(
-      'uModel',
-      UniformValue.mat4(model.m),
-    );
+    encoder.setUniform('uModel', UniformValue.mat4(model.m));
     encoder.setUniform(
       'uNormalMatrix',
       UniformValue.mat4(model.normalMatrix().m),

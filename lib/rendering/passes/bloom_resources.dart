@@ -18,6 +18,6 @@ final class BloomResources {
     height: 108,
   );
 
-  static final ResourceRef sceneColorPostBloom =
-      SafeGraphResources.sceneColor.nextVersion();
+  static final ResourceRef sceneColorPostBloom = SafeGraphResources.sceneColor
+      .nextVersion();
 }

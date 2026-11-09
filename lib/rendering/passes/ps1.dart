@@ -9,6 +9,7 @@ import '../webgl/device_api.dart';
 import '../webgl/draw_encoder.dart';
 import 'grade_resources.dart';
 import 'pass_context_impl.dart';
+import 'post_chain.dart';
 import 'ps1_resources.dart';
 
 final class Ps1QuantizeProgramSource {
@@ -32,6 +33,7 @@ final class Ps1QuantizeFeature implements RenderFeature {
   final GpuDevice device;
   final ResourceRef inputResource;
   final ResourceRef outputResource;
+  final PostChain? chain;
 
   Ps1QuantizeFeature({
     required this.programLibrary,
@@ -40,6 +42,7 @@ final class Ps1QuantizeFeature implements RenderFeature {
     required this.device,
     this.inputResource = GradeResources.gradeOutput,
     this.outputResource = Ps1Resources.ps1Output,
+    this.chain,
   });
 
   @override
@@ -85,6 +88,7 @@ final class Ps1QuantizeFeature implements RenderFeature {
         emptyVao: emptyVao,
         inputResource: inputResource,
         outputResource: outputResource,
+        chain: chain,
       ),
     ];
   }
@@ -100,6 +104,7 @@ final class _Ps1QuantizePass implements RenderPass {
   final GpuObject emptyVao;
   final ResourceRef inputResource;
   final ResourceRef outputResource;
+  final PostChain? chain;
 
   const _Ps1QuantizePass({
     required this.descriptor,
@@ -107,6 +112,7 @@ final class _Ps1QuantizePass implements RenderPass {
     required this.emptyVao,
     required this.inputResource,
     required this.outputResource,
+    this.chain,
   });
 
   @override
@@ -115,11 +121,23 @@ final class _Ps1QuantizePass implements RenderPass {
     final outputView = context.viewOf(outputResource.name) as BoundResourceView;
     final encoder = context.commandEncoder as DrawCommandEncoder;
     final post = context.frameScene.post as PostProcessState;
+    final chain = this.chain;
+    final input = chain == null
+        ? sceneView.gpuObject
+        : chain.source(inputResource, sceneView.gpuObject);
+    // 8-bit quantization of an RGBA8 source with no dither offset rounds
+    // every texel back to itself (see ps1_quantize.frag).
+    if (chain != null &&
+        post.quantizationBits == 8 &&
+        post.ditherStrength == 0) {
+      chain.bypass(outputResource, input);
+      return;
+    }
 
     encoder.bindTarget(outputView.gpuObject);
     encoder.applyDrawState(descriptor.toDrawState());
     encoder.useProgram(program.handle);
-    encoder.bindTexture(0, sceneView.gpuObject);
+    encoder.bindTexture(0, input);
     encoder.setUniform('uScene', const UniformValue.sampler(0));
     encoder.setUniform(
       'uQuantizationBits',
@@ -131,5 +149,6 @@ final class _Ps1QuantizePass implements RenderPass {
     );
     encoder.bindVertexArray(emptyVao);
     encoder.drawArrays(first: 0, count: 3);
+    chain?.produced(outputResource, outputView.gpuObject);
   }
 }

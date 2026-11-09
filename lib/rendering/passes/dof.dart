@@ -14,6 +14,7 @@ import 'bloom_resources.dart';
 import 'depth_resources.dart';
 import 'dof_resources.dart';
 import 'pass_context_impl.dart';
+import 'post_chain.dart';
 
 enum _DofBlurAxis { horizontal, vertical }
 
@@ -218,6 +219,7 @@ final class DofCompositeFeature implements RenderFeature {
   final ResourceRef sceneDepthResource;
   final ResourceRef dofBlurredResource;
   final ResourceRef dofOutputResource;
+  final PostChain? chain;
 
   DofCompositeFeature({
     required this.programLibrary,
@@ -234,6 +236,7 @@ final class DofCompositeFeature implements RenderFeature {
     this.sceneDepthResource = DepthPrepassResources.sceneDepth,
     this.dofBlurredResource = DofResources.dofBlurV,
     this.dofOutputResource = DofResources.dofOutput,
+    this.chain,
   });
 
   ResourceRef get _resolvedSource =>
@@ -290,6 +293,8 @@ final class DofCompositeFeature implements RenderFeature {
         resolveCamera: resolveCamera,
         focusDistance: focusDistance,
         focusRange: focusRange,
+        outputResource: dofOutputResource,
+        chain: chain,
       ),
     ];
   }
@@ -309,6 +314,8 @@ final class _DofCompositePass implements RenderPass {
   final CameraView Function() resolveCamera;
   final double focusDistance;
   final double focusRange;
+  final ResourceRef outputResource;
+  final PostChain? chain;
 
   const _DofCompositePass({
     required this.descriptor,
@@ -320,15 +327,22 @@ final class _DofCompositePass implements RenderPass {
     required this.resolveCamera,
     required this.focusDistance,
     required this.focusRange,
+    this.outputResource = DofResources.dofOutput,
+    this.chain,
   });
 
   @override
   void execute(RenderPassContext context) {
-    final view =
-        context.viewOf(DofResources.dofOutput.name) as BoundResourceView;
+    final post = context.frameScene.post as PostProcessState;
+    final chain = this.chain;
+    // dof_composite.frag copies the sharp input below this strength.
+    if (chain != null && post.depthOfFieldStrength <= 0.0001) {
+      chain.bypass(outputResource, resolveSharp());
+      return;
+    }
+    final view = context.viewOf(outputResource.name) as BoundResourceView;
     final encoder = context.commandEncoder as DrawCommandEncoder;
     final camera = resolveCamera();
-    final post = context.frameScene.post as PostProcessState;
 
     encoder.bindTarget(view.gpuObject);
     encoder.applyDrawState(descriptor.toDrawState());
@@ -349,5 +363,6 @@ final class _DofCompositePass implements RenderPass {
     );
     encoder.bindVertexArray(emptyVao);
     encoder.drawArrays(first: 0, count: 3);
+    chain?.produced(outputResource, view.gpuObject);
   }
 }

@@ -78,9 +78,8 @@ int _drawCountFor({
   required List<String> resourceNames,
   required PostProcessState post,
 }) {
-  final throwawayTarget = device.createTarget(
-    const GpuTargetDescriptor(width: 4, height: 4),
-  );
+  // One target per resource: a pass must never sample the target it
+  // renders into, and the fake device rejects that feedback loop.
   final views = {
     for (final name in resourceNames)
       name: BoundResourceView(
@@ -90,7 +89,7 @@ int _drawCountFor({
           width: 4,
           height: 4,
         ),
-        throwawayTarget,
+        device.createTarget(const GpuTargetDescriptor(width: 4, height: 4)),
       ),
   };
   final before = device.drawLog.length;

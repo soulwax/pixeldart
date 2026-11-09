@@ -306,8 +306,9 @@ final class _ShadowedWorldPass implements RenderPass {
 
   // One object per distinct state, instead of a new descriptor per draw.
   late final DrawStateDescriptor _passState = descriptor.toDrawState();
-  late final DrawStateDescriptor _passStateTwoSided = _passState
-      .withCullEnable(false);
+  late final DrawStateDescriptor _passStateTwoSided = _passState.withCullEnable(
+    false,
+  );
   static final DrawStateDescriptor _alphaTwoSided = DrawStateDescriptor
       .blendedDefault
       .withCullEnable(false);
@@ -968,10 +969,7 @@ final class _ShadowedWorldPass implements RenderPass {
 
   void _setModelUniforms(DrawCommandEncoder encoder, Transform transform) {
     final model = transform.toMat4();
-    encoder.setUniform(
-      'uModel',
-      UniformValue.mat4(model.m),
-    );
+    encoder.setUniform('uModel', UniformValue.mat4(model.m));
     encoder.setUniform(
       'uNormalMatrix',
       UniformValue.mat4(model.normalMatrix().m),

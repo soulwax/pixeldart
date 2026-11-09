@@ -55,7 +55,9 @@ final class OwnedResourcePlan {
     if (profile.installs(PipelineFeatures.grade)) resources.add('gradeOutput');
     if (profile.installs(PipelineFeatures.ps1)) resources.add('ps1Output');
     final hasHistory = profile.installs(PipelineFeatures.vhs);
-    if (hasHistory) resources.add('vhsOutput');
+    // VHS ping-pongs two targets so its ghost never samples the target it
+    // renders into.
+    if (hasHistory) resources.addAll({'vhsOutput', 'vhsHistory'});
     return OwnedResourcePlan(
       resources: Set.unmodifiable(resources),
       hasHistory: hasHistory,

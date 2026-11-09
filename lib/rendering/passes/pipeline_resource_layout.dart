@@ -36,6 +36,7 @@ final class PipelineResourceLayout {
   final ResourceRef gradeOutput;
   final ResourceRef ps1Output;
   final ResourceRef vhsOutput;
+  final ResourceRef vhsHistory;
 
   PipelineResourceLayout({
     required this.internalWidth,
@@ -135,6 +136,11 @@ final class PipelineResourceLayout {
        ),
        vhsOutput = _sized(
          VhsResources.vhsOutput,
+         internalWidth,
+         internalHeight,
+       ),
+       vhsHistory = _sized(
+         VhsResources.vhsHistory,
          internalWidth,
          internalHeight,
        );

@@ -160,11 +160,7 @@ final class SpritesFeature implements RenderFeature {
   @override
   void declare(RenderGraphBuilder graph, RenderFeatureContext context) {
     graph.addPass(
-      PassDeclaration(
-        id: _passId,
-        stage: GraphStage.afterWorld,
-        uses: _uses,
-      ),
+      PassDeclaration(id: _passId, stage: GraphStage.afterWorld, uses: _uses),
     );
   }
 
@@ -207,8 +203,7 @@ final class SpritesFeature implements RenderFeature {
     _frame += 1;
     final hasSprites = _stageHasSprites(SpriteStage.world);
     if (clearGlow || hasSprites) {
-      final view =
-          context.viewOf(sceneColorResource.name) as BoundResourceView;
+      final view = context.viewOf(sceneColorResource.name) as BoundResourceView;
       final encoder = context.commandEncoder as DrawCommandEncoder;
       encoder.bindTarget(view.gpuObject);
       // Earlier composites narrow this target to one draw buffer.
@@ -353,7 +348,10 @@ final class SpritesFeature implements RenderFeature {
     if (entry.retained == null) {
       final bytes = batch.length * SpriteBatch.recordBytes;
       final buffer = device.createBuffer(
-        GpuBufferDescriptor(byteLength: bytes, usage: GpuBufferUsage.staticDraw),
+        GpuBufferDescriptor(
+          byteLength: bytes,
+          usage: GpuBufferUsage.staticDraw,
+        ),
       );
       device.uploadBuffer(
         buffer,

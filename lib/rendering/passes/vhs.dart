@@ -8,6 +8,7 @@ import '../core/render_graph.dart';
 import '../webgl/device_api.dart';
 import '../webgl/draw_encoder.dart';
 import 'pass_context_impl.dart';
+import 'post_chain.dart';
 import 'ps1_resources.dart';
 import 'vhs_resources.dart';
 
@@ -42,6 +43,13 @@ final class VhsFeature implements RenderFeature {
   final double Function() resolveTime;
   final ResourceRef inputResource;
   final ResourceRef outputResource;
+  final PostChain? chain;
+
+  /// A second target the size of [outputResource]. With it and a [chain],
+  /// the pass alternates between the two each frame, reading last frame's
+  /// output as history and never sampling the target it renders into.
+  /// [resolveHistory] is then unused.
+  final GpuObject Function()? resolveAlternateTarget;
 
   VhsFeature({
     required this.programLibrary,
@@ -52,6 +60,8 @@ final class VhsFeature implements RenderFeature {
     required this.resolveTime,
     this.inputResource = Ps1Resources.ps1Output,
     this.outputResource = VhsResources.vhsOutput,
+    this.chain,
+    this.resolveAlternateTarget,
   });
 
   @override
@@ -102,6 +112,8 @@ final class VhsFeature implements RenderFeature {
         resolveTime: resolveTime,
         inputResource: inputResource,
         outputResource: outputResource,
+        chain: chain,
+        resolveAlternateTarget: resolveAlternateTarget,
       ),
     ];
   }
@@ -119,8 +131,15 @@ final class _VhsPass implements RenderPass {
   final double Function() resolveTime;
   final ResourceRef inputResource;
   final ResourceRef outputResource;
+  final PostChain? chain;
+  final GpuObject Function()? resolveAlternateTarget;
+  bool _writeAlternate = false;
+  // Ping-pong history holds a real VHS frame only after a draw; the first
+  // draw (and the first after a bypass) ghosts nothing rather than echoing
+  // a cleared or stale target.
+  bool _historyValid = false;
 
-  const _VhsPass({
+  _VhsPass({
     required this.descriptor,
     required this.program,
     required this.emptyVao,
@@ -128,6 +147,8 @@ final class _VhsPass implements RenderPass {
     required this.resolveTime,
     required this.inputResource,
     required this.outputResource,
+    this.chain,
+    this.resolveAlternateTarget,
   });
 
   @override
@@ -136,6 +157,10 @@ final class _VhsPass implements RenderPass {
     final outputView = context.viewOf(outputResource.name) as BoundResourceView;
     final encoder = context.commandEncoder as DrawCommandEncoder;
     final post = context.frameScene.post as PostProcessState;
+    final chain = this.chain;
+    final input = chain == null
+        ? sceneView.gpuObject
+        : chain.source(inputResource, sceneView.gpuObject);
 
     // §8.10: "reduced motion halves jitter and disables ghosting."
     final trackingWeight = post.reducedMotion
@@ -143,12 +168,39 @@ final class _VhsPass implements RenderPass {
         : post.vhsTrackingWeight;
     final ghostWeight = post.reducedMotion ? 0.0 : post.vhsGhostWeight;
 
-    encoder.bindTarget(outputView.gpuObject);
+    // Every effect is a mix or offset scaled by its weight, so all-zero
+    // weights reproduce the input exactly.
+    if (chain != null &&
+        post.vhsChromaWeight == 0 &&
+        trackingWeight == 0 &&
+        post.vhsNoiseWeight == 0 &&
+        post.vhsHeadSwitchWeight == 0 &&
+        post.vhsDropoutWeight == 0 &&
+        ghostWeight == 0) {
+      chain.bypass(outputResource, input);
+      _historyValid = false;
+      return;
+    }
+
+    var target = outputView.gpuObject;
+    var history = resolveHistory();
+    var ghost = ghostWeight;
+    final alternate = resolveAlternateTarget;
+    if (chain != null && alternate != null) {
+      final other = alternate();
+      history = _writeAlternate ? target : other;
+      target = _writeAlternate ? other : target;
+      _writeAlternate = !_writeAlternate;
+      if (!_historyValid) ghost = 0;
+      _historyValid = true;
+    }
+
+    encoder.bindTarget(target);
     encoder.applyDrawState(descriptor.toDrawState());
     encoder.useProgram(program.handle);
-    encoder.bindTexture(0, sceneView.gpuObject);
+    encoder.bindTexture(0, input);
     encoder.setUniform('uScene', const UniformValue.sampler(0));
-    encoder.bindTexture(1, resolveHistory());
+    encoder.bindTexture(1, history);
     encoder.setUniform('uHistory', const UniformValue.sampler(1));
     encoder.setUniform('uTime', UniformValue.float1(resolveTime()));
     encoder.setUniform(
@@ -168,8 +220,9 @@ final class _VhsPass implements RenderPass {
       'uDropoutWeight',
       UniformValue.float1(post.vhsDropoutWeight),
     );
-    encoder.setUniform('uGhostWeight', UniformValue.float1(ghostWeight));
+    encoder.setUniform('uGhostWeight', UniformValue.float1(ghost));
     encoder.bindVertexArray(emptyVao);
     encoder.drawArrays(first: 0, count: 3);
+    chain?.produced(outputResource, target);
   }
 }

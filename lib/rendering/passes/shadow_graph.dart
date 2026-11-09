@@ -25,6 +25,7 @@ import 'volumetric_light.dart';
 import 'world.dart';
 import 'pipeline_resource_layout.dart';
 import 'msaa_resolve.dart';
+import 'post_chain.dart';
 
 export 'world.dart'
     show AlbedoResolver, MaterialResolver, MaterialTextureResolver;
@@ -60,6 +61,7 @@ FeatureGraph buildShadowGraph(
   required GpuObject Function() resolveDofBlurV,
   required GpuObject Function() resolveGradeLut,
   required GpuObject Function() resolveVhsHistory,
+  GpuObject Function()? resolveVhsAlternate,
   required double Function() resolveTime,
   QualityProfile profile = QualityProfile.ps1Full,
   SpritesFeature? sprites,
@@ -196,6 +198,9 @@ FeatureGraph buildShadowGraph(
   // the multisampled one, since bindGlowTexture refuses a multisampled
   // target exactly like bindTexture already does for color.
   final postFeatures = <RenderFeature>[];
+  // DOF composite, grade, PS1 and VHS each skip their draw at identity
+  // weights; the chain carries their input forward to the next reader.
+  final chain = PostChain();
   var postResource = hasVolumetric
       ? layout.sceneColorPostVolumetric
       : (sampleCount > 1 ? layout.sceneColorResolved : layout.sceneColor);
@@ -281,6 +286,7 @@ FeatureGraph buildShadowGraph(
         sceneDepthResource: layout.sceneDepth,
         dofBlurredResource: layout.dofBlurV,
         dofOutputResource: layout.dofOutput,
+        chain: chain,
       ),
     ]);
     postResource = layout.dofOutput;
@@ -298,6 +304,7 @@ FeatureGraph buildShadowGraph(
         resolveLut: resolveGradeLut,
         inputResource: postResource,
         outputResource: layout.gradeOutput,
+        chain: chain,
       ),
     );
     postResource = layout.gradeOutput;
@@ -313,6 +320,7 @@ FeatureGraph buildShadowGraph(
         device: device,
         inputResource: postResource,
         outputResource: layout.ps1Output,
+        chain: chain,
       ),
     );
     postResource = layout.ps1Output;
@@ -332,6 +340,8 @@ FeatureGraph buildShadowGraph(
         resolveTime: resolveTime,
         inputResource: postResource,
         outputResource: layout.vhsOutput,
+        chain: chain,
+        resolveAlternateTarget: resolveVhsAlternate,
       ),
     );
     postResource = layout.vhsOutput;
@@ -343,16 +353,17 @@ FeatureGraph buildShadowGraph(
     device: device,
     sceneColorResource: postResource,
     outputEncoding: outputEncoding,
+    chain: chain,
   );
   return FeatureGraph([
     depthPrepass,
     if (hasSsao) ssaoOcclusion,
     if (hasSsao) ssaoBlur,
-      shadow,
-      shadowedWorld,
-      if (sprites != null) sprites,
-      if (msaaResolve != null) msaaResolve,
-      if (volumetric != null) volumetric,
+    shadow,
+    shadowedWorld,
+    if (sprites != null) sprites,
+    if (msaaResolve != null) msaaResolve,
+    if (volumetric != null) volumetric,
     ...postFeatures,
     present,
     if (sprites != null) sprites.overlay,
@@ -416,7 +427,7 @@ final class PipelineResourcePlan {
       resources.add(layout.ps1Output);
     }
     if (profile.installs(PipelineFeatures.vhs)) {
-      resources.add(layout.vhsOutput);
+      resources.addAll([layout.vhsOutput, layout.vhsHistory]);
     }
     return PipelineResourcePlan(
       resources: Set.unmodifiable(resources),

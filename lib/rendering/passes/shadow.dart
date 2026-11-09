@@ -328,10 +328,7 @@ final class _ShadowCasterPass implements RenderPass {
     ShadowLightView lightView,
   ) {
     final model = transform.toMat4();
-    encoder.setUniform(
-      'uModel',
-      UniformValue.mat4(model.m),
-    );
+    encoder.setUniform('uModel', UniformValue.mat4(model.m));
     encoder.setUniform(
       'uLightViewProjection',
       UniformValue.mat4(lightView.viewProjection.m),

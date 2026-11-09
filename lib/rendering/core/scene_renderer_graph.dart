@@ -211,7 +211,9 @@ extension on SceneRendererImpl {
                 resolveResource('dofBlurV', fallback: 'sceneColor'),
             resolveGradeLut: () => _resources!.textures.fallbackAlbedo,
             resolveVhsHistory: () =>
-                resolveResource('vhsOutput', fallback: 'sceneColor'),
+                resolveResource('vhsHistory', fallback: 'sceneColor'),
+            resolveVhsAlternate: () =>
+                resolveResource('vhsHistory', fallback: 'sceneColor'),
             resolveTime: () => _activeFrame!.timeSeconds,
             profile: configuration.profile,
             sprites: sprites,
@@ -240,7 +242,11 @@ extension on SceneRendererImpl {
         profile: configuration.profile,
       ),
       availableCapabilities: const {},
-      hasValidPreviousFrame: false,
+      // The graph is built once and reused every frame. Renderer-owned
+      // targets are allocated zero-filled, so a history read never sees
+      // undefined memory; passes that read history (VHS) track for
+      // themselves whether it holds a real frame yet.
+      hasValidPreviousFrame: true,
       resources: _PlanResources(resourceNames),
     );
     if (!result.isValid) {
