@@ -33,6 +33,26 @@ void _inverseTransposeNormals() {
   final n = const Vec3(0, 1, 0);
   _nearVec(rigidNormalMatrix.transformDir(n), rigid.transformDir(n).normalized);
 
+  // The case above is blind to a transposed normal matrix: rotating about Y
+  // leaves +Y fixed. Rotate about X and an arbitrary axis, and probe normals
+  // the rotation actually moves. Rigid normals must turn exactly like
+  // directions do; a transpose turns them the opposite way.
+  for (final model in [
+    Mat4.rotationX(0.9),
+    Transform(rotation: Quat.axisAngle(const Vec3(0.3, 0.8, -0.5).normalized, 1.1), scale: 2.5).toMat4(),
+  ]) {
+    for (final probe in const [Vec3(0, 1, 0), Vec3(0, 0, 1), Vec3(0.3, -0.7, 0.6)]) {
+      _nearVec(
+        model.normalMatrix().transformDir(probe).normalized,
+        model.transformDir(probe).normalized,
+      );
+    }
+  }
+  // inverse3x3 must be a true inverse on a non-symmetric block.
+  final skewed = Mat4.rotationX(0.7) * Mat4.rotationY(0.4);
+  final product = skewed * skewed.inverse3x3();
+  _nearVec(product.transformDir(const Vec3(1, 2, 3)), const Vec3(1, 2, 3));
+
   final nonUniform = Mat4.fromColumnMajor([
     2,
     0,

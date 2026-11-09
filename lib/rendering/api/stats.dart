@@ -77,6 +77,11 @@ final class GpuTimingResult {
 /// later in diagnostics keyed to [frameIndex].
 final class FrameStats {
   final int frameIndex;
+
+  /// Point lights submitted beyond the shader's budget
+  /// (`RuntimeLightBudget.pointLights`) and therefore not drawn this frame.
+  /// The most influential ones at the camera are kept.
+  final int pointLightsDropped;
   final int drawCalls;
   final int trianglesSubmitted;
   final int trianglesCulled;
@@ -90,6 +95,7 @@ final class FrameStats {
 
   const FrameStats({
     required this.frameIndex,
+    this.pointLightsDropped = 0,
     this.drawCalls = 0,
     this.trianglesSubmitted = 0,
     this.trianglesCulled = 0,

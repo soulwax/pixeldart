@@ -18,36 +18,145 @@ base class SceneNode {
   SceneNode? _parent;
   final List<SceneNode> _children = [];
 
-  MeshHandle? mesh;
-  MaterialHandle? material;
+  /// Subtrees detached from this tree since its last [syncToWorld]; their
+  /// retained items are removed then unless they were re-attached.
+  final List<SceneNode> _detached = [];
+
   Aabb? bounds;
   MeshData? meshData;
-  int visibilityMask;
-  DrawMode drawMode;
-  BlendMode blendMode;
-  bool castsShadow;
-  bool receivesShadow;
-  int sortTiebreaker;
-  int? instanceFamilyKey;
+
+  MeshHandle? _mesh;
+  MaterialHandle? _material;
+  int _visibilityMask;
+  bool _visible = true;
+  DrawMode _drawMode;
+  BlendMode _blendMode;
+  bool _castsShadow;
+  bool _receivesShadow;
+  int _sortTiebreaker;
+  int? _instanceFamilyKey;
 
   InstanceId? _instanceId;
 
   SceneNode({
     this.name,
     Transform transform = Transform.identity,
-    this.mesh,
-    this.material,
+    this._mesh,
+    this._material,
     this.bounds,
     this.meshData,
-    this.visibilityMask = -1,
-    this.drawMode = DrawMode.opaque,
-    this.blendMode = BlendMode.alpha,
-    this.castsShadow = true,
-    this.receivesShadow = true,
-    this.sortTiebreaker = 0,
-    this.instanceFamilyKey,
+    this._visibilityMask = -1,
+    this._drawMode = DrawMode.opaque,
+    this._blendMode = BlendMode.alpha,
+    this._castsShadow = true,
+    this._receivesShadow = true,
+    this._sortTiebreaker = 0,
+    this._instanceFamilyKey,
   }) : _localTransform = transform {
     bounds ??= meshData?.bounds;
+  }
+
+  // Draw state. Every setter marks the node so the change reaches the
+  // retained world on the next sync, without the node having to move.
+
+  MeshHandle? get mesh => _mesh;
+  set mesh(MeshHandle? value) {
+    if (value == _mesh) return;
+    _mesh = value;
+    _worldDirty = true;
+  }
+
+  MaterialHandle? get material => _material;
+  set material(MaterialHandle? value) {
+    if (value == _material) return;
+    _material = value;
+    _worldDirty = true;
+  }
+
+  /// Per-view visibility bits for this node's own draw item. Not inherited;
+  /// use [visible] to hide a whole subtree.
+  int get visibilityMask => _visibilityMask;
+  set visibilityMask(int value) {
+    if (value == _visibilityMask) return;
+    _visibilityMask = value;
+    _worldDirty = true;
+  }
+
+  DrawMode get drawMode => _drawMode;
+  set drawMode(DrawMode value) {
+    if (value == _drawMode) return;
+    _drawMode = value;
+    _worldDirty = true;
+  }
+
+  BlendMode get blendMode => _blendMode;
+  set blendMode(BlendMode value) {
+    if (value == _blendMode) return;
+    _blendMode = value;
+    _worldDirty = true;
+  }
+
+  bool get castsShadow => _castsShadow;
+  set castsShadow(bool value) {
+    if (value == _castsShadow) return;
+    _castsShadow = value;
+    _worldDirty = true;
+  }
+
+  bool get receivesShadow => _receivesShadow;
+  set receivesShadow(bool value) {
+    if (value == _receivesShadow) return;
+    _receivesShadow = value;
+    _worldDirty = true;
+  }
+
+  int get sortTiebreaker => _sortTiebreaker;
+  set sortTiebreaker(int value) {
+    if (value == _sortTiebreaker) return;
+    _sortTiebreaker = value;
+    _worldDirty = true;
+  }
+
+  int? get instanceFamilyKey => _instanceFamilyKey;
+  set instanceFamilyKey(int? value) {
+    if (value == _instanceFamilyKey) return;
+    _instanceFamilyKey = value;
+    _worldDirty = true;
+  }
+
+  /// Whether this node and its whole subtree are drawn. Inherited: a hidden
+  /// parent hides every descendant regardless of their own flag.
+  bool get visible => _visible;
+  set visible(bool value) {
+    if (value == _visible) return;
+    _visible = value;
+    _markWorldDirtyTree();
+  }
+
+  /// True when this node and all of its ancestors are [visible].
+  bool get isVisibleInHierarchy {
+    for (SceneNode? n = this; n != null; n = n._parent) {
+      if (!n._visible) return false;
+    }
+    return true;
+  }
+
+  /// The visibility bits this node's draw items should carry: its own
+  /// [visibilityMask], or 0 while hidden through [visible].
+  int get effectiveVisibilityMask => isVisibleInHierarchy ? _visibilityMask : 0;
+
+  /// Whether draw state changed since this node last synced. Subclasses that
+  /// manage their own retained items read this and call [markWorldSynced].
+  bool get hasPendingWorldChanges => _worldDirty || _isDirty;
+
+  /// Marks this node's retained items as up to date (for subclasses).
+  void markWorldSynced() => _worldDirty = false;
+
+  void _markWorldDirtyTree() {
+    _worldDirty = true;
+    for (final child in _children) {
+      child._markWorldDirtyTree();
+    }
   }
 
   /// Creates a grouping node with no visual mesh.
@@ -70,33 +179,21 @@ base class SceneNode {
 
   /// Local translation vector.
   Vec3 get position => _localTransform.translation;
-  set position(Vec3 value) {
-    localTransform = Transform(
-      translation: value,
-      rotation: _localTransform.rotation,
-      scale: _localTransform.scale,
-    );
-  }
+  set position(Vec3 value) => localTransform = _localTransform.copyWith(translation: value);
 
   /// Local rotation quaternion.
   Quat get rotation => _localTransform.rotation;
-  set rotation(Quat value) {
-    localTransform = Transform(
-      translation: _localTransform.translation,
-      rotation: value,
-      scale: _localTransform.scale,
-    );
-  }
+  set rotation(Quat value) => localTransform = _localTransform.copyWith(rotation: value);
 
-  /// Local uniform scale.
+  /// Local uniform scale. Prefer [visible] over scaling toward zero to hide
+  /// a node.
   double get scale => _localTransform.scale;
-  set scale(double value) {
-    localTransform = Transform(
-      translation: _localTransform.translation,
-      rotation: _localTransform.rotation,
-      scale: value,
-    );
-  }
+  set scale(double value) => localTransform = _localTransform.copyWith(scale: value);
+
+  /// Per-axis scale of this node's own geometry (see [Transform.stretch]).
+  /// Not inherited by children.
+  Vec3 get stretch => _localTransform.stretch;
+  set stretch(Vec3 value) => localTransform = _localTransform.copyWith(stretch: value);
 
   /// Translates node by [delta].
   void translate(Vec3 delta) {
@@ -222,24 +319,32 @@ base class SceneNode {
 
   /// Recursively tests this node and its descendants against [ray].
   /// Returns the closest [RaycastHit] or `null` if no intersection occurs.
-  RaycastHit? raycast(Ray ray) {
+  ///
+  /// [where] skips nodes it rejects (their descendants are still tested),
+  /// so a game can pick only ships, say, and never the ocean's large box.
+  /// [precise] refines a bounds hit against the node's [meshData] triangles,
+  /// so a ray between a mast and a sail misses. Hidden subtrees
+  /// ([visible] false) are skipped either way.
+  RaycastHit? raycast(Ray ray, {bool Function(SceneNode node)? where, bool precise = false}) {
     RaycastHit? closest;
 
     void testNode(SceneNode node) {
+      if (!node._visible) return;
       final b = node.worldBounds;
-      if (b != null) {
-        final dist = ray.intersectAabb(b);
-        if (dist != null) {
-          if (closest == null || dist < closest!.distance) {
-            final hitPoint = ray.at(dist);
-            final normal = (hitPoint - b.center).normalized;
-            closest = RaycastHit(
-              node: node,
-              point: hitPoint,
-              normal: normal,
-              distance: dist,
-            );
-          }
+      if (b != null && (where == null || where(node))) {
+        var dist = ray.intersectAabb(b);
+        Vec3? normal;
+        if (dist != null && precise && node.meshData != null) {
+          (dist, normal) = node._intersectTriangles(ray);
+        }
+        if (dist != null && (closest == null || dist < closest!.distance)) {
+          final hitPoint = ray.at(dist);
+          closest = RaycastHit(
+            node: node,
+            point: hitPoint,
+            normal: normal ?? (hitPoint - b.center).normalized,
+            distance: dist,
+          );
         }
       }
 
@@ -252,12 +357,53 @@ base class SceneNode {
     return closest;
   }
 
+  /// Nearest triangle hit of [ray] against this node's mesh in world space.
+  (double?, Vec3?) _intersectTriangles(Ray ray) {
+    final data = meshData!;
+    final layout = data.layout;
+    final stride = layout.strideFloats;
+    final v = data.vertices;
+    final world = worldTransform;
+    Vec3 vertex(int i) => world.transformPoint(Vec3(v[i * stride], v[i * stride + 1], v[i * stride + 2]));
+    final indices = data.indices ?? List<int>.generate(data.vertexCount, (i) => i);
+    double? best;
+    Vec3? bestNormal;
+    for (var i = 0; i + 2 < indices.length; i += 3) {
+      final a = vertex(indices[i]), b = vertex(indices[i + 1]), c = vertex(indices[i + 2]);
+      final t = ray.intersectTriangle(a, b, c);
+      if (t != null && (best == null || t < best)) {
+        best = t;
+        bestNormal = (b - a).cross(c - a).normalized;
+      }
+    }
+    return (best, bestNormal);
+  }
+
   /// Removes [child] from this node.
+  ///
+  /// The child's retained draw items are removed at the tree root's next
+  /// [syncToWorld], unless the child has been attached somewhere by then
+  /// (re-parenting keeps its items alive and simply moves them).
   void removeChild(SceneNode child) {
     if (_children.remove(child)) {
       child._parent = null;
       child._markDirty();
+      var root = this;
+      while (root._parent != null) {
+        root = root._parent!;
+      }
+      root._detached.add(child);
     }
+  }
+
+  /// Removes the retained items of subtrees detached from this tree that
+  /// are still unattached. Called at the start of [syncToWorld].
+  void flushDetached(RenderWorld world) {
+    if (_detached.isEmpty) return;
+    for (final node in _detached) {
+      if (node._parent == null) node.removeFromWorld(world);
+    }
+    _detached.clear();
   }
 
   /// Detaches this node from its parent, if attached.
@@ -265,42 +411,34 @@ base class SceneNode {
     _parent?.removeChild(this);
   }
 
+  /// Builds the retained descriptor for this node's own draw item.
+  RetainedItemDescriptor describeForWorld(MeshHandle mesh, MaterialHandle material) =>
+      RetainedItemDescriptor(
+        mesh: mesh,
+        material: material,
+        transform: worldTransform,
+        visibilityMask: effectiveVisibilityMask,
+        drawMode: _drawMode,
+        blendMode: _blendMode,
+        castsShadow: _castsShadow,
+        receivesShadow: _receivesShadow,
+        sortTiebreaker: _sortTiebreaker,
+        instanceFamilyKey: _instanceFamilyKey,
+      );
+
   /// Synchronizes this node and all descendants to the given [world].
   void syncToWorld(RenderWorld world) {
-    final m = mesh;
-    final mat = material;
+    flushDetached(world);
+    final m = _mesh;
+    final mat = _material;
 
     if (m != null && mat != null) {
       final currentId = _instanceId;
       if (currentId == null) {
-        final desc = RetainedItemDescriptor(
-          mesh: m,
-          material: mat,
-          transform: worldTransform,
-          visibilityMask: visibilityMask,
-          drawMode: drawMode,
-          blendMode: blendMode,
-          castsShadow: castsShadow,
-          receivesShadow: receivesShadow,
-          sortTiebreaker: sortTiebreaker,
-          instanceFamilyKey: instanceFamilyKey,
-        );
-        _instanceId = world.addItem(desc);
+        _instanceId = world.addItem(describeForWorld(m, mat));
         _worldDirty = false;
       } else if (_worldDirty || _isDirty) {
-        final desc = RetainedItemDescriptor(
-          mesh: m,
-          material: mat,
-          transform: worldTransform,
-          visibilityMask: visibilityMask,
-          drawMode: drawMode,
-          blendMode: blendMode,
-          castsShadow: castsShadow,
-          receivesShadow: receivesShadow,
-          sortTiebreaker: sortTiebreaker,
-          instanceFamilyKey: instanceFamilyKey,
-        );
-        world.updateItem(currentId, desc);
+        world.updateItem(currentId, describeForWorld(m, mat));
         _worldDirty = false;
       }
     } else if (_instanceId != null) {

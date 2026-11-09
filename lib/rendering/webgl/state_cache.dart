@@ -96,6 +96,18 @@ final class DrawStateDescriptor {
     blendSrc: BlendFactor.one,
     blendDst: BlendFactor.one,
   );
+
+  /// Additive with coverage: `srcAlpha`/`one`. Still only ever adds light,
+  /// but scaled by the fragment's alpha, so a soft-edged additive sprite
+  /// adds a soft disc rather than its whole quad. World draws with
+  /// `BlendMode.additive` use this; [additiveDefault] stays pure `one`/`one`
+  /// for full-screen composites whose alpha is always 1.
+  static const DrawStateDescriptor additiveCoverage = DrawStateDescriptor(
+    depthWrite: false,
+    blendEnable: true,
+    blendSrc: BlendFactor.srcAlpha,
+    blendDst: BlendFactor.one,
+  );
 }
 
 enum StateField {

@@ -65,7 +65,7 @@ final class TextureStore {
     _fallbackAlbedo = _createFallbackAlbedo();
     _fallbackNormal = _createFallback(FallbackPixels.flatNormal);
     _fallbackOrm = _createFallback(FallbackPixels.identityOrm);
-    _fallbackEmissive = _createFallback(FallbackPixels.blackEmissive);
+    _fallbackEmissive = _createFallback(FallbackPixels.neutralEmissive);
     _fallbackLightmap = _createFallback(FallbackPixels.neutralLightmap);
   }
 
@@ -265,7 +265,7 @@ final class TextureStore {
     _fallbackAlbedo = _createFallbackAlbedo();
     _fallbackNormal = _createFallback(FallbackPixels.flatNormal);
     _fallbackOrm = _createFallback(FallbackPixels.identityOrm);
-    _fallbackEmissive = _createFallback(FallbackPixels.blackEmissive);
+    _fallbackEmissive = _createFallback(FallbackPixels.neutralEmissive);
     _fallbackLightmap = _createFallback(FallbackPixels.neutralLightmap);
     for (final (handle, record) in _registry.liveDescriptors()) {
       if (record.layerPixels.every((pixels) => pixels == null)) {

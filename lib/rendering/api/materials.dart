@@ -18,7 +18,12 @@ final class MaterialDefinition {
   final TextureHandle? albedoTexture;
   final MaterialMapColorSpace albedoColorSpace;
   final double tintR, tintG, tintB;
+  /// Optional emissive map, multiplied with tint and [emissiveStrength].
   final TextureHandle? emissiveTexture;
+
+  /// Glow added on top of lighting: `emissiveMap × tint × emissiveStrength`.
+  /// Without an [emissiveTexture] the map is neutral white, so the strength
+  /// and tint alone make a surface glow. 0 (the default) emits nothing.
   final double emissiveStrength;
 
   /// Tangent-space normal map. The current compatibility vertex layout does

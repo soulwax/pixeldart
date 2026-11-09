@@ -100,6 +100,14 @@ final class Ray {
     return t >= 0 ? t : null;
   }
 
+  /// Where the ray meets the horizontal plane y = [height], or null when it
+  /// points away from it or runs parallel. Handy for aiming at a floor or a
+  /// sea surface from a screen point.
+  Vec3? intersectGround([double height = 0]) {
+    final t = intersectPlane(const Vec3(0, 1, 0), -height);
+    return t == null ? null : at(t);
+  }
+
   /// Tests intersection with a triangle defined by vertices [v0], [v1], [v2]
   /// using the Möller–Trumbore algorithm. Returns positive distance [t] or `null`.
   double? intersectTriangle(Vec3 v0, Vec3 v1, Vec3 v2) {

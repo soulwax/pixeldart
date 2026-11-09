@@ -24,19 +24,35 @@ final class GlbMesh {
   const GlbMesh({required this.name, required this.primitives});
 }
 
-/// An embedded image decoded from a glTF bufferView or binary chunk.
+/// An image referenced by a glTF asset, one per entry of its `images` array.
+///
+/// Embedded images (a bufferView or a base64 `data:` URI) carry their
+/// [bytes]. External images carry a relative [uri] and empty [bytes]; the
+/// host resolves the URI against the asset's own location (see
+/// `PixeldartApp.loadModel`).
 final class GlbImage {
   final String name;
   final String mimeType;
   final Uint8List bytes;
+
+  /// Relative URI of an external image, or null when embedded.
+  final String? uri;
+
   const GlbImage({
     required this.name,
     required this.mimeType,
     required this.bytes,
+    this.uri,
   });
+
+  bool get isExternal => uri != null;
 }
 
 /// Texture slot references associated with a decoded glTF material.
+///
+/// Each index is a glTF *texture* index (into the asset's `textures`
+/// array), not an image index. Resolve it to an image with
+/// [GlbResult.imageForTexture].
 final class GlbMaterialTextures {
   final int? albedoTextureIndex;
   final int? normalTextureIndex;
@@ -55,8 +71,19 @@ final class GlbResult {
   final SceneNode rootNode;
   final List<MeshData> meshes;
   final List<MaterialDefinition> materials;
+
+  /// One entry per glTF image, index-aligned with the asset's `images`.
   final List<GlbImage> images;
   final List<GlbMaterialTextures> materialTextures;
+
+  /// For each glTF texture, the index of its source image (or null).
+  final List<int?> textureImages;
+
+  /// Material index of every node in [rootNode]'s tree that carries a mesh.
+  final Map<SceneNode, int> nodeMaterials;
+
+  /// Things the decoder approximated or could not represent.
+  final List<String> warnings;
 
   const GlbResult({
     required this.rootNode,
@@ -64,7 +91,21 @@ final class GlbResult {
     required this.materials,
     this.images = const [],
     this.materialTextures = const [],
+    this.textureImages = const [],
+    this.nodeMaterials = const {},
+    this.warnings = const [],
   });
+
+  /// The image a glTF texture index samples, or null.
+  int? imageForTexture(int? textureIndex) {
+    if (textureIndex == null || textureIndex < 0 || textureIndex >= textureImages.length) {
+      return null;
+    }
+    return textureImages[textureIndex];
+  }
+
+  /// The material index of a decoded mesh node.
+  int materialOf(SceneNode node) => nodeMaterials[node] ?? 0;
 }
 
 /// Pure Dart GLB 2.0 decoder converting glTF buffers into Pixeldart `MeshData`,
@@ -124,9 +165,16 @@ final class GlbDecoder {
     return GlbDecoder._(json, binary)._decodeAll();
   }
 
+  final List<String> _warnings = [];
+  final Map<SceneNode, int> _nodeMaterials = {};
+
   GlbResult _decodeAll() {
     final (materials, materialTextures) = _decodeMaterials();
     final images = _decodeImages();
+    final textureImages = [
+      for (final t in (_json['textures'] as List<dynamic>? ?? const []))
+        (t as Map<String, dynamic>)['source'] as int?,
+    ];
     final meshes = _decodeMeshes();
     final allMeshDatas = <MeshData>[];
     for (final m in meshes) {
@@ -142,6 +190,9 @@ final class GlbDecoder {
       materials: materials,
       images: images,
       materialTextures: materialTextures,
+      textureImages: textureImages,
+      nodeMaterials: Map.unmodifiable(_nodeMaterials),
+      warnings: List.unmodifiable(_warnings),
     );
   }
 
@@ -156,12 +207,28 @@ final class GlbDecoder {
       final name = img['name'] as String? ?? 'image_$i';
       final mime = img['mimeType'] as String? ?? 'image/png';
       final viewIdx = img['bufferView'] as int?;
+      final uri = img['uri'] as String?;
       if (viewIdx != null && viewIdx >= 0 && viewIdx < bufferViews.length) {
         final view = bufferViews[viewIdx] as Map<String, dynamic>;
         final offset = (view['byteOffset'] as int? ?? 0);
         final length = (view['byteLength'] as int? ?? 0);
         final bytes = Uint8List.sublistView(_bin, offset, offset + length);
         images.add(GlbImage(name: name, mimeType: mime, bytes: bytes));
+      } else if (uri != null && uri.startsWith('data:')) {
+        // Embedded as a data URI: data:<mime>;base64,<payload>
+        final comma = uri.indexOf(',');
+        final header = comma > 5 ? uri.substring(5, comma) : '';
+        final dataMime = header.split(';').first;
+        final bytes = header.endsWith(';base64') && comma >= 0
+            ? base64Decode(uri.substring(comma + 1))
+            : Uint8List(0);
+        images.add(GlbImage(name: name, mimeType: dataMime.isEmpty ? mime : dataMime, bytes: bytes));
+      } else if (uri != null) {
+        images.add(GlbImage(name: name, mimeType: mime, bytes: Uint8List(0), uri: uri));
+      } else {
+        // Keep the list index-aligned with the asset's images array.
+        _warnings.add('image $i ("$name") has neither bufferView nor uri');
+        images.add(GlbImage(name: name, mimeType: mime, bytes: Uint8List(0)));
       }
     }
     return images;
@@ -221,6 +288,22 @@ final class GlbDecoder {
         emissiveTexIdx = emissiveTex['index'] as int?;
       }
 
+      // KHR_materials_unlit: authored to show its base colour as-is. There
+      // is no unlit shading path, so approximate it with a matte dielectric
+      // (otherwise the glTF default metallicFactor of 1 renders it near
+      // black without a reflection probe).
+      final extensions = mat['extensions'] as Map<String, dynamic>?;
+      if (extensions != null && extensions.containsKey('KHR_materials_unlit')) {
+        metallic = 0.0;
+        roughness = 0.9;
+      }
+
+      final alphaMode = switch (mat['alphaMode'] as String?) {
+        'MASK' => AlphaMode.masked,
+        'BLEND' => AlphaMode.blended,
+        _ => AlphaMode.opaque,
+      };
+
       materials.add(
         MaterialDefinition(
           key: name,
@@ -229,6 +312,10 @@ final class GlbDecoder {
           tintB: b,
           metallic: metallic.clamp(0.0, 1.0),
           roughness: roughness.clamp(0.0, 1.0),
+          alphaMode: alphaMode,
+          // Only a masked material compares against a cutoff.
+          alphaCutoff: alphaMode == AlphaMode.masked ? ((mat['alphaCutoff'] as num?)?.toDouble() ?? 0.5) : 0.5,
+          doubleSided: mat['doubleSided'] as bool? ?? false,
         ),
       );
 
@@ -357,16 +444,34 @@ final class GlbDecoder {
         );
       }
 
-      var scale = 1.0;
+      var scaleVec = const Vec3(1, 1, 1);
       final s = nodeJson['scale'] as List<dynamic>?;
-      if (s != null && s.isNotEmpty) {
-        scale = (s[0] as num).toDouble();
+      if (s != null && s.length >= 3) {
+        scaleVec = Vec3((s[0] as num).toDouble(), (s[1] as num).toDouble(), (s[2] as num).toDouble());
       }
 
-      final sNode = SceneNode(
-        name: name,
-        transform: Transform(translation: translation, rotation: rotation, scale: scale > 0 ? scale : 1.0),
-      );
+      final matrix = nodeJson['matrix'] as List<dynamic>?;
+      if (matrix != null && matrix.length == 16) {
+        (translation, rotation, scaleVec) = _decomposeMatrix([for (final v in matrix) (v as num).toDouble()]);
+      }
+
+      final hasChildren = (nodeJson['children'] as List<dynamic>?)?.isNotEmpty ?? false;
+      final uniform = (scaleVec.x - scaleVec.y).abs() < 1e-6 && (scaleVec.x - scaleVec.z).abs() < 1e-6;
+      Transform transform;
+      if (uniform) {
+        transform = Transform(translation: translation, rotation: rotation, scale: scaleVec.x > 0 ? scaleVec.x : 1.0);
+      } else if (!hasChildren && scaleVec.x > 0 && scaleVec.y > 0 && scaleVec.z > 0) {
+        // A leaf's non-uniform scale is exact as a geometry-local stretch.
+        transform = Transform(translation: translation, rotation: rotation, stretch: scaleVec);
+      } else {
+        // Inherited non-uniform scale would shear rotated children, which
+        // translation/rotation/scale cannot express: use the geometric mean.
+        final mean = math.pow((scaleVec.x * scaleVec.y * scaleVec.z).abs(), 1 / 3).toDouble();
+        transform = Transform(translation: translation, rotation: rotation, scale: mean > 0 ? mean : 1.0);
+        _warnings.add('node $i ("$name") has non-uniform scale $scaleVec with children; approximated as uniform $mean');
+      }
+
+      final sNode = SceneNode(name: name, transform: transform);
       sceneNodes.add(sNode);
     }
 
@@ -390,10 +495,18 @@ final class GlbDecoder {
         final glbMesh = meshes[meshIdx];
         for (var p = 0; p < glbMesh.primitives.length; p++) {
           final prim = glbMesh.primitives[p];
-          final primNode = p == 0 ? parentNode : parentNode.add(name: '${parentNode.name}_prim_$p');
-          // In CPU GlbResult, mesh and material references are identified by index
-          // MeshHandles and MaterialHandles are assigned by PixeldartApp upon scene attachment
-          primNode.sortTiebreaker = prim.materialIndex;
+          // Extra primitives become children; stretch is not inherited, so
+          // they repeat the node's own.
+          final primNode = p == 0
+              ? parentNode
+              : parentNode.add(
+                  name: '${parentNode.name}_prim_$p',
+                  transform: Transform(stretch: parentNode.stretch),
+                );
+          // Handles are assigned when a ModelAsset registers this result;
+          // until then a mesh node is identified by its meshData and the
+          // material index recorded here.
+          _nodeMaterials[primNode] = prim.materialIndex;
           primNode.bounds = prim.mesh.bounds;
           primNode.meshData = prim.mesh;
         }
@@ -407,6 +520,54 @@ final class GlbDecoder {
     }
 
     return root;
+  }
+
+  /// Splits a column-major glTF node matrix into translation, rotation and
+  /// per-axis scale (reflections fold into a negative X scale).
+  static (Vec3, Quat, Vec3) _decomposeMatrix(List<double> m) {
+    final translation = Vec3(m[12], m[13], m[14]);
+    var c0 = Vec3(m[0], m[1], m[2]);
+    final c1 = Vec3(m[4], m[5], m[6]);
+    final c2 = Vec3(m[8], m[9], m[10]);
+    var sx = c0.length;
+    final sy = c1.length, sz = c2.length;
+    if (c0.cross(c1).dot(c2) < 0) {
+      sx = -sx;
+      c0 = -c0;
+    }
+    if (sx.abs() < 1e-12 || sy < 1e-12 || sz < 1e-12) {
+      return (translation, Quat.identity, const Vec3(1, 1, 1));
+    }
+    final x = c0 * (1 / sx.abs()), y = c1 * (1 / sy), z = c2 * (1 / sz);
+    // Rotation matrix (columns x, y, z) to quaternion.
+    final trace = x.x + y.y + z.z;
+    double qx, qy, qz, qw;
+    if (trace > 0) {
+      final k = 0.5 / math.sqrt(trace + 1);
+      qw = 0.25 / k;
+      qx = (y.z - z.y) * k;
+      qy = (z.x - x.z) * k;
+      qz = (x.y - y.x) * k;
+    } else if (x.x > y.y && x.x > z.z) {
+      final k = 2 * math.sqrt(1 + x.x - y.y - z.z);
+      qw = (y.z - z.y) / k;
+      qx = 0.25 * k;
+      qy = (y.x + x.y) / k;
+      qz = (z.x + x.z) / k;
+    } else if (y.y > z.z) {
+      final k = 2 * math.sqrt(1 + y.y - x.x - z.z);
+      qw = (z.x - x.z) / k;
+      qx = (y.x + x.y) / k;
+      qy = 0.25 * k;
+      qz = (z.y + y.z) / k;
+    } else {
+      final k = 2 * math.sqrt(1 + z.z - x.x - y.y);
+      qw = (x.y - y.x) / k;
+      qx = (z.x + x.z) / k;
+      qy = (z.y + y.z) / k;
+      qz = 0.25 * k;
+    }
+    return (translation, Quat(qx, qy, qz, qw).normalized, Vec3(sx.abs(), sy, sz));
   }
 
   /// Produces a surface-v2-valid tangent per vertex.

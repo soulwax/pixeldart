@@ -3,6 +3,8 @@ import 'dart:math' as math;
 import '../api/frame.dart';
 import '../api/handles.dart';
 import '../api/lights.dart';
+import '../api/materials.dart';
+import '../api/renderer.dart';
 import '../api/scene.dart';
 import '../math/bounds.dart';
 import '../math/curves.dart';
@@ -716,6 +718,59 @@ final class ParticleEmitter {
       spawned++;
     }
     return spawned;
+  }
+
+  /// Continuous emission from a moving or secondary source.
+  ///
+  /// Spawns [perSecond] × [dt] particles at [position], carrying the
+  /// fractional remainder between frames per [source] key, so one emitter
+  /// can stream from many places at once (every lit torch, every thruster)
+  /// at an exact rate regardless of frame time. Returns the number spawned.
+  int emitAt(Vec3 position, double perSecond, double dt, {Object? source, Vec3? inheritedVelocity}) {
+    if (perSecond <= 0 || dt <= 0) return 0;
+    final key = source ?? this;
+    final owed = (_streamCarry[key] ?? 0) + perSecond * dt;
+    final count = owed.floor();
+    _streamCarry[key] = owed - count;
+    return count > 0 ? burst(count, position: position, inheritedVelocity: inheritedVelocity) : 0;
+  }
+
+  /// Forgets the fractional carry of [source] (or of every source).
+  void resetStream([Object? source]) =>
+      source == null ? _streamCarry.clear() : _streamCarry.remove(source);
+
+  final Map<Object, double> _streamCarry = {};
+
+  List<MaterialHandle>? _gradientMaterials;
+
+  /// Whether [colorGradient] has been turned into per-age materials.
+  bool get isColorGradientBound => _gradientMaterials != null;
+
+  /// True when a [colorGradient] is set but nothing would apply it yet: no
+  /// bound gradient, no [materialRamp] and no sprite sheet.
+  bool get needsColorGradientBinding =>
+      colorGradient != null && _gradientMaterials == null && materialRamp == null && spriteSheet == null;
+
+  /// Applies [colorGradient] over particle lifetime.
+  ///
+  /// Particles are drawn with per-material tint, so the gradient is sampled
+  /// into [steps] materials derived from [base] (its tint replaced by the
+  /// gradient colour; the tint also scales emission). Each particle picks
+  /// the step for its normalised age. `PixeldartApp.addEmitter` does this
+  /// automatically for materials it created.
+  void bindColorGradient(ResourceLibrary resources, MaterialDefinition base, {int steps = 8}) {
+    final gradient = colorGradient;
+    if (gradient == null) {
+      throw StateError('bindColorGradient: this emitter has no colorGradient');
+    }
+    if (steps < 2) throw ArgumentError.value(steps, 'steps', 'must be >= 2');
+    _gradientMaterials = [
+      for (var i = 0; i < steps; i++)
+        resources.registerMaterial(() {
+          final c = gradient.sample(i / (steps - 1));
+          return base.copyWith(key: '${base.key}#gradient$i', tintR: c.r, tintG: c.g, tintB: c.b);
+        }()),
+    ];
   }
 
   /// Emits [count] particles using the sprite identified by [name].
@@ -1444,6 +1499,7 @@ final class ParticleEmitter {
       final cameraForward = frame.camera.forward;
 
       final matRamp = materialRamp;
+      final gradientMats = _gradientMaterials;
       final defaultMat = material;
 
       for (var i = 0; i < _activeCount; i++) {
@@ -1472,6 +1528,9 @@ final class ParticleEmitter {
         if (sheet != null && sheet.isBound) {
           final sIdx = p.spriteIndex.clamp(0, sheet.materials.length - 1);
           activeMat = sheet.materials[sIdx];
+        } else if (gradientMats != null) {
+          final age = p.lifetime > 0 ? (p.age / p.lifetime).clamp(0.0, 1.0) : 0.0;
+          activeMat = gradientMats[(age * (gradientMats.length - 1)).round()];
         } else if (matRamp != null && matRamp.isNotEmpty) {
           activeMat = matRamp[p.materialIndex.clamp(0, matRamp.length - 1)];
         } else {

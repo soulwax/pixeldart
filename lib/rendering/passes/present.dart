@@ -367,7 +367,7 @@ final class _PresentPass implements RenderPass {
       )
       ..setUniform(
         'uCloudSampleCount',
-        UniformValue.float1((skybox?.cloudSampleCount ?? 4).toDouble()),
+        UniformValue.float1((skybox?.cloudSampleCount ?? 4).clamp(4, 24).toDouble()),
       )
       ..setUniform(
         'uCloudLightDirection',

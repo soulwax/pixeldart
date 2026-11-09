@@ -27,6 +27,10 @@ final class CameraShakeEngine {
   /// Maximum translational kick in metres.
   double maxTranslation;
 
+  /// Multiplier on the rotational shake. 0 gives a translation-only shake,
+  /// which suits orthographic and 2D cameras.
+  double rotationScale;
+
   CameraShakeEngine({
     this.decayRate = 1.25,
     this.frequency = 22.0,
@@ -34,6 +38,7 @@ final class CameraShakeEngine {
     this.maxYawRadians = 0.05,
     this.maxRollRadians = 0.035,
     this.maxTranslation = 0.20,
+    this.rotationScale = 1.0,
   });
 
   /// Current trauma level in [0, 1].
@@ -91,34 +96,51 @@ final class CameraShakeEngine {
       nz * 0.67 * maxTranslation * p,
     );
 
-    final pitchQ = Quat.axisAngle(const Vec3(1, 0, 0), npitch * 0.71 * maxPitchRadians * p);
-    final yawQ = Quat.axisAngle(const Vec3(0, 1, 0), nyaw * 0.71 * maxYawRadians * p);
-    final rollQ = Quat.axisAngle(const Vec3(0, 0, 1), nroll * 0.71 * maxRollRadians * p);
+    final r = p * rotationScale;
+    final pitchQ = Quat.axisAngle(const Vec3(1, 0, 0), npitch * 0.71 * maxPitchRadians * r);
+    final yawQ = Quat.axisAngle(const Vec3(0, 1, 0), nyaw * 0.71 * maxYawRadians * r);
+    final rollQ = Quat.axisAngle(const Vec3(0, 0, 1), nroll * 0.71 * maxRollRadians * r);
 
     final rot = yawQ * pitchQ * rollQ;
     return (translation: trans, rotation: rot);
   }
 
   /// Perturbs [baseCamera] with the current shake state.
+  ///
+  /// The offsets are applied in the camera's own view space, on top of its
+  /// existing view matrix. Nothing is rebuilt through a look-at with a fixed
+  /// world up, so straight-down cameras and orthographic projections shake
+  /// correctly and the projection is left untouched.
   CameraView applyTo(CameraView baseCamera) {
     if (_trauma <= 1e-6) return baseCamera;
     final (:translation, :rotation) = evaluate();
 
-    final perturbedEye = baseCamera.eye + translation;
-    final perturbedForward = rotation.rotate(baseCamera.forward);
-    final perturbedUp = rotation.rotate(const Vec3(0, 1, 0));
+    // shake = [R | -t] in view space; perturbed view = shake * view.
+    final r = rotation.toMat4();
+    final shakeMatrix = Mat4.fromColumnMajor([
+      r.m[0], r.m[1], r.m[2], 0,
+      r.m[4], r.m[5], r.m[6], 0,
+      r.m[8], r.m[9], r.m[10], 0,
+      -translation.x, -translation.y, -translation.z, 1,
+    ]);
+    final base = baseCamera.view;
+    final perturbedView = shakeMatrix * base;
 
-    final perturbedView = Mat4.lookAt(
-      eye: perturbedEye,
-      forward: perturbedForward,
-      up: perturbedUp,
+    // World-space eye and forward of the perturbed view: view space vectors
+    // map back to world through the transpose of the base view's rotation.
+    Vec3 viewToWorld(Vec3 v) => Vec3(
+      base.at(0, 0) * v.x + base.at(0, 1) * v.y + base.at(0, 2) * v.z,
+      base.at(1, 0) * v.x + base.at(1, 1) * v.y + base.at(1, 2) * v.z,
+      base.at(2, 0) * v.x + base.at(2, 1) * v.y + base.at(2, 2) * v.z,
     );
-    final perturbedViewProj = baseCamera.projection * perturbedView;
+    final inverseShake = Quat(-rotation.x, -rotation.y, -rotation.z, rotation.w);
+    final perturbedEye = baseCamera.eye + viewToWorld(inverseShake.rotate(translation));
+    final perturbedForward = viewToWorld(inverseShake.rotate(const Vec3(0, 0, -1))).normalized;
 
     return CameraView(
       view: perturbedView,
       projection: baseCamera.projection,
-      viewProjection: perturbedViewProj,
+      viewProjection: baseCamera.projection * perturbedView,
       eye: perturbedEye,
       forward: perturbedForward,
       near: baseCamera.near,

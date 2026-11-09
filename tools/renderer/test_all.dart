@@ -42,6 +42,9 @@ void main() {
     final result = Process.runSync(Platform.resolvedExecutable, [
       '--suppress-analytics',
       'run',
+      // Many fixtures check with assert(); without this flag they verify
+      // nothing and always pass.
+      '--enable-asserts',
       script,
     ], workingDirectory: packageRoot.path);
     stdout.write(result.stdout);

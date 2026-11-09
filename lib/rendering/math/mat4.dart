@@ -213,16 +213,17 @@ final class Mat4 {
       throw StateError('Mat4.inverse3x3: singular upper-left 3x3 (det=$det)');
     }
     final invDet = 1.0 / det;
+    // inverse = adjugate / det, and the adjugate is the transposed cofactor
+    // matrix: inverse(row, col) = cofactor(col, row) / det. (These entries
+    // were once stored untransposed, which made normalMatrix() rotate
+    // normals by the inverse rotation.)
+    final c = _cofactors3x3();
     final r = Float32List(16);
-    r[0] = (m[5] * m[10] - m[9] * m[6]) * invDet;
-    r[1] = (m[8] * m[6] - m[4] * m[10]) * invDet;
-    r[2] = (m[4] * m[9] - m[8] * m[5]) * invDet;
-    r[4] = (m[9] * m[2] - m[1] * m[10]) * invDet;
-    r[5] = (m[0] * m[10] - m[8] * m[2]) * invDet;
-    r[6] = (m[8] * m[1] - m[0] * m[9]) * invDet;
-    r[8] = (m[1] * m[6] - m[5] * m[2]) * invDet;
-    r[9] = (m[4] * m[2] - m[0] * m[6]) * invDet;
-    r[10] = (m[0] * m[5] - m[4] * m[1]) * invDet;
+    for (var col = 0; col < 3; col++) {
+      for (var row = 0; row < 3; row++) {
+        r[col * 4 + row] = c[row * 3 + col] * invDet;
+      }
+    }
     r[15] = 1;
     return Mat4._(r);
   }
@@ -231,12 +232,59 @@ final class Mat4 {
   /// under non-rigid transforms. Rigid transforms (rotation + uniform
   /// scale) make this equal `inverse3x3` up to a scalar, but callers must
   /// not special-case that; always route normals through this method.
+  ///
+  /// A near-singular block (a node scaled toward zero to hide or pop it)
+  /// does not throw: the cofactor matrix equals det · (M⁻¹)ᵀ, the same
+  /// normal transform up to a scalar, and needs no division. It is rescaled
+  /// to unit magnitude; shaders normalise normals anyway. Only a block with
+  /// no finite cofactors at all still throws.
   Mat4 normalMatrix() {
+    final det = determinant3x3;
+    if (!det.isFinite || det.abs() < 1e-12) return _cofactorNormalMatrix(det);
     final inv = inverse3x3();
     final r = Float32List(16);
     for (var c = 0; c < 3; c++) {
       for (var row = 0; row < 3; row++) {
         r[c * 4 + row] = inv.m[row * 4 + c];
+      }
+    }
+    r[15] = 1;
+    return Mat4._(r);
+  }
+
+  /// Cofactors of the upper 3x3, column-major: entry [col * 3 + row] is
+  /// cofactor(row, col). cofactor(M) = det · (M⁻¹)ᵀ.
+  List<double> _cofactors3x3() => <double>[
+      m[5] * m[10] - m[6] * m[9],
+      m[6] * m[8] - m[4] * m[10],
+      m[4] * m[9] - m[5] * m[8],
+      m[2] * m[9] - m[1] * m[10],
+      m[0] * m[10] - m[2] * m[8],
+      m[1] * m[8] - m[0] * m[9],
+      m[1] * m[6] - m[2] * m[5],
+      m[2] * m[4] - m[0] * m[6],
+      m[0] * m[5] - m[1] * m[4],
+    ];
+
+  Mat4 _cofactorNormalMatrix(double det) {
+    final c = _cofactors3x3();
+    var largest = 0.0;
+    for (final v in c) {
+      if (!v.isFinite) {
+        throw StateError('Mat4.normalMatrix: non-finite upper-left 3x3 (det=$det)');
+      }
+      largest = math.max(largest, v.abs());
+    }
+    // A fully collapsed block has no normal direction to preserve; any
+    // finite answer is as good as another, so keep it rigid.
+    if (largest < 1e-30) return Mat4.identity();
+    // A mirrored (negative determinant) block flips normals, as the inverse
+    // transpose would.
+    final s = (det < 0 ? -1.0 : 1.0) / largest;
+    final r = Float32List(16);
+    for (var col = 0; col < 3; col++) {
+      for (var row = 0; row < 3; row++) {
+        r[col * 4 + row] = c[col * 3 + row] * s;
       }
     }
     r[15] = 1;

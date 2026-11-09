@@ -73,6 +73,7 @@ final class ParticleEmitterNode extends SceneNode {
 
   @override
   void syncToWorld(RenderWorld world) {
+    flushDetached(world);
     emitter.transform = worldTransform;
 
     if (syncWithRetainedWorld) {

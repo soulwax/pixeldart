@@ -1,13 +1,10 @@
 import 'dart:js_interop';
 import 'dart:math' as math;
-import 'dart:typed_data';
 
 import 'package:pixeldart/pixeldart.dart';
 import 'package:pixeldart/rendering/webgl/pixeldart_app.dart';
-import 'package:pixeldart/rendering/webgl/texture_loader.dart';
 import 'package:web/web.dart' as web;
 
-import 'model.dart';
 import 'sound.dart';
 
 // TIDEWATCH — tower defense turned inside out.
@@ -51,24 +48,9 @@ void main() async {
     return;
   }
   if (Uri.base.queryParameters.containsKey('autostart')) game.start();
-  var reported = false;
-  app.onFrame = (ctx) {
-    try {
-      game.frame(ctx);
-    } catch (e, s) {
-      if (!reported) print('Tidewatch frame error: $e\n$s');
-      reported = true;
-    }
-  };
+  // A thrown frame is aborted and reported by the app; the loop goes on.
+  app.onFrame = game.frame;
   app.start();
-}
-
-void setVisible(SceneNode node, bool visible) {
-  node.traverse((n) {
-    if (n.mesh == null) return;
-    n.visibilityMask = visible ? -1 : 0;
-    n.markDirty();
-  });
 }
 
 double _wrapAngle(double a) {
@@ -81,53 +63,29 @@ double _wrapAngle(double a) {
   return a;
 }
 
-/// A shipping lane: a Catmull-Rom spline resampled by arc length so ships
-/// move at a steady speed and drift is measured in real units.
+/// A shipping lane: a spline walked by arc length, so ships move at a
+/// steady speed and drift is measured in world units.
 final class Lane {
-  final List<Vec3> _points = [];
-  final List<double> _dist = [];
+  final CatmullRomSpline3D spline;
+  Lane(this.spline);
 
-  Lane(CatmullRomSpline3D spline, {int samples = 400}) {
-    var total = 0.0;
-    for (var i = 0; i <= samples; i++) {
-      final p = spline.sample(i / samples);
-      if (_points.isNotEmpty) total += (p - _points.last).length;
-      _points.add(p);
-      _dist.add(total);
-    }
-  }
+  double get length => spline.totalLength;
 
-  double get length => _dist.last;
+  Vec3 pointAt(double s) => spline.sampleAtDistance(s);
 
-  int _index(double s) {
-    var lo = 0, hi = _dist.length - 1;
-    while (hi - lo > 1) {
-      final mid = (lo + hi) >> 1;
-      if (_dist[mid] <= s) {
-        lo = mid;
-      } else {
-        hi = mid;
-      }
-    }
-    return lo;
-  }
-
-  Vec3 pointAt(double s) {
-    s = s.clamp(0.0, length);
-    final i = _index(s);
-    final j = math.min(i + 1, _points.length - 1);
-    final span = _dist[j] - _dist[i];
-    final f = span > 1e-9 ? (s - _dist[i]) / span : 0.0;
-    return Vec3.lerp(_points[i], _points[j], f);
-  }
-
+  /// Heading along the sea surface (the lanes lie at y = 0).
   Vec3 tangentAt(double s) {
-    final a = pointAt(s - 0.5), b = pointAt(s + 0.5);
-    final d = Vec3(b.x - a.x, 0, b.z - a.z);
-    return d.lengthSquared > 1e-9 ? d.normalized : Vec3.unitZ;
+    final t = spline.tangentAtDistance(s);
+    final flat = Vec3(t.x, 0, t.z);
+    return flat.lengthSquared > 1e-9 ? flat.normalized : Vec3.unitZ;
   }
 
-  Iterable<Vec3> get samples => _points;
+  /// Points every two metres, for clearance checks.
+  Iterable<Vec3> get samples sync* {
+    for (var s = 0.0; s <= length; s += 2) {
+      yield pointAt(s);
+    }
+  }
 }
 
 final class Rock {
@@ -178,7 +136,6 @@ final class Tidewatch {
   late final MaterialHandle lampSafe, lampLost;
   late final ParticleEmitter spray, sparks, gold;
   late final AtmosphericParticleField rain;
-  late final TextureHandle white;
 
   // Base ocean, rescaled every frame by the storm.
   final List<GerstnerWaveComponent> _calm = GerstnerWaveEvaluator.ocean().waves;
@@ -193,9 +150,8 @@ final class Tidewatch {
   double flash = 0, lightningTimer = 6, thunderAt = -1;
   Vec3 lightningPos = Vec3.zero;
   bool raining = false, spyglass = false;
-  double mouseX = -1, mouseY = -1, downX = 0, downY = 0;
+  double mouseX = -1, mouseY = -1;
   Vec3 aim = Vec3.zero;
-  final Map<ParticleEmitter, double> _debt = {};
 
   Tidewatch._(this.app, this.hud);
 
@@ -208,7 +164,6 @@ final class Tidewatch {
   // ── World ───────────────────────────────────────────────────────────────
 
   Future<void> _build() async {
-    white = app.createTexture(width: 2, height: 2, pixels: Uint8List(16)..fillRange(0, 16, 255), debugLabel: 'white');
 
     // Island: fractal terrain with its own biome colouring.
     terrain = TerrainGenerator(
@@ -254,21 +209,22 @@ final class Tidewatch {
         ),
       ),
       name: 'ocean',
-    )..receivesShadow = true;
+      receivesShadow: true,
+    );
 
     _buildLighthouse();
     _layOutSea();
 
-    final palette = await TextureLoader.loadFromUrl(
-      resources: app.resources,
-      url: 'res/models/Textures/colormap.png',
-      generateMips: false,
-      wrap: GpuTextureWrap.clampToEdge,
-      // A palette atlas: filtering would bleed neighbouring swatches.
-      minFilter: GpuTextureFilter.nearest,
-      magFilter: GpuTextureFilter.nearest,
+    // The kit shares one external palette image (Textures/colormap.png);
+    // loadModel resolves it per model URL and loads it once. Nearest
+    // filtering keeps neighbouring swatches from bleeding together.
+    Future<ModelAsset> model(String n) => app.loadModel(
+      'res/models/$n.glb',
+      textureFilter: GpuTextureFilter.nearest,
+      // Authored as unlit palette art; a matte dielectric reads right under
+      // the sun, the lighthouse beam and the flares.
+      materialOverride: (_, m) => m.copyWith(roughness: 0.78, metallic: 0),
     );
-    Future<Model> model(String n) => Model.load(app, 'res/models/$n.glb', palette: palette);
     final models = await Future.wait([
       model('ship-small'),
       model('ship-medium'),
@@ -289,7 +245,7 @@ final class Tidewatch {
   }
 
   MaterialHandle _glow(String key, double r, double g, double b, double e) => app.createMaterial(
-    MaterialDefinition(key: key, tintR: r, tintG: g, tintB: b, emissiveStrength: e, emissiveTexture: white, roughness: 0.4, metallic: 0),
+    MaterialDefinition(key: key, tintR: r, tintG: g, tintB: b, emissiveStrength: e, roughness: 0.4, metallic: 0),
   );
 
   void _buildLighthouse() {
@@ -342,7 +298,8 @@ final class Tidewatch {
       meshData: lampData,
       material: _glow('lh_lamp', 1.0, 0.9, 0.65, 6),
       transform: Transform.at(Vec3(0, y + 0.55, 0)),
-    )..castsShadow = false;
+      castsShadow: false,
+    );
     // A rotating chrome shutter around the lamp.
     lens = tower.add(name: 'lens', transform: Transform.at(Vec3(0, y + 0.55, 0)));
     final shutter = Primitives.roundedBox(width: 0.18, height: 0.9, depth: 1.25, bevelRadius: 0.04, bevelSegments: 1);
@@ -372,7 +329,6 @@ final class Tidewatch {
           tintG: 0.08,
           tintB: 0.06,
           emissiveStrength: 0.25,
-          emissiveTexture: white,
           roughness: 1,
           metallic: 0,
           alphaMode: AlphaMode.blended,
@@ -442,12 +398,13 @@ final class Tidewatch {
     }
   }
 
-  void _placeProps(List<Model> models) {
+  void _placeProps(List<ModelAsset> models) {
     final rockModels = models.sublist(2, 5);
     for (final r in rocks) {
       final m = rockModels[rng.nextInt(rockModels.length)];
       final span = math.max(m.bounds.max.x - m.bounds.min.x, m.bounds.max.z - m.bounds.min.z);
-      final node = m.instantiate(scale: r.radius * 2 / span)
+      final node = m.instantiate()
+        ..scale = r.radius * 2 / span
         ..position = Vec3(r.x, -0.7, r.z)
         ..rotation = Quat.axisAngle(Vec3.unitY, rng.nextDouble() * math.pi * 2);
       app.scene.addChild(node);
@@ -473,7 +430,9 @@ final class Tidewatch {
     final dock = models[5];
     for (final dx in [-1.4, 1.4]) {
       app.scene.addChild(
-        dock.instantiate(scale: 1.1)..position = Vec3(dx, -0.35, harbour.z - 2.2),
+        dock.instantiate()
+          ..scale = 1.1
+          ..position = Vec3(dx, -0.35, harbour.z - 2.2),
       );
     }
 
@@ -486,7 +445,8 @@ final class Tidewatch {
       if ((Vec3(x, h, z) - lampPos).length < 5 || (x.abs() < 4 && z > harbour.z - 9)) continue;
       final palm = models[6 + rng.nextInt(2)];
       app.scene.addChild(
-        palm.instantiate(scale: 0.6 + rng.nextDouble() * 0.4)
+        palm.instantiate()
+          ..scale = 0.6 + rng.nextDouble() * 0.4
           ..position = Vec3(x, h - 0.1, z)
           ..rotation = Quat.axisAngle(Vec3.unitY, rng.nextDouble() * math.pi * 2),
       );
@@ -494,7 +454,7 @@ final class Tidewatch {
     }
   }
 
-  void _buildShips(Model small, Model medium) {
+  void _buildShips(ModelAsset small, ModelAsset medium) {
     lampSafe = _glow('ship_lamp_safe', 1.0, 0.85, 0.5, 4);
     lampLost = _glow('ship_lamp_lost', 1.0, 0.1, 0.05, 6);
     final lampData = Primitives.sphere(radius: 0.22, rings: 8, sectors: 12);
@@ -502,7 +462,7 @@ final class Tidewatch {
     for (var i = 0; i < _maxShips; i++) {
       final m = i.isEven ? small : medium;
       final root = app.scene.add(name: 'ship$i');
-      root.addChild(m.instantiate(scale: _shipScale));
+      root.addChild(m.instantiate()..scale = _shipScale);
       final lamp = root.add(
         mesh: lampMesh,
         meshData: lampData,
@@ -514,7 +474,7 @@ final class Tidewatch {
       final ship = Ship(i, root, lamp, BuoyantVesselBody(position: Vec3.zero, width: width, length: length));
       ships.add(ship);
       _shipOf[root] = ship;
-      setVisible(root, false);
+      root.visible = false;
     }
 
     final flareData = Primitives.sphere(radius: 0.35, rings: 8, sectors: 12);
@@ -522,35 +482,15 @@ final class Tidewatch {
     final flareMat = _glow('flare', 1.0, 0.3, 0.15, 9);
     for (var i = 0; i < 2; i++) {
       final node = app.scene.add(mesh: flareMesh, meshData: flareData, material: flareMat)..castsShadow = false;
-      setVisible(node, false);
+      node.visible = false;
       flares.add(Flare(node));
     }
   }
 
   void _buildEffects() {
     final quad = app.createMesh(Primitives.quad(width: 1, height: 1), debugLabel: 'pquad');
-    final soft = app.createProceduralTexture(
-      ProceduralTextures.radialParticle(width: 64, height: 64, innerRadius: 0.05, edgeColor: const LinearColor(0, 0, 0)),
-      width: 64,
-      height: 64,
-      wrap: GpuTextureWrap.clampToEdge,
-      debugLabel: 'psoft',
-    );
-    MaterialHandle mat(String key, double r, double g, double b, double e) => app.createMaterial(
-      MaterialDefinition(
-        key: key,
-        albedoTexture: soft,
-        emissiveTexture: soft,
-        tintR: r,
-        tintG: g,
-        tintB: b,
-        emissiveStrength: e,
-        roughness: 1,
-        metallic: 0,
-        alphaMode: AlphaMode.blended,
-        doubleSided: true,
-      ),
-    );
+    MaterialHandle mat(String key, double r, double g, double b, double e) =>
+        app.createParticleMaterial(key: key, color: LinearColor(r, g, b), glow: e);
     ParticleEmitter emitter(MaterialHandle m, {double speed = 4, double size = 0.6, double life = 1.0, Vec3 gravity = Vec3.zero}) {
       final e = ParticleEmitter(
         mesh: quad,
@@ -582,7 +522,7 @@ final class Tidewatch {
       material: app.createMaterial(
         MaterialDefinition(
           key: 'rain',
-          albedoTexture: soft,
+          albedoTexture: ParticleMaterials.softTexture(app.resources),
           tintR: 0.6,
           tintG: 0.68,
           tintB: 0.8,
@@ -645,21 +585,10 @@ final class Tidewatch {
         mouseY = e.clientY.toDouble();
       }).toJS,
     );
-    canvas.addEventListener(
-      'mousedown',
-      ((web.MouseEvent e) {
-        downX = e.clientX.toDouble();
-        downY = e.clientY.toDouble();
-      }).toJS,
-    );
-    canvas.addEventListener(
-      'mouseup',
-      ((web.MouseEvent e) {
-        // A press that did not drag is a click: fire a flare at a ship.
-        final moved = (e.clientX - downX).abs() + (e.clientY - downY).abs();
-        if (e.button == 0 && moved < 6 && playing) _clickAt(e.clientX.toDouble(), e.clientY.toDouble());
-      }).toJS,
-    );
+    // A click that did not drag fires a flare at a ship; drags still orbit.
+    app.onTap = (x, y) {
+      if (playing) _clickAt(x, y);
+    };
     web.window.addEventListener(
       'keydown',
       ((web.KeyboardEvent e) {
@@ -694,9 +623,11 @@ final class Tidewatch {
   }
 
   void _clickAt(double clientX, double clientY) {
-    // Raycast the scene; fall back to the ship nearest the beam's aim, since
-    // a thin mast is hard to click on a dark sea.
-    var ship = _shipFromNode(app.pick(clientX, clientY)?.node);
+    // Pick only ships, against their triangles; fall back to the ship nearest
+    // the beam's aim, since a thin mast is hard to click on a dark sea.
+    var ship = _shipFromNode(
+      app.pick(clientX, clientY, where: (n) => _shipFromNode(n) != null, precise: true)?.node,
+    );
     if (ship == null || !ship.active || ship.sinking) {
       var best = 64.0;
       for (final s in ships) {
@@ -726,7 +657,7 @@ final class Tidewatch {
       ..ship = ship
       ..age = 0
       ..pos = ship.body.position + const Vec3(0, 2, 0);
-    setVisible(flare.node, true);
+    flare.node.visible = true;
     sound.play('flare');
   }
 
@@ -752,11 +683,11 @@ final class Tidewatch {
       s
         ..active = false
         ..sinking = false;
-      setVisible(s.root, false);
+      s.root.visible = false;
     }
     for (final f in flares) {
       f.active = false;
-      setVisible(f.node, false);
+      f.node.visible = false;
     }
     // ?hour=22 and ?storm=1 jump straight to night or bad weather.
     final q = Uri.base.queryParameters;
@@ -791,7 +722,7 @@ final class Tidewatch {
 
     _weather(dt);
     _sun(dt);
-    _aimBeam(ctx);
+    _aimBeam();
     if (playing) {
       elapsed += dt;
       _spawn(dt);
@@ -865,54 +796,31 @@ final class Tidewatch {
     final dim = 1 - storm * 0.55;
     final fog = LinearColor(f.r * dim, f.g * dim, f.b * dim);
     app.enableFog(color: fog, start: 80 - storm * 50, end: 245 - storm * 120);
-    app.environment = app.environment.copyWith(clearColor: fog);
-
-    // The sea fades into fog colour at range, so the sky's horizon must be
-    // that same colour or the ocean's far edge shows as a seam.
+    // Storms dim the zenith and hide the stars; then the sea's fogged far
+    // edge and the sky's horizon get the same colour, so no seam shows.
     final sky = app.skybox!;
     final z = sky.zenith;
-    app.skybox = SkyboxDeclaration(
-      assetId: sky.assetId,
-      horizon: fog,
-      ground: fog,
+    app.skybox = sky.copyWith(
       zenith: LinearColor(z.r * dim, z.g * dim, z.b * dim),
-      horizonGlow: sky.horizonGlow,
       starDensity: sky.starDensity * (1 - storm),
-      cloudCoverage: sky.cloudCoverage,
-      cloudDensity: sky.cloudDensity,
-      cloudWindX: sky.cloudWindX,
-      cloudWindZ: sky.cloudWindZ,
-      cloudPhase: sky.cloudPhase,
-      cloudSampleCount: sky.cloudSampleCount,
     );
+    app.matchHorizonToFog();
     // Participating media: barely there in fair weather, thick in a storm.
     // Point lights scatter in it, so the beam and lightning become shafts.
     app.enableVolumetricFog(
       intensity: 1.3,
       dustDensity: 0.004 + storm * 0.016 + (1 - day) * 0.004,
       heightFalloff: 0.06,
-      // Fewer steps band visibly in dense media (a bright line of constant
-      // view depth across the sea).
-      sampleCount: 24,
     );
   }
 
-  void _aimBeam(FrameContext ctx) {
-    if (mouseX >= 0) {
-      final rect = app.canvas.getBoundingClientRect();
-      final ray = ctx.camera.screenPointToRay(
-        mouseX - rect.left,
-        mouseY - rect.top,
-        rect.width.toInt(),
-        rect.height.toInt(),
-      );
-      if (ray.direction.y < -1e-3) {
-        final t = -ray.origin.y / ray.direction.y;
-        var p = ray.origin + ray.direction * t;
-        final flat = Vec3(p.x - lampPos.x, 0, p.z - lampPos.z);
-        if (flat.length > _beamRange) p = lampPos + flat.normalized * _beamRange;
-        aim = Vec3(p.x, waves.sampleHeight(p.x, p.z, time), p.z);
-      }
+  void _aimBeam() {
+    // Where the pointer's ray meets the sea, clamped to the beam's reach.
+    var p = mouseX >= 0 ? app.screenRay(mouseX, mouseY)?.intersectGround() : null;
+    if (p != null) {
+      final flat = Vec3(p.x - lampPos.x, 0, p.z - lampPos.z);
+      if (flat.length > _beamRange) p = lampPos + flat.normalized * _beamRange;
+      aim = Vec3(p.x, waves.sampleHeight(p.x, p.z, time), p.z);
     }
     final toAim = aim - lampPos;
     final len = toAim.length;
@@ -923,7 +831,7 @@ final class Tidewatch {
     }
     lens.rotateY(0.016 * 2.2);
     // The visible shaft only matters once the light is needed.
-    setVisible(beam, visibility < 0.85);
+    beam.visible = visibility < 0.85;
   }
 
   void _spawn(double dt) {
@@ -951,7 +859,7 @@ final class Tidewatch {
       ..velocityY = 0
       ..roll = 0
       ..pitch = 0;
-    setVisible(ship.root, true);
+    ship.root.visible = true;
   }
 
   bool _guided(Vec3 p) {
@@ -978,7 +886,7 @@ final class Tidewatch {
         ship.sinkTime += dt;
         if (ship.sinkTime > 7.2) {
           ship.active = false;
-          setVisible(ship.root, false);
+          ship.root.visible = false;
         }
         continue;
       }
@@ -1033,7 +941,7 @@ final class Tidewatch {
 
   void _arrive(Ship ship) {
     ship.active = false;
-    setVisible(ship.root, false);
+    ship.root.visible = false;
     gold.burst(60, position: ship.body.position + const Vec3(0, 1.5, 0));
     sound.play('home');
     if (!playing) return;
@@ -1087,13 +995,6 @@ final class Tidewatch {
     if (wrecks >= _wrecksAllowed) _gameOver();
   }
 
-  void _stream(ParticleEmitter e, double perSecond, double dt, Vec3 at) {
-    final debt = (_debt[e] ?? 0) + perSecond * dt;
-    final n = debt.floor();
-    _debt[e] = debt - n;
-    if (n > 0) e.burst(n, position: at);
-  }
-
   void _flares(double dt) {
     for (final f in flares) {
       if (!f.active) continue;
@@ -1105,10 +1006,10 @@ final class Tidewatch {
       final follow = ship != null && ship.active && !ship.sinking ? ship.body.position : f.pos;
       f.pos = Vec3(f.pos.x + (follow.x - f.pos.x) * dt, height, f.pos.z + (follow.z - f.pos.z) * dt);
       f.node.position = f.pos;
-      _stream(sparks, 40, dt, f.pos);
+      sparks.emitAt(f.pos, 40, dt, source: f);
       if (f.age > 10) {
         f.active = false;
-        setVisible(f.node, false);
+        f.node.visible = false;
       }
     }
   }

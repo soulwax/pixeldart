@@ -6,7 +6,6 @@ import 'package:pixeldart/rendering/webgl/pixeldart_app.dart';
 import 'package:web/web.dart' as web;
 
 import 'chase_camera.dart';
-import 'prefab.dart';
 import 'sound.dart';
 
 // Play volume. The ship lives near z = 0 and flies down -Z (the standard
@@ -28,6 +27,7 @@ const _shipScale = 0.75, _shipRadius = 0.62;
 final _shipYaw = Quat.axisAngle(Vec3.unitY, math.pi);
 // Primitives.cone points up +Y; the flame trails back toward +Z.
 final _flameAlong = Quat.axisAngle(Vec3.unitX, math.pi / 2);
+const _flameLength = 1.4;
 
 enum Kind { meteor, crystal, fuel }
 
@@ -48,14 +48,25 @@ final class Body {
   double get radius => baseRadius * scale;
 }
 
-/// Sets visibility on every drawable below [node]; masks are not inherited.
-void setVisible(SceneNode node, bool visible) {
-  node.traverse((n) {
-    if (n.mesh == null) return;
-    n.visibilityMask = visible ? -1 : 0;
-    n.markDirty();
-  });
+/// A copy of [model] re-centred on its bounds, so it spins and collides
+/// about its visual middle rather than the asset's authoring origin.
+SceneNode centred(ModelAsset model, {String? name}) {
+  final c = (model.bounds.min + model.bounds.max) * 0.5;
+  return SceneNode.group(name: name)..addChild(model.instantiate(transform: Transform.at(-c)));
 }
+
+/// Bounding-sphere radius of [model] at scale 1.
+double radiusOf(ModelAsset model) => (model.bounds.max - model.bounds.min).length * 0.5;
+
+/// Kenney's kits are authored unlit; the decoder turns that into a matte
+/// dielectric. Give metal parts some sheen and make crystals glow.
+MaterialDefinition kenneySurface(String name, MaterialDefinition m) => switch (name.toLowerCase()) {
+  'crystal' => m.copyWith(roughness: 0.2, emissiveStrength: 2.2),
+  'metal' || 'metaldark' => m.copyWith(metallic: 0.55, roughness: 0.38),
+  'metalred' => m.copyWith(metallic: 0.35, roughness: 0.42),
+  'dark' => m.copyWith(metallic: 0.15, roughness: 0.55),
+  _ => m,
+};
 
 void main() async {
   final canvas = web.document.querySelector('#game');
@@ -84,16 +95,8 @@ void main() async {
   game.toTitle();
   // ?autostart skips the title card (handy for screenshots and quick tests).
   if (Uri.base.queryParameters.containsKey('autostart')) game.start();
-  var reported = false;
-  app.onFrame = (ctx) {
-    try {
-      game.frame(ctx);
-    } catch (e, s) {
-      // Report once rather than flooding the console every frame.
-      if (!reported) print('Pixel Rocket frame error: $e\n$s');
-      reported = true;
-    }
-  };
+  // A thrown frame is aborted and reported by the app; the loop goes on.
+  app.onFrame = game.frame;
   app.start();
 }
 
@@ -144,8 +147,8 @@ final class Game {
   static Future<Game> create(PixeldartApp app, Hud hud) async {
     _setupLook(app);
 
-    Future<Prefab> model(String name, {MaterialTweak tweak = kenneySurface}) =>
-        Prefab.load(app, 'res/models/$name.glb', tweak: tweak);
+    Future<ModelAsset> model(String name, {MaterialOverride tweak = kenneySurface}) =>
+        app.loadModel('res/models/$name.glb', materialOverride: tweak);
 
     final loaded = await Future.wait([
       model('craft_speederA'),
@@ -159,15 +162,7 @@ final class Game {
         'rocket_fuelA',
         tweak: (name, m) {
           final base = kenneySurface(name, m);
-          return MaterialDefinition(
-            key: base.key,
-            tintR: base.tintR * 0.3,
-            tintG: base.tintG,
-            tintB: base.tintB * 0.55,
-            metallic: base.metallic,
-            roughness: base.roughness,
-            emissiveStrength: 1.8,
-          );
+          return base.copyWith(tintR: base.tintR * 0.3, tintB: base.tintB * 0.55, emissiveStrength: 0.9);
         },
       ),
     ]);
@@ -176,20 +171,20 @@ final class Game {
     final crystalPrefab = loaded[5];
     final fuelPrefab = loaded[6];
 
-    final ship = shipPrefab.instantiate(name: 'ship')..scale = _shipScale;
+    final ship = centred(shipPrefab, name: 'ship')..scale = _shipScale;
     app.scene.addChild(ship);
 
     final bodies = <Body>[];
     for (var i = 0; i < _meteorCount; i++) {
       final prefab = meteorPrefabs[i % meteorPrefabs.length];
       // Shrink the hitbox a little: a near-miss should feel like a near-miss.
-      bodies.add(Body(Kind.meteor, prefab.instantiate(), prefab.radius * 0.72));
+      bodies.add(Body(Kind.meteor, centred(prefab), radiusOf(prefab) * 0.72));
     }
     for (var i = 0; i < _crystalCount; i++) {
-      bodies.add(Body(Kind.crystal, crystalPrefab.instantiate(), crystalPrefab.radius * 1.4));
+      bodies.add(Body(Kind.crystal, centred(crystalPrefab), radiusOf(crystalPrefab) * 1.4));
     }
     for (var i = 0; i < _fuelCount; i++) {
-      bodies.add(Body(Kind.fuel, fuelPrefab.instantiate(), fuelPrefab.radius * 1.4));
+      bodies.add(Body(Kind.fuel, centred(fuelPrefab), radiusOf(fuelPrefab) * 1.4));
     }
     for (final b in bodies) {
       app.scene.addChild(b.node);
@@ -228,7 +223,6 @@ final class Game {
       starDensity: 0.03,
       cloudCoverage: 0.0,
       cloudDensity: 0.0,
-      cloudSampleCount: 4, // validator minimum; clouds are off anyway
     );
     app.environment = app.environment.copyWith(
       clearColor: const LinearColor(0.005, 0.006, 0.015),
@@ -255,7 +249,7 @@ final class Game {
   /// Engine flame: an emissive cone behind the ship. Base at the pivot, apex
   /// trailing toward the camera; bloom turns it into a glow.
   static SceneNode _buildFlame(PixeldartApp app) {
-    const length = 1.4;
+    const length = _flameLength;
     final data = Primitives.cone(radius: 0.15, height: length, radialSegments: 14);
     final mesh = app.createMesh(data, debugLabel: 'engine_flame');
     final material = app.createMaterial(
@@ -264,7 +258,7 @@ final class Game {
         tintR: 1.0,
         tintG: 0.38,
         tintB: 0.08,
-        emissiveStrength: 3.2,
+        emissiveStrength: 1.6,
         roughness: 1,
         metallic: 0,
       ),
@@ -276,8 +270,8 @@ final class Game {
       material: material,
       // The cone is centred on its origin; shift it so the base sits here.
       transform: Transform.at(const Vec3(0, length / 2, 0)),
-    )
-      ..castsShadow = false;
+      castsShadow: false,
+    );
     app.scene.addChild(flame);
     return flame;
   }
@@ -286,41 +280,12 @@ final class Game {
     PixeldartApp app,
   ) {
     final quad = app.createMesh(Primitives.quad(width: 1, height: 1), debugLabel: 'particle_quad');
-    // Black edges make RGB fall off with alpha, so the texture can double as
-    // the emissive map. The glow (bloom) target ignores albedo alpha, so an
-    // untextured emissive particle would bloom as a hard square.
-    final soft = app.createProceduralTexture(
-      ProceduralTextures.radialParticle(
-        width: 64,
-        height: 64,
-        innerRadius: 0.05,
-        falloffExponent: 2.0,
-        edgeColor: const LinearColor(0, 0, 0),
-      ),
-      width: 64,
-      height: 64,
-      wrap: GpuTextureWrap.clampToEdge,
-      debugLabel: 'particle_soft',
-    );
-    MaterialHandle glow(String key, TextureHandle tex, double r, double g, double b, double e) =>
-        app.createMaterial(
-          MaterialDefinition(
-            key: key,
-            albedoTexture: tex,
-            emissiveTexture: tex,
-            tintR: r,
-            tintG: g,
-            tintB: b,
-            emissiveStrength: e,
-            roughness: 1,
-            metallic: 0,
-            alphaMode: AlphaMode.blended,
-          ),
-        );
+    MaterialHandle glow(String key, double r, double g, double b, double e) =>
+        app.createParticleMaterial(key: key, color: LinearColor(r, g, b), glow: e);
 
     final blast = ParticleEmitter(
       mesh: quad,
-      material: glow('fx_blast', soft, 1.0, 0.6, 0.2, 7.0),
+      material: glow('fx_blast', 1.0, 0.6, 0.2, 7.0),
       shape: const SphereShape(radius: 0.4, directionMode: SphereDirectionMode.outward),
       minLifetime: 0.5,
       maxLifetime: 1.1,
@@ -340,7 +305,7 @@ final class Game {
 
     final sparkle = ParticleEmitter(
       mesh: quad,
-      material: glow('fx_sparkle', soft, 0.3, 1.0, 0.6, 6.0),
+      material: glow('fx_sparkle', 0.3, 1.0, 0.6, 6.0),
       shape: const SphereShape(radius: 0.3, directionMode: SphereDirectionMode.outward),
       minLifetime: 0.35,
       maxLifetime: 0.7,
@@ -360,7 +325,7 @@ final class Game {
     // the flight axis and read as flat slabs.
     final stars = ParticleEmitter(
       mesh: quad,
-      material: glow('fx_dust', soft, 0.75, 0.82, 1.0, 2.5),
+      material: glow('fx_dust', 0.75, 0.82, 1.0, 2.5),
       shape: const BoxShape(halfExtents: Vec3(22, 13, 4), fixedDirection: Vec3.unitZ),
       transform: Transform.at(const Vec3(0, 0, -95)),
       rate: 90,
@@ -452,7 +417,7 @@ final class Game {
     shields = 3;
     invulnerable = 0;
     boosting = false;
-    setVisible(ship, true);
+    ship.visible = true;
     engineLit = true;
     for (final b in bodies) {
       _spawn(b, initial: true);
@@ -524,7 +489,7 @@ final class Game {
       ..rotation = Quat.axisAngle(b.spinAxis, rng.nextDouble() * math.pi * 2);
     if (!b.active) {
       b.active = true;
-      setVisible(b.node, true);
+      b.node.visible = true;
     }
   }
 
@@ -677,7 +642,7 @@ final class Game {
 
   void _consume(Body b) {
     b.active = false;
-    setVisible(b.node, false);
+    b.node.visible = false;
   }
 
   void _hit(Body meteor) {
@@ -686,7 +651,7 @@ final class Game {
     _consume(meteor);
     if (shields <= 0) {
       blast.burst(220, position: shipPos);
-      setVisible(ship, false);
+      ship.visible = false;
       engineLit = false;
       app.shakeCamera(trauma: 1.0);
       sound.play('explode');
@@ -712,17 +677,22 @@ final class Game {
     if (phase != Phase.over) {
       // Blink while invulnerable.
       final shown = invulnerable <= 0 || (invulnerable * 12).floor().isEven;
-      setVisible(ship, shown);
+      ship.visible = shown;
     }
 
-    // Flicker the flame and stretch it on boost. Scale is uniform, so a
-    // longer flame is also a fatter one, which reads fine as more thrust.
+    // Flicker the flame and lengthen it on boost. Stretch scales the cone
+    // along its own axis only, so a boosted flame gets longer, not fatter;
+    // its centre moves out with it so the base stays at the nozzle.
     final flicker = 0.85 + 0.15 * math.sin(t * 53) * math.sin(t * 31);
+    final length = (boosting ? 1.9 : 1.0) * flicker;
     flame
       ..position = ship.position + tilt.rotate(const Vec3(0, 0.02, 0.78))
-      ..rotation = tilt * _flameAlong
-      ..scale = (boosting ? 1.55 : 1.0) * flicker;
-    setVisible(flame, engineLit && phase != Phase.over);
+      ..rotation = tilt * _flameAlong;
+    flame.children.first.transform = Transform(
+      translation: Vec3(0, _flameLength / 2 * length, 0),
+      stretch: Vec3(1, length, 1),
+    );
+    flame.visible = engineLit && phase != Phase.over;
   }
 }
 

@@ -710,7 +710,15 @@ abstract final class Primitives {
               final i1 = cornerBase + (i + 1) * stride + j;
               final i2 = cornerBase + (i + 1) * stride + (j + 1);
               final i3 = cornerBase + i * stride + (j + 1);
-              if (sx * sy * sz < 0) {
+              if (i == 0) {
+                // The first ring sits on the pole (theta = 0), where i0 and
+                // i3 coincide; a quad there would carry a zero-area triangle.
+                if (sx * sy * sz < 0) {
+                  b.addTriangleIndices(i0, i1, i2);
+                } else {
+                  b.addTriangleIndices(i0, i2, i1);
+                }
+              } else if (sx * sy * sz < 0) {
                 b.addQuadIndices(i0, i1, i2, i3);
               } else {
                 b.addQuadIndices(i0, i3, i2, i1);

@@ -25,11 +25,11 @@ You are a lantern spirit in a dark room. Find five golden motes to open the port
 
 ## Build and run
 
-From the project root:
+From the Pixeldart package root:
 
 ```sh
-dart compile js -O2 -o example_2/build/lantern.js example_2/src/main.dart
-python -m http.server 8765
+dart compile js -O2 --no-source-maps -o examples/example_2/build/lantern.js examples/example_2/src/main.dart
+python -m http.server 8765 --directory examples
 ```
 
 Open <http://127.0.0.1:8765/example_2/>. URL flags:
@@ -37,10 +37,14 @@ Open <http://127.0.0.1:8765/example_2/>. URL flags:
 - `?autostart` skips the title card.
 - `?debug` makes K gather every mote, and pressing K again steps you onto the portal.
 
-## Renderer notes
+## Renderer APIs it leans on
 
-These are the pixeldart behaviours this game works around. Each is commented at the spot in the code that handles it.
+The game itself only uses public Pixeldart APIs:
 
-- `OrthoCamera` builds its view as a plain translation looking down −Z, and does its own translation-only shake, because the app's shake engine also rotates the view.
-- The emissive term samples an emissive map and contributes nothing without one, so emissive materials bind a 2×2 white texture.
-- Nodes are hidden with `visibilityMask`, never by scaling them toward zero. The renderer inverts each node's 3×3 matrix to get normals, and a near-zero scale makes that matrix singular.
+- `app.useOrthoCamera(fitBounds:, clampBounds:)` keeps the whole arena in view at any window shape. Shakes are translation-only (`shakeEngine.rotationScale = 0`), as suits a 2D view.
+- Emissive materials glow from `emissiveStrength` alone; no emissive map is needed.
+- `app.createParticleMaterial` provides soft, glowing sprites, and `ParticleEmitter.emitAt` streams from every brazier, the player and the portal through one emitter per colour.
+- `node.visible` hides a node with its whole subtree.
+- The game steps in `app.onBeforeFrame`, so moves and particle bursts land in the same frame. A frame that throws is aborted and reported by the app, and the loop continues.
+
+See [docs/conventions.md](../../docs/conventions.md) for the conventions behind these.

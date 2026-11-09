@@ -497,10 +497,14 @@ final class _ShadowedWorldPass implements RenderPass {
       'uDirectionalIntensity',
       UniformValue.float1(directional?.intensity ?? 0),
     );
+    // More point lights than shader slots: keep the most influential at the
+    // camera, not merely the first submitted.
+    final pointLights = selectPointLights(
+      lights: environment.pointLights,
+      referencePosition: camera.eye,
+    );
     for (var i = 0; i < 4; i++) {
-      final light = i < environment.pointLights.length
-          ? environment.pointLights[i]
-          : null;
+      final light = i < pointLights.length ? pointLights[i] : null;
       final position = light?.position ?? const Vec3(0, 0, 0);
       final color = light?.color ?? LinearColor.black;
       encoder.setUniform(
@@ -872,7 +876,7 @@ final class _ShadowedWorldPass implements RenderPass {
     final baseState = switch (drawMode) {
       DrawMode.blended => switch (blendMode) {
         BlendMode.alpha => DrawStateDescriptor.blendedDefault,
-        BlendMode.additive => DrawStateDescriptor.additiveDefault,
+        BlendMode.additive => DrawStateDescriptor.additiveCoverage,
       },
       DrawMode.opaque || DrawMode.masked => descriptor.toDrawState(),
     };

@@ -560,7 +560,9 @@ abstract final class ProceduralTextures {
           alpha = math.pow(f, falloffExponent).toDouble();
         }
 
-        final tColor = dist.clamp(0.0, 1.0);
+        // Colour ramps over the same span as alpha: the inner core is
+        // solid centre colour, the falloff band blends to the edge colour.
+        final tColor = ((dist - innerRadius) / (1.0 - innerRadius)).clamp(0.0, 1.0);
         final r = (centerColor.r + (edgeColor.r - centerColor.r) * tColor).clamp(0.0, 1.0);
         final g = (centerColor.g + (edgeColor.g - centerColor.g) * tColor).clamp(0.0, 1.0);
         final b = (centerColor.b + (edgeColor.b - centerColor.b) * tColor).clamp(0.0, 1.0);

@@ -88,6 +88,16 @@ final class CatmullRomSpline3D {
     return sample(t);
   }
 
+  /// Normalised tangent at arc distance [distance] in metres, pairing with
+  /// [sampleAtDistance] for steady-speed motion along the curve.
+  Vec3 tangentAtDistance(double distance) {
+    const step = 0.05;
+    final a = sampleAtDistance(distance - step);
+    final b = sampleAtDistance(distance + step);
+    final delta = b - a;
+    return delta.lengthSquared > 1e-12 ? delta.normalized : sampleTangent(0);
+  }
+
   Vec3 _getPoint(int index) {
     final count = controlPoints.length;
     if (closed) {

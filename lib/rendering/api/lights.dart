@@ -161,6 +161,38 @@ List<SpotLight> selectSpotLights({
   return [for (final entry in ranked.take(limit)) entry.light];
 }
 
+/// Selects the point lights the world shader evaluates.
+///
+/// The shader has [RuntimeLightBudget.pointLights] slots. Lights are ranked
+/// by their influence at [referencePosition] (normally the camera), the
+/// same measure [selectSpotLights] uses, so the most relevant lights win
+/// rather than the first ones submitted. Ties fall back to the authored id,
+/// so the choice is deterministic frame to frame.
+List<PointLight> selectPointLights({
+  required Iterable<PointLight> lights,
+  required Vec3 referencePosition,
+  int limit = RuntimeLightBudget.pointLights,
+}) {
+  if (limit < 0) {
+    throw ArgumentError.value(limit, 'limit', 'must be >= 0');
+  }
+  final all = lights.toList(growable: false);
+  if (all.length <= limit) return all;
+  final ranked = <({PointLight light, double influence})>[];
+  for (final light in all) {
+    final distanceSquared = (light.position - referencePosition).lengthSquared;
+    final chroma = math.max(light.color.r, math.max(light.color.g, light.color.b));
+    final influence =
+        light.intensity * light.radius * light.radius * math.max(chroma, 1e-6) / (1 + distanceSquared);
+    ranked.add((light: light, influence: influence));
+  }
+  ranked.sort((a, b) {
+    final byInfluence = b.influence.compareTo(a.influence);
+    return byInfluence == 0 ? a.light.id.compareTo(b.light.id) : byInfluence;
+  });
+  return [for (final entry in ranked.take(limit)) entry.light];
+}
+
 /// The light and shadow budget the shipping pipeline actually honours.
 ///
 /// These are not aspirational limits. Each is a direct count of what

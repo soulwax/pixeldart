@@ -784,7 +784,10 @@ void main(){
   // (e.g. the checkerboard floor under strong light) must never bloom, only
   // a material with real emissiveStrength does, independent of how the
   // surface happens to be lit this frame.
-  oGlow=vec4(emissive,1.);
+  // Glow carries the same coverage as colour: opaque draws write alpha 1 as
+  // before, while blended and additive draws (both blend with srcAlpha)
+  // fade their glow with the sprite instead of blooming the whole quad.
+  oGlow=vec4(emissive,outAlpha);
 }
 ''';
 

@@ -7,7 +7,10 @@ import 'dart:typed_data';
 final class FallbackPixels {
   static final Uint8List whiteAlbedo = Uint8List.fromList([255, 255, 255, 255]);
   static final Uint8List flatNormal = Uint8List.fromList([128, 128, 255, 255]);
-  static final Uint8List blackEmissive = Uint8List.fromList([0, 0, 0, 255]);
+  /// Neutral (white) like ORM and lightmap: with no emissive map,
+  /// `emissiveStrength × tint` alone sets the glow. Strength 0 (the default)
+  /// still emits nothing. A black fallback made strength silently inert.
+  static final Uint8List neutralEmissive = Uint8List.fromList([255, 255, 255, 255]);
   static final Uint8List whiteAo = Uint8List.fromList([255, 255, 255, 255]);
 
   /// Neutral linear ORM: full occlusion, neutral roughness 1, neutral metal 1.

@@ -6,7 +6,6 @@ import 'package:pixeldart/pixeldart.dart';
 import 'package:pixeldart/rendering/webgl/pixeldart_app.dart';
 import 'package:web/web.dart' as web;
 
-import 'ortho_camera.dart';
 import 'sound.dart';
 import 'textures.dart';
 
@@ -67,14 +66,6 @@ final class Pillar {
   Pillar(this.node, this.half);
 }
 
-void setVisible(SceneNode node, bool visible) {
-  node.traverse((n) {
-    if (n.mesh == null) return;
-    n.visibilityMask = visible ? -1 : 0;
-    n.markDirty();
-  });
-}
-
 void main() async {
   final canvas = web.document.querySelector('#game');
   if (canvas is! web.HTMLCanvasElement) return;
@@ -97,22 +88,16 @@ void main() async {
     return;
   }
   if (Uri.base.queryParameters.containsKey('autostart')) game.start();
-  var reported = false;
-  app.onFrame = (ctx) {
-    try {
-      game.frame(ctx);
-    } catch (e, s) {
-      if (!reported) print('Lantern frame error: $e\n$s');
-      reported = true;
-    }
-  };
+  // Before the frame, so moves and particle bursts land in this frame.
+  // A thrown frame is aborted and reported by the app; the loop goes on.
+  app.onBeforeFrame = (_, dt) => game.frame(dt);
   app.start();
 }
 
 final class Game {
   final PixeldartApp app;
   final Hud hud;
-  final OrthoCamera camera = OrthoCamera();
+  late final OrthoCameraController camera;
   final Sound sound = Sound();
   final math.Random rng = math.Random();
   final Set<String> keys = {};
@@ -138,7 +123,6 @@ final class Game {
   double dashTime = 0, dashCooldown = 0, invulnerable = 0;
   double glitch = 0, fade = 0, hintTimer = 0, time = 0;
   bool _roomBuilt = false;
-  final Map<ParticleEmitter, double> _debt = {};
 
   final bool _debug = Uri.base.queryParameters.containsKey('debug');
 
@@ -150,10 +134,13 @@ final class Game {
     _buildWorld();
     _setupSound();
     _installInput();
-    app.cameraController = camera;
-    camera
-      ..boundsHalfX = _halfW + 1.2
-      ..boundsHalfY = _halfH + 1.2;
+    // The whole arena stays in view at any window shape; shakes only
+    // translate, as suits a 2D view.
+    const arena = Aabb(Vec3(-_halfW - 1.3, -_halfH - 1.3, 0), Vec3(_halfW + 1.3, _halfH + 1.3, 0));
+    camera = app.useOrthoCamera(fitBounds: arena, clampBounds: arena);
+    app.shakeEngine
+      ..rotationScale = 0
+      ..maxTranslation = 0.6;
     _buildRoom();
     _title();
   }
@@ -227,19 +214,10 @@ final class Game {
       emissiveStrength: emissive,
       albedoTexture: albedo,
       normalTexture: normal,
-      // The emissive term samples a map; without one it contributes nothing.
-      emissiveTexture: emissive > 0 ? _white : null,
       normalStrength: normal == null ? 1 : 1.6,
       uvScaleU: uvU,
       uvScaleV: uvV,
     ),
-  );
-
-  late final TextureHandle _white = app.createTexture(
-    width: 2,
-    height: 2,
-    pixels: Uint8List(16)..fillRange(0, 16, 255),
-    debugLabel: 'white',
   );
 
   final Map<String, (MeshHandle, MeshData)> _meshes = {};
@@ -388,21 +366,6 @@ final class Game {
 
   void _setupParticles() {
     final quad = app.createMesh(Primitives.quad(width: 1, height: 1), debugLabel: 'pquad');
-    // Black edges let the texture double as the emissive map, so glow fades
-    // with the sprite instead of blooming as a hard square.
-    final soft = app.createProceduralTexture(
-      ProceduralTextures.radialParticle(
-        width: 64,
-        height: 64,
-        innerRadius: 0.05,
-        falloffExponent: 2.0,
-        edgeColor: const LinearColor(0, 0, 0),
-      ),
-      width: 64,
-      height: 64,
-      wrap: GpuTextureWrap.clampToEdge,
-      debugLabel: 'psoft',
-    );
     ParticleEmitter emitter(
       String key,
       double r,
@@ -419,21 +382,7 @@ final class Game {
     }) {
       final e = ParticleEmitter(
         mesh: quad,
-        material: app.createMaterial(
-          MaterialDefinition(
-            key: key,
-            albedoTexture: soft,
-            emissiveTexture: soft,
-            tintR: r,
-            tintG: g,
-            tintB: b,
-            emissiveStrength: glow,
-            roughness: 1,
-            metallic: 0,
-            alphaMode: AlphaMode.blended,
-            doubleSided: true,
-          ),
-        ),
+        material: app.createParticleMaterial(key: key, color: LinearColor(r, g, b), glow: glow),
         shape: const SphereShape(radius: 0.15, directionMode: SphereDirectionMode.outward),
         minLifetime: minLife,
         maxLifetime: maxLife,
@@ -514,7 +463,7 @@ final class Game {
         p.y = ny;
         p.node.position = Vec3(p.x, p.y, 0.6);
       }
-      setVisible(p.node, p.active);
+      p.node.visible = p.active;
       p.node.markDirty();
     }
 
@@ -525,7 +474,7 @@ final class Game {
       b.y = ny;
       b.lit = false;
       b.node.position = Vec3(b.x, b.y, 0);
-      setVisible(b.flame, false);
+      b.flame.visible = false;
     }
 
     // Motes hide in the gaps between braziers, where it is darkest.
@@ -535,7 +484,7 @@ final class Game {
       m.y = ny;
       m.taken = false;
       m.node.position = Vec3(m.x, m.y, 0.5);
-      setVisible(m.node, true);
+      m.node.visible = true;
     }
     motesLeft = motes.length;
 
@@ -546,12 +495,12 @@ final class Game {
         _respawnShade(s);
       } else {
         s.respawn = double.infinity; // unused this room
-        setVisible(s.node, false);
+        s.node.visible = false;
       }
     }
 
     portalOpen = false;
-    setVisible(portal, false);
+    portal.visible = false;
     camera
       ..target = Vec3.zero
       ..snap();
@@ -577,7 +526,7 @@ final class Game {
     s.vx = s.vy = 0;
     s.respawn = 0;
     s.node.position = Vec3(s.x, s.y, 0);
-    setVisible(s.node, true);
+    s.node.visible = true;
   }
 
   // ── Lifecycle ───────────────────────────────────────────────────────────
@@ -656,13 +605,9 @@ final class Game {
 
   // ── Frame ───────────────────────────────────────────────────────────────
 
-  void frame(FrameContext ctx) {
-    final dt = ctx.deltaTime.clamp(0.0, 0.05);
+  void frame(double frameDt) {
+    final dt = frameDt.clamp(0.0, 0.05);
     time += dt;
-
-    // Keep the whole arena in view whatever the window's shape.
-    final aspect = app.surface.pixelWidth / app.surface.pixelHeight;
-    camera.halfHeight = math.max(_halfH + 1.3, (_halfW + 1.3) / aspect);
 
     switch (phase) {
       case Phase.playing:
@@ -772,13 +717,13 @@ final class Game {
   void _ignite(Brazier b) {
     b.lit = true;
     flames.add(b);
-    setVisible(b.flame, true);
+    b.flame.visible = true;
     fire.burst(40, position: Vec3(b.x, b.y, 0.8));
     sound.play('ignite');
     if (flames.length > _maxFlames) {
       final old = flames.removeAt(0);
       old.lit = false;
-      setVisible(old.flame, false);
+      old.flame.visible = false;
       smoke.burst(30, position: Vec3(old.x, old.y, 0.8));
       sound.play('snuff');
       hud.toast('only four lights may burn');
@@ -794,7 +739,7 @@ final class Game {
   void _dissolve(Shade s) {
     violet.burst(45, position: Vec3(s.x, s.y, 0.8));
     s.respawn = 4.0;
-    setVisible(s.node, false);
+    s.node.visible = false;
     sound.play('snuff');
   }
 
@@ -804,7 +749,7 @@ final class Game {
       final dx = px - m.x, dy = py - m.y;
       if (dx * dx + dy * dy > 0.8 * 0.8) continue;
       m.taken = true;
-      setVisible(m.node, false);
+      m.node.visible = false;
       gold.burst(36, position: Vec3(m.x, m.y, 0.8));
       sound.play('mote');
       motesLeft--;
@@ -840,7 +785,7 @@ final class Game {
     }
     portal.position = Vec3(best.$1, best.$2, 0);
     portalOpen = true;
-    setVisible(portal, true);
+    portal.visible = true;
     sound.play('portal');
     hud.toast('the way is open');
   }
@@ -895,7 +840,7 @@ final class Game {
     glitch = 1.0;
     vx = nx * 16;
     vy = ny * 16;
-    camera.shake(0.55);
+    app.shakeCamera(trauma: 0.55);
     violet.burst(30, position: Vec3(px, py, 0.8));
     sound
       ..play('hit')
@@ -918,7 +863,7 @@ final class Game {
     player
       ..position = Vec3(px, py, 0)
       ..scale = pulse * (blink ? 0.6 : 1.0);
-    setVisible(player, phase != Phase.over);
+    player.visible = phase != Phase.over;
 
     for (final b in flames) {
       b.flame.scale = 0.85 + 0.25 * math.sin(time * 17 + b.id) * math.sin(time * 9.3 + b.id * 2);
@@ -947,27 +892,20 @@ final class Game {
     }
   }
 
-  /// Particle streams are spawned as per-frame bursts, so one emitter per
-  /// colour can feed any number of sources at different positions.
-  void _stream(ParticleEmitter e, double perSecond, double dt, Vec3 at) {
-    final debt = (_debt[e] ?? 0) + perSecond * dt;
-    final n = debt.floor();
-    _debt[e] = debt - n;
-    if (n > 0) e.burst(n, position: at);
-  }
-
+  /// One emitter per colour streams from every source at once; each source
+  /// keeps its own exact rate.
   void _emit(double dt) {
     for (final b in flames) {
-      _stream(fire, 16, dt, Vec3(b.x, b.y + 0.1, 0.8));
+      fire.emitAt(Vec3(b.x, b.y + 0.1, 0.8), 16, dt, source: b);
     }
     if (phase != Phase.over) {
       final moving = vx * vx + vy * vy > 4;
-      _stream(fire, dashTime > 0 ? 160 : (moving ? 14 : 5), dt, Vec3(px, py, 0.8));
+      fire.emitAt(Vec3(px, py, 0.8), dashTime > 0 ? 160 : (moving ? 14 : 5), dt, source: player);
     }
     if (portalOpen) {
       final p = portal.position;
       final a = time * 5;
-      _stream(gold, 20, dt, Vec3(p.x + math.cos(a) * 0.95, p.y + math.sin(a) * 0.95, 0.8));
+      gold.emitAt(Vec3(p.x + math.cos(a) * 0.95, p.y + math.sin(a) * 0.95, 0.8), 20, dt, source: portal);
     }
   }
 

@@ -71,9 +71,11 @@ void _testWaveUpdate() {
     final cr = verts[i * 18 + 10];
     final cg = verts[i * 18 + 11];
     final cb = verts[i * 18 + 12];
-    assert(cr >= 0.35 && cr <= 1.0);
-    assert(cg >= 0.65 && cg <= 1.0);
-    assert(cb >= 0.90 && cb <= 1.0);
+    // Vertex data is Float32: 0.35 reads back as 0.3499999940.
+    const eps = 1e-6;
+    assert(cr >= 0.35 - eps && cr <= 1.0 + eps);
+    assert(cg >= 0.65 - eps && cg <= 1.0 + eps);
+    assert(cb >= 0.90 - eps && cb <= 1.0 + eps);
   }
 }
 

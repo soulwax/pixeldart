@@ -34,11 +34,11 @@ None of these appear in `example_1` or `example_2`:
 
 ## Build and run
 
-From the project root:
+From the Pixeldart package root:
 
 ```sh
-dart compile js -O2 -o example_3/build/tidewatch.js example_3/src/main.dart
-python -m http.server 8765
+dart compile js -O2 --no-source-maps -o examples/example_3/build/tidewatch.js examples/example_3/src/main.dart
+python -m http.server 8765 --directory examples
 ```
 
 Open <http://127.0.0.1:8765/example_3/>. URL flags:
@@ -51,7 +51,14 @@ They combine, e.g. `?autostart&hour=22&storm=1`.
 
 ## Notes
 
-- Pirate Kit models reference an external `Textures/colormap.png`, which the GLB decoder doesn't load. `Model` loads that palette once, binds it to every material, and samples it with nearest filtering and no mipmaps so neighboring colors don't bleed into each other. It also keeps each asset's node hierarchy, since the ships position their masts and sails with node transforms.
-- Building this surfaced two pixeldart bugs, both fixed in `vendor/pixeldart`:
-  - `Mat4.lookAt` was mirrored, which culled the camera-facing side of the terrain and ocean.
+- **The Pirate Kit models** are loaded with `app.loadModel(url, textureFilter: GpuTextureFilter.nearest)`.
+  - Their external `Textures/colormap.png` palette resolves relative to each model and loads once.
+  - Nearest filtering stops neighbouring palette colours from bleeding into each other.
+  - Each model's node hierarchy is kept, since the ships place their masts and sails with node transforms.
+- **Picking:** a click (`app.onTap`) picks only ships, with `app.pick(where:, precise: true)`, against their triangles.
+- **Aiming:** the beam aims where `app.screenRay(...)` meets the sea (`Ray.intersectGround`).
+- **Lanes** walk `CatmullRomSpline3D.sampleAtDistance` / `tangentAtDistance`.
+- **Sky:** `app.matchHorizonToFog()` keeps the fogged sea and the sky's horizon the same colour.
+- **Bugs this game surfaced**, now fixed in Pixeldart:
+  - `Mat4.lookAt` was mirrored, so the camera-facing side of the terrain and the ocean was culled.
   - The GLB decoder rejected the Pirate Kit's slightly skewed authored tangents. It now orthonormalizes every tangent against its normal.

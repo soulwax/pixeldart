@@ -172,8 +172,12 @@ final class SceneRendererImpl with _GpuTimingSupport implements SceneRenderer {
                   total.instancesSubmitted + pass.instancesSubmitted,
             ),
           );
+      final pointLights = frame.environment.pointLights.length;
       return FrameStats(
         frameIndex: frame.frameIndex,
+        pointLightsDropped: pointLights > RuntimeLightBudget.pointLights
+            ? pointLights - RuntimeLightBudget.pointLights
+            : 0,
         drawCalls: sceneStats.drawCalls,
         trianglesSubmitted: sceneStats.trianglesSubmitted,
         trianglesCulled: execution.trianglesCulled,

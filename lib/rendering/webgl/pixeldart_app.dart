@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:web/web.dart' as web;
 
 import '../assets/glb_decoder.dart';
+import '../assets/model_asset.dart';
 
 import '../api/capabilities.dart';
 import '../api/effects.dart';
@@ -24,11 +25,14 @@ import '../camera/camera_shake.dart';
 import '../camera/cinematic_tour_camera.dart';
 import '../camera/fly_camera.dart';
 import '../camera/orbit_camera.dart';
+import '../camera/ortho_camera.dart';
 import '../camera/smooth_follow_camera.dart';
+import '../math/bounds.dart';
 import '../math/ray.dart';
 import '../math/vec.dart';
 import '../particles/atmospheric_particles.dart';
 import '../particles/particle_emitter.dart';
+import '../particles/particle_materials.dart';
 import '../scene/animation.dart';
 import '../scene/scene_node.dart';
 import 'webgl2_renderer_factory.dart';
@@ -135,7 +139,15 @@ final class PixeldartApp {
   List<ParticleEmitter> get emitters => List.unmodifiable(_emitters);
 
   /// Registers a dynamic particle emitter for automatic simulation and rendering.
+  ///
+  /// An emitter with a `colorGradient` and nothing yet applying it has the
+  /// gradient bound here when its material was created through
+  /// [createMaterial] (or [createParticleMaterial]).
   void addEmitter(ParticleEmitter emitter) {
+    if (emitter.needsColorGradientBinding) {
+      final base = _materialDefinitions[emitter.material];
+      if (base != null) emitter.bindColorGradient(resources, base);
+    }
     _emitters.add(emitter);
   }
 
@@ -150,6 +162,26 @@ final class PixeldartApp {
   }
 
   void Function(FrameContext ctx)? onFrame;
+
+  /// Runs at the start of each frame, before animations, particle emitters
+  /// and the scene sync, so changes made here (moving an emitter, spawning
+  /// particles) land in the same frame. [onFrame] runs after them.
+  void Function(double timeSeconds, double deltaTime)? onBeforeFrame;
+
+  /// Called when anything in a frame throws. The frame is aborted and the
+  /// loop keeps running. When unset, each distinct error is printed once.
+  void Function(Object error, StackTrace stack)? onError;
+
+  /// Called for a primary-button click or tap on the canvas that did not
+  /// drag (moved less than 6 CSS pixels), with window client coordinates.
+  /// Orbit and follow cameras still rotate on drags.
+  void Function(double clientX, double clientY)? onTap;
+
+  final Set<String> _reportedErrors = {};
+  final Map<MaterialHandle, MaterialDefinition> _materialDefinitions = {};
+  final Map<String, Future<TextureHandle>> _textureCache = {};
+  double _pressX = 0.0;
+  double _pressY = 0.0;
   bool _running = false;
   double _lastTimeSeconds = 0.0;
   bool _contextLost = false;
@@ -235,8 +267,19 @@ final class PixeldartApp {
 
   MeshHandle createMesh(MeshData data, {String? debugLabel}) =>
       renderer.resources.registerMesh(data, debugLabel: debugLabel);
-  MaterialHandle createMaterial(MaterialDefinition def) =>
-      renderer.resources.registerMaterial(def);
+  MaterialHandle createMaterial(MaterialDefinition def) {
+    final handle = renderer.resources.registerMaterial(def);
+    _materialDefinitions[handle] = def;
+    return handle;
+  }
+
+  /// A soft, glowing sprite material for particle emitters (see
+  /// [ParticleMaterials.soft]).
+  MaterialHandle createParticleMaterial({
+    required String key,
+    LinearColor color = const LinearColor(1, 1, 1),
+    double glow = 2,
+  }) => createMaterial(ParticleMaterials.softDefinition(resources, key: key, color: color, glow: glow));
   TextureHandle createTexture({
     required int width,
     required int height,
@@ -315,17 +358,11 @@ final class PixeldartApp {
     this.skybox = skybox;
   }
 
-  /// Raycasts against the scene hierarchy using client window coordinates [clientX], [clientY].
-  /// Returns the closest [RaycastHit], or `null` if nothing was hit.
-  RaycastHit? pick(double clientX, double clientY) {
-    final rect = canvas.getBoundingClientRect();
-    final x = clientX - rect.left;
-    final y = clientY - rect.top;
-    if (x < 0 || x > rect.width || y < 0 || y > rect.height) return null;
-
-    final camCtrl = cameraController;
+  /// The camera the next frame will render with (before shake).
+  CameraView currentCamera() {
     final aspect = _surface.pixelWidth / _surface.pixelHeight;
-    final camera = camCtrl != null
+    final camCtrl = cameraController;
+    return camCtrl != null
         ? camCtrl.toCameraView(aspect)
         : CameraView.look(
             eye: const Vec3(0, 2, 5),
@@ -335,15 +372,31 @@ final class PixeldartApp {
             near: 0.1,
             far: 200,
           );
+  }
 
-    final ray = camera.screenPointToRay(
-      x,
-      y,
-      rect.width.toInt(),
-      rect.height.toInt(),
-    );
+  /// The world-space ray under window client coordinates, or null outside
+  /// the canvas. Pair with `Ray.intersectGround` to aim at a floor or sea.
+  Ray? screenRay(double clientX, double clientY) {
+    final rect = canvas.getBoundingClientRect();
+    final x = clientX - rect.left;
+    final y = clientY - rect.top;
+    if (x < 0 || x > rect.width || y < 0 || y > rect.height) return null;
+    return currentCamera().screenPointToRay(x, y, rect.width.toInt(), rect.height.toInt());
+  }
 
-    return scene.raycast(ray);
+  /// Raycasts against the scene hierarchy using client window coordinates [clientX], [clientY].
+  /// Returns the closest [RaycastHit], or `null` if nothing was hit.
+  ///
+  /// [where] limits the candidates (e.g. only ships); [precise] tests mesh
+  /// triangles after the bounds hit. See [SceneNode.raycast].
+  RaycastHit? pick(
+    double clientX,
+    double clientY, {
+    bool Function(SceneNode node)? where,
+    bool precise = false,
+  }) {
+    final ray = screenRay(clientX, clientY);
+    return ray == null ? null : scene.raycast(ray, where: where, precise: precise);
   }
 
   /// Sets the active camera controller to orbit controls around [target].
@@ -387,6 +440,28 @@ final class PixeldartApp {
     return ctrl;
   }
 
+  /// Sets the active camera controller to an orthographic 2D/top-down view.
+  /// See [OrthoCameraController] for following, fitting and clamping.
+  OrthoCameraController useOrthoCamera({
+    SceneNode? target,
+    Vec3 targetPosition = Vec3.zero,
+    double halfHeight = 10,
+    Aabb? fitBounds,
+    Aabb? clampBounds,
+    double damping = 4,
+  }) {
+    final ctrl = OrthoCameraController(
+      targetNode: target,
+      target: targetPosition,
+      halfHeight: halfHeight,
+      fitBounds: fitBounds,
+      clampBounds: clampBounds,
+      damping: damping,
+    )..snap();
+    cameraController = ctrl;
+    return ctrl;
+  }
+
   /// Sets the active camera controller to an automated cinematic tour along [waypoints].
   CinematicTourCameraController useCinematicTour({
     required List<CameraWaypoint> waypoints,
@@ -407,7 +482,11 @@ final class PixeldartApp {
   }
 
   /// Triggers a procedural trauma-based camera shake with [trauma] in [0, 1].
-  void shakeCamera({double trauma = 0.5}) {
+  ///
+  /// [rotation] scales the rotational part (0 for a translation-only shake,
+  /// which suits orthographic and 2D views); it stays set for later shakes.
+  void shakeCamera({double trauma = 0.5, double? rotation}) {
+    if (rotation != null) shakeEngine.rotationScale = rotation;
     shakeEngine.addTrauma(trauma);
   }
 
@@ -418,6 +497,7 @@ final class PixeldartApp {
     double cloudCover01 = 0.0,
     double turbidity = 2.0,
     double solarIntensity = 2.5,
+    bool coherentHorizon = false,
   }) {
     final input = SolarCycleInput(
       timeHours: timeHours,
@@ -453,13 +533,10 @@ final class PixeldartApp {
 
     // Update skybox declaration colors to match solar phase
     if (sky != null) {
-      final horizonColor = state.fogColor;
       environment = environment.copyWith(
-        skybox: SkyboxDeclaration(
-          assetId: sky.assetId,
-          texture: sky.texture,
+        skybox: sky.copyWith(
           zenith: zenithColor,
-          horizon: horizonColor,
+          horizon: state.fogColor,
           ground: LinearColor(
             (state.fogColor.r * 0.2).clamp(0.0, 1.0),
             (state.fogColor.g * 0.2).clamp(0.0, 1.0),
@@ -467,23 +544,23 @@ final class PixeldartApp {
           ),
           horizonGlow: (state.horizonVisibility01 * 0.25).clamp(0.0, 1.0),
           starDensity: ((1.0 - state.twilightFactor01) * 0.008).clamp(0.0, 0.1),
-          rotationRadians: sky.rotationRadians,
-          exposure: sky.exposure,
-          textureIsSrgb: sky.textureIsSrgb,
-          cloudCoverage: sky.cloudCoverage,
-          cloudDensity: sky.cloudDensity,
-          cloudBaseHeight: sky.cloudBaseHeight,
-          cloudThickness: sky.cloudThickness,
-          cloudScale: sky.cloudScale,
-          cloudWindX: sky.cloudWindX,
-          cloudWindZ: sky.cloudWindZ,
-          cloudPhase: sky.cloudPhase,
-          cloudDetail: sky.cloudDetail,
-          cloudSilverLining: sky.cloudSilverLining,
-          cloudSampleCount: sky.cloudSampleCount,
         ),
       );
     }
+    if (coherentHorizon) matchHorizonToFog();
+  }
+
+  /// Makes the sky's horizon and ground, and the clear colour, equal to the
+  /// current fog colour. Fogged geometry fades to the fog colour at range;
+  /// without this its far edge shows as a seam against a different sky.
+  /// Call after changing fog (`setSolarTime(coherentHorizon: true)` does).
+  void matchHorizonToFog() {
+    final fog = environment.fogColor;
+    final sky = environment.skybox;
+    environment = environment.copyWith(
+      clearColor: fog,
+      skybox: sky?.copyWith(horizon: fog, ground: fog),
+    );
   }
 
   /// Convenience helper to adjust exposure.
@@ -567,142 +644,129 @@ final class PixeldartApp {
     double dustDensity = 0.05,
     double anisotropy = 0.70,
     int sampleCount = 16,
+    double jitter = 0.5,
   }) {
+    // Dense media band visibly between too few, too regular steps (a
+    // bright line of constant view depth). Raise the floor with density
+    // and jitter the steps per pixel; both within the validated ranges.
+    final floor = (8 + dustDensity * 600).ceil();
     environment = environment.copyWith(
       volumetricAlbedo: albedo,
       volumetricIntensity: intensity,
       volumetricHeightFalloff: heightFalloff,
       volumetricDustDensity: dustDensity,
       volumetricAnisotropy: anisotropy,
-      volumetricSampleCount: sampleCount,
+      volumetricSampleCount: (sampleCount < floor ? floor : sampleCount).clamp(4, 24),
+      volumetricJitter: jitter.clamp(0.0, 0.5),
     );
   }
 
   /// Decodes GLB bytes synchronously (geometry and basic material parameters),
-  /// attaches them to the scene hierarchy, and returns the root [SceneNode].
+  /// attaches one copy to the scene hierarchy, and returns its root [SceneNode].
+  /// Textures are not loaded; use [loadModel] for a textured, reusable asset.
   SceneNode loadGlb(Uint8List bytes) {
-    final result = GlbDecoder.decode(bytes);
-    final meshHandles = <MeshHandle>[];
-    for (final meshData in result.meshes) {
-      meshHandles.add(createMesh(meshData));
-    }
-    final materialHandles = <MaterialHandle>[];
-    for (final matDef in result.materials) {
-      materialHandles.add(createMaterial(matDef));
-    }
-
-    var meshCursor = 0;
-    result.rootNode.traverse((node) {
-      if (node.sortTiebreaker >= 0 && meshCursor < meshHandles.length) {
-        node.mesh = meshHandles[meshCursor];
-        final matIdx = node.sortTiebreaker;
-        node.material = matIdx < materialHandles.length
-            ? materialHandles[matIdx]
-            : materialHandles.first;
-        meshCursor++;
-      }
-    });
-
-    scene.addChild(result.rootNode);
-    return result.rootNode;
+    final asset = ModelAsset.fromGlb(GlbDecoder.decode(bytes), resources, name: 'glb');
+    final node = asset.instantiate();
+    scene.addChild(node);
+    return node;
   }
 
-  /// Asynchronously decodes GLB bytes, registers meshes, embedded textures, and materials,
-  /// attaches them to the scene hierarchy, and returns the root [SceneNode].
+  /// Decodes GLB bytes with their embedded textures, attaches one copy to
+  /// the scene, and returns its root. External image URIs cannot be
+  /// resolved from bytes alone; use [loadModel] for those.
   Future<SceneNode> loadGlbAsync(Uint8List bytes) async {
-    final result = GlbDecoder.decode(bytes);
-    final meshHandles = <MeshHandle>[];
-    for (final meshData in result.meshes) {
-      meshHandles.add(createMesh(meshData));
-    }
-
-    // Register embedded textures
-    final textureHandles = <TextureHandle>[];
-    for (final img in result.images) {
-      final tex = await TextureLoader.loadFromBytes(
-        resources: resources,
-        bytes: img.bytes,
-        mimeType: img.mimeType,
-        debugLabel: img.name,
-      );
-      textureHandles.add(tex);
-    }
-
-    // Build materials with texture bindings
-    final materialHandles = <MaterialHandle>[];
-    for (var i = 0; i < result.materials.length; i++) {
-      var matDef = result.materials[i];
-      if (i < result.materialTextures.length) {
-        final texIndices = result.materialTextures[i];
-        TextureHandle? albedo;
-        TextureHandle? normal;
-        TextureHandle? orm;
-        TextureHandle? emissive;
-
-        final aIdx = texIndices.albedoTextureIndex;
-        if (aIdx != null && aIdx < textureHandles.length) {
-          albedo = textureHandles[aIdx];
-        }
-        final nIdx = texIndices.normalTextureIndex;
-        if (nIdx != null && nIdx < textureHandles.length) {
-          normal = textureHandles[nIdx];
-        }
-        final oIdx = texIndices.ormTextureIndex;
-        if (oIdx != null && oIdx < textureHandles.length) {
-          orm = textureHandles[oIdx];
-        }
-        final eIdx = texIndices.emissiveTextureIndex;
-        if (eIdx != null && eIdx < textureHandles.length) {
-          emissive = textureHandles[eIdx];
-        }
-
-        matDef = MaterialDefinition(
-          key: matDef.key,
-          albedoTexture: albedo,
-          normalTexture: normal,
-          ormTexture: orm,
-          emissiveTexture: emissive,
-          tintR: matDef.tintR,
-          tintG: matDef.tintG,
-          tintB: matDef.tintB,
-          roughness: matDef.roughness,
-          metallic: matDef.metallic,
-          emissiveStrength: matDef.emissiveStrength,
-          normalStrength: matDef.normalStrength,
-          occlusionStrength: matDef.occlusionStrength,
-          clearcoatStrength: matDef.clearcoatStrength,
-          clearcoatRoughness: matDef.clearcoatRoughness,
-          alphaMode: matDef.alphaMode,
-          alphaCutoff: matDef.alphaCutoff,
-          doubleSided: matDef.doubleSided,
-        );
-      }
-      materialHandles.add(createMaterial(matDef));
-    }
-
-    var meshCursor = 0;
-    result.rootNode.traverse((node) {
-      if (node.sortTiebreaker >= 0 && meshCursor < meshHandles.length) {
-        node.mesh = meshHandles[meshCursor];
-        final matIdx = node.sortTiebreaker;
-        node.material = matIdx < materialHandles.length
-            ? materialHandles[matIdx]
-            : materialHandles.first;
-        meshCursor++;
-      }
-    });
-
-    scene.addChild(result.rootNode);
-    return result.rootNode;
+    final asset = await _modelFromBytes(bytes, name: 'glb', baseUrl: null);
+    final node = asset.instantiate();
+    scene.addChild(node);
+    return node;
   }
 
-  /// Asynchronously fetches a GLB file from [url], decodes meshes and embedded textures,
-  /// and attaches the textured hierarchy to the scene.
+  /// Asynchronously fetches a GLB file from [url], decodes meshes and textures,
+  /// and attaches one textured copy to the scene.
   Future<SceneNode> loadGlbFromUrl(String url) async {
+    final node = (await loadModel(url)).instantiate();
+    scene.addChild(node);
+    return node;
+  }
+
+  /// Loads a GLB as a reusable [ModelAsset]: meshes and materials are
+  /// registered once and [ModelAsset.instantiate] stamps out copies.
+  ///
+  /// Embedded and `data:` images load from the file; external images (such
+  /// as a kit's shared `Textures/colormap.png`) resolve relative to [url]
+  /// and load once per URL across models. [textureFilter] picks sampling for
+  /// every texture of the model: [GpuTextureFilter.nearest] (no mipmaps) for
+  /// palette atlases and pixel art. [materialOverride] can rewrite each
+  /// material before registration.
+  Future<ModelAsset> loadModel(
+    String url, {
+    MaterialOverride? materialOverride,
+    GpuTextureFilter textureFilter = GpuTextureFilter.linear,
+  }) async {
     final response = await web.window.fetch(url.toJS).toDart;
-    final buffer = await response.arrayBuffer().toDart;
-    final bytes = buffer.toDart.asUint8List();
-    return loadGlbAsync(bytes);
+    if (!response.ok) {
+      throw StateError('loadModel: failed to fetch $url (${response.status})');
+    }
+    final bytes = (await response.arrayBuffer().toDart).toDart.asUint8List();
+    final name = url.split('/').last.replaceAll('.glb', '');
+    return _modelFromBytes(
+      bytes,
+      name: name,
+      baseUrl: url,
+      materialOverride: materialOverride,
+      textureFilter: textureFilter,
+    );
+  }
+
+  Future<ModelAsset> _modelFromBytes(
+    Uint8List bytes, {
+    required String name,
+    required String? baseUrl,
+    MaterialOverride? materialOverride,
+    GpuTextureFilter textureFilter = GpuTextureFilter.linear,
+  }) async {
+    final result = GlbDecoder.decode(bytes);
+    final nearest = textureFilter == GpuTextureFilter.nearest;
+    final images = <TextureHandle?>[];
+    for (final image in result.images) {
+      TextureHandle? handle;
+      try {
+        if (!image.isExternal && image.bytes.isNotEmpty) {
+          handle = await TextureLoader.loadFromBytes(
+            resources: resources,
+            bytes: image.bytes,
+            mimeType: image.mimeType,
+            debugLabel: '$name/${image.name}',
+            generateMips: !nearest,
+            minFilter: nearest ? GpuTextureFilter.nearest : GpuTextureFilter.linearMipmapLinear,
+            magFilter: textureFilter,
+          );
+        } else if (image.isExternal && baseUrl != null) {
+          final resolved = Uri.parse(baseUrl).resolve(image.uri!).toString();
+          handle = await _textureCache.putIfAbsent(
+            '$resolved|${textureFilter.name}',
+            () => TextureLoader.loadFromUrl(
+              resources: resources,
+              url: resolved,
+              generateMips: !nearest,
+              wrap: GpuTextureWrap.repeat,
+              minFilter: nearest ? GpuTextureFilter.nearest : GpuTextureFilter.linearMipmapLinear,
+              magFilter: textureFilter,
+            ),
+          );
+        }
+      } catch (error, stack) {
+        _report(StateError('loadModel($name): image "${image.name}" failed to load: $error'), stack);
+      }
+      images.add(handle);
+    }
+    return ModelAsset.fromGlb(
+      result,
+      resources,
+      name: name,
+      images: images,
+      materialOverride: materialOverride,
+    );
   }
 
   void _installListeners() {
@@ -735,6 +799,8 @@ final class PixeldartApp {
           _activeButton = e.button;
           _lastPointerX = e.clientX.toDouble();
           _lastPointerY = e.clientY.toDouble();
+          _pressX = _lastPointerX;
+          _pressY = _lastPointerY;
         }
       }).toJS,
     );
@@ -771,6 +837,21 @@ final class PixeldartApp {
       'mouseup',
       ((web.Event _) {
         _isPointerDown = false;
+      }).toJS,
+    );
+    canvas.addEventListener(
+      'mouseup',
+      ((web.Event e) {
+        final tap = onTap;
+        if (tap == null || e is! web.MouseEvent || e.button != 0) return;
+        final x = e.clientX.toDouble(), y = e.clientY.toDouble();
+        if ((x - _pressX).abs() + (y - _pressY).abs() < 6) {
+          try {
+            tap(x, y);
+          } catch (error, stack) {
+            _report(error, stack);
+          }
+        }
       }).toJS,
     );
     canvas.addEventListener(
@@ -863,74 +944,107 @@ final class PixeldartApp {
     final dt = _lastTimeSeconds > 0 ? timeSeconds - _lastTimeSeconds : 1.0 / 60.0;
     _lastTimeSeconds = timeSeconds;
 
-    _resize();
-
-    if (!_contextLost && renderer.state != RendererState.contextLost) {
-      // Step active animation clips and timelines
-      animations.update(dt);
-
-      // Synchronize scene graph tree to retained world
-      root.syncToWorld(world);
-
-      final camCtrl = cameraController;
-      if (camCtrl != null) {
-        camCtrl.update(dt);
+    try {
+      _frame(timeSeconds, dt);
+    } catch (error, stack) {
+      // One bad frame must not end the app: abort it and keep the loop.
+      if (_frameOpen) {
+        try {
+          renderer.abortFrame();
+        } catch (_) {}
+        _frameOpen = false;
       }
-
-      shakeEngine.update(dt);
-
-      final aspect = _surface.pixelWidth / _surface.pixelHeight;
-      var camera = camCtrl != null
-          ? camCtrl.toCameraView(aspect)
-          : CameraView.look(
-              eye: const Vec3(0, 2, 5),
-              forward: const Vec3(0, -0.2, -1),
-              fovYRadians: 1.0,
-              aspect: aspect,
-              near: 0.1,
-              far: 200,
-            );
-      camera = shakeEngine.applyTo(camera);
-
-      final frameInput = sequencer.next(
-        camera: camera,
-        environment: environment,
-        post: post,
-        timeSeconds: timeSeconds,
-      );
-
-      final encoder = renderer.beginFrame(world, frameInput);
-
-      // Submit registered atmospheric particle fields
-      for (var i = 0; i < _particleFields.length; i++) {
-        _particleFields[i].submit(encoder, frameInput);
-      }
-
-      // Update and submit registered dynamic particle emitters
-      for (var i = 0; i < _emitters.length; i++) {
-        _emitters[i].update(dt);
-        _emitters[i].submit(encoder, frameInput);
-      }
-      final ctx = FrameContext(
-        timeSeconds: timeSeconds,
-        deltaTime: dt,
-        frameIndex: sequencer.frameIndex,
-        world: world,
-        resources: resources,
-        encoder: encoder,
-        camera: camera,
-        environment: environment,
-        post: post,
-      );
-
-      onFrame?.call(ctx);
-      final stats = renderer.endFrame();
-      if (showStats) {
-        _updateStats(stats, dt);
-      }
+      _report(error, stack);
     }
 
-    _rafHandle = web.window.requestAnimationFrame(_tick.toJS);
+    // Always schedule the next frame, whatever happened in this one.
+    if (_running) _rafHandle = web.window.requestAnimationFrame(_tick.toJS);
+  }
+
+  bool _frameOpen = false;
+
+  void _report(Object error, StackTrace stack) {
+    final handler = onError;
+    if (handler != null) {
+      handler(error, stack);
+      return;
+    }
+    // Default: print each distinct error once, not every frame.
+    if (_reportedErrors.add('$error')) {
+      web.console.error('Pixeldart frame error: $error\n$stack'.toJS);
+    }
+  }
+
+  void _frame(double timeSeconds, double dt) {
+    _resize();
+    if (_contextLost || renderer.state == RendererState.contextLost) return;
+
+    onBeforeFrame?.call(timeSeconds, dt);
+
+    // Step active animation clips and timelines
+    animations.update(dt);
+
+    // Synchronize scene graph tree to retained world
+    root.syncToWorld(world);
+
+    final camCtrl = cameraController;
+    if (camCtrl != null) {
+      camCtrl.update(dt);
+    }
+
+    shakeEngine.update(dt);
+
+    final aspect = _surface.pixelWidth / _surface.pixelHeight;
+    var camera = camCtrl != null
+        ? camCtrl.toCameraView(aspect)
+        : CameraView.look(
+            eye: const Vec3(0, 2, 5),
+            forward: const Vec3(0, -0.2, -1),
+            fovYRadians: 1.0,
+            aspect: aspect,
+            near: 0.1,
+            far: 200,
+          );
+    camera = shakeEngine.applyTo(camera);
+
+    final frameInput = sequencer.next(
+      camera: camera,
+      environment: environment,
+      post: post,
+      timeSeconds: timeSeconds,
+    );
+
+    final encoder = renderer.beginFrame(world, frameInput);
+    _frameOpen = true;
+
+    // Submit registered atmospheric particle fields
+    for (var i = 0; i < _particleFields.length; i++) {
+      _particleFields[i].submit(encoder, frameInput);
+    }
+
+    // Update and submit registered dynamic particle emitters
+    for (var i = 0; i < _emitters.length; i++) {
+      _emitters[i].update(dt);
+      _emitters[i].submit(encoder, frameInput);
+    }
+    final ctx = FrameContext(
+      timeSeconds: timeSeconds,
+      deltaTime: dt,
+      frameIndex: sequencer.frameIndex,
+      world: world,
+      resources: resources,
+      encoder: encoder,
+      camera: camera,
+      environment: environment,
+      post: post,
+    );
+
+    onFrame?.call(ctx);
+    final stats = renderer.endFrame();
+    _frameOpen = false;
+    if (showStats) {
+      _updateStats(stats, dt);
+    }
   }
 
   void _updateStats(FrameStats stats, double dt) {

@@ -109,11 +109,12 @@ final class InstancedMeshNode extends SceneNode {
   /// Raycasts against all instances of this node and child nodes.
   /// Returns the closest [RaycastHit] with [RaycastHit.instanceIndex] set to the hit instance index.
   @override
-  RaycastHit? raycast(Ray ray) {
+  RaycastHit? raycast(Ray ray, {bool Function(SceneNode node)? where, bool precise = false}) {
     final b = bounds ?? meshData?.bounds;
     RaycastHit? closest;
+    if (!visible) return null;
 
-    if (b != null && _instanceTransforms.isNotEmpty) {
+    if (b != null && _instanceTransforms.isNotEmpty && (where == null || where(this))) {
       final compound = worldBounds;
       if (compound == null || ray.intersectAabb(compound) != null) {
         final wt = worldTransform;
@@ -140,7 +141,7 @@ final class InstancedMeshNode extends SceneNode {
 
     // Also test any children
     for (final child in children) {
-      final hit = child.raycast(ray);
+      final hit = child.raycast(ray, where: where, precise: precise);
       if (hit != null && (closest == null || hit.distance < closest.distance)) {
         closest = hit;
       }
@@ -151,6 +152,7 @@ final class InstancedMeshNode extends SceneNode {
 
   @override
   void syncToWorld(RenderWorld world) {
+    flushDetached(world);
     final m = mesh;
     final mat = material;
 
@@ -160,7 +162,8 @@ final class InstancedMeshNode extends SceneNode {
       final currentWt = worldTransform;
       final wtChanged = _lastWorldTransform != currentWt;
 
-      if (_instancesDirty || wtChanged) {
+      // Draw-state edits (material, visibility, flags) also re-describe.
+      if (_instancesDirty || wtChanged || hasPendingWorldChanges) {
         final key = instanceFamilyKey;
 
         // Prune excess retained items if instance count decreased
@@ -175,7 +178,7 @@ final class InstancedMeshNode extends SceneNode {
             mesh: m,
             material: mat,
             transform: effTransform,
-            visibilityMask: visibilityMask,
+            visibilityMask: effectiveVisibilityMask,
             drawMode: drawMode,
             blendMode: blendMode,
             castsShadow: castsShadow,
@@ -193,6 +196,7 @@ final class InstancedMeshNode extends SceneNode {
 
         _lastWorldTransform = currentWt;
         _instancesDirty = false;
+        markWorldSynced();
       }
     }
 

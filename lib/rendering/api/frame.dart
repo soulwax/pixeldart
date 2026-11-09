@@ -53,7 +53,10 @@ final class CameraView {
     final farPoint = inverseViewProjection.transformPoint(Vec3(ndcX, ndcY, 1.0));
     final dir = (farPoint - nearPoint).normalized;
 
-    return Ray(origin: eye, direction: dir);
+    // Perspective rays all leave the eye. Orthographic rays are parallel and
+    // leave the near plane at the pixel's own position.
+    final orthographic = projection.at(3, 3) != 0;
+    return Ray(origin: orthographic ? nearPoint : eye, direction: dir);
   }
 
   CameraView({
@@ -118,6 +121,56 @@ final class CameraView {
       near: near,
       far: far,
       aspect: aspect,
+    )..validate();
+  }
+
+  /// Builds an orthographic camera: parallel projection of a box
+  /// [halfWidth] × [halfHeight] around the view axis, from [near] to [far].
+  ///
+  /// The same derived-and-validated contract as [CameraView.look]. Use it for
+  /// 2D games, top-down maps, isometric views and UI overlays in world space.
+  /// [aspect] is recorded for consumers; the box itself sets the shape.
+  factory CameraView.orthographic({
+    required Vec3 eye,
+    required Vec3 forward,
+    required double halfWidth,
+    required double halfHeight,
+    required double near,
+    required double far,
+    Vec3 up = const Vec3(0, 1, 0),
+  }) {
+    if (!forward.isFinite || forward.lengthSquared < 1e-12) {
+      throw ArgumentError('CameraView.orthographic requires a finite, nonzero forward: $forward');
+    }
+    if (!halfWidth.isFinite || halfWidth <= 0 || !halfHeight.isFinite || halfHeight <= 0) {
+      throw ArgumentError(
+        'CameraView.orthographic requires positive half extents, got $halfWidth x $halfHeight',
+      );
+    }
+    final direction = forward.normalized;
+    if (up.cross(direction).lengthSquared < 1e-12) {
+      throw ArgumentError(
+        'CameraView.orthographic requires up ($up) not parallel to forward ($forward)',
+      );
+    }
+    final view = Mat4.lookAt(eye: eye, forward: direction, up: up);
+    final projection = Mat4.orthographic(
+      left: -halfWidth,
+      right: halfWidth,
+      bottom: -halfHeight,
+      top: halfHeight,
+      near: near,
+      far: far,
+    );
+    return CameraView(
+      view: view,
+      projection: projection,
+      viewProjection: projection * view,
+      eye: eye,
+      forward: direction,
+      near: near,
+      far: far,
+      aspect: halfWidth / halfHeight,
     )..validate();
   }
 
@@ -298,49 +351,88 @@ final class SkyboxDeclaration {
     this.cloudSampleCount = 12,
   });
 
+  SkyboxDeclaration copyWith({
+    String? assetId,
+    TextureHandle? texture,
+    LinearColor? horizon,
+    LinearColor? zenith,
+    LinearColor? ground,
+    double? horizonGlow,
+    double? starDensity,
+    double? rotationRadians,
+    double? exposure,
+    bool? textureIsSrgb,
+    double? cloudCoverage,
+    double? cloudDensity,
+    double? cloudBaseHeight,
+    double? cloudThickness,
+    double? cloudScale,
+    double? cloudWindX,
+    double? cloudWindZ,
+    double? cloudPhase,
+    double? cloudDetail,
+    double? cloudSilverLining,
+    int? cloudSampleCount,
+  }) => SkyboxDeclaration(
+    assetId: assetId ?? this.assetId,
+    texture: texture ?? this.texture,
+    horizon: horizon ?? this.horizon,
+    zenith: zenith ?? this.zenith,
+    ground: ground ?? this.ground,
+    horizonGlow: horizonGlow ?? this.horizonGlow,
+    starDensity: starDensity ?? this.starDensity,
+    rotationRadians: rotationRadians ?? this.rotationRadians,
+    exposure: exposure ?? this.exposure,
+    textureIsSrgb: textureIsSrgb ?? this.textureIsSrgb,
+    cloudCoverage: cloudCoverage ?? this.cloudCoverage,
+    cloudDensity: cloudDensity ?? this.cloudDensity,
+    cloudBaseHeight: cloudBaseHeight ?? this.cloudBaseHeight,
+    cloudThickness: cloudThickness ?? this.cloudThickness,
+    cloudScale: cloudScale ?? this.cloudScale,
+    cloudWindX: cloudWindX ?? this.cloudWindX,
+    cloudWindZ: cloudWindZ ?? this.cloudWindZ,
+    cloudPhase: cloudPhase ?? this.cloudPhase,
+    cloudDetail: cloudDetail ?? this.cloudDetail,
+    cloudSilverLining: cloudSilverLining ?? this.cloudSilverLining,
+    cloudSampleCount: cloudSampleCount ?? this.cloudSampleCount,
+  );
+
+  /// Rejects invalid values, naming every offending field and its range.
+  ///
+  /// [cloudSampleCount] only matters while clouds are drawn, so it is only
+  /// checked when [cloudCoverage] > 0 (the present pass clamps it anyway).
   void validate() {
-    if (assetId.trim().isEmpty ||
-        !horizon.isFinite ||
-        !zenith.isFinite ||
-        !ground.isFinite ||
-        !horizonGlow.isFinite ||
-        horizonGlow < 0 ||
-        horizonGlow > 1 ||
-        !starDensity.isFinite ||
-        starDensity < 0 ||
-        starDensity > 0.1 ||
-        !rotationRadians.isFinite ||
-        !exposure.isFinite ||
-        exposure <= 0 ||
-        cloudCoverage < 0 ||
-        cloudCoverage > 1 ||
-        !cloudCoverage.isFinite ||
-        cloudDensity < 0 ||
-        cloudDensity > 1 ||
-        !cloudDensity.isFinite ||
-        cloudBaseHeight <= 0 ||
-        cloudBaseHeight > 100000 ||
-        !cloudBaseHeight.isFinite ||
-        cloudThickness <= 0 ||
-        cloudThickness > 100000 ||
-        !cloudThickness.isFinite ||
-        cloudScale <= 0 ||
-        cloudScale > 1 ||
-        !cloudScale.isFinite ||
-        !cloudWindX.isFinite ||
-        !cloudWindZ.isFinite ||
-        cloudWindX.abs() > 1000 ||
-        cloudWindZ.abs() > 1000 ||
-        !cloudPhase.isFinite ||
-        cloudDetail < 0 ||
-        cloudDetail > 1 ||
-        !cloudDetail.isFinite ||
-        cloudSilverLining < 0 ||
-        cloudSilverLining > 1 ||
-        !cloudSilverLining.isFinite ||
-        cloudSampleCount < 4 ||
-        cloudSampleCount > 24) {
-      throw ArgumentError('SkyboxDeclaration contains invalid values');
+    final problems = <String>[];
+    void range(String name, double v, double lo, double hi, {bool loOpen = false}) {
+      final below = loOpen ? v <= lo : v < lo;
+      if (!v.isFinite || below || v > hi) {
+        problems.add('$name=$v (expected ${loOpen ? '(' : '['}$lo, $hi])');
+      }
+    }
+
+    if (assetId.trim().isEmpty) problems.add('assetId must not be empty');
+    for (final (name, color) in [('horizon', horizon), ('zenith', zenith), ('ground', ground)]) {
+      if (!color.isFinite) problems.add('$name must be finite: $color');
+    }
+    range('horizonGlow', horizonGlow, 0, 1);
+    range('starDensity', starDensity, 0, 0.1);
+    if (!rotationRadians.isFinite) problems.add('rotationRadians must be finite: $rotationRadians');
+    range('exposure', exposure, 0, double.maxFinite, loOpen: true);
+    range('cloudCoverage', cloudCoverage, 0, 1);
+    range('cloudDensity', cloudDensity, 0, 1);
+    range('cloudBaseHeight', cloudBaseHeight, 0, 100000, loOpen: true);
+    range('cloudThickness', cloudThickness, 0, 100000, loOpen: true);
+    range('cloudScale', cloudScale, 0, 1, loOpen: true);
+    range('cloudWindX', cloudWindX, -1000, 1000);
+    range('cloudWindZ', cloudWindZ, -1000, 1000);
+    if (!cloudPhase.isFinite) problems.add('cloudPhase must be finite: $cloudPhase');
+    range('cloudDetail', cloudDetail, 0, 1);
+    range('cloudSilverLining', cloudSilverLining, 0, 1);
+    if (cloudCoverage > 0 && (cloudSampleCount < 4 || cloudSampleCount > 24)) {
+      problems.add('cloudSampleCount=$cloudSampleCount (expected [4, 24] while cloudCoverage > 0)');
+    }
+    if (problems.isNotEmpty) {
+      throw ArgumentError('SkyboxDeclaration is invalid: ${problems.join('; ')}');
     }
   }
 }
