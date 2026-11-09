@@ -1,3 +1,4 @@
+import '../api/capabilities.dart';
 import '../api/resource_plan.dart';
 import '../api/settings.dart';
 import 'device_api.dart';
@@ -107,12 +108,19 @@ final class GpuResourcePlanAdapter {
     if (current == null) {
       throw StateError('GPU resource adapter is not initialized');
     }
+    final plan = OwnedResourcePlan.forConfiguration(configuration);
+    final objects = _createObjects(plan, configuration);
+    final previous = current.logical.plan.resources;
+    // The restored context may negotiate a different sample count, which
+    // adds or drops the resolve target; the graph reads names from here.
+    final samePlan =
+        previous.length == plan.resources.length &&
+        previous.containsAll(plan.resources);
     _current = PreparedGpuResourcePlan(
-      logical: current.logical,
-      objects: _createObjects(
-        OwnedResourcePlan.forConfiguration(configuration),
-        configuration,
-      ),
+      logical: samePlan
+          ? current.logical
+          : PreparedResourceAssembly.initial(plan),
+      objects: objects,
     );
   }
 
@@ -200,16 +208,28 @@ final class GpuResourcePlanAdapter {
         resource.startsWith('volumetricLight');
     final targetWidth = half ? _halfExtent(width) : width;
     final targetHeight = half ? _halfExtent(height) : height;
-    final sceneColorResource =
-        resource == 'sceneColor' || resource.startsWith('sceneColor#');
+    if (resource.startsWith('sceneColor#')) {
+      // A separate version only exists as the MSAA resolve target. Every
+      // pass after the resolve is a full-screen composite with no depth
+      // test, and only bloom samples glow, so the target holds just what
+      // its readers need and the resolve skips the rest.
+      return GpuTargetDescriptor(
+        width: width,
+        height: height,
+        attachments: configuration.profile.installs(PipelineFeatures.bloom)
+            ? GpuTargetAttachment.colorAndGlow
+            : GpuTargetAttachment.color,
+      );
+    }
+    final sceneColor = resource == 'sceneColor';
     return GpuTargetDescriptor(
       width: targetWidth,
       height: targetHeight,
-      samples: resource == 'sceneColor' ? configuration.sampleCount : 1,
-      attachments: sceneColorResource
+      samples: sceneColor ? configuration.sampleCount : 1,
+      attachments: sceneColor
           ? GpuTargetAttachment.colorAndGlow
           : GpuTargetAttachment.color,
-      hasDepth: sceneColorResource,
+      hasDepth: sceneColor,
     );
   }
 

@@ -169,6 +169,7 @@ final class ProgramLibrary {
       );
     }
     try {
+      _validateStageInterface(source, replacement);
       if (replacement.fragment != null) {
         _validateFragmentOutputs(
           source.id,
@@ -197,6 +198,103 @@ final class ProgramLibrary {
     }
   }
 
+  void _validateStageInterface(
+    ProgramSource source,
+    ShaderOverride replacement,
+  ) {
+    final defaultVertex = _stageDeclarations(source.vertexSource, source.id);
+    final defaultFragment = _stageDeclarations(
+      source.fragmentSource,
+      source.id,
+    );
+    final vertex = replacement.vertex == null
+        ? defaultVertex
+        : _stageDeclarations(replacement.vertex!, source.id);
+    final fragment = replacement.fragment == null
+        ? defaultFragment
+        : _stageDeclarations(replacement.fragment!, source.id);
+
+    for (final attribute in source.attributeLocations.entries) {
+      final original = _declarationFor(defaultVertex, 'in', attribute.key);
+      final supplied = _declarationFor(vertex, 'in', attribute.key);
+      if (original == null ||
+          supplied == null ||
+          supplied.type != original.type ||
+          supplied.location != attribute.value) {
+        throw ShaderCompileException(
+          ShaderCompileStage.validation,
+          '${source.id} vertex input ${attribute.key} must keep '
+          '${original?.type ?? 'its default type'} at location ${attribute.value}',
+        );
+      }
+    }
+
+    final defaultUniforms = <String, String>{
+      for (final declaration in [...defaultVertex, ...defaultFragment])
+        if (declaration.qualifier == 'uniform')
+          declaration.name: declaration.type,
+    };
+    for (final declaration in [...vertex, ...fragment]) {
+      final expected = defaultUniforms[declaration.name];
+      if (declaration.qualifier == 'uniform' &&
+          expected != null &&
+          declaration.type != expected) {
+        throw ShaderCompileException(
+          ShaderCompileStage.validation,
+          '${source.id} uniform ${declaration.name} must keep type $expected',
+        );
+      }
+    }
+
+    for (final input in fragment.where((item) => item.qualifier == 'in')) {
+      final output = _declarationFor(vertex, 'out', input.name);
+      if (output == null || output.type != input.type) {
+        throw ShaderCompileException(
+          ShaderCompileStage.validation,
+          '${source.id} fragment input ${input.name} (${input.type}) '
+          'has no matching vertex output',
+        );
+      }
+    }
+  }
+
+  _ShaderDeclaration? _declarationFor(
+    List<_ShaderDeclaration> declarations,
+    String qualifier,
+    String name,
+  ) {
+    for (final declaration in declarations) {
+      if (declaration.qualifier == qualifier && declaration.name == name) {
+        return declaration;
+      }
+    }
+    return null;
+  }
+
+  List<_ShaderDeclaration> _stageDeclarations(String source, String programId) {
+    final pattern = RegExp(
+      r'^(?:layout\s*\(\s*location\s*=\s*(\d+)\s*\)\s*)?'
+      r'(in|out|uniform)\s+(?:(?:lowp|mediump|highp)\s+)?'
+      r'([A-Za-z_]\w*)\s+([A-Za-z_]\w*)'
+      r'(?:\s*\[\s*(\d+)\s*\])?$',
+    );
+    final declarations = <_ShaderDeclaration>[];
+    for (final statement in _topLevelStatements(source, programId)) {
+      final match = pattern.firstMatch(statement);
+      if (match == null) continue;
+      final arrayLength = match.group(5);
+      declarations.add((
+        qualifier: match.group(2)!,
+        type: arrayLength == null
+            ? match.group(3)!
+            : '${match.group(3)}[$arrayLength]',
+        name: match.group(4)!,
+        location: match.group(1) == null ? null : int.parse(match.group(1)!),
+      ));
+    }
+    return declarations;
+  }
+
   // The render graph owns attachment locations. A compilable host fragment
   // shader may still write the wrong target, so check its declared outputs
   // against the default pass before asking the GPU to compile it.
@@ -220,37 +318,6 @@ final class ProgramLibrary {
   }
 
   Map<int, String> _fragmentOutputs(String source, String programId) {
-    final withoutComments = source
-        .replaceAll(RegExp(r'/\*[\s\S]*?\*/'), '')
-        .replaceAll(RegExp(r'//[^\r\n]*'), '')
-        .replaceAll(RegExp(r'^\s*#.*$', multiLine: true), '');
-    // Ignore function bodies so `out` parameters and local statements cannot
-    // be mistaken for fragment attachment declarations.
-    final topLevel = StringBuffer();
-    var braceDepth = 0;
-    for (final codeUnit in withoutComments.codeUnits) {
-      if (codeUnit == 123) {
-        if (braceDepth == 0) topLevel.write(';');
-        braceDepth++;
-      } else if (codeUnit == 125) {
-        braceDepth--;
-        if (braceDepth == 0) topLevel.write(';');
-      } else if (braceDepth == 0) {
-        topLevel.writeCharCode(codeUnit);
-      }
-      if (braceDepth < 0) {
-        throw ShaderCompileException(
-          ShaderCompileStage.validation,
-          '$programId has unbalanced fragment shader braces',
-        );
-      }
-    }
-    if (braceDepth != 0) {
-      throw ShaderCompileException(
-        ShaderCompileStage.validation,
-        '$programId has unbalanced fragment shader braces',
-      );
-    }
     final declarationPattern = RegExp(
       r'^(?:layout\s*\(\s*location\s*=\s*(\d+)\s*\)\s*)?'
       r'out\s+(?:(?:lowp|mediump|highp)\s+)?'
@@ -258,8 +325,7 @@ final class ProgramLibrary {
       r'[A-Za-z_]\w*$',
     );
     final declarations = <RegExpMatch>[];
-    for (final statement in topLevel.toString().split(';')) {
-      final trimmed = statement.trim();
+    for (final trimmed in _topLevelStatements(source, programId)) {
       final declaration = declarationPattern.firstMatch(trimmed);
       if (declaration != null) {
         declarations.add(declaration);
@@ -293,6 +359,46 @@ final class ProgramLibrary {
     return outputs;
   }
 
+  List<String> _topLevelStatements(String source, String programId) {
+    final withoutComments = source
+        .replaceAll(RegExp(r'/\*[\s\S]*?\*/'), '')
+        .replaceAll(RegExp(r'//[^\r\n]*'), '')
+        .replaceAll(RegExp(r'^\s*#.*$', multiLine: true), '');
+    // Ignore function bodies so parameters and local statements cannot be
+    // mistaken for stage interface declarations.
+    final topLevel = StringBuffer();
+    var braceDepth = 0;
+    for (final codeUnit in withoutComments.codeUnits) {
+      if (codeUnit == 123) {
+        if (braceDepth == 0) topLevel.write(';');
+        braceDepth++;
+      } else if (codeUnit == 125) {
+        braceDepth--;
+        if (braceDepth == 0) topLevel.write(';');
+      } else if (braceDepth == 0) {
+        topLevel.writeCharCode(codeUnit);
+      }
+      if (braceDepth < 0) {
+        throw ShaderCompileException(
+          ShaderCompileStage.validation,
+          '$programId has unbalanced shader source braces',
+        );
+      }
+    }
+    if (braceDepth != 0) {
+      throw ShaderCompileException(
+        ShaderCompileStage.validation,
+        '$programId has unbalanced shader source braces',
+      );
+    }
+    return topLevel
+        .toString()
+        .split(';')
+        .map((statement) => statement.trim())
+        .where((statement) => statement.isNotEmpty)
+        .toList();
+  }
+
   void _checkOpenSet(PreparedProgramSet prepared) {
     if (!identical(_openSet, prepared) ||
         prepared.state != ProgramSetCandidateState.prepared) {
@@ -306,3 +412,10 @@ final class ProgramLibrary {
     }
   }
 }
+
+typedef _ShaderDeclaration = ({
+  String qualifier,
+  String type,
+  String name,
+  int? location,
+});

@@ -48,6 +48,7 @@
 - **Sky:** `SkyboxDeclaration.copyWith`, `setSolarTime(coherentHorizon:)` and `app.matchHorizonToFog()`.
 - **Fog:** `enableVolumetricFog(jitter:)`.
 - **Docs:** `docs/conventions.md`; `examples/`, three games built on the public API.
+- **MSAA:** `sampleCount` is now a request. The renderer clamps it to `RenderCapabilities.maxSamples`, and steps down (halving to 1×) when a multisampled framebuffer is incomplete. It negotiates again after a context restore. `renderer.msaa` / `app.msaa` report the requested and effective counts and a `MsaaFallbackReason`; `renderer.configuration` keeps the request. `app.setSampleCount(n)` changes it between frames; `RendererConfiguration.withSampleCount` copies a configuration.
 
 ### Changed
 
@@ -61,6 +62,8 @@
   - `WaterSurfaceMesh.updateWaves` evaluates displacement and normal in one pass and rotates each wave's phase along a grid row instead of calling sin/cos per vertex.
   - `Transform.toMat4` writes one buffer (`Mat4.compose`).
   - `PixeldartApp` re-reads the canvas size only after a `ResizeObserver` reports a change, instead of forcing layout every frame.
+
+- The MSAA resolve target holds only what later passes read. It has color always, glow only when bloom is installed, and never depth, since no pass after the resolve depth-tests or samples it. The resolve blits only attachments both sides own. Before this, every MSAA frame copied depth (and glow without bloom) into storage nobody read. At 1080p that is up to about 16 MiB of memory and two full-screen blits per frame. 1× still allocates no multisample storage and runs no resolve.
 
 - `SkyboxDeclaration.validate` names every invalid field. `cloudSampleCount` is only checked while clouds are drawn.
 - The GLB decoder no longer stores material indices in `SceneNode.sortTiebreaker`.

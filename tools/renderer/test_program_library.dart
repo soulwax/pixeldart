@@ -2,6 +2,9 @@ import 'package:pixeldart/rendering/core/program_library.dart';
 import 'package:pixeldart/rendering/core/program_source.dart';
 import 'package:pixeldart/rendering/api/shaders.dart';
 import 'package:pixeldart/rendering/webgl/device_api.dart';
+import 'package:pixeldart/rendering/webgl/generated_shaders.dart';
+import 'package:pixeldart/rendering/passes/present.dart';
+import 'package:pixeldart/rendering/passes/shadowed_world.dart';
 
 import 'fake_gpu_device.dart';
 
@@ -11,10 +14,13 @@ void main() {
   _hostOverrideUsesDefaultVertex();
   _invalidStartupOverrideUsesDefault();
   _fragmentOutputContract();
+  _stageInterfaceContract();
+  _realProgramInterfaces();
   print('Renderer program library fixtures passed.');
 }
 
-const _validVertex = 'attribute aPosition; uniform uViewProjection;';
+const _validVertex =
+    'layout(location=0) in vec3 aPosition; uniform mat4 uViewProjection;';
 const _validFragment = 'out vec4 oColor;';
 
 ProgramSource _worldProgramSource({String vertexOverride = _validVertex}) =>
@@ -135,6 +141,149 @@ layout(location=1) out vec4 oGlow;
   } finally {
     depthLibrary.disposeAll();
   }
+}
+
+void _stageInterfaceContract() {
+  const vertex = '''
+layout(location=0) in vec3 aPosition;
+uniform mat4 uViewProjection;
+uniform mat4 uInstanceModels[16];
+out vec2 vUv;
+void main() { vUv = aPosition.xy; gl_Position = uViewProjection * vec4(aPosition, 1.0); }
+''';
+  const fragment = '''
+in vec2 vUv;
+uniform sampler2D uTex;
+out vec4 oColor;
+void main() { oColor = texture(uTex, vUv); }
+''';
+  const source = ProgramSource(
+    id: 'sprites',
+    vertexSource: vertex,
+    fragmentSource: fragment,
+    attributeLocations: {'aPosition': 0},
+    samplerUnits: {'uTex': 0},
+    requiredUniforms: ['uViewProjection', 'uTex'],
+  );
+
+  final invalid = <ShaderOverride>[
+    const ShaderOverride(
+      vertex: '''
+layout(location=1) in vec3 aPosition;
+uniform mat4 uViewProjection;
+out vec2 vUv;
+''',
+    ),
+    const ShaderOverride(
+      vertex: '''
+layout(location=0) in vec2 aPosition;
+uniform mat4 uViewProjection;
+out vec2 vUv;
+''',
+    ),
+    const ShaderOverride(
+      vertex: '''
+layout(location=0) in vec3 aPosition;
+uniform mat4 uViewProjection;
+out vec3 vOther;
+''',
+    ),
+    const ShaderOverride(
+      vertex: '''
+layout(location=0) in vec3 aPosition;
+uniform mat4 uViewProjection;
+uniform mat4 uInstanceModels[1];
+out vec2 vUv;
+''',
+    ),
+    const ShaderOverride(
+      fragment: '''
+in vec3 vUv;
+uniform sampler2D uTex;
+out vec4 oColor;
+''',
+    ),
+    const ShaderOverride(
+      fragment: '''
+in vec2 vUv;
+uniform float uTex;
+out vec4 oColor;
+''',
+    ),
+  ];
+  for (final replacement in invalid) {
+    final device = FakeGpuDevice();
+    final library = ProgramLibrary(
+      device,
+      overrides: {ShaderSlot.sprites: replacement},
+    );
+    try {
+      library.publish(source);
+      throw StateError('invalid stage interface was accepted: $replacement');
+    } on ShaderCompileException catch (error) {
+      if (error.stage != ShaderCompileStage.validation ||
+          device.programCompileCalls != 0) {
+        throw StateError('stage interface check did not precede compilation');
+      }
+    } finally {
+      library.disposeAll();
+    }
+  }
+
+  final device = FakeGpuDevice();
+  final library = ProgramLibrary(
+    device,
+    overrides: const {
+      ShaderSlot.sprites: ShaderOverride(
+        vertex: '''
+layout(location=0) in vec3 aPosition;
+uniform mat4 uViewProjection;
+out vec3 vCustom;
+void main() { vCustom = aPosition; gl_Position = uViewProjection * vec4(aPosition, 1.0); }
+''',
+        fragment: '''
+in vec3 vCustom;
+uniform sampler2D uTex;
+out vec4 oColor;
+void main() { oColor = texture(uTex, vCustom.xy); }
+''',
+      ),
+    },
+  );
+  library.publish(source);
+  if (device.programCompileCalls != 1) {
+    throw StateError('matching custom stages were rejected');
+  }
+  library.disposeAll();
+}
+
+void _realProgramInterfaces() {
+  final device = FakeGpuDevice();
+  final library = ProgramLibrary(
+    device,
+    overrides: const {
+      ShaderSlot.shadowedWorld: ShaderOverride(
+        vertex: '$shadowedWorldVertSrc\n// HOST',
+      ),
+      ShaderSlot.present: ShaderOverride(fragment: '$presentFragSrc\n// HOST'),
+    },
+  );
+  library.publish(
+    ShadowedWorldProgramSource.build(
+      vertexSource: shadowedWorldVertSrc,
+      fragmentSource: shadowedWorldFragSrc,
+    ),
+  );
+  library.publish(
+    PresentProgramSource.build(
+      vertexSource: presentVertSrc,
+      fragmentSource: presentFragSrc,
+    ),
+  );
+  if (device.programCompileCalls != 2) {
+    throw StateError('authored world/present shader contracts were rejected');
+  }
+  library.disposeAll();
 }
 
 void _invalidStartupOverrideUsesDefault() {

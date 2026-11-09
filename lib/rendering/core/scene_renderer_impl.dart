@@ -6,6 +6,7 @@ import '../api/handles.dart';
 import '../api/lights.dart';
 import '../api/materials.dart';
 import '../api/mesh.dart';
+import '../api/msaa.dart';
 import '../api/renderer.dart';
 import '../api/scene.dart';
 import '../api/settings.dart';
@@ -57,6 +58,10 @@ final class SceneRendererImpl with _GpuTimingSupport implements SceneRenderer {
   FeatureGraph? _featureGraph;
   FeatureGraphResult? _graph;
   RendererConfiguration? _configuration;
+  // _configuration with the negotiated sample count: what targets and the
+  // graph are actually built from.
+  RendererConfiguration? _allocated;
+  MsaaStatus _msaa = const MsaaStatus.off();
   FrameInput? _activeFrame;
   RenderWorldImpl? _activeWorld;
   SceneRendererImpl(this.device);
@@ -71,6 +76,8 @@ final class SceneRendererImpl with _GpuTimingSupport implements SceneRenderer {
   @override
   RendererConfiguration get configuration =>
       _configuration ?? (throw StateError('renderer is not initialized'));
+  @override
+  MsaaStatus get msaa => _msaa;
   @override
   Map<ShaderSlot, String> get shaderErrors =>
       _programs?.overrideErrors ?? const {};
@@ -98,13 +105,19 @@ final class SceneRendererImpl with _GpuTimingSupport implements SceneRenderer {
       _capabilities = device.queryCapabilities();
       _configurations.initialize(configuration);
       _resources = ResourceLibraryImpl(device);
-      _gpuResources = GpuResourcePlanAdapter(device)..initialize(configuration);
+      final gpuResources = _gpuResources = GpuResourcePlanAdapter(device);
+      final allocation = _allocateMultisampled(
+        configuration,
+        gpuResources.initialize,
+      );
       _programs = ProgramLibrary(
         device,
         overrides: configuration.shaderOverrides,
         fallbackToDefaults: true,
       );
       _configuration = configuration;
+      _allocated = allocation.configuration;
+      _msaa = allocation.msaa;
       _buildSafeGraph();
       _state = RendererState.ready;
       _markContextSeen();
@@ -276,11 +289,47 @@ final class SceneRendererImpl with _GpuTimingSupport implements SceneRenderer {
       throw StateError('renderer context remains lost');
     }
     _resources!.rehydrateAfterContextRestore();
-    _gpuResources!.rehydrateAfterContextRestore(_configuration!);
+    // A restored context can sit on a different adapter, so the sample
+    // count is negotiated again rather than replayed.
+    _capabilities = device.queryCapabilities();
+    final allocation = _allocateMultisampled(
+      _configuration!,
+      _gpuResources!.rehydrateAfterContextRestore,
+    );
+    _allocated = allocation.configuration;
+    _msaa = allocation.msaa;
     _programs!.resetAfterContextRestore();
     _buildSafeGraph();
     _state = RendererState.ready;
     _markContextSeen();
+  }
+
+  /// Runs [allocate] at the sample count the device can honour, halving it
+  /// while multisampled framebuffers come back incomplete. 1× is attempted
+  /// last and its failure is rethrown unchanged.
+  ({T value, RendererConfiguration configuration, MsaaStatus msaa})
+  _allocateMultisampled<T>(
+    RendererConfiguration requested,
+    T Function(RendererConfiguration) allocate,
+  ) {
+    var msaa = MsaaStatus.negotiate(requested.sampleCount, _capabilities!);
+    while (true) {
+      final configuration = msaa.effective == requested.sampleCount
+          ? requested
+          : requested.withSampleCount(msaa.effective);
+      try {
+        return (
+          value: allocate(configuration),
+          configuration: configuration,
+          msaa: msaa,
+        );
+      } catch (_) {
+        if (!msaa.isMultisampled || device.status == GpuDeviceStatus.lost) {
+          rethrow;
+        }
+        msaa = msaa.afterIncompleteFramebuffer();
+      }
+    }
   }
 
   void _ensureReady() {

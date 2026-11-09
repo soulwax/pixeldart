@@ -18,7 +18,17 @@ final class FakeGpuDevice
   final bool timerQueries;
   @override
   final bool disjointTimer;
-  FakeGpuDevice({this.timerQueries = true, this.disjointTimer = false});
+  int maxSamples;
+
+  /// Multisampled targets above this count fail as an incomplete
+  /// framebuffer would, even though [maxSamples] advertises them.
+  int? incompleteAboveSamples;
+  FakeGpuDevice({
+    this.timerQueries = true,
+    this.disjointTimer = false,
+    this.maxSamples = 4,
+    this.incompleteAboveSamples,
+  });
   GpuDeviceStatus _status = GpuDeviceStatus.ready;
   int _nextId = 1;
 
@@ -31,6 +41,10 @@ final class FakeGpuDevice
   int targetCreateCalls = 0;
   int targetDeleteCalls = 0;
   int resolveTargetCalls = 0;
+
+  /// The attachments the last resolve copied, mirroring the WebGL device:
+  /// only those both source and destination own.
+  Set<String> lastResolvedAttachments = const {};
   final Map<int, GpuTargetDescriptor> _targetDescriptors = {};
   int vaoCreateCalls = 0;
   int vaoDeleteCalls = 0;
@@ -43,6 +57,9 @@ final class FakeGpuDevice
   GpuTargetDescriptor targetDescriptor(GpuObject target) =>
       _targetDescriptors[(target as _FakeGpuObject).id]!;
 
+  Iterable<GpuTargetDescriptor> get liveTargetDescriptors =>
+      _targetDescriptors.values;
+
   final Set<int> _liveObjects = {};
   final List<String> drawLog = [];
   final List<({String name, UniformValue value})> uniformLog = [];
@@ -54,6 +71,7 @@ final class FakeGpuDevice
 
   bool isLive(GpuObject obj) =>
       _liveObjects.contains((obj as _FakeGpuObject).id);
+
   /// code must not depend on the private object identities.
   int get liveObjectCount => _liveObjects.length;
   int get liveTimerCount => _timerIds.length;
@@ -64,7 +82,7 @@ final class FakeGpuDevice
     rendererString: 'FakeGpuDevice',
     maxTextureSize: 4096,
     maxTextureArrayLayers: 8,
-    maxSamples: 4,
+    maxSamples: maxSamples,
     maxVertexAttributes: 16,
     maxColorAttachments: 4,
     floatRenderTarget: true,
@@ -139,6 +157,7 @@ final class FakeGpuDevice
     textureMipsFinalizedCalls += 1;
     _texturesMissingFinalizedMips.remove((texture as _FakeGpuObject).id);
   }
+
   /// exact real bug this pair of methods was added to close.
   bool hasUnfinalizedMips(GpuObject texture) =>
       _texturesMissingFinalizedMips.contains((texture as _FakeGpuObject).id);
@@ -166,6 +185,10 @@ final class FakeGpuDevice
         'FakeGpuDevice.createTarget requires positive dimensions, '
         'got ${descriptor.width}x${descriptor.height}',
       );
+    }
+    final incompleteAbove = incompleteAboveSamples;
+    if (incompleteAbove != null && descriptor.samples > incompleteAbove) {
+      throw StateError('FakeGpuDevice.createTarget: framebuffer incomplete');
     }
     targetCreateCalls += 1;
     final target = _create();
@@ -212,6 +235,16 @@ final class FakeGpuDevice
       );
     }
     resolveTargetCalls += 1;
+    bool hasGlow(GpuTargetDescriptor d) =>
+        d.attachments == GpuTargetAttachment.colorAndGlow ||
+        d.attachments == GpuTargetAttachment.colorDepthGlow;
+    lastResolvedAttachments = {
+      if (src.attachments != GpuTargetAttachment.depthOnly &&
+          dst.attachments != GpuTargetAttachment.depthOnly)
+        'color',
+      if (hasGlow(src) && hasGlow(dst)) 'glow',
+      if (src.hasDepth && dst.hasDepth) 'depth',
+    };
     drawLog.add('resolveTarget(${source.id}, ${destination.id})');
   }
 
@@ -227,6 +260,7 @@ final class FakeGpuDevice
     vaoDeleteCalls += 1;
     _delete(vao);
   }
+
   /// source, simulating attribute/uniform validation (§7.2 step 3).
   @override
   GpuObject compileProgram({
@@ -289,6 +323,7 @@ final class FakeGpuDevice
   void simulateContextLoss() {
     _status = GpuDeviceStatus.lost;
     _liveObjects.clear();
+    _targetDescriptors.clear();
   }
 
   @override

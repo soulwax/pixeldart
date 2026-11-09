@@ -7,9 +7,13 @@ attributes at the listed locations, the varyings shared between stages, and
 the engine uniforms used by the pass. The renderer binds the listed samplers;
 host uniforms and extra textures do not yet have a public binding API.
 
-The compiler checks required attributes and uniforms. Before compilation,
-fragment overrides must declare the same attachment locations and types as
-the default. A single `vec4` output may omit `layout(location=0)`; passes with
+Before compilation, vertex overrides must keep the renderer's attribute types
+and locations, uniforms that retain an engine name must keep their default
+type and array length, and each fragment input must have a matching vertex
+output. The WebGL
+compiler also checks required attributes and uniforms. Fragment overrides
+must declare the same attachment locations and types as the default. A single
+`vec4` output may omit `layout(location=0)`; passes with
 two outputs must declare both locations. The depth-only passes declare no
 color output. Compilation and linking still depend on the browser's WebGL 2
 driver. A failed live change retains the previous graph; a failed startup

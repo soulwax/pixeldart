@@ -175,6 +175,21 @@ final class RendererConfiguration {
     shaderOverrides: Map.unmodifiable(overrides),
   );
 
+  RendererConfiguration withSampleCount(int samples) => RendererConfiguration(
+    profile: profile,
+    internalWidth: internalWidth,
+    internalHeight: internalHeight,
+    sampleCount: samples,
+    outputEncoding: outputEncoding,
+    shadowMapCount: shadowMapCount,
+    shadowMapSize: shadowMapSize,
+    materialTableCapacity: materialTableCapacity,
+    lightTableCapacity: lightTableCapacity,
+    textureArrayLayerCapacity: textureArrayLayerCapacity,
+    diagnosticLevel: diagnosticLevel,
+    shaderOverrides: shaderOverrides,
+  );
+
   static const RendererConfiguration safe = RendererConfiguration(
     profile: QualityProfile.safe,
     internalWidth: 384,

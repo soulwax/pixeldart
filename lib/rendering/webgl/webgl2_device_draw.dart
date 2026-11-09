@@ -52,8 +52,18 @@ extension WebGl2DeviceDraw on WebGl2Device {
         'destination (${dst.width}x${dst.height}) must match',
       );
     }
-    final srcHasGlow = src.glowRb != null || src.glowTex != null;
-    final dstHasGlow = dst.glowRb != null || dst.glowTex != null;
+    // Each attachment resolves only when both sides own it: the destination
+    // is sized by its readers, so a missing glow or depth there means no
+    // later pass samples it and the blit would be wasted bandwidth.
+    final resolveColor =
+        (src.colorRb != null || src.colorTex != null) &&
+        (dst.colorRb != null || dst.colorTex != null);
+    final resolveGlow =
+        (src.glowRb != null || src.glowTex != null) &&
+        (dst.glowRb != null || dst.glowTex != null);
+    final resolveDepth =
+        (src.depthRb != null || src.depthTex != null) &&
+        (dst.depthRb != null || dst.depthTex != null);
 
     gl.bindFramebuffer(_G.READ_FRAMEBUFFER, src.fbo);
     gl.bindFramebuffer(_G.DRAW_FRAMEBUFFER, dst.fbo);
@@ -66,8 +76,8 @@ extension WebGl2DeviceDraw on WebGl2Device {
     // isolating one attachment via readBuffer/drawBuffers, since a single
     // blit call cannot target two source/destination attachment pairs at
     // once.
-    if (src.colorRb != null || src.colorTex != null) {
-      if (srcHasGlow) {
+    if (resolveColor) {
+      if (resolveGlow) {
         gl.readBuffer(_G.COLOR_ATTACHMENT0);
         gl.drawBuffers(
           <JSNumber>[_G.COLOR_ATTACHMENT0.toJS, _G.NONE.toJS].toJS,
@@ -86,7 +96,7 @@ extension WebGl2DeviceDraw on WebGl2Device {
         _G.LINEAR,
       );
     }
-    if (srcHasGlow && dstHasGlow) {
+    if (resolveGlow) {
       gl.readBuffer(_G.COLOR_ATTACHMENT1);
       gl.drawBuffers(<JSNumber>[_G.NONE.toJS, _G.COLOR_ATTACHMENT1.toJS].toJS);
       gl.blitFramebuffer(
@@ -102,7 +112,7 @@ extension WebGl2DeviceDraw on WebGl2Device {
         _G.LINEAR,
       );
     }
-    if (src.depthRb != null || src.depthTex != null) {
+    if (resolveDepth) {
       gl.blitFramebuffer(
         0,
         0,
@@ -121,8 +131,10 @@ extension WebGl2DeviceDraw on WebGl2Device {
     // ever affects whichever framebuffer is bound to DRAW_FRAMEBUFFER,
     // never READ_FRAMEBUFFER) — restore it to the two-attachment state
     // createTargetImpl established, or a later pass rendering into dst
-    // would silently stop writing one of its two color attachments.
-    if (dstHasGlow) {
+    // would silently stop writing one of its two color attachments. The
+    // source's read buffer goes back to its default for the same reason.
+    if (resolveGlow) {
+      gl.readBuffer(_G.COLOR_ATTACHMENT0);
       gl.drawBuffers(
         <JSNumber>[_G.COLOR_ATTACHMENT0.toJS, _G.COLOR_ATTACHMENT1.toJS].toJS,
       );

@@ -15,6 +15,7 @@ import '../api/host_bootstrap.dart';
 import '../api/lights.dart';
 import '../api/materials.dart';
 import '../api/mesh.dart';
+import '../api/msaa.dart';
 import '../api/renderer.dart';
 import '../api/scene.dart';
 import '../api/settings.dart';
@@ -94,6 +95,15 @@ final class PixeldartApp {
     }
     return renderer.configure(renderer.configuration.withShaderOverrides(next));
   }
+
+  /// The sample count in use, the one requested, and why they differ.
+  MsaaStatus get msaa => renderer.msaa;
+
+  /// Requests [samples]× MSAA between frames. The renderer clamps the
+  /// request to what the device can allocate; read [msaa] for the result.
+  /// 1× allocates no multisample storage and skips the resolve entirely.
+  Future<void> setSampleCount(int samples) =>
+      renderer.configure(renderer.configuration.withSampleCount(samples));
 
   SurfaceMetrics _surface;
   CameraController? cameraController;
@@ -953,7 +963,8 @@ final class PixeldartApp {
       if (_pressedKeys.contains('keya') || _pressedKeys.contains('arrowleft')) {
         rgt -= 1.0;
       }
-      if (_pressedKeys.contains('keyd') || _pressedKeys.contains('arrowright')) {
+      if (_pressedKeys.contains('keyd') ||
+          _pressedKeys.contains('arrowright')) {
         rgt += 1.0;
       }
       if (_pressedKeys.contains('space') || _pressedKeys.contains('keye')) {

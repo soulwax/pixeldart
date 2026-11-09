@@ -5,6 +5,7 @@ import 'frame.dart';
 import 'handles.dart';
 import 'materials.dart';
 import 'mesh.dart';
+import 'msaa.dart';
 import 'scene.dart';
 import 'settings.dart';
 import 'shaders.dart';
@@ -52,7 +53,11 @@ abstract interface class SceneRenderer {
   RenderCapabilities get capabilities;
   RendererHealth get health;
 
+  /// The configuration as requested; [msaa] reports the sample count that
+  /// was actually allocated for it.
   RendererConfiguration get configuration;
+
+  MsaaStatus get msaa;
 
   Map<ShaderSlot, String> get shaderErrors;
   ResourceLibrary get resources;

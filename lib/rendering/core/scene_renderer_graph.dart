@@ -34,31 +34,38 @@ extension on SceneRendererImpl {
     if (transition.configuration.delta.isNoop) {
       _configurations.commit(transition);
       _configuration = configuration;
+      _allocated = configuration.withSampleCount(_msaa.effective);
       return;
     }
     PreparedGpuResourcePlan? candidateResources;
     ProgramLibrary? candidatePrograms;
     FeatureGraph? candidateFeatures;
     try {
-      candidateResources = _gpuResources!.prepare(configuration);
+      final allocation = _allocateMultisampled(
+        configuration,
+        _gpuResources!.prepare,
+      );
+      final prepared = candidateResources = allocation.value;
       candidatePrograms = ProgramLibrary(
         device,
         overrides: configuration.shaderOverrides,
       );
       final candidate = _assembleSafeGraph(
         candidatePrograms,
-        configuration,
-        candidateResources.logical.plan.resources,
+        allocation.configuration,
+        prepared.logical.plan.resources,
       );
       candidateFeatures = candidate.featureGraph;
       _configurations.commit(transition);
-      _gpuResources!.commit(candidateResources);
+      _gpuResources!.commit(prepared);
       final oldFeatures = _featureGraph, oldPrograms = _programs;
       _featureGraph = candidate.featureGraph;
       _graph = candidate.result;
       _programs = candidatePrograms;
       candidatePrograms.fallbackToDefaults = true;
       _configuration = configuration;
+      _allocated = allocation.configuration;
+      _msaa = allocation.msaa;
       oldFeatures?.disposeAll();
       oldPrograms?.disposeAll();
     } catch (_) {
@@ -82,7 +89,7 @@ extension on SceneRendererImpl {
   void _buildSafeGraph() {
     final assembled = _assembleSafeGraph(
       _programs!,
-      _configuration!,
+      _allocated!,
       _gpuResources!.current.logical.plan.resources,
     );
     _featureGraph = assembled.featureGraph;

@@ -39,6 +39,28 @@ Future<void> main() async {
     'failed shader change disturbed the live graph',
   );
 
+  rejected = false;
+  try {
+    await renderer.configure(
+      _base.withShaderOverrides({
+        ShaderSlot.sprites: ShaderOverride(
+          fragment: spriteFragSrc.replaceFirst(
+            'uniform sampler2D uTex;',
+            'uniform float uTex;',
+          ),
+        ),
+      }),
+    );
+  } on ShaderCompileException catch (error) {
+    rejected = error.stage == ShaderCompileStage.validation;
+  }
+  _check(rejected, 'wrong engine uniform type was accepted');
+  _check(
+    renderer.configuration.shaderOverrides.isEmpty &&
+        device.liveObjectCount == live,
+    'rejected interface change disturbed the live graph',
+  );
+
   final custom = _base.withShaderOverrides(const {
     ShaderSlot.sprites: ShaderOverride(fragment: '$spriteFragSrc\n// HOST'),
   });
