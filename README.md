@@ -899,6 +899,41 @@ A few design decisions worth knowing before reading the code:
 - **Steady-state frames allocate nothing.** After warm-up, a normal frame performs no buffer/texture/target/program creation; dynamic geometry uses persistent grow-only buffers, and growth events are counted in diagnostics.
 - **PS1 is not a VHS filter.** Fixed low resolution is a resolution policy, vertex snapping and affine UV live in the world vertex path, quantize/dither is a composite after grade, and VHS is the final recording stage over the already-graded image. They compose because they are separate.
 
+## Shader overrides
+
+The built-in GLSL is the default for each `ShaderSlot`. A host may replace the
+vertex stage, fragment stage, or both when mounting an app. A missing stage
+keeps its built-in source. For example, `ShaderSlot.sprites` uses
+[`sprite.vert`](shaders/rendering/sprites/sprite.vert) and
+[`sprite.frag`](shaders/rendering/sprites/sprite.frag) as its defaults:
+
+```dart
+final app = await PixeldartApp.mount2d(
+  canvas,
+  shaders: {
+    ShaderSlot.sprites: ShaderOverride(fragment: mySpriteFragmentGlsl),
+  },
+);
+```
+
+`mySpriteFragmentGlsl` is a complete GLSL ES 3.0 source string that the host
+loads or embeds. It must keep the sprite pass's inputs (`vUv`, `vColor`,
+`vParams`), engine uniforms (`uTex`, `uLinearize`, `uMultiply`), and
+`oColor`/`oGlow` outputs. The default vertex stage supplies the inputs. Other
+slots follow their pass's `ProgramSource` binding contract and authored GLSL
+under `shaders/rendering/`. Only slots installed by the selected profile
+compile or draw.
+
+For a live change between frames, call
+`await app.setShader(ShaderSlot.sprites, ShaderOverride(fragment: nextSource))`.
+Pass `null` as the replacement to restore the default. A rejected live change
+keeps the previous graph; a rejected startup override uses the default and is
+listed in `app.shaderErrors`. Low-level hosts pass the same map through
+`RendererConfiguration(shaderOverrides: ...)` and inspect
+`renderer.shaderErrors`. Overrides keep the built-in pass layout; custom
+uniforms, extra textures, per-draw shader choice and new graph passes remain
+separate work in [PLAN.md](../PLAN.md).
+
 ## Testing
 
 ```sh
@@ -930,7 +965,7 @@ Hard-won, and now guarded by tests or API shape:
 The current checkout has both the standalone feature-graph demo and a concrete
 `SceneRendererImpl` bootstrap facade. The facade owns the safe world → present
 graph, retained resources, frame legality, disposal, and fake-device context
-recovery. The remaining gaps are deliberately itemized in [TODO.md](TODO.md),
+recovery. The remaining gaps are deliberately itemized in [TODO.md](../TODO.md),
 including full profile-driven graph replacement, live target resizing, authored
 surface-v2 tangents/lightmaps, browser-lab automation, and hardware acceptance.
 
