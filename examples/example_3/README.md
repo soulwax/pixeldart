@@ -49,6 +49,9 @@ Open <http://127.0.0.1:8765/example_3/>. URL flags:
 
 They combine, e.g. `?autostart&hour=22&storm=1`.
 
+For a Windows executable, run `.\examples\example_3\build_windows.ps1` from
+the Pixeldart package root.
+
 ## Notes
 
 - **The Pirate Kit models** are loaded with `app.loadModel(url, textureFilter: GpuTextureFilter.nearest)`.

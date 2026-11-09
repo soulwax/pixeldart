@@ -22,4 +22,5 @@ A small meteor-field runner. Steer through tumbling meteors. Crystals give point
 
 ## Build and run
 
-See [../README.md](../README.md).
+See [../README.md](../README.md). For a Windows executable, run
+`.\examples\example_1\build_windows.ps1` from the Pixeldart package root.

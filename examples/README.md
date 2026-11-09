@@ -26,6 +26,24 @@ Then open <http://127.0.0.1:8765/example_1/>, `/example_2/`, `/example_3/` or `/
 
 Build with `--no-source-maps`: the package-content check (`tools/test_plib11_archive_manifest.dart`) rejects generated `.js.map` files anywhere in the package tree. `build/` folders are gitignored.
 
+## Windows executables
+
+On Windows with the Dart and .NET 10 SDKs installed, build every game from the
+Pixeldart package root:
+
+```powershell
+.\examples\build_windows.ps1
+```
+
+Pass `-Example 1`, `2`, `3` or `4` to build just one. Each example also has
+its own `build_windows.ps1` entry point. The resulting single-file x64
+executables are `example_1/build/PixelRocket.exe`,
+`example_2/build/Lantern.exe`, `example_3/build/Tidewatch.exe` and
+`example_4/build/Procession.exe`. They embed their HTML, JavaScript and Kenney
+assets, so no static server or separate .NET installation is needed at run
+time. They use the installed Microsoft Edge WebView2 Runtime. Pass
+`--autostart` to an executable to skip its title card.
+
 ## Assets
 
 All downloaded art, models and sounds are CC0, from [Kenney](https://kenney.nl); each `res/CREDITS.txt` lists the packs. Other visuals, including Procession's water tile, are generated at runtime.

@@ -37,6 +37,9 @@ Open <http://127.0.0.1:8765/example_2/>. URL flags:
 - `?autostart` skips the title card.
 - `?debug` makes K gather every mote, and pressing K again steps you onto the portal.
 
+For a Windows executable, run `.\examples\example_2\build_windows.ps1` from
+the Pixeldart package root.
+
 ## Renderer APIs it leans on
 
 The game itself only uses public Pixeldart APIs:
