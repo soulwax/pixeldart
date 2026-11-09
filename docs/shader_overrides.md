@@ -92,8 +92,10 @@ one, and draws still naming it use the default.
 `setShaderUniform` and `setShaderTexture` take a `ShaderSlot`, a registered
 `ShaderHandle` or a `PostEffect`. An override can bind its own values:
 
-- `ShaderUniform.float`, `.vec2`, `.vec3`, `.vec4` and `.color` supply starting
-  values through `uniforms:`.
+- `ShaderUniform.float`, `.vec2`, `.vec3`, `.vec4`, `.int`, `.mat4` and `.color`
+  supply starting values through `uniforms:`. `.mat4` takes a `Mat4` and
+  snapshots its 16 elements, so later edits to the source matrix do not
+  change a bound value.
 - `app.setShaderUniform(slot, name, value)` changes one at any time. It never
   recompiles, an unchanged value does nothing, and live values survive resizes,
   graph rebuilds and context restores.

@@ -319,6 +319,7 @@ final class SpritesFeature implements RenderFeature {
     CompiledProgram? boundProgram;
     GpuObject? boundTexture;
     DrawStateDescriptor? boundState;
+    Float32List? boundProjection;
     var multiply = -1;
 
     for (var i = 0; i < count; i += 1) {
@@ -337,15 +338,18 @@ final class SpritesFeature implements RenderFeature {
           UniformValue.float1(linearize ? 1 : 0),
         );
         boundProgram = program;
+        boundProjection = null;
         multiply = -1;
       }
       final batch = submission.batch;
       final vertices = offsets[i] < 0 ? _entries[batch]!.retained! : stream!;
       final base = offsets[i] < 0 ? 0 : offsets[i];
-      encoder.setUniform(
-        'uViewProjection',
-        UniformValue.mat4(submission.viewProjection),
-      );
+      final projection = submission.viewProjection;
+      if (boundProjection == null ||
+          !_sameProjection(boundProjection, projection)) {
+        encoder.setUniform('uViewProjection', UniformValue.mat4(projection));
+        boundProjection = projection;
+      }
       encoder.bindVertexArray(vertices.vao);
       final useDepth = submission.depthTest && stage == SpriteStage.world;
 
@@ -382,6 +386,13 @@ final class SpritesFeature implements RenderFeature {
         );
       }
     }
+  }
+
+  static bool _sameProjection(Float32List a, Float32List b) {
+    for (var i = 0; i < 16; i += 1) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
   }
 
   _BatchEntry _update(SpriteBatch batch) {

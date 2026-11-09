@@ -379,6 +379,8 @@ Future<void> _defaultSpritesStayCheap() async {
   final host = await _Host.start(_config(QualityProfile.safe));
   final batch = _batch();
   final projection = Float32List(16);
+  host.draw();
+  final otherPassMatrices = host.sent('uViewProjection').length;
   host.draw((encoder) {
     for (var i = 0; i < 5; i += 1) {
       encoder.drawSpritesWith(batch, projection);
@@ -387,6 +389,32 @@ Future<void> _defaultSpritesStayCheap() async {
   require(
     host.sent('uLinearize').length == 1,
     'default sprites must bind their program once per stage',
+  );
+  require(
+    host.sent('uViewProjection').length == otherPassMatrices + 1,
+    'identical sprite projections must upload once per program run',
+  );
+
+  final changed = Float32List.fromList(projection)..[0] = 2;
+  host.draw((encoder) {
+    encoder.drawSpritesWith(batch, projection);
+    encoder.drawSpritesWith(batch, changed);
+    encoder.drawSpritesWith(batch, changed);
+  });
+  require(
+    host.sent('uViewProjection').length == otherPassMatrices + 2,
+    'a changed projection must upload before its draw',
+  );
+
+  final shader = host.renderer.registerSpriteShader(_spriteTint);
+  host.draw((encoder) {
+    encoder.drawSpritesWith(batch, projection);
+    encoder.drawSpritesWith(batch, projection, shader: shader);
+    encoder.drawSpritesWith(batch, projection);
+  });
+  require(
+    host.sent('uViewProjection').length == otherPassMatrices + 3,
+    'switching programs must upload the projection for each run',
   );
   host.renderer.dispose();
 }

@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import '../math/mat4.dart';
 import '../webgl/device_api.dart';
 import '../webgl/generated_shaders.dart';
 import 'handles.dart';
@@ -99,20 +100,56 @@ enum ShaderSlot implements ShaderTarget {
   };
 }
 
-/// A float or float-vector value for a host-declared GLSL uniform.
+/// An immutable value for a host-declared GLSL uniform.
 final class ShaderUniform {
   final String glslType;
   final double x, y, z, w;
+  final int? integer;
+  final Float32List? _matrix;
 
   const ShaderUniform.float(double value)
     : glslType = 'float',
       x = value,
       y = 0,
       z = 0,
-      w = 0;
-  const ShaderUniform.vec2(this.x, this.y) : glslType = 'vec2', z = 0, w = 0;
-  const ShaderUniform.vec3(this.x, this.y, this.z) : glslType = 'vec3', w = 0;
-  const ShaderUniform.vec4(this.x, this.y, this.z, this.w) : glslType = 'vec4';
+      w = 0,
+      integer = null,
+      _matrix = null;
+  const ShaderUniform.vec2(this.x, this.y)
+    : glslType = 'vec2',
+      z = 0,
+      w = 0,
+      integer = null,
+      _matrix = null;
+  const ShaderUniform.vec3(this.x, this.y, this.z)
+    : glslType = 'vec3',
+      w = 0,
+      integer = null,
+      _matrix = null;
+  const ShaderUniform.vec4(this.x, this.y, this.z, this.w)
+    : glslType = 'vec4',
+      integer = null,
+      _matrix = null;
+  const ShaderUniform.int(int value)
+    : glslType = 'int',
+      x = 0,
+      y = 0,
+      z = 0,
+      w = 0,
+      integer = value,
+      _matrix = null;
+
+  ShaderUniform._mat4(this._matrix)
+    : glslType = 'mat4',
+      x = 0,
+      y = 0,
+      z = 0,
+      w = 0,
+      integer = null;
+
+  /// Captures [matrix] now; later edits to it cannot change the bound value.
+  factory ShaderUniform.mat4(Mat4 matrix) =>
+      ShaderUniform._mat4(Float32List.fromList(matrix.m));
 
   /// A `vec3` holding [color]'s linear red, green and blue.
   factory ShaderUniform.color(LinearColor color) =>
@@ -122,7 +159,9 @@ final class ShaderUniform {
     'float' => UniformValue.float1(x),
     'vec2' => UniformValue.float2(Float32List.fromList([x, y])),
     'vec3' => UniformValue.float3(Float32List.fromList([x, y, z])),
-    _ => UniformValue.float4(Float32List.fromList([x, y, z, w])),
+    'vec4' => UniformValue.float4(Float32List.fromList([x, y, z, w])),
+    'int' => UniformValue.int1(integer!),
+    _ => UniformValue.mat4(Float32List.fromList(_matrix!)),
   };
 
   @override
@@ -132,13 +171,36 @@ final class ShaderUniform {
       other.x == x &&
       other.y == y &&
       other.z == z &&
-      other.w == w;
+      other.w == w &&
+      other.integer == integer &&
+      _sameMatrix(other._matrix, _matrix);
 
   @override
-  int get hashCode => Object.hash(glslType, x, y, z, w);
+  int get hashCode => Object.hash(
+    glslType,
+    x,
+    y,
+    z,
+    w,
+    integer,
+    _matrix == null ? null : Object.hashAll(_matrix),
+  );
 
   @override
-  String toString() => 'ShaderUniform.$glslType($x, $y, $z, $w)';
+  String toString() => switch (glslType) {
+    'int' => 'ShaderUniform.int($integer)',
+    'mat4' => 'ShaderUniform.mat4($_matrix)',
+    _ => 'ShaderUniform.$glslType($x, $y, $z, $w)',
+  };
+
+  static bool _sameMatrix(Float32List? a, Float32List? b) {
+    if (identical(a, b)) return true;
+    if (a == null || b == null) return false;
+    for (var i = 0; i < 16; i += 1) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
+  }
 }
 
 final class ShaderOverride {

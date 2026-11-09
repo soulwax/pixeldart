@@ -315,6 +315,85 @@ Future<void> _automaticUniforms() async {
   host.renderer.dispose();
 }
 
+Future<void> _integerAndMatrixValues() async {
+  final matrix = Mat4.identity();
+  final captured = ShaderUniform.mat4(matrix);
+  matrix.m[0] = 7;
+  require(
+    _floats(captured.toUniformValue())[0] == 1,
+    'mat4 must capture a snapshot of the source matrix',
+  );
+  final exposed = captured.toUniformValue().value as Float32List;
+  exposed[0] = 9;
+  require(
+    _floats(captured.toUniformValue())[0] == 1,
+    'a converted GPU value must not mutate the host value',
+  );
+  require(
+    captured == ShaderUniform.mat4(Mat4.identity()) &&
+        captured.hashCode == ShaderUniform.mat4(Mat4.identity()).hashCode,
+    'equal matrices must compare and hash equally',
+  );
+
+  final host = await _Host.start({
+    ShaderSlot.grade: ShaderOverride.effect(
+      'vec4 effect(vec4 color, vec2 uv) { '
+      'return color * float(uCount) * uWarp[0][0]; }',
+      uniforms: {'uCount': const ShaderUniform.int(2), 'uWarp': captured},
+    ),
+  });
+  host.draw();
+  require(
+    host.sent('uCount').single.type == UniformType.int1 &&
+        host.sent('uCount').single.value == 2,
+    'GLSL int must upload with an integer value',
+  );
+  require(
+    host.sent('uWarp').single.type == UniformType.mat4 &&
+        _floats(host.sent('uWarp').single)[0] == 1,
+    'GLSL mat4 must upload all matrix elements',
+  );
+  final source = host.device.compiledShaderSources
+      .map((entry) => entry.fragment)
+      .firstWhere((fragment) => fragment.contains('uCount'));
+  require(
+    source.contains('uniform int uCount;') &&
+        source.contains('uniform mat4 uWarp;'),
+    'the effect wrapper must declare each host type',
+  );
+
+  host.draw();
+  require(
+    host.sent('uCount').isEmpty && host.sent('uWarp').isEmpty,
+    'unchanged typed values must not upload again',
+  );
+  host.renderer.setShaderUniform(
+    ShaderSlot.grade,
+    'uCount',
+    const ShaderUniform.int(3),
+  );
+  host.renderer.setShaderUniform(
+    ShaderSlot.grade,
+    'uWarp',
+    ShaderUniform.mat4(Mat4.compose(sx: 2)),
+  );
+  host.draw();
+  require(
+    host.sent('uCount').single.value == 3 &&
+        _floats(host.sent('uWarp').single)[0] == 2,
+    'live integer and matrix updates must upload',
+  );
+  expectThrows<ArgumentError>(
+    () => host.renderer.setShaderUniform(
+      ShaderSlot.grade,
+      'uCount',
+      const ShaderUniform.float(3),
+    ),
+    'a float supplied to an int uniform',
+  );
+  host.renderer.dispose();
+}
+
 Future<void> _hostTextures() async {
   final host = await _Host.start(const {
     ShaderSlot.grade: ShaderOverride(
@@ -403,6 +482,7 @@ Future<void> main() async {
   await _valueOnlyOverrideEditDoesNotRecompile();
   await _badBindingsExplainThemselves();
   await _automaticUniforms();
+  await _integerAndMatrixValues();
   await _hostTextures();
   await _overrideMayIgnoreEngineInputs();
   await _noOverridesNoCost();

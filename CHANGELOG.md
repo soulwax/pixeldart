@@ -54,6 +54,7 @@
 - **Host shaders:**
   - `ShaderOverride.effect` writes a post effect for `grade`, `ps1Quantize`, `vhs` or `dofComposite` as one GLSL function. Compile errors report the snippet's own line numbers.
   - `ShaderUniform` and `ShaderOverride(uniforms:, textures:)` give overrides typed values with no GL handles. `app.setShaderUniform` and `app.setShaderTexture` change them live without recompiling, and live values survive resizes, graph rebuilds and context restores. Uniforms are uploaded only when they change.
+  - `ShaderUniform.int` and `.mat4` bind GLSL integer and matrix uniforms. Matrix values snapshot their source so later edits cannot change a live binding.
   - `pdTime` and `pdResolution` are filled automatically in any override that declares them.
   - `PixeldartApp.loadShaderSource` fetches GLSL from a URL.
   - `RendererConfiguration.postEffects`, `mount(postEffects:)`, `mount2d(postEffects:)` and `app.setPostEffects` add host post-process stages before present on any profile.
@@ -65,6 +66,7 @@
 
 ### Changed
 
+- Adjacent sprite batches with the same projection now upload the view-projection matrix once per shader program run.
 - Performance (main-thread busy time, 6 s of play):
   - Pixel Rocket: 43% → 24%.
   - Lantern: 17% → 10%.

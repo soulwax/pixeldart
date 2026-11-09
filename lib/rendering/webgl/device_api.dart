@@ -230,7 +230,16 @@ abstract interface class GpuDevice {
   });
 }
 
-enum UniformType { float1, float2, float3, float4, mat4, mat4Array, sampler }
+enum UniformType {
+  float1,
+  float2,
+  float3,
+  float4,
+  int1,
+  mat4,
+  mat4Array,
+  sampler,
+}
 
 final class UniformValue {
   final UniformType type;
@@ -245,6 +254,7 @@ final class UniformValue {
   const UniformValue.float4(Float32List v)
     : type = UniformType.float4,
       value = v;
+  const UniformValue.int1(int v) : type = UniformType.int1, value = v;
   const UniformValue.mat4(Float32List v) : type = UniformType.mat4, value = v;
   const UniformValue.mat4Array(Float32List v)
     : type = UniformType.mat4Array,
