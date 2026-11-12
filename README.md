@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/logo.svg" width="88" alt="pixeldart logo"/>
+</p>
+
 # pixeldart
 
 > Current checkout note — 2026-08-09: the concrete `SceneRendererImpl`
