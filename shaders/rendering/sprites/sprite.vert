@@ -10,11 +10,14 @@ uniform mat4 uViewProjection;
 out vec2 vUv;
 out vec4 vColor;
 out vec3 vParams;
+out float vViewDepth;
 
 void main(){
   vec2 world=aOrigin.xy+aAxes.xy*aCorner.x+aAxes.zw*aCorner.y;
   vUv=mix(aUv.xy,aUv.zw,aCorner);
   vColor=aColor;
   vParams=aParams.xyz;
-  gl_Position=uViewProjection*vec4(world,aOrigin.z,1.);
+  vec4 clip=uViewProjection*vec4(world,aOrigin.z,1.);
+  vViewDepth=clip.w;
+  gl_Position=clip;
 }

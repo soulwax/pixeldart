@@ -6,6 +6,14 @@ final class FeatureGraph {
 
   FeatureGraph(this._installedFeatures);
 
+  void install(RenderFeature feature) {
+    _installedFeatures.add(feature);
+  }
+
+  void uninstall(String featureId) {
+    _installedFeatures.removeWhere((f) => f.id == featureId);
+  }
+
   FeatureGraphResult build({
     required RenderFeatureContext featureContext,
     required Set<String> availableCapabilities,

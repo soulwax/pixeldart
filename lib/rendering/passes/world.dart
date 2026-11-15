@@ -256,27 +256,59 @@ final class _WorldPass implements RenderPass {
 
   void _drawBatch(DrawCommandEncoder encoder, Object batch) {
     if (batch is InstanceBatch) {
-      // Keep the representative model uniform populated for the shader's
-      // explicit non-instanced fallback; the per-member matrices uploaded by
-      // setInstanceTransformUniforms are selected with gl_InstanceID below.
       final representative = batch.representative;
-      _setModelUniforms(encoder, representative.descriptor.transform);
-      setInstanceTransformUniforms(encoder, batch);
       final mesh = resolveMesh(representative.descriptor.mesh);
       encoder.bindVertexArray(mesh.vao);
-      if (mesh.isIndexed) {
-        encoder.drawElementsInstanced(
-          count: mesh.drawCount,
-          offsetBytes: 0,
-          instanceCount: batch.instanceCount,
-          index32: mesh.usesUint32Indices,
-        );
+      final total = batch.instanceCount;
+      if (total <= InstanceBatch.maxInstanceCount) {
+        _setModelUniforms(encoder, representative.descriptor.transform);
+        setInstanceTransformUniforms(encoder, batch);
+        if (mesh.isIndexed) {
+          encoder.drawElementsInstanced(
+            count: mesh.drawCount,
+            offsetBytes: 0,
+            instanceCount: total,
+            index32: mesh.usesUint32Indices,
+          );
+        } else {
+          encoder.drawArraysInstanced(
+            first: 0,
+            count: mesh.drawCount,
+            instanceCount: total,
+          );
+        }
       } else {
-        encoder.drawArraysInstanced(
-          first: 0,
-          count: mesh.drawCount,
-          instanceCount: batch.instanceCount,
-        );
+        for (
+          var offset = 0;
+          offset < total;
+          offset += InstanceBatch.maxInstanceCount
+        ) {
+          final count = (total - offset).clamp(
+            0,
+            InstanceBatch.maxInstanceCount,
+          );
+          final chunkMembers = batch.members.sublist(offset, offset + count);
+          final chunkBatch = InstanceBatch(chunkMembers.first, chunkMembers);
+          _setModelUniforms(
+            encoder,
+            chunkBatch.representative.descriptor.transform,
+          );
+          setInstanceTransformUniforms(encoder, chunkBatch);
+          if (mesh.isIndexed) {
+            encoder.drawElementsInstanced(
+              count: mesh.drawCount,
+              offsetBytes: 0,
+              instanceCount: count,
+              index32: mesh.usesUint32Indices,
+            );
+          } else {
+            encoder.drawArraysInstanced(
+              first: 0,
+              count: mesh.drawCount,
+              instanceCount: count,
+            );
+          }
+        }
       }
     } else if (batch is RetainedItemView) {
       disableInstanceTransformUniforms(encoder);

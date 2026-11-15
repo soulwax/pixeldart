@@ -27,5 +27,7 @@
     ,"volumetric/volumetric_composite.frag": "volumetricCompositeFragSrc"
     ,"sprites/sprite.vert": "spriteVertSrc"
     ,"sprites/sprite.frag": "spriteFragSrc"
+    ,"decal/decal.vert": "decalVertSrc"
+    ,"decal/decal.frag": "decalFragSrc"
   }
 }

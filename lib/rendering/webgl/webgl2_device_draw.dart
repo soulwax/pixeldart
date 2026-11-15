@@ -187,6 +187,28 @@ extension WebGl2DeviceDraw on WebGl2Device {
     BlendEquation.reverseSubtract => _G.FUNC_REVERSE_SUBTRACT,
   };
 
+  int _glStencilFunc(StencilFunc func) => switch (func) {
+    StencilFunc.never => _G.NEVER,
+    StencilFunc.less => _G.LESS,
+    StencilFunc.lessEqual => _G.LEQUAL,
+    StencilFunc.greater => _G.GREATER,
+    StencilFunc.greaterEqual => _G.GEQUAL,
+    StencilFunc.equal => _G.EQUAL,
+    StencilFunc.notEqual => _G.NOTEQUAL,
+    StencilFunc.always => _G.ALWAYS,
+  };
+
+  int _glStencilOp(StencilOp op) => switch (op) {
+    StencilOp.keep => _G.KEEP,
+    StencilOp.zero => _G.ZERO,
+    StencilOp.replace => _G.REPLACE,
+    StencilOp.increment => _G.INCR,
+    StencilOp.incrementWrap => _G.INCR_WRAP,
+    StencilOp.decrement => _G.DECR,
+    StencilOp.decrementWrap => _G.DECR_WRAP,
+    StencilOp.invert => _G.INVERT,
+  };
+
   void applyDrawStateImpl(DrawStateDescriptor state) {
     _requireReady();
     final changed = _stateCache.diff(state);
@@ -234,6 +256,30 @@ extension WebGl2DeviceDraw on WebGl2Device {
     if (changed.contains(StateField.blendEquation)) {
       gl.blendEquation(_glBlendEquation(state.blendEquation));
     }
+    if (changed.contains(StateField.stencilEnable)) {
+      if (state.stencilEnable) {
+        gl.enable(_G.STENCIL_TEST);
+      } else {
+        gl.disable(_G.STENCIL_TEST);
+      }
+    }
+    if (changed.contains(StateField.stencilFunc)) {
+      gl.stencilFunc(
+        _glStencilFunc(state.stencilFunc),
+        state.stencilRef,
+        state.stencilMask,
+      );
+    }
+    if (changed.contains(StateField.stencilOp)) {
+      gl.stencilOp(
+        _glStencilOp(state.stencilFail),
+        _glStencilOp(state.stencilZFail),
+        _glStencilOp(state.stencilZPass),
+      );
+    }
+    if (changed.contains(StateField.stencilMask)) {
+      gl.stencilMask(state.stencilWriteMask);
+    }
     if (changed.contains(StateField.colorMask)) {
       gl.colorMask(
         state.colorMaskR,
@@ -256,6 +302,9 @@ extension WebGl2DeviceDraw on WebGl2Device {
     ClearMask.colorOnly => _G.COLOR_BUFFER_BIT,
     ClearMask.colorAndDepth => _G.COLOR_BUFFER_BIT | _G.DEPTH_BUFFER_BIT,
     ClearMask.depthOnly => _G.DEPTH_BUFFER_BIT,
+    ClearMask.colorDepthStencil =>
+      _G.COLOR_BUFFER_BIT | _G.DEPTH_BUFFER_BIT | _G.STENCIL_BUFFER_BIT,
+    ClearMask.stencilOnly => _G.STENCIL_BUFFER_BIT,
   };
 
   void clearImpl(

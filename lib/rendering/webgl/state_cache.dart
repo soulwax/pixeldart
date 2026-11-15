@@ -14,6 +14,28 @@ enum CullFace { front, back }
 
 enum DepthFunc { less, lessEqual, always, never }
 
+enum StencilFunc {
+  never,
+  less,
+  lessEqual,
+  greater,
+  greaterEqual,
+  equal,
+  notEqual,
+  always,
+}
+
+enum StencilOp {
+  keep,
+  zero,
+  replace,
+  increment,
+  incrementWrap,
+  decrement,
+  decrementWrap,
+  invert,
+}
+
 final class DrawStateDescriptor {
   final bool depthTest;
   final DepthFunc depthFunc;
@@ -26,6 +48,13 @@ final class DrawStateDescriptor {
   final CullFace cullFace;
   final bool frontFaceCcw;
   final bool stencilEnable;
+  final StencilFunc stencilFunc;
+  final int stencilRef;
+  final int stencilMask;
+  final StencilOp stencilFail;
+  final StencilOp stencilZFail;
+  final StencilOp stencilZPass;
+  final int stencilWriteMask;
   final bool colorMaskR, colorMaskG, colorMaskB, colorMaskA;
   final bool scissorEnable;
 
@@ -41,6 +70,13 @@ final class DrawStateDescriptor {
     this.cullFace = CullFace.back,
     this.frontFaceCcw = true,
     this.stencilEnable = false,
+    this.stencilFunc = StencilFunc.always,
+    this.stencilRef = 0,
+    this.stencilMask = 0xFF,
+    this.stencilFail = StencilOp.keep,
+    this.stencilZFail = StencilOp.keep,
+    this.stencilZPass = StencilOp.keep,
+    this.stencilWriteMask = 0xFF,
     this.colorMaskR = true,
     this.colorMaskG = true,
     this.colorMaskB = true,
@@ -60,6 +96,74 @@ final class DrawStateDescriptor {
     cullFace: cullFace,
     frontFaceCcw: frontFaceCcw,
     stencilEnable: stencilEnable,
+    stencilFunc: stencilFunc,
+    stencilRef: stencilRef,
+    stencilMask: stencilMask,
+    stencilFail: stencilFail,
+    stencilZFail: stencilZFail,
+    stencilZPass: stencilZPass,
+    stencilWriteMask: stencilWriteMask,
+    colorMaskR: colorMaskR,
+    colorMaskG: colorMaskG,
+    colorMaskB: colorMaskB,
+    colorMaskA: colorMaskA,
+    scissorEnable: scissorEnable,
+  );
+
+  DrawStateDescriptor withCullFace(CullFace face) => DrawStateDescriptor(
+    depthTest: depthTest,
+    depthFunc: depthFunc,
+    depthWrite: depthWrite,
+    blendEnable: blendEnable,
+    blendSrc: blendSrc,
+    blendDst: blendDst,
+    blendEquation: blendEquation,
+    cullEnable: cullEnable,
+    cullFace: face,
+    frontFaceCcw: frontFaceCcw,
+    stencilEnable: stencilEnable,
+    stencilFunc: stencilFunc,
+    stencilRef: stencilRef,
+    stencilMask: stencilMask,
+    stencilFail: stencilFail,
+    stencilZFail: stencilZFail,
+    stencilZPass: stencilZPass,
+    stencilWriteMask: stencilWriteMask,
+    colorMaskR: colorMaskR,
+    colorMaskG: colorMaskG,
+    colorMaskB: colorMaskB,
+    colorMaskA: colorMaskA,
+    scissorEnable: scissorEnable,
+  );
+
+  DrawStateDescriptor withStencil({
+    bool? enable,
+    StencilFunc? func,
+    int? ref,
+    int? mask,
+    StencilOp? fail,
+    StencilOp? zFail,
+    StencilOp? zPass,
+    int? writeMask,
+  }) => DrawStateDescriptor(
+    depthTest: depthTest,
+    depthFunc: depthFunc,
+    depthWrite: depthWrite,
+    blendEnable: blendEnable,
+    blendSrc: blendSrc,
+    blendDst: blendDst,
+    blendEquation: blendEquation,
+    cullEnable: cullEnable,
+    cullFace: cullFace,
+    frontFaceCcw: frontFaceCcw,
+    stencilEnable: enable ?? stencilEnable,
+    stencilFunc: func ?? stencilFunc,
+    stencilRef: ref ?? stencilRef,
+    stencilMask: mask ?? stencilMask,
+    stencilFail: fail ?? stencilFail,
+    stencilZFail: zFail ?? stencilZFail,
+    stencilZPass: zPass ?? stencilZPass,
+    stencilWriteMask: writeMask ?? stencilWriteMask,
     colorMaskR: colorMaskR,
     colorMaskG: colorMaskG,
     colorMaskB: colorMaskB,
@@ -102,6 +206,9 @@ enum StateField {
   cullFace,
   frontFace,
   stencilEnable,
+  stencilFunc,
+  stencilOp,
+  stencilMask,
   colorMask,
   scissorEnable,
 }
@@ -135,6 +242,19 @@ final class WebGlStateCache {
     }
     if (prev.stencilEnable != next.stencilEnable) {
       changed.add(StateField.stencilEnable);
+    }
+    if (prev.stencilFunc != next.stencilFunc ||
+        prev.stencilRef != next.stencilRef ||
+        prev.stencilMask != next.stencilMask) {
+      changed.add(StateField.stencilFunc);
+    }
+    if (prev.stencilFail != next.stencilFail ||
+        prev.stencilZFail != next.stencilZFail ||
+        prev.stencilZPass != next.stencilZPass) {
+      changed.add(StateField.stencilOp);
+    }
+    if (prev.stencilWriteMask != next.stencilWriteMask) {
+      changed.add(StateField.stencilMask);
     }
     if (prev.colorMaskR != next.colorMaskR ||
         prev.colorMaskG != next.colorMaskG ||

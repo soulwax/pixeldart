@@ -34,10 +34,17 @@ void main() {
     'Pixeldart runtime contains source-specific symbols: $forbidden',
   );
 
-  // The source-specific references live in the host game; a standalone
-  // checkout has none to audit.
-  if (!Directory('${projectRoot.path}/lib').existsSync()) {
-    stdout.writeln('RF11 package audit passed; no host project at ${projectRoot.path}, host audit skipped.');
+  // The source-specific references live in the legacy quarantine host game;
+  // a standalone checkout or modern submodule host (e.g. glVolition) has none
+  // to audit.
+  final isLegacyQuarantineHost =
+      Directory('${projectRoot.path}/lib').existsSync() &&
+      Directory('${projectRoot.path}/web').existsSync() &&
+      File('${projectRoot.path}/lib/engine/fbx_runtime_package.dart').existsSync();
+  if (!isLegacyQuarantineHost) {
+    stdout.writeln(
+      'RF11 package audit passed; no legacy host project at ${projectRoot.path}, host audit skipped.',
+    );
     return;
   }
 

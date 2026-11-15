@@ -128,6 +128,7 @@ final class GpuTargetDescriptor {
   final int samples;
   final GpuTargetAttachment attachments;
   final bool hasDepth;
+  final bool hasStencil;
 
   const GpuTargetDescriptor({
     required this.width,
@@ -135,6 +136,7 @@ final class GpuTargetDescriptor {
     this.samples = 1,
     this.attachments = GpuTargetAttachment.color,
     this.hasDepth = false,
+    this.hasStencil = false,
   });
 }
 
@@ -296,4 +298,10 @@ final class UniformValue {
       value = textureUnit;
 }
 
-enum ClearMask { colorOnly, colorAndDepth, depthOnly }
+enum ClearMask {
+  colorOnly,
+  colorAndDepth,
+  depthOnly,
+  colorDepthStencil,
+  stencilOnly,
+}

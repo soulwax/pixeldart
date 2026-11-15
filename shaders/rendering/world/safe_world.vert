@@ -10,6 +10,7 @@ uniform mat4 uNormalMatrix;
 uniform mat4 uInstanceModels[16];
 uniform mat4 uInstanceNormalMatrices[16];
 uniform float uUseInstances;
+uniform float uVertexSnapGrid;
 out vec4 vColor;
 out vec3 vNormal;
 void main(){
@@ -18,5 +19,11 @@ void main(){
   if(uUseInstances>0.5){model=uInstanceModels[gl_InstanceID];normalMatrix=uInstanceNormalMatrices[gl_InstanceID];}
   vColor=vec4(aColor.rgb,aAlpha);
   vNormal=mat3(normalMatrix)*aNormal;
-  gl_Position=uViewProjection*model*vec4(aPosition,1.0);
+  vec4 clip=uViewProjection*model*vec4(aPosition,1.0);
+  if(uVertexSnapGrid>0.0){
+    vec2 ndc=clip.xy/clip.w;
+    ndc=floor(ndc/uVertexSnapGrid+0.5)*uVertexSnapGrid;
+    clip.xy=ndc*clip.w;
+  }
+  gl_Position=clip;
 }

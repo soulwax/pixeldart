@@ -337,6 +337,20 @@ final class SpritesFeature implements RenderFeature {
           'uLinearize',
           UniformValue.float1(linearize ? 1 : 0),
         );
+        encoder.setUniform(
+          'uSoftParticlesEnabled',
+          const UniformValue.float1(0),
+        );
+        encoder.setUniform(
+          'uSoftParticleDistance',
+          const UniformValue.float1(0),
+        );
+        encoder.setUniform('uNear', const UniformValue.float1(0.1));
+        encoder.setUniform('uFar', const UniformValue.float1(100.0));
+        encoder.setUniform(
+          'uViewportResolution',
+          UniformValue.float2(Float32List(2)),
+        );
         boundProgram = program;
         boundProjection = null;
         multiply = -1;

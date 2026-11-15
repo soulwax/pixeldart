@@ -91,7 +91,9 @@ final class _WebGlTimerQuery {
   _WebGlTimerQuery(this.query);
 }
 
-final class WebGl2Device with _WebGlTimerSupport implements GpuDevice, GpuContextGeneration {
+final class WebGl2Device
+    with _WebGlTimerSupport
+    implements GpuDevice, GpuContextGeneration {
   @override
   final WebGL2RenderingContext gl;
   GpuDeviceStatus _status = GpuDeviceStatus.ready;
@@ -106,7 +108,9 @@ final class WebGl2Device with _WebGlTimerSupport implements GpuDevice, GpuContex
   WebGLProgram? get boundProgram => _boundProgram;
   void setBoundProgram(WebGLProgram? program) {
     _boundProgram = program;
-    _boundUniforms = program == null ? null : _uniformLocations.putIfAbsent(program, _UniformLocations.new);
+    _boundUniforms = program == null
+        ? null
+        : _uniformLocations.putIfAbsent(program, _UniformLocations.new);
   }
 
   _UniformLocations? _boundUniforms;
@@ -115,20 +119,22 @@ final class WebGl2Device with _WebGlTimerSupport implements GpuDevice, GpuContex
     final canvasTarget = gl.canvas as EventTarget;
     _lostListener =
         ((JSAny? e) {
-          final event = e as web.Event;
-          event.preventDefault();
-          _status = GpuDeviceStatus.lost;
-        }).toJS as EventListener;
+              final event = e as web.Event;
+              event.preventDefault();
+              _status = GpuDeviceStatus.lost;
+            }).toJS
+            as EventListener;
     _restoredListener =
         ((JSAny? e) {
-          _status = GpuDeviceStatus.ready;
-          _contextGeneration++;
-          _uniformLocations.clear();
-          setBoundProgram(null);
-          for (final name in _enabledExtensions) {
-            gl.getExtension(name);
-          }
-        }).toJS as EventListener;
+              _status = GpuDeviceStatus.ready;
+              _contextGeneration++;
+              _uniformLocations.clear();
+              setBoundProgram(null);
+              for (final name in _enabledExtensions) {
+                gl.getExtension(name);
+              }
+            }).toJS
+            as EventListener;
     canvasTarget.addEventListener('webglcontextlost', _lostListener);
     canvasTarget.addEventListener('webglcontextrestored', _restoredListener);
   }
@@ -150,7 +156,8 @@ final class WebGl2Device with _WebGlTimerSupport implements GpuDevice, GpuContex
 
   final Map<WebGLProgram, _UniformLocations> _uniformLocations = {};
 
-  bool _isStale(GpuObject object) => (object as _WebGpuObject).generation != _contextGeneration;
+  bool _isStale(GpuObject object) =>
+      (object as _WebGpuObject).generation != _contextGeneration;
 
   void disposeListeners() {
     final canvasTarget = gl.canvas as EventTarget;

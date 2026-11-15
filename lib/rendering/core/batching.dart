@@ -12,7 +12,7 @@ final class InstanceBatch {
 
 List<InstanceBatch> batchOpaque(List<RetainedItemView> sortedOpaqueItems) {
   final batches = <InstanceBatch>[];
-  final groupIndexByKey = <String, int>{};
+  final groupIndexByKey = <({int mesh, int material, int? family}), int>{};
 
   for (final item in sortedOpaqueItems) {
     final familyKey = item.descriptor.instanceFamilyKey;
@@ -20,8 +20,11 @@ List<InstanceBatch> batchOpaque(List<RetainedItemView> sortedOpaqueItems) {
       batches.add(InstanceBatch(item, [item]));
       continue;
     }
-    final key =
-        '${item.descriptor.mesh.slot}:${item.descriptor.material.slot}:$familyKey';
+    final key = (
+      mesh: item.descriptor.mesh.slot,
+      material: item.descriptor.material.slot,
+      family: familyKey,
+    );
     final existingIndex = groupIndexByKey[key];
     if (existingIndex == null) {
       groupIndexByKey[key] = batches.length;

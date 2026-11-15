@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:typed_data';
 import '../api/capabilities.dart';
 import '../api/configuration_coordinator.dart';
@@ -7,6 +8,7 @@ import '../api/lights.dart';
 import '../api/materials.dart';
 import '../api/mesh.dart';
 import '../api/msaa.dart';
+import '../api/render_pass_decl.dart';
 import '../api/renderer.dart';
 import '../api/scene.dart';
 import '../api/settings.dart';
@@ -31,11 +33,15 @@ import '../passes/sprites.dart';
 import '../passes/world.dart';
 import '../passes/shadowed_world.dart';
 import '../webgl/generated_shaders.dart';
-import 'batching.dart';
+import 'debug_views.dart';
+import 'declared_pass.dart';
+import 'dynamic_batch.dart';
 import 'feature_graph.dart';
+import 'frame_arena.dart';
 import 'frame_telemetry.dart';
 import 'frame_queue.dart';
 import 'graph_resource.dart';
+import 'material_table.dart';
 import 'program_library.dart';
 import 'render_feature.dart';
 import 'render_world_impl.dart';
@@ -73,6 +79,12 @@ final class SceneRendererImpl with _GpuTimingSupport implements SceneRenderer {
   int _nextShaderId = 1;
   FrameInput? _activeFrame;
   RenderWorldImpl? _activeWorld;
+  final DeclaredPassRegistry _declaredPasses = DeclaredPassRegistry();
+  final FrameArena _arena = FrameArena();
+  final DynamicBatcher _dynamicBatcher = DynamicBatcher();
+  late MaterialTable _materialTable = MaterialTable();
+  MaterialTable get materialTable => _materialTable;
+  final Map<String, GpuObject> _transientTargetPool = {};
   SceneRendererImpl(this.device);
 
   @override
@@ -232,6 +244,9 @@ final class SceneRendererImpl with _GpuTimingSupport implements SceneRenderer {
       _configuration = configuration;
       _allocated = allocation.configuration;
       _msaa = allocation.msaa;
+      _materialTable = MaterialTable(
+        capacity: configuration.materialTableCapacity,
+      );
       _syncShaderBindings(configuration);
       _buildSafeGraph();
       _state = RendererState.ready;
@@ -277,6 +292,7 @@ final class SceneRendererImpl with _GpuTimingSupport implements SceneRenderer {
     frame.validate();
     _activeFrame = frame;
     _activeWorld = world;
+    _arena.reset();
     final encoder = _frames.beginFrame();
     try {
       _beginGpuTiming(frame.frameIndex);
@@ -315,11 +331,33 @@ final class SceneRendererImpl with _GpuTimingSupport implements SceneRenderer {
                   total.instancesSubmitted + pass.instancesSubmitted,
             ),
           );
-      final pointLights = frame.environment.pointLights.length;
+
+      final pointCount = frame.environment.pointLights.length;
+      final spotCount = frame.environment.spotLights.length;
+      final dirCount = frame.environment.directionalLight != null ? 1 : 0;
+      final totalLights = pointCount + spotCount + dirCount;
+
+      final activePointCount =
+          math.min<int>(pointCount, RuntimeLightBudget.pointLights);
+      final activeSpotCount = math.min<int>(
+        spotCount,
+        RuntimeLightBudget.unshadowedSpotLights +
+            RuntimeLightBudget.shadowedSpotLights,
+      );
+      final activeDirCount = dirCount;
+      final activeLights = activePointCount + activeSpotCount + activeDirCount;
+      final droppedLights = totalLights - activeLights;
+
+      final lightSelection = LightSelectionStats(
+        totalLights: totalLights,
+        activeLights: activeLights,
+        droppedLights: droppedLights,
+      );
+
       return FrameStats(
         frameIndex: frame.frameIndex,
-        pointLightsDropped: pointLights > RuntimeLightBudget.pointLights
-            ? pointLights - RuntimeLightBudget.pointLights
+        pointLightsDropped: pointCount > RuntimeLightBudget.pointLights
+            ? pointCount - RuntimeLightBudget.pointLights
             : 0,
         drawCalls: sceneStats.drawCalls,
         trianglesSubmitted: sceneStats.trianglesSubmitted,
@@ -331,12 +369,50 @@ final class SceneRendererImpl with _GpuTimingSupport implements SceneRenderer {
         resourceCreateCount: _resources!.resourceCreateCount,
         resourceDeleteCount: _resources!.resourceDeleteCount,
         passStats: passStats,
+        lightSelection: lightSelection,
       );
     } finally {
       _finishGpuTiming(frame.frameIndex);
       _activeFrame = null;
       _activeWorld = null;
     }
+  }
+
+  String? debugView;
+
+  Map<String, RenderPassDecl> get declaredRenderPasses =>
+      Map.unmodifiable({for (final p in _declaredPasses.all) p.id: p});
+
+  List<String> get declaredPassIds => _declaredPasses.declaredPassIds;
+
+  void declareRenderPass(RenderPassDecl pass) {
+    _declaredPasses.declare(pass);
+    _reconcileDeclaredPasses();
+  }
+
+  void removeDeclaredRenderPass(String passId) {
+    if (_declaredPasses.remove(passId)) {
+      _reconcileDeclaredPasses();
+    }
+  }
+
+  void _reconcileDeclaredPasses() {
+    _declaredPasses.orderedPasses();
+  }
+
+  RendererDiagnosticsSnapshot diagnosticsSnapshot({String? debugView}) {
+    final frameIndex = _activeFrame?.frameIndex ?? 0;
+    final view = debugView ?? this.debugView;
+    final mode = DebugViewMode.fromString(view);
+    return RendererDiagnosticsSnapshot(
+      frameIndex: frameIndex,
+      liveGpuBytes: _resources?.estimatedGpuBytes ?? 0,
+      peakGpuBytes: _resources?.estimatedGpuBytes ?? 0,
+      resourceCreateCount: _resources?.resourceCreateCount ?? 0,
+      resourceDeleteCount: _resources?.resourceDeleteCount ?? 0,
+      declaredPassIds: declaredPassIds,
+      debugView: mode?.id ?? view,
+    );
   }
 
   @override
@@ -375,6 +451,10 @@ final class SceneRendererImpl with _GpuTimingSupport implements SceneRenderer {
     _graph = null;
     _programs = null;
     _gpuResources = null;
+    for (final target in _transientTargetPool.values) {
+      device.deleteTarget(target);
+    }
+    _transientTargetPool.clear();
     _configurations.dispose();
     _state = RendererState.disposed;
   }

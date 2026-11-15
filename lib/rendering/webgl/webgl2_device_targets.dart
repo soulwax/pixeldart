@@ -124,20 +124,41 @@ extension WebGl2DeviceTargets on WebGl2Device {
 
     web.WebGLRenderbuffer? depthRb;
     web.WebGLTexture? depthTex;
-    if (descriptor.hasDepth) {
+    if (descriptor.hasDepth || descriptor.hasStencil) {
+      final internalDepth = descriptor.hasStencil
+          ? _G.DEPTH24_STENCIL8
+          : _G.DEPTH_COMPONENT24;
+      final attachDepth = descriptor.hasStencil
+          ? _G.DEPTH_STENCIL_ATTACHMENT
+          : _G.DEPTH_ATTACHMENT;
       if (descriptor.samples > 1) {
         depthRb = gl.createRenderbuffer();
         gl.bindRenderbuffer(_G.RENDERBUFFER, depthRb);
         gl.renderbufferStorageMultisample(
           _G.RENDERBUFFER,
           descriptor.samples,
-          _G.DEPTH_COMPONENT24,
+          internalDepth,
           descriptor.width,
           descriptor.height,
         );
         gl.framebufferRenderbuffer(
           _G.FRAMEBUFFER,
-          _G.DEPTH_ATTACHMENT,
+          attachDepth,
+          _G.RENDERBUFFER,
+          depthRb,
+        );
+      } else if (descriptor.hasStencil) {
+        depthRb = gl.createRenderbuffer();
+        gl.bindRenderbuffer(_G.RENDERBUFFER, depthRb);
+        gl.renderbufferStorage(
+          _G.RENDERBUFFER,
+          _G.DEPTH24_STENCIL8,
+          descriptor.width,
+          descriptor.height,
+        );
+        gl.framebufferRenderbuffer(
+          _G.FRAMEBUFFER,
+          _G.DEPTH_STENCIL_ATTACHMENT,
           _G.RENDERBUFFER,
           depthRb,
         );

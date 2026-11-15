@@ -704,6 +704,23 @@ final class _ShadowedWorldPass implements RenderPass {
       );
     }
 
+    encoder.setUniform('uDebugViewMode', const UniformValue.int1(0));
+    encoder.setUniform('uVertexLightingEnabled', const UniformValue.float1(0));
+    encoder.setUniform('uLightProbeShEnabled', const UniformValue.float1(0));
+    encoder.setUniform(
+      'uLightProbeShOrigin',
+      UniformValue.float3(Float32List(3)),
+    );
+    encoder.setUniform('uLightProbeShIntensity', const UniformValue.float1(1));
+    for (var i = 0; i < 9; i++) {
+      encoder.setUniform(
+        'uLightProbeSh_$i',
+        UniformValue.float3(Float32List(3)),
+      );
+    }
+    encoder.setUniform('uSkinEnabled', const UniformValue.float1(0));
+    encoder.setUniform('uJointCount', const UniformValue.int1(0));
+
     capture?.finish();
     if (capture == null) {
       for (final batch in context.frameScene.opaqueBatches) {
@@ -775,9 +792,6 @@ final class _ShadowedWorldPass implements RenderPass {
       }
     } else if (batch is InstanceBatch) {
       final representative = batch.representative;
-      _setModelUniforms(encoder, representative.descriptor.transform);
-      setInstanceTransformUniforms(encoder, batch);
-      _lastUseInstances = true;
       _setMaterialState(
         encoder,
         representative.descriptor.material,
@@ -789,19 +803,58 @@ final class _ShadowedWorldPass implements RenderPass {
       );
       final mesh = resolveMesh(representative.descriptor.mesh);
       encoder.bindVertexArray(mesh.vao);
-      if (mesh.isIndexed) {
-        encoder.drawElementsInstanced(
-          count: mesh.drawCount,
-          offsetBytes: 0,
-          instanceCount: batch.instanceCount,
-          index32: mesh.usesUint32Indices,
-        );
+      final total = batch.instanceCount;
+      if (total <= InstanceBatch.maxInstanceCount) {
+        _setModelUniforms(encoder, representative.descriptor.transform);
+        setInstanceTransformUniforms(encoder, batch);
+        _lastUseInstances = true;
+        if (mesh.isIndexed) {
+          encoder.drawElementsInstanced(
+            count: mesh.drawCount,
+            offsetBytes: 0,
+            instanceCount: total,
+            index32: mesh.usesUint32Indices,
+          );
+        } else {
+          encoder.drawArraysInstanced(
+            first: 0,
+            count: mesh.drawCount,
+            instanceCount: total,
+          );
+        }
       } else {
-        encoder.drawArraysInstanced(
-          first: 0,
-          count: mesh.drawCount,
-          instanceCount: batch.instanceCount,
-        );
+        for (
+          var offset = 0;
+          offset < total;
+          offset += InstanceBatch.maxInstanceCount
+        ) {
+          final count = (total - offset).clamp(
+            0,
+            InstanceBatch.maxInstanceCount,
+          );
+          final chunkMembers = batch.members.sublist(offset, offset + count);
+          final chunkBatch = InstanceBatch(chunkMembers.first, chunkMembers);
+          _setModelUniforms(
+            encoder,
+            chunkBatch.representative.descriptor.transform,
+          );
+          setInstanceTransformUniforms(encoder, chunkBatch);
+          _lastUseInstances = true;
+          if (mesh.isIndexed) {
+            encoder.drawElementsInstanced(
+              count: mesh.drawCount,
+              offsetBytes: 0,
+              instanceCount: count,
+              index32: mesh.usesUint32Indices,
+            );
+          } else {
+            encoder.drawArraysInstanced(
+              first: 0,
+              count: mesh.drawCount,
+              instanceCount: count,
+            );
+          }
+        }
       }
     } else {
       throw ArgumentError(

@@ -20,6 +20,7 @@ import '../math/transform.dart';
 import '../math/vec.dart';
 import '../webgl/device_api.dart';
 import '../webgl/draw_encoder.dart';
+import '../webgl/state_cache.dart';
 import 'pass_context_impl.dart';
 import 'shadow_resources.dart';
 import 'world.dart';
@@ -70,6 +71,39 @@ final class ShadowLightView {
       far: radius * 2.0,
     );
     return ShadowLightView(projection * view);
+  }
+
+  static List<ShadowLightView> computeMultiCasterViews({
+    DirectionalLight? directionalLight,
+    List<SpotLight> spotLights = const [],
+    required Aabb sceneBounds,
+    int maxCasters = 4,
+  }) {
+    final views = <ShadowLightView>[];
+    if (directionalLight != null) {
+      views.add(
+        ShadowLightView.fromDirectionalLight(
+          light: directionalLight,
+          bounds: sceneBounds,
+        ),
+      );
+    }
+    for (final spot in spotLights) {
+      if (views.length >= maxCasters) break;
+      if (spot.castsShadow) {
+        views.add(ShadowLightView.fromSpotLight(spot));
+      }
+    }
+    return views;
+  }
+
+  static int resolveShadowResolution({
+    required int maxTextureSize,
+    int requestedSize = 512,
+    bool highQuality = true,
+  }) {
+    final target = highQuality ? requestedSize : (requestedSize ~/ 2);
+    return target.clamp(128, maxTextureSize);
   }
 }
 
@@ -309,7 +343,9 @@ final class _ShadowCasterPass implements RenderPass {
     );
     final baseState = descriptor.toDrawState();
     encoder.applyDrawState(
-      material.doubleSided ? baseState.withCullEnable(false) : baseState,
+      material.doubleSided
+          ? baseState.withCullEnable(false)
+          : baseState.withCullFace(CullFace.front),
     );
   }
 
@@ -344,30 +380,65 @@ final class _ShadowCasterPass implements RenderPass {
         representative.descriptor.transform,
         lightView,
       );
-      setInstanceTransformUniforms(
-        encoder,
-        batch,
-        includeNormalMatrices: false,
-      );
       _setMaterialState(encoder, representative.descriptor.material);
       final meshHandle =
           resolveCasterMesh?.call(representative, light, lod) ??
           representative.descriptor.mesh;
       final mesh = resolveMesh(meshHandle);
       encoder.bindVertexArray(mesh.vao);
-      if (mesh.isIndexed) {
-        encoder.drawElementsInstanced(
-          count: mesh.drawCount,
-          offsetBytes: 0,
-          instanceCount: batch.instanceCount,
-          index32: mesh.usesUint32Indices,
+      final total = batch.instanceCount;
+      if (total <= InstanceBatch.maxInstanceCount) {
+        setInstanceTransformUniforms(
+          encoder,
+          batch,
+          includeNormalMatrices: false,
         );
+        if (mesh.isIndexed) {
+          encoder.drawElementsInstanced(
+            count: mesh.drawCount,
+            offsetBytes: 0,
+            instanceCount: total,
+            index32: mesh.usesUint32Indices,
+          );
+        } else {
+          encoder.drawArraysInstanced(
+            first: 0,
+            count: mesh.drawCount,
+            instanceCount: total,
+          );
+        }
       } else {
-        encoder.drawArraysInstanced(
-          first: 0,
-          count: mesh.drawCount,
-          instanceCount: batch.instanceCount,
-        );
+        for (
+          var offset = 0;
+          offset < total;
+          offset += InstanceBatch.maxInstanceCount
+        ) {
+          final count = (total - offset).clamp(
+            0,
+            InstanceBatch.maxInstanceCount,
+          );
+          final chunkMembers = batch.members.sublist(offset, offset + count);
+          final chunkBatch = InstanceBatch(chunkMembers.first, chunkMembers);
+          setInstanceTransformUniforms(
+            encoder,
+            chunkBatch,
+            includeNormalMatrices: false,
+          );
+          if (mesh.isIndexed) {
+            encoder.drawElementsInstanced(
+              count: mesh.drawCount,
+              offsetBytes: 0,
+              instanceCount: count,
+              index32: mesh.usesUint32Indices,
+            );
+          } else {
+            encoder.drawArraysInstanced(
+              first: 0,
+              count: mesh.drawCount,
+              instanceCount: count,
+            );
+          }
+        }
       }
     }
   }

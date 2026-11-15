@@ -59,3 +59,9 @@ export 'optics/environment_response.dart';
 export 'atmosphere/volumetric_media.dart';
 export 'atmosphere/thermal_field.dart';
 export 'atmosphere/solar_cycle.dart';
+
+export 'core/frame_arena.dart';
+export 'core/dynamic_batch.dart';
+export 'core/material_table.dart';
+export 'core/debug_views.dart';
+export 'core/declared_pass.dart';

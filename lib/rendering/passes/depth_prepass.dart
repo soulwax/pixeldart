@@ -195,11 +195,6 @@ final class _DepthPrepassPass implements RenderPass {
     } else if (batch is InstanceBatch) {
       final representative = batch.representative;
       _setUniforms(encoder, representative.descriptor.transform, camera);
-      setInstanceTransformUniforms(
-        encoder,
-        batch,
-        includeNormalMatrices: false,
-      );
       _setMaterialState(
         encoder,
         representative.descriptor.material,
@@ -207,19 +202,59 @@ final class _DepthPrepassPass implements RenderPass {
       );
       final mesh = resolveMesh(representative.descriptor.mesh);
       encoder.bindVertexArray(mesh.vao);
-      if (mesh.isIndexed) {
-        encoder.drawElementsInstanced(
-          count: mesh.drawCount,
-          offsetBytes: 0,
-          instanceCount: batch.instanceCount,
-          index32: mesh.usesUint32Indices,
+      final total = batch.instanceCount;
+      if (total <= InstanceBatch.maxInstanceCount) {
+        setInstanceTransformUniforms(
+          encoder,
+          batch,
+          includeNormalMatrices: false,
         );
+        if (mesh.isIndexed) {
+          encoder.drawElementsInstanced(
+            count: mesh.drawCount,
+            offsetBytes: 0,
+            instanceCount: total,
+            index32: mesh.usesUint32Indices,
+          );
+        } else {
+          encoder.drawArraysInstanced(
+            first: 0,
+            count: mesh.drawCount,
+            instanceCount: total,
+          );
+        }
       } else {
-        encoder.drawArraysInstanced(
-          first: 0,
-          count: mesh.drawCount,
-          instanceCount: batch.instanceCount,
-        );
+        for (
+          var offset = 0;
+          offset < total;
+          offset += InstanceBatch.maxInstanceCount
+        ) {
+          final count = (total - offset).clamp(
+            0,
+            InstanceBatch.maxInstanceCount,
+          );
+          final chunkMembers = batch.members.sublist(offset, offset + count);
+          final chunkBatch = InstanceBatch(chunkMembers.first, chunkMembers);
+          setInstanceTransformUniforms(
+            encoder,
+            chunkBatch,
+            includeNormalMatrices: false,
+          );
+          if (mesh.isIndexed) {
+            encoder.drawElementsInstanced(
+              count: mesh.drawCount,
+              offsetBytes: 0,
+              instanceCount: count,
+              index32: mesh.usesUint32Indices,
+            );
+          } else {
+            encoder.drawArraysInstanced(
+              first: 0,
+              count: mesh.drawCount,
+              instanceCount: count,
+            );
+          }
+        }
       }
     } else {
       throw ArgumentError(

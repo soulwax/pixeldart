@@ -9,6 +9,7 @@ in vec4 vLightSpacePos;
 in vec3 vWorldPos;
 in vec4 vTangent;
 in float vViewDepth;
+in vec3 vVertexLighting;
 uniform sampler2D uAlbedo;
 uniform sampler2D uNormalMap;
 uniform sampler2D uOrmMap;
@@ -115,8 +116,36 @@ uniform float uThermalSourceDissolution2;
 uniform vec3 uThermalSourcePosition3;
 uniform float uThermalSourceRadius3;
 uniform float uThermalSourceDissolution3;
+uniform int uDebugViewMode;
+uniform float uVertexLightingEnabled;
+uniform float uLightProbeShEnabled;
+uniform vec3 uLightProbeSh_0;
+uniform vec3 uLightProbeSh_1;
+uniform vec3 uLightProbeSh_2;
+uniform vec3 uLightProbeSh_3;
+uniform vec3 uLightProbeSh_4;
+uniform vec3 uLightProbeSh_5;
+uniform vec3 uLightProbeSh_6;
+uniform vec3 uLightProbeSh_7;
+uniform vec3 uLightProbeSh_8;
+uniform vec3 uLightProbeShOrigin;
+uniform float uLightProbeShIntensity;
 layout(location=0)out vec4 oColor;
 layout(location=1)out vec4 oGlow;
+
+vec3 evaluateLightProbeSh3(vec3 n){
+  float x=n.x; float y=n.y; float z=n.z;
+  vec3 sh=uLightProbeSh_0*0.886227
+        +uLightProbeSh_1*(2.0*0.511664*y)
+        +uLightProbeSh_2*(2.0*0.511664*z)
+        +uLightProbeSh_3*(2.0*0.511664*x)
+        +uLightProbeSh_4*(2.0*0.429043*x*y)
+        +uLightProbeSh_5*(2.0*0.429043*y*z)
+        +uLightProbeSh_6*(0.743125*z*z-0.247708)
+        +uLightProbeSh_7*(2.0*0.429043*x*z)
+        +uLightProbeSh_8*(0.429043*(x*x-y*y));
+  return max(sh*uLightProbeShIntensity,vec3(0.0));
+}
 
 // Distance falloff (smooth to zero at uLightRange, matching SpotLight.range
 // rather than an unbounded inverse-square that never reaches zero) times
@@ -552,6 +581,12 @@ void main(){
   if(uLightmapIntensity>0.0){
     lit+=baseColor*texture(uLightmap,vUv1).rgb*uLightmapIntensity;
   }
+  if(uLightProbeShEnabled>0.5){
+    lit+=baseColor*evaluateLightProbeSh3(n)*ao;
+  }
+  if(uVertexLightingEnabled>0.5){
+    lit+=baseColor*vVertexLighting*ao;
+  }
   // Fog blends the surface's own lit color toward uFogColor only — never
   // oGlow below, which stays a declared emissive quantity independent of
   // how much atmosphere sits between the surface and the camera, matching
@@ -569,6 +604,16 @@ void main(){
   // is exactly 0 or 1, so the mix is exact in both directions and the
   // blended path keeps its pre-existing expression bit-for-bit.
   float outAlpha=mix(vColor.a*tex.a,1.,uOpaqueCoverage);
+  if(uDebugViewMode==1){oColor=vec4(baseColor,outAlpha);oGlow=vec4(0.0);return;}
+  if(uDebugViewMode==2){oColor=vec4(n*0.5+0.5,outAlpha);oGlow=vec4(0.0);return;}
+  if(uDebugViewMode==3){oColor=vec4(vec3(rough),outAlpha);oGlow=vec4(0.0);return;}
+  if(uDebugViewMode==4){
+    float heat=clamp((ndotl+spotNdotL*shadow)*0.5,0.0,1.0);
+    vec3 heatColor=mix(vec3(0.0,0.0,1.0),vec3(0.0,1.0,0.0),clamp(heat*2.0,0.0,1.0));
+    heatColor=mix(heatColor,vec3(1.0,0.0,0.0),clamp(heat*2.0-1.0,0.0,1.0));
+    oColor=vec4(heatColor,outAlpha);oGlow=vec4(0.0);return;
+  }
+  if(uDebugViewMode==5){oColor=vec4(0.1,0.04,0.02,outAlpha);oGlow=vec4(0.0);return;}
   oColor=vec4(foggedLit,outAlpha);
   // §8.7: bloom reads this declared attachment directly, never inferring
   // glow from oColor's final luma — a bright-but-non-emissive lit surface

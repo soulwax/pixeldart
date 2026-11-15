@@ -361,7 +361,10 @@ extension on SceneRendererImpl {
       }
     }
     final scene = _FrameScene(
-      opaqueBatches: batchOpaque(sortOpaque(opaque)),
+      opaqueBatches: _dynamicBatcher.batchOpaque(
+        sortOpaque(opaque),
+        maxUniqueMaterialsPerChunk: _allocated?.materialTableCapacity,
+      ),
       blendedItemsBackToFront: sortBlended(blended),
       camera: frame.camera,
       environment: frame.environment,
@@ -381,21 +384,49 @@ extension on SceneRendererImpl {
         : _resources!.textures.resolve(skyboxHandle);
     // A graph is rebuilt whenever its GPU objects change (configure and
     // context restore both do), so its views can be kept with it.
-    final passViews = _passViews[graph] ??= [
-      for (final pass in graph.passes) _viewsFor(pass, resources),
-    ];
-    final passes = graph.passes;
-    for (var i = 0; i < passes.length; i += 1) {
-      final pass = passes[i];
-      telemetry.beginPass(pass.descriptor.id);
-      pass.execute(
-        BoundPassContext(
-          views: passViews[i],
-          encoder: encoder,
-          frameScene: scene,
-          skyboxTexture: skyboxTexture,
-        ),
+    if (_declaredPasses.isEmpty) {
+      final passViews = _passViews[graph] ??= [
+        for (final pass in graph.passes) _viewsFor(pass, resources),
+      ];
+      final passes = graph.passes;
+      for (var i = 0; i < passes.length; i += 1) {
+        final pass = passes[i];
+        telemetry.beginPass(pass.descriptor.id);
+        pass.execute(
+          BoundPassContext(
+            views: passViews[i],
+            encoder: encoder,
+            frameScene: scene,
+            skyboxTexture: skyboxTexture,
+          ),
+        );
+      }
+    } else {
+      final declared = _declaredPasses.orderedPasses();
+      final declaredPasses = [
+        for (final decl in declared)
+          DeclaredRenderPass.fromDeclaration(
+            decl,
+            baseWidth: _allocated!.internalWidth,
+            baseHeight: _allocated!.internalHeight,
+          ),
+      ];
+      final allPasses = <RenderPass>[...graph.passes, ...declaredPasses];
+      allPasses.sort(
+        (a, b) => a.descriptor.stage.index.compareTo(b.descriptor.stage.index),
       );
+      for (var i = 0; i < allPasses.length; i += 1) {
+        final pass = allPasses[i];
+        telemetry.beginPass(pass.descriptor.id);
+        pass.execute(
+          BoundPassContext(
+            views: _viewsFor(pass, resources),
+            encoder: encoder,
+            frameScene: scene,
+            skyboxTexture: skyboxTexture,
+          ),
+        );
+      }
     }
     return _FrameExecution(telemetry, cull, culledTriangles);
   }
@@ -422,14 +453,32 @@ extension on SceneRendererImpl {
     final views = <String, BoundResourceView>{};
     for (final use in pass.descriptor.uses) {
       final resource = use.resource;
-      final view = BoundResourceView(
-        use.resource,
-        resources.current.objectFor(
-          resource.version == 0
-              ? resource.name
-              : '${resource.name}#${resource.version}',
-        ),
-      );
+      final key = resource.version == 0
+          ? resource.name
+          : '${resource.name}#${resource.version}';
+
+      GpuObject? gpuObject;
+      final currentObjects = resources.current.objects;
+      if (currentObjects.containsKey(key)) {
+        gpuObject = currentObjects[key];
+      } else if (currentObjects.containsKey(resource.name)) {
+        gpuObject = currentObjects[resource.name];
+      } else {
+        final targetKey =
+            '${resource.format.name}_${resource.width}x${resource.height}';
+        gpuObject = _transientTargetPool[targetKey];
+        if (gpuObject == null) {
+          gpuObject = device.createTarget(
+            GpuTargetDescriptor(
+              width: resource.width,
+              height: resource.height,
+            ),
+          );
+          _transientTargetPool[targetKey] = gpuObject;
+        }
+      }
+
+      final view = BoundResourceView(use.resource, gpuObject!);
       views['${resource.name}#${resource.version}'] = view;
       views.putIfAbsent(resource.name, () => view);
     }

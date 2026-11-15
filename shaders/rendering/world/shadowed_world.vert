@@ -16,6 +16,13 @@ uniform float uUseInstances;
 uniform mat4 uLightViewProjection;
 uniform float uVertexSnapGrid;
 uniform float uAffineWarpStrength;
+uniform float uVertexLightingEnabled;
+uniform vec3 uDirectionalDirection;
+uniform vec3 uDirectionalColor;
+uniform float uDirectionalIntensity;
+uniform float uSkinEnabled;
+uniform int uJointCount;
+uniform mat4 uJointMatrices[64];
 out vec4 vColor;
 out vec3 vNormal;
 out highp vec2 vUv;
@@ -25,13 +32,28 @@ out vec4 vLightSpacePos;
 out vec3 vWorldPos;
 out vec4 vTangent;
 out float vViewDepth;
+out vec3 vVertexLighting;
 void main(){
   mat4 model=uModel;
   mat4 normalMatrix=uNormalMatrix;
   if(uUseInstances>0.5){model=uInstanceModels[gl_InstanceID];normalMatrix=uInstanceNormalMatrices[gl_InstanceID];}
+  vec3 inPos=aPosition;
+  vec3 inNorm=aNormal;
+  if(uSkinEnabled>0.5 && uJointCount>0){
+    mat4 skinMat=uJointMatrices[0];
+    inPos=(skinMat*vec4(inPos,1.0)).xyz;
+    inNorm=mat3(skinMat)*inNorm;
+  }
   vColor=vec4(aColor.rgb,aAlpha);
-  vNormal=mat3(normalMatrix)*aNormal;
-  vec4 worldPos=model*vec4(aPosition,1.0);
+  vNormal=mat3(normalMatrix)*inNorm;
+  if(uVertexLightingEnabled>0.5){
+    vec3 n=normalize(vNormal);
+    float ndotl=max(dot(n,normalize(uDirectionalDirection)),0.0);
+    vVertexLighting=uDirectionalColor*uDirectionalIntensity*ndotl;
+  } else {
+    vVertexLighting=vec3(0.0);
+  }
+  vec4 worldPos=model*vec4(inPos,1.0);
   vWorldPos=worldPos.xyz;
   vTangent=vec4(mat3(normalMatrix)*aTangent.xyz,aTangent.w);
   vLightSpacePos=uLightViewProjection*worldPos;

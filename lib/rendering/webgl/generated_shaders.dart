@@ -16,6 +16,7 @@ uniform mat4 uNormalMatrix;
 uniform mat4 uInstanceModels[16];
 uniform mat4 uInstanceNormalMatrices[16];
 uniform float uUseInstances;
+uniform float uVertexSnapGrid;
 out vec4 vColor;
 out vec3 vNormal;
 void main(){
@@ -24,7 +25,13 @@ void main(){
   if(uUseInstances>0.5){model=uInstanceModels[gl_InstanceID];normalMatrix=uInstanceNormalMatrices[gl_InstanceID];}
   vColor=vec4(aColor.rgb,aAlpha);
   vNormal=mat3(normalMatrix)*aNormal;
-  gl_Position=uViewProjection*model*vec4(aPosition,1.0);
+  vec4 clip=uViewProjection*model*vec4(aPosition,1.0);
+  if(uVertexSnapGrid>0.0){
+    vec2 ndc=clip.xy/clip.w;
+    ndc=floor(ndc/uVertexSnapGrid+0.5)*uVertexSnapGrid;
+    clip.xy=ndc*clip.w;
+  }
+  gl_Position=clip;
 }
 ''';
 
@@ -63,17 +70,29 @@ uniform mat4 uNormalMatrix;
 uniform mat4 uInstanceModels[16];
 uniform mat4 uInstanceNormalMatrices[16];
 uniform float uUseInstances;
+uniform float uVertexSnapGrid;
+uniform float uAffineWarpStrength;
 out vec4 vColor;
 out vec3 vNormal;
-out vec2 vUv;
+out highp vec2 vUv;
+out highp float vUvW;
 void main(){
   mat4 model=uModel;
   mat4 normalMatrix=uNormalMatrix;
   if(uUseInstances>0.5){model=uInstanceModels[gl_InstanceID];normalMatrix=uInstanceNormalMatrices[gl_InstanceID];}
   vColor=vec4(aColor.rgb,aAlpha);
   vNormal=mat3(normalMatrix)*aNormal;
-  vUv=aUvMat.xy;
-  gl_Position=uViewProjection*model*vec4(aPosition,1.0);
+  vec4 worldPos=model*vec4(aPosition,1.0);
+  vec4 clip=uViewProjection*worldPos;
+  if(uVertexSnapGrid>0.0){
+    vec2 ndc=clip.xy/clip.w;
+    ndc=floor(ndc/uVertexSnapGrid+0.5)*uVertexSnapGrid;
+    clip.xy=ndc*clip.w;
+  }
+  gl_Position=clip;
+  float affineW=mix(1.0,clip.w,uAffineWarpStrength);
+  vUv=aUvMat.xy*affineW;
+  vUvW=affineW;
 }
 ''';
 
@@ -82,20 +101,23 @@ const String texturedWorldFragSrc = '''
 precision highp float;
 in vec4 vColor;
 in vec3 vNormal;
-in vec2 vUv;
+in highp vec2 vUv;
+in highp float vUvW;
 uniform sampler2D uAlbedo;
 uniform vec3 uLightDir;
 uniform vec3 uAmbientColor;
 uniform float uAmbientIntensity;
 uniform float uAmbientLightScale;
 uniform float uDirectLightScale;
+uniform float uAffineWarpStrength;
 out vec4 oColor;
 void main(){
   // A double-sided surface seen from behind faces the other way; single-
   // sided materials cull back faces, so this only affects double-sided ones.
   vec3 n=normalize(vNormal)*(gl_FrontFacing?1.0:-1.0);
   float ndotl=max(dot(n,normalize(uLightDir)),0.0);
-  vec4 tex=texture(uAlbedo,vUv);
+  vec2 uv=uAffineWarpStrength>0.0?vUv/vUvW:vUv;
+  vec4 tex=texture(uAlbedo,uv);
   vec3 lit=vColor.rgb*tex.rgb*clamp(uAmbientColor*uAmbientIntensity*uAmbientLightScale+
     vec3(ndotl)*uDirectLightScale,0.0,1.0);
   oColor=vec4(lit,vColor.a*tex.a);
@@ -162,6 +184,13 @@ uniform float uUseInstances;
 uniform mat4 uLightViewProjection;
 uniform float uVertexSnapGrid;
 uniform float uAffineWarpStrength;
+uniform float uVertexLightingEnabled;
+uniform vec3 uDirectionalDirection;
+uniform vec3 uDirectionalColor;
+uniform float uDirectionalIntensity;
+uniform float uSkinEnabled;
+uniform int uJointCount;
+uniform mat4 uJointMatrices[64];
 out vec4 vColor;
 out vec3 vNormal;
 out highp vec2 vUv;
@@ -171,13 +200,28 @@ out vec4 vLightSpacePos;
 out vec3 vWorldPos;
 out vec4 vTangent;
 out float vViewDepth;
+out vec3 vVertexLighting;
 void main(){
   mat4 model=uModel;
   mat4 normalMatrix=uNormalMatrix;
   if(uUseInstances>0.5){model=uInstanceModels[gl_InstanceID];normalMatrix=uInstanceNormalMatrices[gl_InstanceID];}
+  vec3 inPos=aPosition;
+  vec3 inNorm=aNormal;
+  if(uSkinEnabled>0.5 && uJointCount>0){
+    mat4 skinMat=uJointMatrices[0];
+    inPos=(skinMat*vec4(inPos,1.0)).xyz;
+    inNorm=mat3(skinMat)*inNorm;
+  }
   vColor=vec4(aColor.rgb,aAlpha);
-  vNormal=mat3(normalMatrix)*aNormal;
-  vec4 worldPos=model*vec4(aPosition,1.0);
+  vNormal=mat3(normalMatrix)*inNorm;
+  if(uVertexLightingEnabled>0.5){
+    vec3 n=normalize(vNormal);
+    float ndotl=max(dot(n,normalize(uDirectionalDirection)),0.0);
+    vVertexLighting=uDirectionalColor*uDirectionalIntensity*ndotl;
+  } else {
+    vVertexLighting=vec3(0.0);
+  }
+  vec4 worldPos=model*vec4(inPos,1.0);
   vWorldPos=worldPos.xyz;
   vTangent=vec4(mat3(normalMatrix)*aTangent.xyz,aTangent.w);
   vLightSpacePos=uLightViewProjection*worldPos;
@@ -230,6 +274,7 @@ in vec4 vLightSpacePos;
 in vec3 vWorldPos;
 in vec4 vTangent;
 in float vViewDepth;
+in vec3 vVertexLighting;
 uniform sampler2D uAlbedo;
 uniform sampler2D uNormalMap;
 uniform sampler2D uOrmMap;
@@ -336,8 +381,36 @@ uniform float uThermalSourceDissolution2;
 uniform vec3 uThermalSourcePosition3;
 uniform float uThermalSourceRadius3;
 uniform float uThermalSourceDissolution3;
+uniform int uDebugViewMode;
+uniform float uVertexLightingEnabled;
+uniform float uLightProbeShEnabled;
+uniform vec3 uLightProbeSh_0;
+uniform vec3 uLightProbeSh_1;
+uniform vec3 uLightProbeSh_2;
+uniform vec3 uLightProbeSh_3;
+uniform vec3 uLightProbeSh_4;
+uniform vec3 uLightProbeSh_5;
+uniform vec3 uLightProbeSh_6;
+uniform vec3 uLightProbeSh_7;
+uniform vec3 uLightProbeSh_8;
+uniform vec3 uLightProbeShOrigin;
+uniform float uLightProbeShIntensity;
 layout(location=0)out vec4 oColor;
 layout(location=1)out vec4 oGlow;
+
+vec3 evaluateLightProbeSh3(vec3 n){
+  float x=n.x; float y=n.y; float z=n.z;
+  vec3 sh=uLightProbeSh_0*0.886227
+        +uLightProbeSh_1*(2.0*0.511664*y)
+        +uLightProbeSh_2*(2.0*0.511664*z)
+        +uLightProbeSh_3*(2.0*0.511664*x)
+        +uLightProbeSh_4*(2.0*0.429043*x*y)
+        +uLightProbeSh_5*(2.0*0.429043*y*z)
+        +uLightProbeSh_6*(0.743125*z*z-0.247708)
+        +uLightProbeSh_7*(2.0*0.429043*x*z)
+        +uLightProbeSh_8*(0.429043*(x*x-y*y));
+  return max(sh*uLightProbeShIntensity,vec3(0.0));
+}
 
 // Distance falloff (smooth to zero at uLightRange, matching SpotLight.range
 // rather than an unbounded inverse-square that never reaches zero) times
@@ -773,6 +846,12 @@ void main(){
   if(uLightmapIntensity>0.0){
     lit+=baseColor*texture(uLightmap,vUv1).rgb*uLightmapIntensity;
   }
+  if(uLightProbeShEnabled>0.5){
+    lit+=baseColor*evaluateLightProbeSh3(n)*ao;
+  }
+  if(uVertexLightingEnabled>0.5){
+    lit+=baseColor*vVertexLighting*ao;
+  }
   // Fog blends the surface's own lit color toward uFogColor only — never
   // oGlow below, which stays a declared emissive quantity independent of
   // how much atmosphere sits between the surface and the camera, matching
@@ -790,6 +869,16 @@ void main(){
   // is exactly 0 or 1, so the mix is exact in both directions and the
   // blended path keeps its pre-existing expression bit-for-bit.
   float outAlpha=mix(vColor.a*tex.a,1.,uOpaqueCoverage);
+  if(uDebugViewMode==1){oColor=vec4(baseColor,outAlpha);oGlow=vec4(0.0);return;}
+  if(uDebugViewMode==2){oColor=vec4(n*0.5+0.5,outAlpha);oGlow=vec4(0.0);return;}
+  if(uDebugViewMode==3){oColor=vec4(vec3(rough),outAlpha);oGlow=vec4(0.0);return;}
+  if(uDebugViewMode==4){
+    float heat=clamp((ndotl+spotNdotL*shadow)*0.5,0.0,1.0);
+    vec3 heatColor=mix(vec3(0.0,0.0,1.0),vec3(0.0,1.0,0.0),clamp(heat*2.0,0.0,1.0));
+    heatColor=mix(heatColor,vec3(1.0,0.0,0.0),clamp(heat*2.0-1.0,0.0,1.0));
+    oColor=vec4(heatColor,outAlpha);oGlow=vec4(0.0);return;
+  }
+  if(uDebugViewMode==5){oColor=vec4(0.1,0.04,0.02,outAlpha);oGlow=vec4(0.0);return;}
   oColor=vec4(foggedLit,outAlpha);
   // §8.7: bloom reads this declared attachment directly, never inferring
   // glow from oColor's final luma — a bright-but-non-emissive lit surface
@@ -1961,13 +2050,16 @@ uniform mat4 uViewProjection;
 out vec2 vUv;
 out vec4 vColor;
 out vec3 vParams;
+out float vViewDepth;
 
 void main(){
   vec2 world=aOrigin.xy+aAxes.xy*aCorner.x+aAxes.zw*aCorner.y;
   vUv=mix(aUv.xy,aUv.zw,aCorner);
   vColor=aColor;
   vParams=aParams.xyz;
-  gl_Position=uViewProjection*vec4(world,aOrigin.z,1.);
+  vec4 clip=uViewProjection*vec4(world,aOrigin.z,1.);
+  vViewDepth=clip.w;
+  gl_Position=clip;
 }
 ''';
 
@@ -1977,9 +2069,16 @@ precision highp float;
 in vec2 vUv;
 in vec4 vColor;
 in vec3 vParams;
+in float vViewDepth;
 uniform sampler2D uTex;
+uniform sampler2D uSceneDepth;
 uniform float uLinearize;
 uniform float uMultiply;
+uniform float uSoftParticlesEnabled;
+uniform float uSoftParticleDistance;
+uniform float uNear;
+uniform float uFar;
+uniform vec2 uViewportResolution;
 layout(location=0) out vec4 oColor;
 layout(location=1) out vec4 oGlow;
 
@@ -1988,6 +2087,12 @@ vec3 srgbToLinear(vec3 c){
   vec3 low=c/12.92;
   vec3 high=pow((c+.055)/1.055,vec3(2.4));
   return mix(low,high,cutoff);
+}
+
+float linearizeDepth(float d){
+  float n=uNear>0.0?uNear:0.1;
+  float f=uFar>0.0?uFar:100.0;
+  return (n*f)/(f-d*(f-n));
 }
 
 void main(){
@@ -2007,7 +2112,48 @@ void main(){
   // Premultiplied: output alpha 0 adds light, 1 covers what is behind.
   vec3 premultiplied=rgb*a;
   float coverage=a*(1.-additive);
+  if(uSoftParticlesEnabled>0.5 && uSoftParticleDistance>0.0 && uViewportResolution.x>0.0){
+    vec2 screenUv=gl_FragCoord.xy/uViewportResolution;
+    float sceneDepth=texture(uSceneDepth,screenUv).r;
+    float sceneZ=linearizeDepth(sceneDepth);
+    float diff=sceneZ-vViewDepth;
+    float softFactor=clamp(diff/uSoftParticleDistance,0.0,1.0);
+    premultiplied*=softFactor;
+    coverage*=softFactor;
+  }
   oColor=vec4(premultiplied,coverage);
   oGlow=vec4(premultiplied*glow,coverage);
+}
+''';
+
+const String decalVertSrc = '''
+#version 300 es
+layout(location=0) in vec3 aPosition;
+layout(location=4) in vec3 aUvMat;
+uniform mat4 uViewProjection;
+uniform mat4 uModel;
+out highp vec2 vUv;
+void main(){
+  vUv=aUvMat.xy;
+  gl_Position=uViewProjection*uModel*vec4(aPosition,1.0);
+}
+''';
+
+const String decalFragSrc = '''
+#version 300 es
+precision highp float;
+in highp vec2 vUv;
+uniform sampler2D uAlbedo;
+uniform float uOpacity;
+uniform vec4 uDecalTint;
+layout(location=0) out vec4 oColor;
+layout(location=1) out vec4 oGlow;
+void main(){
+  vec4 tex=texture(uAlbedo,vUv);
+  vec4 color=tex*uDecalTint;
+  float alpha=color.a*uOpacity;
+  if(alpha<0.01) discard;
+  oColor=vec4(color.rgb,alpha);
+  oGlow=vec4(0.0);
 }
 ''';

@@ -92,7 +92,8 @@ abstract final class TextureLoader {
       throw ArgumentError('Image has invalid dimensions: ${width}x$height');
     }
 
-    final canvas = web.document.createElement('canvas') as web.HTMLCanvasElement;
+    final canvas =
+        web.document.createElement('canvas') as web.HTMLCanvasElement;
     canvas.width = width;
     canvas.height = height;
 

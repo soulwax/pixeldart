@@ -350,4 +350,76 @@ final class RenderGraph {
   const RenderGraph._(this.orderedPasses, this.failures);
 
   bool get isValid => failures.isEmpty;
+
+  /// Topologically sorts [passes] by [GraphStage] and resource write->read dependencies.
+  static List<PassDeclaration> topologicalSort(List<PassDeclaration> passes) {
+    if (passes.length <= 1) return List.of(passes);
+
+    // Group by stage
+    final byStage = <GraphStage, List<PassDeclaration>>{};
+    for (final pass in passes) {
+      byStage.putIfAbsent(pass.stage, () => []).add(pass);
+    }
+
+    final sortedStages = byStage.keys.toList()
+      ..sort((a, b) => a.index.compareTo(b.index));
+
+    final result = <PassDeclaration>[];
+    for (final stage in sortedStages) {
+      final stagePasses = byStage[stage]!;
+      if (stagePasses.length <= 1) {
+        result.addAll(stagePasses);
+        continue;
+      }
+
+      // Intra-stage writer->reader ordering
+      final writes = <String, int>{};
+      for (var i = 0; i < stagePasses.length; i++) {
+        for (final use in stagePasses[i].writes) {
+          writes['${use.resource.name}#${use.resource.version}'] = i;
+        }
+      }
+
+      final adj = List.generate(stagePasses.length, (_) => <int>{});
+      for (var i = 0; i < stagePasses.length; i++) {
+        for (final use in stagePasses[i].reads) {
+          final writer = writes['${use.resource.name}#${use.resource.version}'];
+          if (writer != null && writer != i) {
+            adj[writer].add(i);
+          }
+        }
+      }
+
+      final inDegree = List.filled(stagePasses.length, 0);
+      for (final neighbors in adj) {
+        for (final next in neighbors) {
+          inDegree[next]++;
+        }
+      }
+
+      final queue = <int>[];
+      for (var i = 0; i < stagePasses.length; i++) {
+        if (inDegree[i] == 0) queue.add(i);
+      }
+
+      final stageResult = <PassDeclaration>[];
+      while (queue.isNotEmpty) {
+        final node = queue.removeAt(0);
+        stageResult.add(stagePasses[node]);
+        for (final next in adj[node]) {
+          inDegree[next]--;
+          if (inDegree[next] == 0) queue.add(next);
+        }
+      }
+
+      if (stageResult.length == stagePasses.length) {
+        result.addAll(stageResult);
+      } else {
+        // Cycle detected: retain original order so cycle detection reports failure
+        result.addAll(stagePasses);
+      }
+    }
+
+    return result;
+  }
 }

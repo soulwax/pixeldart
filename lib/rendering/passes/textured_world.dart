@@ -178,6 +178,8 @@ final class _TexturedWorldPass implements RenderPass {
       'uDirectLightScale',
       UniformValue.float1(environment.directLightScale),
     );
+    encoder.setUniform('uVertexSnapGrid', const UniformValue.float1(0));
+    encoder.setUniform('uAffineWarpStrength', const UniformValue.float1(0));
 
     for (final batch in context.frameScene.opaqueBatches) {
       _drawBatch(encoder, batch);
@@ -204,23 +206,58 @@ final class _TexturedWorldPass implements RenderPass {
       }
     } else if (batch is InstanceBatch) {
       final representative = batch.representative;
-      _setModelUniforms(encoder, representative.descriptor.transform);
-      setInstanceTransformUniforms(encoder, batch);
       final mesh = resolveMesh(representative.descriptor.mesh);
       encoder.bindVertexArray(mesh.vao);
-      if (mesh.isIndexed) {
-        encoder.drawElementsInstanced(
-          count: mesh.drawCount,
-          offsetBytes: 0,
-          instanceCount: batch.instanceCount,
-          index32: mesh.usesUint32Indices,
-        );
+      final total = batch.instanceCount;
+      if (total <= InstanceBatch.maxInstanceCount) {
+        _setModelUniforms(encoder, representative.descriptor.transform);
+        setInstanceTransformUniforms(encoder, batch);
+        if (mesh.isIndexed) {
+          encoder.drawElementsInstanced(
+            count: mesh.drawCount,
+            offsetBytes: 0,
+            instanceCount: total,
+            index32: mesh.usesUint32Indices,
+          );
+        } else {
+          encoder.drawArraysInstanced(
+            first: 0,
+            count: mesh.drawCount,
+            instanceCount: total,
+          );
+        }
       } else {
-        encoder.drawArraysInstanced(
-          first: 0,
-          count: mesh.drawCount,
-          instanceCount: batch.instanceCount,
-        );
+        for (
+          var offset = 0;
+          offset < total;
+          offset += InstanceBatch.maxInstanceCount
+        ) {
+          final count = (total - offset).clamp(
+            0,
+            InstanceBatch.maxInstanceCount,
+          );
+          final chunkMembers = batch.members.sublist(offset, offset + count);
+          final chunkBatch = InstanceBatch(chunkMembers.first, chunkMembers);
+          _setModelUniforms(
+            encoder,
+            chunkBatch.representative.descriptor.transform,
+          );
+          setInstanceTransformUniforms(encoder, chunkBatch);
+          if (mesh.isIndexed) {
+            encoder.drawElementsInstanced(
+              count: mesh.drawCount,
+              offsetBytes: 0,
+              instanceCount: count,
+              index32: mesh.usesUint32Indices,
+            );
+          } else {
+            encoder.drawArraysInstanced(
+              first: 0,
+              count: mesh.drawCount,
+              instanceCount: count,
+            );
+          }
+        }
       }
     } else {
       throw ArgumentError(
