@@ -608,7 +608,7 @@ void main(){
   if(uDebugViewMode==2){oColor=vec4(n*0.5+0.5,outAlpha);oGlow=vec4(0.0);return;}
   if(uDebugViewMode==3){oColor=vec4(vec3(rough),outAlpha);oGlow=vec4(0.0);return;}
   if(uDebugViewMode==4){
-    float heat=clamp((ndotl+spotNdotL*shadow)*0.5,0.0,1.0);
+    float heat=clamp((directionalNdotL+spotNdotL*shadow)*0.5,0.0,1.0);
     vec3 heatColor=mix(vec3(0.0,0.0,1.0),vec3(0.0,1.0,0.0),clamp(heat*2.0,0.0,1.0));
     heatColor=mix(heatColor,vec3(1.0,0.0,0.0),clamp(heat*2.0-1.0,0.0,1.0));
     oColor=vec4(heatColor,outAlpha);oGlow=vec4(0.0);return;

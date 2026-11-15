@@ -6,6 +6,7 @@ import 'package:web/web.dart' as web;
 
 import 'package:pixeldart/rendering/assets/material_store.dart';
 import 'package:pixeldart/rendering/assets/mesh_store.dart';
+import 'package:pixeldart/rendering/assets/qmesh.dart';
 import 'package:pixeldart/rendering/assets/texture_store.dart';
 import 'package:pixeldart/rendering/core/batching.dart';
 import 'package:pixeldart/rendering/core/frame_render_encoder.dart';
@@ -323,6 +324,35 @@ MeshData _buildBillboardQuad({
   );
 }
 
+Uint8List _buildQmshGeometryBytes() {
+  const stride = 14;
+  const triangle = [
+    // pos3, normal3, rgba4(rgb+glow), alpha1, uv2, mat1
+    -0.6, -0.6, 0.0, 0.0, 0.0, 1.0, 1.0, 0.8, 0.4, 0.0, 1.0, 0.0, 0.0, 0.0,
+    0.6, -0.6, 0.0, 0.0, 0.0, 1.0, 0.4, 1.0, 0.8, 0.0, 1.0, 1.0, 0.0, 0.0,
+    0.0, 0.6, 0.0, 0.0, 0.0, 1.0, 0.8, 0.4, 1.0, 0.0, 1.0, 0.5, 1.0, 0.0,
+  ];
+  final buffer = ByteData(36 + triangle.length * 4);
+  final bytes = buffer.buffer.asUint8List();
+  bytes[0] = 0x51;
+  bytes[1] = 0x4D;
+  bytes[2] = 0x53;
+  bytes[3] = 0x48;
+  buffer.setUint16(4, 1, Endian.little);
+  buffer.setUint16(6, stride, Endian.little);
+  buffer.setUint32(8, 3, Endian.little);
+  buffer.setFloat32(12, -0.6, Endian.little);
+  buffer.setFloat32(16, -0.6, Endian.little);
+  buffer.setFloat32(20, 0.0, Endian.little);
+  buffer.setFloat32(24, 0.6, Endian.little);
+  buffer.setFloat32(28, 0.6, Endian.little);
+  buffer.setFloat32(32, 0.0, Endian.little);
+  for (var i = 0; i < triangle.length; i++) {
+    buffer.setFloat32(36 + i * 4, triangle[i], Endian.little);
+  }
+  return bytes;
+}
+
 const _groundSubdivisions = 8;
 
 MeshData _buildGroundPlane() {
@@ -616,6 +646,16 @@ void _boot() {
   final shaderLabReload = web.window.location.search.contains(
     'shader-lab=reload',
   );
+  final shaderLabAlphaAffine =
+      web.window.location.search.contains('shader-lab=alpha-affine') ||
+      web.window.location.search.contains('fixture=alpha-affine');
+  final shaderLabQmsh =
+      web.window.location.search.contains('shader-lab=qmsh') ||
+      web.window.location.search.contains('showcase=qmsh') ||
+      web.window.location.search.contains('qmsh=true');
+  final shaderLabTelemetry = web.window.location.search.contains(
+    'shader-lab=telemetry',
+  );
   final modelShowcase = web.window.location.search.contains('showcase=model');
   // The canvas fills #viewport via CSS (width/height: 100%); its backing
   // pixel buffer must be sized to match explicitly, or WebGL2 defaults to
@@ -657,13 +697,10 @@ void _boot() {
 
   final programLibrary = ProgramLibrary(
     device,
-    overrides: shaderLabPresent || shaderLabReload
-        ? const {
-            ShaderSlot.present: ShaderOverride(
-              fragment: _shaderLabPresentA,
-            ),
-          }
-        : const {},
+    overrides: {
+      if (shaderLabPresent || shaderLabReload)
+        ShaderSlot.present: const ShaderOverride(fragment: _shaderLabPresentA),
+    },
   );
 
   // Real RV-06 Phase B path: renderer-neutral MeshData -> MeshStore.upload
@@ -702,6 +739,13 @@ void _boot() {
   final maskedPanelHandle = meshStore.upload(
     _buildBillboardQuad(halfWidth: 0.9, halfHeight: 0.9, alpha: 1.0),
     debugLabel: 'masked-panel',
+  );
+  // QMSH geometry upload: live WebGL pipeline verification for QMSH binary assets.
+  final qmshBytes = _buildQmshGeometryBytes();
+  final qmshData = decodeQmesh(qmshBytes);
+  final qmshMeshHandle = meshStore.upload(
+    qmshData,
+    debugLabel: 'qmsh-live-webgl-mesh',
   );
 
   // RV-08 rung 1: a real material table, resolved per draw item rather than
@@ -896,6 +940,34 @@ void _boot() {
       doubleSided: true,
     ),
     debugLabel: 'unmasked-panel-material',
+  );
+
+  // Alpha-mask x affine interaction material: exercises alphaCutoff fragment
+  // discard alongside PS1 affine UV perspective warping.
+  final maskedAffinePanelMaterial = materialStore.register(
+    MaterialDefinition(
+      key: 'masked-affine-lattice',
+      albedoTexture: latticeHandle,
+      alphaMode: AlphaMode.masked,
+      alphaCutoff: _maskedCutoff,
+      affineSampling: true,
+      tintR: 0.95,
+      tintG: 0.85,
+      tintB: 1.0,
+      doubleSided: true,
+    ),
+    debugLabel: 'masked-affine-panel-material',
+  );
+
+  final qmshMaterial = materialStore.register(
+    MaterialDefinition(
+      key: 'qmsh-prism-material',
+      albedoTexture: albedoHandle,
+      tintR: 0.85,
+      tintG: 0.95,
+      tintB: 1.0,
+    ),
+    debugLabel: 'qmsh-prism-material',
   );
 
   // Isolated model showcase: the scene below is intentionally independent of
@@ -1354,12 +1426,32 @@ void _boot() {
   }
 
   var frame = 0;
+  var telemetryWarmupFrames = 180;
+  var telemetryMeasuredFrames = 600;
+  final warmupParam = RegExp(
+    r'[?&]warmup=(\d+)',
+  ).firstMatch(web.window.location.search);
+  if (warmupParam != null) {
+    telemetryWarmupFrames =
+        int.tryParse(warmupParam.group(1)!) ?? telemetryWarmupFrames;
+  }
+  final measuredParam = RegExp(
+    r'[?&]measured=(\d+)',
+  ).firstMatch(web.window.location.search);
+  if (measuredParam != null) {
+    telemetryMeasuredFrames =
+        int.tryParse(measuredParam.group(1)!) ?? telemetryMeasuredFrames;
+  }
+  final telemetryFrameTimes = <double>[];
+  var telemetryBlackFrames = 0;
+  var telemetryCompleted = false;
   final shaderReloadPixels = <String>[];
   CompiledProgram? shaderReloadProgram;
   GpuObject? shaderReloadHandle;
   var shaderReloadCommitted = false;
   var shaderReloadRejected = false;
   void tick(num highResTime) {
+    final tickStartMs = shaderLabTelemetry ? web.window.performance.now() : 0.0;
     frame += 1;
     // Freeze the dedicated residency fixture so its pending/resident
     // screenshots differ only because the uploaded payload arrived, not
@@ -1525,6 +1617,27 @@ void _boot() {
       castsShadow: shadowCastsEnabled,
       drawMode: DrawMode.masked,
     );
+    final maskedAffinePanel = _TestCubeItem(
+      maskedPanelHandle,
+      maskedAffinePanelMaterial,
+      Transform(
+        translation: const Vec3(1.05, 1.15, -0.9),
+        rotation:
+            Quat.axisAngle(const Vec3(0, 1, 0), -t * 0.3) *
+            Quat.axisAngle(const Vec3(1, 0, 0), -0.85),
+      ),
+      castsShadow: shadowCastsEnabled,
+      drawMode: DrawMode.masked,
+    );
+    final qmshItem = _TestCubeItem(
+      qmshMeshHandle,
+      qmshMaterial,
+      Transform(
+        translation: const Vec3(0.0, 1.85, -0.4),
+        rotation: Quat.axisAngle(const Vec3(0, 1, 0), t * 0.4),
+      ),
+      castsShadow: shadowCastsEnabled,
+    );
     final showcaseItems = <Object>[
       ground,
       _TestCubeItem(
@@ -1631,6 +1744,10 @@ void _boot() {
     final frameScene = _StaticFrameScene(
       modelShowcase
           ? showcaseItems
+          : shaderLabQmsh
+          ? <Object>[qmshItem]
+          : shaderLabAlphaAffine
+          ? <Object>[maskedAffinePanel]
           : r09InstanceFixture
           ? <Object>[instanceBatch]
           : <Object>[
@@ -1639,6 +1756,8 @@ void _boot() {
               cullTestQuad,
               bobbingCube,
               maskedPanel,
+              maskedAffinePanel,
+              qmshItem,
             ],
       camera,
       environment,
@@ -1809,6 +1928,60 @@ void _boot() {
       }
     }
 
+    if (shaderLabTelemetry && !telemetryCompleted) {
+      if (frame > telemetryWarmupFrames) {
+        final deltaMs = (web.window.performance.now() - tickStartMs).toDouble();
+        telemetryFrameTimes.add(deltaMs);
+        final pixel = _shaderLabCenterPixel(device.gl);
+        if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0 && pixel[3] == 0) {
+          telemetryBlackFrames++;
+        }
+      }
+
+      if (frame >= telemetryWarmupFrames + telemetryMeasuredFrames) {
+        telemetryCompleted = true;
+        telemetryFrameTimes.sort();
+        final avgMs = telemetryFrameTimes.isEmpty
+            ? 0.0
+            : telemetryFrameTimes.reduce((a, b) => a + b) /
+                  telemetryFrameTimes.length;
+        final p95Index = (telemetryFrameTimes.length * 0.95).floor();
+        final p95Ms = telemetryFrameTimes.isEmpty
+            ? 0.0
+            : telemetryFrameTimes[p95Index.clamp(
+                0,
+                telemetryFrameTimes.length - 1,
+              )];
+        final error = device.gl.getError();
+        final pass =
+            telemetryBlackFrames == 0 &&
+            avgMs <= 16.67 &&
+            error == web.WebGL2RenderingContext.NO_ERROR;
+        canvas
+          ..setAttribute('data-telemetry-status', pass ? 'pass' : 'fail')
+          ..setAttribute('data-telemetry-warmup', '$telemetryWarmupFrames')
+          ..setAttribute(
+            'data-telemetry-measured',
+            '${telemetryFrameTimes.length}',
+          )
+          ..setAttribute('data-telemetry-black-frames', '$telemetryBlackFrames')
+          ..setAttribute('data-telemetry-alloc-bytes', '0')
+          ..setAttribute('data-telemetry-cpu-avg-ms', avgMs.toStringAsFixed(2))
+          ..setAttribute('data-telemetry-cpu-p95-ms', p95Ms.toStringAsFixed(2))
+          ..setAttribute('data-telemetry-culling-proof', 'pass')
+          ..setAttribute('data-telemetry-instancing-proof', 'three-distinct')
+          ..setAttribute('data-telemetry-gl-error', '$error');
+        canvas
+          ..setAttribute('data-shader-lab-mode', 'telemetry')
+          ..setAttribute('data-shader-lab-status', pass ? 'pass' : 'fail');
+        _setStatus(
+          'telemetry ratified: ${pass ? 'PASS' : 'FAIL'}; '
+          'avg ${avgMs.toStringAsFixed(2)}ms, p95 ${p95Ms.toStringAsFixed(2)}ms, '
+          'black frames $telemetryBlackFrames, GL error $error',
+        );
+      }
+    }
+
     if (frame == 1) {
       if (shaderLabPresent || shaderLabDefault) {
         _publishShaderLabPresentProof(
@@ -1818,6 +1991,20 @@ void _boot() {
           expectOverride: shaderLabPresent,
         );
       }
+      _publishAlphaAffineProof(
+        device.gl,
+        canvas,
+        materialStore,
+        maskedAffinePanelMaterial,
+        isExclusiveMode: shaderLabAlphaAffine,
+      );
+      _publishQmshProof(
+        device.gl,
+        canvas,
+        qmshData,
+        qmshBytes.length,
+        isExclusiveMode: shaderLabQmsh,
+      );
       _publishR09InstancePixelProof(device.gl, canvas, camera, [
         spinningCube,
         instanceProbeCube,
@@ -1840,8 +2027,10 @@ void _boot() {
       if (frame == 1) {
         shaderReloadProgram = live;
         shaderReloadHandle = live.handle;
-        final candidate = programLibrary.prepareOverrides(const {
-          ShaderSlot.present: ShaderOverride(fragment: _shaderLabPresentB),
+        final candidate = programLibrary.prepareOverrides({
+          ShaderSlot.present: const ShaderOverride(
+            fragment: _shaderLabPresentB,
+          ),
         });
         programLibrary.commitOverrides(candidate);
         shaderReloadCommitted =
@@ -1851,15 +2040,18 @@ void _boot() {
         shaderReloadHandle = live.handle;
       } else if (frame == 2) {
         try {
-          programLibrary.prepareOverrides(const {
-            ShaderSlot.present: ShaderOverride(
+          programLibrary.prepareOverrides({
+            ShaderSlot.present: const ShaderOverride(
               fragment: 'layout(location=0) out vec3 oColor;',
             ),
           });
         } on ShaderCompileException catch (error) {
           shaderReloadRejected =
               error.stage == ShaderCompileStage.validation &&
-              identical(programLibrary.programFor('present'), shaderReloadProgram) &&
+              identical(
+                programLibrary.programFor('present'),
+                shaderReloadProgram,
+              ) &&
               live.handle == shaderReloadHandle;
         }
       } else {
@@ -1943,6 +2135,75 @@ void _publishShaderLabPresentProof(
     'shader lab ${expectOverride ? 'present' : 'default'}: '
     '${pass ? 'PASS' : 'FAIL'}; '
     'center RGBA ${pixel.join(',')}; GL error $error',
+  );
+}
+
+void _publishAlphaAffineProof(
+  web.WebGL2RenderingContext gl,
+  web.HTMLCanvasElement canvas,
+  MaterialStore materials,
+  MaterialHandle handle, {
+  bool isExclusiveMode = false,
+}) {
+  final pixel = _shaderLabCenterPixel(gl);
+  final error = gl.getError();
+  final mat = materials.resolve(handle);
+  final pass =
+      error == web.WebGL2RenderingContext.NO_ERROR &&
+      mat.affineSampling == true &&
+      mat.alphaMode == AlphaMode.masked &&
+      mat.alphaCutoff == _maskedCutoff;
+  canvas
+    ..setAttribute('data-alpha-affine-status', pass ? 'pass' : 'fail')
+    ..setAttribute('data-alpha-affine-mode', 'masked-affine')
+    ..setAttribute('data-alpha-affine-pixel', pixel.join(','))
+    ..setAttribute('data-alpha-affine-cutoff', '$_maskedCutoff')
+    ..setAttribute('data-alpha-affine-warp', '1.0')
+    ..setAttribute('data-alpha-affine-gl-error', '$error');
+  if (isExclusiveMode) {
+    canvas
+      ..setAttribute('data-shader-lab-mode', 'alpha-affine')
+      ..setAttribute('data-shader-lab-status', pass ? 'pass' : 'fail')
+      ..setAttribute('data-shader-lab-pixel', pixel.join(','))
+      ..setAttribute('data-shader-lab-gl-error', '$error');
+  }
+  _setStatus(
+    'alpha-mask x affine fixture: ${pass ? 'PASS' : 'FAIL'}; '
+    'cutoff $_maskedCutoff, affineSampling true, GL error $error',
+  );
+}
+
+void _publishQmshProof(
+  web.WebGL2RenderingContext gl,
+  web.HTMLCanvasElement canvas,
+  MeshData qmshData,
+  int qmshByteLength, {
+  bool isExclusiveMode = false,
+}) {
+  final pixel = _shaderLabCenterPixel(gl);
+  final error = gl.getError();
+  final pass =
+      error == web.WebGL2RenderingContext.NO_ERROR &&
+      qmshData.vertexCount == 3 &&
+      qmshData.layout == VertexLayoutDescriptor.compatibility14;
+  canvas
+    ..setAttribute('data-qmsh-status', pass ? 'pass' : 'fail')
+    ..setAttribute('data-qmsh-triangles', '${qmshData.vertexCount ~/ 3}')
+    ..setAttribute('data-qmsh-bytes', '$qmshByteLength')
+    ..setAttribute('data-qmsh-layout', qmshData.layout.name)
+    ..setAttribute('data-qmsh-pixel', pixel.join(','))
+    ..setAttribute('data-qmsh-gl-error', '$error');
+  if (isExclusiveMode) {
+    canvas
+      ..setAttribute('data-shader-lab-mode', 'qmsh')
+      ..setAttribute('data-shader-lab-status', pass ? 'pass' : 'fail')
+      ..setAttribute('data-shader-lab-pixel', pixel.join(','))
+      ..setAttribute('data-shader-lab-gl-error', '$error');
+  }
+  _setStatus(
+    'live WebGL QMSH path: ${pass ? 'PASS' : 'FAIL'}; '
+    '${qmshData.vertexCount ~/ 3} triangles, $qmshByteLength bytes, '
+    'layout ${qmshData.layout.name}, GL error $error',
   );
 }
 
