@@ -1,6 +1,8 @@
 import 'dart:typed_data';
 
+import '../../rendering/assets/qmesh.dart';
 import '../importers/asset_import_diagnostic.dart';
+import 'model_package_emitter.dart';
 import 'model_package_manifest.dart';
 
 List<AssetImportDiagnostic> validateModelPackageManifest(
@@ -39,8 +41,12 @@ List<AssetImportDiagnostic> validateModelPackageManifest(
 
 List<AssetImportDiagnostic> validateModelPackagePayloads(
   ModelPackageManifest manifest,
-  Map<String, Uint8List> payloads,
-) {
+  Map<String, Uint8List> payloads, {
+  bool verifyQmesh = false,
+  bool verifyPackageHash = false,
+  bool verifyBounds = false,
+  Set<String>? availableSidecars,
+}) {
   final diagnostics = <AssetImportDiagnostic>[];
   void error(String code, String message) {
     diagnostics.add(
@@ -73,6 +79,57 @@ List<AssetImportDiagnostic> validateModelPackagePayloads(
         lower.endsWith('.gltf') ||
         lower.endsWith('.glb')) {
       error('MODEL_PACKAGE_SOURCE_LEAK', 'source/intermediate payload: $path');
+    }
+  }
+  if (verifyQmesh || verifyBounds) {
+    final hasCombinedBounds = manifest.combinedBounds.length == 6 &&
+        manifest.combinedBounds.every((value) => value.isFinite);
+    const boundsEpsilon = 1e-4;
+    for (final path in declared) {
+      final bytes = payloads[path];
+      if (bytes == null) continue;
+      try {
+        final mesh = decodeQmesh(bytes);
+        if (verifyBounds && hasCombinedBounds) {
+          final lo = mesh.localBounds.min;
+          final hi = mesh.localBounds.max;
+          if (lo.x < manifest.combinedBounds[0] - boundsEpsilon ||
+              lo.y < manifest.combinedBounds[1] - boundsEpsilon ||
+              lo.z < manifest.combinedBounds[2] - boundsEpsilon ||
+              hi.x > manifest.combinedBounds[3] + boundsEpsilon ||
+              hi.y > manifest.combinedBounds[4] + boundsEpsilon ||
+              hi.z > manifest.combinedBounds[5] + boundsEpsilon) {
+            error(
+              'MODEL_PACKAGE_BOUNDS_MISMATCH',
+              'QMSH bounds for $path fall outside manifest combinedBounds',
+            );
+          }
+        }
+      } on QmeshDecodeException catch (e) {
+        error(
+          'MODEL_PACKAGE_INVALID_QMESH',
+          'payload $path failed QMSH decode (${e.reason.name}): ${e.detail}',
+        );
+      }
+    }
+  }
+  if (verifyPackageHash) {
+    final expected = ModelPackageEmitter.computePackageHash(manifest, payloads);
+    if (expected != manifest.packageHash) {
+      error(
+        'MODEL_PACKAGE_PAYLOAD_HASH',
+        'payload-inclusive package hash does not match manifest',
+      );
+    }
+  }
+  if (availableSidecars != null) {
+    for (final texture in manifest.textures) {
+      if (!availableSidecars.contains(texture)) {
+        error(
+          'MODEL_PACKAGE_TEXTURE_MISSING',
+          'declared texture sidecar is missing: $texture',
+        );
+      }
     }
   }
   return diagnostics;

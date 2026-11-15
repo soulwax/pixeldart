@@ -12,6 +12,7 @@ export 'api/materials.dart';
 export 'api/mesh.dart';
 export 'api/msaa.dart';
 export 'api/renderer.dart';
+export 'api/render_pass_decl.dart';
 export 'api/resource_plan.dart';
 export 'api/scene.dart';
 export 'api/settings.dart';

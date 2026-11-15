@@ -28,6 +28,7 @@ usemtl ceramic
 f 1/1/1 2/2/1 3/3/1 4/4/1
 ''';
   final scene = parseObj(source);
+  check(scene.mtlLibraries.length == 1 && scene.mtlLibraries.single == 'materials/room.mtl', 'mtllib preserved');
   check(scene.triangles.length == 2, 'quad triangulates deterministically');
   check(scene.triangles.first.material == 'ceramic', 'material slot retained');
   check(scene.triangles.last.position.join(',') == '0,2,3', 'fan order stable');
@@ -46,13 +47,15 @@ f 1/1/1 2/2/1 3/3/1 4/4/1
   }
   check(rejected, 'missing MTL material rejects');
 
-  rejected = false;
-  try {
-    parseObj('mtllib ../escape.mtl\nv 0 0 0\nv 1 0 0\nv 0 1 0\nf 1 2 3');
-  } on FormatException {
-    rejected = true;
+  for (final badPath in ['../escape.mtl', r'..\escape.mtl', 'C:/escape.mtl', './room.mtl']) {
+    rejected = false;
+    try {
+      parseObj('mtllib $badPath\nv 0 0 0\nv 1 0 0\nv 0 1 0\nf 1 2 3');
+    } on FormatException {
+      rejected = true;
+    }
+    check(rejected, 'MTL traversal/unsafe path rejects: $badPath');
   }
-  check(rejected, 'MTL traversal rejects');
   rejected = false;
   try {
     parseObj('vp 0 0 0\nv 0 0 0\nv 1 0 0\nv 0 1 0\nf 1 2 3');

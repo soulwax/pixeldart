@@ -153,6 +153,7 @@ final class ObjNormalizedScene {
   final List<ObjTriangle> triangles;
   final List<String> materials;
   final List<double> bounds;
+  final List<String> mtlLibraries;
 
   const ObjNormalizedScene({
     required this.positions,
@@ -161,6 +162,7 @@ final class ObjNormalizedScene {
     required this.triangles,
     required this.materials,
     required this.bounds,
+    this.mtlLibraries = const [],
   });
 
   Map<String, dynamic> toJson() => {
@@ -170,6 +172,7 @@ final class ObjNormalizedScene {
     'triangles': triangles.map((triangle) => triangle.toJson()).toList(),
     'materials': materials,
     'bounds': bounds,
+    if (mtlLibraries.isNotEmpty) 'mtlLibraries': mtlLibraries,
   };
 
   String canonicalJson() => jsonEncode(toJson());
@@ -193,6 +196,7 @@ ObjNormalizedScene parseObj(String source, {ObjImportLimits limits = const ObjIm
   final normals = <List<double>>[];
   final triangles = <ObjTriangle>[];
   final materials = <String>{};
+  final mtlLibraries = <String>[];
   var material = '';
   var lineCount = 0;
 
@@ -231,13 +235,24 @@ ObjNormalizedScene parseObj(String source, {ObjImportLimits limits = const ObjIm
         if (materials.length > limits.maxMaterials) throw const FormatException('OBJ material limit exceeded');
       }
     } else if (tag == 'mtllib') {
-      if (fields.length != 2 || !_isSafeRelativePath(fields[1])) {
+      if (fields.length < 2) {
         throw const FormatException('OBJ MTL reference is not a safe local path');
+      }
+      for (final path in fields.skip(1)) {
+        if (!_isSafeRelativePath(path)) {
+          throw const FormatException('OBJ MTL reference is not a safe local path');
+        }
+        if (!mtlLibraries.contains(path)) {
+          mtlLibraries.add(path);
+        }
       }
     } else if (tag == 'f') {
       if (fields.length < 4) throw const FormatException('OBJ face has fewer than three corners');
       final corners = fields.skip(1).map((field) {
         final parts = field.split('/');
+        if (parts.length > 3) {
+          throw const FormatException('OBJ face vertex has too many slash-separated components');
+        }
         return (
           resolveIndex(parts[0], positions.length, 'position'),
           parts.length > 1 && parts[1].isNotEmpty ? resolveIndex(parts[1], texcoords.length, 'texcoord') : null,
@@ -274,8 +289,20 @@ ObjNormalizedScene parseObj(String source, {ObjImportLimits limits = const ObjIm
     triangles: List.unmodifiable(triangles),
     materials: List.unmodifiable(materials.toList()..sort()),
     bounds: [...min, ...max],
+    mtlLibraries: List.unmodifiable(mtlLibraries),
   );
 }
 
-bool _isSafeRelativePath(String value) =>
-    value.isNotEmpty && !value.contains('://') && !value.startsWith('/') && !value.split('/').contains('..');
+bool _isSafeRelativePath(String value) {
+  if (value.isEmpty ||
+      value.startsWith('/') ||
+      value.contains('://') ||
+      value.contains('\\') ||
+      value.contains(':')) {
+    return false;
+  }
+  final segments = value.split('/');
+  return segments.every(
+    (segment) => segment.isNotEmpty && segment != '.' && segment != '..',
+  );
+}

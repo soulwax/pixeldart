@@ -70,10 +70,20 @@ final class ModelPackageManifest {
     if (parts.isEmpty) errors.add('parts must be non-empty');
     if (lods.toSet().length != lods.length) errors.add('lods must be unique');
     if (!lods.contains('LOD0')) errors.add('LOD0 is required');
-    if (combinedBounds.isNotEmpty &&
-        (combinedBounds.length != 6 ||
-            combinedBounds.any((value) => !value.isFinite))) {
-      errors.add('combinedBounds must contain six finite values');
+    if (combinedBounds.isNotEmpty) {
+      if (combinedBounds.length != 6 ||
+          combinedBounds.any((value) => !value.isFinite)) {
+        errors.add('combinedBounds must contain six finite values');
+      } else if (combinedBounds[0] > combinedBounds[3] ||
+          combinedBounds[1] > combinedBounds[4] ||
+          combinedBounds[2] > combinedBounds[5]) {
+        errors.add('combinedBounds min must not exceed max');
+      }
+    }
+    for (final texture in textures) {
+      if (!_isSafeRelativePath(texture)) {
+        errors.add('texture contains unsafe relative path: $texture');
+      }
     }
     for (final entry in sockets.entries) {
       if (entry.key.isEmpty ||
@@ -85,14 +95,20 @@ final class ModelPackageManifest {
       }
     }
     for (final part in parts) {
+      if (part.id.isEmpty) {
+        errors.add('part id must be non-empty');
+      }
       if (part.materialSlot < 0 || part.materialSlot >= materials.length) {
         errors.add('part material slot is outside materials');
       }
       if (part.lodFiles.isEmpty) {
         errors.add('part ${part.id} must declare payload files');
       }
-      for (final path in part.lodFiles.values) {
-        if (!_isSafeRelativePath(path)) {
+      for (final entry in part.lodFiles.entries) {
+        if (!lods.contains(entry.key)) {
+          errors.add('part ${part.id} declares unknown LOD ${entry.key}');
+        }
+        if (!_isSafeRelativePath(entry.value)) {
           errors.add('part ${part.id} contains unsafe payload path');
         }
       }

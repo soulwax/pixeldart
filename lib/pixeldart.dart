@@ -24,6 +24,7 @@ export 'rendering/camera/ortho_camera.dart';
 export 'rendering/camera/camera_shake.dart';
 export 'rendering/camera/cinematic_tour_camera.dart';
 export 'rendering/api/renderer.dart';
+export 'rendering/api/render_pass_decl.dart';
 export 'rendering/api/scene.dart';
 export 'rendering/scene/scene_node.dart';
 export 'rendering/scene/instanced_mesh_node.dart';

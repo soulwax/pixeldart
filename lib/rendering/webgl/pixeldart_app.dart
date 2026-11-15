@@ -224,6 +224,9 @@ final class PixeldartApp {
     _emitters.clear();
   }
 
+  /// Visibility layer bitmask forwarded to [FrameSequencer.next] each frame.
+  int visibilityMask = -1;
+
   void Function(FrameContext ctx)? onFrame;
 
   void Function(double timeSeconds, double deltaTime)? onBeforeFrame;
@@ -1196,6 +1199,7 @@ final class PixeldartApp {
       environment: environment,
       post: post,
       timeSeconds: timeSeconds,
+      visibilityMask: visibilityMask,
     );
 
     final encoder = renderer.beginFrame(world, frameInput);

@@ -24,9 +24,18 @@ void main(List<String> arguments) {
     scene: scene,
     materials: material,
   );
-  final packageErrors = package.manifest.validate();
-  if (packageErrors.isNotEmpty) {
-    throw FormatException(packageErrors.join('; '));
+  final diagnostics = [
+    ...validateModelPackageManifest(package.manifest),
+    ...validateModelPackagePayloads(
+      package.manifest,
+      package.payloads,
+      verifyQmesh: true,
+      verifyPackageHash: true,
+      verifyBounds: true,
+    ),
+  ];
+  if (diagnostics.isNotEmpty) {
+    throw FormatException(diagnostics.map((d) => d.message).join('; '));
   }
   final canonical = scene.canonicalJson();
   final digest = Sha256.compute(utf8.encode(canonical));
