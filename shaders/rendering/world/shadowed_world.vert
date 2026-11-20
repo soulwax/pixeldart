@@ -6,12 +6,28 @@ layout(location=3) in float aAlpha;
 layout(location=4) in vec3 aUvMat;
 layout(location=5) in vec4 aTangent;
 layout(location=6) in vec2 aUv1;
+layout(location=7) in vec4 aInstanceModel0;
+layout(location=8) in vec4 aInstanceModel1;
+layout(location=9) in vec4 aInstanceModel2;
+layout(location=10) in vec4 aInstanceModel3;
+layout(location=11) in vec4 aInstanceNormal0;
+layout(location=12) in vec4 aInstanceNormal1;
+layout(location=13) in vec4 aInstanceNormal2;
+layout(location=14) in vec4 aInstanceNormal3;
+layout(std140) uniform FrameBlock {
+  mat4 uFrameViewProjection;
+  mat4 uFrameView;
+  vec4 uFrameCameraPosTime;
+  vec4 uFrameExposureParams;
+};
+layout(std140) uniform SkinBlock {
+  mat4 uJointMatrices[256];
+};
+uniform float uUseFrameUbo;
 uniform mat4 uViewProjection;
 uniform mat4 uView;
 uniform mat4 uModel;
 uniform mat4 uNormalMatrix;
-uniform mat4 uInstanceModels[16];
-uniform mat4 uInstanceNormalMatrices[16];
 uniform float uUseInstances;
 uniform mat4 uLightViewProjection;
 uniform float uVertexSnapGrid;
@@ -22,7 +38,6 @@ uniform vec3 uDirectionalColor;
 uniform float uDirectionalIntensity;
 uniform float uSkinEnabled;
 uniform int uJointCount;
-uniform mat4 uJointMatrices[64];
 out vec4 vColor;
 out vec3 vNormal;
 out highp vec2 vUv;
@@ -34,9 +49,14 @@ out vec4 vTangent;
 out float vViewDepth;
 out vec3 vVertexLighting;
 void main(){
+  mat4 viewProj=uUseFrameUbo>0.5?uFrameViewProjection:uViewProjection;
+  mat4 viewMat=uUseFrameUbo>0.5?uFrameView:uView;
   mat4 model=uModel;
   mat4 normalMatrix=uNormalMatrix;
-  if(uUseInstances>0.5){model=uInstanceModels[gl_InstanceID];normalMatrix=uInstanceNormalMatrices[gl_InstanceID];}
+  if(uUseInstances>0.5){
+    model=mat4(aInstanceModel0,aInstanceModel1,aInstanceModel2,aInstanceModel3);
+    normalMatrix=mat4(aInstanceNormal0,aInstanceNormal1,aInstanceNormal2,aInstanceNormal3);
+  }
   vec3 inPos=aPosition;
   vec3 inNorm=aNormal;
   if(uSkinEnabled>0.5 && uJointCount>0){
@@ -57,36 +77,14 @@ void main(){
   vWorldPos=worldPos.xyz;
   vTangent=vec4(mat3(normalMatrix)*aTangent.xyz,aTangent.w);
   vLightSpacePos=uLightViewProjection*worldPos;
-  // RV-09 rung 5's fog: the same "linear view depth" convention SSAO/DOF
-  // already reconstruct from a depth texture, computed directly here
-  // instead — this pass rasterizes the actual geometry, so there is a true
-  // view-space Z per-vertex already, with no texture round-trip needed.
-  vViewDepth=-(uView*worldPos).z;
-  vec4 clip=uViewProjection*worldPos;
-  // RV-09 rung 3's PS1 profile: snaps clip-space xy to a fixed grid before
-  // the perspective divide, emulating the fixed-point vertex transform
-  // precision loss that gives PS1 geometry its characteristic wobble as it
-  // moves. uVertexSnapGrid==0 skips the branch entirely, so the default/
-  // safe path is bit-for-bit unchanged from before this rung.
+  vViewDepth=-(viewMat*worldPos).z;
+  vec4 clip=viewProj*worldPos;
   if(uVertexSnapGrid>0.0){
     vec2 ndc=clip.xy/clip.w;
     ndc=floor(ndc/uVertexSnapGrid+0.5)*uVertexSnapGrid;
     clip.xy=ndc*clip.w;
   }
   gl_Position=clip;
-  // Affine UV, the PS1 rung's deferred half. GLSL ES 300 has no
-  // `noperspective` qualifier, so the divide the rasterizer already performs
-  // is cancelled instead of disabled: hardware hands the fragment
-  // interp(v/w)/interp(1/w), so premultiplying a varying by w makes that
-  // expression collapse to interp(v) — screen-space linear, which *is*
-  // affine. Both varyings are scaled by the same factor so the fragment's
-  // vUv/vUvW recovers exactly that, and the intermediate blend between the
-  // two regimes stays continuous rather than popping at any strength.
-  // uAffineWarpStrength==0 gives affineW==1.0 exactly, leaving vUv equal to
-  // aUvMat.xy bit-for-bit; the fragment then skips the divide entirely on
-  // the same uniform, so the perspective-correct path is untouched rather
-  // than merely round-tripped. Snapping above only rewrites clip.xy, never
-  // clip.w, so the two PS1 halves are independent.
   float affineW=mix(1.0,clip.w,uAffineWarpStrength);
   vUv=aUvMat.xy*affineW;
   vUvW=affineW;

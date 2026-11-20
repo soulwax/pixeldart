@@ -51,10 +51,10 @@ final class DynamicBatcher {
 
   DynamicBatchPool get pool => _pool;
 
-  /// Groups items into batches with bounded instance counts per batch.
+  /// Groups items into batches with optional bounded instance counts per batch.
   List<InstanceBatch> batchOpaque(
     List<RetainedItemView> sortedOpaqueItems, {
-    int maxInstancesPerBatch = InstanceBatch.maxInstanceCount,
+    int maxInstancesPerBatch = 65536,
     int? maxUniqueMaterialsPerChunk,
   }) {
     final batches = <InstanceBatch>[];

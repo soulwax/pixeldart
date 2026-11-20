@@ -28,6 +28,7 @@ import '../webgl/resource_plan_adapter.dart';
 import '../passes/pass_context_impl.dart';
 import '../passes/safe_graph.dart';
 import '../passes/safe_graph_resources.dart';
+import 'instance_transforms.dart';
 import '../passes/shadow_graph.dart';
 import '../passes/sprites.dart';
 import '../passes/world.dart';
@@ -455,6 +456,7 @@ final class SceneRendererImpl with _GpuTimingSupport implements SceneRenderer {
       device.deleteTarget(target);
     }
     _transientTargetPool.clear();
+    disposeDeviceInstanceStream(device);
     _configurations.dispose();
     _state = RendererState.disposed;
   }

@@ -387,58 +387,20 @@ final class _ShadowCasterPass implements RenderPass {
       final mesh = resolveMesh(meshHandle);
       encoder.bindVertexArray(mesh.vao);
       final total = batch.instanceCount;
-      if (total <= InstanceBatch.maxInstanceCount) {
-        setInstanceTransformUniforms(
-          encoder,
-          batch,
-          includeNormalMatrices: false,
+      bindInstanceAttributes(encoder, batch, includeNormalMatrices: false);
+      if (mesh.isIndexed) {
+        encoder.drawElementsInstanced(
+          count: mesh.drawCount,
+          offsetBytes: 0,
+          instanceCount: total,
+          index32: mesh.usesUint32Indices,
         );
-        if (mesh.isIndexed) {
-          encoder.drawElementsInstanced(
-            count: mesh.drawCount,
-            offsetBytes: 0,
-            instanceCount: total,
-            index32: mesh.usesUint32Indices,
-          );
-        } else {
-          encoder.drawArraysInstanced(
-            first: 0,
-            count: mesh.drawCount,
-            instanceCount: total,
-          );
-        }
       } else {
-        for (
-          var offset = 0;
-          offset < total;
-          offset += InstanceBatch.maxInstanceCount
-        ) {
-          final count = (total - offset).clamp(
-            0,
-            InstanceBatch.maxInstanceCount,
-          );
-          final chunkMembers = batch.members.sublist(offset, offset + count);
-          final chunkBatch = InstanceBatch(chunkMembers.first, chunkMembers);
-          setInstanceTransformUniforms(
-            encoder,
-            chunkBatch,
-            includeNormalMatrices: false,
-          );
-          if (mesh.isIndexed) {
-            encoder.drawElementsInstanced(
-              count: mesh.drawCount,
-              offsetBytes: 0,
-              instanceCount: count,
-              index32: mesh.usesUint32Indices,
-            );
-          } else {
-            encoder.drawArraysInstanced(
-              first: 0,
-              count: mesh.drawCount,
-              instanceCount: count,
-            );
-          }
-        }
+        encoder.drawArraysInstanced(
+          first: 0,
+          count: mesh.drawCount,
+          instanceCount: total,
+        );
       }
     }
   }

@@ -1,22 +1,29 @@
 #version 300 es
 layout(location=0) in vec3 aPosition;
 layout(location=4) in vec3 aUvMat;
+layout(location=7) in vec4 aInstanceModel0;
+layout(location=8) in vec4 aInstanceModel1;
+layout(location=9) in vec4 aInstanceModel2;
+layout(location=10) in vec4 aInstanceModel3;
+layout(std140) uniform SkinBlock {
+  mat4 uJointMatrices[256];
+};
 uniform mat4 uLightViewProjection;
 uniform mat4 uModel;
-uniform mat4 uInstanceModels[16];
 uniform float uUseInstances;
+uniform float uSkinEnabled;
+uniform int uJointCount;
 out highp vec2 vUv;
-// No affine premultiply here, unlike depth_prepass.vert. Affine sampling is
-// an artifact of *this camera's* screen-space rasterization; the shadow map
-// rasterizes the same triangle from the light, where the equivalent warp
-// would be a different, unrelated distortion. A masked surface therefore
-// cuts its shadow from the perspective-correct UVs — the geometrically
-// right holes — while the camera passes cut theirs from whatever the PS1
-// profile asked for. That divergence is deliberate: the two rasterizations
-// have no shared screen space to agree in.
 void main(){
   mat4 model=uModel;
-  if(uUseInstances>0.5){model=uInstanceModels[gl_InstanceID];}
+  if(uUseInstances>0.5){
+    model=mat4(aInstanceModel0,aInstanceModel1,aInstanceModel2,aInstanceModel3);
+  }
+  vec3 inPos=aPosition;
+  if(uSkinEnabled>0.5 && uJointCount>0){
+    mat4 skinMat=uJointMatrices[0];
+    inPos=(skinMat*vec4(inPos,1.0)).xyz;
+  }
   vUv=aUvMat.xy;
-  gl_Position=uLightViewProjection*model*vec4(aPosition,1.0);
+  gl_Position=uLightViewProjection*model*vec4(inPos,1.0);
 }

@@ -12,6 +12,7 @@ part 'webgl2_device_draw.dart';
 part 'webgl2_device_resources.dart';
 part 'webgl2_device_targets.dart';
 part 'webgl2_device_timing.dart';
+part 'webgl2_device_v2.dart';
 
 typedef _G = WebGL2RenderingContext;
 
@@ -51,6 +52,8 @@ final class _WebGlTexture {
   final int width, height, layers;
   final bool hasMips;
   final AnisotropyDecision anisotropy;
+  final GpuTextureTarget target;
+  final GpuTextureFormat format;
   const _WebGlTexture({
     required this.handle,
     required this.width,
@@ -58,6 +61,8 @@ final class _WebGlTexture {
     required this.layers,
     required this.hasMips,
     required this.anisotropy,
+    this.target = GpuTextureTarget.tex2d,
+    this.format = GpuTextureFormat.rgba8,
   });
 }
 
@@ -69,6 +74,7 @@ final class _WebGlFramebuffer {
   final web.WebGLTexture? depthTex;
   final web.WebGLTexture? glowTex;
   final web.WebGLRenderbuffer? glowRb;
+  final List<web.WebGLTexture> colorAttachments;
   final int width, height, samples;
 
   const _WebGlFramebuffer({
@@ -79,10 +85,17 @@ final class _WebGlFramebuffer {
     this.depthTex,
     this.glowTex,
     this.glowRb,
+    this.colorAttachments = const [],
     required this.width,
     required this.height,
     required this.samples,
   });
+}
+
+final class _WebGlOcclusionQuery {
+  final WebGLQuery query;
+  bool ended = false;
+  _WebGlOcclusionQuery(this.query);
 }
 
 final class _WebGlTimerQuery {
@@ -93,7 +106,7 @@ final class _WebGlTimerQuery {
 
 final class WebGl2Device
     with _WebGlTimerSupport
-    implements GpuDevice, GpuContextGeneration {
+    implements GpuDeviceV2, GpuContextGeneration {
   @override
   final WebGL2RenderingContext gl;
   GpuDeviceStatus _status = GpuDeviceStatus.ready;
@@ -462,4 +475,116 @@ final class WebGl2Device
     instanceCount: instanceCount,
     index32: index32,
   );
+
+  // --- GpuDeviceV2 (S1-A) ---
+
+  @override
+  GpuObject createUniformBuffer(GpuUniformBufferDescriptor descriptor) =>
+      createUniformBufferImpl(descriptor);
+
+  @override
+  void updateUniformBuffer(
+    GpuObject buffer,
+    ByteData data, {
+    int dstByteOffset = 0,
+  }) => updateUniformBufferImpl(buffer, data, dstByteOffset: dstByteOffset);
+
+  @override
+  void bindUniformBufferBase(int bindingPoint, GpuObject buffer) =>
+      bindUniformBufferBaseImpl(bindingPoint, buffer);
+
+  @override
+  void uniformBlockBinding(
+    GpuObject program,
+    String blockName,
+    int bindingPoint,
+  ) => uniformBlockBindingImpl(program, blockName, bindingPoint);
+
+  @override
+  GpuObject createCubeTexture(GpuCubeTextureDescriptor descriptor) =>
+      createCubeTextureImpl(descriptor);
+
+  @override
+  void uploadCubeFace(
+    GpuObject texture,
+    GpuCubeFace face,
+    Uint8List pixels, {
+    int mipLevel = 0,
+  }) => uploadCubeFaceImpl(texture, face, pixels, mipLevel: mipLevel);
+
+  @override
+  void uploadCubeFaceFloat(
+    GpuObject texture,
+    GpuCubeFace face,
+    Float32List pixels, {
+    int mipLevel = 0,
+  }) => uploadCubeFaceFloatImpl(texture, face, pixels, mipLevel: mipLevel);
+
+  @override
+  void bindCubeTexture(int unit, GpuObject texture) =>
+      bindCubeTextureImpl(unit, texture);
+
+  @override
+  GpuObject createTextureArray(GpuTextureArrayDescriptor descriptor) =>
+      createTextureArrayImpl(descriptor);
+
+  @override
+  void uploadTextureArrayLayer(
+    GpuObject texture,
+    int layer,
+    Uint8List pixels, {
+    int mipLevel = 0,
+  }) => uploadTextureArrayLayerImpl(texture, layer, pixels, mipLevel: mipLevel);
+
+  @override
+  void uploadTextureArrayLayerFloat(
+    GpuObject texture,
+    int layer,
+    Float32List pixels, {
+    int mipLevel = 0,
+  }) => uploadTextureArrayLayerFloatImpl(
+    texture,
+    layer,
+    pixels,
+    mipLevel: mipLevel,
+  );
+
+  @override
+  void bindTextureArray(int unit, GpuObject texture) =>
+      bindTextureArrayImpl(unit, texture);
+
+  @override
+  GpuObject createMrtTarget(GpuMrtTargetDescriptor descriptor) =>
+      createMrtTargetImpl(descriptor);
+
+  @override
+  void drawBuffers(List<int> colorAttachmentIndices) =>
+      drawBuffersImpl(colorAttachmentIndices);
+
+  @override
+  void bindTargetColorAttachment(
+    int unit,
+    GpuObject target,
+    int attachmentIndex,
+  ) => bindTargetColorAttachmentImpl(unit, target, attachmentIndex);
+
+  @override
+  GpuObject? beginOcclusionQuery() => beginOcclusionQueryImpl();
+
+  @override
+  void endOcclusionQuery(GpuObject query) => endOcclusionQueryImpl(query);
+
+  @override
+  GpuOcclusionQueryPoll pollOcclusionQuery(GpuObject query) =>
+      pollOcclusionQueryImpl(query);
+
+  @override
+  void deleteOcclusionQuery(GpuObject query) => deleteOcclusionQueryImpl(query);
+
+  @override
+  GpuPassTimerScope? beginPassTimer(String passName) =>
+      beginPassTimerImpl(passName);
+
+  @override
+  void endPassTimer(GpuPassTimerScope scope) => endPassTimerImpl(scope);
 }

@@ -145,15 +145,10 @@ Future<void> main() async {
         stats.pass('present').drawCalls == 1,
     'per-pass encoder telemetry is incomplete',
   );
-  final instanceUniform = device.uniformLog.lastWhere(
-    (entry) => entry.name == 'uInstanceModels',
-  );
-  final instanceModels = instanceUniform.value.value as Float32List;
   require(
-    instanceModels.length == 48 &&
-        instanceModels[28] == 2 &&
-        instanceModels[44] == 0.25,
-    'world pass did not submit the distinct instance transform stream',
+    device.drawLog.contains('vertexAttribDivisor(7, 1)') &&
+        device.drawLog.contains('vertexAttribDivisor(11, 1)'),
+    'world pass did not bind per-instance vertex attribute divisors',
   );
   require(stats.liveGpuBytes == 168, 'mesh upload bytes were not reported');
   require(

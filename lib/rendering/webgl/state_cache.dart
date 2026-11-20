@@ -215,8 +215,32 @@ enum StateField {
 
 final class WebGlStateCache {
   DrawStateDescriptor? _applied;
+  final Map<int, Object?> _uboBindings = <int, Object?>{};
+  final Map<int, ({int target, Object? handle})> _textureBindings =
+      <int, ({int target, Object? handle})>{};
 
   DrawStateDescriptor? get applied => _applied;
+
+  /// Returns `true` when [handle] is not already bound to UBO [bindingPoint].
+  bool shouldBindUbo(int bindingPoint, Object? handle) =>
+      !identical(_uboBindings[bindingPoint], handle) &&
+      _uboBindings[bindingPoint] != handle;
+
+  void markUboBound(int bindingPoint, Object? handle) {
+    _uboBindings[bindingPoint] = handle;
+  }
+
+  /// Returns `true` when ([target], [handle]) is not already bound on [unit].
+  bool shouldBindTexture(int unit, int target, Object? handle) {
+    final prev = _textureBindings[unit];
+    if (prev == null) return true;
+    return prev.target != target ||
+        (!identical(prev.handle, handle) && prev.handle != handle);
+  }
+
+  void markTextureBound(int unit, int target, Object? handle) {
+    _textureBindings[unit] = (target: target, handle: handle);
+  }
 
   Set<StateField> diff(DrawStateDescriptor next) {
     final prev = _applied;
@@ -274,5 +298,7 @@ final class WebGlStateCache {
 
   void invalidate() {
     _applied = null;
+    _uboBindings.clear();
+    _textureBindings.clear();
   }
 }

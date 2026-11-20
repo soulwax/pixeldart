@@ -29,10 +29,6 @@ List<InstanceBatch> batchOpaque(List<RetainedItemView> sortedOpaqueItems) {
     if (existingIndex == null) {
       groupIndexByKey[key] = batches.length;
       batches.add(InstanceBatch(item, [item]));
-    } else if (batches[existingIndex].members.length >=
-        InstanceBatch.maxInstanceCount) {
-      groupIndexByKey[key] = batches.length;
-      batches.add(InstanceBatch(item, [item]));
     } else {
       batches[existingIndex].members.add(item);
     }

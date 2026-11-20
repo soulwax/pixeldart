@@ -115,8 +115,8 @@ final class SubmittedIndirectBatch {
 /// Frozen capacity constants, shader slot IDs, and uniform names shared between
 /// `pixeldart` and `gl_volition` across Wave 12 (`[P4-W12-0]`).
 abstract final class RenderingShaderContracts {
-  /// Maximum bone palette matrices uploaded for skeletal GPU skinning.
-  static const int maxSkinJoints = 64;
+  /// Maximum bone palette matrices uploaded for skeletal GPU skinning (S1-B).
+  static const int maxSkinJoints = 256;
 
   /// Fixed joint influences per skinned vertex (`JOINTS_0` / `WEIGHTS_0`).
   static const int maxJointInfluencesPerVertex = 4;

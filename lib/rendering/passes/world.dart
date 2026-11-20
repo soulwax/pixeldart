@@ -260,55 +260,21 @@ final class _WorldPass implements RenderPass {
       final mesh = resolveMesh(representative.descriptor.mesh);
       encoder.bindVertexArray(mesh.vao);
       final total = batch.instanceCount;
-      if (total <= InstanceBatch.maxInstanceCount) {
-        _setModelUniforms(encoder, representative.descriptor.transform);
-        setInstanceTransformUniforms(encoder, batch);
-        if (mesh.isIndexed) {
-          encoder.drawElementsInstanced(
-            count: mesh.drawCount,
-            offsetBytes: 0,
-            instanceCount: total,
-            index32: mesh.usesUint32Indices,
-          );
-        } else {
-          encoder.drawArraysInstanced(
-            first: 0,
-            count: mesh.drawCount,
-            instanceCount: total,
-          );
-        }
+      _setModelUniforms(encoder, representative.descriptor.transform);
+      bindInstanceAttributes(encoder, batch);
+      if (mesh.isIndexed) {
+        encoder.drawElementsInstanced(
+          count: mesh.drawCount,
+          offsetBytes: 0,
+          instanceCount: total,
+          index32: mesh.usesUint32Indices,
+        );
       } else {
-        for (
-          var offset = 0;
-          offset < total;
-          offset += InstanceBatch.maxInstanceCount
-        ) {
-          final count = (total - offset).clamp(
-            0,
-            InstanceBatch.maxInstanceCount,
-          );
-          final chunkMembers = batch.members.sublist(offset, offset + count);
-          final chunkBatch = InstanceBatch(chunkMembers.first, chunkMembers);
-          _setModelUniforms(
-            encoder,
-            chunkBatch.representative.descriptor.transform,
-          );
-          setInstanceTransformUniforms(encoder, chunkBatch);
-          if (mesh.isIndexed) {
-            encoder.drawElementsInstanced(
-              count: mesh.drawCount,
-              offsetBytes: 0,
-              instanceCount: count,
-              index32: mesh.usesUint32Indices,
-            );
-          } else {
-            encoder.drawArraysInstanced(
-              first: 0,
-              count: mesh.drawCount,
-              instanceCount: count,
-            );
-          }
-        }
+        encoder.drawArraysInstanced(
+          first: 0,
+          count: mesh.drawCount,
+          instanceCount: total,
+        );
       }
     } else if (batch is RetainedItemView) {
       disableInstanceTransformUniforms(encoder);

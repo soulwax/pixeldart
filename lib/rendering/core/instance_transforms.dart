@@ -4,7 +4,45 @@ import '../api/scene.dart';
 import '../math/transform.dart';
 import '../webgl/device_api.dart';
 import '../webgl/draw_encoder.dart';
+import '../webgl/instanced_stream.dart';
 import 'batching.dart';
+
+final Expando<InstancedAttributeStream> _deviceInstanceStreams =
+    Expando<InstancedAttributeStream>('pixeldart.instanceStreams');
+
+/// Streams an uncapped [InstanceBatch] into per-instance vertex attributes
+/// (locations 7..10 for model matrices and 11..14 for normal matrices, divisor 1)
+/// so any instance count (e.g. 4,096+) executes in a single instanced draw call
+/// (`[S1-B]`).
+void bindInstanceAttributes(
+  DrawCommandEncoder encoder,
+  InstanceBatch batch, {
+  bool includeNormalMatrices = true,
+}) {
+  if (encoder is DeviceDrawCommandEncoder) {
+    final device = encoder.device;
+    final stream = _deviceInstanceStreams[device] ??= InstancedAttributeStream(
+      device,
+      initialCapacity: batch.instanceCount < 64 ? 64 : batch.instanceCount,
+    );
+    stream.streamViews(
+      batch.members,
+      computeNormals: includeNormalMatrices,
+    );
+    stream.bindInstancedAttributes(includeNormals: includeNormalMatrices);
+  }
+  encoder.setUniform('uUseInstances', const UniformValue.float1(1));
+}
+
+/// Disposes any cached [InstancedAttributeStream] GPU buffers associated with
+/// [device] so renderer shutdown leaves zero live GPU objects (`[S1-B]`).
+void disposeDeviceInstanceStream(GpuDevice device) {
+  final stream = _deviceInstanceStreams[device];
+  if (stream != null) {
+    stream.dispose();
+    _deviceInstanceStreams[device] = null;
+  }
+}
 
 void setInstanceTransformUniforms(
   DrawCommandEncoder encoder,
