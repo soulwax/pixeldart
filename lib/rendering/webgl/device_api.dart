@@ -5,7 +5,7 @@ import 'state_cache.dart';
 
 enum GpuBufferUsage { staticDraw, dynamicDraw, streamDraw }
 
-enum GpuBufferKind { vertex, indices }
+enum GpuBufferKind { vertex, indices, uniform }
 
 enum GpuTextureFilter { nearest, linear, linearMipmapLinear }
 
@@ -304,4 +304,268 @@ enum ClearMask {
   depthOnly,
   colorDepthStencil,
   stencilOnly,
+}
+
+// =============================================================================
+// Device API v2 (S1-0): UBOs, Cubemaps, Texture Arrays, Float/MRT Targets,
+// Occlusion Queries & Per-Pass Timer Scopes.
+// =============================================================================
+
+enum GpuTextureTarget { tex2d, tex2dArray, cubeMap }
+
+enum GpuTextureFormat {
+  rgba8,
+  srgb8Alpha8,
+  rgba16f,
+  rgba32f,
+  r16f,
+  r32f,
+  rg16f,
+  depth24,
+  depth32f,
+}
+
+enum GpuCubeFace {
+  positiveX,
+  negativeX,
+  positiveY,
+  negativeY,
+  positiveZ,
+  negativeZ,
+}
+
+enum GpuColorTargetFormat { rgba8, rgba16f, rgba32f }
+
+enum GpuOcclusionQueryStatus { unsupported, pending, ready }
+
+final class GpuOcclusionQueryPoll {
+  final GpuOcclusionQueryStatus status;
+  final bool? anySamplesPassed;
+
+  const GpuOcclusionQueryPoll(this.status, [this.anySamplesPassed]);
+}
+
+final class GpuPassTimerScope {
+  final String passName;
+  final GpuObject query;
+
+  const GpuPassTimerScope({required this.passName, required this.query});
+}
+
+final class GpuUniformBufferDescriptor {
+  final int byteLength;
+  final GpuBufferUsage usage;
+
+  const GpuUniformBufferDescriptor({
+    required this.byteLength,
+    this.usage = GpuBufferUsage.dynamicDraw,
+  });
+
+  void validate() {
+    if (byteLength <= 0) {
+      throw ArgumentError.value(
+        byteLength,
+        'byteLength',
+        'uniform buffer byteLength must be > 0',
+      );
+    }
+  }
+}
+
+final class GpuCubeTextureDescriptor {
+  final int size;
+  final GpuTextureFormat format;
+  final bool hasMips;
+  final GpuTextureFilter minFilter;
+  final GpuTextureFilter magFilter;
+
+  const GpuCubeTextureDescriptor({
+    required this.size,
+    this.format = GpuTextureFormat.rgba8,
+    this.hasMips = false,
+    this.minFilter = GpuTextureFilter.linear,
+    this.magFilter = GpuTextureFilter.linear,
+  });
+
+  int get mipLevelCount {
+    if (!hasMips) return 1;
+    var dim = size;
+    var levels = 1;
+    while (dim > 1) {
+      dim ~/= 2;
+      levels += 1;
+    }
+    return levels;
+  }
+
+  void validate() {
+    if (size <= 0) {
+      throw ArgumentError.value(size, 'size', 'cubemap size must be > 0');
+    }
+    if (magFilter == GpuTextureFilter.linearMipmapLinear) {
+      throw ArgumentError('cubemap magFilter cannot be linearMipmapLinear');
+    }
+    if (minFilter == GpuTextureFilter.linearMipmapLinear && !hasMips) {
+      throw ArgumentError(
+        'cubemap minFilter linearMipmapLinear requires hasMips: true',
+      );
+    }
+  }
+}
+
+final class GpuTextureArrayDescriptor {
+  final int width;
+  final int height;
+  final int layers;
+  final GpuTextureFormat format;
+  final bool hasMips;
+  final GpuTextureFilter minFilter;
+  final GpuTextureFilter magFilter;
+  final GpuTextureWrap wrap;
+  final double anisotropy;
+
+  const GpuTextureArrayDescriptor({
+    required this.width,
+    required this.height,
+    required this.layers,
+    this.format = GpuTextureFormat.rgba8,
+    this.hasMips = false,
+    this.minFilter = GpuTextureFilter.linear,
+    this.magFilter = GpuTextureFilter.linear,
+    this.wrap = GpuTextureWrap.clampToEdge,
+    this.anisotropy = 1,
+  });
+
+  int get mipLevelCount {
+    if (!hasMips) return 1;
+    var dim = width > height ? width : height;
+    var levels = 1;
+    while (dim > 1) {
+      dim ~/= 2;
+      levels += 1;
+    }
+    return levels;
+  }
+
+  void validate() {
+    if (width <= 0 || height <= 0 || layers <= 0) {
+      throw ArgumentError('texture array dimensions and layers must be > 0');
+    }
+    if (magFilter == GpuTextureFilter.linearMipmapLinear) {
+      throw ArgumentError(
+        'texture array magFilter cannot be linearMipmapLinear',
+      );
+    }
+    if (minFilter == GpuTextureFilter.linearMipmapLinear && !hasMips) {
+      throw ArgumentError(
+        'texture array minFilter linearMipmapLinear requires hasMips: true',
+      );
+    }
+    if (!anisotropy.isFinite || anisotropy < 1 || anisotropy > 16) {
+      throw ArgumentError(
+        'texture array anisotropy must be finite and in [1, 16]',
+      );
+    }
+  }
+}
+
+final class GpuMrtTargetDescriptor {
+  final int width;
+  final int height;
+  final int samples;
+  final List<GpuColorTargetFormat> colorFormats;
+  final bool hasDepth;
+  final bool hasStencil;
+
+  const GpuMrtTargetDescriptor({
+    required this.width,
+    required this.height,
+    this.samples = 1,
+    required this.colorFormats,
+    this.hasDepth = true,
+    this.hasStencil = false,
+  });
+
+  void validate() {
+    if (width <= 0 || height <= 0) {
+      throw ArgumentError('MRT target dimensions must be > 0');
+    }
+    if (samples <= 0) {
+      throw ArgumentError('MRT target samples must be > 0');
+    }
+    if (colorFormats.isEmpty && !hasDepth) {
+      throw ArgumentError(
+        'MRT target must define at least one color attachment or depth',
+      );
+    }
+  }
+}
+
+/// Device API v2 extension contract implemented by WebGL2, `Gles3FfiDevice`,
+/// and `RecordingGlesDevice` in `[S1-A]`.
+abstract interface class GpuDeviceV2 implements GpuDevice {
+  // Uniform Buffer Objects (std140)
+  GpuObject createUniformBuffer(GpuUniformBufferDescriptor descriptor);
+  void updateUniformBuffer(
+    GpuObject buffer,
+    ByteData data, {
+    int dstByteOffset = 0,
+  });
+  void bindUniformBufferBase(int bindingPoint, GpuObject buffer);
+  void uniformBlockBinding(
+    GpuObject program,
+    String blockName,
+    int bindingPoint,
+  );
+
+  // Cubemap Textures (6 faces + mips)
+  GpuObject createCubeTexture(GpuCubeTextureDescriptor descriptor);
+  void uploadCubeFace(
+    GpuObject texture,
+    GpuCubeFace face,
+    Uint8List pixels, {
+    int mipLevel = 0,
+  });
+  void uploadCubeFaceFloat(
+    GpuObject texture,
+    GpuCubeFace face,
+    Float32List pixels, {
+    int mipLevel = 0,
+  });
+  void bindCubeTexture(int unit, GpuObject texture);
+
+  // 2D Texture Arrays
+  GpuObject createTextureArray(GpuTextureArrayDescriptor descriptor);
+  void uploadTextureArrayLayer(
+    GpuObject texture,
+    int layer,
+    Uint8List pixels, {
+    int mipLevel = 0,
+  });
+  void uploadTextureArrayLayerFloat(
+    GpuObject texture,
+    int layer,
+    Float32List pixels, {
+    int mipLevel = 0,
+  });
+  void bindTextureArray(int unit, GpuObject texture);
+
+  // Half-Float / Float & Multi-Render-Target (MRT) Framebuffers
+  GpuObject createMrtTarget(GpuMrtTargetDescriptor descriptor);
+  void drawBuffers(List<int> colorAttachmentIndices);
+  void bindTargetColorAttachment(
+    int unit,
+    GpuObject target,
+    int attachmentIndex,
+  );
+
+  // Occlusion Queries (ANY_SAMPLES_PASSED_CONSERVATIVE)
+  GpuObject? beginOcclusionQuery();
+  void endOcclusionQuery(GpuObject query);
+  GpuOcclusionQueryPoll pollOcclusionQuery(GpuObject query);
+  void deleteOcclusionQuery(GpuObject query);
+
+  // Per-Pass Timer Query Scopes
+  GpuPassTimerScope? beginPassTimer(String passName);
+  void endPassTimer(GpuPassTimerScope scope);
 }

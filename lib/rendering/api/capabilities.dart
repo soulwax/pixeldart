@@ -12,7 +12,12 @@ final class RenderCapabilities {
   final bool disjointTimerQuery,
       floatRenderTarget,
       halfFloatRenderTarget,
-      contextLossExtension;
+      contextLossExtension,
+      occlusionQueryConservative;
+  final int maxUniformBlockSize;
+  final int maxUniformBufferBindings;
+  final int maxDrawBuffers;
+  final int maxCubeMapTextureSize;
   const RenderCapabilities({
     this.webglVersion,
     this.rendererString,
@@ -28,6 +33,11 @@ final class RenderCapabilities {
     this.floatRenderTarget = false,
     this.halfFloatRenderTarget = false,
     this.contextLossExtension = false,
+    this.occlusionQueryConservative = false,
+    this.maxUniformBlockSize = 16384,
+    this.maxUniformBufferBindings = 24,
+    this.maxDrawBuffers = 1,
+    this.maxCubeMapTextureSize = 2048,
   });
 
   static const RenderCapabilities safeMinimum = RenderCapabilities(
@@ -44,6 +54,10 @@ final class RenderCapabilities {
       maxSamples,
       maxVertexAttributes,
       maxColorAttachments,
+      maxUniformBlockSize,
+      maxUniformBufferBindings,
+      maxDrawBuffers,
+      maxCubeMapTextureSize,
     ].any((value) => value <= 0)) {
       throw const FormatException('render capabilities contain invalid limits');
     }

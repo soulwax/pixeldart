@@ -15,11 +15,23 @@ Map<String, Object?> capabilityToMap(RenderCapabilities value) => {
   'floatRenderTarget': value.floatRenderTarget,
   'halfFloatRenderTarget': value.halfFloatRenderTarget,
   'contextLossExtension': value.contextLossExtension,
+  'occlusionQueryConservative': value.occlusionQueryConservative,
+  'maxUniformBlockSize': value.maxUniformBlockSize,
+  'maxUniformBufferBindings': value.maxUniformBufferBindings,
+  'maxDrawBuffers': value.maxDrawBuffers,
+  'maxCubeMapTextureSize': value.maxCubeMapTextureSize,
 };
 
 RenderCapabilities capabilityFromMap(Map<String, Object?> value) {
   int requiredInt(String key) {
     final result = value[key];
+    if (result is! int) throw FormatException('capability $key is malformed');
+    return result;
+  }
+
+  int optionalInt(String key, int fallback) {
+    final result = value[key];
+    if (result == null) return fallback;
     if (result is! int) throw FormatException('capability $key is malformed');
     return result;
   }
@@ -49,6 +61,11 @@ RenderCapabilities capabilityFromMap(Map<String, Object?> value) {
     floatRenderTarget: optionalBool('floatRenderTarget'),
     halfFloatRenderTarget: optionalBool('halfFloatRenderTarget'),
     contextLossExtension: optionalBool('contextLossExtension'),
+    occlusionQueryConservative: optionalBool('occlusionQueryConservative'),
+    maxUniformBlockSize: optionalInt('maxUniformBlockSize', 16384),
+    maxUniformBufferBindings: optionalInt('maxUniformBufferBindings', 24),
+    maxDrawBuffers: optionalInt('maxDrawBuffers', 1),
+    maxCubeMapTextureSize: optionalInt('maxCubeMapTextureSize', 2048),
   );
   capabilities.validate();
   return capabilities;
