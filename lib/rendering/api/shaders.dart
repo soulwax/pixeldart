@@ -6,6 +6,62 @@ import '../webgl/generated_shaders.dart';
 import 'handles.dart';
 import 'lights.dart';
 
+/// Shader variant keywords compiled into GLSL ES 3.00 `#define`s (`[S3-0]`).
+enum ShaderKeyword {
+  normalMap('VRP_NORMAL_MAP'),
+  ormMap('VRP_ORM_MAP'),
+  emissiveMap('VRP_EMISSIVE_MAP'),
+  skinned('VRP_SKINNED'),
+  instanced('VRP_INSTANCED'),
+  alphaTest('VRP_ALPHA_TEST'),
+  shadowsPcf('VRP_SHADOWS_PCF'),
+  shadowsPcss('VRP_SHADOWS_PCSS'),
+  ps1Affine('VRP_PS1_AFFINE'),
+  hdr('VRP_HDR');
+
+  final String defineName;
+  const ShaderKeyword(this.defineName);
+}
+
+/// Deterministic variant cache key and `#define` preprocessor for uber-shaders
+/// (`[S3-0]`).
+final class ShaderVariantKey {
+  final ShaderSlot slot;
+  final Set<ShaderKeyword> keywords;
+
+  ShaderVariantKey(this.slot, Iterable<ShaderKeyword> keywords)
+    : keywords = Set<ShaderKeyword>.unmodifiable(keywords);
+
+  String get canonicalId {
+    final sorted = keywords.map((k) => k.defineName).toList()..sort();
+    return '${slot.name}:${sorted.join('+')}';
+  }
+
+  /// Inserts `#define <KEYWORD> 1` lines directly after `#version 300 es`.
+  String injectDefines(String glslSource) {
+    if (keywords.isEmpty) return glslSource;
+    final sorted = keywords.map((k) => k.defineName).toList()..sort();
+    final defines = sorted.map((d) => '#define $d 1').join('\n');
+    final versionLineEnd = glslSource.indexOf('\n');
+    if (glslSource.startsWith('#version') && versionLineEnd >= 0) {
+      return '${glslSource.substring(0, versionLineEnd + 1)}'
+          '$defines\n'
+          '${glslSource.substring(versionLineEnd + 1)}';
+    }
+    return '$defines\n$glslSource';
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      other is ShaderVariantKey && other.canonicalId == canonicalId;
+
+  @override
+  int get hashCode => canonicalId.hashCode;
+
+  @override
+  String toString() => 'ShaderVariantKey($canonicalId)';
+}
+
 /// Something host shader values can be bound to: a built-in [ShaderSlot], a
 /// registered sprite [ShaderHandle], or a named [PostEffect].
 sealed class ShaderTarget {

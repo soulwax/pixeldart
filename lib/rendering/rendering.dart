@@ -2,6 +2,7 @@ export 'api/capabilities.dart';
 export 'api/capability_serialization.dart';
 export 'api/configuration_coordinator.dart';
 export 'api/configuration_transition.dart';
+export 'api/editor_overlay.dart';
 export 'api/effects.dart';
 export 'api/frame.dart';
 export 'api/frame_sequencer.dart';

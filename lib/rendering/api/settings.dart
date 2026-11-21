@@ -256,3 +256,195 @@ final class RendererConfiguration {
     }
   }
 }
+
+/// Quality tier selector for [RenderPipelineSettings] (`[S3-0]`).
+enum VrpQualityTier { low, medium, high, ultra }
+
+/// Scene color buffer format for HDR / LDR rendering (`[S3-0]`).
+enum VrpHdrFormat { rgba8, rgba16f, rgba32f }
+
+/// Serializable Volition Render Pipeline (VRP) settings asset (`[S3-0]`).
+final class RenderPipelineSettings {
+  final VrpQualityTier tier;
+  final bool hdrEnabled;
+  final VrpHdrFormat hdrFormat;
+  final int msaaSamples;
+  final double renderScale;
+  final int maxVisibleLights;
+  final int clusterDimX;
+  final int clusterDimY;
+  final int clusterDimZ;
+  final double shadowDistance;
+  final int shadowCascadeCount;
+  final double shadowSplitLambda;
+  final int shadowAtlasSize;
+  final List<int> shadowResolutionTiers;
+
+  const RenderPipelineSettings({
+    this.tier = VrpQualityTier.high,
+    this.hdrEnabled = true,
+    this.hdrFormat = VrpHdrFormat.rgba16f,
+    this.msaaSamples = 1,
+    this.renderScale = 1.0,
+    this.maxVisibleLights = 256,
+    this.clusterDimX = 16,
+    this.clusterDimY = 9,
+    this.clusterDimZ = 24,
+    this.shadowDistance = 120.0,
+    this.shadowCascadeCount = 4,
+    this.shadowSplitLambda = 0.65,
+    this.shadowAtlasSize = 2048,
+    this.shadowResolutionTiers = const [256, 512, 1024, 2048],
+  });
+
+  static const RenderPipelineSettings low = RenderPipelineSettings(
+    tier: VrpQualityTier.low,
+    hdrEnabled: false,
+    hdrFormat: VrpHdrFormat.rgba8,
+    msaaSamples: 1,
+    renderScale: 0.75,
+    maxVisibleLights: 32,
+    clusterDimX: 8,
+    clusterDimY: 4,
+    clusterDimZ: 12,
+    shadowDistance: 40.0,
+    shadowCascadeCount: 1,
+    shadowAtlasSize: 1024,
+    shadowResolutionTiers: [128, 256, 512],
+  );
+
+  static const RenderPipelineSettings medium = RenderPipelineSettings(
+    tier: VrpQualityTier.medium,
+    hdrEnabled: true,
+    hdrFormat: VrpHdrFormat.rgba16f,
+    msaaSamples: 2,
+    renderScale: 1.0,
+    maxVisibleLights: 128,
+    clusterDimX: 12,
+    clusterDimY: 6,
+    clusterDimZ: 16,
+    shadowDistance: 80.0,
+    shadowCascadeCount: 2,
+    shadowAtlasSize: 2048,
+    shadowResolutionTiers: [256, 512, 1024],
+  );
+
+  static const RenderPipelineSettings high = RenderPipelineSettings();
+
+  static const RenderPipelineSettings ultra = RenderPipelineSettings(
+    tier: VrpQualityTier.ultra,
+    hdrEnabled: true,
+    hdrFormat: VrpHdrFormat.rgba16f,
+    msaaSamples: 4,
+    renderScale: 1.0,
+    maxVisibleLights: 512,
+    clusterDimX: 16,
+    clusterDimY: 9,
+    clusterDimZ: 24,
+    shadowDistance: 200.0,
+    shadowCascadeCount: 4,
+    shadowAtlasSize: 4096,
+    shadowResolutionTiers: [512, 1024, 2048],
+  );
+
+  static RenderPipelineSettings forTier(VrpQualityTier tier) => switch (tier) {
+    VrpQualityTier.low => low,
+    VrpQualityTier.medium => medium,
+    VrpQualityTier.high => high,
+    VrpQualityTier.ultra => ultra,
+  };
+
+  int get totalClusters => clusterDimX * clusterDimY * clusterDimZ;
+
+  void validate() {
+    if (msaaSamples <= 0) {
+      throw ArgumentError.value(msaaSamples, 'msaaSamples', 'must be > 0');
+    }
+    if (!renderScale.isFinite || renderScale <= 0 || renderScale > 2.0) {
+      throw ArgumentError.value(
+        renderScale,
+        'renderScale',
+        'must be in (0, 2.0]',
+      );
+    }
+    if (maxVisibleLights <= 0) {
+      throw ArgumentError.value(
+        maxVisibleLights,
+        'maxVisibleLights',
+        'must be > 0',
+      );
+    }
+    if (clusterDimX <= 0 || clusterDimY <= 0 || clusterDimZ <= 0) {
+      throw ArgumentError('cluster dimensions must be > 0');
+    }
+    if (shadowCascadeCount < 1 || shadowCascadeCount > 4) {
+      throw ArgumentError.value(
+        shadowCascadeCount,
+        'shadowCascadeCount',
+        'must be in 1..4',
+      );
+    }
+    if (shadowAtlasSize <= 0) {
+      throw ArgumentError.value(
+        shadowAtlasSize,
+        'shadowAtlasSize',
+        'must be > 0',
+      );
+    }
+  }
+
+  Map<String, Object?> toJson() => {
+    'tier': tier.name,
+    'hdrEnabled': hdrEnabled,
+    'hdrFormat': hdrFormat.name,
+    'msaaSamples': msaaSamples,
+    'renderScale': renderScale,
+    'maxVisibleLights': maxVisibleLights,
+    'clusterDims': [clusterDimX, clusterDimY, clusterDimZ],
+    'shadowDistance': shadowDistance,
+    'shadowCascadeCount': shadowCascadeCount,
+    'shadowSplitLambda': shadowSplitLambda,
+    'shadowAtlasSize': shadowAtlasSize,
+    'shadowResolutionTiers': shadowResolutionTiers,
+  };
+
+  factory RenderPipelineSettings.fromJson(Map<String, Object?> json) {
+    final tierName = json['tier'] as String? ?? 'high';
+    final tier = VrpQualityTier.values.firstWhere(
+      (t) => t.name == tierName,
+      orElse: () => VrpQualityTier.high,
+    );
+    final fmtName = json['hdrFormat'] as String? ?? 'rgba16f';
+    final hdrFormat = VrpHdrFormat.values.firstWhere(
+      (f) => f.name == fmtName,
+      orElse: () => VrpHdrFormat.rgba16f,
+    );
+    final dims = json['clusterDims'] as List?;
+    final resTiers = json['shadowResolutionTiers'] as List?;
+    return RenderPipelineSettings(
+      tier: tier,
+      hdrEnabled: json['hdrEnabled'] as bool? ?? true,
+      hdrFormat: hdrFormat,
+      msaaSamples: (json['msaaSamples'] as num?)?.toInt() ?? 1,
+      renderScale: (json['renderScale'] as num?)?.toDouble() ?? 1.0,
+      maxVisibleLights: (json['maxVisibleLights'] as num?)?.toInt() ?? 256,
+      clusterDimX: dims != null && dims.isNotEmpty
+          ? (dims[0] as num).toInt()
+          : 16,
+      clusterDimY: dims != null && dims.length > 1
+          ? (dims[1] as num).toInt()
+          : 9,
+      clusterDimZ: dims != null && dims.length > 2
+          ? (dims[2] as num).toInt()
+          : 24,
+      shadowDistance: (json['shadowDistance'] as num?)?.toDouble() ?? 120.0,
+      shadowCascadeCount: (json['shadowCascadeCount'] as num?)?.toInt() ?? 4,
+      shadowSplitLambda:
+          (json['shadowSplitLambda'] as num?)?.toDouble() ?? 0.65,
+      shadowAtlasSize: (json['shadowAtlasSize'] as num?)?.toInt() ?? 2048,
+      shadowResolutionTiers: resTiers != null
+          ? [for (final v in resTiers) (v as num).toInt()]
+          : const [256, 512, 1024, 2048],
+    )..validate();
+  }
+}
