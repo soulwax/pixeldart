@@ -37,7 +37,7 @@ final class ShaderVariantKey {
     return '${slot.name}:${sorted.join('+')}';
   }
 
-  /// Inserts `#define <KEYWORD> 1` lines directly after `#version 300 es`.
+  /// Inserts `#define <KEYWORD> 1` lines directly after the GLSL version header.
   String injectDefines(String glslSource) {
     if (keywords.isEmpty) return glslSource;
     final sorted = keywords.map((k) => k.defineName).toList()..sort();
