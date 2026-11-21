@@ -2208,3 +2208,674 @@ void main(){
   oGlow=vec4(0.0);
 }
 ''';
+
+const String litWorldVertSrc = '''
+#version 300 es
+layout(location=0) in vec3 aPosition;
+layout(location=1) in vec3 aNormal;
+layout(location=2) in vec4 aColor;
+layout(location=3) in float aAlpha;
+layout(location=4) in vec3 aUvMat;
+layout(location=5) in vec4 aTangent;
+layout(location=6) in vec2 aUv1;
+layout(location=7) in vec4 aInstanceModel0;
+layout(location=8) in vec4 aInstanceModel1;
+layout(location=9) in vec4 aInstanceModel2;
+layout(location=10) in vec4 aInstanceModel3;
+layout(location=11) in vec4 aInstanceNormal0;
+layout(location=12) in vec4 aInstanceNormal1;
+layout(location=13) in vec4 aInstanceNormal2;
+layout(location=14) in vec4 aInstanceNormal3;
+
+layout(std140) uniform FrameBlock {
+  mat4 uFrameViewProjection;
+  mat4 uFrameView;
+  vec4 uFrameCameraPosTime;
+  vec4 uFrameExposureParams;
+};
+
+layout(std140) uniform SkinBlock {
+  mat4 uJointMatrices[256];
+};
+
+uniform float uUseFrameUbo;
+uniform mat4 uViewProjection;
+uniform mat4 uView;
+uniform mat4 uModel;
+uniform mat4 uNormalMatrix;
+uniform float uUseInstances;
+uniform float uVertexSnapGrid;
+uniform float uAffineWarpStrength;
+uniform float uSkinEnabled;
+uniform int uJointCount;
+
+out vec4 vColor;
+out vec3 vNormal;
+out highp vec2 vUv;
+out highp float vUvW;
+out highp vec2 vUv1;
+out vec3 vWorldPos;
+out vec4 vTangent;
+out float vViewDepth;
+
+void main() {
+  mat4 viewProj = uUseFrameUbo > 0.5 ? uFrameViewProjection : uViewProjection;
+  mat4 viewMat = uUseFrameUbo > 0.5 ? uFrameView : uView;
+
+  mat4 model = uModel;
+  mat4 normalMatrix = uNormalMatrix;
+#ifdef VRP_INSTANCED
+  model = mat4(aInstanceModel0, aInstanceModel1, aInstanceModel2, aInstanceModel3);
+  normalMatrix = mat4(aInstanceNormal0, aInstanceNormal1, aInstanceNormal2, aInstanceNormal3);
+#else
+  if (uUseInstances > 0.5) {
+    model = mat4(aInstanceModel0, aInstanceModel1, aInstanceModel2, aInstanceModel3);
+    normalMatrix = mat4(aInstanceNormal0, aInstanceNormal1, aInstanceNormal2, aInstanceNormal3);
+  }
+#endif
+
+  vec3 inPos = aPosition;
+  vec3 inNorm = aNormal;
+#ifdef VRP_SKINNED
+  if (uJointCount > 0) {
+    mat4 skinMat = uJointMatrices[0];
+    inPos = (skinMat * vec4(inPos, 1.0)).xyz;
+    inNorm = mat3(skinMat) * inNorm;
+  }
+#else
+  if (uSkinEnabled > 0.5 && uJointCount > 0) {
+    mat4 skinMat = uJointMatrices[0];
+    inPos = (skinMat * vec4(inPos, 1.0)).xyz;
+    inNorm = mat3(skinMat) * inNorm;
+  }
+#endif
+
+  vColor = vec4(aColor.rgb, aAlpha);
+  vNormal = mat3(normalMatrix) * inNorm;
+  vec4 worldPos = model * vec4(inPos, 1.0);
+  vWorldPos = worldPos.xyz;
+  vTangent = vec4(mat3(normalMatrix) * aTangent.xyz, aTangent.w);
+  vViewDepth = -(viewMat * worldPos).z;
+
+  vec4 clip = viewProj * worldPos;
+#ifdef VRP_QUANTIZED
+  if (uVertexSnapGrid > 0.0) {
+    vec2 ndc = clip.xy / max(clip.w, 1e-5);
+    ndc = floor(ndc / uVertexSnapGrid + 0.5) * uVertexSnapGrid;
+    clip.xy = ndc * clip.w;
+  }
+#endif
+  gl_Position = clip;
+
+#ifdef VRP_PS1_AFFINE
+  float affineW = mix(1.0, clip.w, uAffineWarpStrength);
+#else
+  float affineW = 1.0;
+#endif
+  vUv = aUvMat.xy * affineW;
+  vUvW = affineW;
+  vUv1 = aUv1;
+}
+''';
+
+const String litWorldFragSrc = '''
+#version 300 es
+precision highp float;
+
+// Shared VRP math constants & helpers (S3-0).
+const float VRP_PI = 3.14159265359;
+const float VRP_INV_PI = 0.31830988618;
+float vrpSaturate(float x) { return clamp(x, 0.0, 1.0); }
+// VRP Shared Lit Shader Uniforms & Helpers (S3-A)
+
+float vrpRangeAttenuation(float dist, float range) {
+  float invRange = 1.0 / max(range, 0.001);
+  float ratio = clamp(dist * invRange, 0.0, 1.0);
+  float r2 = ratio * ratio;
+  float cutoff = max(1.0 - r2 * r2, 0.0);
+  return (cutoff * cutoff) / (1.0 + dist * dist * invRange * invRange);
+}
+
+float vrpSpotConeAttenuation(vec3 lightToFragDir, vec3 spotDir, float cosInner, float cosOuter) {
+  float cosAngle = dot(lightToFragDir, spotDir);
+  return smoothstep(cosOuter, cosInner, cosAngle);
+}
+
+vec3 vrpApplyFog(vec3 color, float viewDepth, vec3 fogColor, float fogStart, float fogEnd, float fogDensity) {
+  if (fogDensity <= 0.0) return color;
+  float t = clamp((viewDepth - fogStart) / max(fogEnd - fogStart, 0.001), 0.0, 1.0);
+  float factor = clamp(1.0 - exp(-t * fogDensity * 2.0), 0.0, 1.0);
+  return mix(color, fogColor, factor);
+}
+// VRP Physically-Based BRDF (S3-A):
+// GGX NDF, height-correlated Smith visibility, Schlick Fresnel,
+// Kulla-Conty / Fdez-Aguera multi-scatter energy compensation, and clearcoat.
+
+float vrpDistributionGGX(float NdotH, float alpha) {
+  float a2 = alpha * alpha;
+  float denom = (NdotH * NdotH) * (a2 - 1.0) + 1.0;
+  return a2 / max(VRP_PI * denom * denom, 1e-7);
+}
+
+float vrpVisibilitySmithGGXCorrelated(float NdotV, float NdotL, float alpha) {
+  float a2 = alpha * alpha;
+  float lambdaV = NdotL * sqrt(max(NdotV * NdotV * (1.0 - a2) + a2, 1e-7));
+  float lambdaL = NdotV * sqrt(max(NdotL * NdotL * (1.0 - a2) + a2, 1e-7));
+  return 0.5 / max(lambdaV + lambdaL, 1e-7);
+}
+
+float vrpVisibilityKelemen(float LdotH) {
+  return 0.25 / max(LdotH * LdotH, 1e-5);
+}
+
+vec3 vrpFresnelSchlick(float cosTheta, vec3 F0) {
+  float f = pow(vrpSaturate(1.0 - cosTheta), 5.0);
+  return F0 + (1.0 - F0) * f;
+}
+
+// Analytic single-scatter directional albedo approximation for GGX
+// (Karis / Fdez-Aguera) used for multi-scatter energy compensation.
+float vrpApproxDirectionalAlbedo(float NdotV, float roughness) {
+  vec2 r = vec2(roughness, 1.0 - NdotV);
+  float c0 = -1.0 * r.x + 0.0425;
+  float c1 = 1.04 * r.x + 0.04;
+  float a004 = min(r.x * r.x, exp2(-9.28 * NdotV)) * c0 + c1;
+  return vrpSaturate(1.0 - a004 * 0.45);
+}
+
+vec3 vrpMultiScatterEnergyCompensation(vec3 F0, float NdotV, float roughness) {
+  float ess = max(vrpApproxDirectionalAlbedo(NdotV, roughness), 0.05);
+  float ems = 1.0 - ess;
+  vec3 fAvg = F0 + (1.0 - F0) / 21.0;
+  return 1.0 + F0 * (ems / ess) * fAvg;
+}
+
+vec3 vrpEvaluateDirectBRDF(
+  vec3 N,
+  vec3 V,
+  vec3 L,
+  vec3 albedo,
+  float metallic,
+  float roughness,
+  float clearcoat,
+  float clearcoatRoughness
+) {
+  float NdotL = max(dot(N, L), 0.0);
+  if (NdotL <= 0.0) return vec3(0.0);
+  float NdotV = max(dot(N, V), 1e-4);
+  vec3 H = normalize(V + L);
+  float NdotH = max(dot(N, H), 0.0);
+  float VdotH = max(dot(V, H), 0.0);
+  float LdotH = max(dot(L, H), 0.0);
+
+  float clampedRoughness = clamp(roughness, 0.045, 1.0);
+  float alpha = clampedRoughness * clampedRoughness;
+
+  vec3 F0 = mix(vec3(0.04), albedo, metallic);
+  float D = vrpDistributionGGX(NdotH, alpha);
+  float Vis = vrpVisibilitySmithGGXCorrelated(NdotV, NdotL, alpha);
+  vec3 F = vrpFresnelSchlick(VdotH, F0);
+  vec3 energyComp = vrpMultiScatterEnergyCompensation(F0, NdotV, clampedRoughness);
+
+  vec3 specular = (D * Vis) * F * energyComp;
+  vec3 kD = (vec3(1.0) - F) * (1.0 - metallic);
+  vec3 diffuse = kD * albedo * VRP_INV_PI;
+  vec3 color = diffuse + specular;
+
+  if (clearcoat > 0.001) {
+    float ccRough = clamp(clearcoatRoughness, 0.045, 1.0);
+    float ccAlpha = ccRough * ccRough;
+    float Dc = vrpDistributionGGX(NdotH, ccAlpha);
+    float Vc = vrpVisibilityKelemen(LdotH);
+    float Fc = vrpFresnelSchlick(LdotH, vec3(0.04)).r * clearcoat;
+    color = color * (1.0 - Fc) + vec3(Dc * Vc * Fc);
+  }
+
+  return color * NdotL;
+}
+// VRP Surface Evaluation (S3-A)
+
+struct VrpSurface {
+  vec3 albedo;
+  float alpha;
+  vec3 normal;
+  float metallic;
+  float roughness;
+  float ao;
+  vec3 emissive;
+  float clearcoat;
+  float clearcoatRoughness;
+};
+
+VrpSurface vrpEvaluateSurface(
+  vec2 uv,
+  vec4 vertColor,
+  vec3 worldNormal,
+  vec4 worldTangent,
+  sampler2D albedoTex,
+  sampler2D normalTex,
+  sampler2D ormTex,
+  sampler2D emissiveTex,
+  vec3 materialTint,
+  float normalStrength,
+  float roughnessFactor,
+  float metallicFactor,
+  float occlusionStrength,
+  float emissiveStrength,
+  float clearcoatStrength,
+  float clearcoatRoughnessFactor,
+  float alphaCutoff
+) {
+  VrpSurface s;
+  vec4 albedoSample = texture(albedoTex, uv);
+  s.albedo = albedoSample.rgb * vertColor.rgb * materialTint;
+  s.alpha = albedoSample.a * vertColor.a;
+
+#ifdef VRP_ALPHA_TEST
+  if (s.alpha < alphaCutoff) {
+    discard;
+  }
+#endif
+
+  vec3 N = normalize(worldNormal);
+#ifdef VRP_NORMAL_MAP
+  vec3 T = normalize(worldTangent.xyz - N * dot(N, worldTangent.xyz));
+  vec3 B = cross(N, T) * worldTangent.w;
+  vec3 nSample = texture(normalTex, uv).xyz * 2.0 - 1.0;
+  nSample.xy *= normalStrength;
+  N = normalize(T * nSample.x + B * nSample.y + N * nSample.z);
+#endif
+  s.normal = N;
+
+  s.ao = 1.0;
+  s.roughness = roughnessFactor;
+  s.metallic = metallicFactor;
+#ifdef VRP_ORM_MAP
+  vec3 orm = texture(ormTex, uv).rgb;
+  s.ao = mix(1.0, orm.r, occlusionStrength);
+  s.roughness = clamp(orm.g * roughnessFactor, 0.045, 1.0);
+  s.metallic = clamp(orm.b * metallicFactor, 0.0, 1.0);
+#endif
+
+  s.emissive = vec3(0.0);
+#ifdef VRP_EMISSIVE_MAP
+  s.emissive = texture(emissiveTex, uv).rgb * emissiveStrength;
+#endif
+
+  s.clearcoat = clearcoatStrength;
+  s.clearcoatRoughness = clearcoatRoughnessFactor;
+  return s;
+}
+// VRP Clustered Forward+ Lighting (S3-B)
+// Samples froxel cluster grid & light index list to evaluate >=256 punctual lights.
+
+uniform ivec3 uClusterDims;
+uniform vec2 uClusterNearFar;
+uniform vec2 uViewportSize;
+uniform int uClusteredLightCount;
+uniform highp usampler2D uClusterGridTex;
+uniform highp usampler2D uLightIndexTex;
+uniform highp sampler2D uPunctualLightDataTex;
+
+int vrpComputeClusterZ(float viewDepth, float nearZ, float farZ, int dimZ) {
+  float d = clamp(viewDepth, nearZ, farZ);
+  float slice = log(d / max(nearZ, 1e-4)) / max(log(farZ / max(nearZ, 1e-4)), 1e-4);
+  return clamp(int(floor(slice * float(dimZ))), 0, dimZ - 1);
+}
+
+ivec3 vrpComputeClusterCoord(vec2 fragCoord, float viewDepth) {
+  int cx = clamp(int(floor((fragCoord.x / max(uViewportSize.x, 1.0)) * float(uClusterDims.x))), 0, uClusterDims.x - 1);
+  int cy = clamp(int(floor((fragCoord.y / max(uViewportSize.y, 1.0)) * float(uClusterDims.y))), 0, uClusterDims.y - 1);
+  int cz = vrpComputeClusterZ(viewDepth, uClusterNearFar.x, uClusterNearFar.y, uClusterDims.z);
+  return ivec3(cx, cy, cz);
+}
+
+vec3 vrpClusterHeatmapColor(int count) {
+  float t = clamp(float(count) / 16.0, 0.0, 1.0);
+  if (t < 0.25) return mix(vec3(0.0, 0.1, 0.35), vec3(0.0, 0.7, 0.9), t * 4.0);
+  if (t < 0.5) return mix(vec3(0.0, 0.7, 0.9), vec3(0.2, 0.9, 0.2), (t - 0.25) * 4.0);
+  if (t < 0.75) return mix(vec3(0.2, 0.9, 0.2), vec3(1.0, 0.85, 0.0), (t - 0.5) * 4.0);
+  return mix(vec3(1.0, 0.85, 0.0), vec3(1.0, 0.1, 0.1), (t - 0.75) * 4.0);
+}
+
+vec3 vrpEvaluateClusteredLights(
+  vec2 fragCoord,
+  float viewDepth,
+  vec3 worldPos,
+  vec3 N,
+  vec3 V,
+  VrpSurface s,
+  out int outClusterLightCount
+) {
+  outClusterLightCount = 0;
+  if (uClusteredLightCount <= 0) return vec3(0.0);
+
+  ivec3 c = vrpComputeClusterCoord(fragCoord, viewDepth);
+  int clusterIdx = (c.z * uClusterDims.y + c.y) * uClusterDims.x + c.x;
+  int gridW = max(uClusterDims.x * uClusterDims.y, 1);
+  uvec2 header = texelFetch(uClusterGridTex, ivec2(clusterIdx % gridW, clusterIdx / gridW), 0).rg;
+  int offset = int(header.r);
+  int count = int(header.g);
+  outClusterLightCount = count;
+
+  vec3 accum = vec3(0.0);
+  for (int i = 0; i < 64; i++) {
+    if (i >= count) break;
+    int listIdx = offset + i;
+    int lightId = int(texelFetch(uLightIndexTex, ivec2(listIdx & 255, listIdx >> 8), 0).r);
+    if (lightId >= uClusteredLightCount) continue;
+
+    vec4 posRange = texelFetch(uPunctualLightDataTex, ivec2(0, lightId), 0);
+    vec4 colorInt = texelFetch(uPunctualLightDataTex, ivec2(1, lightId), 0);
+    vec4 dirType = texelFetch(uPunctualLightDataTex, ivec2(2, lightId), 0);
+    vec4 coneShadow = texelFetch(uPunctualLightDataTex, ivec2(3, lightId), 0);
+
+    vec3 toLight = posRange.xyz - worldPos;
+    float dist = length(toLight);
+    if (dist >= posRange.w) continue;
+
+    vec3 L = toLight / max(dist, 1e-5);
+    float atten = vrpRangeAttenuation(dist, posRange.w);
+    if (dirType.w > 0.5) {
+      atten *= vrpSpotConeAttenuation(-L, normalize(dirType.xyz), coneShadow.x, coneShadow.y);
+    }
+    if (atten <= 0.0) continue;
+
+    vec3 brdf = vrpEvaluateDirectBRDF(
+      N, V, L, s.albedo, s.metallic, s.roughness, s.clearcoat, s.clearcoatRoughness
+    );
+    accum += brdf * colorInt.rgb * colorInt.w * atten;
+  }
+  return accum;
+}
+// VRP Shadows (S3-C): Directional CSM + Spot/Point Shadow Atlas, PCF 3x3/5x5 & PCSS.
+
+uniform int uShadowCascadeCount;
+uniform vec4 uCascadeSplits;
+layout(std140) uniform ShadowCascadeBlock {
+  mat4 uCascadeMatrices[4];
+  vec4 uCascadeAtlasRects[4];
+};
+uniform vec2 uShadowAtlasTexelSize;
+uniform float uShadowDepthBias;
+uniform float uShadowNormalBias;
+uniform float uShadowPcssLightRadius;
+
+float vrpSampleShadowPcf3x3(sampler2D atlas, vec2 uv, float compareDepth, vec2 texelSize, vec4 rect) {
+  float sum = 0.0;
+  for (int y = -1; y <= 1; y++) {
+    for (int x = -1; x <= 1; x++) {
+      vec2 sampleUv = clamp(uv + vec2(float(x), float(y)) * texelSize, rect.xy + texelSize * 0.5, rect.xy + rect.zw - texelSize * 0.5);
+      float d = texture(atlas, sampleUv).r;
+      sum += compareDepth <= d ? 1.0 : 0.0;
+    }
+  }
+  return sum / 9.0;
+}
+
+float vrpSampleShadowPcss(sampler2D atlas, vec2 uv, float compareDepth, vec2 texelSize, vec4 rect, float lightRadius) {
+  float blockerSum = 0.0;
+  float blockerCount = 0.0;
+  float searchRadius = max(lightRadius, 1.0);
+  for (int y = -1; y <= 1; y++) {
+    for (int x = -1; x <= 1; x++) {
+      vec2 sUv = clamp(uv + vec2(float(x), float(y)) * texelSize * searchRadius, rect.xy + texelSize * 0.5, rect.xy + rect.zw - texelSize * 0.5);
+      float d = texture(atlas, sUv).r;
+      if (d < compareDepth) {
+        blockerSum += d;
+        blockerCount += 1.0;
+      }
+    }
+  }
+  if (blockerCount < 0.5) return 1.0;
+  float avgBlocker = blockerSum / blockerCount;
+  float penumbra = clamp((compareDepth - avgBlocker) / max(avgBlocker, 0.001) * lightRadius * 6.0, 1.0, 3.0);
+  return vrpSampleShadowPcf3x3(atlas, uv, compareDepth, texelSize * penumbra, rect);
+}
+
+int vrpSelectCascade(float viewDepth, int count, vec4 splits) {
+  if (count <= 1) return 0;
+  if (viewDepth < splits.x) return 0;
+  if (count > 2 && viewDepth < splits.y) return 1;
+  if (count > 3 && viewDepth < splits.z) return 2;
+  return count - 1;
+}
+
+float vrpEvaluateDirectionalCsm(
+  sampler2D shadowAtlas,
+  vec3 worldPos,
+  vec3 worldNormal,
+  vec3 lightDir,
+  float viewDepth,
+  out int outCascadeIndex
+) {
+  outCascadeIndex = 0;
+#if !defined(VRP_SHADOWS_PCF) && !defined(VRP_SHADOWS_PCSS)
+  return 1.0;
+#else
+  if (uShadowCascadeCount <= 0) return 1.0;
+  int idx = vrpSelectCascade(viewDepth, uShadowCascadeCount, uCascadeSplits);
+  outCascadeIndex = idx;
+
+  float ndotl = max(dot(worldNormal, lightDir), 0.0);
+  float slopeBias = uShadowDepthBias * (1.0 + 2.0 * (1.0 - ndotl));
+  vec3 biasedPos = worldPos + worldNormal * uShadowNormalBias;
+  vec4 ls = uCascadeMatrices[idx] * vec4(biasedPos, 1.0);
+  vec3 proj = ls.xyz / max(ls.w, 1e-5) * 0.5 + 0.5;
+  if (proj.x < 0.0 || proj.x > 1.0 || proj.y < 0.0 || proj.y > 1.0 || proj.z > 1.0) {
+    return 1.0;
+  }
+
+  vec4 rect = uCascadeAtlasRects[idx];
+  vec2 atlasUv = rect.xy + proj.xy * rect.zw;
+  float cmpDepth = proj.z - slopeBias;
+
+#ifdef VRP_SHADOWS_PCSS
+  return vrpSampleShadowPcss(shadowAtlas, atlasUv, cmpDepth, uShadowAtlasTexelSize, rect, uShadowPcssLightRadius);
+#else
+  return vrpSampleShadowPcf3x3(shadowAtlas, atlasUv, cmpDepth, uShadowAtlasTexelSize, rect);
+#endif
+#endif
+}
+
+in vec4 vColor;
+in vec3 vNormal;
+in highp vec2 vUv;
+in highp float vUvW;
+in highp vec2 vUv1;
+in vec3 vWorldPos;
+in vec4 vTangent;
+in float vViewDepth;
+
+uniform sampler2D uAlbedo;
+uniform sampler2D uNormalMap;
+uniform sampler2D uOrmMap;
+uniform sampler2D uEmissiveMap;
+uniform sampler2D uLightmap;
+uniform sampler2D uShadowMap;
+
+uniform vec3 uCameraPosition;
+uniform vec3 uDirectionalDirection;
+uniform vec3 uDirectionalColor;
+uniform float uDirectionalIntensity;
+uniform vec3 uAmbientColor;
+uniform float uAmbientIntensity;
+uniform vec3 uMaterialTint;
+uniform vec4 uUvScaleOffset;
+uniform float uEmissiveStrength;
+uniform float uNormalStrength;
+uniform float uRoughness;
+uniform float uMetallic;
+uniform float uOcclusionStrength;
+uniform float uClearcoatStrength;
+uniform float uClearcoatRoughness;
+uniform float uLightmapIntensity;
+uniform float uAlphaCutoff;
+uniform vec3 uFogColor;
+uniform float uFogStart;
+uniform float uFogEnd;
+uniform float uFogDensity;
+uniform int uDebugViewMode;
+
+layout(location=0) out vec4 oColor;
+layout(location=1) out vec4 oGlow;
+
+void main() {
+  vec2 uv = (vUv / max(vUvW, 1e-5)) * uUvScaleOffset.xy + uUvScaleOffset.zw;
+  VrpSurface s = vrpEvaluateSurface(
+    uv,
+    vColor,
+    vNormal,
+    vTangent,
+    uAlbedo,
+    uNormalMap,
+    uOrmMap,
+    uEmissiveMap,
+    uMaterialTint,
+    uNormalStrength,
+    uRoughness,
+    uMetallic,
+    uOcclusionStrength,
+    uEmissiveStrength,
+    uClearcoatStrength,
+    uClearcoatRoughness,
+    uAlphaCutoff
+  );
+
+#ifdef VRP_UNLIT
+  vec3 outColor = s.albedo + s.emissive;
+  outColor = vrpApplyFog(outColor, vViewDepth, uFogColor, uFogStart, uFogEnd, uFogDensity);
+  oColor = vec4(outColor, s.alpha);
+  oGlow = vec4(s.emissive, 1.0);
+  return;
+#endif
+
+  vec3 V = normalize(uCameraPosition - vWorldPos);
+  vec3 N = s.normal;
+  vec3 dirL = normalize(uDirectionalDirection);
+
+  int cascadeIndex = 0;
+  float dirShadow = vrpEvaluateDirectionalCsm(
+    uShadowMap, vWorldPos, N, dirL, vViewDepth, cascadeIndex
+  );
+
+  vec3 direct = vrpEvaluateDirectBRDF(
+    N, V, dirL, s.albedo, s.metallic, s.roughness, s.clearcoat, s.clearcoatRoughness
+  ) * uDirectionalColor * uDirectionalIntensity * dirShadow;
+
+  int clusterLightCount = 0;
+  vec3 clustered = vrpEvaluateClusteredLights(
+    gl_FragCoord.xy, vViewDepth, vWorldPos, N, V, s, clusterLightCount
+  );
+
+  vec3 ambient = uAmbientColor * uAmbientIntensity * s.albedo * s.ao;
+#ifdef VRP_LIGHTMAP
+  ambient += texture(uLightmap, vUv1).rgb * uLightmapIntensity * s.albedo;
+#endif
+
+  vec3 color = ambient + direct + clustered + s.emissive;
+  color = vrpApplyFog(color, vViewDepth, uFogColor, uFogStart, uFogEnd, uFogDensity);
+
+  // Debug visualization modes: 1=albedo, 2=normals, 3=roughness, 4=light heatmap, 5=cascades
+  if (uDebugViewMode == 1) {
+    color = s.albedo;
+  } else if (uDebugViewMode == 2) {
+    color = N * 0.5 + 0.5;
+  } else if (uDebugViewMode == 3) {
+    color = vec3(s.roughness, s.metallic, s.ao);
+  } else if (uDebugViewMode == 4) {
+    color = vrpClusterHeatmapColor(clusterLightCount);
+  } else if (uDebugViewMode == 5) {
+    vec3 cColors[4];
+    cColors[0] = vec3(0.2, 0.9, 0.3);
+    cColors[1] = vec3(0.95, 0.85, 0.15);
+    cColors[2] = vec3(0.95, 0.45, 0.15);
+    cColors[3] = vec3(0.9, 0.15, 0.25);
+    color = mix(color, cColors[clamp(cascadeIndex, 0, 3)], 0.5);
+  }
+
+#ifndef VRP_HDR
+  // Fallback in-shader neutral tonemap when rendering to RGBA8 target.
+  color = color / (color + vec3(1.0));
+#endif
+
+  oColor = vec4(color, s.alpha);
+  oGlow = vec4(s.emissive, 1.0);
+}
+''';
+
+const String tonemapHdrFragSrc = '''
+#version 300 es
+precision highp float;
+
+in vec2 vUv;
+
+uniform sampler2D uHdrSceneColor;
+uniform sampler2D uBloomTex;
+uniform float uExposure;
+uniform float uBloomIntensity;
+uniform int uTonemapperMode; // 0=ACES, 1=AgX, 2=KhronosNeutral
+
+layout(location=0) out vec4 oColor;
+
+vec3 tonemapAces(vec3 x) {
+  x = max(x, vec3(0.0));
+  return clamp((x * (2.51 * x + 0.03)) / (x * (2.43 * x + 0.59) + 0.14), 0.0, 1.0);
+}
+
+vec3 tonemapAgX(vec3 c) {
+  c = max(c, vec3(0.0));
+  const mat3 inset = mat3(
+    0.842479062253094, 0.0423282422610123, 0.0423756549057051,
+    0.0784335999999992, 0.878468636469772, 0.0784336,
+    0.0792237451477643, 0.0791661274605434, 0.879142973793104
+  );
+  vec3 v = inset * c;
+  v = clamp((log2(max(v, vec3(1e-10))) + 12.47393) / 16.5, 0.0, 1.0);
+  vec3 v2 = v * v;
+  vec3 v4 = v2 * v2;
+  return clamp(
+    15.5 * v4 * v2 - 40.14 * v4 * v + 31.96 * v4 - 6.868 * v2 * v + 0.4298 * v2 + 0.1191 * v - 0.00232,
+    0.0,
+    1.0
+  );
+}
+
+vec3 tonemapKhronosNeutral(vec3 color) {
+  color = max(color, vec3(0.0));
+  const float startCompression = 0.76;
+  const float desaturation = 0.15;
+  float x = min(color.r, min(color.g, color.b));
+  float offset = x < 0.08 ? x - 6.25 * x * x : 0.04;
+  color -= offset;
+  float peak = max(color.r, max(color.g, color.b));
+  if (peak < startCompression) return clamp(color, 0.0, 1.0);
+  const float d = 1.0 - startCompression;
+  float newPeak = 1.0 - d * d / (peak + d - startCompression);
+  color *= newPeak / peak;
+  float g = 1.0 - 1.0 / (desaturation * (peak - newPeak) + 1.0);
+  return clamp(mix(color, vec3(newPeak), g), 0.0, 1.0);
+}
+
+vec3 linearToSrgb(vec3 c) {
+  c = clamp(c, 0.0, 1.0);
+  vec3 lo = c * 12.92;
+  vec3 hi = 1.055 * pow(c, vec3(1.0 / 2.4)) - 0.055;
+  return mix(lo, hi, step(vec3(0.0031308), c));
+}
+
+void main() {
+  vec3 hdr = texture(uHdrSceneColor, vUv).rgb;
+  vec3 bloom = texture(uBloomTex, vUv).rgb * uBloomIntensity;
+  vec3 exposed = (hdr + bloom) * uExposure;
+  vec3 mapped;
+  if (uTonemapperMode == 1) {
+    mapped = tonemapAgX(exposed);
+  } else if (uTonemapperMode == 2) {
+    mapped = tonemapKhronosNeutral(exposed);
+  } else {
+    mapped = tonemapAces(exposed);
+  }
+  oColor = vec4(linearToSrgb(mapped), 1.0);
+}
+''';

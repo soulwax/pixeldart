@@ -29,5 +29,8 @@
     ,"sprites/sprite.frag": "spriteFragSrc"
     ,"decal/decal.vert": "decalVertSrc"
     ,"decal/decal.frag": "decalFragSrc"
+    ,"world/lit.vert": "litWorldVertSrc"
+    ,"world/lit.frag": "litWorldFragSrc"
+    ,"exposure/tonemap_hdr.frag": "tonemapHdrFragSrc"
   }
 }

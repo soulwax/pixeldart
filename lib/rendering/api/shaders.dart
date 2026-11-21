@@ -11,16 +11,21 @@ enum ShaderKeyword {
   normalMap('VRP_NORMAL_MAP'),
   ormMap('VRP_ORM_MAP'),
   emissiveMap('VRP_EMISSIVE_MAP'),
+  lightmap('VRP_LIGHTMAP'),
   skinned('VRP_SKINNED'),
   instanced('VRP_INSTANCED'),
   alphaTest('VRP_ALPHA_TEST'),
   shadowsPcf('VRP_SHADOWS_PCF'),
   shadowsPcss('VRP_SHADOWS_PCSS'),
   ps1Affine('VRP_PS1_AFFINE'),
+  quantized('VRP_QUANTIZED'),
+  unlit('VRP_UNLIT'),
   hdr('VRP_HDR');
 
   final String defineName;
   const ShaderKeyword(this.defineName);
+
+  int get bit => 1 << index;
 }
 
 /// Deterministic variant cache key and `#define` preprocessor for uber-shaders
@@ -31,6 +36,18 @@ final class ShaderVariantKey {
 
   ShaderVariantKey(this.slot, Iterable<ShaderKeyword> keywords)
     : keywords = Set<ShaderKeyword>.unmodifiable(keywords);
+
+  /// Bitset representation of [keywords] for O(1) cache lookup.
+  int get bitmask {
+    var mask = 0;
+    for (final k in keywords) {
+      mask |= k.bit;
+    }
+    return mask;
+  }
+
+  /// Combined integer key encoding both [slot] and [bitmask].
+  int get cacheKey => (slot.index << 24) | bitmask;
 
   String get canonicalId {
     final sorted = keywords.map((k) => k.defineName).toList()..sort();

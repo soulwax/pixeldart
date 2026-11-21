@@ -645,3 +645,76 @@ final class ProgramLibrary {
     }
   }
 }
+
+/// Bitset-keyed shader variant cache with per-scene warmup (`[S3-A]`).
+final class ShaderVariantCache {
+  final GpuDevice _device;
+  final Map<int, CompiledProgram> _variants = <int, CompiledProgram>{};
+  int cacheHits = 0;
+  int cacheMisses = 0;
+
+  ShaderVariantCache(this._device);
+
+  int get compiledCount => _variants.length;
+
+  bool contains(ShaderVariantKey key) => _variants.containsKey(key.cacheKey);
+
+  CompiledProgram getOrCompile(
+    ShaderVariantKey key, {
+    required String vertexSource,
+    required String fragmentSource,
+    Map<String, int> attributeLocations = const {},
+    Map<String, int> samplerUnits = const {},
+  }) {
+    final existing = _variants[key.cacheKey];
+    if (existing != null) {
+      cacheHits++;
+      return existing;
+    }
+    cacheMisses++;
+    final vs = key.injectDefines(vertexSource);
+    final fs = key.injectDefines(fragmentSource);
+    final handle = _device.compileProgram(
+      vertexSource: vs,
+      fragmentSource: fs,
+      requiredAttributes: attributeLocations.keys.toList(),
+      requiredUniforms: const [],
+    );
+
+    final compiled = CompiledProgram(
+      id: key.canonicalId,
+      handle: handle,
+      attributeLocations: Map.unmodifiable(attributeLocations),
+      samplerUnits: Map.unmodifiable(samplerUnits),
+    );
+    _variants[key.cacheKey] = compiled;
+    return compiled;
+  }
+
+  /// Pre-compiles a per-scene list of [ShaderVariantKey]s to eliminate runtime
+  /// shader compilation hitches.
+  void warmup(
+    Iterable<ShaderVariantKey> keys, {
+    required String vertexSource,
+    required String fragmentSource,
+    Map<String, int> attributeLocations = const {},
+    Map<String, int> samplerUnits = const {},
+  }) {
+    for (final key in keys) {
+      getOrCompile(
+        key,
+        vertexSource: vertexSource,
+        fragmentSource: fragmentSource,
+        attributeLocations: attributeLocations,
+        samplerUnits: samplerUnits,
+      );
+    }
+  }
+
+  void dispose() {
+    for (final p in _variants.values) {
+      _device.deleteProgram(p.handle);
+    }
+    _variants.clear();
+  }
+}
