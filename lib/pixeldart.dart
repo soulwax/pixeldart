@@ -5,6 +5,7 @@ export 'rendering/api/frame.dart';
 export 'rendering/api/frame_sequencer.dart';
 export 'rendering/api/host_bootstrap.dart';
 export 'rendering/api/effects.dart';
+export 'rendering/api/environment.dart';
 export 'rendering/api/handles.dart';
 export 'rendering/api/lights.dart';
 export 'rendering/api/materials.dart';
